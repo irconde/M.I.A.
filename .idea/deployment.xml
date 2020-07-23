@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="sharedHost">
+    <serverData>
+      <paths name="sharedHost">
+        <serverdata>
+          <mappings>
+            <mapping deploy="dna-client-ui" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

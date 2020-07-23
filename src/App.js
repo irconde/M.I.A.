@@ -4,6 +4,7 @@ import './App.css';
 import * as cornerstone from "cornerstone-core";
 import * as cornerstoneTools from "cornerstone-tools";
 import dicomParser from 'dicom-parser';
+import ReactDOM from 'react-dom';
 import * as cornerstoneMath from "cornerstone-math";
 import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -36,106 +37,82 @@ class App extends Component {
       // Initially, no file is selected
       selectedFile: null,
       viewport: cornerstone.getDefaultViewport(null, undefined),
+      x: 0,
+      y: 0
     };
     this.onFileChange = this.onFileChange.bind(this);
     this.onFileUpload = this.onFileUpload.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
   }
-
   // On file select (from the pop up)
   onFileChange = event => {
-
     // Update the state
     this.setState({ selectedFile: event.target.files[0] });
     const files = event.target.files[0];
     this.onFileUpload(files)
   };
 
-  // On file upload (click the upload button)
-  onFileUpload = (file) => {
-
+    // On file upload (click the upload button)
+    onFileUpload = (file) => {
     const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
     this.loadAndViewImage(imageId);
   };
 
   loadAndViewImage(imageId) {
     const element = document.getElementById('dicomImage');
+    element.addEventListener('click', handleClick);
+
     cornerstone.enable(element);
 
+    const start = new Date().getTime();
     cornerstone.loadImage(imageId).then(function(image) {
       const viewport = cornerstone.getDefaultViewportForImage(element, image);
       // document.getElementById('toggleModalityLUT').checked = (viewport.modalityLUT !== undefined);
       // document.getElementById('toggleVOILUT').checked = (viewport.voiLUT !== undefined);
       cornerstone.displayImage(element, image, viewport);
       if(loaded === false) {
-        // cornerstoneTools.mouseInput.enable(element);
-        // cornerstoneTools.mouseWheelInput.enable(element);
-        // cornerstoneTools.wwwc.activate(element, 1); // ww/wc is the default tool for left mouse button
-        // cornerstoneTools.pan.activate(element, 2); // pan is the default tool for middle mouse button
-        // cornerstoneTools.zoom.activate(element, 4); // zoom is the default tool for right mouse button
-        // cornerstoneTools.zoomWheel.activate(element); // zoom is the default tool for middle mouse wheel
-        //
-        // cornerstoneTools.imageStats.enable(element);
         loaded = true;
+        // var toolTypes = ['RectangleRoi'];
+        //
+        // // Try pasting this block into the allImageTools example:
+        // var toolDataString = '{"angle":{"data":[{"visible":true,"handles":{"start":{"x":92.40628941112809,"y":109.38908238107877,"highlight":true,"active":false},"end":{"x":112.40628941112809,"y":99.64666043201174,"highlight":true,"active":false,"eactive":false},"start2":{"x":92.40628941112809,"y":109.38908238107877,"highlight":true,"active":false},"end2":{"x":112.40628941112809,"y":119.38908238107877,"highlight":true,"active":false}}}]},"length":{"data":[{"visible":true,"handles":{"start":{"x":30.63388210486889,"y":77.14351868515968,"highlight":true,"active":false},"end":{"x":57.46755322260141,"y":154.21895700205096,"highlight":true,"active":false,"eactive":false}}}]}}';
+        //
+        // // --- To put the tool data back ---
+        // var allToolData = JSON.parse(toolDataString);
+        // for (var toolType in allToolData) {
+        //   if (allToolData.hasOwnProperty(toolType)) {
+        //     for (var i = 0; i < allToolData[toolType].data.length; i++) {
+        //       var toolData = allToolData[toolType].data[i];
+        //       cornerstoneTools.addToolState(element, toolType, toolData);
+        //     }
+        //   }
+        // }
+        // // Update the canvas
+        // cornerstone.updateImage(element);
+        setTools();
       }
 
       function setTools(){
         // IMAGE PAN
         const PanTool = cornerstoneTools.PanTool;
-        cornerstoneTools.addTool(PanTool)
-        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 })
+        cornerstoneTools.addTool(PanTool);
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
 
         // ZOOM
         // Add our tool, and set it's mode
-        const Zoom = cornerstoneTools.ZoomTool;
-        cornerstoneTools.addTool(Zoom)
+        const Zoom = cornerstoneTools.ZoomMouseWheelTool;
+        cornerstoneTools.addTool(Zoom);
         cornerstoneTools.setToolActive("ZoomMouseWheel", {});
 
         const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
-        cornerstoneTools.addTool(ZoomTouchPinchTool)
-        cornerstoneTools.setToolActive('ZoomTouchPinch', {})
+        cornerstoneTools.addTool(ZoomTouchPinchTool);
+        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
 
         // RECTANGLE ROI
         const RectangleRoiTool = cornerstoneTools.RectangleRoiTool;
-        cornerstoneTools.addTool(RectangleRoiTool)
-        cornerstoneTools.setToolActive('RectangleRoi', { mouseButtonMask: 2 })
+        cornerstoneTools.addTool(RectangleRoiTool);
+        cornerstoneTools.setToolActive('RectangleRoi', { mouseButtonMask: 2 });
       }
-      setTools();
-
-      // function getTransferSyntax() {
-      //   const value = image.data.string('x00020010');
-      //   return value + ' [' + uids[value] + ']';
-      // }
-      //
-      // function getSopClass() {
-      //   const value = image.data.string('x00080016');
-      //   return value + ' [' + uids[value] + ']';
-      // }
-
-      function getStudyDescription() {
-        const value = image.data.string('x00081030');
-        if(value === undefined) {
-          return;
-        }
-        return value + (value === 0 ? ' (unsigned)' : ' (signed)');
-      }
-
-      function getInstitutionName() {
-        const value = image.data.string('x00080080');
-        if(value === undefined) {
-          return;
-        }
-        return value + (value === 0 ? ' (unsigned)' : ' (signed)');
-      }
-
-      function getInstitutionLocation() {
-        const value = image.data.string('x00080081');
-        if(value === undefined) {
-          return;
-        }
-        return value + (value === 0 ? ' (unsigned)' : ' (signed)');
-      }
-
 
       const detectAlgo = image.data.string('x40101029');
       const detectType = image.data.string('x00187004');
@@ -152,16 +129,17 @@ class App extends Component {
       var seriesTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
       var seriesDate = mm + '/' + dd + '/' + yyyy;
 
-      console.log(image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d);
-      var pixelData = new Uint8Array(image.data.byteArray.buffer,
-          image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d.dataOffset,
-          image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d.length);
+      // var pixelData = new Uint8Array(image.data.byteArray.buffer,
+      //     image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d.dataOffset,
+      //     image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d.length);
+      //
+      // console.log(pixelData);
+      // get the pixel data element (contains the offset and length of the data)
+      var pixelDataElement = image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d;
 
-      console.log(pixelData);
-      console.log(detectAlgo);
-      console.log(getStudyDescription());
-      console.log(getInstitutionName());
-      console.log(getInstitutionLocation());
+      // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+      var pixelData = new Uint8Array(image.data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
+
 
 
       // setup handlers before we display the image
@@ -195,13 +173,13 @@ class App extends Component {
         document.getElementById('bottomleft2').textContent = "Study: " + study;
 
       }
+
       element.addEventListener('cornerstoneimagerendered', onImageRendered);
 
-      }, function(err) {
+    }, function(err) {
       alert(err);
     });
   }
-
 
   // File content to be displayed after
   // file upload is complete
@@ -240,6 +218,51 @@ class App extends Component {
           </div>
           {this.fileData()}
         </div>
+    );
+  }
+}
+
+function handleClick(e) {
+  var left = e.screenX + 'px';
+  var top =  e.screenY + 'px';
+  console.log(left);
+  console.log(top);
+  console.log("click event worked!");
+
+  // RENDERING THIS INTO THE PARENT ELEMENT('viewerContainer') BRINGS THE BUTTONS UP, BUT MAKES EVERYTHING ELSE DISAPPEAR
+  ReactDOM.render(<Buttons style={{left:left, top:top,position:'absolute'}} />, document.getElementById('feedback-buttons'));
+}
+
+var buttonConfirm = {
+  margin: '10px 10px 10px 0',
+  backgroundColor: 'green',
+  color: 'white',
+  borderRadius: '30px',
+  borderSize: '1pt',
+  height: '30px',
+  width: '100px',
+  fontWeight: 'bold'
+};
+
+var buttonReject = {
+  margin: '10px 10px 10px 0',
+  backgroundColor: 'red',
+  color: 'white',
+  borderRadius: '30px',
+  borderSize: '1pt',
+  height: '30px',
+  width: '100px',
+  fontWeight: 'bold'
+};
+
+class Buttons extends React.Component {
+  render(){
+    return ([
+        <button
+            className="btn btn-default" key={'confirm'} style={buttonConfirm}>CONFIRM</button>,
+          <button
+              className="btn btn-default" key={'reject'} style={buttonReject}>REJECT</button>
+            ]
     );
   }
 }
