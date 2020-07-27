@@ -141,7 +141,6 @@ class App extends Component {
       var pixelData = new Uint8Array(image.data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
 
 
-
       // setup handlers before we display the image
       function onImageRendered(e) {
         const eventData = e.detail;
@@ -161,6 +160,8 @@ class App extends Component {
         context.fillStyle = "#4ceb34";
         context.font = "10px Arial";
         context.fillText(detectAlgo, 190, 405);
+        context.fillStyle = "rgba(76, 235, 52, 0.1)";
+        context.fillRect(190, 410, 110, 110);
 
         document.getElementById('topleft').textContent = "Algorithm: " + detectAlgo;
         document.getElementById('topleft2').textContent = "Detector Type: " + detectType;
