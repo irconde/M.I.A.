@@ -229,8 +229,9 @@ function handleClick(e) {
   console.log(top);
   console.log("click event worked!");
 
+  const buttons = React.createElement(Buttons, {}, {});
   // RENDERING THIS INTO THE PARENT ELEMENT('viewerContainer') BRINGS THE BUTTONS UP, BUT MAKES EVERYTHING ELSE DISAPPEAR
-  ReactDOM.render(<Buttons style={{left:left, top:top,position:'absolute'}} />, document.getElementById('feedback-buttons'));
+  ReactDOM.render(buttons, document.getElementById('feedback-buttons'));
 }
 
 var buttonConfirm = {
@@ -241,7 +242,9 @@ var buttonConfirm = {
   borderSize: '1pt',
   height: '30px',
   width: '100px',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+  position: 'absolute',
+  zIndex:'9'
 };
 
 var buttonReject = {
@@ -252,7 +255,9 @@ var buttonReject = {
   borderSize: '1pt',
   height: '30px',
   width: '100px',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+  position: 'absolute',
+  zIndex:'9'
 };
 
 class Buttons extends React.Component {
