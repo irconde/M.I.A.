@@ -33,6 +33,7 @@ let loaded = false;
 class App extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       // Initially, no file is selected
       selectedFile: null,
@@ -72,23 +73,6 @@ class App extends Component {
       cornerstone.displayImage(element, image, viewport);
       if(loaded === false) {
         loaded = true;
-        // var toolTypes = ['RectangleRoi'];
-        //
-        // // Try pasting this block into the allImageTools example:
-        // var toolDataString = '{"angle":{"data":[{"visible":true,"handles":{"start":{"x":92.40628941112809,"y":109.38908238107877,"highlight":true,"active":false},"end":{"x":112.40628941112809,"y":99.64666043201174,"highlight":true,"active":false,"eactive":false},"start2":{"x":92.40628941112809,"y":109.38908238107877,"highlight":true,"active":false},"end2":{"x":112.40628941112809,"y":119.38908238107877,"highlight":true,"active":false}}}]},"length":{"data":[{"visible":true,"handles":{"start":{"x":30.63388210486889,"y":77.14351868515968,"highlight":true,"active":false},"end":{"x":57.46755322260141,"y":154.21895700205096,"highlight":true,"active":false,"eactive":false}}}]}}';
-        //
-        // // --- To put the tool data back ---
-        // var allToolData = JSON.parse(toolDataString);
-        // for (var toolType in allToolData) {
-        //   if (allToolData.hasOwnProperty(toolType)) {
-        //     for (var i = 0; i < allToolData[toolType].data.length; i++) {
-        //       var toolData = allToolData[toolType].data[i];
-        //       cornerstoneTools.addToolState(element, toolType, toolData);
-        //     }
-        //   }
-        // }
-        // // Update the canvas
-        // cornerstone.updateImage(element);
         setTools();
       }
 
@@ -138,8 +122,8 @@ class App extends Component {
       var pixelDataElement = image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet.elements.x4010101d;
 
       // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
-      var pixelData = new Uint8Array(image.data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
-
+      var pixelData = new Uint16Array(image.data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
+      console.log(pixelData);
 
       // setup handlers before we display the image
       function onImageRendered(e) {
@@ -185,7 +169,6 @@ class App extends Component {
   // File content to be displayed after
   // file upload is complete
   fileData = () => {
-
     if (this.state.selectedFile) {
       const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
       this.loadAndViewImage(imageId);
@@ -194,10 +177,6 @@ class App extends Component {
             <h2>File Details:</h2>
             <p>File Name: {this.state.selectedFile.name}</p>
             <p>File Type: {this.state.selectedFile.type}</p>
-            {/*<p>*/}
-            {/*  Last Modified:{" "}*/}
-            {/*  {this.state.selectedFile.lastModifiedDate.toDateString()}*/}
-            {/*</p>*/}
           </div>
       );
     } else {
@@ -230,7 +209,7 @@ function handleClick(e) {
   console.log(top);
   console.log("click event worked!");
 
-  const buttons = React.createElement(Buttons, {}, {});
+  const buttons = React.createElement(Buttons, {style: {left: left, top: top}}, {});
   // RENDERING THIS INTO THE PARENT ELEMENT('viewerContainer') BRINGS THE BUTTONS UP, BUT MAKES EVERYTHING ELSE DISAPPEAR
   ReactDOM.render(buttons, document.getElementById('feedback-buttons'));
 }
@@ -270,6 +249,44 @@ class Buttons extends React.Component {
               className="btn btn-default" key={'reject'} style={buttonReject}>REJECT</button>
             ]
     );
+  }
+}
+
+class Detections extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      confidence: 0.0,
+      validity: false,
+      coordinates: [
+        {
+          title: "Top left coordinates",
+          x: 0,
+          y: 0
+        },
+        {
+          title: "Bottom left coordinates",
+          x: 0,
+          y: 0
+        },
+        {
+          title: "Top right coordinates",
+          x: 0,
+          y: 0
+        },
+        {
+          title: "Bottom right coordinates",
+          x: 0,
+          y: 0
+        }
+      ]
+    };
+  }
+
+  render() {
+    return([
+
+        ]);
   }
 }
 
