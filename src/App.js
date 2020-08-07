@@ -14,8 +14,6 @@ const B_BOX_TAG = 'x4010101d';
 const B_BOX_LENGTH = 6;
 const B_BOX_COORDS = 4;
 const B_BOX_POINT_COUNT = 2;
-var firstTime = true;
-var boundingBoxData;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -35,90 +33,93 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
   },
 });
 
-function retrieveBoundingBoxData(image) {
-  const bBoxDataSet = image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet;
-  const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
-  const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
-  // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
-  const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
-  var bBoxCoords = new Array(bBoxComponentsCount);
-  var bBoxIndex = 0;
-  var componentCount = 0;
-
-  for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
-    if (componentCount == B_BOX_POINT_COUNT) {
-      componentCount = -1;
-      continue;
-    }
-    bBoxCoords[bBoxIndex] = bBoxDataSet.float(B_BOX_TAG, i);
-    bBoxIndex++;
-  }
-  return bBoxCoords;
-}
-
-function renderDetections(data, context) {
-  for (var i = 0; i < data.length; i += B_BOX_COORDS) {
-    context.beginPath();
-    context.strokeStyle = '#4ceb34';
-    context.lineWidth = 1;
-    // rect expected parameters (x, y, width, height)
-    context.rect(data[i], data[i+1], Math.abs(data[i+2] - data[i]), Math.abs(data[i+3] - data[i+1]));
-    context.stroke();
-    // TODO. We need to pass as another paarameter of the function a list with the corresponding labels
-    /*
-    context.fillStyle = "#4ceb34";
-    context.font = "10px Arial";
-    context.fillText("Label01", data[i], data[i+1]);
-    */
-  }
-}
-
-// setup handlers before we display the image
-function onImageRendered(e) {
-  console.log("onImageRendered");
-  const eventData = e.detail;
-
-  // set the canvas context to the image coordinate system
-  //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
-  // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
-  // to location 0,0 will be the top left of the image and rows,columns is the bottom
-  // right.
-  const context = eventData.canvasContext;
-  renderDetections(boundingBoxData, context);
-}
-
-const element = document.getElementById('dicomImage');
-element.addEventListener('cornerstoneimagerendered', onImageRendered);
-element.addEventListener('click', handleClick);
-cornerstone.enable(element);
-const start = new Date().getTime();
-const PanTool = cornerstoneTools.PanTool;
-cornerstoneTools.addTool(PanTool);
-cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
-
-const Zoom = cornerstoneTools.ZoomMouseWheelTool;
-cornerstoneTools.addTool(Zoom);
-cornerstoneTools.setToolActive("ZoomMouseWheel", {});
-
-const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
-cornerstoneTools.addTool(ZoomTouchPinchTool);
-cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-
 
 class App extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      // Initially, no file is selected
       selectedFile: null,
-      viewport: cornerstone.getDefaultViewport(null, undefined),
-      x: 0,
-      y: 0
+      boundingBoxData: null,
+      imageViewport: document.getElementById('dicomImage'),
+      viewport: cornerstone.getDefaultViewport(null, undefined)
     };
+
     this.onFileChange = this.onFileChange.bind(this);
     this.onFileUpload = this.onFileUpload.bind(this);
+    this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+    this.state.imageViewport.addEventListener('click', handleClick);
+    this.setupConerstoneJS(this.state.imageViewport);
+  }
+
+  renderDetections(data, context) {
+    if (!data) return;
+    for (var i = 0; i < data.length; i += B_BOX_COORDS) {
+      context.beginPath();
+      context.strokeStyle = '#4ceb34';
+      context.lineWidth = 1;
+      // rect expected parameters (x, y, width, height)
+      context.rect(data[i], data[i+1], Math.abs(data[i+2] - data[i]), Math.abs(data[i+3] - data[i+1]));
+      context.stroke();
+      // TODO. We need to pass as another paarameter of the function a list with the corresponding labels
+      /*
+      context.fillStyle = "#4ceb34";
+      context.font = "10px Arial";
+      context.fillText("Label01", data[i], data[i+1]);
+      */
+    }
+  };
+
+  // setup handlers before we display the image
+  onImageRendered(e) {
+    const eventData = e.detail;
+    // set the canvas context to the image coordinate system
+    //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
+    // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
+    // to location 0,0 will be the top left of the image and rows,columns is the bottom
+    // right.
+    const context = eventData.canvasContext;
+    this.renderDetections(this.state.boundingBoxData, context);
+  }
+
+  setupConerstoneJS(imageViewport) {
+    cornerstone.enable(imageViewport);
+    const start = new Date().getTime();
+    const PanTool = cornerstoneTools.PanTool;
+    cornerstoneTools.addTool(PanTool);
+    cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+
+    const Zoom = cornerstoneTools.ZoomMouseWheelTool;
+    cornerstoneTools.addTool(Zoom);
+    cornerstoneTools.setToolActive("ZoomMouseWheel", {});
+
+    const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
+    cornerstoneTools.addTool(ZoomTouchPinchTool);
+    cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+  };
+
+  retrieveBoundingBoxData(image) {
+    const bBoxDataSet = image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet;
+    const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
+    const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
+    // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
+    const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
+    var bBoxCoords = new Array(bBoxComponentsCount);
+    var bBoxIndex = 0;
+    var componentCount = 0;
+
+    for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
+      if (componentCount == B_BOX_POINT_COUNT) {
+        componentCount = -1;
+        continue;
+      }
+      bBoxCoords[bBoxIndex] = bBoxDataSet.float(B_BOX_TAG, i);
+      bBoxIndex++;
+    }
+    return bBoxCoords;
   }
 
   // On file select (from the pop up)
@@ -129,39 +130,35 @@ class App extends Component {
     this.onFileUpload(files)
   };
 
-    // On file upload (click the upload button)
-    onFileUpload = (file) => {
+  // On file upload (click the upload button)
+  onFileUpload = (file) => {
       const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
       this.loadAndViewImage(imageId);
 
     };
 
+  displayDICOSinfo(image) {
+    const viewport = cornerstone.getDefaultViewportForImage(this.state.imageViewport, image);
+    this.state.boundingBoxData = this.retrieveBoundingBoxData(image);
+    cornerstone.displayImage(this.state.imageViewport, image, viewport);
+    const detectAlgo = image.data.string('x40101029');
+    const detectType = image.data.string('x00187004');
+    const detectConfig = image.data.string('x00187005');
+    const station = image.data.string('x00081010');
+    const series = image.data.string('x0008103e');
+    const study = image.data.string('x00081030');
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    var seriesTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var seriesDate = mm + '/' + dd + '/' + yyyy;
+  }
+
   loadAndViewImage(imageId) {
-    cornerstone.loadImage(imageId).then(function(image) {
-
-      const viewport = cornerstone.getDefaultViewportForImage(element, image);
-      // document.getElementById('toggleModalityLUT').checked = (viewport.modalityLUT !== undefined);
-      // document.getElementById('toggleVOILUT').checked = (viewport.voiLUT !== undefined);
-      cornerstone.displayImage(element, image, viewport);
-
-      const detectAlgo = image.data.string('x40101029');
-      const detectType = image.data.string('x00187004');
-      const detectConfig = image.data.string('x00187005');
-      const station = image.data.string('x00081010');
-      const series = image.data.string('x0008103e');
-      const study = image.data.string('x00081030');
-
-      var today = new Date();
-      var dd = String(today.getDate()).padStart(2, '0');
-      var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-      var yyyy = today.getFullYear();
-
-      var seriesTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-      var seriesDate = mm + '/' + dd + '/' + yyyy;
-
-      boundingBoxData = retrieveBoundingBoxData(image);
-
-    }, function(err) {
+    const self = this;
+    cornerstone.loadImage(imageId).then(
+      function(image) {self.displayDICOSinfo(image)}, function(err) {
       alert(err);
     });
   }
