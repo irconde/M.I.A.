@@ -60,6 +60,8 @@ class App extends Component {
       station: null,
       series: null,
       study: null,
+      date: null,
+      time: null,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined)
     };
@@ -125,23 +127,35 @@ class App extends Component {
   loadAndViewImage(imageId) {
     const self = this;
     cornerstone.loadImage(imageId).then(
-      function(image) {self.displayDICOSinfo(image)}, function(err) {
+      function(image) {
+        self.displayDICOSimage(image);
+        self.loadDICOSdata(image);
+      }, function(err) {
       alert(err);
     });
   }
 
 
   /**
-   * displayDICOSinfo - Method that renders the x-ray image encoded in the DICOS+TDR
-   * file and parses the file to pull all the data regarding the threat detections
+   * displayDICOSinfo - Method that renders the x-ray image encoded in the DICOS+TDR file and
    *
-   * @param  {type} image DICOS+TDR image data
-   * @return {type}       NONE
+   * @param  {type} image DICOS+TDR data
+   * @return {type}       None
    */
-  displayDICOSinfo(image) {
+  displayDICOSimage(image) {
     const viewport = cornerstone.getDefaultViewportForImage(this.state.imageViewport, image);
-    this.state.boundingBoxData = this.retrieveBoundingBoxData(image);
     cornerstone.displayImage(this.state.imageViewport, image, viewport);
+  }
+
+
+  /**
+   * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+   *
+   * @param  {type} image DICOS+TDR data
+   * @return {type}       None
+   */
+  loadDICOSdata(image) {
+    this.state.boundingBoxData = this.retrieveBoundingBoxData(image);
     this.state.algorithm = image.data.string('x40101029');
     this.state.type = image.data.string('x00187004');
     this.state.configuration = image.data.string('x00187005');
@@ -152,8 +166,8 @@ class App extends Component {
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    var seriesTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    var seriesDate = mm + '/' + dd + '/' + yyyy;
+    this.state.time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    this.state.date = mm + '/' + dd + '/' + yyyy;
   }
 
 
@@ -202,6 +216,7 @@ class App extends Component {
     // right.
     const context = eventData.canvasContext;
     this.renderDetections(this.state.boundingBoxData, context);
+    this.renderGeneralInfo();
   }
 
 
@@ -227,6 +242,23 @@ class App extends Component {
       context.fillText(this.state.algorithm, data[i], data[i+1]);
     }
   };
+
+
+  /**
+   * renderGeneralInfo - Updates DOM elements with general data pulled from the DICOS+TDR file
+   *
+   * @return {type}  None
+   */
+  renderGeneralInfo() {
+    document.getElementById('topleft').textContent = "Algorithm: " + this.state.algorithm;
+    document.getElementById('topleft2').textContent = "Detector Type: " + this.state.type;
+    document.getElementById('topleft3').textContent = "Detector Configuration: " + this.state.configuration;
+    document.getElementById('topright').textContent = "Station Name: " + this.state.station;
+    document.getElementById('topright2').textContent = "Date: " + this.state.date;
+    document.getElementById('topright3').textContent = "Time: " + this.state.time;
+    document.getElementById('bottomleft').textContent = "Series: " + this.state.series;
+    document.getElementById('bottomleft2').textContent = "Study: " + this.state.study;
+  }
 
 
   // File content to be displayed after
