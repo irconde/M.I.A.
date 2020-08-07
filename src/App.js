@@ -54,6 +54,12 @@ class App extends Component {
     this.state = {
       selectedFile: null,
       boundingBoxData: null,
+      algorithm: null,
+      type: null,
+      configuration: null,
+      station: null,
+      series: null,
+      study: null,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined)
     };
@@ -136,12 +142,12 @@ class App extends Component {
     const viewport = cornerstone.getDefaultViewportForImage(this.state.imageViewport, image);
     this.state.boundingBoxData = this.retrieveBoundingBoxData(image);
     cornerstone.displayImage(this.state.imageViewport, image, viewport);
-    const detectAlgo = image.data.string('x40101029');
-    const detectType = image.data.string('x00187004');
-    const detectConfig = image.data.string('x00187005');
-    const station = image.data.string('x00081010');
-    const series = image.data.string('x0008103e');
-    const study = image.data.string('x00081030');
+    this.state.algorithm = image.data.string('x40101029');
+    this.state.type = image.data.string('x00187004');
+    this.state.configuration = image.data.string('x00187005');
+    this.state.station = image.data.string('x00081010');
+    this.state.series = image.data.string('x0008103e');
+    this.state.study = image.data.string('x00081030');
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -215,12 +221,10 @@ class App extends Component {
       // rect expected parameters (x, y, width, height)
       context.rect(data[i], data[i+1], Math.abs(data[i+2] - data[i]), Math.abs(data[i+3] - data[i+1]));
       context.stroke();
-      // TODO. We need to pass as another paarameter of the function a list with the corresponding labels
-      /*
+      // TODO. We need to pass as another parameter of the function a list with the corresponding labels
       context.fillStyle = "#4ceb34";
       context.font = "10px Arial";
-      context.fillText("Label01", data[i], data[i+1]);
-      */
+      context.fillText(this.state.algorithm, data[i], data[i+1]);
     }
   };
 
