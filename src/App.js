@@ -8,6 +8,9 @@ import ReactDOM from 'react-dom';
 import * as cornerstoneMath from "cornerstone-math";
 import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
+import socketIOClient from "socket.io-client";
+
+const ENDPOINT = "http://127.0.0.1:4001";
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -63,7 +66,10 @@ class App extends Component {
       date: null,
       time: null,
       imageViewport: document.getElementById('dicomImage'),
-      viewport: cornerstone.getDefaultViewport(null, undefined)
+      viewport: cornerstone.getDefaultViewport(null, undefined),
+      response: "",
+      socket: null,
+      isConnected: null
     };
 
     this.onFileChange = this.onFileChange.bind(this);
@@ -73,6 +79,14 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', handleClick);
     this.setupConerstoneJS(this.state.imageViewport);
+    
+    this.state.socket = socketIOClient(ENDPOINT);
+    this.state.socket.on("img", data => {
+      var imgBlob = this.b64toBlob(data, "image/dcs");
+      this.setState({
+        response: imgBlob
+      })
+    })    
   }
 
 
@@ -96,6 +110,33 @@ class App extends Component {
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
   };
 
+
+  /**
+   * b64toBlob - Converts binary64 encoding to a blob to display
+   *
+   * @param  {type} b64Data Binary string
+   * @param  {type} contentType The MIMI type, image/dcs
+   * @return {type}               blob
+   */
+  b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+  
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+  
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+  
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+  
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  };
 
   /**
    * Event that represents the selection of file from the file manager of the system
@@ -289,25 +330,54 @@ class App extends Component {
   render() {
 
     return (
-        <div>
+      <div>
           <div>
             <input type="file" onChange={this.onFileChange} />
           </div>
           {this.fileData()}
-        </div>
+      </div>
     );
   }
 }
 
 function handleClick(e) {
   var left = e.screenX + 'px';
+  var offset = e.screenX-125 + 'px';
   var top =  e.screenY + 'px';
-  console.log(left);
-  console.log(top);
-  console.log("click event worked!");
+  buttonConfirm = {
+    margin: '10px 10px 10px 0',
+    backgroundColor: 'green',
+    color: 'white',
+    borderRadius: '30px',
+    borderSize: '1pt',
+    height: '30px',
+    width: '100px',
+    fontWeight: 'bold',
+    position: 'absolute',
+    zIndex:'9',
+    top: top,
+    left: offset
+  }
+  buttonReject = {
+    margin: '10px 10px 10px 0',
+    backgroundColor: 'red',
+    color: 'white',
+    borderRadius: '30px',
+    borderSize: '1pt',
+    height: '30px',
+    width: '100px',
+    fontWeight: 'bold',
+    position: 'absolute',
+    zIndex:'9',
+    top: top,
+    left: left
+  }
 
-  const buttons = React.createElement(Buttons, {style: {left: left, top: top}}, {});
-  // RENDERING THIS INTO THE PARENT ELEMENT('viewerContainer') BRINGS THE BUTTONS UP, BUT MAKES EVERYTHING ELSE DISAPPEAR
+  const buttons = React.createElement(
+    Buttons, 
+    {}, 
+    {}
+  );
   ReactDOM.render(buttons, document.getElementById('feedback-buttons'));
 }
 
@@ -321,7 +391,9 @@ var buttonConfirm = {
   width: '100px',
   fontWeight: 'bold',
   position: 'absolute',
-  zIndex:'9'
+  zIndex:'9',
+  left: '0px',
+  top: '0px'
 };
 
 var buttonReject = {
@@ -334,7 +406,9 @@ var buttonReject = {
   width: '100px',
   fontWeight: 'bold',
   position: 'absolute',
-  zIndex:'9'
+  zIndex:'9',
+  left: '0px',
+  top: '0px'
 };
 
 class Buttons extends React.Component {
@@ -386,5 +460,7 @@ class Detections extends React.Component {
         ]);
   }
 }
+
+
 
 export default App;
