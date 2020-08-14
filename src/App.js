@@ -11,8 +11,11 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
 import Utils from "./Utils.js";
 import Detection from "./Detection.js";
+import axios from "axios";
 
-const ENDPOINT = "http://127.0.0.1:4001";
+const COMMAND_SERVER = "http://127.0.0.1:4001";
+const FILE_SERVER = "http://127.0.0.1:4002";
+
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -83,9 +86,11 @@ class App extends Component {
       displayButtons: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
-      response: "",
-      socket: null,
-      isConnected: null
+      socketCommand: null,
+      socketFS: null,
+      isConnected: null,
+      filesInQueue: 0
+      
     };
   }
 
@@ -98,6 +103,7 @@ class App extends Component {
   componentDidMount() {
     this.onFileChange = this.onFileChange.bind(this);
     this.onFileUpload = this.onFileUpload.bind(this);
+    this.nextImageClick = this.nextImageClick.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -105,16 +111,90 @@ class App extends Component {
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
 
     this.setupConerstoneJS(this.state.imageViewport);
+    this.state.socketCommand = socketIOClient(COMMAND_SERVER);
+    this.state.socketFS = socketIOClient(FILE_SERVER);
+    this.getFilesFromCommandServer();
+  }
 
-    this.state.socket = socketIOClient(ENDPOINT);
-    this.state.socket.on("img", data => {
+  /**
+   * getFilesFromCommandServer - Socket Listener to get files from command server then send them
+   *                           - to the file server directly after
+   * @param {type} - None      
+   * @return {type} - None
+   */
+  async getFilesFromCommandServer(){
+    this.state.socketCommand.on("img", data => {
+      console.log('got image from command server');
       var imgBlob = this.b64toBlob(data, "image/dcs");
-      this.setState({
-        response: imgBlob
-      })
+      this.sendFilesToServer(imgBlob, this.state.socketFS);
+      console.log('sending image to file server');
     })
   }
 
+  /**
+   * sendFilesToServer - Socket IO to send a file to the server
+   * @param {type} - file - which file we are sending
+   * @param {type} - socket - what socket we are sending files on, command or file server
+   * @return {type} - None
+   */
+  async sendFilesToServer(file, socket){
+    socket.emit("fileFromClient", file);
+    console.log(`File sent to server`);
+  }
+
+  /**
+   * getNextImage() - Attempts to retreive the next image from the file server via get request
+   *                - Then sets the state to the blob and calls the loadAndViewImage() function
+   * @param {type} - None      
+   * @return {type} - None
+   */
+  getNextImage(){
+    axios.get(`${FILE_SERVER}/next`).then((res) => {
+      // We get our latest file upon the main component mounting
+      if (res.data.response === 'no-next-image') {
+        alert('No next image to display');
+      } else {
+        const myBlob = this.b64toBlob(res.data.b64);
+        this.setState({ selectedFile: myBlob});
+        const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
+        this.loadAndViewImage(imageId);
+      }
+    })
+  }
+
+  /**
+   * nextImageClick() - When the operator taps next, we send to the file server to remove the 
+   *                  - current image, then when that is complete, we send the image to the command
+   *                  - server. Reset the state of selected file(image) to null and retreiving the next
+   * @param {type} - None      
+   * @return {type} - None
+   */
+  nextImageClick() {  
+    axios.post(`${FILE_SERVER}/confirm`, {
+      valid: true
+    }, {
+      crossdomain: true
+    }).then((res) => {
+      console.log(res);
+      if (res.data.confirm === 'image-removed'){
+        console.log('next image removed');
+        // we can now send it to command server
+        this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand);
+        this.setState({ selectedFile: null });
+        this.getNextImage();
+        // This behaviour of reloading is not for future use
+        // Once we implement the redux store that will update things for us
+        // Then this will be removed
+        window.location.reload(false);
+      } else if (res.data.confirm === 'image-not-removed') {
+        console.log('file server couldnt remove the next image');
+      } else if (res.data.confirm === 'no-next-image'){
+        alert('No next image');
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
 
   /**
    * setupConerstoneJS - CornerstoneJS Tools are initialized
@@ -178,7 +258,7 @@ class App extends Component {
    * the load and display of the data in a DICOS+TDR file
    */
   onFileUpload = (file) => {
-    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);  
     this.loadAndViewImage(imageId);
   };
 
