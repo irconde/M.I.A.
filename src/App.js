@@ -213,9 +213,9 @@ class App extends Component {
     var yyyy = today.getFullYear();
 
     this.setState({
-      boundingBoxData: this.retrieveBoundingBoxData(image),
-      objectClass: this.retrieveObjectClass(image),
-      confidenceLevel: Utils.decimalToPercentage(this.retrieveConfidenceLevel(image)),
+      boundingBoxData: null,
+      objectClass: "",
+      confidenceLevel: 0,
       algorithm: image.data.string('x40101029'),
       type: image.data.string('x00187004'),
       configuration: image.data.string('x00187005'),
@@ -224,6 +224,20 @@ class App extends Component {
       study: image.data.string('x00081030'),
       time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
       date: mm + '/' + dd + '/' + yyyy
+    });
+
+    // Threat Sequence information
+    const threatSequence = image.data.elements.x40101011;
+
+    if (threatSequence == null){
+      console.log("No Threat Sequence");
+      return;
+    }
+
+    this.setState({
+      boundingBoxData: this.retrieveBoundingBoxData(threatSequence),
+      objectClass: this.retrieveObjectClass(threatSequence),
+      confidenceLevel: Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence)),
     });
   }
 
@@ -236,7 +250,7 @@ class App extends Component {
    *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
    */
   retrieveBoundingBoxData(image) {
-    const bBoxDataSet = image.data.elements.x40101011.items[0].dataSet.elements.x40101037.items[0].dataSet;
+    const bBoxDataSet = image.items[0].dataSet.elements.x40101037.items[0].dataSet;
     const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
@@ -264,7 +278,7 @@ class App extends Component {
    * @return {type}       String value with the description of the potential threat object
    */
   retrieveObjectClass(image) {
-    return image.data.elements.x40101011.items[0].dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
+    return image.items[0].dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
   }
 
 
@@ -275,7 +289,7 @@ class App extends Component {
    * @return {type}       Float value with the confidence level
    */
   retrieveConfidenceLevel(image) {
-    return image.data.elements.x40101011.items[0].dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
+    return image.items[0].dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
   }
 
   /**
@@ -315,6 +329,7 @@ class App extends Component {
     const detectionLabel = Utils.formatDetectionLabel(data.objectClass, data.confidenceLevel);
     const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
 
+    context.clearRect(0, 0, context.width, context.height);
     // Bounding box rendering
     context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
     // Label rendering
@@ -459,45 +474,5 @@ class Buttons extends React.Component {
     );
   }
 }
-
-class Detections extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      confidence: 0.0,
-      validity: false,
-      coordinates: [
-        {
-          title: "Top left coordinates",
-          x: 0,
-          y: 0
-        },
-        {
-          title: "Bottom left coordinates",
-          x: 0,
-          y: 0
-        },
-        {
-          title: "Top right coordinates",
-          x: 0,
-          y: 0
-        },
-        {
-          title: "Bottom right coordinates",
-          x: 0,
-          y: 0
-        }
-      ]
-    };
-  }
-
-  render() {
-    return([
-
-        ]);
-  }
-}
-
-
 
 export default App;
