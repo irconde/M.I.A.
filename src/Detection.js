@@ -1,14 +1,11 @@
 /**
- * Class that emcompases any secondary method to support the primary features of the client
+ * Class that represents a detected protential threat to be rendered
  */
 export default class Detection {
-  constructor() {
-    this.height = 0;
-    this.width = 0;
-    this.x = 0;
-    this.y = 0;
+  constructor(diagonalCoords, className, confidenceValue) {
+    this.boundingBox = diagonalCoords
     this.seletected = false;
-    this.class = "";
-    this.confidence = 0;
+    this.class = className;
+    this.confidence = confidenceValue;
   }
 }

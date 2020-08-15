@@ -25,13 +25,17 @@ const B_BOX_POINT_COUNT = 2;
 const LABEL_FONT = "bold 12px Arial";
 const LABEL_PADDING = 4;
 const DETECTION_COLOR = '#367FFF';
+const DETECTION_COLOR_SELECTED = '#F7B500';
 const DETECTION_BORDER = 2;
 const LABEL_TEXT_COLOR = '#FFFFFF'
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-cornerstoneTools.init();
+cornerstoneTools.init({
+  mouseEnabled: true,
+  touchEnabled: true
+});
 cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 cornerstoneWADOImageLoader.webWorkerManager.initialize({
@@ -74,22 +78,29 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
-      boundingBoxData: null,
-      objectClass: "",
-      confidenceLevel: 0.0,
+      detections: null,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       response: "",
       socket: null,
       isConnected: null
     };
+  }
 
+
+  /**
+   * componentDidMount - Method invoked after all elements on the page are rendered properly
+   *
+   * @return {type}  None
+   */
+  componentDidMount() {
     this.onFileChange = this.onFileChange.bind(this);
     this.onFileUpload = this.onFileUpload.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.onMouseClicked = this.onMouseClicked.bind(this);
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-    this.state.imageViewport.addEventListener('click', handleClick);
+    this.state.imageViewport.addEventListener('click', this.onMouseClicked);
     this.setupConerstoneJS(this.state.imageViewport);
 
     this.state.socket = socketIOClient(ENDPOINT);
@@ -214,9 +225,7 @@ class App extends Component {
     var yyyy = today.getFullYear();
 
     this.setState({
-      boundingBoxData: null,
-      objectClass: "",
-      confidenceLevel: 0,
+      detections: null,
       algorithm: image.data.string('x40101029'),
       type: image.data.string('x00187004'),
       configuration: image.data.string('x00187005'),
@@ -235,11 +244,13 @@ class App extends Component {
       return;
     }
 
+    const boundingBoxCoords = this.retrieveBoundingBoxData(threatSequence);
+    const objectClass = this.retrieveObjectClass(threatSequence);
+    const confidenceLevel = Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence));
     this.setState({
-      boundingBoxData: this.retrieveBoundingBoxData(threatSequence),
-      objectClass: this.retrieveObjectClass(threatSequence),
-      confidenceLevel: Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence)),
+      detections: new Detection(boundingBoxCoords, objectClass, confidenceLevel)
     });
+
   }
 
 
@@ -308,7 +319,7 @@ class App extends Component {
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
     const context = eventData.canvasContext;
-    this.renderDetections(this.state, context);
+    this.renderDetections(this.state.detections, context);
     this.renderGeneralInfo();
   }
 
@@ -321,20 +332,22 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
+    context.clearRect(0, 0, context.width, context.height);
+    if (!data || data.boundingBox.length < B_BOX_COORDS) return;
+
     // We set the rendering properties
+    const detectionColor = data.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
     context.font = LABEL_FONT;
-    context.strokeStyle = DETECTION_COLOR;
+    context.strokeStyle = detectionColor;
     context.lineWidth = DETECTION_BORDER;
-    const boundingBoxCoords = data.boundingBoxData;
-    if (!boundingBoxCoords || boundingBoxCoords.length < B_BOX_COORDS) return;
-    const detectionLabel = Utils.formatDetectionLabel(data.objectClass, data.confidenceLevel);
+    const boundingBoxCoords = data.boundingBox;
+    const detectionLabel = Utils.formatDetectionLabel(data.class, data.confidence);
     const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
 
-    context.clearRect(0, 0, context.width, context.height);
     // Bounding box rendering
     context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
     // Label rendering
-    context.fillStyle = DETECTION_COLOR;
+    context.fillStyle = detectionColor;
     context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
     context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
     context.fillStyle = LABEL_TEXT_COLOR;
@@ -381,7 +394,6 @@ class App extends Component {
   };
 
   render() {
-
     return (
       <div>
           <div>
@@ -391,12 +403,36 @@ class App extends Component {
       </div>
     );
   }
+
+
+  /**
+   * onMouseClicked - Callback function invoked on mouse clicked. We handle the selection of detections.
+   *
+   * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}   None
+   */
+  onMouseClicked(e) {
+    if (this.state.detections == null){
+      return;
+    }
+    const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
+    var detection = this.state.detections;
+    if (Utils.pointInRect(mousePos, detection.boundingBox)){
+      detection.selected = true;
+    } else {
+      detection.selected = false;
+    }
+    this.setState({detections: detection});
+    cornerstone.updateImage(this.state.imageViewport, true);
+  }
+
 }
 
 function handleClick(e) {
   var left = e.screenX + 'px';
   var offset = e.screenX-125 + 'px';
   var top =  e.screenY + 'px';
+  console.log("left: " + left + " top: " + top);
   buttonConfirm = {
     margin: '10px 10px 10px 0',
     backgroundColor: 'green',

@@ -32,13 +32,25 @@ export default class Utils {
    * @param  {type} context   2d canvas context
    * @param  {type} labelText string value to be displayed inside the label
    * @param  {type} padding   blank space surrounding the text within the label
-   * @return {type}           dictionary with two components: width and height   
+   * @return {type}           dictionary with two components: width and height
    */
   static getTextLabelSize(context, labelText, padding) {
     const textSize = context.measureText(labelText);
     // Aproximation to estimate the text height
     const lineHeight = context.measureText('M').width
     return {'width': textSize.width + 2 * padding, 'height': lineHeight + 2 * padding};
+  }
+
+
+  /**
+   * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
+   *
+   * @param  {type} point 2D point with two coordinates, x and y
+   * @param  {type} rect  rectangle defined as a floar array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+   * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise   
+   */
+  static pointInRect(point, rect) {
+    return point.x >= rect[0] && point.x <= rect[2] && point.y >= rect[1] && point.y <= rect[3];
   }
 
 }
