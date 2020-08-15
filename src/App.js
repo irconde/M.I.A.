@@ -10,6 +10,7 @@ import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
 import Utils from "./Utils.js";
+import Detection from "./Detection.js";
 
 const ENDPOINT = "http://127.0.0.1:4001";
 
@@ -65,7 +66,6 @@ class App extends Component {
 
     this.state = {
       selectedFile: null,
-      boundingBoxData: null,
       algorithm: null,
       type: null,
       configuration: null,
@@ -74,6 +74,7 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
+      boundingBoxData: null,
       objectClass: "",
       confidenceLevel: 0.0,
       imageViewport: document.getElementById('dicomImage'),
