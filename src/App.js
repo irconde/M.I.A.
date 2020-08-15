@@ -9,14 +9,23 @@ import * as cornerstoneMath from "cornerstone-math";
 import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
+import Utils from "./Utils.js";
 
 const ENDPOINT = "http://127.0.0.1:4001";
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
-const B_BOX_LENGTH = 6;
+const OBJECT_CLASS_TAG = 'x40101013';
+const CONFIDENCE_LEVEL_TAG = 'x40101016';
 const B_BOX_COORDS = 4;
 const B_BOX_POINT_COUNT = 2;
+
+// Detection label properties
+const LABEL_FONT = "bold 12px Arial";
+const LABEL_PADDING = 4;
+const DETECTION_COLOR = '#367FFF';
+const DETECTION_BORDER = 2;
+const LABEL_TEXT_COLOR = '#FFFFFF'
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -65,6 +74,8 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
+      objectClass: "",
+      confidenceLevel: 0.0,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       response: "",
@@ -79,14 +90,14 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', handleClick);
     this.setupConerstoneJS(this.state.imageViewport);
-    
+
     this.state.socket = socketIOClient(ENDPOINT);
     this.state.socket.on("img", data => {
       var imgBlob = this.b64toBlob(data, "image/dcs");
       this.setState({
         response: imgBlob
       })
-    })    
+    })
   }
 
 
@@ -98,7 +109,6 @@ class App extends Component {
    */
   setupConerstoneJS(imageViewport) {
     cornerstone.enable(imageViewport);
-    const start = new Date().getTime();
     const PanTool = cornerstoneTools.PanTool;
     cornerstoneTools.addTool(PanTool);
     cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
@@ -121,19 +131,19 @@ class App extends Component {
   b64toBlob = (b64Data, contentType='', sliceSize=512) => {
     const byteCharacters = atob(b64Data);
     const byteArrays = [];
-  
+
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
       const slice = byteCharacters.slice(offset, offset + sliceSize);
-  
+
       const byteNumbers = new Array(slice.length);
       for (let i = 0; i < slice.length; i++) {
         byteNumbers[i] = slice.charCodeAt(i);
       }
-  
+
       const byteArray = new Uint8Array(byteNumbers);
       byteArrays.push(byteArray);
     }
-  
+
     const blob = new Blob(byteArrays, {type: contentType});
     return blob;
   };
@@ -196,19 +206,25 @@ class App extends Component {
    * @return {type}       None
    */
   loadDICOSdata(image) {
-    this.state.boundingBoxData = this.retrieveBoundingBoxData(image);
-    this.state.algorithm = image.data.string('x40101029');
-    this.state.type = image.data.string('x00187004');
-    this.state.configuration = image.data.string('x00187005');
-    this.state.station = image.data.string('x00081010');
-    this.state.series = image.data.string('x0008103e');
-    this.state.study = image.data.string('x00081030');
+
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    this.state.time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    this.state.date = mm + '/' + dd + '/' + yyyy;
+
+    this.setState({
+      boundingBoxData: this.retrieveBoundingBoxData(image),
+      objectClass: this.retrieveObjectClass(image),
+      confidenceLevel: Utils.decimalToPercentage(this.retrieveConfidenceLevel(image)),
+      algorithm: image.data.string('x40101029'),
+      type: image.data.string('x00187004'),
+      configuration: image.data.string('x00187005'),
+      station: image.data.string('x00081010'),
+      series: image.data.string('x0008103e'),
+      study: image.data.string('x00081030'),
+      time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
+      date: mm + '/' + dd + '/' + yyyy
+    });
   }
 
 
@@ -230,7 +246,7 @@ class App extends Component {
     var componentCount = 0;
 
     for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
-      if (componentCount == B_BOX_POINT_COUNT) {
+      if (componentCount === B_BOX_POINT_COUNT) {
         componentCount = -1;
         continue;
       }
@@ -240,6 +256,27 @@ class App extends Component {
     return bBoxCoords;
   }
 
+
+  /**
+   * retrieveObjectClass - Method that parses a DICOS+TDR file to pull the a string value that indicates the class of the potential threat object
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @return {type}       String value with the description of the potential threat object
+   */
+  retrieveObjectClass(image) {
+    return image.data.elements.x40101011.items[0].dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
+  }
+
+
+  /**
+   * retrieveConfidenceLevel - Method that parses a DICOS+TDR file to pull the a float value that indicates the confidence level of the detection algorithm used
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @return {type}       Float value with the confidence level
+   */
+  retrieveConfidenceLevel(image) {
+    return image.data.elements.x40101011.items[0].dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
+  }
 
   /**
    * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
@@ -256,7 +293,7 @@ class App extends Component {
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
     const context = eventData.canvasContext;
-    this.renderDetections(this.state.boundingBoxData, context);
+    this.renderDetections(this.state, context);
     this.renderGeneralInfo();
   }
 
@@ -269,19 +306,23 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-    if (!data) return;
-    for (var i = 0; i < data.length; i += B_BOX_COORDS) {
-      context.beginPath();
-      context.strokeStyle = '#4ceb34';
-      context.lineWidth = 1;
-      // rect expected parameters (x, y, width, height)
-      context.rect(data[i], data[i+1], Math.abs(data[i+2] - data[i]), Math.abs(data[i+3] - data[i+1]));
-      context.stroke();
-      // TODO. We need to pass as another parameter of the function a list with the corresponding labels
-      context.fillStyle = "#4ceb34";
-      context.font = "10px Arial";
-      context.fillText(this.state.algorithm, data[i], data[i+1]);
-    }
+    // We set the rendering properties
+    context.font = LABEL_FONT;
+    context.strokeStyle = DETECTION_COLOR;
+    context.lineWidth = DETECTION_BORDER;
+    const boundingBoxCoords = data.boundingBoxData;
+    if (!boundingBoxCoords || boundingBoxCoords.length < B_BOX_COORDS) return;
+    const detectionLabel = Utils.formatDetectionLabel(data.objectClass, data.confidenceLevel);
+    const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
+
+    // Bounding box rendering
+    context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
+    // Label rendering
+    context.fillStyle = DETECTION_COLOR;
+    context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
+    context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
+    context.fillStyle = LABEL_TEXT_COLOR;
+    context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
   };
 
 
@@ -306,10 +347,6 @@ class App extends Component {
   // file upload is complete
   fileData = () => {
     if (this.state.selectedFile) {
-      const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
-      // TODO. Review this and delete if if it's not necessary. This line makes
-      // the "loadAndViewImage" method to execute three times. That's why I commented it
-      // this.loadAndViewImage(imageId);
       return (
           <div>
             <h2>File Details:</h2>
@@ -374,8 +411,8 @@ function handleClick(e) {
   }
 
   const buttons = React.createElement(
-    Buttons, 
-    {}, 
+    Buttons,
+    {},
     {}
   );
   ReactDOM.render(buttons, document.getElementById('feedback-buttons'));
