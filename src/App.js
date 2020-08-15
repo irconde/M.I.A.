@@ -418,7 +418,7 @@ class App extends Component {
     const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
     var detection = this.state.detections;
     if (Utils.pointInRect(mousePos, detection.boundingBox)){
-      detection.selected = true;
+      detection.selected = !detection.selected;
     } else {
       detection.selected = false;
     }
