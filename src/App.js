@@ -69,6 +69,7 @@ class App extends Component {
     super(props);
 
     this.state = {
+      threatsCount: 0,
       selectedFile: null,
       algorithm: null,
       type: null,
@@ -79,6 +80,7 @@ class App extends Component {
       date: null,
       time: null,
       detections: null,
+      selectedDetection: -1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       response: "",
@@ -226,6 +228,8 @@ class App extends Component {
 
     this.setState({
       detections: null,
+      selectedDetection: -1,
+      threatsCount: image.data.uint16('x40101034'),
       algorithm: image.data.string('x40101029'),
       type: image.data.string('x00187004'),
       configuration: image.data.string('x00187005'),
@@ -236,21 +240,28 @@ class App extends Component {
       date: mm + '/' + dd + '/' + yyyy
     });
 
+    if (this.state.threatsCount === 0 || this.state.threatsCount === undefined) {
+      console.log("No Potential Threat Objects detected");
+      return;
+    }
     // Threat Sequence information
     const threatSequence = image.data.elements.x40101011;
-
     if (threatSequence == null){
       console.log("No Threat Sequence");
       return;
     }
 
-    const boundingBoxCoords = this.retrieveBoundingBoxData(threatSequence);
-    const objectClass = this.retrieveObjectClass(threatSequence);
-    const confidenceLevel = Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence));
-    this.setState({
-      detections: new Detection(boundingBoxCoords, objectClass, confidenceLevel)
-    });
+    var detectionList = new Array(this.state.threatsCount);
+    for (var i = 0; i < this.state.threatsCount; i++) {
+      const boundingBoxCoords = this.retrieveBoundingBoxData(threatSequence.items[i]);
+      const objectClass = this.retrieveObjectClass(threatSequence.items[i]);
+      const confidenceLevel = Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence.items[i]));
 
+      detectionList[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+      this.setState({
+        detections: detectionList
+      });
+    }
   }
 
 
@@ -262,7 +273,7 @@ class App extends Component {
    *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
    */
   retrieveBoundingBoxData(image) {
-    const bBoxDataSet = image.items[0].dataSet.elements.x40101037.items[0].dataSet;
+    const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
     const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
@@ -290,7 +301,7 @@ class App extends Component {
    * @return {type}       String value with the description of the potential threat object
    */
   retrieveObjectClass(image) {
-    return image.items[0].dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
+    return image.dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
   }
 
 
@@ -301,7 +312,7 @@ class App extends Component {
    * @return {type}       Float value with the confidence level
    */
   retrieveConfidenceLevel(image) {
-    return image.items[0].dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
+    return image.dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
   }
 
   /**
@@ -333,25 +344,31 @@ class App extends Component {
    */
   renderDetections(data, context) {
     context.clearRect(0, 0, context.width, context.height);
-    if (!data || data.boundingBox.length < B_BOX_COORDS) return;
+    if (data === null || data.length === 0) {
+      return;
+    }
+    for (var i = 0; i < data.length; i++){
+      const detectionData = data[i];
+      if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
-    // We set the rendering properties
-    const detectionColor = data.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
-    context.font = LABEL_FONT;
-    context.strokeStyle = detectionColor;
-    context.lineWidth = DETECTION_BORDER;
-    const boundingBoxCoords = data.boundingBox;
-    const detectionLabel = Utils.formatDetectionLabel(data.class, data.confidence);
-    const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
+      // We set the rendering properties
+      const detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
+      context.font = LABEL_FONT;
+      context.strokeStyle = detectionColor;
+      context.lineWidth = DETECTION_BORDER;
+      const boundingBoxCoords = detectionData.boundingBox;
+      const detectionLabel = Utils.formatDetectionLabel(detectionData.class, detectionData.confidence);
+      const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
 
-    // Bounding box rendering
-    context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
-    // Label rendering
-    context.fillStyle = detectionColor;
-    context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
-    context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
-    context.fillStyle = LABEL_TEXT_COLOR;
-    context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
+      // Bounding box rendering
+      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
+      // Label rendering
+      context.fillStyle = detectionColor;
+      context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
+      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
+      context.fillStyle = LABEL_TEXT_COLOR;
+      context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
+    }
   };
 
 
@@ -412,17 +429,36 @@ class App extends Component {
    * @return {type}   None
    */
   onMouseClicked(e) {
-    if (this.state.detections == null){
+    if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
+    var detectionList = this.state.detections;
+    var selectedIndex = this.state.selectedDetection;
+
     const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
-    var detection = this.state.detections;
-    if (Utils.pointInRect(mousePos, detection.boundingBox)){
-      detection.selected = !detection.selected;
-    } else {
-      detection.selected = false;
+    var clickedPos = -1;
+    for (var i = 0; i < detectionList.length; i++) {
+      if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
+        clickedPos = i;
+        break;
+      }
     }
-    this.setState({detections: detection});
+    if(clickedPos === -1) {
+      if (selectedIndex != -1) detectionList[selectedIndex].selected = false;
+      selectedIndex = -1;
+    }
+    else {
+      if (clickedPos === selectedIndex){
+        detectionList[clickedPos].selected = false;
+        selectedIndex = -1;
+      } else {
+        if (selectedIndex != -1) detectionList[selectedIndex].selected = false;
+        detectionList[clickedPos].selected = true;
+        selectedIndex = clickedPos;
+      }
+    }
+
+    this.setState({detections: detectionList, selectedDetection: selectedIndex});
     cornerstone.updateImage(this.state.imageViewport, true);
   }
 
