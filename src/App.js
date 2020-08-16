@@ -444,7 +444,7 @@ class App extends Component {
       }
     }
     if(clickedPos === -1) {
-      if (selectedIndex != -1) detectionList[selectedIndex].selected = false;
+      if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
       selectedIndex = -1;
     }
     else {
@@ -452,7 +452,7 @@ class App extends Component {
         detectionList[clickedPos].selected = false;
         selectedIndex = -1;
       } else {
-        if (selectedIndex != -1) detectionList[selectedIndex].selected = false;
+        if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
         detectionList[clickedPos].selected = true;
         selectedIndex = clickedPos;
       }
