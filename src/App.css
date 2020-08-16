@@ -28,6 +28,20 @@
   color: #61dafb;
 }
 
+.feedback-buttons {
+  position: absolute;
+  color: white;
+  border-radius: 5px;
+  font-weight: bolder;
+  width: 100px;
+  height: 30px;
+  z-index: 9999
+}
+
+.hidden {
+  display: none !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

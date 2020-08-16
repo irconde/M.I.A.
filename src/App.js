@@ -81,6 +81,7 @@ class App extends Component {
       time: null,
       detections: null,
       selectedDetection: -1,
+      displayButtons: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       response: "",
@@ -103,6 +104,7 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
+
     this.setupConerstoneJS(this.state.imageViewport);
 
     this.state.socket = socketIOClient(ENDPOINT);
@@ -220,7 +222,6 @@ class App extends Component {
    * @return {type}       None
    */
   loadDICOSdata(image) {
-
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -273,6 +274,7 @@ class App extends Component {
    *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
    */
   retrieveBoundingBoxData(image) {
+    console.log(image);
     const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
     const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
@@ -429,6 +431,7 @@ class App extends Component {
    * @return {type}   None
    */
   onMouseClicked(e) {
+    var className = "";
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
@@ -445,107 +448,54 @@ class App extends Component {
     }
     if(clickedPos === -1) {
       if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+      this.setState({displayButtons: false})
       selectedIndex = -1;
     }
     else {
       if (clickedPos === selectedIndex){
         detectionList[clickedPos].selected = false;
+        this.setState({displayButtons: false})
         selectedIndex = -1;
       } else {
         if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
         detectionList[clickedPos].selected = true;
+        this.setState({displayButtons: true})
         selectedIndex = clickedPos;
       }
     }
 
+    className = this.state.displayButtons ? "" : "hidden";
+    let top = 0;
+    let left = 0;
+    if(className !== "hidden"){
+      top = e.pageY;
+      left = detectionList[clickedPos].boundingBox[3];
+    }
+    className = className + "feedback-buttons"
+
+
     this.setState({detections: detectionList, selectedDetection: selectedIndex});
+
+    ReactDOM.render(React.createElement("button", { className: className,
+      style: {
+        top: top,
+        left: left,
+        backgroundColor: "green",
+      }
+    }, "CONFIRM"), document.getElementById('feedback-confirm'));
+
+    ReactDOM.render(React.createElement("button", { className: className,
+      style: {
+        top: top,
+        left: left,
+        marginTop: "40px",
+        backgroundColor: "red",
+      }
+    }, "REJECT"), document.getElementById('feedback-reject'));
+
     cornerstone.updateImage(this.state.imageViewport, true);
   }
 
-}
-
-function handleClick(e) {
-  var left = e.screenX + 'px';
-  var offset = e.screenX-125 + 'px';
-  var top =  e.screenY + 'px';
-  console.log("left: " + left + " top: " + top);
-  buttonConfirm = {
-    margin: '10px 10px 10px 0',
-    backgroundColor: 'green',
-    color: 'white',
-    borderRadius: '30px',
-    borderSize: '1pt',
-    height: '30px',
-    width: '100px',
-    fontWeight: 'bold',
-    position: 'absolute',
-    zIndex:'9',
-    top: top,
-    left: offset
-  }
-  buttonReject = {
-    margin: '10px 10px 10px 0',
-    backgroundColor: 'red',
-    color: 'white',
-    borderRadius: '30px',
-    borderSize: '1pt',
-    height: '30px',
-    width: '100px',
-    fontWeight: 'bold',
-    position: 'absolute',
-    zIndex:'9',
-    top: top,
-    left: left
-  }
-
-  const buttons = React.createElement(
-    Buttons,
-    {},
-    {}
-  );
-  ReactDOM.render(buttons, document.getElementById('feedback-buttons'));
-}
-
-var buttonConfirm = {
-  margin: '10px 10px 10px 0',
-  backgroundColor: 'green',
-  color: 'white',
-  borderRadius: '30px',
-  borderSize: '1pt',
-  height: '30px',
-  width: '100px',
-  fontWeight: 'bold',
-  position: 'absolute',
-  zIndex:'9',
-  left: '0px',
-  top: '0px'
-};
-
-var buttonReject = {
-  margin: '10px 10px 10px 0',
-  backgroundColor: 'red',
-  color: 'white',
-  borderRadius: '30px',
-  borderSize: '1pt',
-  height: '30px',
-  width: '100px',
-  fontWeight: 'bold',
-  position: 'absolute',
-  zIndex:'9',
-  left: '0px',
-  top: '0px'
-};
-
-class Buttons extends React.Component {
-  render(){
-    return ([
-        <button
-            className="btn btn-default" key={'confirm'} style={buttonConfirm}>CONFIRM</button>,
-          <button
-              className="btn btn-default" key={'reject'} style={buttonReject}>REJECT</button>
-            ]
-    );
-  }
 }
 
 export default App;
