@@ -1,68 +1,71 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Pilot GUI version 1.0
 
-## Available Scripts
+## Requirements
+You will need Node.js to run and install the dependencies needed for this project. You may download it here: [nodejs.org](https://nodejs.org/) <br />
 
-In the project directory, you can run:
+## Starting the Pilot and Server
+### Structure
 
-### `yarn start`
+We assume your project structure will look similar to this:
+```
+D:\Documents\Pilot-1.0\dna-atr-pilot-gui
+D:\Documents\Pilot-1.0\dna-atr-socket.io-server
+```
+It need not match this exactly, long as you have the two project folders which are the Pilot GUI and a Mock Command Server
+```
+dna-atr-pilot-gui
+dna-atr-socket.io-server
+```
+### Installing Dependencies
+We first need to install all the libraries and such the projects use. To do this, open a terminal and navigate to the location of your pilot folder 'dna-atr-pilot-gui.' Then run the command
+```
+npm install
+```
+This may take a minute, as it must fetch the files needed. Finally, navigate to the server folder 'dna-atr-socket.io-server' and run the same install command
+```
+npm i
+``` 
+<br />
+### Getting started
+<br />
+You will need 2 terminals or command prompts to start the development environment. <br /><br />
+First we need to start the mock command server. Navigate to the 'dna-atr-socket.io-server' folder in a terminal and begin the server with
+```
+node app.js
+```
+You will see the server begin and listen on port 4002, as well the requests made to the server are console logged. <br /><br />
+Lastly, we start the Pilot GUI by running navigating to the folder of 'dna-atr-pilot.gui' and running the command: 
+```
+npm start
+```
+This will open the Pilot GUI in your web browser. As well, this starts both the file server and react development environment in parallel. 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Structure
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+### Pilot GUI
+Contains the React App and a File Server to manage the DICOS-TDR Images locally. The images received from the mock command server are stored in the folders directory 'img' folder in the server. <br />
+```
+D:\Documents\Pilot-1.0\dna-atr-pilot-gui\server\img
+```
+Files are removed once the Pilot GUI goes to the next image and are sent to the server mentioned below.
+### Server
+This acts as command server. It sends DICOS-TDR images to the React App at a set interval. As well, it saves images sent back from the Pilot GUI. <br />
 
-### `yarn test`
+The files being sent are located in the ./static/img directory.
+```
+D:\Documents\Pilot-1.0\dna-atr-socket.io-server\static\img
+```
+Each file is sent at the interval and will send all the files until the last one then ending sending anymore files. Optionally, you can set it to reset back at the start of the index and send the same files. <br /> <br /> 
+To edit the interval, open app.js with your text editor or IDE
+```
+D:\Documents\Pilot-1.0\dna-atr-socket.io-server\app.js
+```
+Line 19 contains the time interval specified in MS (1000 = 1 second)
+```
+const TIME_INTERVAL =  2250;
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+Images returned from the Pilot GUI are located in the returned image folder
+```
+D:\Documents\Pilot-1.0\dna-atr-socket.io-server\static\returned
+```

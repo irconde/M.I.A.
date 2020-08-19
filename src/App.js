@@ -11,11 +11,9 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
 import Utils from "./Utils.js";
 import Detection from "./Detection.js";
-import axios from "axios";
-
+import axios from 'axios';
 const COMMAND_SERVER = "http://127.0.0.1:4001";
 const FILE_SERVER = "http://127.0.0.1:4002";
-
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -68,7 +66,14 @@ class App extends Component {
    */
   constructor(props) {
     super(props);
-
+    this.topLeftRef = React.createRef();
+    this.topLeft2Ref = React.createRef();
+    this.topLeft3Ref = React.createRef();
+    this.topRightRef = React.createRef();
+    this.topRight2Ref = React.createRef();
+    this.topRight3Ref = React.createRef();
+    this.bottomLeftRef = React.createRef();
+    this.bottomLeft2Ref = React.createRef();
     this.state = {
       threatsCount: 0,
       selectedFile: null,
@@ -86,11 +91,9 @@ class App extends Component {
       displayButtons: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
-      socketCommand: null,
-      socketFS: null,
       isConnected: null,
-      filesInQueue: 0
-      
+      socketCommand: socketIOClient(COMMAND_SERVER),
+      socketFS: socketIOClient(FILE_SERVER)
     };
   }
 
@@ -101,9 +104,10 @@ class App extends Component {
    * @return {type}  None
    */
   componentDidMount() {
+    this.sendFilesToServer = this.sendFilesToServer.bind(this);
+    this.nextImageClick = this.nextImageClick.bind(this);
     this.onFileChange = this.onFileChange.bind(this);
     this.onFileUpload = this.onFileUpload.bind(this);
-    this.nextImageClick = this.nextImageClick.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -115,6 +119,7 @@ class App extends Component {
     this.state.socketFS = socketIOClient(FILE_SERVER);
     this.getFilesFromCommandServer();
   }
+  
 
   /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
@@ -149,23 +154,32 @@ class App extends Component {
    * @return {type} - None
    */
   getNextImage(){
-    axios.get(`${FILE_SERVER}/next`).then((res) => {
+    axios.get(`${FILE_SERVER}/next`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control' : 'no-cache'
+      }
+    }).then((res) => {
       // We get our latest file upon the main component mounting
-      if (res.data.response === 'no-next-image') {
-        alert('No next image to display');
+      if (res.data.response === 'error '){
+        console.log('error getting next image');
+      } else if (res.data.response === 'no-next-image') {
+        console.log('No next image to display');
       } else {
         const myBlob = this.b64toBlob(res.data.b64);
         this.setState({ selectedFile: myBlob});
         const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
         this.loadAndViewImage(imageId);
       }
-    })
+    }).catch((err) => {
+      console.log(err);
+    });
   }
 
   /**
    * nextImageClick() - When the operator taps next, we send to the file server to remove the 
    *                  - current image, then when that is complete, we send the image to the command
-   *                  - server. Reset the state of selected file(image) to null and retreiving the next
+   *                  - server. Finally, calling getNextImage to display another image if there is one
    * @param {type} - None      
    * @return {type} - None
    */
@@ -174,26 +188,49 @@ class App extends Component {
       valid: true
     }, {
       crossdomain: true
-    }).then((res) => {
-      console.log(res);
+    }).then(async (res) => {
       if (res.data.confirm === 'image-removed'){
-        console.log('next image removed');
-        // we can now send it to command server
-        this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand);
-        this.setState({ selectedFile: null });
-        this.getNextImage();
-        // This behaviour of reloading is not for future use
-        // Once we implement the redux store that will update things for us
-        // Then this will be removed
-        window.location.reload(false);
+        this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand).then((res) => {
+          this.getNextImage();
+        });
       } else if (res.data.confirm === 'image-not-removed') {
         console.log('file server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
         alert('No next image');
+        this.setState({selectedFile: null});
       }
     }).catch((err) => {
       console.log(err);
     })
+  }
+
+  /**
+   * getFilesFromCommandServer - Socket Listener to get files from command server then send them
+   *                           - to the file server directly after
+   * @param {type} - None      
+   * @return {type} - None
+   */
+  async getFilesFromCommandServer(){
+    this.state.socketCommand.on("img", data => {
+      var imgBlob = this.b64toBlob(data, "image/dcs");
+      this.sendFilesToServer(imgBlob, this.state.socketFS);
+      // If we got an image and we are null, we know we can now fetch one
+      // This is how it triggers to display a new file if none existed and a new one
+      // was added
+      if (this.state.selectedFile === null){
+        this.getNextImage();
+      }
+    })
+  }
+
+  /**
+   * sendFilesToServer - Socket IO to send a file to the server
+   * @param {type} - file - which file we are sending
+   * @param {type} - socket - what socket we are sending files on, command or file server
+   * @return {type} - None
+   */
+  async sendFilesToServer(file, socket){
+    socket.emit("fileFromClient", file);
   }
 
   /**
@@ -258,7 +295,7 @@ class App extends Component {
    * the load and display of the data in a DICOS+TDR file
    */
   onFileUpload = (file) => {
-    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);  
+    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
     this.loadAndViewImage(imageId);
   };
 
@@ -463,14 +500,14 @@ class App extends Component {
    * @return {type}  None
    */
   renderGeneralInfo() {
-    document.getElementById('topleft').textContent = "Algorithm: " + this.state.algorithm;
-    document.getElementById('topleft2').textContent = "Detector Type: " + this.state.type;
-    document.getElementById('topleft3').textContent = "Detector Configuration: " + this.state.configuration;
-    document.getElementById('topright').textContent = "Station Name: " + this.state.station;
-    document.getElementById('topright2').textContent = "Date: " + this.state.date;
-    document.getElementById('topright3').textContent = "Time: " + this.state.time;
-    document.getElementById('bottomleft').textContent = "Series: " + this.state.series;
-    document.getElementById('bottomleft2').textContent = "Study: " + this.state.study;
+    this.topLeftRef.current.textContent = "Algorithm: " + this.state.algorithm;
+    this.topLeft2Ref.current.textContent = "Detector Type: " + this.state.type;
+    this.topLeft3Ref.current.textContent = "Detector Configuration: " + this.state.configuration;
+    this.topRightRef.current.textContent = "Station Name: " + this.state.station;
+    this.topRight2Ref.current.textContent = "Date: " + this.state.date;
+    this.topRight3Ref.current.textContent = "Time: " + this.state.time;
+    this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
+    this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
   }
 
   /**
@@ -572,6 +609,78 @@ class App extends Component {
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
 
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
+      style: {
+        top: top,
+        left: left,
+        marginTop: "40px",
+        backgroundColor: "red",
+      }
+    }, "REJECT"), document.getElementById('feedback-reject'));
+
+    cornerstone.updateImage(this.state.imageViewport, true);
+  }
+
+  /**
+   * onMouseClicked - Callback function invoked on mouse clicked. We handle the selection of detections.
+   *
+   * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}   None
+   */
+  onMouseClicked(e) {
+    var className = "";
+    if (this.state.detections === null || this.state.detections.length === 0){
+      return;
+    }
+    var detectionList = this.state.detections;
+    var selectedIndex = this.state.selectedDetection;
+
+    const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
+    var clickedPos = -1;
+    for (var i = 0; i < detectionList.length; i++) {
+      if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
+        clickedPos = i;
+        break;
+      }
+    }
+    if(clickedPos === -1) {
+      if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+      this.setState({displayButtons: false})
+      selectedIndex = -1;
+    }
+    else {
+      if (clickedPos === selectedIndex){
+        detectionList[clickedPos].selected = false;
+        this.setState({displayButtons: false})
+        selectedIndex = -1;
+      } else {
+        if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+        detectionList[clickedPos].selected = true;
+        this.setState({displayButtons: true})
+        selectedIndex = clickedPos;
+      }
+    }
+
+    className = this.state.displayButtons ? "" : "hidden";
+    let top = 0;
+    let left = 0;
+    if(className !== "hidden"){
+      top = e.pageY;
+      left = detectionList[clickedPos].boundingBox[3];
+    }
+    className = className + "feedback-buttons"
+
+
+    this.setState({detections: detectionList, selectedDetection: selectedIndex});
+
+    ReactDOM.render(React.createElement("button", { className: className,
+      style: {
+        top: top,
+        left: left,
+        backgroundColor: "green",
+      }
+    }, "CONFIRM"), document.getElementById('feedback-confirm'));
+
+    ReactDOM.render(React.createElement("button", { className: className,
       style: {
         top: top,
         left: left,
