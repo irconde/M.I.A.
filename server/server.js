@@ -19,6 +19,10 @@ let maxFileNumber = 0;
 const regExpDCS = /\.dcs$/;
 const regExpFileName = /^[0-9]{1,}_{1}img\.dcs$/;
 
+if (!fs.existsSync(imgPath)){
+    fs.mkdirSync(imgPath);
+}
+
 /**
  * -----------File Watcher System and Queue Management---------------
  * ---------------------------------------------------------------------

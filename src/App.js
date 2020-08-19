@@ -13,7 +13,7 @@ import Utils from "./Utils.js";
 import Detection from "./Detection.js";
 import axios from 'axios';
 const COMMAND_SERVER = "http://127.0.0.1:4001";
-const FILE_SERVER = "http://127.0.0.1:4002";
+const FILE_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -116,8 +116,7 @@ class App extends Component {
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
     this.setupConerstoneJS(this.state.imageViewport);
     this.getNextImage();
-  }
-  
+  }  
 
   /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
