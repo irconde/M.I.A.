@@ -95,6 +95,14 @@ class App extends Component {
       socketCommand: socketIOClient(COMMAND_SERVER),
       socketFS: socketIOClient(FILE_SERVER)
     };
+    this.sendFilesToServer = this.sendFilesToServer.bind(this);
+    this.nextImageClick = this.nextImageClick.bind(this);
+    this.onFileChange = this.onFileChange.bind(this);
+    this.onFileUpload = this.onFileUpload.bind(this);
+    this.onImageRendered = this.onImageRendered.bind(this);
+    this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.onMouseClicked = this.onMouseClicked.bind(this);
+    this.getFilesFromCommandServer();
   }
 
 
@@ -104,20 +112,10 @@ class App extends Component {
    * @return {type}  None
    */
   componentDidMount() {
-    this.sendFilesToServer = this.sendFilesToServer.bind(this);
-    this.nextImageClick = this.nextImageClick.bind(this);
-    this.onFileChange = this.onFileChange.bind(this);
-    this.onFileUpload = this.onFileUpload.bind(this);
-    this.onImageRendered = this.onImageRendered.bind(this);
-    this.loadAndViewImage = this.loadAndViewImage.bind(this);
-    this.onMouseClicked = this.onMouseClicked.bind(this);
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
-
     this.setupConerstoneJS(this.state.imageViewport);
-    this.state.socketCommand = socketIOClient(COMMAND_SERVER);
-    this.state.socketFS = socketIOClient(FILE_SERVER);
-    this.getFilesFromCommandServer();
+    this.getNextImage();
   }
   
 
@@ -129,10 +127,14 @@ class App extends Component {
    */
   async getFilesFromCommandServer(){
     this.state.socketCommand.on("img", data => {
-      console.log('got image from command server');
       var imgBlob = this.b64toBlob(data, "image/dcs");
       this.sendFilesToServer(imgBlob, this.state.socketFS);
-      console.log('sending image to file server');
+      // If we got an image and we are null, we know we can now fetch one
+      // This is how it triggers to display a new file if none existed and a new one
+      // was added
+      if (this.state.selectedFile === null){
+        this.getNextImage();
+      }
     })
   }
 
@@ -144,7 +146,6 @@ class App extends Component {
    */
   async sendFilesToServer(file, socket){
     socket.emit("fileFromClient", file);
-    console.log(`File sent to server`);
   }
 
   /**
@@ -695,6 +696,134 @@ class App extends Component {
   render() {
     return (
       <div>
+        <div 
+          id="viewerContainer" 
+          style={{
+            width: '100vw',
+            height: '95vh',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            color: 'white'}}
+          onContextMenu={(e) => e.preventDefault() }
+          className='disable-selection noIbar'
+          unselectable='off'
+          ref={el => {
+            el && el.addEventListener('selectstart', (e) =>{
+              e.preventDefault();
+            })
+          }}
+          onMouseDown={(e) => e.preventDefault() } >
+          <div id="feedback-confirm"></div>
+          <div id="feedback-reject"></div>
+          <div 
+            id="topleft" 
+            ref={this.topLeftRef}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              left: '2rem'
+            }}>
+            Algorithm:
+          </div>
+          <div 
+            id="topleft2" 
+            ref={this.topLeft2Ref}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              top: '4rem',
+              left: '2rem'
+            }}>
+            Detector Type:
+          </div>
+          <div 
+            id="topleft3" 
+            ref={this.topLeft3Ref}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              top: '6rem',
+              left: '2rem'
+            }}>
+            Detector Configuration:
+          </div>
+          <div 
+            id="topright"
+            ref={this.topRightRef}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              right: '2rem'
+            }}>
+            Station Name:
+          </div>
+          <div 
+            id="topright2" 
+            ref={this.topRight2Ref}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              top: '4rem',
+              right: '2rem'
+            }}>
+            Date:
+          </div>
+          <div 
+            id="topright3" 
+            ref={this.topRight3Ref}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              top: '6rem',
+              right: '2rem'
+            }}>
+            Time:
+          </div>
+          <div 
+            id="bottomleft" 
+            ref={this.bottomLeftRef}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              bottom:'7.5rem',
+              left: '2rem'
+            }}>
+            Series Study:
+          </div>
+          <div 
+            id="bottomleft2" 
+            ref={this.bottomLeft2Ref}
+            className="overlay" 
+            style={{
+              position: 'absolute',
+              bottom:'6rem',
+              left: '2rem'
+            }}>
+            Series Study:
+          </div>
+        </div>
+        <div className="overlay" style={{
+          width: '10vw', 
+          height: '100vh', 
+          position: 'absolute', 
+          top: '0', 
+          right: '0',
+          color: 'white',
+          display: 'block'
+          }}
+          >
+            <button style={{
+                position: 'absolute',
+                top: '35vh',
+                right: '1rem',
+                width: '10vw',
+                height: '5vh',
+                }} onClick={this.nextImageClick}>
+                  Next
+            </button>
+        </div>
           <div>
             <input type="file" onChange={this.onFileChange} />
           </div>
