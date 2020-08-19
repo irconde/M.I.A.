@@ -167,7 +167,7 @@ class App extends Component {
    * Event that represents the selection of file from the file manager of the system
    */
   onFileChange = event => {
-    this.setState({ selectedFile: event.target.files[0] });
+    this.setState({ selectedFile: event.target.files[0], validated: false });
     const files = event.target.files[0];
     this.onFileUpload(files)
   };
