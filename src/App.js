@@ -52,8 +52,6 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 
 
 class App extends Component {
-
-
   /**
    * constructor - All the related elements of the class are intialized:
    * Callback methods are bound to the class
@@ -81,6 +79,7 @@ class App extends Component {
       time: null,
       detections: null,
       selectedDetection: -1,
+      validated: false,
       displayButtons: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -362,14 +361,18 @@ class App extends Component {
       const detectionLabel = Utils.formatDetectionLabel(detectionData.class, detectionData.confidence);
       const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
 
+      const validated = this.state.validated;
+
       // Bounding box rendering
-      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
-      // Label rendering
-      context.fillStyle = detectionColor;
-      context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
-      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"] , labelSize["width"], labelSize["height"]);
-      context.fillStyle = LABEL_TEXT_COLOR;
-      context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
+      if(validated === false) {
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
+        // Label rendering
+        context.fillStyle = detectionColor;
+        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.fillStyle = LABEL_TEXT_COLOR;
+        context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
+      }
     }
   };
 
@@ -390,79 +393,84 @@ class App extends Component {
     document.getElementById('bottomleft2').textContent = "Study: " + this.state.study;
   }
 
-
-  // File content to be displayed after
-  // file upload is complete
-  fileData = () => {
-    if (this.state.selectedFile) {
-      return (
-          <div>
-            <h2>File Details:</h2>
-            <p>File Name: {this.state.selectedFile.name}</p>
-            <p>File Type: {this.state.selectedFile.type}</p>
-          </div>
-      );
-    } else {
-      return (
-          <div>
-            {/*<br />*/}
-            {/*<h4>Choose before Pressing the Upload button</h4>*/}
-          </div>
-      );
-    }
-  };
-
-  render() {
-    return (
-      <div>
-          <div>
-            <input type="file" onChange={this.onFileChange} />
-          </div>
-          {this.fileData()}
-      </div>
-    );
-  }
-
-
   /**
-   * onMouseClicked - Callback function invoked on mouse clicked. We handle the selection of detections.
+   * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
    *
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
   onMouseClicked(e) {
-    var className = "";
+    if (this.state.detections === null || this.state.detections.length === 0){
+      return;
+    }
+
+    var clickedPos = -1;
+    var selectedIndex = this.state.selectedDetection;
+    var detectionList = this.state.detections;
+
+    // User is submitting feedback through confirm or reject buttons
+    if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
+      if(e.currentTarget.id === "confirm"){
+        this.setState({ selectedIndex: -1, validated: true }, () => {
+          selectedIndex = this.state.selectedDetection;
+        });
+        console.log("user confirmed detection");
+      }
+      if(e.currentTarget.id === "reject"){
+        this.setState({ selectedIndex: -1, validated: true }, () => {
+          selectedIndex = this.state.selectedDetection;
+        });
+        console.log("user rejected detection");
+      }
+      detectionList[selectedIndex].selected = false
+      this.setState({ displayButtons: false }, () => {
+        this.renderButtons(e, clickedPos, selectedIndex);
+      });
+    }
+
+    // Handle regular click events for selecting and deselecting detections
+    else{
+      const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
+
+      for (var i = 0; i < detectionList.length; i++) {
+        if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
+          clickedPos = i;
+          break;
+        }
+      }
+      if(clickedPos === -1) {
+        if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+        selectedIndex = -1;
+        this.setState({ displayButtons: false }, () => {
+          this.renderButtons(e, clickedPos, selectedIndex);
+        });
+      }
+      else {
+        if (clickedPos === selectedIndex){
+          detectionList[clickedPos].selected = false;
+          selectedIndex = -1;
+          this.setState({ displayButtons: false }, () => {
+            this.renderButtons(e, clickedPos, selectedIndex);
+          });
+        } else {
+          if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+          detectionList[clickedPos].selected = true;
+          selectedIndex = clickedPos;
+          this.setState({ displayButtons: true }, () => {
+            this.renderButtons(e, clickedPos, selectedIndex);
+          });
+        }
+      }
+    }
+  }
+
+  renderButtons(e, clickedPos, selectedIndex) {
+    let className = "";
+
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
     var detectionList = this.state.detections;
-    var selectedIndex = this.state.selectedDetection;
-
-    const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
-    var clickedPos = -1;
-    for (var i = 0; i < detectionList.length; i++) {
-      if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
-        clickedPos = i;
-        break;
-      }
-    }
-    if(clickedPos === -1) {
-      if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
-      this.setState({displayButtons: false})
-      selectedIndex = -1;
-    }
-    else {
-      if (clickedPos === selectedIndex){
-        detectionList[clickedPos].selected = false;
-        this.setState({displayButtons: false})
-        selectedIndex = -1;
-      } else {
-        if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
-        detectionList[clickedPos].selected = true;
-        this.setState({displayButtons: true})
-        selectedIndex = clickedPos;
-      }
-    }
 
     className = this.state.displayButtons ? "" : "hidden";
     let top = 0;
@@ -473,10 +481,9 @@ class App extends Component {
     }
     className = className + "feedback-buttons"
 
-
     this.setState({detections: detectionList, selectedDetection: selectedIndex});
 
-    ReactDOM.render(React.createElement("button", { className: className,
+    ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
         top: top,
         left: left,
@@ -484,7 +491,7 @@ class App extends Component {
       }
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
 
-    ReactDOM.render(React.createElement("button", { className: className,
+    ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
         top: top,
         left: left,
@@ -494,6 +501,16 @@ class App extends Component {
     }, "REJECT"), document.getElementById('feedback-reject'));
 
     cornerstone.updateImage(this.state.imageViewport, true);
+  }
+
+  render() {
+    return (
+      <div>
+          <div>
+            <input type="file" onChange={this.onFileChange} />
+          </div>
+      </div>
+    );
   }
 
 }
