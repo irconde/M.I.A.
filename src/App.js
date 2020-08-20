@@ -13,7 +13,7 @@ import Utils from "./Utils.js";
 import Detection from "./Detection.js";
 import axios from 'axios';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
-const FILE_SERVER = "http://127.0.0.1:4001";
+const FILE_SERVER = "http://127.0.0.1:4002";
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -127,8 +127,7 @@ class App extends Component {
    */
   async getFilesFromCommandServer(){
     this.state.socketCommand.on("img", data => {
-      var imgBlob = this.b64toBlob(data, "image/dcs");
-      this.sendFilesToServer(imgBlob, this.state.socketFS);
+      this.sendFilesToServer(this.b64toBlob(data), this.state.socketFS);
       // If we got an image and we are null, we know we can now fetch one
       // This is how it triggers to display a new file if none existed and a new one
       // was added
@@ -136,16 +135,6 @@ class App extends Component {
         this.getNextImage();
       }
     })
-  }
-
-  /**
-   * sendFilesToServer - Socket IO to send a file to the server
-   * @param {type} - file - which file we are sending
-   * @param {type} - socket - what socket we are sending files on, command or file server
-   * @return {type} - None
-   */
-  async sendFilesToServer(file, socket){
-    socket.emit("fileFromClient", file);
   }
 
   /**
@@ -205,24 +194,6 @@ class App extends Component {
     })
   }
 
-  /**
-   * getFilesFromCommandServer - Socket Listener to get files from command server then send them
-   *                           - to the file server directly after
-   * @param {type} - None      
-   * @return {type} - None
-   */
-  async getFilesFromCommandServer(){
-    this.state.socketCommand.on("img", data => {
-      var imgBlob = this.b64toBlob(data, "image/dcs");
-      this.sendFilesToServer(imgBlob, this.state.socketFS);
-      // If we got an image and we are null, we know we can now fetch one
-      // This is how it triggers to display a new file if none existed and a new one
-      // was added
-      if (this.state.selectedFile === null){
-        this.getNextImage();
-      }
-    })
-  }
 
   /**
    * sendFilesToServer - Socket IO to send a file to the server
@@ -231,7 +202,7 @@ class App extends Component {
    * @return {type} - None
    */
   async sendFilesToServer(file, socket){
-    socket.emit("fileFromClient", file);
+    socket.binary(true).emit("fileFromClient", file);
   }
 
   /**
