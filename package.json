@@ -12,23 +12,20 @@
     "cornerstone-tools": "^4.15.2",
     "cornerstone-wado-image-loader": "^3.1.2",
     "cornerstone-web-image-loader": "^2.0.0",
+    "dcmjs": "^0.16.2",
     "dicom-parser": "1.8.5",
+    "file-saver": "^2.0.2",
     "hammerjs": "^2.0.8",
     "lodash.debounce": "4.0.8",
     "react": "^16.2.0",
     "react-cornerstone-viewport": "^2.3.9",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.0",
-    "socket.io-client": "^2.3.0",
-    "chokidar": "^3.4.2",
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0",
-    "npm-run-all": "^4.1.5"
+    "save-file": "^2.3.1",
+    "socket.io-client": "^2.3.0"
   },
   "scripts": {
-    "start": "npm-run-all -p server react",
-    "react": "react-scripts start",
-    "server": "cd server && node server.js",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
