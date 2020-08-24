@@ -758,7 +758,7 @@ class App extends Component {
             className="overlay" 
             style={{
               position: 'absolute',
-              bottom:'7.5rem',
+              bottom:'4rem',
               left: '2rem'
             }}>
             Series Study:
@@ -769,7 +769,7 @@ class App extends Component {
             className="overlay" 
             style={{
               position: 'absolute',
-              bottom:'6rem',
+              bottom:'2.5rem',
               left: '2rem'
             }}>
             Series Study:
@@ -787,7 +787,7 @@ class App extends Component {
           >
             <button style={{
                 position: 'absolute',
-                top: '35vh',
+                top: '45vh',
                 right: '1rem',
                 width: '10vw',
                 height: '5vh',
