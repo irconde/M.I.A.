@@ -169,15 +169,8 @@ class App extends Component {
    * Event that represents the selection of file from the file manager of the system
    */
   onFileChange = event => {
-    const self = this;
     this.setState({ selectedFile: event.target.files[0] });
     const files = event.target.files[0];
-
-    let reader = new FileReader();
-    reader.onload = function(event) {
-      self.setState({image: reader.result})
-    }
-    reader.readAsArrayBuffer(event.target.files[0]);
 
     this.onFileUpload(files)
   };
@@ -188,6 +181,15 @@ class App extends Component {
    * the load and display of the data in a DICOS+TDR file
    */
   onFileUpload = (file) => {
+    const self = this;
+
+    // this needs to go in the function where James reads the file on the server unless he calls onFileUpload
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      self.setState({image: reader.result})
+    }
+    reader.readAsArrayBuffer(file);
+
     const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
     this.loadAndViewImage(imageId);
   };
@@ -408,19 +410,69 @@ class App extends Component {
   }
 
 
-  dicosWriter(feedback) {
+  dicosWriter() {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    let validations = this.state.validations;
+    var i;
+    var abortFlag = true;
+
     var arrayBuffer = this.state.image;
     var dicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+
+    dicomDict.upsertTag("4010106D", "CS", "YES");
+    dicomDict.upsertTag("4010106E", "CS", "RANDOM");
+
+    //THIS CREATEs A NEW TAG FOR THE 'REFERENCE PTO SEQUENCE' ATTRIBUTE
+    //A TOTALLY NEW TOP-LEVEL PARENT ATTRIBUTE IS CREATED INSTEAD OF
+    //CREATING THIS UNDER THE PARENT ELEMENT, 'THREAT SEQUENCE'(40101011)
+    dicomDict.upsertTag("40101076", "SQ");
+
+
     var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomDict.dict);
-    dataset.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = feedback;
+    let copiedData = JSON.parse(JSON.stringify(dataset));
 
-    dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(dataset);
+    let instanceNumber = copiedData.InstanceNumber;
+    var numberAlarmObjs = copiedData.NumberOfAlarmObjects;
+    var numberTotalObjs = copiedData.NumberOfTotalObjects;
+    instanceNumber = instanceNumber * 4;
 
-    let new_file_WriterBuffer = dicomDict.write();
+    copiedData.InstanceNumber = instanceNumber;
+    copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
+    copiedData.InstanceCreationTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    copiedData.AquisitionNumber = instanceNumber;
+    copiedData.TDRType = "OPERATOR";
+
+    // TODO: Rewrite/modify this when we receive test files with multiple detections
+    for(i=0; i<validations.length; i++){
+      if (validations[i] === "CONFIRM"){
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
+        abortFlag = false;
+      }
+      else if (validations[i] === "REJECT") {
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
+        numberAlarmObjs = numberAlarmObjs - 1;
+        numberTotalObjs = numberTotalObjs - 1;
+        copiedData.ThreatSequence['NumberOfAlarmObjects'] = numberAlarmObjs;
+        copiedData.ThreatSequence['NumberOfTotalObjects'] = numberTotalObjs;
+        abortFlag = false;
+      }
+    }
+
+    dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(copiedData);
+    console.log(copiedData);
+
+    // let new_file_WriterBuffer = dicomDict.write();
 
     // var a = document.createElement("a");
-    var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
-    this.setState({selectedFile: file});
+    // var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
+    // this.setState({selectedFile: file});
 
     // a.href = URL.createObjectURL(file);
     // a.download = 'test.dcs';
@@ -443,6 +495,8 @@ class App extends Component {
     var selectedIndex = this.state.selectedDetection;
     var detectionList = this.state.detections;
     var validations = this.state.validations;
+    let feedback = "";
+    let validationsComplete = true;
 
     // User is submitting feedback through confirm or reject buttons
     if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
@@ -451,20 +505,30 @@ class App extends Component {
           selectedIndex = this.state.selectedDetection;
         });
         console.log("user confirmed detection");
-        this.dicosWriter("CONFIRM");
+        feedback = "CONFIRM";
       }
       if(e.currentTarget.id === "reject"){
         this.setState({ selectedIndex: -1 }, () => {
           selectedIndex = this.state.selectedDetection;
-          this.dicosWriter("REJECT");
+          feedback = "REJECT";
         });
         console.log("user rejected detection");
       }
       detectionList[selectedIndex].selected = false;
-      validations[selectedIndex] = 1;
+      validations[selectedIndex] = feedback;
       console.log(validations);
       this.setState({ displayButtons: false, validations:validations }, () => {
         this.renderButtons(e, clickedPos, selectedIndex);
+        for(i=0; i<this.state.validations;i++){
+          if (this.state.validations[i] === 0) {
+            validationsComplete = false;
+          }
+        }
+        if(validationsComplete === true){
+          console.log("all detection validated");
+          this.dicosWriter();
+        }
+
       });
     }
 
