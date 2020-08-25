@@ -97,8 +97,6 @@ class App extends Component {
     };
     this.sendFilesToServer = this.sendFilesToServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
-    this.onFileChange = this.onFileChange.bind(this);
-    this.onFileUpload = this.onFileUpload.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -251,26 +249,6 @@ class App extends Component {
     const blob = new Blob(byteArrays, {type: contentType});
     return blob;
   };
-
-  /**
-   * Event that represents the selection of file from the file manager of the system
-   */
-  onFileChange = event => {
-    this.setState({ selectedFile: event.target.files[0], validated: false });
-    const files = event.target.files[0];
-    this.onFileUpload(files)
-  };
-
-
-  /**
-   * Callback function triggered when a file change event happens that leads to
-   * the load and display of the data in a DICOS+TDR file
-   */
-  onFileUpload = (file) => {
-    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
-    this.loadAndViewImage(imageId);
-  };
-
 
   /**
    * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
@@ -671,7 +649,7 @@ class App extends Component {
           id="viewerContainer" 
           style={{
             width: '100vw',
-            height: '95vh',
+            height: '100vh',
             marginLeft: 'auto',
             marginRight: 'auto',
             color: 'white'}}
@@ -795,9 +773,6 @@ class App extends Component {
                   Next
             </button>
         </div>
-          <div>
-            <input type="file" onChange={this.onFileChange} />
-          </div>
       </div>
     );
   }
