@@ -172,6 +172,28 @@ class App extends Component {
 
 
   /**
+   * validationCompleted - Method that indicates is the operator has finished validating detections
+   *
+   * @param  {type} validationList array sized with the number of detections. Every position
+   * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
+   * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
+   */
+  validationCompleted(validationList) {
+    var validationsComplete = true;
+    if (validationList == null) {
+      return validationsComplete;
+    }
+    for( var i=0; i < validationList.length; i++){
+      if (validationList[i] == 0) {
+        validationsComplete = false;
+        break;
+      }
+    }
+    return validationsComplete;
+  }
+
+
+  /**
    * nextImageClick() - When the operator taps next, we send to the file server to remove the
    *                  - current image, then when that is complete, we send the image to the command
    *                  - server. Finally, calling getNextImage to display another image if there is one
@@ -198,15 +220,10 @@ class App extends Component {
       console.log(err);
     })
 
+    let validationCompleted = this.validationCompleted(this.state.validations);
+    console.log(validationCompleted);
 
-    let i;
-    let validationsComplete = false;
-    for(i=0; i<this.state.validations;i++){
-      if (this.state.validations[i] !== 0) {
-        validationsComplete = true;
-      }
-    }
-    if(validationsComplete === true){
+    if(validationCompleted === true){
       //feedback has been left for at least one detection so create a TDR to save feedback
       this.dicosWriter(false);
     }
