@@ -515,7 +515,29 @@ class App extends Component {
     copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
     copiedData.InstanceCreationTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     copiedData.AcquisitionNumber = instanceNumber;
+
     copiedData.TDRType = "OPERATOR";
+    copiedData.OperatorIdentificationSequence = {
+      'vrMap': {},
+      'PersonIdentificationCodeSequence': {
+        'CodeValue': 'none',
+        'CodingSchemeDesignator': 'none',
+        'CodingSchemeVersion': '1.1.1',
+        'CodeMeaning': 'none',
+        'vrMap': {}
+      },
+      'PersonAddress': '123 Main Street',
+      'PersonTelephoneNumbers': '1112223333',
+      'OrganizationName': 'The Organization',
+      'OrganizationAddress': '123 Main Street',
+      'OrganizationCodeSequence': {
+        'CodeValue': 'none',
+        'CodingSchemeDesignator': 'none',
+        'CodingSchemeVersion': '1.1.1',
+        'CodeMeaning': 'none',
+        'vrMap': {}
+      }
+    }
 
     if(abort === true){
       copiedData.abortFlag = 'ABORT';
@@ -587,7 +609,6 @@ class App extends Component {
     var detectionList = this.state.detections;
     var validations = this.state.validations;
     let feedback = "";
-    let validationsComplete = true;
 
     // User is submitting feedback through confirm or reject buttons
     if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
