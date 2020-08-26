@@ -7,43 +7,43 @@ export default class Dicos {
 
   static get dictionary() {
     return {
-      "BOUNDING_BOX": {
+      "BoundingPolygon": {
         tag: "x4010101d",
         name: "BoundingPolygon"
       },
-      "THREAT_OBJECT_CLASS": {
+      "ThreatCategoryDescription": {
         tag: "x40101013",
         name: "ThreatCategoryDescription"
       },
-      "CONFIDENCE_LEVEL": {
+      "ATDAssessmentProbability": {
         tag: "x40101016",
         name: "ATDAssessmentProbability"
       },
-      "THREATS_NUMBER": {
+      "NumberOfAlarmObjects": {
         tag: "x40101034",
         name: "NumberOfAlarmObjects"
       },
-      "ALGORITHM_NAME": {
+      "ThreatDetectionAlgorithmandVersion": {
         tag: "x40101029",
         name: "ThreatDetectionAlgorithmandVersion"
       },
-      "DETECTOR_TYPE": {
+      "DetectorType": {
         tag: "x00187004",
         name: "DetectorType"
       },
-      "DETECTOR_CONFIGURATION": {
+      "DetectorConfiguration": {
         tag: "x00187005",
         name: "DetectorConfiguration"
       },
-      "STATION_NAME": {
+      "StationName": {
         tag: "x00081010",
         name: "StationName"
       },
-      "SERIES_DESCRIPTION": {
+      "SeriesDescription": {
         tag: "x0008103e",
         name: "SeriesDescription"
       },
-      "STUDY_DESCRIPTION": {
+      "StudyDescription": {
         tag: "x00081030",
         name: "StudyDescription"
       },
@@ -62,7 +62,7 @@ export default class Dicos {
     let BYTES_PER_FLOAT = 4;
     let B_BOX_POINT_COUNT = 2;
     const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
-    const bBoxByteArraySize = bBoxDataSet.elements[Dicos.dictionary['BOUNDING_BOX'].tag].length
+    const bBoxByteArraySize = bBoxDataSet.elements[Dicos.dictionary['BoundingPolygon'].tag].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
     const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
@@ -75,7 +75,7 @@ export default class Dicos {
         componentCount = -1;
         continue;
       }
-      bBoxCoords[bBoxIndex] = bBoxDataSet.float(Dicos.dictionary['BOUNDING_BOX'].tag, i);
+      bBoxCoords[bBoxIndex] = bBoxDataSet.float(Dicos.dictionary['BoundingPolygon'].tag, i);
       bBoxIndex++;
     }
     return bBoxCoords;
@@ -89,7 +89,7 @@ export default class Dicos {
    * @return {type}       String value with the description of the potential threat object
    */
   static retrieveObjectClass(image) {
-    return image.dataSet.elements.x40101038.items[0].dataSet.string(Dicos.dictionary['THREAT_OBJECT_CLASS'].tag);
+    return image.dataSet.elements.x40101038.items[0].dataSet.string(Dicos.dictionary['ThreatCategoryDescription'].tag);
   }
 
 
@@ -100,7 +100,7 @@ export default class Dicos {
    * @return {type}       Float value with the confidence level
    */
   static retrieveConfidenceLevel(image) {
-    return image.dataSet.elements.x40101038.items[0].dataSet.float(Dicos.dictionary['CONFIDENCE_LEVEL'].tag);
+    return image.dataSet.elements.x40101038.items[0].dataSet.float(Dicos.dictionary['ATDAssessmentProbability'].tag);
   }
 
 

@@ -304,13 +304,13 @@ class App extends Component {
     this.setState({
       detections: null,
       selectedDetection: -1,
-      threatsCount: image.data.uint16(Dicos.dictionary['THREATS_NUMBER'].tag),
-      algorithm: image.data.string(Dicos.dictionary['ALGORITHM_NAME'].tag),
-      type: image.data.string(Dicos.dictionary['DETECTOR_TYPE'].tag),
-      configuration: image.data.string(Dicos.dictionary['DETECTOR_CONFIGURATION'].tag),
-      station: image.data.string(Dicos.dictionary['STATION_NAME'].tag),
-      series: image.data.string(Dicos.dictionary['SERIES_DESCRIPTION'].tag),
-      study: image.data.string(Dicos.dictionary['STUDY_DESCRIPTION'].tag),
+      threatsCount: image.data.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
+      algorithm: image.data.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
+      type: image.data.string(Dicos.dictionary['DetectorType'].tag),
+      configuration: image.data.string(Dicos.dictionary['DetectorConfiguration'].tag),
+      station: image.data.string(Dicos.dictionary['StationName'].tag),
+      series: image.data.string(Dicos.dictionary['SeriesDescription'].tag),
+      study: image.data.string(Dicos.dictionary['StudyDescription'].tag),
       time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
       date: mm + '/' + dd + '/' + yyyy
     });
