@@ -85,7 +85,6 @@ class App extends Component {
       selectedDetection: -1,
       validations: null,
       displayButtons: false,
-      hover: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: null,
@@ -98,7 +97,6 @@ class App extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
-    this.toggleHoverNext = this.toggleHoverNext.bind(this);
     this.getFilesFromCommandServer();
   }
 
@@ -166,10 +164,6 @@ class App extends Component {
     }).catch((err) => {
       console.log(err);
     });
-  }
-
-  toggleHoverNext(){
-    this.setState({hover: !this.state.hover})
   }
 
   /**
