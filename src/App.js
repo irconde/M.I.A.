@@ -539,6 +539,16 @@ class App extends Component {
       }
     }
 
+    copiedData.ThreatSequence['ReferencedPTOSequence'] = {
+      'vrMap': {},
+      'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
+      'ReferencedTDRInstanceSequence': {
+        'ReferencedSOPClassUID': copiedData.SOPClassUID,
+        'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
+        'vrMap': {}
+      }
+    }
+
     if(abort === true){
       copiedData.abortFlag = 'ABORT';
       copiedData.abortReason = 'NOT_REVIEWED';
@@ -554,16 +564,6 @@ class App extends Component {
       for(i=0; i<validations.length; i++){
         copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
         copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
-
-        copiedData.ThreatSequence['ReferencedPTOSequence'] = {
-          'vrMap': {},
-          'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
-          'ReferencedTDRInstanceSequence': {
-            'ReferencedSOPClassUID': copiedData.SOPClassUID,
-            'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
-            'vrMap': {}
-          }
-        }
 
         if (validations[i] === "CONFIRM"){
           copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
