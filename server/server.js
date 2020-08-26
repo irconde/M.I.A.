@@ -30,59 +30,59 @@ if (!fs.existsSync(imgPath)){
  * When certain events occur, the queue is updated based on these events
  * When a file gets saved by the server, this watcher adds it the queue
  * Same for when it is removed, the watcher updates the queue
- * This supports users putting their own files into the folder too and will 
+ * This supports users putting their own files into the folder too and will
  * serve them if they are of type .dcs, as well will rename them if they arent
  * but are of type .dcs
  */
 const watcher = chokidar.watch(imgPath, {ignored: /^\./, awaitWriteFinish: false});
 watcher
-  .on('add', (file) => {
-      console.log('File Server: File', path.resolve(file), 'has been added');
-      if (validateRegExp(getFileName(file), regExpDCS)){
-          if (validateRegExp(getFileName(file), regExpFileName)) {
-              if (fileQueue.indexOf(file) == -1) {
-                // If the file is not already in the queue add it
-                fileQueue.push(file);
-                if (getFileNumber(file) <= maxFileNumber) {
-                    // If we are adding a file that is lower than a max file number
-                    // We need to sort, otherwise, we don't need to sort.
-                    fileQueue.sort((a, b) => {
-                        return getFileNumber(a) - getFileNumber(b);
-                    });
+    .on('add', (file) => {
+        console.log('File Server: File', path.resolve(file), 'has been added');
+        if (validateRegExp(getFileName(file), regExpDCS)){
+            if (validateRegExp(getFileName(file), regExpFileName)) {
+                if (fileQueue.indexOf(file) == -1) {
+                    // If the file is not already in the queue add it
+                    fileQueue.push(file);
+                    if (getFileNumber(file) <= maxFileNumber) {
+                        // If we are adding a file that is lower than a max file number
+                        // We need to sort, otherwise, we don't need to sort.
+                        fileQueue.sort((a, b) => {
+                            return getFileNumber(a) - getFileNumber(b);
+                        });
+                    }
+                    setMaxFileNumber();
                 }
-                setMaxFileNumber();
-              }
-          } else {
-            // Rename the file
-            fs.rename(file, `${imgPath}${maxFileNumber+1}_img.dcs`, (err) => console.log(`File Server Error: ${err}`));
-            console.log(`File Server: File Not Formated Properly --- Renamed file to ${imgPath}${maxFileNumber+1}_img.dcs`)
-          }
-      } else {
-          console.log('File Server: file is not of type .dcs');
-      }     
+            } else {
+                // Rename the file
+                fs.rename(file, `${imgPath}${maxFileNumber+1}_img.dcs`, (err) => console.log(`File Server Error: ${err}`));
+                console.log(`File Server: File Not Formated Properly --- Renamed file to ${imgPath}${maxFileNumber+1}_img.dcs`)
+            }
+        } else {
+            console.log('File Server: file is not of type .dcs');
+        }
     })
-  .on('change', (file) => {
-      console.log('File Server: File', path.resolve(file), 'has been changed');
+    .on('change', (file) => {
+        console.log('File Server: File', path.resolve(file), 'has been changed');
     })
-  .on('unlink', (file) => {
-      console.log('File Server: File', path.resolve(file), 'has been removed');
-      const index = fileQueue.indexOf(file);
-      if (index > 1){
-          fileQueue.splice(index, 1);
-      } else if (index === 0){
-          fileQueue.shift();
-      }
-      setMaxFileNumber();
+    .on('unlink', (file) => {
+        console.log('File Server: File', path.resolve(file), 'has been removed');
+        const index = fileQueue.indexOf(file);
+        if (index > 1){
+            fileQueue.splice(index, 1);
+        } else if (index === 0){
+            fileQueue.shift();
+        }
+        setMaxFileNumber();
     })
-  .on('error', (error) => {
-      console.error('Error happened', error);
+    .on('error', (error) => {
+        console.error('Error happened', error);
     })
 
 /**
- * setMaxFileNumber() - This function is how we keep track of our max file number 
- *                    - such as maxNum_img.dcs from our file queue. This calls the 
+ * setMaxFileNumber() - This function is how we keep track of our max file number
+ *                    - such as maxNum_img.dcs from our file queue. This calls the
  *                    - function getFileNumber and passes in the last element of the queue
- * @param {type} - None     
+ * @param {type} - None
  * @return {type} - None
  */
 function setMaxFileNumber() {
@@ -97,21 +97,31 @@ function setMaxFileNumber() {
  * getFileNumber()    - We can pull out our file number and return it to the user
  *                    - We do this by pulling apart the file name, which is a path like /static/img/1_img.dcs
  *                    - by splitting on the slashes and pulling the number off the 1_img.dcs part
- * @param {type} - None     
+ * @param {type} - None
  * @return {type} - None
  */
 function getFileNumber(file){
-    var fileSplit = file.split("\\");
+    var fileSplit;
+    if (process.platform === 'win32') {
+        fileSplit = file.split("\\");
+    } else if (process.platform === 'darwin' || process.platform === 'linux') {
+        fileSplit = file.split("/");
+    }
     return parseInt(fileSplit[fileSplit.length-1]);
 }
 
 /**
  * getFileName()      - This function simply returns the file name from whatever file we have
- * @param {type} - None     
+ * @param {type} - None
  * @return {type} - None
  */
 function getFileName(file) {
-    var fileSplit = file.split("\\");
+    var fileSplit;
+    if (process.platform === 'win32') {
+        fileSplit = file.split("\\");
+    } else if (process.platform === 'darwin' || process.platform === 'linux') {
+        fileSplit = file.split("/");
+    }
     return fileSplit[fileSplit.length-1];
 }
 
@@ -119,7 +129,7 @@ function getFileName(file) {
  * validateRegExp()   - We test if the regular expression we are being passed matches our file name
  *                    - This is to test if the file is of type .dcs and as well num_img.dcs
  *                    - Which are from our regular expressions defined at the top of the file
- * @param {type} - None     
+ * @param {type} - None
  * @return {type} - None
  */
 function validateRegExp(file, re){
@@ -187,7 +197,7 @@ router.get("/next", (req, res) => {
         } catch (error) {
             console.log(error);
             res.send({ response: 'error'});
-        }     
+        }
     }
 });
 
@@ -231,7 +241,7 @@ const io = socketIo(server);
  */
 io.on("connection", (socket) => {
     console.log('File Server: New Client Connected');
-    
+
     socket.on("disconnect", () => {
         console.log('File Server: Client disconnected');
     })
@@ -246,8 +256,8 @@ io.on("connection", (socket) => {
  * storeFile - Will check the total unvalidated files received
  *           - Then will store the file in order with the current
  *           - file structure
- * 
- * @param {type} data 
+ *
+ * @param {type} data
  */
 async function storeFile(data) {
     let fileNameDir = `${imgPath}${maxFileNumber+1}_img.dcs`;

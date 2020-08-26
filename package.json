@@ -22,10 +22,16 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.0",
     "save-file": "^2.3.1",
-    "socket.io-client": "^2.3.0"
+    "socket.io-client": "^2.3.0",
+    "chokidar": "^3.4.2",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0",
+    "npm-run-all": "^4.1.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "npm-run-all -p server react",
+    "react": "react-scripts start",
+    "server": "cd server && node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

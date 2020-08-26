@@ -12,8 +12,9 @@ import socketIOClient from "socket.io-client";
 import Utils from "./Utils.js";
 import Detection from "./Detection.js";
 import * as dcmjs from 'dcmjs';
-
-const ENDPOINT = "http://127.0.0.1:4001";
+import axios from 'axios';
+const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
+const FILE_SERVER = "http://127.0.0.1:4002";
 
 const BYTES_PER_FLOAT = 4;
 const B_BOX_TAG = 'x4010101d';
@@ -66,7 +67,14 @@ class App extends Component {
    */
   constructor(props) {
     super(props);
-
+    this.topLeftRef = React.createRef();
+    this.topLeft2Ref = React.createRef();
+    this.topLeft3Ref = React.createRef();
+    this.topRightRef = React.createRef();
+    this.topRight2Ref = React.createRef();
+    this.topRight3Ref = React.createRef();
+    this.bottomLeftRef = React.createRef();
+    this.bottomLeft2Ref = React.createRef();
     this.state = {
       threatsCount: 0,
       selectedFile: null,
@@ -85,10 +93,17 @@ class App extends Component {
       displayButtons: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
-      response: "",
-      socket: null,
-      isConnected: null
+      isConnected: null,
+      socketCommand: socketIOClient(COMMAND_SERVER),
+      socketFS: socketIOClient(FILE_SERVER)
     };
+
+    this.sendFilesToServer = this.sendFilesToServer.bind(this);
+    this.nextImageClick = this.nextImageClick.bind(this);
+    this.onImageRendered = this.onImageRendered.bind(this);
+    this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.onMouseClicked = this.onMouseClicked.bind(this);
+    this.getFilesFromCommandServer();
   }
 
 
@@ -98,23 +113,118 @@ class App extends Component {
    * @return {type}  None
    */
   componentDidMount() {
-    this.onFileChange = this.onFileChange.bind(this);
-    this.onFileUpload = this.onFileUpload.bind(this);
-    this.onImageRendered = this.onImageRendered.bind(this);
-    this.loadAndViewImage = this.loadAndViewImage.bind(this);
-    this.onMouseClicked = this.onMouseClicked.bind(this);
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
-
     this.setupConerstoneJS(this.state.imageViewport);
+    this.getNextImage();
+  }
 
-    this.state.socket = socketIOClient(ENDPOINT);
-    this.state.socket.on("img", data => {
-      var imgBlob = this.b64toBlob(data, "image/dcs");
-      this.setState({
-        response: imgBlob
-      })
+
+  /**
+   * getFilesFromCommandServer - Socket Listener to get files from command server then send them
+   *                           - to the file server directly after
+   * @param {type} - None
+   * @return {type} - None
+   */
+  async getFilesFromCommandServer(){
+    this.state.socketCommand.on("img", data => {
+      this.sendFilesToServer(this.b64toBlob(data), this.state.socketFS);
+      // If we got an image and we are null, we know we can now fetch one
+      // This is how it triggers to display a new file if none existed and a new one
+      // was added
+      if (this.state.selectedFile === null){
+        this.getNextImage();
+      }
     })
+  }
+
+
+  /**
+   * getNextImage() - Attempts to retreive the next image from the file server via get request
+   *                - Then sets the state to the blob and calls the loadAndViewImage() function
+   * @param {type} - None
+   * @return {type} - None
+   */
+  getNextImage(){
+    axios.get(`${FILE_SERVER}/next`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control' : 'no-cache'
+      }
+    }).then((res) => {
+      // We get our latest file upon the main component mounting
+      if (res.data.response === 'error '){
+        console.log('error getting next image');
+      } else if (res.data.response === 'no-next-image') {
+        console.log('No next image to display');
+      } else {
+        // let image = ArrayBuffer.from(res.data.b64, 'base64'); // Ta-da
+        // this.setState({image: image});
+        const myBlob = this.b64toBlob(res.data.b64);
+        this.setState({ selectedFile: myBlob});
+        const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
+        this.loadAndViewImage(imageId);
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+
+
+  /**
+   * nextImageClick() - When the operator taps next, we send to the file server to remove the
+   *                  - current image, then when that is complete, we send the image to the command
+   *                  - server. Finally, calling getNextImage to display another image if there is one
+   * @param {type} - None
+   * @return {type} - None
+   */
+  nextImageClick() {
+    axios.post(`${FILE_SERVER}/confirm`, {
+      valid: true
+    }, {
+      crossdomain: true
+    }).then(async (res) => {
+      if (res.data.confirm === 'image-removed'){
+        this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand).then((res) => {
+          this.getNextImage();
+        });
+      } else if (res.data.confirm === 'image-not-removed') {
+        console.log('file server couldnt remove the next image');
+      } else if (res.data.confirm === 'no-next-image'){
+        alert('No next image');
+        this.setState({selectedFile: null});
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+
+
+    let i;
+    let validationsComplete = false;
+    for(i=0; i<this.state.validations;i++){
+      if (this.state.validations[i] !== 0) {
+        validationsComplete = true;
+      }
+    }
+    if(validationsComplete === true){
+      //feedback has been left for at least one detection so create a TDR to save feedback
+      this.dicosWriter(false);
+    }
+    else{
+      //feedback has not been left for any detection so create a TDR w/ ABORT flag
+      this.dicosWriter(true);
+    }
+
+  }
+
+  /**
+   * sendFilesToServer - Socket IO to send a file to the server
+   * @param {type} - file - which file we are sending
+   * @param {type} - socket - what socket we are sending files on, command or file server
+   * @return {type} - None
+   */
+  async sendFilesToServer(file, socket){
+    socket.binary(true).emit("fileFromClient", file);
   }
 
 
@@ -165,35 +275,6 @@ class App extends Component {
     return blob;
   };
 
-  /**
-   * Event that represents the selection of file from the file manager of the system
-   */
-  onFileChange = event => {
-    this.setState({ selectedFile: event.target.files[0] });
-    const files = event.target.files[0];
-
-    this.onFileUpload(files)
-  };
-
-
-  /**
-   * Callback function triggered when a file change event happens that leads to
-   * the load and display of the data in a DICOS+TDR file
-   */
-  onFileUpload = (file) => {
-    const self = this;
-
-    // this needs to go in the function where James reads the file on the server unless he calls onFileUpload
-    let reader = new FileReader();
-    reader.onload = function(event) {
-      self.setState({image: reader.result})
-    }
-    reader.readAsArrayBuffer(file);
-
-    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
-    this.loadAndViewImage(imageId);
-  };
-
 
   /**
    * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
@@ -204,7 +285,6 @@ class App extends Component {
    */
   loadAndViewImage(imageId) {
     const self = this;
-
     cornerstone.loadImage(imageId).then(
       function(image) {
         self.displayDICOSimage(image);
@@ -340,6 +420,7 @@ class App extends Component {
    */
   onImageRendered(e) {
     const eventData = e.detail;
+
     // set the canvas context to the image coordinate system
     //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
@@ -399,37 +480,28 @@ class App extends Component {
    * @return {type}  None
    */
   renderGeneralInfo() {
-    document.getElementById('topleft').textContent = "Algorithm: " + this.state.algorithm;
-    document.getElementById('topleft2').textContent = "Detector Type: " + this.state.type;
-    document.getElementById('topleft3').textContent = "Detector Configuration: " + this.state.configuration;
-    document.getElementById('topright').textContent = "Station Name: " + this.state.station;
-    document.getElementById('topright2').textContent = "Date: " + this.state.date;
-    document.getElementById('topright3').textContent = "Time: " + this.state.time;
-    document.getElementById('bottomleft').textContent = "Series: " + this.state.series;
-    document.getElementById('bottomleft2').textContent = "Study: " + this.state.study;
+    this.topLeftRef.current.textContent = "Algorithm: " + this.state.algorithm;
+    this.topLeft2Ref.current.textContent = "Detector Type: " + this.state.type;
+    this.topLeft3Ref.current.textContent = "Detector Configuration: " + this.state.configuration;
+    this.topRightRef.current.textContent = "Station Name: " + this.state.station;
+    this.topRight2Ref.current.textContent = "Date: " + this.state.date;
+    this.topRight3Ref.current.textContent = "Time: " + this.state.time;
+    this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
+    this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
   }
 
 
-  dicosWriter() {
+  dicosWriter(abort= false) {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
     let validations = this.state.validations;
     var i;
-    var abortFlag = true;
 
-    var arrayBuffer = this.state.image;
-    var dicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+    var image = this.state.image;
 
-    dicomDict.upsertTag("4010106D", "CS", "YES");
-    dicomDict.upsertTag("4010106E", "CS", "RANDOM");
-
-    //THIS CREATEs A NEW TAG FOR THE 'REFERENCE PTO SEQUENCE' ATTRIBUTE
-    //A TOTALLY NEW TOP-LEVEL PARENT ATTRIBUTE IS CREATED INSTEAD OF
-    //CREATING THIS UNDER THE PARENT ELEMENT, 'THREAT SEQUENCE'(40101011)
-    dicomDict.upsertTag("40101076", "SQ");
-
+    var dicomDict = dcmjs.data.DicomMessage.readFile(image);
 
     var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomDict.dict);
     let copiedData = JSON.parse(JSON.stringify(dataset));
@@ -442,37 +514,56 @@ class App extends Component {
     copiedData.InstanceNumber = instanceNumber;
     copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
     copiedData.InstanceCreationTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    copiedData.AquisitionNumber = instanceNumber;
+    copiedData.AcquisitionNumber = instanceNumber;
     copiedData.TDRType = "OPERATOR";
 
-    // TODO: Rewrite/modify this when we receive test files with multiple detections
-    for(i=0; i<validations.length; i++){
-      if (validations[i] === "CONFIRM"){
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
-        abortFlag = false;
-      }
-      else if (validations[i] === "REJECT") {
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
-        numberAlarmObjs = numberAlarmObjs - 1;
-        numberTotalObjs = numberTotalObjs - 1;
-        copiedData.ThreatSequence['NumberOfAlarmObjects'] = numberAlarmObjs;
-        copiedData.ThreatSequence['NumberOfTotalObjects'] = numberTotalObjs;
-        abortFlag = false;
-      }
+    if(abort === true){
+      copiedData.abortFlag = 'ABORT';
+      copiedData.abortReason = 'NOT_REVIEWED';
+      copiedData.AdditionalScreeningPerformed = "NO";
     }
+
+    else {
+      copiedData.abortFlag = 'SUCCESS';
+      copiedData.AdditionalScreeningPerformed = "YES";
+      copiedData.AdditionalInspectionSelectionCriteria = "RANDOM";
+
+      // TODO: Rewrite/modify this when we receive test files with multiple detections
+      for(i=0; i<validations.length; i++){
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
+        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
+
+        copiedData.ThreatSequence['ReferencedPTOSequence'] = {
+          'vrMap': {},
+          'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
+          'ReferencedTDRInstanceSequence': {
+            'ReferencedSOPClassUID': copiedData.SOPClassUID,
+            'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
+            'vrMap': {}
+          }
+        }
+
+        if (validations[i] === "CONFIRM"){
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
+        }
+        else if (validations[i] === "REJECT") {
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
+          numberAlarmObjs = numberAlarmObjs - 1;
+          numberTotalObjs = numberTotalObjs - 1;
+          copiedData.NumberOfAlarmObjects = numberAlarmObjs;
+          copiedData.NumberOfTotalObjects = numberTotalObjs;
+        }
+      } //end for loop through validations
+    } //end else abort
 
     dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(copiedData);
     console.log(copiedData);
 
-    // let new_file_WriterBuffer = dicomDict.write();
+    let new_file_WriterBuffer = dicomDict.write();
 
     // var a = document.createElement("a");
-    // var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
-    // this.setState({selectedFile: file});
+    var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
+    this.setState({selectedFile: file});
 
     // a.href = URL.createObjectURL(file);
     // a.download = 'test.dcs';
@@ -510,26 +601,18 @@ class App extends Component {
       if(e.currentTarget.id === "reject"){
         this.setState({ selectedIndex: -1 }, () => {
           selectedIndex = this.state.selectedDetection;
-          feedback = "REJECT";
         });
+        feedback = "REJECT";
         console.log("user rejected detection");
       }
+
       detectionList[selectedIndex].selected = false;
       validations[selectedIndex] = feedback;
       console.log(validations);
       this.setState({ displayButtons: false, validations:validations }, () => {
         this.renderButtons(e, clickedPos, selectedIndex);
-        for(i=0; i<this.state.validations;i++){
-          if (this.state.validations[i] === 0) {
-            validationsComplete = false;
-          }
-        }
-        if(validationsComplete === true){
-          console.log("all detection validated");
-          this.dicosWriter();
-        }
-
       });
+      // this.renderGeneralInfo();
     }
 
     // Handle regular click events for selecting and deselecting detections
@@ -610,9 +693,134 @@ class App extends Component {
   render() {
     return (
       <div>
-          <div>
-            <input type="file" onChange={this.onFileChange} />
+        <div
+          id="viewerContainer"
+          style={{
+            width: '100vw',
+            height: '100vh',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            color: 'white'}}
+          onContextMenu={(e) => e.preventDefault() }
+          className='disable-selection noIbar'
+          unselectable='off'
+          ref={el => {
+            el && el.addEventListener('selectstart', (e) =>{
+              e.preventDefault();
+            })
+          }}
+          onMouseDown={(e) => e.preventDefault() } >
+          <div id="feedback-confirm"> </div>
+          <div id="feedback-reject"> </div>
+          <div
+            id="topleft"
+            ref={this.topLeftRef}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              left: '2rem'
+            }}>
+            Algorithm:
           </div>
+          <div
+            id="topleft2"
+            ref={this.topLeft2Ref}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '4rem',
+              left: '2rem'
+            }}>
+            Detector Type:
+          </div>
+          <div
+            id="topleft3"
+            ref={this.topLeft3Ref}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '6rem',
+              left: '2rem'
+            }}>
+            Detector Configuration:
+          </div>
+          <div
+            id="topright"
+            ref={this.topRightRef}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              right: '2rem'
+            }}>
+            Station Name:
+          </div>
+          <div
+            id="topright2"
+            ref={this.topRight2Ref}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '4rem',
+              right: '2rem'
+            }}>
+            Date:
+          </div>
+          <div
+            id="topright3"
+            ref={this.topRight3Ref}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              top: '6rem',
+              right: '2rem'
+            }}>
+            Time:
+          </div>
+          <div
+            id="bottomleft"
+            ref={this.bottomLeftRef}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              bottom:'4rem',
+              left: '2rem'
+            }}>
+            Series Study:
+          </div>
+          <div
+            id="bottomleft2"
+            ref={this.bottomLeft2Ref}
+            className="overlay"
+            style={{
+              position: 'absolute',
+              bottom:'2.5rem',
+              left: '2rem'
+            }}>
+            Series Study:
+          </div>
+        </div>
+        <div className="overlay" style={{
+          width: '10vw',
+          height: '100vh',
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          color: 'white',
+          display: 'block'
+          }}
+          >
+            <button type='button' style={{
+                position: 'absolute',
+                top: '45vh',
+                right: '1rem',
+                width: '10vw',
+                height: '5vh',
+                }} onClick={this.nextImageClick}>
+                  Next
+            </button>
+        </div>
       </div>
     );
   }

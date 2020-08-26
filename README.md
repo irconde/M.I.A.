@@ -33,10 +33,10 @@ First we need to start the mock command server. Navigate to the 'dna-atr-socket.
 ```
 node app.js
 ```
-You will see the server begin and listen on port 4002, as well the requests made to the server are console logged. 
+You will see the server begin and listen on port 4001, as well the requests made to the server are console logged. 
 Lastly, we start the Pilot GUI by running navigating to the folder of 'dna-atr-pilot.gui' and running the command with takes in the REACT_APP_COMMAND_SERVER parameter for you to specifiy a command server. As such:
 ```
-REACT_APP_COMMAND_SERVER=http://127.0.0.1:4002 npm start
+REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 npm start
 ```
 This will open the Pilot GUI in your web browser pointed at our local command server. As well, this starts both the file server and react development environment in parallel. 
 
