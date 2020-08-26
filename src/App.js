@@ -158,10 +158,12 @@ class App extends Component {
       } else if (res.data.response === 'no-next-image') {
         console.log('No next image to display');
       } else {
-        // let image = ArrayBuffer.from(res.data.b64, 'base64'); // Ta-da
-        // this.setState({image: image});
         const myBlob = this.b64toBlob(res.data.b64);
-        this.setState({ selectedFile: myBlob});
+        this.setState({
+          selectedFile: myBlob,
+          image: this.base64ToArrayBuffer(res.data.b64),
+          validations: null
+        });
         const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
         this.loadAndViewImage(imageId);
       }
@@ -169,6 +171,27 @@ class App extends Component {
       console.log(err);
     });
   }
+
+  /**
+   * * validationCompleted - Method that indicates is the operator has finished validating detections
+   *
+   * @param  {type} validationList array sized with the number of detections. Every position
+   * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
+   * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
+   */
+  validationCompleted(validationList) {
+    var validationsComplete = true;
+    if (validationList == null) {
+      return validationsComplete;
+    }
+    for( var i=0; i < validationList.length; i++){
+      if (validationList[i] == 0) {
+        validationsComplete = false;
+        break;
+      }
+    }
+    return validationsComplete;
+    }
 
 
   /**
@@ -198,15 +221,10 @@ class App extends Component {
       console.log(err);
     })
 
+    let validationCompleted = this.validationCompleted(this.state.validations);
+    console.log(validationCompleted);
 
-    let i;
-    let validationsComplete = false;
-    for(i=0; i<this.state.validations;i++){
-      if (this.state.validations[i] !== 0) {
-        validationsComplete = true;
-      }
-    }
-    if(validationsComplete === true){
+    if(validationCompleted === true){
       //feedback has been left for at least one detection so create a TDR to save feedback
       this.dicosWriter(false);
     }
@@ -274,6 +292,22 @@ class App extends Component {
     const blob = new Blob(byteArrays, {type: contentType});
     return blob;
   };
+
+  /**
+   * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
+   *
+   * @param {type} base64 Binary 64 string to convert to ArrayBuffer
+   * @return {type} ArrayBuffer
+   */
+  base64ToArrayBuffer(base64) {
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
 
 
   /**
@@ -496,7 +530,10 @@ class App extends Component {
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    let validations = this.state.validations;
+    let validations = [];
+    if(this.state.validations){
+      validations = this.state.validations;
+    }
     var i;
 
     var image = this.state.image;
@@ -504,7 +541,7 @@ class App extends Component {
     var dicomDict = dcmjs.data.DicomMessage.readFile(image);
 
     var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomDict.dict);
-    let copiedData = JSON.parse(JSON.stringify(dataset));
+    let copiedData = dataset;
 
     let instanceNumber = copiedData.InstanceNumber;
     var numberAlarmObjs = copiedData.NumberOfAlarmObjects;
@@ -539,13 +576,15 @@ class App extends Component {
       }
     }
 
-    copiedData.ThreatSequence['ReferencedPTOSequence'] = {
-      'vrMap': {},
-      'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
-      'ReferencedTDRInstanceSequence': {
-        'ReferencedSOPClassUID': copiedData.SOPClassUID,
-        'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
-        'vrMap': {}
+    if(copiedData.ThreatSequence) {
+      copiedData.ThreatSequence['ReferencedPTOSequence'] = {
+        'vrMap': {},
+        'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
+        'ReferencedTDRInstanceSequence': {
+          'ReferencedSOPClassUID': copiedData.SOPClassUID,
+          'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
+          'vrMap': {}
+        }
       }
     }
 
