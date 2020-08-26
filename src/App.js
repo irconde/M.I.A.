@@ -628,9 +628,11 @@ class App extends Component {
 
         if (validations[i] === "CONFIRM"){
           copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
         }
         else if (validations[i] === "REJECT") {
           copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
           numberAlarmObjs = numberAlarmObjs - 1;
           numberTotalObjs = numberTotalObjs - 1;
           copiedData.NumberOfAlarmObjects = numberAlarmObjs;
