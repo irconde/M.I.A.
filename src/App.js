@@ -13,6 +13,7 @@ import Utils from "./Utils.js";
 import Dicos from "./Dicos.js";
 import Detection from "./Detection.js";
 import axios from 'axios';
+import NextButton from './components/NextButton';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -84,6 +85,7 @@ class App extends Component {
       selectedDetection: -1,
       validations: null,
       displayButtons: false,
+      hover: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: null,
@@ -96,6 +98,7 @@ class App extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
+    this.toggleHoverNext = this.toggleHoverNext.bind(this);
     this.getFilesFromCommandServer();
   }
 
@@ -163,6 +166,10 @@ class App extends Component {
     }).catch((err) => {
       console.log(err);
     });
+  }
+
+  toggleHoverNext(){
+    this.setState({hover: !this.state.hover})
   }
 
   /**
@@ -603,8 +610,8 @@ class App extends Component {
             className="overlay"
             style={{
               position: 'absolute',
-              top: '2rem',
-              right: '2rem'
+              top: '8rem',
+              left: '2rem'
             }}>
             Station Name:
           </div>
@@ -614,8 +621,8 @@ class App extends Component {
             className="overlay"
             style={{
               position: 'absolute',
-              top: '4rem',
-              right: '2rem'
+              top: '10rem',
+              left: '2rem'
             }}>
             Date:
           </div>
@@ -625,8 +632,8 @@ class App extends Component {
             className="overlay"
             style={{
               position: 'absolute',
-              top: '6rem',
-              right: '2rem'
+              top: '12rem',
+              left: '2rem'
             }}>
             Time:
           </div>
@@ -653,26 +660,7 @@ class App extends Component {
             Series Study:
           </div>
         </div>
-        <div className="overlay" style={{
-          width: '10vw',
-          height: '100vh',
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          color: 'white',
-          display: 'block'
-          }}
-          >
-            <button type='button' style={{
-                position: 'absolute',
-                top: '45vh',
-                right: '1rem',
-                width: '10vw',
-                height: '5vh',
-                }} onClick={this.nextImageClick}>
-                  Next
-            </button>
-        </div>
+        <NextButton nextImageClick={this.nextImageClick} />
       </div>
     );
   }
