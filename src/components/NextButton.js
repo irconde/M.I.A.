@@ -62,8 +62,4 @@ class NextButton extends Component {
     }
 }
 
-NextButton.propTypes = {
-
-};
-
 export default NextButton;
