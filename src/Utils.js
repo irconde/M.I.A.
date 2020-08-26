@@ -47,10 +47,53 @@ export default class Utils {
    *
    * @param  {type} point 2D point with two coordinates, x and y
    * @param  {type} rect  rectangle defined as a floar array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
-   * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise   
+   * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise
    */
   static pointInRect(point, rect) {
     return point.x >= rect[0] && point.x <= rect[2] && point.y >= rect[1] && point.y <= rect[3];
+  }
+
+  /**
+   * b64toBlob - Converts binary64 encoding to a blob to display
+   *
+   * @param  {type} b64Data Binary string
+   * @param  {type} contentType The MIMI type, image/dcs
+   * @return {type}               blob
+   */
+  static b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  };
+
+  /**
+   * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
+   *
+   * @param {type} base64 Binary 64 string to convert to ArrayBuffer
+   * @return {type} ArrayBuffer
+   */
+  static base64ToArrayBuffer(base64) {
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
   }
 
 }

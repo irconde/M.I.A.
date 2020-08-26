@@ -10,8 +10,8 @@ import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
 import Utils from "./Utils.js";
+import Dicos from "./Dicos.js";
 import Detection from "./Detection.js";
-import * as dcmjs from 'dcmjs';
 import axios from 'axios';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
@@ -128,7 +128,7 @@ class App extends Component {
    */
   async getFilesFromCommandServer(){
     this.state.socketCommand.on("img", data => {
-      this.sendFilesToServer(this.b64toBlob(data), this.state.socketFS);
+      this.sendFilesToServer(Utils.b64toBlob(data), this.state.socketFS);
       // If we got an image and we are null, we know we can now fetch one
       // This is how it triggers to display a new file if none existed and a new one
       // was added
@@ -158,10 +158,10 @@ class App extends Component {
       } else if (res.data.response === 'no-next-image') {
         console.log('No next image to display');
       } else {
-        const myBlob = this.b64toBlob(res.data.b64);
+        const myBlob = Utils.b64toBlob(res.data.b64);
         this.setState({
           selectedFile: myBlob,
-          image: this.base64ToArrayBuffer(res.data.b64),
+          image: Utils.base64ToArrayBuffer(res.data.b64),
           validations: null
         });
         const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
@@ -181,11 +181,11 @@ class App extends Component {
    */
   validationCompleted(validationList) {
     var validationsComplete = true;
-    if (validationList == null) {
+    if (validationList === null) {
       return validationsComplete;
     }
     for( var i=0; i < validationList.length; i++){
-      if (validationList[i] == 0) {
+      if (validationList[i] === 0) {
         validationsComplete = false;
         break;
       }
@@ -221,15 +221,16 @@ class App extends Component {
     })
 
     let validationCompleted = this.validationCompleted(this.state.validations);
+    let validationList = this.state.validations;
+    let image = this.state.image;
 
-    if(validationCompleted === true){
-      //feedback has been left for at least one detection so create a TDR to save feedback
-      this.dicosWriter(false);
-    }
-    else{
-      //feedback has not been left for any detection so create a TDR w/ ABORT flag
-      this.dicosWriter(true);
-    }
+    /*
+     *  Third parameter is the "abort flag": True / False
+     *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
+     *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
+     */
+    let file = Dicos.dataToBlob(validationList, image, !validationCompleted);
+    this.setState({selectedFile: file});
 
   }
 
@@ -262,50 +263,6 @@ class App extends Component {
     cornerstoneTools.addTool(ZoomTouchPinchTool);
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
   };
-
-
-  /**
-   * b64toBlob - Converts binary64 encoding to a blob to display
-   *
-   * @param  {type} b64Data Binary string
-   * @param  {type} contentType The MIMI type, image/dcs
-   * @return {type}               blob
-   */
-  b64toBlob = (b64Data, contentType='', sliceSize=512) => {
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
-
-    const blob = new Blob(byteArrays, {type: contentType});
-    return blob;
-  };
-
-  /**
-   * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
-   *
-   * @param {type} base64 Binary 64 string to convert to ArrayBuffer
-   * @return {type} ArrayBuffer
-   */
-  base64ToArrayBuffer(base64) {
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-      bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
 
 
   /**
@@ -393,6 +350,7 @@ class App extends Component {
   }
 
 
+  // TODO. To be moved to the Dicos.js class
   /**
    * retrieveBoundingBoxData - Method that parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
    *
@@ -422,6 +380,7 @@ class App extends Component {
   }
 
 
+  // TODO. To be moved to the Dicos.js class
   /**
    * retrieveObjectClass - Method that parses a DICOS+TDR file to pull the a string value that indicates the class of the potential threat object
    *
@@ -433,6 +392,7 @@ class App extends Component {
   }
 
 
+  // TODO. To be moved to the Dicos.js class
   /**
    * retrieveConfidenceLevel - Method that parses a DICOS+TDR file to pull the a float value that indicates the confidence level of the detection algorithm used
    *
@@ -520,108 +480,6 @@ class App extends Component {
     this.topRight3Ref.current.textContent = "Time: " + this.state.time;
     this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
     this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
-  }
-
-
-  dicosWriter(abort= false) {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
-    let validations = [];
-    if(this.state.validations){
-      validations = this.state.validations;
-    }
-    var i;
-
-    var image = this.state.image;
-
-    var dicomDict = dcmjs.data.DicomMessage.readFile(image);
-
-    var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomDict.dict);
-    let copiedData = dataset;
-
-    let instanceNumber = copiedData.InstanceNumber;
-    var numberAlarmObjs = copiedData.NumberOfAlarmObjects;
-    var numberTotalObjs = copiedData.NumberOfTotalObjects;
-    instanceNumber = instanceNumber * 4;
-
-    copiedData.InstanceNumber = instanceNumber;
-    copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
-    copiedData.InstanceCreationTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    copiedData.AcquisitionNumber = instanceNumber;
-
-    copiedData.TDRType = "OPERATOR";
-    copiedData.OperatorIdentificationSequence = {
-      'vrMap': {},
-      'PersonIdentificationCodeSequence': {
-        'CodeValue': 'none',
-        'CodingSchemeDesignator': 'none',
-        'CodingSchemeVersion': '1.1.1',
-        'CodeMeaning': 'none',
-        'vrMap': {}
-      },
-      'PersonAddress': '123 Main Street',
-      'PersonTelephoneNumbers': '1112223333',
-      'OrganizationName': 'The Organization',
-      'OrganizationAddress': '123 Main Street',
-      'OrganizationCodeSequence': {
-        'CodeValue': 'none',
-        'CodingSchemeDesignator': 'none',
-        'CodingSchemeVersion': '1.1.1',
-        'CodeMeaning': 'none',
-        'vrMap': {}
-      }
-    }
-
-    if(copiedData.ThreatSequence) {
-      copiedData.ThreatSequence['ReferencedPTOSequence'] = {
-        'vrMap': {},
-        'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
-        'ReferencedTDRInstanceSequence': {
-          'ReferencedSOPClassUID': copiedData.SOPClassUID,
-          'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
-          'vrMap': {}
-        }
-      }
-    }
-
-    if(abort === true){
-      copiedData.abortFlag = 'ABORT';
-      copiedData.abortReason = 'NOT_REVIEWED';
-      copiedData.AdditionalScreeningPerformed = "NO";
-    }
-
-    else {
-      copiedData.abortFlag = 'SUCCESS';
-      copiedData.AdditionalScreeningPerformed = "YES";
-      copiedData.AdditionalInspectionSelectionCriteria = "RANDOM";
-
-      // TODO: Rewrite/modify this when we receive test files with multiple detections
-      for(i=0; i<validations.length; i++){
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
-        copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
-
-        if (validations[i] === "CONFIRM"){
-          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
-          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
-        }
-        else if (validations[i] === "REJECT") {
-          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
-          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
-          numberAlarmObjs = numberAlarmObjs - 1;
-          numberTotalObjs = numberTotalObjs - 1;
-          copiedData.NumberOfAlarmObjects = numberAlarmObjs;
-          copiedData.NumberOfTotalObjects = numberTotalObjs;
-        }
-      } //end for loop through validations
-    } //end else abort
-
-    dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(copiedData);
-    let new_file_WriterBuffer = dicomDict.write();
-    var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
-    this.setState({selectedFile: file});
-    
   }
 
 
