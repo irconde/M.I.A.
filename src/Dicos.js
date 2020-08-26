@@ -1,10 +1,107 @@
+import * as dcmjs from 'dcmjs';
+
 /**
  * Class that emcompases any secondary method related to DICOS file management
  */
-
-import * as dcmjs from 'dcmjs';
-
 export default class Dicos {
+
+  static get dictionary() {
+    return {
+      "BOUNDING_BOX": {
+        tag: "x4010101d",
+        name: "BoundingPolygon"
+      },
+      "THREAT_OBJECT_CLASS": {
+        tag: "x40101013",
+        name: "ThreatCategoryDescription"
+      },
+      "CONFIDENCE_LEVEL": {
+        tag: "x40101016",
+        name: "ATDAssessmentProbability"
+      },
+      "THREATS_NUMBER": {
+        tag: "x40101034",
+        name: "NumberOfAlarmObjects"
+      },
+      "ALGORITHM_NAME": {
+        tag: "x40101029",
+        name: "ThreatDetectionAlgorithmandVersion"
+      },
+      "DETECTOR_TYPE": {
+        tag: "x00187004",
+        name: "DetectorType"
+      },
+      "DETECTOR_CONFIGURATION": {
+        tag: "x00187005",
+        name: "DetectorConfiguration"
+      },
+      "STATION_NAME": {
+        tag: "x00081010",
+        name: "StationName"
+      },
+      "SERIES_DESCRIPTION": {
+        tag: "x0008103e",
+        name: "SeriesDescription"
+      },
+      "STUDY_DESCRIPTION": {
+        tag: "x00081030",
+        name: "StudyDescription"
+      },
+    };
+  };
+
+
+  /**
+   * retrieveBoundingBoxData - Method that parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @return {type}       Float array with the coordenates of the several bounding boxes derived from the DICOS+TDR data.
+   *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
+   */
+  static retrieveBoundingBoxData(image) {
+    let BYTES_PER_FLOAT = 4;
+    let B_BOX_POINT_COUNT = 2;
+    const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
+    const bBoxByteArraySize = bBoxDataSet.elements[Dicos.dictionary['BOUNDING_BOX'].tag].length
+    const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
+    // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
+    const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
+    var bBoxCoords = new Array(bBoxComponentsCount);
+    var bBoxIndex = 0;
+    var componentCount = 0;
+
+    for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
+      if (componentCount === B_BOX_POINT_COUNT) {
+        componentCount = -1;
+        continue;
+      }
+      bBoxCoords[bBoxIndex] = bBoxDataSet.float(Dicos.dictionary['BOUNDING_BOX'].tag, i);
+      bBoxIndex++;
+    }
+    return bBoxCoords;
+  }
+
+
+  /**
+   * retrieveObjectClass - Method that parses a DICOS+TDR file to pull the a string value that indicates the class of the potential threat object
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @return {type}       String value with the description of the potential threat object
+   */
+  static retrieveObjectClass(image) {
+    return image.dataSet.elements.x40101038.items[0].dataSet.string(Dicos.dictionary['THREAT_OBJECT_CLASS'].tag);
+  }
+
+
+  /**
+   * retrieveConfidenceLevel - Method that parses a DICOS+TDR file to pull the a float value that indicates the confidence level of the detection algorithm used
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @return {type}       Float value with the confidence level
+   */
+  static retrieveConfidenceLevel(image) {
+    return image.dataSet.elements.x40101038.items[0].dataSet.float(Dicos.dictionary['CONFIDENCE_LEVEL'].tag);
+  }
 
 
   /**
@@ -112,5 +209,4 @@ export default class Dicos {
     var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
     return file;
   }
-
-}
+};

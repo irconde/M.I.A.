@@ -16,13 +16,6 @@ import axios from 'axios';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
-const BYTES_PER_FLOAT = 4;
-const B_BOX_TAG = 'x4010101d';
-const OBJECT_CLASS_TAG = 'x40101013';
-const CONFIDENCE_LEVEL_TAG = 'x40101016';
-const B_BOX_COORDS = 4;
-const B_BOX_POINT_COUNT = 2;
-
 // Detection label properties
 const LABEL_FONT = "bold 12px Arial";
 const LABEL_PADDING = 4;
@@ -311,13 +304,13 @@ class App extends Component {
     this.setState({
       detections: null,
       selectedDetection: -1,
-      threatsCount: image.data.uint16('x40101034'),
-      algorithm: image.data.string('x40101029'),
-      type: image.data.string('x00187004'),
-      configuration: image.data.string('x00187005'),
-      station: image.data.string('x00081010'),
-      series: image.data.string('x0008103e'),
-      study: image.data.string('x00081030'),
+      threatsCount: image.data.uint16(Dicos.dictionary['THREATS_NUMBER'].tag),
+      algorithm: image.data.string(Dicos.dictionary['ALGORITHM_NAME'].tag),
+      type: image.data.string(Dicos.dictionary['DETECTOR_TYPE'].tag),
+      configuration: image.data.string(Dicos.dictionary['DETECTOR_CONFIGURATION'].tag),
+      station: image.data.string(Dicos.dictionary['STATION_NAME'].tag),
+      series: image.data.string(Dicos.dictionary['SERIES_DESCRIPTION'].tag),
+      study: image.data.string(Dicos.dictionary['STUDY_DESCRIPTION'].tag),
       time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
       date: mm + '/' + dd + '/' + yyyy
     });
@@ -336,9 +329,9 @@ class App extends Component {
     var detectionList = new Array(this.state.threatsCount);
     var validations = new Array(this.state.threatsCount);
     for (var i = 0; i < this.state.threatsCount; i++) {
-      const boundingBoxCoords = this.retrieveBoundingBoxData(threatSequence.items[i]);
-      const objectClass = this.retrieveObjectClass(threatSequence.items[i]);
-      const confidenceLevel = Utils.decimalToPercentage(this.retrieveConfidenceLevel(threatSequence.items[i]));
+      const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[i]);
+      const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
+      const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[i]));
 
       detectionList[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
       validations[i] = 0;
@@ -349,59 +342,6 @@ class App extends Component {
     }
   }
 
-
-  // TODO. To be moved to the Dicos.js class
-  /**
-   * retrieveBoundingBoxData - Method that parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
-   *
-   * @param  {type} image DICOS+TDR image data
-   * @return {type}       Float array with the coordenates of the several bounding boxes derived from the DICOS+TDR data.
-   *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
-   */
-  retrieveBoundingBoxData(image) {
-    const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
-    const bBoxByteArraySize = bBoxDataSet.elements[B_BOX_TAG].length
-    const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
-    // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
-    const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
-    var bBoxCoords = new Array(bBoxComponentsCount);
-    var bBoxIndex = 0;
-    var componentCount = 0;
-
-    for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
-      if (componentCount === B_BOX_POINT_COUNT) {
-        componentCount = -1;
-        continue;
-      }
-      bBoxCoords[bBoxIndex] = bBoxDataSet.float(B_BOX_TAG, i);
-      bBoxIndex++;
-    }
-    return bBoxCoords;
-  }
-
-
-  // TODO. To be moved to the Dicos.js class
-  /**
-   * retrieveObjectClass - Method that parses a DICOS+TDR file to pull the a string value that indicates the class of the potential threat object
-   *
-   * @param  {type} image DICOS+TDR image data
-   * @return {type}       String value with the description of the potential threat object
-   */
-  retrieveObjectClass(image) {
-    return image.dataSet.elements.x40101038.items[0].dataSet.string(OBJECT_CLASS_TAG);
-  }
-
-
-  // TODO. To be moved to the Dicos.js class
-  /**
-   * retrieveConfidenceLevel - Method that parses a DICOS+TDR file to pull the a float value that indicates the confidence level of the detection algorithm used
-   *
-   * @param  {type} image DICOS+TDR image data
-   * @return {type}       Float value with the confidence level
-   */
-  retrieveConfidenceLevel(image) {
-    return image.dataSet.elements.x40101038.items[0].dataSet.float(CONFIDENCE_LEVEL_TAG);
-  }
 
   /**
    * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
@@ -432,6 +372,7 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
+    let B_BOX_COORDS = 4;
     let validations = this.state.validations;
     context.clearRect(0, 0, context.width, context.height);
     if (data === null || data.length === 0) {
