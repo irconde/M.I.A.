@@ -444,10 +444,13 @@ class App extends Component {
 
       var selectedIndex = this.state.selectedDetection;
       var detectionList = this.state.detections;
-      if(detectionList[selectedIndex]){
-        detectionList[selectedIndex].selected = false;
-        this.setState({selectedDetection: -1})
+      if(selectedIndex !== -1){
+        if(detectionList[selectedIndex]){
+          detectionList[selectedIndex].selected = false;
+          this.setState({selectedDetection: -1})
+        }
       }
+
     }
   }
 
@@ -540,13 +543,11 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
-    var detectionList = this.state.detections;
-
     className = this.state.displayButtons ? "" : "hidden";
 
     className = className + "feedback-buttons"
 
-    this.setState({detections: detectionList, selectedDetection: selectedIndex});
+    this.setState({selectedDetection: selectedIndex});
 
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
@@ -556,7 +557,7 @@ class App extends Component {
 
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
-        marginTop: "50px",
+        marginTop: "60px",
         backgroundColor: DETECTION_COLOR_INVALID,
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
