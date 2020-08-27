@@ -1,71 +1,92 @@
 # Pilot GUI version 1.0
 
-## Requirements
-You will need Node.js to run and install the dependencies needed for this project. You may download it here: [nodejs.org](https://nodejs.org/)
+The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple detections or objects identified as potentially of interest by the system itself.
 
-## Starting the Pilot and Server
-### Structure
+Through this client, the pilot system provides the user with visual feedback on the results derived from the different deep learning workflows executed on the server side. The several algorithms that constitute the business logic are implemented as a remote service, while the client is conceived as a tool that allows the user to efficiently and effectively inspect the detections received in the form of DICOS+TDR files.
 
-We assume your project structure will look similar to this:
+In particular, the porject contains a React App and a File Queue Server to manage locally the DICOS-TDR images received from the server. Those images are stored in the 'img' folder inside the server directory.
+
 ```
-D:\Documents\Pilot-1.0\dna-atr-pilot-gui
-D:\Documents\Pilot-1.0\dna-atr-socket.io-server
+<ROOT>\server\img
 ```
-It need not match this exactly, long as you have the two project folders which are the Pilot GUI and a Mock Command Server
-```
-dna-atr-pilot-gui
-dna-atr-socket.io-server
-```
-### Installing Dependencies
-We first need to install all the libraries and such the projects use. To do this, open a terminal and navigate to the location of your pilot folder 'dna-atr-pilot-gui.' Then run the command
+
+Every file will be removed from the Pilot GUI local storage once the operator finishes validating the detections included in the DICOS file processed and navigates to the next one.
+
+## Build and development pre-requisites
+
+The installation of both [nodejs](https://nodejs.org/) and npm is required for the proper build of the client. 
+
+Additionally, the Pilot GUI is intended to connect to, and work with a remote server. It will be necessary to have a web server up and running, able to send to the client the DICOS files to be rendered. 
+
+[Here](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/) you can find the code of a mock file server that can be used for development and testing purposes. More information on how to use the server below.
+
+## Installation of dependencies
+
+Access the root folder of the project from a terminal and run the following command:
+
 ```
 npm install
 ```
-This may take a minute, as it must fetch the files needed. Finally, navigate to the server folder 'dna-atr-socket.io-server' and run the same install command
-```
-npm i
-``` 
 
-### Getting started
+## Starting the client in development mode
 
-You will need 2 terminals or command prompts to start the development environment.
-First we need to start the mock command server. Navigate to the 'dna-atr-socket.io-server' folder in a terminal and begin the server with
+Again, using terminal and being at the root folder of the project, it is possible to start the client in development mode by using this command:
+
 ```
-node app.js
+REACT_APP_COMMAND_SERVER=http://<SERVER_IP>:<SERVER_PORT> npm start
 ```
-You will see the server begin and listen on port 4001, as well the requests made to the server are console logged. 
-Lastly, we start the Pilot GUI by running navigating to the folder of 'dna-atr-pilot.gui' and running the command with takes in the REACT_APP_COMMAND_SERVER parameter for you to specifiy a command server. As such:
+
+Note that we use the environment variable  REACT_APP_COMMAND_SERVER to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service runing on a machine with the 127.0.0.1 ip number and through the 4001 port,  the command to be used is:
+
 ```
 REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 npm start
 ```
-This will open the Pilot GUI in your web browser pointed at our local command server. As well, this starts both the file server and react development environment in parallel. 
 
-## Structure
+## Building the client
 
-### Pilot GUI
-Contains the React App and a File Server to manage the DICOS-TDR Images locally. The images received from the mock command server are stored in the folders directory 'img' folder in the server. 
-```
-D:\Documents\Pilot-1.0\dna-atr-pilot-gui\server\img
-```
-Files are removed once the Pilot GUI goes to the next image and are sent to the server mentioned below.
-### Server
-This acts as command server. It sends DICOS-TDR images to the React App at a set interval. As well, it saves images sent back from the Pilot GUI. 
+To create an optimized production build run from the terminal the following command:
 
-The files being sent are located in the ./static/img directory.
 ```
-D:\Documents\Pilot-1.0\dna-atr-socket.io-server\static\img
-```
-Each file is sent at the interval and will send all the files until the last one then ending sending anymore files. Optionally, you can set it to reset back at the start of the index and send the same files.  
-To edit the interval, open app.js with your text editor or IDE
-```
-D:\Documents\Pilot-1.0\dna-atr-socket.io-server\app.js
-```
-Line 19 contains the time interval specified in MS (1000 = 1 second)
-```
-const TIME_INTERVAL =  2250;
+npm run build
 ```
 
-Images returned from the Pilot GUI are located in the returned image folder
+As a result, a build folder is created with all the necessary files. At that point, the build folder is ready to be deployed. You may serve it with a static server:
+
 ```
-D:\Documents\Pilot-1.0\dna-atr-socket.io-server\static\returned
+yarn global add serve
+serve -s build
 ```
+
+## Mock file server
+
+You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends DICOS-TDR images to the react-based client at a given interval, and it also manages the persistence of the images sent back from the Pilot GUI.
+
+The files being sent are located in the "static/img" directory.
+
+```
+<ROOT>\static\img
+```
+
+Each file is sent at the given interval and will send all the files until the last one then ending sending anymore files. Optionally, you can set it to reset back at the start of the index and send the same files. 
+
+Images returned from the Pilot GUI are saved in the "returned" image folder
+
+```
+<ROOT>\static\returned
+```
+
+### Getting started
+
+Once cloned the repository in your machine, access the root folder of the project from the terminal. To install the required dependencies run the following command:
+
+```
+npm i
+```
+
+Then, before launching the client, it's necessary to start the mock server:
+
+```
+node app.js
+```
+
+The server gets started and remains listening on port 4001. During the server's life, log messages are provided on the terminal for debugging purposes.
