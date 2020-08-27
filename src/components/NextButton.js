@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ReactSVG } from 'react-svg';
 
 class NextButton extends Component {
     constructor(props){
@@ -44,20 +43,26 @@ class NextButton extends Component {
                 }
             }
             return (
-                <div className="overlay" 
+                <div className="overlay"
                 onClick={this.props.nextImageClick}
                 onMouseEnter={this.toggleHoverNext}
                 onMouseLeave={this.toggleHoverNext}
                 style={nextStyle}
                 >
-                    <ReactSVG
-                        src="./img/next-arrow.svg"
-                        style={{
+                <img
+                src="./img/navigate_next.png"
+                style={{
                         position: 'absolute',
-                        top: '45vh',
-                        right: '1rem',
+                        top: '0',
+                        bottom: '0',
+                        left: '0',
+                        right: '0',
+                        width: '75%',
+                        maxWidth: '125px',
+                        margin: 'auto'
                         }}
-                    />
+                alt="arrow icon" />
+
                 </div>
             );
         } else {
