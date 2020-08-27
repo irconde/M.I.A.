@@ -1,6 +1,6 @@
+import './App.css';
 import React from 'react';
 import {Component} from 'react';
-import './App.css';
 import * as cornerstone from "cornerstone-core";
 import * as cornerstoneTools from "cornerstone-tools";
 import dicomParser from 'dicom-parser';
@@ -91,6 +91,7 @@ class App extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
+    this.onToolActive = this.onToolActive.bind(this);
     this.getFilesFromCommandServer();
   }
 
@@ -103,6 +104,8 @@ class App extends Component {
   componentDidMount() {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('click', this.onMouseClicked);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.onToolActive);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.onToolActive);
     this.setupConerstoneJS(this.state.imageViewport);
     this.getNextImage();
   }
@@ -403,13 +406,47 @@ class App extends Component {
     }
   };
 
+
   /**
+   * renderGeneralInfo - Updates DOM elements with general data pulled from the DICOS+TDR file
+   *
+   * @return {type}  None
+   */
+  renderGeneralInfo() {
+    this.topLeftRef.current.textContent = "Algorithm: " + this.state.algorithm;
+    this.topLeft2Ref.current.textContent = "Detector Type: " + this.state.type;
+    this.topLeft3Ref.current.textContent = "Detector Configuration: " + this.state.configuration;
+    this.topRightRef.current.textContent = "Station Name: " + this.state.station;
+    this.topRight2Ref.current.textContent = "Date: " + this.state.date;
+    this.topRight3Ref.current.textContent = "Time: " + this.state.time;
+    this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
+    this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
+  }
+
+  onToolActive(e){
+    console.log(e.type);
+    this.setState({ displayButtons: false }, () => {
+      this.renderButtons(-1, this.state.selectedDetection);
+    });
+
+    if(e.type === "cornerstonetoolsmousewheel"){
+      var selectedIndex = this.state.selectedDetection;
+      var detectionList = this.state.detections;
+      if(detectionList[selectedIndex]){
+        detectionList[selectedIndex].selected = false;
+        this.setState({selectedDetection: -1})
+      }
+    }
+  }
+
+    /**
    * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
    *
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
   onMouseClicked(e) {
+    console.log(e);
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
@@ -463,7 +500,7 @@ class App extends Component {
         if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
         selectedIndex = -1;
         this.setState({ displayButtons: false }, () => {
-          this.renderButtons(e, clickedPos, selectedIndex);
+          this.renderButtons(clickedPos, selectedIndex);
         });
       }
       else {
@@ -471,21 +508,23 @@ class App extends Component {
           detectionList[clickedPos].selected = false;
           selectedIndex = -1;
           this.setState({ displayButtons: false }, () => {
-            this.renderButtons(e, clickedPos, selectedIndex);
+            this.renderButtons(clickedPos, selectedIndex);
           });
         } else {
-          if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
-          detectionList[clickedPos].selected = true;
-          selectedIndex = clickedPos;
-          this.setState({ displayButtons: true }, () => {
-            this.renderButtons(e, clickedPos, selectedIndex);
-          });
+          if(this.state.validations[clickedPos] === 0) {
+            if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+            detectionList[clickedPos].selected = true;
+            selectedIndex = clickedPos;
+            this.setState({displayButtons: true}, () => {
+              this.renderButtons(clickedPos, selectedIndex);
+            });
+          }
         }
       }
     }
   }
 
-  renderButtons(e, clickedPos, selectedIndex) {
+  renderButtons(clickedPos, selectedIndex) {
     let className = "";
 
     if (this.state.detections === null || this.state.detections.length === 0){
@@ -494,30 +533,21 @@ class App extends Component {
     var detectionList = this.state.detections;
 
     className = this.state.displayButtons ? "" : "hidden";
-    let top = 0;
-    let left = 0;
-    if(className !== "hidden"){
-      top = e.pageY;
-      left = detectionList[clickedPos].boundingBox[3];
-    }
+
     className = className + "feedback-buttons"
 
     this.setState({detections: detectionList, selectedDetection: selectedIndex});
 
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
-        top: top,
-        left: left,
-        backgroundColor: "green",
+        backgroundColor: "#23b803",
       }
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
 
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
-        top: top,
-        left: left,
-        marginTop: "40px",
-        backgroundColor: "red",
+        marginTop: "50px",
+        backgroundColor: "#ed0909",
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
 
