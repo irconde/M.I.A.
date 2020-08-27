@@ -206,8 +206,8 @@ router.get("/next", (req, res) => {
 router.post("/confirm", (req, res) => {
     console.log('File Server: /confirm request');
     if (req.body.valid === true){
-        if (fileQueue[0]){
-            fs.unlink(fileQueue[0], (err) =>{
+        if(fs.existsSync(fileQueue[0])) {
+            fs.unlink(fileQueue[0], (err) => {
                 if (err){
                     console.log(`File Server Error: ${err}`);
                     res.send({ confirm: 'image-not-removed'});
@@ -217,7 +217,7 @@ router.post("/confirm", (req, res) => {
                 }
             })
         } else {
-            res.send({ confirm: 'no-next-image' });
+            res.send({ confirm: 'image-not-removed '});
         }
     } else {
         res.send({ confirm: 'image-not-removed '});

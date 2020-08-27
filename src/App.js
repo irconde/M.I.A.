@@ -85,6 +85,7 @@ class App extends Component {
       selectedDetection: -1,
       validations: null,
       displayButtons: false,
+      displayNext: false,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: null,
@@ -122,13 +123,15 @@ class App extends Component {
    */
   async getFilesFromCommandServer(){
     this.state.socketCommand.on("img", data => {
-      this.sendFilesToServer(Utils.b64toBlob(data), this.state.socketFS);
+      this.sendFilesToServer(Utils.b64toBlob(data), this.state.socketFS).then((res) => {
+        if (this.state.selectedFile === null){
+          this.getNextImage();
+        }
+      });
       // If we got an image and we are null, we know we can now fetch one
       // This is how it triggers to display a new file if none existed and a new one
       // was added
-      if (this.state.selectedFile === null){
-        this.getNextImage();
-      }
+      
     })
   }
 
@@ -145,17 +148,19 @@ class App extends Component {
         'Content-Type': 'application/json',
         'Cache-Control' : 'no-cache'
       }
-    }).then((res) => {
+    }).then(async (res) => {
       // We get our latest file upon the main component mounting
       if (res.data.response === 'error '){
         console.log('error getting next image');
       } else if (res.data.response === 'no-next-image') {
         console.log('No next image to display');
+        this.setState({selectedFile: null});
       } else {
         const myBlob = Utils.b64toBlob(res.data.b64);
         this.setState({
           selectedFile: myBlob,
           image: Utils.base64ToArrayBuffer(res.data.b64),
+          displayNext: false,
           validations: null
         });
         const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
@@ -195,13 +200,26 @@ class App extends Component {
    * @return {type} - None
    */
   nextImageClick() {
+    
     axios.post(`${FILE_SERVER}/confirm`, {
       valid: true
     }, {
       crossdomain: true
-    }).then(async (res) => {
+    }).then((res) => {
       if (res.data.confirm === 'image-removed'){
+        let validationCompleted = this.validationCompleted(this.state.validations);
+        let validationList = this.state.validations;
+        let image = this.state.image;
+        /*
+        *  Third parameter is the "abort flag": True / False
+        *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
+        *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
+        */
+        this.setState({
+          selectedFile: Dicos.dataToBlob(validationList, image, !validationCompleted)
+        })
         this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand).then((res) => {
+          this.setState({selectedFile: null});
           this.getNextImage();
         });
       } else if (res.data.confirm === 'image-not-removed') {
@@ -214,17 +232,7 @@ class App extends Component {
       console.log(err);
     })
 
-    let validationCompleted = this.validationCompleted(this.state.validations);
-    let validationList = this.state.validations;
-    let image = this.state.image;
-
-    /*
-     *  Third parameter is the "abort flag": True / False
-     *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-     *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-     */
-    let file = Dicos.dataToBlob(validationList, image, !validationCompleted);
-    this.setState({selectedFile: file});
+    
 
   }
 
@@ -235,7 +243,7 @@ class App extends Component {
    * @return {type} - None
    */
   async sendFilesToServer(file, socket){
-    socket.binary(true).emit("fileFromClient", file);
+    await socket.binary(true).emit("fileFromClient", file);
   }
 
 
@@ -318,6 +326,9 @@ class App extends Component {
 
     if (this.state.threatsCount === 0 || this.state.threatsCount === undefined) {
       console.log("No Potential Threat Objects detected");
+      this.setState({
+        displayNext: true
+      });
       return;
     }
     // Threat Sequence information
@@ -462,9 +473,14 @@ class App extends Component {
       detectionList[selectedIndex].selected = false;
       validations[selectedIndex] = feedback;
       console.log(validations);
-      this.setState({ displayButtons: false, validations:validations }, () => {
+      this.setState({ 
+        displayButtons: false, 
+        displayNext: true,
+        validations:validations
+      }, () => {
         this.renderButtons(e, clickedPos, selectedIndex);
       });
+
       // this.renderGeneralInfo();
     }
 
@@ -654,7 +670,7 @@ class App extends Component {
             Series Study:
           </div>
         </div>
-        <NextButton nextImageClick={this.nextImageClick} />
+        <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
       </div>
     );
   }
