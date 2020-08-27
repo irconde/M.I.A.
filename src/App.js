@@ -23,6 +23,8 @@ const LABEL_FONT = "bold 12px Arial";
 const LABEL_PADDING = 4;
 const DETECTION_COLOR = '#367FFF';
 const DETECTION_COLOR_SELECTED = '#F7B500';
+const DETECTION_COLOR_VALID = '#87bb47';
+const DETECTION_COLOR_INVALID = '#961e13';
 const DETECTION_BORDER = 2;
 const LABEL_TEXT_COLOR = '#FFFFFF'
 
@@ -359,6 +361,7 @@ class App extends Component {
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
+
     const context = eventData.canvasContext;
     this.renderDetections(this.state.detections, context);
   }
@@ -382,27 +385,34 @@ class App extends Component {
       const detectionData = data[i];
       if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
+      let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
+
       // We set the rendering properties
-      const detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
+      if(validations[i] === "CONFIRM"){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
+      }
+      else if(validations[i] === "REJECT"){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+      }
+
       context.font = LABEL_FONT;
       context.strokeStyle = detectionColor;
+      context.fillStyle = detectionColor;
       context.lineWidth = DETECTION_BORDER;
       const boundingBoxCoords = detectionData.boundingBox;
       const detectionLabel = Utils.formatDetectionLabel(detectionData.class, detectionData.confidence);
       const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
 
-      const validated = validations[i];
+      context.fillStyle = detectionColor;
+      context.strokeStyle = detectionColor;
+      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
 
-      // Bounding box rendering
-      if(validated === 0) {
-        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
-        // Label rendering
-        context.fillStyle = detectionColor;
-        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.fillStyle = LABEL_TEXT_COLOR;
-        context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
-      }
+      // Label rendering
+      context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+      context.fillStyle = LABEL_TEXT_COLOR;
+      context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
+
     }
   };
 
@@ -424,12 +434,14 @@ class App extends Component {
   }
 
   onToolActive(e){
-    console.log(e.type);
+    console.log(e);
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(-1, this.state.selectedDetection);
     });
 
     if(e.type === "cornerstonetoolsmousewheel"){
+      console.log(e.detail.viewport.scale.toFixed(2));
+
       var selectedIndex = this.state.selectedDetection;
       var detectionList = this.state.detections;
       if(detectionList[selectedIndex]){
@@ -511,14 +523,12 @@ class App extends Component {
             this.renderButtons(clickedPos, selectedIndex);
           });
         } else {
-          if(this.state.validations[clickedPos] === 0) {
             if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
             detectionList[clickedPos].selected = true;
             selectedIndex = clickedPos;
             this.setState({displayButtons: true}, () => {
               this.renderButtons(clickedPos, selectedIndex);
             });
-          }
         }
       }
     }
@@ -540,14 +550,14 @@ class App extends Component {
 
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
-        backgroundColor: "#23b803",
+        backgroundColor: DETECTION_COLOR_VALID,
       }
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
 
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
         marginTop: "50px",
-        backgroundColor: "#ed0909",
+        backgroundColor: DETECTION_COLOR_INVALID,
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
 
