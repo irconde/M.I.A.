@@ -203,24 +203,20 @@ router.get("/next", (req, res) => {
 
 // This is to remove the current file from the front of the queue
 // Will delete the file if it exists and return values based on what occured
-router.post("/confirm", (req, res) => {
+router.get("/confirm", (req, res) => {
     console.log('File Server: /confirm request');
-    if (req.body.valid === true){
-        if(fs.existsSync(fileQueue[0])) {
-            fs.unlink(fileQueue[0], (err) => {
-                if (err){
-                    console.log(`File Server Error: ${err}`);
-                    res.send({ confirm: 'image-not-removed'});
-                } else{
-                    console.log('File Server: file removed successfully');
-                    res.send({ confirm: 'image-removed'});
-                }
-            })
-        } else {
-            res.send({ confirm: 'image-not-removed '});
-        }
+    if(fs.existsSync(fileQueue[0])) {
+        fs.unlink(fileQueue[0], (err) => {
+            if (err){
+                console.log(`File Server Error: ${err}`);
+                res.send({ confirm: 'image-not-removed'});
+            } else{
+                console.log('File Server: file removed successfully');
+                res.send({ confirm: 'image-removed' });
+            }
+        })
     } else {
-        res.send({ confirm: 'image-not-removed '});
+        res.send({ confirm: 'no-next-image' });
     }
 })
 

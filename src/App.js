@@ -155,6 +155,7 @@ class App extends Component {
       } else if (res.data.response === 'no-next-image') {
         console.log('No next image to display');
         this.setState({selectedFile: null});
+        // Need to clear the canvas here or make a no image to load display
       } else {
         const myBlob = Utils.b64toBlob(res.data.b64);
         this.setState({
@@ -200,12 +201,7 @@ class App extends Component {
    * @return {type} - None
    */
   nextImageClick() {
-    
-    axios.post(`${FILE_SERVER}/confirm`, {
-      valid: true
-    }, {
-      crossdomain: true
-    }).then((res) => {
+    axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
         let validationCompleted = this.validationCompleted(this.state.validations);
         let validationList = this.state.validations;
@@ -231,9 +227,6 @@ class App extends Component {
     }).catch((err) => {
       console.log(err);
     })
-
-    
-
   }
 
   /**
@@ -243,7 +236,7 @@ class App extends Component {
    * @return {type} - None
    */
   async sendFilesToServer(file, socket){
-    await socket.binary(true).emit("fileFromClient", file);
+    socket.binary(true).emit("fileFromClient", file);
   }
 
 

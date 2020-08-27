@@ -51,7 +51,6 @@ class NextButton extends Component {
                 style={nextStyle}
                 >
                     <ReactSVG
-                        onClick={this.props.nextImageClick}
                         src="./img/next-arrow.svg"
                         style={{
                         position: 'absolute',
