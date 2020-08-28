@@ -14,6 +14,7 @@ import Dicos from "./Dicos.js";
 import Detection from "./Detection.js";
 import axios from 'axios';
 import NextButton from './components/NextButton';
+import MetaData from './components/MetaData';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -61,14 +62,6 @@ class App extends Component {
    */
   constructor(props) {
     super(props);
-    this.topLeftRef = React.createRef();
-    this.topLeft2Ref = React.createRef();
-    this.topLeft3Ref = React.createRef();
-    this.topRightRef = React.createRef();
-    this.topRight2Ref = React.createRef();
-    this.topRight3Ref = React.createRef();
-    this.bottomLeftRef = React.createRef();
-    this.bottomLeft2Ref = React.createRef();
     this.state = {
       threatsCount: 0,
       selectedFile: null,
@@ -365,7 +358,6 @@ class App extends Component {
     // right.
     const context = eventData.canvasContext;
     this.renderDetections(this.state.detections, context);
-    this.renderGeneralInfo();
   }
 
 
@@ -411,24 +403,6 @@ class App extends Component {
     }
   };
 
-
-  /**
-   * renderGeneralInfo - Updates DOM elements with general data pulled from the DICOS+TDR file
-   *
-   * @return {type}  None
-   */
-  renderGeneralInfo() {
-    this.topLeftRef.current.textContent = "Algorithm: " + this.state.algorithm;
-    this.topLeft2Ref.current.textContent = "Detector Type: " + this.state.type;
-    this.topLeft3Ref.current.textContent = "Detector Configuration: " + this.state.configuration;
-    this.topRightRef.current.textContent = "Station Name: " + this.state.station;
-    this.topRight2Ref.current.textContent = "Date: " + this.state.date;
-    this.topRight3Ref.current.textContent = "Time: " + this.state.time;
-    this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
-    this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
-  }
-
-
   /**
    * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
    *
@@ -473,8 +447,6 @@ class App extends Component {
       }, () => {
         this.renderButtons(e, clickedPos, selectedIndex);
       });
-
-      // this.renderGeneralInfo();
     }
 
     // Handle regular click events for selecting and deselecting detections
@@ -562,7 +534,8 @@ class App extends Component {
             height: '100vh',
             marginLeft: 'auto',
             marginRight: 'auto',
-            color: 'white'}}
+            
+          }}
           onContextMenu={(e) => e.preventDefault() }
           className='disable-selection noIbar'
           unselectable='off'
@@ -572,96 +545,15 @@ class App extends Component {
             })
           }}
           onMouseDown={(e) => e.preventDefault() } >
+          <MetaData 
+            algorithmType={this.state.algorithm}
+            detectorType={this.state.type}
+            detectorConfigType={this.state.configuration}
+            seriesType={this.state.series}
+            studyType={this.state.study}
+          />
           <div id="feedback-confirm"> </div>
           <div id="feedback-reject"> </div>
-          <div
-            id="topleft"
-            ref={this.topLeftRef}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '2rem',
-              left: '2rem'
-            }}>
-            Algorithm:
-          </div>
-          <div
-            id="topleft2"
-            ref={this.topLeft2Ref}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '4rem',
-              left: '2rem'
-            }}>
-            Detector Type:
-          </div>
-          <div
-            id="topleft3"
-            ref={this.topLeft3Ref}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '6rem',
-              left: '2rem'
-            }}>
-            Detector Configuration:
-          </div>
-          <div
-            id="topright"
-            ref={this.topRightRef}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '8rem',
-              left: '2rem'
-            }}>
-            Station Name:
-          </div>
-          <div
-            id="topright2"
-            ref={this.topRight2Ref}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '10rem',
-              left: '2rem'
-            }}>
-            Date:
-          </div>
-          <div
-            id="topright3"
-            ref={this.topRight3Ref}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              top: '12rem',
-              left: '2rem'
-            }}>
-            Time:
-          </div>
-          <div
-            id="bottomleft"
-            ref={this.bottomLeftRef}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              bottom:'4rem',
-              left: '2rem'
-            }}>
-            Series Study:
-          </div>
-          <div
-            id="bottomleft2"
-            ref={this.bottomLeft2Ref}
-            className="overlay"
-            style={{
-              position: 'absolute',
-              bottom:'2.5rem',
-              left: '2rem'
-            }}>
-            Series Study:
-          </div>
         </div>
         <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
       </div>
