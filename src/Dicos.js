@@ -110,12 +110,13 @@ export default class Dicos {
    *
    * @param  {type} validationList Array with information regarding the validations made on the detections
    * @param  {type} image          Original DICOS data
+   * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
    * @param  {type} abort= false   Boolean value that represents the abort flag.
    *                               True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
    *                               False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
    * @return {type}                Blob with data for the creation of the amended DICOS file.
    */
-  static dataToBlob(validationList, image, abort= false) {
+  static dataToBlob(validationList, image, startTime, abort= false) {
 
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -137,7 +138,8 @@ export default class Dicos {
     copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
     copiedData.InstanceCreationTime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     copiedData.AcquisitionNumber = instanceNumber;
-
+    copiedData.TotalProcessingTime = startTime - Date.now();
+    console.log(copiedData.TotalProcessingTime);
     copiedData.TDRType = "OPERATOR";
     copiedData.OperatorIdentificationSequence = {
       'vrMap': {},

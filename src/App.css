@@ -35,24 +35,19 @@ body {
   color: #61dafb;
 }
 
+
 .feedback-buttons {
-  position: absolute;
-  top: 40%;
-  left: 4%;
+  position: relative;
   color: white;
   padding: 10px 30px;
   border-radius: 25px;
   border-color: white;
   border-width: 2pt;
   font-size: 14px;
-  font-weight: normal;
+  font-weight: bold;
   font-family: "Montserrat", sans-serif;
   text-align: center;
-  min-width: 130px;
-  min-height: 40px;
-  max-height: 250px;
-  max-width: 50px;
-  z-index: 9999
+  z-index: 9999;
 }
 
 .hidden {

@@ -79,6 +79,7 @@ class App extends Component {
       detections: null,
       selectedDetection: -1,
       validations: null,
+      receiveTime: null,
       displayButtons: false,
       displayNext: false,
       imageViewport: document.getElementById('dicomImage'),
@@ -105,7 +106,7 @@ class App extends Component {
    */
   componentDidMount() {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-    this.state.imageViewport.addEventListener('click', this.onMouseClicked);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.onToolActive);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.onToolActive);
     this.setupConerstoneJS(this.state.imageViewport);
@@ -159,8 +160,9 @@ class App extends Component {
         this.setState({
           selectedFile: myBlob,
           image: Utils.base64ToArrayBuffer(res.data.b64),
+          validations: null,
           displayNext: false,
-          validations: null
+          receiveTime: Date.now()
         });
         const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
         this.loadAndViewImage(imageId);
@@ -418,40 +420,25 @@ class App extends Component {
 
 
   /**
-   * renderGeneralInfo - Updates DOM elements with general data pulled from the DICOS+TDR file
+   *onToolActive - Receives custom event information when the Pan or Zoom tools from
+   * cornerstone is used.
    *
    * @return {type}  None
    */
-  renderGeneralInfo() {
-    this.topLeftRef.current.textContent = "Algorithm: " + this.state.algorithm;
-    this.topLeft2Ref.current.textContent = "Detector Type: " + this.state.type;
-    this.topLeft3Ref.current.textContent = "Detector Configuration: " + this.state.configuration;
-    this.topRightRef.current.textContent = "Station Name: " + this.state.station;
-    this.topRight2Ref.current.textContent = "Date: " + this.state.date;
-    this.topRight3Ref.current.textContent = "Time: " + this.state.time;
-    this.bottomLeftRef.current.textContent = "Series: " + this.state.series;
-    this.bottomLeft2Ref.current.textContent = "Study: " + this.state.study;
-  }
-
   onToolActive(e){
-    console.log(e);
     this.setState({ displayButtons: false }, () => {
-      this.renderButtons(-1, this.state.selectedDetection);
+      this.renderButtons(e);
     });
 
-    if(e.type === "cornerstonetoolsmousewheel"){
-      console.log(e.detail.viewport.scale.toFixed(2));
-
-      var selectedIndex = this.state.selectedDetection;
-      var detectionList = this.state.detections;
-      if(selectedIndex !== -1){
-        if(detectionList[selectedIndex]){
-          detectionList[selectedIndex].selected = false;
-          this.setState({selectedDetection: -1})
-        }
+    var selectedIndex = this.state.selectedDetection;
+    var detectionList = this.state.detections;
+    if(selectedIndex !== -1){
+      if(detectionList[selectedIndex]){
+        detectionList[selectedIndex].selected = false;
+        this.setState({selectedDetection: -1})
       }
-
     }
+
   }
 
     /**
@@ -497,13 +484,13 @@ class App extends Component {
         displayNext: true,
         validations:validations
       }, () => {
-        this.renderButtons(e, clickedPos, selectedIndex);
+        this.renderButtons(e);
       });
     }
 
     // Handle regular click events for selecting and deselecting detections
     else{
-      const mousePos = cornerstone.canvasToPixel(e.currentTarget, {x:e.pageX, y:e.pageY});
+      const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.page.x, y:e.detail.currentPoints.page.y});
 
       for (var i = 0; i < detectionList.length; i++) {
         if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
@@ -514,50 +501,77 @@ class App extends Component {
       if(clickedPos === -1) {
         if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
         selectedIndex = -1;
-        this.setState({ displayButtons: false }, () => {
-          this.renderButtons(clickedPos, selectedIndex);
+        this.setState({ displayButtons: false,  selectedDetection: selectedIndex }, () => {
+          this.renderButtons(e);
         });
       }
       else {
         if (clickedPos === selectedIndex){
           detectionList[clickedPos].selected = false;
           selectedIndex = -1;
-          this.setState({ displayButtons: false }, () => {
-            this.renderButtons(clickedPos, selectedIndex);
+          this.setState({ displayButtons: false,  selectedDetection: selectedIndex }, () => {
+            this.renderButtons(e);
           });
         } else {
             if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
             detectionList[clickedPos].selected = true;
             selectedIndex = clickedPos;
-            this.setState({displayButtons: true}, () => {
-              this.renderButtons(clickedPos, selectedIndex);
+            this.setState({displayButtons: true, selectedDetection: selectedIndex}, () => {
+              this.renderButtons(e);
             });
         }
       }
     }
   }
 
-  renderButtons(clickedPos, selectedIndex) {
+
+  /**
+   * renderButtons - Function that handles the logic behind whether or not to display
+   * the feedback buttons and where to display those buttons depending on the current
+   * zoom level in the window
+   *
+   * @param  {type} e Event data passed from the onMouseClick function,
+   * such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}   None
+   */
+  renderButtons(e) {
+    console.log(e);
     let className = "";
 
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
+
     className = this.state.displayButtons ? "" : "hidden";
+    let top = 0;
+    let left = 0;
+    if(e.detail !== null){
+      if(className !== "hidden"){
+        top =  e.detail.startPoints.page.y;
+        left = e.detail.startPoints.page.x + 20;
+      }
+      if(e.detail.viewport.scale < .7 || e.detail.viewport.scale > 2.5){
+        top = 300;
+        left = 30;
+      }
+    }
 
-    className = className + "feedback-buttons"
-
-    this.setState({selectedDetection: selectedIndex});
+    className = className + "feedback-buttons";
 
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
+        top: top,
+        left: left,
         backgroundColor: DETECTION_COLOR_VALID,
       }
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
 
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
-        marginTop: "60px",
+        top: top,
+        left: left,
+        marginLeft: "5px",
+        marginTop: "30px",
         backgroundColor: DETECTION_COLOR_INVALID,
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
