@@ -448,7 +448,6 @@ class App extends Component {
    * @return {type}   None
    */
   onMouseClicked(e) {
-    console.log(e);
     if (this.state.detections === null || this.state.detections.length === 0){
       return;
     }
@@ -462,25 +461,16 @@ class App extends Component {
     // User is submitting feedback through confirm or reject buttons
     if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
       if(e.currentTarget.id === "confirm"){
-        this.setState({ selectedIndex: -1 }, () => {
-          selectedIndex = this.state.selectedDetection;
-        });
-        console.log("user confirmed detection");
         feedback = "CONFIRM";
       }
       if(e.currentTarget.id === "reject"){
-        this.setState({ selectedIndex: -1 }, () => {
-          selectedIndex = this.state.selectedDetection;
-        });
         feedback = "REJECT";
-        console.log("user rejected detection");
       }
-
       detectionList[selectedIndex].selected = false;
       validations[selectedIndex] = feedback;
-      console.log(validations);
-      this.setState({ 
-        displayButtons: false, 
+      this.setState({
+        selectedDetection: -1,
+        displayButtons: false,
         displayNext: true,
         validations:validations
       }, () => {
