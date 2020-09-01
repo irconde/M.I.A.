@@ -27,6 +27,10 @@ const DETECTION_COLOR_VALID = '#87bb47';
 const DETECTION_COLOR_INVALID = '#961e13';
 const DETECTION_BORDER = 2;
 const LABEL_TEXT_COLOR = '#FFFFFF'
+const BUTTON_MARGIN_LEFT = 60;
+const BUTTONS_GAP = 120;
+const BUTTON_HEIGHT = 60;
+const LINE_GAP = 40;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -82,6 +86,7 @@ class App extends Component {
       receiveTime: null,
       displayButtons: false,
       displayNext: false,
+      zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: null,
@@ -287,6 +292,7 @@ class App extends Component {
    */
   displayDICOSimage(image) {
     const viewport = cornerstone.getDefaultViewportForImage(this.state.imageViewport, image);
+    this.setState({viewport: viewport})
     cornerstone.displayImage(this.state.imageViewport, image, viewport);
   }
 
@@ -357,7 +363,7 @@ class App extends Component {
    */
   onImageRendered(e) {
     const eventData = e.detail;
-
+    this.setState({zoomLevel: eventData.viewport.scale.toFixed(2)});
     // set the canvas context to the image coordinate system
     //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
@@ -408,6 +414,25 @@ class App extends Component {
       context.fillStyle = detectionColor;
       context.strokeStyle = detectionColor;
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
+
+      // Line rendering
+      if (i === this.state.selectedDetection) {
+        const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
+        context.beginPath();
+        // Staring point (10,45)
+        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + LINE_GAP);
+        // End point (180,47)
+        context.lineTo(boundingBoxCoords[2] + BUTTON_MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] + buttonGap);
+        // Make the line visible
+        context.stroke();
+        context.beginPath();
+        // Staring point (10,45)
+        context.moveTo(boundingBoxCoords[2] - LINE_GAP, boundingBoxCoords[1]);
+        // End point (180,47)
+        context.lineTo(boundingBoxCoords[2] + BUTTON_MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] - buttonGap);
+        // Make the line visible
+        context.stroke();
+      }
 
       // Label rendering
       context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
@@ -525,7 +550,6 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
-    console.log(e);
     let className = "";
 
     if (this.state.detections === null || this.state.detections.length === 0){
@@ -533,39 +557,43 @@ class App extends Component {
     }
 
     className = this.state.displayButtons ? "" : "hidden";
-    let top = 0;
-    let left = 0;
+    var leftAcceptBtn = 0;
+    var topAcceptBtn = 0;
+    var topRejectBtn = 0;
     if(e.detail !== null){
       if(className !== "hidden"){
-        top =  e.detail.startPoints.page.y;
-        left = e.detail.startPoints.page.x + 20;
+        const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
+        const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
+        const boundingBoxCoords = this.state.detections[this.state.selectedDetection].boundingBox;
+        var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
+        leftAcceptBtn = coordsAcceptBtn.x ;
+        topAcceptBtn = coordsAcceptBtn.y;
+        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]});
+        topRejectBtn = coordsRejectBtn.y;
       }
+      // TODO. Make sure buttons are inside screen
+      /*
       if(e.detail.viewport.scale < .7 || e.detail.viewport.scale > 2.5){
         top = 300;
         left = 30;
       }
+      */
     }
-
     className = className + "feedback-buttons";
-
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
       style: {
-        top: top,
-        left: left,
+        top: topAcceptBtn,
+        left: leftAcceptBtn,
         backgroundColor: DETECTION_COLOR_VALID,
       }
     }, "CONFIRM"), document.getElementById('feedback-confirm'));
-
     ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
       style: {
-        top: top,
-        left: left,
-        marginLeft: "5px",
-        marginTop: "30px",
+        top: topRejectBtn,
+        left: leftAcceptBtn,
         backgroundColor: DETECTION_COLOR_INVALID,
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
-
     cornerstone.updateImage(this.state.imageViewport, true);
   }
 
