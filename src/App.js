@@ -99,7 +99,7 @@ class App extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
-    this.onToolActive = this.onToolActive.bind(this);
+    this.hideButtons = this.hideButtons.bind(this);
     this.getFilesFromCommandServer();
   }
 
@@ -112,8 +112,8 @@ class App extends Component {
   componentDidMount() {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.onToolActive);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.onToolActive);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButton);
     this.setupConerstoneJS(this.state.imageViewport);
     this.getNextImage();
   }
@@ -205,7 +205,7 @@ class App extends Component {
    * @param {type} - None
    * @return {type} - None
    */
-  nextImageClick() {
+  nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
         let validationCompleted = this.validationCompleted(this.state.validations);
@@ -220,6 +220,7 @@ class App extends Component {
           selectedFile: Dicos.dataToBlob(validationList, image, !validationCompleted)
         })
         this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand).then((res) => {
+          this.hideButtons(e);
           this.setState({selectedFile: null});
           this.getNextImage();
         });
@@ -446,12 +447,12 @@ class App extends Component {
 
 
   /**
-   *onToolActive - Receives custom event information when the Pan or Zoom tools from
-   * cornerstone is used.
+   * hideButtons - Unselect the selected detection and hide the two "feedback" buttons.
    *
+   * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}  None
    */
-  onToolActive(e){
+  hideButtons(e){
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
     });
