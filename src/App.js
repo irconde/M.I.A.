@@ -234,6 +234,7 @@ class App extends Component {
     })
   }
 
+
   /**
    * sendFilesToServer - Socket IO to send a file to the server
    * @param {type} - file - which file we are sending
@@ -420,14 +421,14 @@ class App extends Component {
         const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + LINE_GAP);
+        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + LINE_GAP/2);
         // End point (180,47)
         context.lineTo(boundingBoxCoords[2] + BUTTON_MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] + buttonGap);
         // Make the line visible
         context.stroke();
         context.beginPath();
         // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2] - LINE_GAP, boundingBoxCoords[1]);
+        context.moveTo(boundingBoxCoords[2] - LINE_GAP/2, boundingBoxCoords[1]);
         // End point (180,47)
         context.lineTo(boundingBoxCoords[2] + BUTTON_MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] - buttonGap);
         // Make the line visible
