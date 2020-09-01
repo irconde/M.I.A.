@@ -113,7 +113,7 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButton);
+    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
     this.getNextImage();
   }
@@ -135,7 +135,7 @@ class App extends Component {
       // If we got an image and we are null, we know we can now fetch one
       // This is how it triggers to display a new file if none existed and a new one
       // was added
-      
+
     })
   }
 
@@ -609,7 +609,7 @@ class App extends Component {
             height: '100vh',
             marginLeft: 'auto',
             marginRight: 'auto',
-            
+
           }}
           onContextMenu={(e) => e.preventDefault() }
           className='disable-selection noIbar'
@@ -620,7 +620,7 @@ class App extends Component {
             })
           }}
           onMouseDown={(e) => e.preventDefault() } >
-          <MetaData 
+          <MetaData
             algorithmType={this.state.algorithm}
             detectorType={this.state.type}
             detectorConfigType={this.state.configuration}
