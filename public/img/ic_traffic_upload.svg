@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ic_traffic_download</title>
+    <g id="ic_traffic_download" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#000000" x="0" y="0" width="32" height="32"></rect>
+        <g id="import_export-24px">
+            <polygon id="Path" points="0 0 32 0 32 32 0 32"></polygon>
+            <path d="M12,3.29377655 L18.5425799,9.82 L13.8333333,9.82 L13.8333333,19.1666667 L10.1666667,19.1666667 L10.1666667,9.82 L5.4574201,9.82 L12,3.29377655 Z" id="Path" stroke="#FFFFFF" fill="#FFFFFF" fill-rule="nonzero"></path>
+            <polygon id="Path" stroke="#878787" fill="#878787" fill-rule="nonzero" points="21.3333333 22.68 21.3333333 13.3333333 18.6666667 13.3333333 18.6666667 22.68 14.6666667 22.68 20 28 25.3333333 22.68"></polygon>
+        </g>
+    </g>
+</svg>

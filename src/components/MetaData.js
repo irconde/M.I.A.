@@ -24,7 +24,7 @@ class MetaData extends Component {
             },
             divStyle: {
                 position: 'absolute',
-                top: '2rem',
+                top: '5rem',
                 left: '2rem',
                 backgroundColor: 'rgba(38, 38, 38, 0.75)',
                 borderRadius: '0.5rem',

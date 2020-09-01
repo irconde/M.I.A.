@@ -51,6 +51,7 @@ watcher
                         });
                     }
                     setMaxFileNumber();
+                    io.emit('numberOfFiles', fileQueue.length);
                 }
             } else {
                 // Rename the file
@@ -73,6 +74,7 @@ watcher
             fileQueue.shift();
         }
         setMaxFileNumber();
+        io.emit('numberOfFiles', fileQueue.length);
     })
     .on('error', (error) => {
         console.error('Error happened', error);
@@ -176,7 +178,9 @@ router.get("/next", (req, res) => {
                         console.log(err);
                         res.send({ response: 'error'});
                     } else {
-                        res.send({ b64: Buffer.from(data).toString('base64')});
+                        res.send({ 
+                            b64: Buffer.from(data).toString('base64')
+                        });
                     }
                 })
             } else {
@@ -237,7 +241,7 @@ const io = socketIo(server);
  */
 io.on("connection", (socket) => {
     console.log('File Server: New Client Connected');
-
+    socket.emit('numberOfFiles', fileQueue.length)
     socket.on("disconnect", () => {
         console.log('File Server: Client disconnected');
     })

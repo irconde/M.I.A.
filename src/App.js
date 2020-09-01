@@ -15,6 +15,7 @@ import Detection from "./Detection.js";
 import axios from 'axios';
 import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
+import TopBar from './components/TopBar';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -89,18 +90,23 @@ class App extends Component {
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
-      isConnected: null,
+      isConnected: false,
+      numOfFilesInQueue: 0,
+      isUpload: false,
+      isDownload: false,
       socketCommand: socketIOClient(COMMAND_SERVER),
       socketFS: socketIOClient(FILE_SERVER)
     };
-
-    this.sendFilesToServer = this.sendFilesToServer.bind(this);
+    this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
+    this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
-    this.hideButtons = this.hideButtons.bind(this);
+    this.hideButtons = this.hideButtons.bind(this);    
+    this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
     this.getFilesFromCommandServer();
+    this.updateNumberOfFiles();
   }
 
 
@@ -126,16 +132,28 @@ class App extends Component {
    * @return {type} - None
    */
   async getFilesFromCommandServer(){
+    this.state.socketCommand.on('connect', () => {
+      this.setState({ isConnected: true });
+    })
     this.state.socketCommand.on("img", data => {
-      this.sendFilesToServer(Utils.b64toBlob(data), this.state.socketFS).then((res) => {
+      this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
+        // If we got an image and we are null, we know we can now fetch one
+        // This is how it triggers to display a new file if none existed and a new one
+        // was added
+        this.setState({ isDownload: false });
         if (this.state.selectedFile === null){
           this.getNextImage();
         }
       });
-      // If we got an image and we are null, we know we can now fetch one
-      // This is how it triggers to display a new file if none existed and a new one
-      // was added
+    })    
+    this.state.socketCommand.on('disconnect', () => {
+      this.setState({ isConnected: false });
+    })
+  }
 
+  async updateNumberOfFiles(){
+    this.state.socketFS.on('numberOfFiles', data => {
+      this.setState({ numberOfFilesInQueue: data});
     })
   }
 
@@ -219,9 +237,12 @@ class App extends Component {
         this.setState({
           selectedFile: Dicos.dataToBlob(validationList, image, !validationCompleted)
         })
-        this.sendFilesToServer(this.state.selectedFile, this.state.socketCommand).then((res) => {
+        this.sendImageToCommandServer(this.state.selectedFile).then((res) => {
           this.hideButtons(e);
-          this.setState({selectedFile: null});
+          this.setState({
+            selectedFile: null,
+            isUpload: false
+          });
           this.getNextImage();
         });
       } else if (res.data.confirm === 'image-not-removed') {
@@ -237,15 +258,25 @@ class App extends Component {
 
 
   /**
-   * sendFilesToServer - Socket IO to send a file to the server
+   * sendImageToFileServer - Socket IO to send an imge to the file server
    * @param {type} - file - which file we are sending
-   * @param {type} - socket - what socket we are sending files on, command or file server
    * @return {type} - None
    */
-  async sendFilesToServer(file, socket){
-    socket.binary(true).emit("fileFromClient", file);
+  async sendImageToFileServer(file){
+    this.setState({ isDownload: true });
+    this.state.socketFS.binary(true).emit("fileFromClient", file);    
   }
 
+
+  /**
+   * sendImageToCommandServer - Socket IO to send a file to the server
+   * @param {type} - file - which file we are sending
+   * @return {type} - None
+   */
+  async sendImageToCommandServer(file){
+    this.setState({ isUpload: true });
+    this.state.socketCommand.binary(true).emit("fileFromClient", file);    
+  }
 
   /**
    * setupConerstoneJS - CornerstoneJS Tools are initialized
@@ -620,13 +651,19 @@ class App extends Component {
             })
           }}
           onMouseDown={(e) => e.preventDefault() } >
+          <TopBar
+            numberOfFiles={this.state.numberOfFilesInQueue}
+            isUpload={this.state.isUpload}
+            isDownload={this.state.isDownload}
+            isConnected={this.state.isConnected}
+          />
           <MetaData
             algorithmType={this.state.algorithm}
             detectorType={this.state.type}
             detectorConfigType={this.state.configuration}
             seriesType={this.state.series}
             studyType={this.state.study}
-          />
+          />          
           <div id="feedback-confirm"> </div>
           <div id="feedback-reject"> </div>
         </div>
