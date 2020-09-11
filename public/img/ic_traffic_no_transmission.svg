@@ -2,7 +2,6 @@
 <svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>ic_traffic_no_transmission</title>
     <g id="ic_traffic_no_transmission" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect fill="#000000" x="0" y="0" width="32" height="32"></rect>
         <g id="file_exchange_icon">
             <polygon id="Path" points="0 0 32 0 32 32 0 32"></polygon>
             <path d="M12,3.29377655 L18.5425799,9.82 L13.8333333,9.82 L13.8333333,19.1666667 L10.1666667,19.1666667 L10.1666667,9.82 L5.4574201,9.82 L12,3.29377655 Z" id="Path" stroke="#878787" fill="#878787" fill-rule="nonzero"></path>

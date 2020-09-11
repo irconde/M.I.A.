@@ -129,7 +129,7 @@ class App extends Component {
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
    *                           - to the file server directly after
    * @param {type} - None
-   * @return {type} - None
+   * @return {type} - Promise
    */
   async getFilesFromCommandServer(){
     this.state.socketCommand.on('connect', () => {
@@ -151,6 +151,11 @@ class App extends Component {
     })
   }
 
+  /**
+   * updateNumberOfFiles - Opens a socket to constantly monitor the number of files with the file server
+   * @param {type} - None
+   * @return {type} - Promise
+   */
   async updateNumberOfFiles(){
     this.state.socketFS.on('numberOfFiles', data => {
       this.setState({ numberOfFilesInQueue: data});

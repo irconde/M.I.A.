@@ -2,7 +2,6 @@
 <svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>ic_traffic_download_upload</title>
     <g id="ic_traffic_download_upload" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect fill="#000000" x="0" y="0" width="32" height="32"></rect>
         <g id="import_export-24px">
             <polygon id="Path" points="0 0 32 0 32 32 0 32"></polygon>
             <polygon id="Path" stroke="#FFFFFF" fill="#FFFFFF" fill-rule="nonzero" points="12 4 6.66666667 9.32 10.6666667 9.32 10.6666667 18.6666667 13.3333333 18.6666667 13.3333333 9.32 17.3333333 9.32"></polygon>
