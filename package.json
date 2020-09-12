@@ -10,10 +10,10 @@
     "chokidar": "^3.4.2",
     "cornerstone-core": "^2.3.0",
     "cornerstone-math": "^0.1.8",
-    "cornerstone-tools": "^4.15.2",
+    "cornerstone-tools": "^4.21.1",
     "cornerstone-wado-image-loader": "^3.1.2",
     "cornerstone-web-image-loader": "^2.0.0",
-    "dcmjs": "^0.16.2",
+    "dcmjs": "^0.16.3",
     "dicom-parser": "1.8.5",
     "express": "^4.17.1",
     "file-saver": "^2.0.2",
@@ -23,12 +23,15 @@
     "react": "^16.2.0",
     "react-cornerstone-viewport": "^2.3.9",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.1.0",
-    "react-svg": "^11.0.36",
+    "react-scripts": "^3.4.3",
+    "react-svg": "^11.0.38",
     "save-file": "^2.3.1",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
-    "styled-components": "^5.1.1"
+    "styled-components": "^5.2.0"
+  },
+  "resolutions": {
+    "react-dev-utils": "^10.2.1"
   },
   "scripts": {
     "start": "npm-run-all -p server react",
