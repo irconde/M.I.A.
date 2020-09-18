@@ -16,8 +16,8 @@ const port = process.env.PORT || 4002;
 const imgPath = './img/'
 let fileQueue = [];
 let maxFileNumber = 0;
-const regExpDCS = /\.dcs$/;
-const regExpFileName = /^[0-9]{1,}_{1}img\.dcs$/;
+const regExpDCS = /\.ora$/;
+const regExpFileName = /^[0-9]{1,}_{1}img\.ora$/;
 
 if (!fs.existsSync(imgPath)){
     fs.mkdirSync(imgPath);
@@ -31,8 +31,8 @@ if (!fs.existsSync(imgPath)){
  * When a file gets saved by the server, this watcher adds it the queue
  * Same for when it is removed, the watcher updates the queue
  * This supports users putting their own files into the folder too and will
- * serve them if they are of type .dcs, as well will rename them if they arent
- * but are of type .dcs
+ * serve them if they are of type .ora, as well will rename them if they arent
+ * but are of type .ora
  */
 const watcher = chokidar.watch(imgPath, {ignored: /^\./, awaitWriteFinish: false});
 watcher
@@ -55,11 +55,11 @@ watcher
                 }
             } else {
                 // Rename the file
-                fs.rename(file, `${imgPath}${maxFileNumber+1}_img.dcs`, (err) => console.log(`File Server Error: ${err}`));
-                console.log(`File Server: File Not Formated Properly --- Renamed file to ${imgPath}${maxFileNumber+1}_img.dcs`)
+                fs.rename(file, `${imgPath}${maxFileNumber+1}_img.ora`, (err) => console.log(`File Server Error: ${err}`));
+                console.log(`File Server: File Not Formated Properly --- Renamed file to ${imgPath}${maxFileNumber+1}_img.ora`)
             }
         } else {
-            console.log('File Server: file is not of type .dcs');
+            console.log('File Server: file is not of type .ora');
         }
     })
     .on('change', (file) => {
@@ -82,7 +82,7 @@ watcher
 
 /**
  * setMaxFileNumber() - This function is how we keep track of our max file number
- *                    - such as maxNum_img.dcs from our file queue. This calls the
+ *                    - such as maxNum_img.ora from our file queue. This calls the
  *                    - function getFileNumber and passes in the last element of the queue
  * @param {type} - None
  * @return {type} - None
@@ -97,8 +97,8 @@ function setMaxFileNumber() {
 
 /**
  * getFileNumber()    - We can pull out our file number and return it to the user
- *                    - We do this by pulling apart the file name, which is a path like /static/img/1_img.dcs
- *                    - by splitting on the slashes and pulling the number off the 1_img.dcs part
+ *                    - We do this by pulling apart the file name, which is a path like /static/img/1_img.ora
+ *                    - by splitting on the slashes and pulling the number off the 1_img.ora part
  * @param {type} - None
  * @return {type} - None
  */
@@ -129,7 +129,7 @@ function getFileName(file) {
 
 /**
  * validateRegExp()   - We test if the regular expression we are being passed matches our file name
- *                    - This is to test if the file is of type .dcs and as well num_img.dcs
+ *                    - This is to test if the file is of type .ora and as well num_img.ora
  *                    - Which are from our regular expressions defined at the top of the file
  * @param {type} - None
  * @return {type} - None
@@ -162,14 +162,14 @@ app.use(function(req, res, next) {
 // Basic alive request
 router.get("/", (req, res) => {
     console.log('File Server: Alive request');
-    res.send({ response: "I am alive" }).status(200);
+    res.send({ response: "I am alive" });
 });
 
 // Here we serve up the next image if there is one in binary64 string
 router.get("/next", (req, res) => {
     console.log('File Server: /next image serve request')
     if (fileQueue.length === 0){
-        res.send({ response: "no-next-image"}).status(200);
+        res.send({ response: "no-next-image"});
     } else {
         try {
             if(fs.existsSync(fileQueue[0])){
@@ -195,7 +195,7 @@ router.get("/next", (req, res) => {
                         }
                     })
                 } else {
-                    res.send({ response: "no-next-image"}).status(200);
+                    res.send({ response: "no-next-image"});
                 }
             }
         } catch (error) {
@@ -260,7 +260,7 @@ io.on("connection", (socket) => {
  * @param {type} data
  */
 async function storeFile(data) {
-    let fileNameDir = `${imgPath}${maxFileNumber+1}_img.dcs`;
+    let fileNameDir = `${imgPath}${maxFileNumber+1}_img.ora`;
     fs.writeFile(fileNameDir, data, function(err) {
         if (err) return console.log(`File Server Error: ${err}`);
     })
