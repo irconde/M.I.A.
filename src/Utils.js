@@ -105,19 +105,24 @@ export default class Utils {
    * 
    * @returns {type} object
    */
-  static base64ToOpenRaster(base64){
+  static async base64ToOpenRaster(base64){
     const myZip = new JSZip();
     const dataPathRegExp = /^data{1,}\//;
+    var layerOrder = [];
     const myOra = {
       layers: []
     }
-    myZip.loadAsync(base64, { base64: true }).then((res) => {
-      res.forEach((path, file) => {
-        if (this.validateRegExp(path, dataPathRegExp)){
-          myZip.file(path).async("uint8array").then((res) => {
-            myOra.layers.push(new Blob(res, { type: 'image/dcs' }));
-          })  
-        }
+
+    // TODO:
+    // Having issues returning the myOra file once these async calls are finished
+    await myZip.loadAsync(base64, { base64: true }).then((res) => {
+      myZip.file('stack.xml').async('string').then((stackFile) => {
+        layerOrder = this.getLayerOrder(stackFile);
+        layerOrder.forEach((imagePath) => {
+          myZip.file(imagePath).async('uint8array').then((imageData) => {
+            myOra.layers.push(new Blob(imageData, { type: 'image/dcs' }));
+          })
+        })
       })
       console.log(myOra);
     });   
@@ -139,4 +144,27 @@ export default class Utils {
     }
   }
 
+
+  /**
+   * getLayerOrder - This function takes in the stack.xml file to learn the order of the
+   *                 DICOS-TDR images. It then returns an array of the order of the stack
+   *                 file, which the first layer is always the pixel data.
+   * 
+   * @param {type} stackFile 
+   * 
+   * @returns {type} array
+   */
+  static getLayerOrder(stackFile){
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(stackFile, 'text/xml');
+    const myStack = xmlDoc.getElementsByTagName('stack');
+    const layerOrder = [];
+    for (const layer of myStack) {
+      const data = layer.getElementsByTagName('layer');
+      for (const image of data){
+        layerOrder.push(image.getAttribute('src'));
+      }
+    }
+    return layerOrder;
+  }
 }

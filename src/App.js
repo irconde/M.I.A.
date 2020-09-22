@@ -184,7 +184,11 @@ class App extends Component {
         this.setState({selectedFile: null});
         // Need to clear the canvas here or make a no image to load display
       } else {
-        const myOra = Utils.base64ToOpenRaster(res.data.b64);
+        // TODO:
+        // This is returning undefined currently. See Utils file and function base64ToOpenRaster
+        Utils.base64ToOpenRaster(res.data.b64).then((res) => {
+          console.log(res);
+        });         
         // this.setState({
         //   selectedFile: myBlob,
         //   image: Utils.base64ToArrayBuffer(res.data.b64),
