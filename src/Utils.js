@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 
 /**
  * Class that emcompases any secondary method to support the primary features of the client
@@ -94,6 +95,48 @@ export default class Utils {
       bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
+  }
+
+  /**
+   * base64ToOpenRaster - Takes in a base64 encoded string and returns an object
+   *                      that contains the OpenRaster data.
+   * 
+   * @param {type} base64 - What string we are converting
+   * 
+   * @returns {type} object
+   */
+  static base64ToOpenRaster(base64){
+    const myZip = new JSZip();
+    const dataPathRegExp = /^data{1,}\//;
+    const myOra = {
+      layers: []
+    }
+    myZip.loadAsync(base64, { base64: true }).then((res) => {
+      res.forEach((path, file) => {
+        if (this.validateRegExp(path, dataPathRegExp)){
+          myZip.file(path).async("uint8array").then((res) => {
+            myOra.layers.push(new Blob(res, { type: 'image/dcs' }));
+          })  
+        }
+      })
+      console.log(myOra);
+    });   
+  }
+
+  /**
+   * validateRegExp - Takes in the string(path) we are going to test the regular expression(regExp) with
+   * 
+   * @param {type} path - What we are testing on
+   * @param {type} regExp - The regular expression
+   * 
+   * @return {type} true/false
+   */
+  static validateRegExp(path, regExp){
+    if(regExp.test(path)){
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

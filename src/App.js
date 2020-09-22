@@ -184,9 +184,7 @@ class App extends Component {
         this.setState({selectedFile: null});
         // Need to clear the canvas here or make a no image to load display
       } else {
-        console.log(res);
-        // TODO: Extract the data properly from the new formatted .ora file
-        // const myBlob = Utils.b64toBlob(res.data.b64);
+        const myOra = Utils.base64ToOpenRaster(res.data.b64);
         // this.setState({
         //   selectedFile: myBlob,
         //   image: Utils.base64ToArrayBuffer(res.data.b64),
