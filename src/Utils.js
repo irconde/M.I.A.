@@ -105,27 +105,48 @@ export default class Utils {
    * 
    * @returns {type} object
    */
-  static async base64ToOpenRaster(base64){
+  static async base64ToOpenRaster(base64, myOra){
     const myZip = new JSZip();
-    const dataPathRegExp = /^data{1,}\//;
     var layerOrder = [];
-    const myOra = {
-      layers: []
-    }
-
+    const promises = [];
     // TODO:
     // Having issues returning the myOra file once these async calls are finished
-    await myZip.loadAsync(base64, { base64: true }).then((res) => {
-      myZip.file('stack.xml').async('string').then((stackFile) => {
+    await myZip.loadAsync(base64, { base64: true }).then(async () => {
+      console.log('inside initial zip async load of b64 data');
+      await myZip.file('stack.xml').async('string').then( async (stackFile) => {
+        console.log('after xml has been loaded');
         layerOrder = this.getLayerOrder(stackFile);
-        layerOrder.forEach((imagePath) => {
-          myZip.file(imagePath).async('uint8array').then((imageData) => {
-            myOra.layers.push(new Blob(imageData, { type: 'image/dcs' }));
+        console.log('after find layer order');
+        await layerOrder.forEach((imagePath, index) => {
+          console.log('inside layer order for each');
+          myZip.file(imagePath).async('uint8array', (metadata) => {
+              console.log("progression: " + metadata.percent.toFixed(2) + " %");
+              // if (metadata.percent === 100){
+              //   console.log('100% - Finished loading image');
+              // }
+            }).then((imageData) => {
+              // promises.push(imageData);
+              console.log(`before adding image layers to myOra --- on index: ${index}`);
+              myOra.layers.push(new Blob(imageData, { type: 'image/dcs' }));
+              if (index === 0){
+                myOra.imageBuffer = imageData;
+              }
+              console.log(`after adding image layers to myOra --- on index: ${index}`);
           })
         })
       })
-      console.log(myOra);
-    });   
+    });
+    // This shows all the image data in the promises array
+    // console.log(promises);
+    // Promise.all(promises).then((data) => {
+    //   // However, here our data here is null
+    //   console.log(data);
+    //   myOra.layers.push(new Blob(data, { type: 'image/dcs' }));
+    // }).catch((e) => {
+    //   console.log(e);
+    // })
+    
+    return myOra;
   }
 
   /**

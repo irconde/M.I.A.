@@ -80,6 +80,10 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
+      myOra: {
+        layers: [],
+        imageBuffer: null
+      },
       image: null,
       detections: null,
       selectedDetection: -1,
@@ -186,18 +190,23 @@ class App extends Component {
       } else {
         // TODO:
         // This is returning undefined currently. See Utils file and function base64ToOpenRaster
-        Utils.base64ToOpenRaster(res.data.b64).then((res) => {
+        Utils.base64ToOpenRaster(res.data.b64, this.state.myOra).then((res) => {
+          console.log(this.state.myOra);
+          console.log(this.state.myOra.layers);
+          console.log(`myOra.layer.length: ${this.state.myOra.layers.length}`);
           console.log(res);
-        });         
-        // this.setState({
-        //   selectedFile: myBlob,
-        //   image: Utils.base64ToArrayBuffer(res.data.b64),
-        //   validations: null,
-        //   displayNext: false,
-        //   receiveTime: Date.now()
-        // });
-        // const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(myBlob);
-        // this.loadAndViewImage(imageId);
+          console.log(res.layers);
+          console.log(`res.layer.length: ${res.layers.length}`);
+          this.setState({
+            selectedFile: this.state.myOra.layers[0],
+            image: this.state.myOra.imageBuffer,
+            validations: null,
+            displayNext: false,
+            receiveTime: Date.now()
+          });
+          const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
+          this.loadAndViewImage(imageId);
+        });        
       }
     }).catch((err) => {
       console.log(err);
