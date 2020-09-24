@@ -16,6 +16,7 @@ import axios from 'axios';
 import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
 import TopBar from './components/TopBar';
+import JSZip from "jszip";
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -107,7 +108,7 @@ class App extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
-    this.hideButtons = this.hideButtons.bind(this);    
+    this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
     this.getFilesFromCommandServer();
     this.updateNumberOfFiles();
@@ -149,7 +150,7 @@ class App extends Component {
           this.getNextImage();
         }
       });
-    })    
+    })
     this.state.socketCommand.on('disconnect', () => {
       this.setState({ isConnected: false });
     })
@@ -165,7 +166,6 @@ class App extends Component {
       this.setState({ numberOfFilesInQueue: data});
     })
   }
-
 
   /**
    * getNextImage() - Attempts to retreive the next image from the file server via get request
@@ -190,23 +190,45 @@ class App extends Component {
       } else {
         // TODO:
         // This is returning undefined currently. See Utils file and function base64ToOpenRaster
-        Utils.base64ToOpenRaster(res.data.b64, this.state.myOra).then((res) => {
-          console.log(this.state.myOra);
-          console.log(this.state.myOra.layers);
-          console.log(`myOra.layer.length: ${this.state.myOra.layers.length}`);
-          console.log(res);
-          console.log(res.layers);
-          console.log(`res.layer.length: ${res.layers.length}`);
-          this.setState({
-            selectedFile: this.state.myOra.layers[0],
-            image: this.state.myOra.imageBuffer,
-            validations: null,
-            displayNext: false,
-            receiveTime: Date.now()
-          });
-          const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
-          this.loadAndViewImage(imageId);
-        });        
+        const myZip = new JSZip();
+        var layerOrder = [];
+        var listOfPromises = [];
+        var listOfLayers = [];
+
+        myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
+          console.log('inside initial zip async load of b64 data');
+          myZip.file('stack.xml').async('string').then((stackFile) => {
+            console.log('after xml has been loaded');
+            layerOrder = Utils.getLayerOrder(stackFile);
+            console.log('after find layer order: ' + layerOrder);
+            console.log(layerOrder.length);
+            for (var i = 0; i < layerOrder.length; i++) {
+              myZip.file(layerOrder[i]).async('uint8array', (metadata) => {
+                  // console.log("progression: " + metadata.percent.toFixed(2) + " %");
+                  // if (metadata.percent === 100){
+                  //   console.log('100% - Finished loading image');
+                  // }
+                }).then((imageData) => {
+                  listOfLayers.push(new Blob(imageData, { type: 'image/dcs' }));
+              })
+            }
+            var promiseOfList = Promise.all(listOfPromises);
+            // Once we have all the layers...
+            promiseOfList.then(() => {
+              this.state.myOra.layers = listOfLayers;
+              console.log(this.state.myOra.layers);
+              this.setState({
+                selectedFile: this.state.myOra.layers[0],
+                image: this.state.myOra.layers[0],
+                validations: null,
+                displayNext: false,
+                receiveTime: Date.now()
+              });
+              const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
+              this.loadAndViewImage(imageId);
+            });
+          })
+        });
       }
     }).catch((err) => {
       console.log(err);
@@ -282,7 +304,7 @@ class App extends Component {
    */
   async sendImageToFileServer(file){
     this.setState({ isDownload: true });
-    this.state.socketFS.binary(true).emit("fileFromClient", file);    
+    this.state.socketFS.binary(true).emit("fileFromClient", file);
   }
 
 
@@ -293,7 +315,7 @@ class App extends Component {
    */
   async sendImageToCommandServer(file){
     this.setState({ isUpload: true });
-    this.state.socketCommand.binary(true).emit("fileFromClient", file);    
+    this.state.socketCommand.binary(true).emit("fileFromClient", file);
   }
 
   /**
@@ -681,7 +703,7 @@ class App extends Component {
             detectorConfigType={this.state.configuration}
             seriesType={this.state.series}
             studyType={this.state.study}
-          />          
+          />
           <div id="feedback-confirm"> </div>
           <div id="feedback-reject"> </div>
         </div>
