@@ -113,8 +113,7 @@ class App extends Component {
     this.getFilesFromCommandServer();
     this.updateNumberOfFiles();
   }
-
-
+  
   /**
    * componentDidMount - Method invoked after all elements on the page are rendered properly
    *
@@ -188,35 +187,23 @@ class App extends Component {
         this.setState({selectedFile: null});
         // Need to clear the canvas here or make a no image to load display
       } else {
-        // TODO:
-        // This is returning undefined currently. See Utils file and function base64ToOpenRaster
         const myZip = new JSZip();
         var layerOrder = [];
         var listOfPromises = [];
         var listOfLayers = [];
-
         myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
-          console.log('inside initial zip async load of b64 data');
-          myZip.file('stack.xml').async('string').then((stackFile) => {
-            console.log('after xml has been loaded');
+          myZip.file('stack.xml').async('string').then( async (stackFile) => {
             layerOrder = Utils.getLayerOrder(stackFile);
-            console.log('after find layer order: ' + layerOrder);
-            console.log(layerOrder.length);
             for (var i = 0; i < layerOrder.length; i++) {
-              myZip.file(layerOrder[i]).async('uint8array', (metadata) => {
-                  // console.log("progression: " + metadata.percent.toFixed(2) + " %");
-                  // if (metadata.percent === 100){
-                  //   console.log('100% - Finished loading image');
-                  // }
-                }).then((imageData) => {
-                  listOfLayers.push(new Blob(imageData, { type: 'image/dcs' }));
+              await myZip.file(layerOrder[i]).async('uint8array').then((imageData) => {
+                listOfLayers.push(new Blob(imageData, { type: 'image/dcs' }));
               })
             }
+            
             var promiseOfList = Promise.all(listOfPromises);
             // Once we have all the layers...
             promiseOfList.then(() => {
               this.state.myOra.layers = listOfLayers;
-              console.log(this.state.myOra.layers);
               this.setState({
                 selectedFile: this.state.myOra.layers[0],
                 image: this.state.myOra.layers[0],
@@ -352,10 +339,12 @@ class App extends Component {
         self.displayDICOSimage(image);
         self.loadDICOSdata(image);
       }, function(err) {
-      alert(err);
+      // alert(err);
+      console.log(err);
+      // Uncomment if you wish to download the errored file
+      // window.location.replace(URL.createObjectURL(self.state.selectedFile));
     });
   }
-
 
   /**
    * displayDICOSinfo - Method that renders the x-ray image encoded in the DICOS+TDR file and
