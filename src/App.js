@@ -191,12 +191,14 @@ class App extends Component {
         var layerOrder = [];
         var listOfPromises = [];
         var listOfLayers = [];
+        var imgBuf = null;
         myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
           myZip.file('stack.xml').async('string').then( async (stackFile) => {
             layerOrder = Utils.getLayerOrder(stackFile);
             for (var i = 0; i < layerOrder.length; i++) {
-              await myZip.file(layerOrder[i]).async('uint8array').then((imageData) => {
-                listOfLayers.push(new Blob(imageData, { type: 'image/dcs' }));
+              await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
+                if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
+                listOfLayers.push(Utils.b64toBlob(imageData));
               })
             }
             
@@ -206,7 +208,7 @@ class App extends Component {
               this.state.myOra.layers = listOfLayers;
               this.setState({
                 selectedFile: this.state.myOra.layers[0],
-                image: this.state.myOra.layers[0],
+                image: imgBuf,
                 validations: null,
                 displayNext: false,
                 receiveTime: Date.now()
