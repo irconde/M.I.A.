@@ -82,12 +82,17 @@ class App extends Component {
       date: null,
       time: null,
       myOra: {
-        layers: [],
-        imageBuffer: null
+        layers: []
       },
       image: null,
-      detections: null,
-      selectedDetection: -1,
+      layers: {
+        visible: false,
+        detections: []
+      },
+      selection: {
+        detectionIndex: -1,
+        layerIndex: 0
+      },
       validations: null,
       receiveTime: null,
       displayButtons: false,
@@ -375,7 +380,9 @@ class App extends Component {
 
     this.setState({
       detections: null,
-      selectedDetection: -1,
+      selection : {
+        detectionsIndex: -1
+      },
       threatsCount: image.data.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
       algorithm: image.data.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
       type: image.data.string(Dicos.dictionary['DetectorType'].tag),
@@ -435,7 +442,7 @@ class App extends Component {
     // right.
 
     const context = eventData.canvasContext;
-    this.renderDetections(this.state.detections, context);
+    this.renderDetections(this.state.layers.detections, context);
   }
 
 
@@ -480,7 +487,7 @@ class App extends Component {
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
 
       // Line rendering
-      if (i === this.state.selectedDetection) {
+      if (i === this.state.selection.detectionsIndex) {
         const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)
@@ -519,12 +526,12 @@ class App extends Component {
       this.renderButtons(e);
     });
 
-    var selectedIndex = this.state.selectedDetection;
-    var detectionList = this.state.detections;
+    var selectedIndex = this.state.selection.detectionsIndex;
+    var detectionList = this.state.layers.detections;
     if(selectedIndex !== -1){
       if(detectionList[selectedIndex]){
         detectionList[selectedIndex].selected = false;
-        this.setState({selectedDetection: -1})
+        this.setState({selection: {detectionsIndex: -1}})
       }
     }
 
@@ -537,13 +544,13 @@ class App extends Component {
    * @return {type}   None
    */
   onMouseClicked(e) {
-    if (this.state.detections === null || this.state.detections.length === 0){
+    if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
       return;
     }
 
     var clickedPos = -1;
-    var selectedIndex = this.state.selectedDetection;
-    var detectionList = this.state.detections;
+    var selectedIndex = this.state.selection.detectionsIndex;
+    var detectionList = this.state.layers.detections;
     var validations = this.state.validations;
     let feedback = "";
 
@@ -558,7 +565,9 @@ class App extends Component {
       detectionList[selectedIndex].selected = false;
       validations[selectedIndex] = feedback;
       this.setState({
-        selectedDetection: -1,
+        selection: {
+          detectionsIndex: -1
+        },
         displayButtons: false,
         displayNext: true,
         validations:validations
@@ -580,7 +589,7 @@ class App extends Component {
       if(clickedPos === -1) {
         if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
         selectedIndex = -1;
-        this.setState({ displayButtons: false,  selectedDetection: selectedIndex }, () => {
+        this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
           this.renderButtons(e);
         });
       }
@@ -588,14 +597,14 @@ class App extends Component {
         if (clickedPos === selectedIndex){
           detectionList[clickedPos].selected = false;
           selectedIndex = -1;
-          this.setState({ displayButtons: false,  selectedDetection: selectedIndex }, () => {
+          this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
             this.renderButtons(e);
           });
         } else {
             if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
             detectionList[clickedPos].selected = true;
             selectedIndex = clickedPos;
-            this.setState({displayButtons: true, selectedDetection: selectedIndex}, () => {
+            this.setState({displayButtons: true, selection: { detectionsIndex: selectedIndex } }, () => {
               this.renderButtons(e);
             });
         }
@@ -616,7 +625,7 @@ class App extends Component {
   renderButtons(e) {
     let className = "";
 
-    if (this.state.detections === null || this.state.detections.length === 0){
+    if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
       return;
     }
 
@@ -628,7 +637,7 @@ class App extends Component {
       if(className !== "hidden"){
         const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
         const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
-        const boundingBoxCoords = this.state.detections[this.state.selectedDetection].boundingBox;
+        const boundingBoxCoords = this.state.layers.detections[this.state.selection.detectionsIndex].boundingBox;
         var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
