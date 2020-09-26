@@ -85,7 +85,7 @@ class App extends Component {
       time: null,
       openRasterData: [],
       image: null,
-      detectionSetList: new DetectionSet(), // TODO. Use the new DetectionSet class to save the information regarding the detections coming from the several used algorithms
+      detectionSetList: [], // TODO. Use the new DetectionSet class to save the information regarding the detections coming from the several used algorithms
       currentSelection: new Selection(), // TODO. Use the new selection to keep track of the detection selected and its corresponding set.
       validations: null, // TODO. This is replaced by the new member detectionSetList
       receiveTime: null,
