@@ -17,6 +17,8 @@ import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
 import TopBar from './components/TopBar';
 import JSZip from "jszip";
+import DetectionSet from "./DetectionSet.js";
+import Selection from "./Selection.js";
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -81,19 +83,11 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
-      myOra: {
-        layers: []
-      },
+      openRasterData: [],
       image: null,
-      layers: {
-        visible: false,
-        detections: []
-      },
-      selection: {
-        detectionIndex: -1,
-        layerIndex: 0
-      },
-      validations: null,
+      detectionSetList: new DetectionSet(), // TODO. Use the new DetectionSet class to save the information regarding the detections coming from the several used algorithms
+      currentSelection: new Selection(), // TODO. Use the new selection to keep track of the detection selected and its corresponding set.
+      validations: null, // TODO. This is replaced by the new member detectionSetList
       receiveTime: null,
       displayButtons: false,
       displayNext: false,
@@ -118,7 +112,7 @@ class App extends Component {
     this.getFilesFromCommandServer();
     this.updateNumberOfFiles();
   }
-  
+
   /**
    * componentDidMount - Method invoked after all elements on the page are rendered properly
    *
@@ -206,13 +200,13 @@ class App extends Component {
                 listOfLayers.push(Utils.b64toBlob(imageData));
               })
             }
-            
+
             var promiseOfList = Promise.all(listOfPromises);
             // Once we have all the layers...
             promiseOfList.then(() => {
-              this.state.myOra.layers = listOfLayers;
+              this.state.openRasterData = listOfLayers;
               this.setState({
-                selectedFile: this.state.myOra.layers[0],
+                selectedFile: this.state.openRasterData[0],
                 image: imgBuf,
                 validations: null,
                 displayNext: false,
@@ -344,6 +338,8 @@ class App extends Component {
     cornerstone.loadImage(imageId).then(
       function(image) {
         self.displayDICOSimage(image);
+        // TODO. We need to read DICOS data not only from the first DCS file in the ORA, also from the rest of the files included
+        // You have all that data in this.state.openRasterData
         self.loadDICOSdata(image);
       }, function(err) {
       // alert(err);
@@ -381,7 +377,7 @@ class App extends Component {
     this.setState({
       detections: null,
       selection : {
-        detectionsIndex: -1
+        detectionsIndex: Selection.NO_SELECTION
       },
       threatsCount: image.data.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
       algorithm: image.data.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
@@ -442,7 +438,8 @@ class App extends Component {
     // right.
 
     const context = eventData.canvasContext;
-    this.renderDetections(this.state.layers.detections, context);
+    // TODO. We use the new detectionSetList to render the associated bounding boxes
+    this.renderDetections(this.state.detectionSetList, context);
   }
 
 
@@ -453,7 +450,11 @@ class App extends Component {
    * @param  {type} context Rendering context
    * @return {type}         None
    */
+
+   // TODO. Change this method to render the different set of detections read from the ORA file
+
   renderDetections(data, context) {
+    /*
     let B_BOX_COORDS = 4;
     let validations = this.state.validations;
     context.clearRect(0, 0, context.width, context.height);
@@ -512,6 +513,7 @@ class App extends Component {
       context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
 
     }
+    */
   };
 
 
@@ -521,20 +523,24 @@ class App extends Component {
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}  None
    */
+
+  // TODO. Modify this function to use this.state.detectionSetList instead of
+  // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
   hideButtons(e){
+    /*
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
     });
 
     var selectedIndex = this.state.selection.detectionsIndex;
     var detectionList = this.state.layers.detections;
-    if(selectedIndex !== -1){
+    if(selectedIndex !== Selection.NO_SELECTION){
       if(detectionList[selectedIndex]){
         detectionList[selectedIndex].selected = false;
-        this.setState({selection: {detectionsIndex: -1}})
+        this.setState({selection: {detectionsIndex: Selection.NO_SELECTION}})
       }
     }
-
+    */
   }
 
     /**
@@ -543,12 +549,15 @@ class App extends Component {
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
+   // TODO. Modify this function to use this.state.detectionSetList instead of
+   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
   onMouseClicked(e) {
+  /*
     if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
       return;
     }
 
-    var clickedPos = -1;
+    var clickedPos = Selection.NO_SELECTION;
     var selectedIndex = this.state.selection.detectionsIndex;
     var detectionList = this.state.layers.detections;
     var validations = this.state.validations;
@@ -566,7 +575,7 @@ class App extends Component {
       validations[selectedIndex] = feedback;
       this.setState({
         selection: {
-          detectionsIndex: -1
+          detectionsIndex: Selection.NO_SELECTION
         },
         displayButtons: false,
         displayNext: true,
@@ -586,9 +595,9 @@ class App extends Component {
           break;
         }
       }
-      if(clickedPos === -1) {
-        if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
-        selectedIndex = -1;
+      if(clickedPos === Selection.NO_SELECTION) {
+        if (selectedIndex !== Selection.NO_SELECTION) detectionList[selectedIndex].selected = false;
+        selectedIndex = Selection.NO_SELECTION;
         this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
           this.renderButtons(e);
         });
@@ -596,12 +605,12 @@ class App extends Component {
       else {
         if (clickedPos === selectedIndex){
           detectionList[clickedPos].selected = false;
-          selectedIndex = -1;
+          selectedIndex = Selection.NO_SELECTION;
           this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
             this.renderButtons(e);
           });
         } else {
-            if (selectedIndex !== -1) detectionList[selectedIndex].selected = false;
+            if (selectedIndex !== Selection.NO_SELECTION) detectionList[selectedIndex].selected = false;
             detectionList[clickedPos].selected = true;
             selectedIndex = clickedPos;
             this.setState({displayButtons: true, selection: { detectionsIndex: selectedIndex } }, () => {
@@ -610,6 +619,7 @@ class App extends Component {
         }
       }
     }
+    */
   }
 
 
@@ -622,9 +632,13 @@ class App extends Component {
    * such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
-  renderButtons(e) {
-    let className = "";
 
+   // TODO. Modify this function to use this.state.detectionSetList instead of
+   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
+
+  renderButtons(e) {
+    /*
+    let className = "";
     if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
       return;
     }
@@ -644,13 +658,6 @@ class App extends Component {
         var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]});
         topRejectBtn = coordsRejectBtn.y;
       }
-      // TODO. Make sure buttons are inside screen
-      /*
-      if(e.detail.viewport.scale < .7 || e.detail.viewport.scale > 2.5){
-        top = 300;
-        left = 30;
-      }
-      */
     }
     className = className + "feedback-buttons";
     ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
@@ -668,6 +675,7 @@ class App extends Component {
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
     cornerstone.updateImage(this.state.imageViewport, true);
+    */
   }
 
   render() {
