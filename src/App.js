@@ -90,7 +90,7 @@ class App extends Component {
       validations: null, // TODO. This is replaced by the new member detectionSetList
       receiveTime: null,
       displayButtons: false,
-      displayNext: false,
+      displayNext: true,
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -104,6 +104,7 @@ class App extends Component {
     this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
     this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
+    this.getNextAlgorithm = this.getNextAlgorithm.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -124,11 +125,31 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
+    var algoButton = document.getElementById('nextAlg');
+
+    // Should we be able to iterate through all detections
+    algoButton.addEventListener('click', this.getNextAlgorithm);
     this.getNextImage();
   }
 
+  getNextAlgorithm = (event) => {
+    console.log(event);
+    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
+    if(this.state.detectionSetList[currentDetectionSet]){
+      this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
 
-  /**
+      // remove button too iterate through algorithms is there are no more after the current one
+      if(!this.state.detectionSetList[currentDetectionSet + 1]){
+        document.getElementById('nextAlg').style.display = 'none';
+      }
+
+    }
+
+    this.displayDICOSimage();
+  }
+
+
+    /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
    *                           - to the file server directly after
    * @param {type} - None
@@ -208,12 +229,13 @@ class App extends Component {
               this.setState({
                 selectedFile: this.state.openRasterData[0],
                 image: imgBuf,
-                validations: null,
-                displayNext: false,
+                displayNext: true,
                 receiveTime: Date.now()
               });
-              const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
-              this.loadAndViewImage(imageId);
+              this.loadAndViewImage();
+              this.state.currentSelection.detectionSetIndex = 1;
+              this.state.currentSelection.detectionIndex = -1;
+              document.getElementById('nextAlg').style.display = 'block';
             });
           })
         });
@@ -277,7 +299,7 @@ class App extends Component {
         console.log('file server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
         alert('No next image');
-        this.setState({selectedFile: null});
+        this.setState({selectedFile: null, algorithm: this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].algorithm});
       }
     }).catch((err) => {
       console.log(err);
@@ -333,20 +355,23 @@ class App extends Component {
    * @param  {type} imageId id that references the DICOS+TDR file to be loaded
    * @return {type}         None
    */
-  loadAndViewImage(imageId) {
+  loadAndViewImage() {
     const self = this;
-    cornerstone.loadImage(imageId).then(
-      function(image) {
-        self.displayDICOSimage(image);
-        // TODO. We need to read DICOS data not only from the first DCS file in the ORA, also from the rest of the files included
-        // You have all that data in this.state.openRasterData
-        self.loadDICOSdata(image);
-      }, function(err) {
-      // alert(err);
-      console.log(err);
-      // Uncomment if you wish to download the errored file
-      // window.location.replace(URL.createObjectURL(self.state.selectedFile));
-    });
+    self.displayDICOSimage();
+    // all other images do not have pixel data -- cornerstoneJS will fail and send an error
+    // if pixel data is missing in the dicom/dicos file. To parse out only the data,
+    // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
+    // the file data and call loadDICOSdata() to store the data in a DetectionSet
+    for(var i=1; i< self.state.openRasterData.length; i++){
+      const reader = new FileReader();
+
+      reader.addEventListener("loadend", function() {
+        const view = new Uint8Array(reader.result);
+        var dataSet = dicomParser.parseDicom(view);
+        self.loadDICOSdata(dataSet);
+      });
+      reader.readAsArrayBuffer(self.state.openRasterData[i]);
+    }
   }
 
   /**
@@ -355,10 +380,16 @@ class App extends Component {
    * @param  {type} image DICOS+TDR data
    * @return {type}       None
    */
-  displayDICOSimage(image) {
-    const viewport = cornerstone.getDefaultViewportForImage(this.state.imageViewport, image);
-    this.setState({viewport: viewport})
-    cornerstone.displayImage(this.state.imageViewport, image, viewport);
+  displayDICOSimage() {
+    // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
+    const self = this;
+    const pixelData = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.openRasterData[0]);
+    cornerstone.loadImage(pixelData).then(
+        function(image) {
+          const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
+          self.setState({viewport: viewport})
+          cornerstone.displayImage(self.state.imageViewport, image, viewport);
+        });
   }
 
 
@@ -379,13 +410,13 @@ class App extends Component {
       selection : {
         detectionsIndex: Selection.NO_SELECTION
       },
-      threatsCount: image.data.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
-      algorithm: image.data.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
-      type: image.data.string(Dicos.dictionary['DetectorType'].tag),
-      configuration: image.data.string(Dicos.dictionary['DetectorConfiguration'].tag),
-      station: image.data.string(Dicos.dictionary['StationName'].tag),
-      series: image.data.string(Dicos.dictionary['SeriesDescription'].tag),
-      study: image.data.string(Dicos.dictionary['StudyDescription'].tag),
+      threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
+      algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
+      type: image.string(Dicos.dictionary['DetectorType'].tag),
+      configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
+      station: image.string(Dicos.dictionary['StationName'].tag),
+      series: image.string(Dicos.dictionary['SeriesDescription'].tag),
+      study: image.string(Dicos.dictionary['StudyDescription'].tag),
       time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
       date: mm + '/' + dd + '/' + yyyy
     });
@@ -398,26 +429,32 @@ class App extends Component {
       return;
     }
     // Threat Sequence information
-    const threatSequence = image.data.elements.x40101011;
+    const threatSequence = image.elements.x40101011;
     if (threatSequence == null){
       console.log("No Threat Sequence");
       return;
     }
 
     var detectionList = new Array(this.state.threatsCount);
-    var validations = new Array(this.state.threatsCount);
+
+    const detectionSet = new DetectionSet();
+    console.log(this.state.threatsCount);
+
+    // for every threat found, create a new Detection object and store all Detection
+    // objects in s DetectionSet object
     for (var i = 0; i < this.state.threatsCount; i++) {
       const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[i]);
       const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
       const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[i]));
 
       detectionList[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
-      validations[i] = 0;
-      this.setState({
-        detections: detectionList,
-        validations: validations
-      });
     }
+    // detectionSet.detections = detectionList;
+    detectionSet.algorithm = this.state.algorithm;
+    detectionSet.detections = detectionList;
+    // set i to the currently selected index set during loadandviewimage for loop
+    this.state.detectionSetList[i] = detectionSet;
+    console.log(this.state.detectionSetList);
   }
 
 
@@ -429,6 +466,7 @@ class App extends Component {
    * @return {type}   None
    */
   onImageRendered(e) {
+    console.log("image rendered!")
     const eventData = e.detail;
     this.setState({zoomLevel: eventData.viewport.scale.toFixed(2)});
     // set the canvas context to the image coordinate system
@@ -454,26 +492,23 @@ class App extends Component {
    // TODO. Change this method to render the different set of detections read from the ORA file
 
   renderDetections(data, context) {
-    /*
+    console.log(data);
     let B_BOX_COORDS = 4;
-    let validations = this.state.validations;
+    let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
+    console.log(currDataSetIndex);
+    let currDataIndex = this.state.currentSelection.detectionIndex;
     context.clearRect(0, 0, context.width, context.height);
+
     if (data === null || data.length === 0) {
       return;
     }
-    for (var i = 0; i < data.length; i++){
-      const detectionData = data[i];
+
+    for(var j=0; j<data[currDataSetIndex].detections.length; j++){
+      const detectionData = data[currDataSetIndex].detections[j];
+
       if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
       let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
-
-      // We set the rendering properties
-      if(validations[i] === "CONFIRM"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
-      }
-      else if(validations[i] === "REJECT"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
-      }
 
       context.font = LABEL_FONT;
       context.strokeStyle = detectionColor;
@@ -488,7 +523,7 @@ class App extends Component {
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
 
       // Line rendering
-      if (i === this.state.selection.detectionsIndex) {
+      if (j === this.state.selection.detectionsIndex) {
         const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)
@@ -511,9 +546,7 @@ class App extends Component {
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
       context.fillStyle = LABEL_TEXT_COLOR;
       context.fillText(detectionLabel, boundingBoxCoords[0] + LABEL_PADDING, boundingBoxCoords[1] - LABEL_PADDING);
-
     }
-    */
   };
 
 
@@ -712,6 +745,7 @@ class App extends Component {
             seriesType={this.state.series}
             studyType={this.state.study}
           />
+          <div id="algorithm-outputs"> </div>
           <div id="feedback-confirm"> </div>
           <div id="feedback-reject"> </div>
         </div>
