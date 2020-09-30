@@ -70,7 +70,8 @@ class MetaData extends Component {
                    <span style={this.state.spanHeadStyle}>Study:</span>
                    <span style={this.state.spanBodyStyle}> {this.props.studyType}</span>
                 </p>
-                <button style={{cursor:'pointer', fontWeight: 'bold', width:'100%'}} id="nextAlg" type="button">NEXT ALGORITHM ></button>
+                <button style={{cursor:'pointer', fontWeight: 'bold', width:'30%', float:'right'}} id="nextAlg" type="button">NEXT &gt;</button>
+                <button style={{cursor:'pointer', fontWeight: 'bold', width:'30%', float:'left'}} id="prevAlg" type="button"> &lt; PREV</button>
             </div>
         );
     }

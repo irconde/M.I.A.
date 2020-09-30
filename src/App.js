@@ -87,7 +87,7 @@ class App extends Component {
       image: null,
       detectionSetList: [], // TODO. Use the new DetectionSet class to save the information regarding the detections coming from the several used algorithms
       currentSelection: new Selection(), // TODO. Use the new selection to keep track of the detection selected and its corresponding set.
-      validations: null, // TODO. This is replaced by the new member detectionSetList
+      validations: [], // TODO. This is replaced by the new member detectionSetList
       receiveTime: null,
       displayButtons: false,
       displayNext: true,
@@ -105,6 +105,7 @@ class App extends Component {
     this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
     this.getNextAlgorithm = this.getNextAlgorithm.bind(this);
+    this.getPrevAlgorithm = this.getPrevAlgorithm.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -125,28 +126,61 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
-    var algoButton = document.getElementById('nextAlg');
+    var nextButton = document.getElementById('nextAlg');
+    var prevButton = document.getElementById('prevAlg');
 
     // Should we be able to iterate through all detections
-    algoButton.addEventListener('click', this.getNextAlgorithm);
+    nextButton.addEventListener('click', this.getNextAlgorithm);
+    prevButton.addEventListener('click', this.getPrevAlgorithm);
     this.getNextImage();
   }
 
-  getNextAlgorithm = (event) => {
-    console.log(event);
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
-    if(this.state.detectionSetList[currentDetectionSet]){
-      this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
 
-      // remove button too iterate through algorithms is there are no more after the current one
-      if(!this.state.detectionSetList[currentDetectionSet + 1]){
+  getNextAlgorithm = (event) => {
+    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
+    // this.state.validations[currentDetectionSet] = [];
+
+      this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+      // remove button too iterate through algorithms if there are no more after the current one
+      if(!this.state.validations[currentDetectionSet + 1]){
         document.getElementById('nextAlg').style.display = 'none';
       }
-
-    }
+      else {
+        document.getElementById('nextAlg').style.display = 'block';
+      }
+      if(!this.state.validations[currentDetectionSet - 1]){
+        document.getElementById('prevAlg').style.display = 'none';
+      }
+      else {
+        console.log("displaying previous button");
+        document.getElementById('prevAlg').style.display = 'block';
+      }
 
     this.displayDICOSimage();
   }
+
+  getPrevAlgorithm = (event) => {
+    let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
+    // this.state.validations[currentDetectionSet] = [];
+
+    this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+    // remove button too iterate through algorithms if there are no more after the current one
+    if(!this.state.validations[currentDetectionSet - 1]){
+      document.getElementById('prevAlg').style.display = 'none';
+    }
+    else {
+      document.getElementById('prevAlg').style.display = 'block';
+    }
+
+    if(!this.state.validations[currentDetectionSet + 1]){
+      document.getElementById('nextAlg').style.display = 'none';
+    }
+    else {
+      document.getElementById('nextAlg').style.display = 'block';
+    }
+    this.displayDICOSimage();
+  }
+
 
 
     /**
@@ -193,6 +227,7 @@ class App extends Component {
    * @return {type} - None
    */
   getNextImage(){
+    console.log("get next image");
     axios.get(`${FILE_SERVER}/next`, {
       headers: {
         'Content-Type': 'application/json',
@@ -230,12 +265,12 @@ class App extends Component {
                 selectedFile: this.state.openRasterData[0],
                 image: imgBuf,
                 displayNext: true,
-                receiveTime: Date.now()
+                receiveTime: Date.now(),
               });
-              this.loadAndViewImage();
-              this.state.currentSelection.detectionSetIndex = 1;
-              this.state.currentSelection.detectionIndex = -1;
-              document.getElementById('nextAlg').style.display = 'block';
+
+              this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
+                this.loadAndViewImage();
+              });
             });
           })
         });
@@ -254,11 +289,13 @@ class App extends Component {
    */
   validationCompleted(validationList) {
     var validationsComplete = true;
-    if (validationList === null) {
+    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
+
+    if (!validationList[detectionSetIndex]) {
       return validationsComplete;
     }
-    for( var i=0; i < validationList.length; i++){
-      if (validationList[i] === 0) {
+    for( var i=0; i < validationList[detectionSetIndex].length; i++){
+      if (validationList[detectionSetIndex][i] === 0) {
         validationsComplete = false;
         break;
       }
@@ -276,18 +313,34 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
+        console.log("image removed");
         let validationCompleted = this.validationCompleted(this.state.validations);
-        let validationList = this.state.validations;
-        let image = this.state.image;
+        let image = this.state.openRasterData[0];
+
         /*
         *  Third parameter is the "abort flag": True / False
         *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
         *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
         */
-        this.setState({
-          selectedFile: Dicos.dataToBlob(validationList, image, !validationCompleted)
-        })
+        for(var i=1; i<this.state.openRasterData; i++){
+          let imageData = this.state.openRasterData[i];
+          let validationList = this.state.validations[i];
+
+          this.setState({
+            selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
+            // detectionSetList: [],
+            algorithm: null
+          })
+        }
+
+        // this.setState({
+        //   selectedFile: Dicos.dataToBlob(validationList, image, Date.now(), !validationCompleted),
+        //   // detectionSetList: [],
+        //   algorithm: null
+        // })
+
         this.sendImageToCommandServer(this.state.selectedFile).then((res) => {
+          console.log("send to command server");
           this.hideButtons(e);
           this.setState({
             selectedFile: null,
@@ -299,7 +352,7 @@ class App extends Component {
         console.log('file server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
         alert('No next image');
-        this.setState({selectedFile: null, algorithm: this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].algorithm});
+        this.setState({selectedFile: null});
       }
     }).catch((err) => {
       console.log(err);
@@ -405,10 +458,15 @@ class App extends Component {
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
 
+    for(var i=0; i<this.state.openRasterData.length-1;i++){
+      this.state.validations[i] = [0];
+    }
+
     this.setState({
       detections: null,
-      selection : {
-        detectionsIndex: Selection.NO_SELECTION
+      currentSelection : {
+        detectionIndex: Selection.NO_SELECTION,
+        detectionSetIndex: this.state.currentSelection.detectionSetIndex
       },
       threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
       algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
@@ -435,10 +493,8 @@ class App extends Component {
       return;
     }
 
-    var detectionList = new Array(this.state.threatsCount);
-
     const detectionSet = new DetectionSet();
-    console.log(this.state.threatsCount);
+    detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
 
     // for every threat found, create a new Detection object and store all Detection
     // objects in s DetectionSet object
@@ -447,14 +503,24 @@ class App extends Component {
       const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
       const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[i]));
 
-      detectionList[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+      detectionSet.detections[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+      this.state.detectionSetList[i] = detectionSet;
     }
-    // detectionSet.detections = detectionList;
-    detectionSet.algorithm = this.state.algorithm;
-    detectionSet.detections = detectionList;
-    // set i to the currently selected index set during loadandviewimage for loop
-    this.state.detectionSetList[i] = detectionSet;
-    console.log(this.state.detectionSetList);
+
+    if(this.state.validations[this.state.currentSelection.detectionSetIndex + 1]){
+      document.getElementById('nextAlg').style.display = 'block';
+    }
+    else {
+      document.getElementById('nextAlg').style.display = 'none';
+    }
+
+    if(this.state.validations[this.state.currentSelection.detectionSetIndex - 1]){
+      document.getElementById('prevAlg').style.display = 'block';
+    }
+    else {
+      document.getElementById('prevAlg').style.display = 'none';
+    }
+
   }
 
 
@@ -474,7 +540,6 @@ class App extends Component {
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
-
     const context = eventData.canvasContext;
     // TODO. We use the new detectionSetList to render the associated bounding boxes
     this.renderDetections(this.state.detectionSetList, context);
@@ -492,23 +557,29 @@ class App extends Component {
    // TODO. Change this method to render the different set of detections read from the ORA file
 
   renderDetections(data, context) {
-    console.log(data);
+    let validations = this.state.validations[this.state.currentSelection.detectionSetIndex];
     let B_BOX_COORDS = 4;
     let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
-    console.log(currDataSetIndex);
     let currDataIndex = this.state.currentSelection.detectionIndex;
     context.clearRect(0, 0, context.width, context.height);
 
     if (data === null || data.length === 0) {
       return;
     }
-
     for(var j=0; j<data[currDataSetIndex].detections.length; j++){
       const detectionData = data[currDataSetIndex].detections[j];
 
       if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
       let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
+
+      // We set the rendering properties
+      if(validations[j] === "CONFIRM"){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
+      }
+      else if(validations[j] === "REJECT"){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+      }
 
       context.font = LABEL_FONT;
       context.strokeStyle = detectionColor;
@@ -523,7 +594,7 @@ class App extends Component {
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
 
       // Line rendering
-      if (j === this.state.selection.detectionsIndex) {
+      if (j === this.state.currentSelection.detectionIndex) {
         const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)
@@ -558,22 +629,22 @@ class App extends Component {
    */
 
   // TODO. Modify this function to use this.state.detectionSetList instead of
-  // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
+  // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
   hideButtons(e){
-    /*
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
     });
 
-    var selectedIndex = this.state.selection.detectionsIndex;
-    var detectionList = this.state.layers.detections;
+    var selectedIndex = this.state.currentSelection.detectionIndex;
+    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
+    var detectionList = this.state.detectionSetList;
+
     if(selectedIndex !== Selection.NO_SELECTION){
-      if(detectionList[selectedIndex]){
-        detectionList[selectedIndex].selected = false;
-        this.setState({selection: {detectionsIndex: Selection.NO_SELECTION}})
+      if(detectionList[detectionSetIndex].detections[selectedIndex]){
+        detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+        this.setState({currentSelection: {detectionIndex: Selection.NO_SELECTION, detectionSetIndex: detectionSetIndex}})
       }
     }
-    */
   }
 
     /**
@@ -583,17 +654,17 @@ class App extends Component {
    * @return {type}   None
    */
    // TODO. Modify this function to use this.state.detectionSetList instead of
-   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
+   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
   onMouseClicked(e) {
-  /*
-    if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
+    if (this.state.detectionsSetList === null || this.state.detectionSetList.length === 0){
       return;
     }
 
     var clickedPos = Selection.NO_SELECTION;
-    var selectedIndex = this.state.selection.detectionsIndex;
-    var detectionList = this.state.layers.detections;
-    var validations = this.state.validations;
+    var selectedIndex = this.state.currentSelection.detectionIndex;
+    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
+    var detectionList = this.state.detectionSetList;
+    var validations = this.state.validations[detectionSetIndex];
     let feedback = "";
 
     // User is submitting feedback through confirm or reject buttons
@@ -604,15 +675,16 @@ class App extends Component {
       if(e.currentTarget.id === "reject"){
         feedback = "REJECT";
       }
-      detectionList[selectedIndex].selected = false;
-      validations[selectedIndex] = feedback;
+      detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+      this.state.validations[detectionSetIndex][selectedIndex] = feedback;
+
       this.setState({
-        selection: {
-          detectionsIndex: Selection.NO_SELECTION
+        currentSelection: {
+          detectionIndex: Selection.NO_SELECTION,
+          detectionSetIndex: this.state.currentSelection.detectionSetIndex
         },
         displayButtons: false,
         displayNext: true,
-        validations:validations
       }, () => {
         this.renderButtons(e);
       });
@@ -622,37 +694,37 @@ class App extends Component {
     else{
       const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.page.x, y:e.detail.currentPoints.page.y});
 
-      for (var i = 0; i < detectionList.length; i++) {
-        if(Utils.pointInRect(mousePos, detectionList[i].boundingBox)){
-          clickedPos = i;
-          break;
+        for (var j = 0; j < detectionList[detectionSetIndex].detections.length; j++){
+          if(Utils.pointInRect(mousePos, detectionList[detectionSetIndex].detections[j].boundingBox)){
+            clickedPos = j;
+            break;
         }
-      }
+        }
       if(clickedPos === Selection.NO_SELECTION) {
-        if (selectedIndex !== Selection.NO_SELECTION) detectionList[selectedIndex].selected = false;
+        if (selectedIndex !== Selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
         selectedIndex = Selection.NO_SELECTION;
-        this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
+        this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
           this.renderButtons(e);
         });
       }
       else {
         if (clickedPos === selectedIndex){
-          detectionList[clickedPos].selected = false;
+          detectionList[detectionSetIndex].detections[clickedPos].selected = false;
           selectedIndex = Selection.NO_SELECTION;
-          this.setState({ displayButtons: false,  selection: { detectionsIndex: selectedIndex } }, () => {
+          this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
             this.renderButtons(e);
           });
         } else {
-            if (selectedIndex !== Selection.NO_SELECTION) detectionList[selectedIndex].selected = false;
-            detectionList[clickedPos].selected = true;
+            if (selectedIndex !== Selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+            detectionList[detectionSetIndex].detections[clickedPos].selected = true;
             selectedIndex = clickedPos;
-            this.setState({displayButtons: true, selection: { detectionsIndex: selectedIndex } }, () => {
+            this.setState({displayButtons: true, currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
               this.renderButtons(e);
             });
         }
       }
     }
-    */
+
   }
 
 
@@ -667,12 +739,11 @@ class App extends Component {
    */
 
    // TODO. Modify this function to use this.state.detectionSetList instead of
-   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionsIndex
+   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
 
   renderButtons(e) {
-    /*
     let className = "";
-    if (this.state.layers.detections === null || this.state.layers.detections.length === 0){
+    if (this.state.detectionsSetList === null || this.state.detectionsSetList === 0){
       return;
     }
 
@@ -684,7 +755,7 @@ class App extends Component {
       if(className !== "hidden"){
         const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
         const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
-        const boundingBoxCoords = this.state.layers.detections[this.state.selection.detectionsIndex].boundingBox;
+        const boundingBoxCoords = this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].detections[this.state.currentSelection.detectionIndex].boundingBox;
         var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
@@ -708,7 +779,6 @@ class App extends Component {
       }
     }, "REJECT"), document.getElementById('feedback-reject'));
     cornerstone.updateImage(this.state.imageViewport, true);
-    */
   }
 
   render() {
