@@ -90,7 +90,7 @@ class App extends Component {
       validations: [],
       receiveTime: null,
       displayButtons: false,
-      displayNext: true,
+      displayNext: false,
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -108,6 +108,7 @@ class App extends Component {
     this.getPrevAlgorithm = this.getPrevAlgorithm.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.loadDICOSdata = this.loadDICOSdata.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
@@ -163,19 +164,7 @@ class App extends Component {
 
     this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
     // remove button too iterate through algorithms if there are no more after the current one
-    if(!this.state.validations[currentDetectionSet - 1]){
-      document.getElementById('prevAlg').style.display = 'none';
-    }
-    else {
-      document.getElementById('prevAlg').style.display = 'block';
-    }
-
-    if(!this.state.validations[currentDetectionSet + 1]){
-      document.getElementById('nextAlg').style.display = 'none';
-    }
-    else {
-      document.getElementById('nextAlg').style.display = 'block';
-    }
+    this.showAlgButtons();
     this.displayDICOSimage();
   }
 
@@ -261,7 +250,7 @@ class App extends Component {
               this.setState({
                 selectedFile: this.state.openRasterData[0],
                 image: imgBuf,
-                displayNext: true,
+                displayNext: false,
                 receiveTime: Date.now(),
               });
 
@@ -275,6 +264,29 @@ class App extends Component {
     }).catch((err) => {
       console.log(err);
     });
+  }
+
+
+  /**
+   * * showAlgButtons - Method that indicates whether to display the buttons to iterate through algorithms
+   *
+   * @param  none
+   * @return none
+   */
+  showAlgButtons() {
+    if(this.state.detectionSetList[this.state.currentSelection.detectionSetIndex + 1]){
+      document.getElementById('nextAlg').style.display = 'block';
+    }
+    else {
+      document.getElementById('nextAlg').style.display = 'none';
+    }
+
+    if(this.state.detectionSetList[this.state.currentSelection.detectionSetIndex - 1]){
+      document.getElementById('prevAlg').style.display = 'block';
+    }
+    else {
+      document.getElementById('prevAlg').style.display = 'none';
+    }
   }
 
   /**
@@ -398,21 +410,18 @@ class App extends Component {
    */
   loadAndViewImage() {
     const self = this;
+    const dataImages = [];
     self.displayDICOSimage();
     // all other images do not have pixel data -- cornerstoneJS will fail and send an error
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
     for(var i=1; i< self.state.openRasterData.length; i++){
-      const reader = new FileReader();
-
-      reader.addEventListener("loadend", function() {
-        const view = new Uint8Array(reader.result);
-        var dataSet = dicomParser.parseDicom(view);
-        self.loadDICOSdata(dataSet);
-      });
-      reader.readAsArrayBuffer(self.state.openRasterData[i]);
+      dataImages[i-1] = self.state.openRasterData[i];
     }
+    self.loadDICOSdata(dataImages);
+
+    // this.state.currentSelection.detectionSetIndex=0;
   }
 
   /**
@@ -437,80 +446,93 @@ class App extends Component {
   /**
    * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
    *
-   * @param  {type} image DICOS+TDR data
+   * @param  {type} images list of DICOS+TDR data from each algorithm
    * @return {type}       None
    */
-  loadDICOSdata(image) {
+  loadDICOSdata(images) {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
+    let all_detections = [];
 
-    for(var i=0; i<this.state.openRasterData.length-1;i++){
+    for(var i=0; i<images.length;i++){
+      if(i===0){
+        const reader = new FileReader();
+        let self = this;
+
+        reader.addEventListener("loadend", function() {
+          const view = new Uint8Array(reader.result);
+          var image = dicomParser.parseDicom(view);
+
+          self.setState({
+            detections: null,
+            currentSelection : {
+              detectionIndex: Selection.NO_SELECTION,
+              detectionSetIndex: 0
+            },
+            threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
+            algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
+            type: image.string(Dicos.dictionary['DetectorType'].tag),
+            configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
+            station: image.string(Dicos.dictionary['StationName'].tag),
+            series: image.string(Dicos.dictionary['SeriesDescription'].tag),
+            study: image.string(Dicos.dictionary['StudyDescription'].tag),
+            time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
+            date: mm + '/' + dd + '/' + yyyy
+          });
+        });
+        reader.readAsArrayBuffer(images[i]);
+      }
+
+      const detectionSet = new DetectionSet();
       this.state.validations[i] = [0];
-    }
 
-    this.setState({
-      detections: null,
-      currentSelection : {
-        detectionIndex: Selection.NO_SELECTION,
-        detectionSetIndex: this.state.currentSelection.detectionSetIndex
-      },
-      threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
-      algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
-      type: image.string(Dicos.dictionary['DetectorType'].tag),
-      configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
-      station: image.string(Dicos.dictionary['StationName'].tag),
-      series: image.string(Dicos.dictionary['SeriesDescription'].tag),
-      study: image.string(Dicos.dictionary['StudyDescription'].tag),
-      time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
-      date: mm + '/' + dd + '/' + yyyy
-    });
+      const reader = new FileReader();
 
-    if (this.state.threatsCount === 0 || this.state.threatsCount === undefined) {
-      console.log("No Potential Threat Objects detected");
-      this.setState({
-        displayNext: true
+      reader.addEventListener("loadend", function() {
+        const view = new Uint8Array(reader.result);
+        var image = dicomParser.parseDicom(view);
+
+        let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
+
+        detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+
+        // Threat Sequence information
+        const threatSequence = image.elements.x40101011;
+        if (threatSequence == null){
+          console.log("No Threat Sequence");
+          return;
+        }
+
+        if (image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === 0 || image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === undefined) {
+          console.log("No Potential Threat Objects detected");
+          this.setState({
+            displayNext: true
+          });
+          return;
+        }
+
+        // for every threat found, create a new Detection object and store all Detection
+        // objects in s DetectionSet object
+        for (var j = 0; j < threatsCount; j++) {
+          const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
+          const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
+          const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
+
+          detectionSet.detections[j] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+          // all_detections[i] = detectionSet;
+        }
       });
-      return;
-    }
-    // Threat Sequence information
-    const threatSequence = image.elements.x40101011;
-    if (threatSequence == null){
-      console.log("No Threat Sequence");
-      return;
-    }
+      reader.readAsArrayBuffer(images[i]);
+      all_detections[i] = detectionSet;
 
-    const detectionSet = new DetectionSet();
-    detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+    }
+    this.state.detectionSetList = all_detections;
 
-    // for every threat found, create a new Detection object and store all Detection
-    // objects in s DetectionSet object
-    for (var i = 0; i < this.state.threatsCount; i++) {
-      const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[i]);
-      const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
-      const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[i]));
-
-      detectionSet.detections[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
-      this.state.detectionSetList[i] = detectionSet;
-    }
-
-    if(this.state.validations[this.state.currentSelection.detectionSetIndex + 1]){
-      document.getElementById('nextAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('nextAlg').style.display = 'none';
-    }
-
-    if(this.state.validations[this.state.currentSelection.detectionSetIndex - 1]){
-      document.getElementById('prevAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('prevAlg').style.display = 'none';
-    }
+    this.showAlgButtons();
 
   }
-
 
   /**
    * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
