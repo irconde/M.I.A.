@@ -98,63 +98,11 @@ export default class Utils {
   }
 
   /**
-   * base64ToOpenRaster - Takes in a base64 encoded string and returns an object
-   *                      that contains the OpenRaster data.
-   * 
-   * @param {type} base64 - What string we are converting
-   * 
-   * @returns {type} object
-   */
-  static async base64ToOpenRaster(base64, myOra){
-    const myZip = new JSZip();
-    var layerOrder = [];
-    const promises = [];
-    // TODO:
-    // Having issues returning the myOra file once these async calls are finished
-    await myZip.loadAsync(base64, { base64: true }).then(async () => {
-      console.log('inside initial zip async load of b64 data');
-      await myZip.file('stack.xml').async('string').then( async (stackFile) => {
-        console.log('after xml has been loaded');
-        layerOrder = this.getLayerOrder(stackFile);
-        console.log('after find layer order');
-        await layerOrder.forEach((imagePath, index) => {
-          console.log('inside layer order for each');
-          myZip.file(imagePath).async('uint8array', (metadata) => {
-              console.log("progression: " + metadata.percent.toFixed(2) + " %");
-              // if (metadata.percent === 100){
-              //   console.log('100% - Finished loading image');
-              // }
-            }).then((imageData) => {
-              // promises.push(imageData);
-              console.log(`before adding image layers to myOra --- on index: ${index}`);
-              myOra.layers.push(new Blob(imageData, { type: 'image/dcs' }));
-              if (index === 0){
-                myOra.imageBuffer = imageData;
-              }
-              console.log(`after adding image layers to myOra --- on index: ${index}`);
-          })
-        })
-      })
-    });
-    // This shows all the image data in the promises array
-    // console.log(promises);
-    // Promise.all(promises).then((data) => {
-    //   // However, here our data here is null
-    //   console.log(data);
-    //   myOra.layers.push(new Blob(data, { type: 'image/dcs' }));
-    // }).catch((e) => {
-    //   console.log(e);
-    // })
-    
-    return myOra;
-  }
-
-  /**
    * validateRegExp - Takes in the string(path) we are going to test the regular expression(regExp) with
-   * 
+   *
    * @param {type} path - What we are testing on
    * @param {type} regExp - The regular expression
-   * 
+   *
    * @return {type} true/false
    */
   static validateRegExp(path, regExp){
@@ -165,14 +113,13 @@ export default class Utils {
     }
   }
 
-
   /**
    * getLayerOrder - This function takes in the stack.xml file to learn the order of the
    *                 DICOS-TDR images. It then returns an array of the order of the stack
    *                 file, which the first layer is always the pixel data.
-   * 
-   * @param {type} stackFile 
-   * 
+   *
+   * @param {type} stackFile
+   *
    * @returns {type} array
    */
   static getLayerOrder(stackFile){

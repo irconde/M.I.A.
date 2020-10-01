@@ -184,13 +184,11 @@ export default class Dicos {
         copiedData.abortReason = 'NOT_REVIEWED';
         copiedData.AdditionalScreeningPerformed = "NO";
       }
-
       else {
         copiedData.abortFlag = 'SUCCESS';
         copiedData.AdditionalScreeningPerformed = "YES";
         copiedData.AdditionalInspectionSelectionCriteria = "RANDOM";
 
-        // TODO: Rewrite/modify this when we receive test files with multiple detections
         for(var i = 0; i<validations.length; i++){
           copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
           copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;

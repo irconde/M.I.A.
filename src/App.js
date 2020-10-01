@@ -85,9 +85,9 @@ class App extends Component {
       time: null,
       openRasterData: [],
       image: null,
-      detectionSetList: [], // TODO. Use the new DetectionSet class to save the information regarding the detections coming from the several used algorithms
-      currentSelection: new Selection(), // TODO. Use the new selection to keep track of the detection selected and its corresponding set.
-      validations: [], // TODO. This is replaced by the new member detectionSetList
+      detectionSetList: [],
+      currentSelection: new Selection(),
+      validations: [],
       receiveTime: null,
       displayButtons: false,
       displayNext: true,
@@ -152,7 +152,6 @@ class App extends Component {
         document.getElementById('prevAlg').style.display = 'none';
       }
       else {
-        console.log("displaying previous button");
         document.getElementById('prevAlg').style.display = 'block';
       }
 
@@ -161,7 +160,6 @@ class App extends Component {
 
   getPrevAlgorithm = (event) => {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
-    // this.state.validations[currentDetectionSet] = [];
 
     this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
     // remove button too iterate through algorithms if there are no more after the current one
@@ -227,7 +225,6 @@ class App extends Component {
    * @return {type} - None
    */
   getNextImage(){
-    console.log("get next image");
     axios.get(`${FILE_SERVER}/next`, {
       headers: {
         'Content-Type': 'application/json',
@@ -236,7 +233,7 @@ class App extends Component {
     }).then(async (res) => {
       // We get our latest file upon the main component mounting
       if (res.data.response === 'error '){
-        console.log('error getting next image');
+        console.log('Error getting next image');
       } else if (res.data.response === 'no-next-image') {
         console.log('No next image to display');
         this.setState({selectedFile: null});
@@ -313,7 +310,6 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
-        console.log("image removed");
         let validationCompleted = this.validationCompleted(this.state.validations);
         let image = this.state.openRasterData[0];
 
@@ -328,19 +324,11 @@ class App extends Component {
 
           this.setState({
             selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
-            // detectionSetList: [],
             algorithm: null
           })
         }
 
-        // this.setState({
-        //   selectedFile: Dicos.dataToBlob(validationList, image, Date.now(), !validationCompleted),
-        //   // detectionSetList: [],
-        //   algorithm: null
-        // })
-
         this.sendImageToCommandServer(this.state.selectedFile).then((res) => {
-          console.log("send to command server");
           this.hideButtons(e);
           this.setState({
             selectedFile: null,
@@ -349,7 +337,7 @@ class App extends Component {
           this.getNextImage();
         });
       } else if (res.data.confirm === 'image-not-removed') {
-        console.log('file server couldnt remove the next image');
+        console.log('File server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
         alert('No next image');
         this.setState({selectedFile: null});
@@ -532,7 +520,6 @@ class App extends Component {
    * @return {type}   None
    */
   onImageRendered(e) {
-    console.log("image rendered!")
     const eventData = e.detail;
     this.setState({zoomLevel: eventData.viewport.scale.toFixed(2)});
     // set the canvas context to the image coordinate system
@@ -541,7 +528,6 @@ class App extends Component {
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
     const context = eventData.canvasContext;
-    // TODO. We use the new detectionSetList to render the associated bounding boxes
     this.renderDetections(this.state.detectionSetList, context);
   }
 
@@ -553,9 +539,6 @@ class App extends Component {
    * @param  {type} context Rendering context
    * @return {type}         None
    */
-
-   // TODO. Change this method to render the different set of detections read from the ORA file
-
   renderDetections(data, context) {
     let validations = this.state.validations[this.state.currentSelection.detectionSetIndex];
     let B_BOX_COORDS = 4;
@@ -586,12 +569,14 @@ class App extends Component {
       context.fillStyle = detectionColor;
       context.lineWidth = DETECTION_BORDER;
       const boundingBoxCoords = detectionData.boundingBox;
+      const boundingBoxWidth = Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]);
+      const boundingBoxHeight = Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]);
+      if (boundingBoxWidth === 0 || boundingBoxHeight === 0) continue;
       const detectionLabel = Utils.formatDetectionLabel(detectionData.class, detectionData.confidence);
       const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
-
       context.fillStyle = detectionColor;
       context.strokeStyle = detectionColor;
-      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]), Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]));
+      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
 
       // Line rendering
       if (j === this.state.currentSelection.detectionIndex) {
@@ -627,9 +612,6 @@ class App extends Component {
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}  None
    */
-
-  // TODO. Modify this function to use this.state.detectionSetList instead of
-  // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
   hideButtons(e){
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
@@ -653,8 +635,6 @@ class App extends Component {
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
-   // TODO. Modify this function to use this.state.detectionSetList instead of
-   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
   onMouseClicked(e) {
     if (this.state.detectionsSetList === null || this.state.detectionSetList.length === 0){
       return;
@@ -737,10 +717,6 @@ class App extends Component {
    * such as the mouse cursor position, mouse button clicked, etc.
    * @return {type}   None
    */
-
-   // TODO. Modify this function to use this.state.detectionSetList instead of
-   // this.state.layers.detections and this.state.currentSelection instead of this.state.selection.detectionIndex
-
   renderButtons(e) {
     let className = "";
     if (this.state.detectionsSetList === null || this.state.detectionsSetList === 0){
