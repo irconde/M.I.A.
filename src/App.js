@@ -323,6 +323,7 @@ class App extends Component {
         let image = this.state.openRasterData[0];
 
         const stackXML = document.implementation.createDocument("", "", null);
+        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
         const imageElem = stackXML.createElement('image');
         const stackElem = stackXML.createElement('stack');
         
@@ -351,9 +352,9 @@ class App extends Component {
         }
         imageElem.appendChild(stackElem);
         stackXML.appendChild(imageElem);
-        newOra.file('stack.xml', new Blob([new XMLSerializer().serializeToString(stackXML)], { type: 'application/xml '}));
-        newOra.generateAsync({ type: 'blob' }).then((blob) => {
-          this.sendImageToCommandServer(blob).then((res) => {
+        newOra.file('stack.xml', new Blob([prolog + new XMLSerializer().serializeToString(stackXML)], { type: 'application/xml '}));
+        newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
+          this.sendImageToCommandServer(oraBlob).then((res) => {
             this.hideButtons(e);
             this.setState({
               selectedFile: null,
