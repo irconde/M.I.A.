@@ -19,6 +19,7 @@ import TopBar from './components/TopBar';
 import JSZip from "jszip";
 import DetectionSet from "./DetectionSet.js";
 import Selection from "./Selection.js";
+import NoFileSign from "./components/NoFileSign.js"
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -848,6 +849,7 @@ class App extends Component {
           <div id="feedback-reject"> </div>
         </div>
         <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+        <NoFileSign isVisible={!this.state.fileInQueue} />
       </div>
     );
   }
