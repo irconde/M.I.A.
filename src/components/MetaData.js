@@ -32,13 +32,14 @@ class MetaData extends Component {
                 textAlign: 'left',
                 color: '#ffffff',
                 padding: '0.8rem 0.8rem',
-                width: 'auto'
+                width: 'auto',
             }
         }
 
     }
 
     static propTypes = {
+        isVisible: PropTypes.bool,
         algorithmType: PropTypes.string,
         detectorType: PropTypes.string,
         detectorConfigType: PropTypes.string,
@@ -47,6 +48,7 @@ class MetaData extends Component {
     }
 
     render() {
+        if (!this.props.isVisible) return (<div></div>);
         return (
             <div style={this.state.divStyle}>
                <p style={this.state.paragraphStyle}>

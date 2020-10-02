@@ -91,6 +91,7 @@ class App extends Component {
       receiveTime: null,
       displayButtons: false,
       displayNext: false,
+      fileInQueue: false,
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -127,50 +128,35 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
-    var nextButton = document.getElementById('nextAlg');
-    var prevButton = document.getElementById('prevAlg');
-
-    // Should we be able to iterate through all detections
-    nextButton.addEventListener('click', this.getNextAlgorithm);
-    prevButton.addEventListener('click', this.getPrevAlgorithm);
     this.getNextImage();
   }
 
+  initAlgorithmNavButtons() {
+    var nextButton = document.getElementById('nextAlg');
+    var prevButton = document.getElementById('prevAlg');
+    if (nextButton && prevButton) {
+      nextButton.addEventListener('click', this.getNextAlgorithm);
+      prevButton.addEventListener('click', this.getPrevAlgorithm);
+    }
+  }
 
   getNextAlgorithm = (event) => {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
-    // this.state.validations[currentDetectionSet] = [];
-
-      this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
-      // remove button too iterate through algorithms if there are no more after the current one
-      if(!this.state.validations[currentDetectionSet + 1]){
-        document.getElementById('nextAlg').style.display = 'none';
-      }
-      else {
-        document.getElementById('nextAlg').style.display = 'block';
-      }
-      if(!this.state.validations[currentDetectionSet - 1]){
-        document.getElementById('prevAlg').style.display = 'none';
-      }
-      else {
-        document.getElementById('prevAlg').style.display = 'block';
-      }
-
+    this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+    // remove button to iterate through algorithms if there are no more after the current one
+    this.showAlgButtons();
     this.displayDICOSimage();
   }
 
   getPrevAlgorithm = (event) => {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
-
     this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
     // remove button too iterate through algorithms if there are no more after the current one
     this.showAlgButtons();
     this.displayDICOSimage();
   }
 
-
-
-    /**
+  /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
    *                           - to the file server directly after
    * @param {type} - None
@@ -203,8 +189,35 @@ class App extends Component {
    */
   async updateNumberOfFiles(){
     this.state.socketFS.on('numberOfFiles', data => {
-      this.setState({ numberOfFilesInQueue: data});
+      if (!this.state.fileInQueue && data > 0) {
+        this.state.imageViewport.style.visibility = 'visible'
+        this.initAlgorithmNavButtons();
+        this.getNextImage();
+      }
+      this.setState({
+        numberOfFilesInQueue: data,
+        fileInQueue: data > 0,
+      });
     })
+  }
+
+
+  /**
+   * onNoImageLeft - Method invoked when there isn't any file in the file queue.
+   * A 'No file' image is displayed insted of the cornerstonejs canvas
+   *
+   * @param {type}  - None
+   * @return {type} -  None
+   */
+  onNoImageLeft(){
+    console.log('No next image to display');
+    this.state.imageViewport.style.visibility = 'hidden'
+    this.setState({
+      selectedFile: null,
+      displayNext: false,
+      validations: [],
+      currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION }
+    });
   }
 
   /**
@@ -224,9 +237,8 @@ class App extends Component {
         if (res.data.response === 'error '){
           console.log('Error getting next image');
         } else if (res.data.response === 'no-next-image') {
-          console.log('No next image to display');
-          this.setState({selectedFile: null});
           // Need to clear the canvas here or make a no image to load display
+          this.onNoImageLeft();
         } else {
           const myZip = new JSZip();
           var layerOrder = [];
@@ -242,7 +254,6 @@ class App extends Component {
                   listOfLayers.push(Utils.b64toBlob(imageData));
                 })
               }
-
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
@@ -326,7 +337,7 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
-        console.log(this.state.validations);
+
         let validationCompleted = this.validationCompleted(this.state.validations);
 
         for(var i=1; i<this.state.openRasterData; i++){
@@ -568,7 +579,11 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-    let validations = this.state.validations[this.state.currentSelection.detectionSetIndex];
+
+    console.log(this.state.validations.length);
+
+    let validations = this.state.validations.length > 0 ? this.state.validations[this.state.currentSelection.detectionSetIndex] : null;
+
     let B_BOX_COORDS = 4;
     let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
     let currDataIndex = this.state.currentSelection.detectionIndex;
@@ -577,19 +592,22 @@ class App extends Component {
     if (data === null || data.length === 0) {
       return;
     }
+
     for(var j=0; j<data[currDataSetIndex].detections.length; j++){
+
       const detectionData = data[currDataSetIndex].detections[j];
 
       if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
       let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
 
-      // We set the rendering properties
-      if(validations[j] === "CONFIRM"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
-      }
-      else if(validations[j] === "REJECT"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+      if (validations) {
+        if(validations[j] === "CONFIRM"){
+          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
+        }
+        else if(validations[j] === "REJECT"){
+          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+        }
       }
 
       context.font = LABEL_FONT;
@@ -801,7 +819,6 @@ class App extends Component {
             height: '100vh',
             marginLeft: 'auto',
             marginRight: 'auto',
-
           }}
           onContextMenu={(e) => e.preventDefault() }
           className='disable-selection noIbar'
@@ -819,6 +836,7 @@ class App extends Component {
             isConnected={this.state.isConnected}
           />
           <MetaData
+            isVisible={this.state.fileInQueue}
             algorithmType={this.state.algorithm}
             detectorType={this.state.type}
             detectorConfigType={this.state.configuration}
