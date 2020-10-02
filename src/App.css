@@ -29,6 +29,7 @@ body {
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  z-index: 999;
 }
 
 .App-link {
@@ -51,7 +52,7 @@ body {
   box-shadow: 0px 2px 8px 2px #888888;
   font-family: "Noto Sans JP", sans-serif;
   text-align: center;
-  z-index: 9999;
+  z-index: 500;
 }
 
 .hidden {

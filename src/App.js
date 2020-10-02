@@ -91,7 +91,7 @@ class App extends Component {
       receiveTime: null,
       displayButtons: false,
       displayNext: false,
-      zoomLevel: 1,
+      zoomLevel: 1.4,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: false,
@@ -306,7 +306,6 @@ class App extends Component {
     }
     for( var i=0; i < validationList.length; i++){
       for(var j=0; j<validationList[i].length; j++){
-        console.log(validationList[i][j])
         if (validationList[i][j] === 0) {
           validationsComplete = false;
           break;
@@ -441,6 +440,7 @@ class App extends Component {
     cornerstone.loadImage(pixelData).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
+          viewport.scale = self.state.zoomLevel;
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewport, image, viewport);
         });
