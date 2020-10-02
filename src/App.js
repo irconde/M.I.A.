@@ -140,7 +140,10 @@ class App extends Component {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
     // this.state.validations[currentDetectionSet] = [];
 
-      this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+      this.setState({ 
+        currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, 
+        algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
+      });
       // remove button too iterate through algorithms if there are no more after the current one
       if(!this.state.validations[currentDetectionSet + 1]){
         document.getElementById('nextAlg').style.display = 'none';
@@ -161,7 +164,10 @@ class App extends Component {
   getPrevAlgorithm = (event) => {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
 
-    this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+    this.setState({ 
+      currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, 
+      algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
+    });
     // remove button too iterate through algorithms if there are no more after the current one
     if(!this.state.validations[currentDetectionSet - 1]){
       document.getElementById('prevAlg').style.display = 'none';
@@ -310,32 +316,52 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
+        this.setState({
+          algorithm: null
+        })
         let validationCompleted = this.validationCompleted(this.state.validations);
         let image = this.state.openRasterData[0];
 
+        const stackXML = document.implementation.createDocument("", "", null);
+        const imageElem = stackXML.createElement('image');
+        const stackElem = stackXML.createElement('stack');
+        
+        const mimeType = new Blob(['image/openraster'], {type: "text/plain;charset=utf-8"});
+        const newOra = new JSZip();
+
+        newOra.file('mimetype', mimeType, { compression: null });       
+        newOra.file('data/pixel_data.dcs', image);
+
+        const pixelLayer = stackXML.createElement('layer');
+        pixelLayer.setAttribute('src', 'data/pixel_data.dcs');
+        stackElem.appendChild(pixelLayer);
+        
         /*
         *  Third parameter is the "abort flag": True / False
         *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
         *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
         */
-        for(var i=1; i<this.state.openRasterData; i++){
+        for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
           let validationList = this.state.validations[i];
-
-          this.setState({
-            selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
-            algorithm: null
-          })
+          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
+          let additionalLayer = stackXML.createElement('layer');
+          additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
+          stackElem.appendChild(additionalLayer);
         }
-
-        this.sendImageToCommandServer(this.state.selectedFile).then((res) => {
-          this.hideButtons(e);
-          this.setState({
-            selectedFile: null,
-            isUpload: false
-          });
-          this.getNextImage();
-        });
+        imageElem.appendChild(stackElem);
+        stackXML.appendChild(imageElem);
+        newOra.file('stack.xml', new Blob([new XMLSerializer().serializeToString(stackXML)], { type: 'application/xml '}));
+        newOra.generateAsync({ type: 'blob' }).then((blob) => {
+          this.sendImageToCommandServer(blob).then((res) => {
+            this.hideButtons(e);
+            this.setState({
+              selectedFile: null,
+              isUpload: false
+            });
+            this.getNextImage();
+          });  
+        })               
       } else if (res.data.confirm === 'image-not-removed') {
         console.log('File server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
@@ -485,7 +511,7 @@ class App extends Component {
     detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
 
     // for every threat found, create a new Detection object and store all Detection
-    // objects in s DetectionSet object
+    // objects in a DetectionSet object
     for (var i = 0; i < this.state.threatsCount; i++) {
       const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[i]);
       const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
