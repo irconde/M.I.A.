@@ -33,6 +33,19 @@ class MetaData extends Component {
                 color: '#ffffff',
                 padding: '0.8rem 0.8rem',
                 width: 'auto',
+            },
+            btnStyle: {
+              cursor: 'pointer',
+              fontWeight: '800',
+              width:'94%',
+              border: 'none',
+              margin: '0.5rem',
+              marginTop: '1rem',
+              backgroundColor: '#367FFF',
+              paddingTop: '0.8rem',
+              paddingBottom: '0.8rem',
+              borderRadius: '0.2rem',
+              color: 'white'
             }
         }
 
@@ -72,8 +85,8 @@ class MetaData extends Component {
                    <span style={this.state.spanHeadStyle}>Study:</span>
                    <span style={this.state.spanBodyStyle}> {this.props.studyType}</span>
                 </p>
-                <button style={{cursor:'pointer', fontWeight: 'bold', width:'30%', float:'right'}} id="nextAlg" type="button">NEXT &gt;</button>
-                <button style={{cursor:'pointer', fontWeight: 'bold', width:'30%', float:'left'}} id="prevAlg" type="button"> &lt; PREV</button>
+                <button style={this.state.btnStyle} id="nextAlg" type="button">NEXT ALGORITHM &gt;</button>
+                <button style={this.state.btnStyle} id="prevAlg" type="button"> &lt; PREV ALGORITHM</button>
             </div>
         );
     }

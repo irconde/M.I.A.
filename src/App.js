@@ -133,6 +133,7 @@ class App extends Component {
   }
 
   initAlgorithmNavButtons() {
+    console.log("Initializing algorithms");
     var nextButton = document.getElementById('nextAlg');
     var prevButton = document.getElementById('prevAlg');
     if (nextButton && prevButton) {
@@ -141,7 +142,8 @@ class App extends Component {
     }
   }
 
-  getNextAlgorithm = (event) => {
+  getNextAlgorithm() {
+    console.log("getNextAl");
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
     this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
     // remove button to iterate through algorithms if there are no more after the current one
@@ -149,7 +151,7 @@ class App extends Component {
     this.displayDICOSimage();
   }
 
-  getPrevAlgorithm = (event) => {
+  getPrevAlgorithm() {
     let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
     this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
     // remove button too iterate through algorithms if there are no more after the current one
