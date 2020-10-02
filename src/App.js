@@ -91,7 +91,7 @@ class App extends Component {
       receiveTime: null,
       displayButtons: false,
       displayNext: false,
-      zoomLevel: 1.4,
+      zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: false,
@@ -304,8 +304,9 @@ class App extends Component {
     if (!validationList[detectionSetIndex]) {
       return validationsComplete;
     }
+
     for( var i=0; i < validationList.length; i++){
-      for(var j=0; j<validationList[i].length; j++){
+      for(var j=0; j< validationList[i].length; j++){
         if (validationList[i][j] === 0) {
           validationsComplete = false;
           break;
@@ -313,7 +314,7 @@ class App extends Component {
       }
     }
     return validationsComplete;
-    }
+  }
 
   /**
    * nextImageClick() - When the operator taps next, we send to the file server to remove the
@@ -440,7 +441,8 @@ class App extends Component {
     cornerstone.loadImage(pixelData).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
-          viewport.scale = self.state.zoomLevel;
+          viewport.scale = 1.4;
+          viewport.translation.y = 50;
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewport, image, viewport);
         });
@@ -682,14 +684,14 @@ class App extends Component {
         feedback = "REJECT";
       }
 
+      detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+      this.state.validations[detectionSetIndex][selectedIndex] = feedback;
+
       if(this.validationCompleted(this.state.validations)){
         this.setState({
           displayNext: true
         });
       }
-
-      detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-      this.state.validations[detectionSetIndex][selectedIndex] = feedback;
 
       this.setState({
         currentSelection: {
