@@ -192,7 +192,6 @@ class App extends Component {
     this.state.socketFS.on('numberOfFiles', data => {
       if (!this.state.fileInQueue && data > 0) {
         this.state.imageViewport.style.visibility = 'visible'
-        this.initAlgorithmNavButtons();
         this.getNextImage();
       }
       this.setState({
@@ -547,9 +546,8 @@ class App extends Component {
 
     }
     this.state.detectionSetList = all_detections;
-
+    this.initAlgorithmNavButtons();
     this.showAlgButtons();
-
   }
 
   /**
