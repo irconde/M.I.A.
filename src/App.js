@@ -214,56 +214,57 @@ class App extends Component {
    * @return {type} - None
    */
   getNextImage(){
-    axios.get(`${FILE_SERVER}/next`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control' : 'no-cache'
-      }
-    }).then(async (res) => {
-      // We get our latest file upon the main component mounting
-      if (res.data.response === 'error '){
-        console.log('Error getting next image');
-      } else if (res.data.response === 'no-next-image') {
-        console.log('No next image to display');
-        this.setState({selectedFile: null});
-        // Need to clear the canvas here or make a no image to load display
-      } else {
-        const myZip = new JSZip();
-        var layerOrder = [];
-        var listOfPromises = [];
-        var listOfLayers = [];
-        var imgBuf = null;
-        myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
-          myZip.file('stack.xml').async('string').then( async (stackFile) => {
-            layerOrder = Utils.getLayerOrder(stackFile);
-            for (var i = 0; i < layerOrder.length; i++) {
-              await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
-                if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
-                listOfLayers.push(Utils.b64toBlob(imageData));
-              })
-            }
+      axios.get(`${FILE_SERVER}/next`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control' : 'no-cache'
+        }
+      }).then(async (res) => {
+        // We get our latest file upon the main component mounting
+        if (res.data.response === 'error '){
+          console.log('Error getting next image');
+        } else if (res.data.response === 'no-next-image') {
+          console.log('No next image to display');
+          this.setState({selectedFile: null});
+          // Need to clear the canvas here or make a no image to load display
+        } else {
+          const myZip = new JSZip();
+          var layerOrder = [];
+          var listOfPromises = [];
+          var listOfLayers = [];
+          var imgBuf = null;
+          myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
+            myZip.file('stack.xml').async('string').then( async (stackFile) => {
+              layerOrder = Utils.getLayerOrder(stackFile);
+              for (var i = 0; i < layerOrder.length; i++) {
+                await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
+                  if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
+                  listOfLayers.push(Utils.b64toBlob(imageData));
+                })
+              }
 
-            var promiseOfList = Promise.all(listOfPromises);
-            // Once we have all the layers...
-            promiseOfList.then(() => {
-              this.state.openRasterData = listOfLayers;
-              this.setState({
-                selectedFile: this.state.openRasterData[0],
-                image: imgBuf,
-                displayNext: false,
-                receiveTime: Date.now(),
-              });
+              var promiseOfList = Promise.all(listOfPromises);
+              // Once we have all the layers...
+              promiseOfList.then(() => {
+                this.state.openRasterData = listOfLayers;
+                this.setState({
+                  selectedFile: this.state.openRasterData[0],
+                  image: imgBuf,
+                  displayNext: false,
+                  receiveTime: Date.now(),
+                });
 
-              this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
-                this.loadAndViewImage();
+                this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
+                  this.loadAndViewImage();
+                });
               });
-            });
-          })
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-    });
+            })
+          });
+        }
+      }).catch((err) => {
+        console.log(err);
+      });
+
   }
 
 
@@ -303,10 +304,13 @@ class App extends Component {
     if (!validationList[detectionSetIndex]) {
       return validationsComplete;
     }
-    for( var i=0; i < validationList[detectionSetIndex].length; i++){
-      if (validationList[detectionSetIndex][i] === 0) {
-        validationsComplete = false;
-        break;
+    for( var i=0; i < validationList.length; i++){
+      for(var j=0; j<validationList[i].length; j++){
+        console.log(validationList[i][j])
+        if (validationList[i][j] === 0) {
+          validationsComplete = false;
+          break;
+        }
       }
     }
     return validationsComplete;
@@ -322,19 +326,19 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
+        console.log(this.state.validations);
         let validationCompleted = this.validationCompleted(this.state.validations);
-        let image = this.state.openRasterData[0];
 
-        /*
-        *  Third parameter is the "abort flag": True / False
-        *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-        *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-        */
         for(var i=1; i<this.state.openRasterData; i++){
           let imageData = this.state.openRasterData[i];
           let validationList = this.state.validations[i];
 
           this.setState({
+            /*
+            *  Third parameter is the "abort flag": True / False
+            *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
+            *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
+            */
             selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
             algorithm: null
           })
@@ -677,6 +681,13 @@ class App extends Component {
       if(e.currentTarget.id === "reject"){
         feedback = "REJECT";
       }
+
+      if(this.validationCompleted(this.state.validations)){
+        this.setState({
+          displayNext: true
+        });
+      }
+
       detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
       this.state.validations[detectionSetIndex][selectedIndex] = feedback;
 
@@ -686,7 +697,6 @@ class App extends Component {
           detectionSetIndex: this.state.currentSelection.detectionSetIndex
         },
         displayButtons: false,
-        displayNext: true,
       }, () => {
         this.renderButtons(e);
       });
