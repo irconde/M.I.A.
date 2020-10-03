@@ -13,7 +13,7 @@ class TopBar extends Component {
                 left: '0',
                 top: '0',
                 width: '100%',
-                zIndex: '1',
+                zIndex: '999',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
                 color: 'white',

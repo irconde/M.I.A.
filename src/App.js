@@ -19,6 +19,7 @@ import TopBar from './components/TopBar';
 import JSZip from "jszip";
 import DetectionSet from "./DetectionSet.js";
 import Selection from "./Selection.js";
+import NoFileSign from "./components/NoFileSign.js"
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -90,7 +91,10 @@ class App extends Component {
       validations: [],
       receiveTime: null,
       displayButtons: false,
-      displayNext: true,
+      displayNext: false,
+      fileInQueue: false,
+      nextAlgBtnEnabled: false,
+      prevAlgBtnEnabled: false,
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -101,13 +105,13 @@ class App extends Component {
       socketCommand: socketIOClient(COMMAND_SERVER),
       socketFS: socketIOClient(FILE_SERVER)
     };
+    this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
     this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
     this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
-    this.getNextAlgorithm = this.getNextAlgorithm.bind(this);
-    this.getPrevAlgorithm = this.getPrevAlgorithm.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
+    this.loadDICOSdata = this.loadDICOSdata.bind(this);
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
@@ -126,68 +130,28 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
-    var nextButton = document.getElementById('nextAlg');
-    var prevButton = document.getElementById('prevAlg');
-
-    // Should we be able to iterate through all detections
-    nextButton.addEventListener('click', this.getNextAlgorithm);
-    prevButton.addEventListener('click', this.getPrevAlgorithm);
     this.getNextImage();
+    this.updateNavigationBtnState();
   }
 
 
-  getNextAlgorithm = (event) => {
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
-    // this.state.validations[currentDetectionSet] = [];
-
-      this.setState({ 
-        currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, 
-        algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
-      });
-      // remove button too iterate through algorithms if there are no more after the current one
-      if(!this.state.validations[currentDetectionSet + 1]){
-        document.getElementById('nextAlg').style.display = 'none';
-      }
-      else {
-        document.getElementById('nextAlg').style.display = 'block';
-      }
-      if(!this.state.validations[currentDetectionSet - 1]){
-        document.getElementById('prevAlg').style.display = 'none';
-      }
-      else {
-        document.getElementById('prevAlg').style.display = 'block';
-      }
-
-    this.displayDICOSimage();
-  }
-
-  getPrevAlgorithm = (event) => {
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
-
-    this.setState({ 
-      currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, 
+  getAlgorithmForPos(pos) {
+    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + pos;
+    this.setState({
+      currentSelection: {
+        detectionSetIndex: currentDetectionSet,
+        detectionIndex: Selection.NO_SELECTION
+      },
       algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
     });
-    // remove button too iterate through algorithms if there are no more after the current one
-    if(!this.state.validations[currentDetectionSet - 1]){
-      document.getElementById('prevAlg').style.display = 'none';
-    }
-    else {
-      document.getElementById('prevAlg').style.display = 'block';
-    }
-
-    if(!this.state.validations[currentDetectionSet + 1]){
-      document.getElementById('nextAlg').style.display = 'none';
-    }
-    else {
-      document.getElementById('nextAlg').style.display = 'block';
-    }
+    this.state.currentSelection.detectionSetIndex = currentDetectionSet;
+    // remove button to iterate through algorithms if there are no more after the current one
+    this.updateNavigationBtnState();
     this.displayDICOSimage();
   }
 
 
-
-    /**
+  /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
    *                           - to the file server directly after
    * @param {type} - None
@@ -220,8 +184,34 @@ class App extends Component {
    */
   async updateNumberOfFiles(){
     this.state.socketFS.on('numberOfFiles', data => {
-      this.setState({ numberOfFilesInQueue: data});
+      if (!this.state.fileInQueue && data > 0) {
+        this.state.imageViewport.style.visibility = 'visible'
+        this.getNextImage();
+      }
+      this.setState({
+        numberOfFilesInQueue: data,
+        fileInQueue: data > 0,
+      });
     })
+  }
+
+
+  /**
+   * onNoImageLeft - Method invoked when there isn't any file in the file queue.
+   * A 'No file' image is displayed insted of the cornerstonejs canvas
+   *
+   * @param {type}  - None
+   * @return {type} -  None
+   */
+  onNoImageLeft(){
+    console.log('No next image to display');
+    this.state.imageViewport.style.visibility = 'hidden'
+    this.setState({
+      selectedFile: null,
+      displayNext: false,
+      validations: [],
+      currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION }
+    });
   }
 
   /**
@@ -231,56 +221,70 @@ class App extends Component {
    * @return {type} - None
    */
   getNextImage(){
-    axios.get(`${FILE_SERVER}/next`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control' : 'no-cache'
-      }
-    }).then(async (res) => {
-      // We get our latest file upon the main component mounting
-      if (res.data.response === 'error '){
-        console.log('Error getting next image');
-      } else if (res.data.response === 'no-next-image') {
-        console.log('No next image to display');
-        this.setState({selectedFile: null});
-        // Need to clear the canvas here or make a no image to load display
-      } else {
-        const myZip = new JSZip();
-        var layerOrder = [];
-        var listOfPromises = [];
-        var listOfLayers = [];
-        var imgBuf = null;
-        myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
-          myZip.file('stack.xml').async('string').then( async (stackFile) => {
-            layerOrder = Utils.getLayerOrder(stackFile);
-            for (var i = 0; i < layerOrder.length; i++) {
-              await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
-                if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
-                listOfLayers.push(Utils.b64toBlob(imageData));
-              })
-            }
+      axios.get(`${FILE_SERVER}/next`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control' : 'no-cache'
+        }
+      }).then(async (res) => {
+        // We get our latest file upon the main component mounting
+        if (res.data.response === 'error '){
+          console.log('Error getting next image');
+        } else if (res.data.response === 'no-next-image') {
+          // Need to clear the canvas here or make a no image to load display
+          this.onNoImageLeft();
+        } else {
+          const myZip = new JSZip();
+          var layerOrder = [];
+          var listOfPromises = [];
+          var listOfLayers = [];
+          var imgBuf = null;
+          myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
+            myZip.file('stack.xml').async('string').then( async (stackFile) => {
+              layerOrder = Utils.getLayerOrder(stackFile);
+              for (var i = 0; i < layerOrder.length; i++) {
+                await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
+                  if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
+                  listOfLayers.push(Utils.b64toBlob(imageData));
+                })
+              }
+              var promiseOfList = Promise.all(listOfPromises);
+              // Once we have all the layers...
+              promiseOfList.then(() => {
+                this.state.openRasterData = listOfLayers;
+                this.setState({
+                  selectedFile: this.state.openRasterData[0],
+                  image: imgBuf,
+                  displayNext: false,
+                  receiveTime: Date.now(),
+                });
 
-            var promiseOfList = Promise.all(listOfPromises);
-            // Once we have all the layers...
-            promiseOfList.then(() => {
-              this.state.openRasterData = listOfLayers;
-              this.setState({
-                selectedFile: this.state.openRasterData[0],
-                image: imgBuf,
-                displayNext: true,
-                receiveTime: Date.now(),
+                this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
+                  this.loadAndViewImage();
+                });
               });
+            })
+          });
+        }
+      }).catch((err) => {
+        console.log(err);
+      });
 
-              this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
-                this.loadAndViewImage();
-              });
-            });
-          })
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-    });
+  }
+
+
+  /**
+   * * updateNavigationBtnState - Method that enables/disables the buttons for
+   *  navigating through the several algorithms
+   *
+   * @param  - None
+   * @return - None
+   */
+  updateNavigationBtnState() {
+    const algorithmCount = this.state.detectionSetList.length;
+    const currentAlgorithmIndex = this.state.currentSelection.detectionSetIndex;
+    this.state.nextAlgBtnEnabled = (currentAlgorithmIndex < (algorithmCount - 1));
+    this.state.prevAlgBtnEnabled = currentAlgorithmIndex > 0;
   }
 
   /**
@@ -297,14 +301,17 @@ class App extends Component {
     if (!validationList[detectionSetIndex]) {
       return validationsComplete;
     }
-    for( var i=0; i < validationList[detectionSetIndex].length; i++){
-      if (validationList[detectionSetIndex][i] === 0) {
-        validationsComplete = false;
-        break;
+
+    for( var i=0; i < validationList.length; i++){
+      for(var j=0; j< validationList[i].length; j++){
+        if (validationList[i][j] === 0) {
+          validationsComplete = false;
+          break;
+        }
       }
     }
     return validationsComplete;
-    }
+  }
 
   /**
    * nextImageClick() - When the operator taps next, we send to the file server to remove the
@@ -316,39 +323,21 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
-        this.setState({
-          algorithm: null
-        })
         let validationCompleted = this.validationCompleted(this.state.validations);
-        let image = this.state.openRasterData[0];
 
-        const stackXML = document.implementation.createDocument("", "", null);
-        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
-        const imageElem = stackXML.createElement('image');
-        const stackElem = stackXML.createElement('stack');
-        
-        const mimeType = new Blob(['image/openraster'], {type: "text/plain;charset=utf-8"});
-        const newOra = new JSZip();
-
-        newOra.file('mimetype', mimeType, { compression: null });       
-        newOra.file('data/pixel_data.dcs', image);
-
-        const pixelLayer = stackXML.createElement('layer');
-        pixelLayer.setAttribute('src', 'data/pixel_data.dcs');
-        stackElem.appendChild(pixelLayer);
-        
-        /*
-        *  Third parameter is the "abort flag": True / False
-        *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-        *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-        */
-        for(var i = 1; i < this.state.openRasterData.length; i++){
+        for(var i=1; i<this.state.openRasterData; i++){
           let imageData = this.state.openRasterData[i];
           let validationList = this.state.validations[i];
-          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
-          let additionalLayer = stackXML.createElement('layer');
-          additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
-          stackElem.appendChild(additionalLayer);
+
+          this.setState({
+            /*
+            *  Third parameter is the "abort flag": True / False
+            *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
+            *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
+            */
+            selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
+            algorithm: null
+          })
         }
         imageElem.appendChild(stackElem);
         stackXML.appendChild(imageElem);
@@ -425,21 +414,18 @@ class App extends Component {
    */
   loadAndViewImage() {
     const self = this;
+    const dataImages = [];
     self.displayDICOSimage();
     // all other images do not have pixel data -- cornerstoneJS will fail and send an error
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
     for(var i=1; i< self.state.openRasterData.length; i++){
-      const reader = new FileReader();
-
-      reader.addEventListener("loadend", function() {
-        const view = new Uint8Array(reader.result);
-        var dataSet = dicomParser.parseDicom(view);
-        self.loadDICOSdata(dataSet);
-      });
-      reader.readAsArrayBuffer(self.state.openRasterData[i]);
+      dataImages[i-1] = self.state.openRasterData[i];
     }
+    self.loadDICOSdata(dataImages);
+
+    // this.state.currentSelection.detectionSetIndex=0;
   }
 
   /**
@@ -455,89 +441,101 @@ class App extends Component {
     cornerstone.loadImage(pixelData).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
+          viewport.scale = 1.4;
+          viewport.translation.y = 50;
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewport, image, viewport);
         });
   }
 
-
   /**
    * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
    *
-   * @param  {type} image DICOS+TDR data
+   * @param  {type} images list of DICOS+TDR data from each algorithm
    * @return {type}       None
    */
-  loadDICOSdata(image) {
+  loadDICOSdata(images) {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
+    let all_detections = [];
 
-    for(var i=0; i<this.state.openRasterData.length-1;i++){
+    for(var i=0; i<images.length;i++){
+      if(i===0){
+        const reader = new FileReader();
+        let self = this;
+
+        reader.addEventListener("loadend", function() {
+          const view = new Uint8Array(reader.result);
+          var image = dicomParser.parseDicom(view);
+
+          self.setState({
+            detections: null,
+            currentSelection : {
+              detectionIndex: Selection.NO_SELECTION,
+              detectionSetIndex: 0
+            },
+            threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
+            algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
+            type: image.string(Dicos.dictionary['DetectorType'].tag),
+            configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
+            station: image.string(Dicos.dictionary['StationName'].tag),
+            series: image.string(Dicos.dictionary['SeriesDescription'].tag),
+            study: image.string(Dicos.dictionary['StudyDescription'].tag),
+            time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
+            date: mm + '/' + dd + '/' + yyyy
+          });
+        });
+        reader.readAsArrayBuffer(images[i]);
+      }
+
+      const detectionSet = new DetectionSet();
       this.state.validations[i] = [0];
-    }
 
-    this.setState({
-      detections: null,
-      currentSelection : {
-        detectionIndex: Selection.NO_SELECTION,
-        detectionSetIndex: this.state.currentSelection.detectionSetIndex
-      },
-      threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
-      algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
-      type: image.string(Dicos.dictionary['DetectorType'].tag),
-      configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
-      station: image.string(Dicos.dictionary['StationName'].tag),
-      series: image.string(Dicos.dictionary['SeriesDescription'].tag),
-      study: image.string(Dicos.dictionary['StudyDescription'].tag),
-      time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
-      date: mm + '/' + dd + '/' + yyyy
-    });
+      const reader = new FileReader();
 
-    if (this.state.threatsCount === 0 || this.state.threatsCount === undefined) {
-      console.log("No Potential Threat Objects detected");
-      this.setState({
-        displayNext: true
+      reader.addEventListener("loadend", function() {
+        const view = new Uint8Array(reader.result);
+        var image = dicomParser.parseDicom(view);
+
+        let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
+
+        detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+
+        // Threat Sequence information
+        const threatSequence = image.elements.x40101011;
+        if (threatSequence == null){
+          console.log("No Threat Sequence");
+          return;
+        }
+
+        if (image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === 0 || image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === undefined) {
+          console.log("No Potential Threat Objects detected");
+          this.setState({
+            displayNext: true
+          });
+          return;
+        }
+
+        // for every threat found, create a new Detection object and store all Detection
+        // objects in s DetectionSet object
+        for (var j = 0; j < threatsCount; j++) {
+          const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
+          const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
+          const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
+
+          detectionSet.detections[j] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+          // all_detections[i] = detectionSet;
+        }
       });
-      return;
-    }
-    // Threat Sequence information
-    const threatSequence = image.elements.x40101011;
-    if (threatSequence == null){
-      console.log("No Threat Sequence");
-      return;
-    }
+      reader.readAsArrayBuffer(images[i]);
+      all_detections[i] = detectionSet;
 
-    const detectionSet = new DetectionSet();
-    detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
-
-    // for every threat found, create a new Detection object and store all Detection
-    // objects in a DetectionSet object
-    for (var i = 0; i < this.state.threatsCount; i++) {
-      const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[i]);
-      const objectClass = Dicos.retrieveObjectClass(threatSequence.items[i]);
-      const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[i]));
-
-      detectionSet.detections[i] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
-      this.state.detectionSetList[i] = detectionSet;
     }
-
-    if(this.state.validations[this.state.currentSelection.detectionSetIndex + 1]){
-      document.getElementById('nextAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('nextAlg').style.display = 'none';
-    }
-
-    if(this.state.validations[this.state.currentSelection.detectionSetIndex - 1]){
-      document.getElementById('prevAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('prevAlg').style.display = 'none';
-    }
-
+    this.state.detectionSetList = all_detections;
+    this.updateNavigationBtnState();
   }
-
 
   /**
    * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
@@ -567,7 +565,9 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-    let validations = this.state.validations[this.state.currentSelection.detectionSetIndex];
+
+    let validations = this.state.validations.length > 0 ? this.state.validations[this.state.currentSelection.detectionSetIndex] : null;
+
     let B_BOX_COORDS = 4;
     let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
     let currDataIndex = this.state.currentSelection.detectionIndex;
@@ -576,19 +576,22 @@ class App extends Component {
     if (data === null || data.length === 0) {
       return;
     }
+
     for(var j=0; j<data[currDataSetIndex].detections.length; j++){
+
       const detectionData = data[currDataSetIndex].detections[j];
 
       if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
       let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
 
-      // We set the rendering properties
-      if(validations[j] === "CONFIRM"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
-      }
-      else if(validations[j] === "REJECT"){
-        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+      if (validations) {
+        if(validations[j] === "CONFIRM"){
+          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
+        }
+        else if(validations[j] === "REJECT"){
+          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
+        }
       }
 
       context.font = LABEL_FONT;
@@ -656,7 +659,7 @@ class App extends Component {
     }
   }
 
-    /**
+  /**
    * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
    *
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
@@ -682,8 +685,15 @@ class App extends Component {
       if(e.currentTarget.id === "reject"){
         feedback = "REJECT";
       }
+
       detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
       this.state.validations[detectionSetIndex][selectedIndex] = feedback;
+
+      if(this.validationCompleted(this.state.validations)){
+        this.setState({
+          displayNext: true
+        });
+      }
 
       this.setState({
         currentSelection: {
@@ -691,7 +701,6 @@ class App extends Component {
           detectionSetIndex: this.state.currentSelection.detectionSetIndex
         },
         displayButtons: false,
-        displayNext: true,
       }, () => {
         this.renderButtons(e);
       });
@@ -794,7 +803,6 @@ class App extends Component {
             height: '100vh',
             marginLeft: 'auto',
             marginRight: 'auto',
-
           }}
           onContextMenu={(e) => e.preventDefault() }
           className='disable-selection noIbar'
@@ -812,17 +820,22 @@ class App extends Component {
             isConnected={this.state.isConnected}
           />
           <MetaData
+            isVisible={this.state.fileInQueue}
             algorithmType={this.state.algorithm}
             detectorType={this.state.type}
             detectorConfigType={this.state.configuration}
             seriesType={this.state.series}
             studyType={this.state.study}
+            navigationBtnClick={this.getAlgorithmForPos}
+            nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
+            prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           />
           <div id="algorithm-outputs"> </div>
           <div id="feedback-confirm"> </div>
           <div id="feedback-reject"> </div>
         </div>
         <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+        <NoFileSign isVisible={!this.state.fileInQueue} />
       </div>
     );
   }
