@@ -130,7 +130,6 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
-    this.getNextImage();
     this.updateNavigationBtnState();
   }
 
@@ -143,11 +142,12 @@ class App extends Component {
         detectionIndex: Selection.NO_SELECTION
       },
       algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
+    }, () => {
+      //this.state.currentSelection.detectionSetIndex = currentDetectionSet;
+      // remove button to iterate through algorithms if there are no more after the current one
+      this.updateNavigationBtnState();
+      this.displayDICOSimage();
     });
-    this.state.currentSelection.detectionSetIndex = currentDetectionSet;
-    // remove button to iterate through algorithms if there are no more after the current one
-    this.updateNavigationBtnState();
-    this.displayDICOSimage();
   }
 
 
@@ -257,11 +257,13 @@ class App extends Component {
                   image: imgBuf,
                   displayNext: false,
                   receiveTime: Date.now(),
-                });
-
-                this.setState({ currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION } }, () => {
-                  this.loadAndViewImage();
-                });
+                  validations: [],
+                  currentSelection: {
+                    detectionSetIndex: 0,
+                    detectionIndex: Selection.NO_SELECTION }
+                  }, () => {
+                   this.loadAndViewImage();
+                 });
               });
             })
           });
@@ -296,14 +298,8 @@ class App extends Component {
    */
   validationCompleted(validationList) {
     var validationsComplete = true;
-    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
-
-    if (!validationList[detectionSetIndex]) {
-      return validationsComplete;
-    }
-
-    for( var i=0; i < validationList.length; i++){
-      for(var j=0; j< validationList[i].length; j++){
+    for( var i = 0; i < validationList.length; i++){
+      for(var j = 0; j < validationList[i].length; j++){
         if (validationList[i][j] === 0) {
           validationsComplete = false;
           break;
@@ -333,17 +329,17 @@ class App extends Component {
         const prolog = '<?xml version="1.0" encoding="utf-8"?>';
         const imageElem = stackXML.createElement('image');
         const stackElem = stackXML.createElement('stack');
-        
+
         const mimeType = new Blob(['image/openraster'], {type: "text/plain;charset=utf-8"});
         const newOra = new JSZip();
 
-        newOra.file('mimetype', mimeType, { compression: null });       
+        newOra.file('mimetype', mimeType, { compression: null });
         newOra.file('data/pixel_data.dcs', image);
 
         const pixelLayer = stackXML.createElement('layer');
         pixelLayer.setAttribute('src', 'data/pixel_data.dcs');
         stackElem.appendChild(pixelLayer);
-        
+
         /*
         *  Third parameter is the "abort flag": True / False
         *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
@@ -351,7 +347,8 @@ class App extends Component {
         */
         for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
-          let validationList = this.state.validations[i];
+          // TODO: Why do we do this ????
+          let validationList = this.state.validations[i-1];
           newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
           let additionalLayer = stackXML.createElement('layer');
           additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
@@ -368,8 +365,8 @@ class App extends Component {
               isUpload: false
             });
             this.getNextImage();
-          });  
-        })               
+          });
+        })
       } else if (res.data.confirm === 'image-not-removed') {
         console.log('File server couldnt remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
@@ -438,6 +435,7 @@ class App extends Component {
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
+    // TODO. Why do we do this ????
     for(var i=1; i< self.state.openRasterData.length; i++){
       dataImages[i-1] = self.state.openRasterData[i];
     }
@@ -509,9 +507,8 @@ class App extends Component {
       }
 
       const detectionSet = new DetectionSet();
-      this.state.validations[i] = [0];
-
       const reader = new FileReader();
+      let validations = new Array();
 
       reader.addEventListener("loadend", function() {
         const view = new Uint8Array(reader.result);
@@ -542,14 +539,13 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-
+          validations[j] = 0;
           detectionSet.detections[j] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
-          // all_detections[i] = detectionSet;
         }
       });
       reader.readAsArrayBuffer(images[i]);
       all_detections[i] = detectionSet;
-
+      this.state.validations[i] = validations;
     }
     this.state.detectionSetList = all_detections;
     this.updateNavigationBtnState();
@@ -619,7 +615,8 @@ class App extends Component {
       const boundingBoxCoords = detectionData.boundingBox;
       const boundingBoxWidth = Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]);
       const boundingBoxHeight = Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]);
-      if (boundingBoxWidth === 0 || boundingBoxHeight === 0) continue;
+      // TODO. Why do we comment this ?
+      //if (boundingBoxWidth === 0 || boundingBoxHeight === 0) continue;
       const detectionLabel = Utils.formatDetectionLabel(detectionData.class, detectionData.confidence);
       const labelSize = Utils.getTextLabelSize(context, detectionLabel, LABEL_PADDING);
       context.fillStyle = detectionColor;
@@ -707,12 +704,6 @@ class App extends Component {
       detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
       this.state.validations[detectionSetIndex][selectedIndex] = feedback;
 
-      if(this.validationCompleted(this.state.validations)){
-        this.setState({
-          displayNext: true
-        });
-      }
-
       this.setState({
         currentSelection: {
           detectionIndex: Selection.NO_SELECTION,
@@ -720,6 +711,11 @@ class App extends Component {
         },
         displayButtons: false,
       }, () => {
+        if(this.validationCompleted(this.state.validations)){
+          this.setState({
+            displayNext: true
+          });
+        }
         this.renderButtons(e);
       });
     }
