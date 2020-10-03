@@ -93,6 +93,8 @@ class App extends Component {
       displayButtons: false,
       displayNext: false,
       fileInQueue: false,
+      nextAlgBtnEnabled: false,
+      prevAlgBtnEnabled: false,
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -103,11 +105,10 @@ class App extends Component {
       socketCommand: socketIOClient(COMMAND_SERVER),
       socketFS: socketIOClient(FILE_SERVER)
     };
+    this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
     this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
     this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
-    this.getNextAlgorithm = this.getNextAlgorithm.bind(this);
-    this.getPrevAlgorithm = this.getPrevAlgorithm.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.loadAndViewImage = this.loadAndViewImage.bind(this);
     this.loadDICOSdata = this.loadDICOSdata.bind(this);
@@ -130,34 +131,25 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewport);
     this.getNextImage();
+    this.updateNavigationBtnState();
   }
 
-  initAlgorithmNavButtons() {
-    console.log("Initializing algorithms");
-    var nextButton = document.getElementById('nextAlg');
-    var prevButton = document.getElementById('prevAlg');
-    if (nextButton && prevButton) {
-      nextButton.addEventListener('click', this.getNextAlgorithm);
-      prevButton.addEventListener('click', this.getPrevAlgorithm);
-    }
-  }
 
-  getNextAlgorithm() {
-    console.log("getNextAl");
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + 1;
-    this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
+  getAlgorithmForPos(pos) {
+    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + pos;
+    this.setState({
+      currentSelection: {
+        detectionSetIndex: currentDetectionSet,
+        detectionIndex: Selection.NO_SELECTION
+      },
+      algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
+    });
+    this.state.currentSelection.detectionSetIndex = currentDetectionSet;
     // remove button to iterate through algorithms if there are no more after the current one
-    this.showAlgButtons();
+    this.updateNavigationBtnState();
     this.displayDICOSimage();
   }
 
-  getPrevAlgorithm() {
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex - 1;
-    this.setState({ currentSelection: { detectionSetIndex: currentDetectionSet, detectionIndex: Selection.NO_SELECTION }, algorithm: this.state.detectionSetList[currentDetectionSet].algorithm });
-    // remove button too iterate through algorithms if there are no more after the current one
-    this.showAlgButtons();
-    this.displayDICOSimage();
-  }
 
   /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
@@ -282,25 +274,17 @@ class App extends Component {
 
 
   /**
-   * * showAlgButtons - Method that indicates whether to display the buttons to iterate through algorithms
+   * * updateNavigationBtnState - Method that enables/disables the buttons for
+   *  navigating through the several algorithms
    *
-   * @param  none
-   * @return none
+   * @param  - None
+   * @return - None
    */
-  showAlgButtons() {
-    if(this.state.detectionSetList[this.state.currentSelection.detectionSetIndex + 1]){
-      document.getElementById('nextAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('nextAlg').style.display = 'none';
-    }
-
-    if(this.state.detectionSetList[this.state.currentSelection.detectionSetIndex - 1]){
-      document.getElementById('prevAlg').style.display = 'block';
-    }
-    else {
-      document.getElementById('prevAlg').style.display = 'none';
-    }
+  updateNavigationBtnState() {
+    const algorithmCount = this.state.detectionSetList.length;
+    const currentAlgorithmIndex = this.state.currentSelection.detectionSetIndex;
+    this.state.nextAlgBtnEnabled = (currentAlgorithmIndex < (algorithmCount - 1));
+    this.state.prevAlgBtnEnabled = currentAlgorithmIndex > 0;
   }
 
   /**
@@ -461,7 +445,6 @@ class App extends Component {
         });
   }
 
-
   /**
    * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
    *
@@ -548,8 +531,7 @@ class App extends Component {
 
     }
     this.state.detectionSetList = all_detections;
-    this.initAlgorithmNavButtons();
-    this.showAlgButtons();
+    this.updateNavigationBtnState();
   }
 
   /**
@@ -580,8 +562,6 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-
-    console.log(this.state.validations.length);
 
     let validations = this.state.validations.length > 0 ? this.state.validations[this.state.currentSelection.detectionSetIndex] : null;
 
@@ -676,7 +656,7 @@ class App extends Component {
     }
   }
 
-    /**
+  /**
    * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
    *
    * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
@@ -843,6 +823,9 @@ class App extends Component {
             detectorConfigType={this.state.configuration}
             seriesType={this.state.series}
             studyType={this.state.study}
+            navigationBtnClick={this.getAlgorithmForPos}
+            nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
+            prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           />
           <div id="algorithm-outputs"> </div>
           <div id="feedback-confirm"> </div>

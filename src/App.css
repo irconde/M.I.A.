@@ -55,6 +55,14 @@ body {
   z-index: 500;
 }
 
+.btn-enabled {
+  opacity: 1.0;
+}
+
+.btn-disabled {
+  opacity: 0.4;
+}
+
 .hidden {
   display: none !important;
 }
