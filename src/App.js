@@ -323,21 +323,39 @@ class App extends Component {
   nextImageClick(e) {
     axios.get(`${FILE_SERVER}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
+        this.setState({
+          algorithm: null
+        })
         let validationCompleted = this.validationCompleted(this.state.validations);
+        let image = this.state.openRasterData[0];
 
-        for(var i=1; i<this.state.openRasterData; i++){
+        const stackXML = document.implementation.createDocument("", "", null);
+        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
+        const imageElem = stackXML.createElement('image');
+        const stackElem = stackXML.createElement('stack');
+        
+        const mimeType = new Blob(['image/openraster'], {type: "text/plain;charset=utf-8"});
+        const newOra = new JSZip();
+
+        newOra.file('mimetype', mimeType, { compression: null });       
+        newOra.file('data/pixel_data.dcs', image);
+
+        const pixelLayer = stackXML.createElement('layer');
+        pixelLayer.setAttribute('src', 'data/pixel_data.dcs');
+        stackElem.appendChild(pixelLayer);
+        
+        /*
+        *  Third parameter is the "abort flag": True / False
+        *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
+        *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
+        */
+        for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
           let validationList = this.state.validations[i];
-
-          this.setState({
-            /*
-            *  Third parameter is the "abort flag": True / False
-            *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-            *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-            */
-            selectedFile: Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted),
-            algorithm: null
-          })
+          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
+          let additionalLayer = stackXML.createElement('layer');
+          additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
+          stackElem.appendChild(additionalLayer);
         }
         imageElem.appendChild(stackElem);
         stackXML.appendChild(imageElem);
