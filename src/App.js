@@ -347,7 +347,6 @@ class App extends Component {
         */
         for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
-          // TODO: Why do we do this ????
           let validationList = this.state.validations[i-1];
           newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
           let additionalLayer = stackXML.createElement('layer');
@@ -435,9 +434,8 @@ class App extends Component {
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
-    // TODO. Why do we do this ????
-    for(var i=1; i< self.state.openRasterData.length; i++){
-      dataImages[i-1] = self.state.openRasterData[i];
+    for(var i = 1; i< self.state.openRasterData.length; i++){
+      dataImages[i - 1] = self.state.openRasterData[i];
     }
     self.loadDICOSdata(dataImages);
 
