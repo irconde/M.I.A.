@@ -1,22 +1,22 @@
-# Pilot GUI version 1.0
+# Pilot GUI version 1.1.1
 
 The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple detections or objects identified as potentially of interest by the system itself.
 
-Through this client, the pilot system provides the user with visual feedback on the results derived from the different deep learning workflows executed on the server side. The several algorithms that constitute the business logic are implemented as a remote service, while the client is conceived as a tool that allows the user to efficiently and effectively inspect the detections received in the form of DICOS+TDR files.
+Through this client, the pilot system provides the user with visual feedback on the results derived from the different deep learning workflows executed on the server side. The several algorithms that constitute the business logic are implemented as a remote service, while the client is conceived as a tool that allows the user to efficiently and effectively inspect the detections received in the form of DICOS+TDR files packed in an tailored OpenRaster (ORA) file.
 
-In particular, the porject contains a React App and a File Queue Server to manage locally the DICOS-TDR images received from the server. Those images are stored in the 'img' folder inside the server directory.
+In particular, the project contains a React App and a File Queue Server to manage locally the DICOS-TDR images received from the server. The ORA files are stored temporarily in the 'img' folder inside the server directory.
 
 ```
 <ROOT>\server\img
 ```
 
-Every file will be removed from the Pilot GUI local storage once the operator finishes validating the detections included in the DICOS file processed and navigates to the next one.
+Every ORA file will be removed from the Pilot GUI local storage once the operator finishes validating the detections included in all the related DICOS file processed and navigates to the next one.
 
 ## Build and development pre-requisites
 
 The installation of both [nodejs](https://nodejs.org/) and npm is required for the proper build of the client. 
 
-Additionally, the Pilot GUI is intended to connect to, and work with a remote server. It will be necessary to have a web server up and running, able to send to the client the DICOS files to be rendered. 
+Additionally, the Pilot GUI is intended to connect to, and work with a remote server. It will be necessary to have a web server up and running, able to send ORA files to the client. 
 
 [Here](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/) you can find the code of a mock file server that can be used for development and testing purposes. More information on how to use the server below.
 
@@ -59,7 +59,7 @@ serve -s build
 
 ## Mock file server
 
-You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends DICOS-TDR images to the react-based client at a given interval, and it also manages the persistence of the images sent back from the Pilot GUI.
+You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends ORA files to the react-based client at a given interval, and it also manages the persistence of the amended ORA files sent back from the Pilot GUI.
 
 The files being sent are located in the "static/img" directory.
 
