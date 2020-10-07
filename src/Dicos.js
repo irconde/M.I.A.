@@ -127,6 +127,8 @@ export default class Dicos {
       validations = validationList;
     }
 
+    console.log(validations);
+
     var fileReader = new FileReader();
     fileReader.onload = function(event) {
       image = event.target.result;
@@ -177,11 +179,42 @@ export default class Dicos {
         copiedData.AdditionalScreeningPerformed = "YES";
         copiedData.AdditionalInspectionSelectionCriteria = "RANDOM";
 
-        for(var i = 0; i<validations.length; i++){
-          if(copiedData.ThreatSequence[i]) {
-            copiedData.ThreatSequence[i]['ReferencedPTOSequence'] = {
+        if(validations.length>1) {
+          for (var i = 0; i < validations.length; i++) {
+            console.log(copiedData.ThreatSequence);
+            if (copiedData.ThreatSequence[i]) {
+              copiedData.ThreatSequence[i]['ReferencedPTOSequence'] = {
+                'vrMap': {},
+                'PotentialThreatObjectID': copiedData.ThreatSequence[i]['PotentialThreatObjectID'],
+                'ReferencedTDRInstanceSequence': {
+                  'ReferencedSOPClassUID': copiedData.SOPClassUID,
+                  'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
+                  'vrMap': {}
+                }
+              }
+            }
+            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
+            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
+
+            if (validations[i] === "CONFIRM") {
+              copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
+              copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
+            } else if (validations[i] === "REJECT") {
+              copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
+              copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
+              numberAlarmObjs = numberAlarmObjs - 1;
+              numberTotalObjs = numberTotalObjs - 1;
+              copiedData.NumberOfAlarmObjects = numberAlarmObjs;
+              copiedData.NumberOfTotalObjects = numberTotalObjs;
+            }
+          } //end for loop through validations
+        } // end if validations.length>1
+
+        else {
+          if (copiedData.ThreatSequence) {
+            copiedData.ThreatSequence['ReferencedPTOSequence'] = {
               'vrMap': {},
-              'PotentialThreatObjectID': copiedData.ThreatSequence[i]['PotentialThreatObjectID'],
+              'PotentialThreatObjectID': copiedData.ThreatSequence['PotentialThreatObjectID'],
               'ReferencedTDRInstanceSequence': {
                 'ReferencedSOPClassUID': copiedData.SOPClassUID,
                 'ReferencedSOPInstanceUID': copiedData.SOPInstanceUID,
@@ -189,23 +222,23 @@ export default class Dicos {
               }
             }
           }
-          copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
-          copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations;
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
 
-          if (validations[i] === "CONFIRM"){
-            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
-            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
-          }
-          else if (validations[i] === "REJECT") {
-            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
-            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
+          if (validations[i] === "CONFIRM") {
+            copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
+            copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
+          } else if (validations === "REJECT") {
+            copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
+            copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
             numberAlarmObjs = numberAlarmObjs - 1;
             numberTotalObjs = numberTotalObjs - 1;
             copiedData.NumberOfAlarmObjects = numberAlarmObjs;
             copiedData.NumberOfTotalObjects = numberTotalObjs;
           }
-        } //end for loop through validations
+        } // else
       } //end else abort
+
       dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(copiedData);
       let new_file_WriterBuffer = dicomDict.write();
       var file = new Blob([new_file_WriterBuffer], {type: "image/dcs"});
