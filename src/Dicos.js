@@ -127,8 +127,6 @@ export default class Dicos {
       validations = validationList;
     }
 
-    console.log(validations);
-
     var fileReader = new FileReader();
     fileReader.onload = function(event) {
       image = event.target.result;
@@ -181,7 +179,6 @@ export default class Dicos {
 
         if(validations.length>1) {
           for (var i = 0; i < validations.length; i++) {
-            console.log(copiedData.ThreatSequence);
             if (copiedData.ThreatSequence[i]) {
               copiedData.ThreatSequence[i]['ReferencedPTOSequence'] = {
                 'vrMap': {},
