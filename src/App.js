@@ -19,14 +19,14 @@ import TopBar from './components/TopBar';
 import JSZip from "jszip";
 import DetectionSet from "./DetectionSet.js";
 import Selection from "./Selection.js";
-import NoFileSign from "./components/NoFileSign.js"
+import NoFileSign from "./components/NoFileSign.js";
+import randomColor from "randomcolor";
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
 // Detection label properties
 const LABEL_FONT = "bold 12px Arial";
 const LABEL_PADDING = 4;
-const DETECTION_COLOR = '#367FFF';
 const DETECTION_COLOR_SELECTED = '#F7B500';
 const DETECTION_COLOR_VALID = '#87bb47';
 const DETECTION_COLOR_INVALID = '#961e13';
@@ -36,6 +36,9 @@ const BUTTON_MARGIN_LEFT = 60;
 const BUTTONS_GAP = 120;
 const BUTTON_HEIGHT = 60;
 const LINE_GAP = 40;
+const ALLOWED_HUES = ['blue', 'pink', 'purple', 'orange']
+const ALLOWED_LUMINOSITY = ['light', 'bright', 'dark']
+
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -95,6 +98,7 @@ class App extends Component {
       fileInQueue: false,
       nextAlgBtnEnabled: false,
       prevAlgBtnEnabled: false,
+      detectionColors: [],
       zoomLevel: 1,
       imageViewport: document.getElementById('dicomImage'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -474,6 +478,7 @@ class App extends Component {
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
     let all_detections = [];
+    let class_list = [];
 
     for(var i=0; i<images.length;i++){
       if(i===0){
@@ -507,6 +512,7 @@ class App extends Component {
       const detectionSet = new DetectionSet();
       const reader = new FileReader();
       let validations = new Array();
+      let colorsList = new Array();
 
       reader.addEventListener("loadend", function() {
         const view = new Uint8Array(reader.result);
@@ -538,14 +544,34 @@ class App extends Component {
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           validations[j] = 0;
+          class_list.push(Dicos.retrieveObjectClass(threatSequence.items[j]));
           detectionSet.detections[j] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
         }
+
+        let all_classes = [];
+        for(var m=0;m<class_list.length;m++){
+          if(!all_classes.includes(class_list[m])){
+            all_classes.push(class_list[m]);
+          }
+        }
+
+        let hue = 'orange';
+        let luminosity = 'bright';
+
+        for(var k=0;k<all_classes.length;k++){
+          hue = ALLOWED_HUES[Math.floor(Math.random() * ALLOWED_HUES.length)];
+          luminosity = ALLOWED_LUMINOSITY[Math.floor(Math.random() * ALLOWED_LUMINOSITY.length)];
+          colorsList.push({'class':all_classes[k], 'hue':hue, 'luminosity':luminosity});
+        }
       });
+
       reader.readAsArrayBuffer(images[i]);
       all_detections[i] = detectionSet;
       this.state.validations[i] = validations;
+      this.state.detectionColors = colorsList;
     }
     this.state.detectionSetList = all_detections;
+
     this.updateNavigationBtnState();
   }
 
@@ -589,13 +615,20 @@ class App extends Component {
       return;
     }
 
-    for(var j=0; j<data[currDataSetIndex].detections.length; j++){
+    const threatColors = this.state.detectionColors;
 
+    for(var j=0; j<data[currDataSetIndex].detections.length; j++){
       const detectionData = data[currDataSetIndex].detections[j];
 
-      if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
+      let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : randomColor({seed: data[currDataSetIndex].detections[j]['class'], hue: 'orange'});
 
-      let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
+      for(var k=0;k<threatColors.length;k++){
+        if(threatColors[k]['class']===data[currDataSetIndex].detections[j]['class']){
+          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : randomColor({seed: threatColors[k]['class'], hue: threatColors[k]['hue'], luminosity: threatColors[k]['luminosity']});
+        }
+      }
+
+      if (!detectionData || detectionData.boundingBox.length < B_BOX_COORDS) return;
 
       if (validations) {
         if(validations[j] === "CONFIRM"){
