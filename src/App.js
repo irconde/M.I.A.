@@ -16,6 +16,7 @@ import axios from 'axios';
 import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
 import TopBar from './components/TopBar';
+import ValidationButtons from './components/ValidationButtons';
 import JSZip from "jszip";
 import DetectionSet from "./DetectionSet.js";
 import Selection from "./Selection.js";
@@ -91,6 +92,10 @@ class App extends Component {
       validations: [],
       receiveTime: null,
       displayButtons: false,
+      buttonStyles: {
+        confirm: {},
+        reject: {}
+      },
       displayNext: false,
       fileInQueue: false,
       nextAlgBtnEnabled: false,
@@ -784,24 +789,29 @@ class App extends Component {
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
         var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]});
-        topRejectBtn = coordsRejectBtn.y;
+        // TODO:
+        // Fix reject button y cords
+        // Reject button position is different now that is in a component
+        // To align it, for now, I pushed the button down by additional 12%
+        // Need to investigate why this changed.
+        topRejectBtn = coordsRejectBtn.y + 0.12 *coordsRejectBtn.y;
       }
     }
     className = className + "feedback-buttons";
-    ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
-      style: {
-        top: topAcceptBtn,
-        left: leftAcceptBtn,
-        backgroundColor: DETECTION_COLOR_VALID,
+    this.setState({
+      buttonStyles: {
+        confirm: {
+          top: topAcceptBtn,
+          left: leftAcceptBtn,
+          backgroundColor: DETECTION_COLOR_VALID
+        },
+        reject: {
+          top: topRejectBtn,
+          left: leftAcceptBtn,
+          backgroundColor: DETECTION_COLOR_INVALID
+        }
       }
-    }, "CONFIRM"), document.getElementById('feedback-confirm'));
-    ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
-      style: {
-        top: topRejectBtn,
-        left: leftAcceptBtn,
-        backgroundColor: DETECTION_COLOR_INVALID,
-      }
-    }, "REJECT"), document.getElementById('feedback-reject'));
+    })
     cornerstone.updateImage(this.state.imageViewport, true);
   }
 
@@ -843,8 +853,7 @@ class App extends Component {
             prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           />
           <div id="algorithm-outputs"> </div>
-          <div id="feedback-confirm"> </div>
-          <div id="feedback-reject"> </div>
+          <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
         </div>
         <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
         <NoFileSign isVisible={!this.state.fileInQueue} />
