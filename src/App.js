@@ -771,17 +771,14 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
-    let className = "";
     if (this.state.detectionsSetList === null || this.state.detectionsSetList === 0){
       return;
     }
-
-    className = this.state.displayButtons ? "" : "hidden";
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;
     if(e.detail !== null){
-      if(className !== "hidden"){
+      if(this.state.displayButtons !== false){
         const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
         const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
         const boundingBoxCoords = this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].detections[this.state.currentSelection.detectionIndex].boundingBox;
@@ -794,10 +791,9 @@ class App extends Component {
         // Reject button position is different now that is in a component
         // To align it, for now, I pushed the button down by additional 12%
         // Need to investigate why this changed.
-        topRejectBtn = coordsRejectBtn.y + 0.12 *coordsRejectBtn.y;
+        topRejectBtn = coordsRejectBtn.y;
       }
     }
-    className = className + "feedback-buttons";
     this.setState({
       buttonStyles: {
         confirm: {
@@ -854,9 +850,9 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+          <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
-        <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
-        <NoFileSign isVisible={!this.state.fileInQueue} />
       </div>
     );
   }
