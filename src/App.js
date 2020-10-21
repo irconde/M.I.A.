@@ -791,7 +791,7 @@ class App extends Component {
         // Reject button position is different now that is in a component
         // To align it, for now, I pushed the button down by additional 12%
         // Need to investigate why this changed.
-        topRejectBtn = coordsRejectBtn.y;
+        topRejectBtn = coordsRejectBtn.y + 0.12 * coordsRejectBtn.y;
       }
     }
     this.setState({
