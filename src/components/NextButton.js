@@ -58,7 +58,7 @@ class NextButton extends Component {
                         left: '0',
                         right: '0',
                         width: '75%',
-                        maxWidth: '125px',
+                        maxWidth: '7.8125rem',
                         margin: 'auto'
                         }}
                 alt="arrow icon" />
