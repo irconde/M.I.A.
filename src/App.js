@@ -16,6 +16,7 @@ import axios from 'axios';
 import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
 import TopBar from './components/TopBar';
+import ValidationButtons from './components/ValidationButtons';
 import JSZip from "jszip";
 import DetectionSet from "./DetectionSet.js";
 import Selection from "./Selection.js";
@@ -91,6 +92,10 @@ class App extends Component {
       validations: [],
       receiveTime: null,
       displayButtons: false,
+      buttonStyles: {
+        confirm: {},
+        reject: {}
+      },
       displayNext: false,
       fileInQueue: false,
       nextAlgBtnEnabled: false,
@@ -766,42 +771,38 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
-    let className = "";
     if (this.state.detectionsSetList === null || this.state.detectionsSetList === 0){
       return;
     }
-
-    className = this.state.displayButtons ? "" : "hidden";
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;
     if(e.detail !== null){
-      if(className !== "hidden"){
+      if(this.state.displayButtons !== false){
         const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
         const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
         const boundingBoxCoords = this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].detections[this.state.currentSelection.detectionIndex].boundingBox;
         var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
-        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]});
+        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
         topRejectBtn = coordsRejectBtn.y;
       }
     }
-    className = className + "feedback-buttons";
-    ReactDOM.render(React.createElement("button", { id:"confirm", onClick: this.onMouseClicked, className: className,
-      style: {
-        top: topAcceptBtn,
-        left: leftAcceptBtn,
-        backgroundColor: DETECTION_COLOR_VALID,
+    this.setState({
+      buttonStyles: {
+        confirm: {
+          top: topAcceptBtn,
+          left: leftAcceptBtn,
+          backgroundColor: DETECTION_COLOR_VALID
+        },
+        reject: {
+          top: topRejectBtn,
+          left: leftAcceptBtn,
+          backgroundColor: DETECTION_COLOR_INVALID
+        }
       }
-    }, "CONFIRM"), document.getElementById('feedback-confirm'));
-    ReactDOM.render(React.createElement("button", { id:"reject", onClick: this.onMouseClicked ,className: className,
-      style: {
-        top: topRejectBtn,
-        left: leftAcceptBtn,
-        backgroundColor: DETECTION_COLOR_INVALID,
-      }
-    }, "REJECT"), document.getElementById('feedback-reject'));
+    })
     cornerstone.updateImage(this.state.imageViewport, true);
   }
 
@@ -843,11 +844,10 @@ class App extends Component {
             prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           />
           <div id="algorithm-outputs"> </div>
-          <div id="feedback-confirm"> </div>
-          <div id="feedback-reject"> </div>
+          <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+          <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
-        <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
-        <NoFileSign isVisible={!this.state.fileInQueue} />
       </div>
     );
   }
