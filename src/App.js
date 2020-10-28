@@ -785,13 +785,8 @@ class App extends Component {
         var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
-        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]});
-        // TODO:
-        // Fix reject button y cords
-        // Reject button position is different now that is in a component
-        // To align it, for now, I pushed the button down by additional 12%
-        // Need to investigate why this changed.
-        topRejectBtn = coordsRejectBtn.y + 0.12 * coordsRejectBtn.y;
+        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
+        topRejectBtn = coordsRejectBtn.y;
       }
     }
     this.setState({

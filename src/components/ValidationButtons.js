@@ -22,8 +22,8 @@ class ValidationButtons extends Component {
         } else {
             return (
                 <div>
-                    <button className='feedback-buttons' id="confirm" onClick={this.props.onMouseClicked} style={this.props.buttonStyles.confirm} >Confirm</button>
-                    <button className='feedback-buttons' id="reject" onClick={this.props.onMouseClicked} style={this.props.buttonStyles.reject}>Reject</button>
+                    <button className='feedback-buttons' id="confirm" onClick={this.props.onMouseClicked} style={this.props.buttonStyles.confirm} >CONFIRM</button>
+                    <button className='feedback-buttons' id="reject" onClick={this.props.onMouseClicked} style={this.props.buttonStyles.reject}>REJECT</button>
                 </div>
             );
         }
