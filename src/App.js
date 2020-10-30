@@ -301,17 +301,15 @@ class App extends Component {
    * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
    * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
    */
-  validationCompleted(validationList) {
-    var validationsComplete = true;
-    for( var i = 0; i < validationList.length; i++){
-      for(var j = 0; j < validationList[i].length; j++){
-        if (validationList[i][j] === 0) {
-          validationsComplete = false;
-          break;
-        }
+  validationCompleted() {
+    let result = true;
+    for (let x = 0; x < this.state.detectionSetList.length; x++){
+      if (this.state.detectionSetList[x].isDetectionsValidated() === false){
+        result = false;
+        break;
       }
     }
-    return validationsComplete;
+    return result;
   }
 
   /**
@@ -327,7 +325,7 @@ class App extends Component {
         this.setState({
           algorithm: null
         })
-        let validationCompleted = this.validationCompleted(this.state.validations);
+        let validationCompleted = this.validationCompleted();
         let image = this.state.openRasterData[0];
 
         const stackXML = document.implementation.createDocument("", "", null);
@@ -352,8 +350,7 @@ class App extends Component {
         */
         for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
-          let validationList = this.state.validations[i-1];
-          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(validationList, imageData, Date.now(), !validationCompleted));
+          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(this.state.detectionSetList[i-1], imageData, Date.now(), !validationCompleted));
           let additionalLayer = stackXML.createElement('layer');
           additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
           stackElem.appendChild(additionalLayer);
@@ -490,7 +487,8 @@ class App extends Component {
           var image = dicomParser.parseDicom(view);
 
           self.setState({
-            detections: null,
+            // What was this used for?
+            // detections: null,
             currentSelection : {
               detectionIndex: Selection.NO_SELECTION,
               detectionSetIndex: 0
@@ -511,7 +509,6 @@ class App extends Component {
 
       const detectionSet = new DetectionSet();
       const reader = new FileReader();
-      let validations = new Array();
 
       reader.addEventListener("loadend", function() {
         const view = new Uint8Array(reader.result);
@@ -519,7 +516,7 @@ class App extends Component {
 
         let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
 
-        detectionSet.algorithm = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+        detectionSet.setAlgorithmName(image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag));
 
         // Threat Sequence information
         const threatSequence = image.elements.x40101011;
@@ -537,18 +534,16 @@ class App extends Component {
         }
 
         // for every threat found, create a new Detection object and store all Detection
-        // objects in s DetectionSet object
+        // objects in a DetectionSet object
         for (var j = 0; j < threatsCount; j++) {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-          validations[j] = 0;
-          detectionSet.detections[j] = new Detection(boundingBoxCoords, objectClass, confidenceLevel);
+          detectionSet.addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
         }
       });
       reader.readAsArrayBuffer(images[i]);
       all_detections[i] = detectionSet;
-      this.state.validations[i] = validations;
     }
     this.state.detectionSetList = all_detections;
     this.updateNavigationBtnState();
@@ -583,8 +578,6 @@ class App extends Component {
    */
   renderDetections(data, context) {
 
-    let validations = this.state.validations.length > 0 ? this.state.validations[this.state.currentSelection.detectionSetIndex] : null;
-
     let B_BOX_COORDS = 4;
     let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
     let currDataIndex = this.state.currentSelection.detectionIndex;
@@ -602,13 +595,11 @@ class App extends Component {
 
       let detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR;
 
-      if (validations) {
-        if(validations[j] === "CONFIRM"){
-          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
-        }
-        else if(validations[j] === "REJECT"){
-          detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
-        }
+      if(data[currDataSetIndex].detections[j].feedback === true){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_VALID;
+      }
+      else if(data[currDataSetIndex].detections[j].feedback === false){
+        detectionColor = detectionData.selected? DETECTION_COLOR_SELECTED : DETECTION_COLOR_INVALID;
       }
 
       context.font = LABEL_FONT;
@@ -687,25 +678,24 @@ class App extends Component {
     if (this.state.detectionsSetList === null || this.state.detectionSetList.length === 0){
       return;
     }
-
     var clickedPos = Selection.NO_SELECTION;
     var selectedIndex = this.state.currentSelection.detectionIndex;
     var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
-    var validations = this.state.validations[detectionSetIndex];
     let feedback = "";
 
     // User is submitting feedback through confirm or reject buttons
     if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
       if(e.currentTarget.id === "confirm"){
-        feedback = "CONFIRM";
+        feedback = true;
       }
       if(e.currentTarget.id === "reject"){
-        feedback = "REJECT";
+        feedback = false;
       }
 
       detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-      this.state.validations[detectionSetIndex][selectedIndex] = feedback;
+      this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].feedback = feedback;
+      this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].isValidated = true;
 
       this.setState({
         currentSelection: {
@@ -714,7 +704,7 @@ class App extends Component {
         },
         displayButtons: false,
       }, () => {
-        if(this.validationCompleted(this.state.validations)){
+        if(this.validationCompleted()){
           this.setState({
             displayNext: true
           });
