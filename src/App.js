@@ -89,7 +89,6 @@ class App extends Component {
       image: null,
       detectionSetList: [],
       currentSelection: new Selection(),
-      validations: [],
       receiveTime: null,
       displayButtons: false,
       buttonStyles: {
@@ -214,7 +213,6 @@ class App extends Component {
     this.setState({
       selectedFile: null,
       displayNext: false,
-      validations: [],
       currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION }
     });
   }
@@ -262,7 +260,6 @@ class App extends Component {
                   image: imgBuf,
                   displayNext: false,
                   receiveTime: Date.now(),
-                  validations: [],
                   currentSelection: {
                     detectionSetIndex: 0,
                     detectionIndex: Selection.NO_SELECTION }
