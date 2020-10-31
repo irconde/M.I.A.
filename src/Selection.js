@@ -1,13 +1,21 @@
+import * as constants from './Constants';
 /**
  * Class that provides information on the selected detection
  */
 export default class Selection {
 
-  static get NO_SELECTION() { return -1; }
-
   constructor() {
-    this.detectionSetIndex = Selection.NO_SELECTION;
-    this.detectionIndex = Selection.NO_SELECTION;
+    this.detectionSetIndex = constants.selection.NO_SELECTION;
+    this.detectionIndex = constants.selection.NO_SELECTION;
+    this.availableAlgorithms = [];
+  }
+
+  addAlgorithm(algorithm) {
+    this.availableAlgorithms.push(algorithm);
+  }
+
+  getAlgorithm() {
+    return this.availableAlgorithms[this.detectionSetIndex];
   }
 
   set(detectionSetIndex, detectionIndex) {
@@ -16,8 +24,8 @@ export default class Selection {
   }
 
   clear() {
-    this.detectionSetIndex = Selection.NO_SELECTION;
-    this.detectionIndex = Selection.NO_SELECTION;
+    this.detectionSetIndex = constants.selection.NO_SELECTION;
+    this.detectionIndex = constants.selection.NO_SELECTION;
   }
 
 }

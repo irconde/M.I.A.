@@ -18,9 +18,10 @@ import MetaData from './components/MetaData';
 import TopBar from './components/TopBar';
 import ValidationButtons from './components/ValidationButtons';
 import JSZip from "jszip";
-import DetectionSet from "./DetectionSet.js";
-import Selection from "./Selection.js";
-import NoFileSign from "./components/NoFileSign.js"
+import DetectionSet from "./DetectionSet";
+import Selection from "./Selection";
+import NoFileSign from "./components/NoFileSign";
+import * as constants from './Constants';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 const FILE_SERVER = "http://127.0.0.1:4002";
 
@@ -74,6 +75,7 @@ class App extends Component {
    */
   constructor(props) {
     super(props);
+    this.currentSelection = new Selection();
     this.state = {
       threatsCount: 0,
       selectedFile: null,
@@ -88,6 +90,7 @@ class App extends Component {
       openRasterData: [],
       image: null,
       detectionSetList: [],
+      detections: {},
       currentSelection: new Selection(),
       receiveTime: null,
       displayButtons: false,
@@ -119,8 +122,6 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
-    this.getFilesFromCommandServer();
-    this.updateNumberOfFiles();
   }
 
   /**
@@ -133,6 +134,8 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+    this.getFilesFromCommandServer();
+    this.updateNumberOfFiles();
     this.setupConerstoneJS(this.state.imageViewport);
     this.updateNavigationBtnState();
   }
@@ -143,7 +146,7 @@ class App extends Component {
     this.setState({
       currentSelection: {
         detectionSetIndex: currentDetectionSet,
-        detectionIndex: Selection.NO_SELECTION
+        detectionIndex: constants.selection.NO_SELECTION
       },
       algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
     }, () => {
@@ -213,7 +216,7 @@ class App extends Component {
     this.setState({
       selectedFile: null,
       displayNext: false,
-      currentSelection: { detectionSetIndex: 0, detectionIndex: Selection.NO_SELECTION }
+      currentSelection: { detectionSetIndex: 0, detectionIndex: constants.selection.NO_SELECTION }
     });
   }
 
@@ -262,7 +265,7 @@ class App extends Component {
                   receiveTime: Date.now(),
                   currentSelection: {
                     detectionSetIndex: 0,
-                    detectionIndex: Selection.NO_SELECTION }
+                    detectionIndex: constants.selection.NO_SELECTION }
                   }, () => {
                    this.loadAndViewImage();
                  });
@@ -301,7 +304,7 @@ class App extends Component {
   validationCompleted() {
     let result = true;
     for (let x = 0; x < this.state.detectionSetList.length; x++){
-      if (this.state.detectionSetList[x].isDetectionsValidated() === false){
+      if (this.state.detectionSetList[x].isValidated() === false){
         result = false;
         break;
       }
@@ -468,6 +471,7 @@ class App extends Component {
    * @return {type}       None
    */
   loadDICOSdata(images) {
+    const self = this;
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -487,7 +491,7 @@ class App extends Component {
             // What was this used for?
             // detections: null,
             currentSelection : {
-              detectionIndex: Selection.NO_SELECTION,
+              detectionIndex: constants.selection.NO_SELECTION,
               detectionSetIndex: 0
             },
             threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
@@ -504,7 +508,9 @@ class App extends Component {
         reader.readAsArrayBuffer(images[i]);
       }
 
+      // TODO. Delete this
       const detectionSet = new DetectionSet();
+
       const reader = new FileReader();
 
       reader.addEventListener("loadend", function() {
@@ -512,8 +518,16 @@ class App extends Component {
         var image = dicomParser.parseDicom(view);
 
         let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
+        let algorithmName = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
 
-        detectionSet.setAlgorithmName(image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag));
+        if (!(algorithmName in self.state.detections)) {
+          self.state.detections[algorithmName] = new DetectionSet();
+          self.state.detections[algorithmName].setAlgorithmName(algorithmName);
+          self.currentSelection.addAlgorithm(algorithmName);
+        }
+
+        // TODO. Delete this
+        detectionSet.setAlgorithmName(algorithmName);
 
         // Threat Sequence information
         const threatSequence = image.elements.x40101011;
@@ -537,6 +551,7 @@ class App extends Component {
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           detectionSet.addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
         }
       });
       reader.readAsArrayBuffer(images[i]);
@@ -657,10 +672,10 @@ class App extends Component {
     var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
 
-    if(selectedIndex !== Selection.NO_SELECTION){
+    if(selectedIndex !== constants.selection.NO_SELECTION){
       if(detectionList[detectionSetIndex].detections[selectedIndex]){
         detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-        this.setState({currentSelection: {detectionIndex: Selection.NO_SELECTION, detectionSetIndex: detectionSetIndex}})
+        this.setState({currentSelection: {detectionIndex: constants.selection.NO_SELECTION, detectionSetIndex: detectionSetIndex}})
       }
     }
   }
@@ -675,7 +690,7 @@ class App extends Component {
     if (this.state.detectionsSetList === null || this.state.detectionSetList.length === 0){
       return;
     }
-    var clickedPos = Selection.NO_SELECTION;
+    var clickedPos = constants.selection.NO_SELECTION;
     var selectedIndex = this.state.currentSelection.detectionIndex;
     var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
@@ -696,7 +711,7 @@ class App extends Component {
 
       this.setState({
         currentSelection: {
-          detectionIndex: Selection.NO_SELECTION,
+          detectionIndex: constants.selection.NO_SELECTION,
           detectionSetIndex: this.state.currentSelection.detectionSetIndex
         },
         displayButtons: false,
@@ -720,9 +735,9 @@ class App extends Component {
             break;
         }
         }
-      if(clickedPos === Selection.NO_SELECTION) {
-        if (selectedIndex !== Selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-        selectedIndex = Selection.NO_SELECTION;
+      if(clickedPos === constants.selection.NO_SELECTION) {
+        if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+        selectedIndex = constants.selection.NO_SELECTION;
         this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
           this.renderButtons(e);
         });
@@ -730,12 +745,12 @@ class App extends Component {
       else {
         if (clickedPos === selectedIndex){
           detectionList[detectionSetIndex].detections[clickedPos].selected = false;
-          selectedIndex = Selection.NO_SELECTION;
+          selectedIndex = constants.selection.NO_SELECTION;
           this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
             this.renderButtons(e);
           });
         } else {
-            if (selectedIndex !== Selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+            if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
             detectionList[detectionSetIndex].detections[clickedPos].selected = true;
             selectedIndex = clickedPos;
             this.setState({displayButtons: true, currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
