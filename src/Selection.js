@@ -20,11 +20,23 @@ export default class Selection {
 
   set(detectionSetIndex, detectionIndex) {
     this.detectionSetIndex = detectionSetIndex;
-    this.detectionIndex = detectionIndex;
+    if (detectionIndex !== undefined) {
+      this.detectionIndex = detectionIndex;
+    } else {
+      this.detectionIndex = constants.selection.NO_SELECTION;
+    }
+  }
+
+  clearDetection() {
+    this.detectionIndex = constants.selection.NO_SELECTION;
+  }
+
+  setDetection(index) {
+    this.detectionIndex = index;
   }
 
   clear() {
-    this.detectionSetIndex = constants.selection.NO_SELECTION;
+    this.detectionSetIndex = constants.selection.FIRST_ELEMENT;
     this.detectionIndex = constants.selection.NO_SELECTION;
   }
 

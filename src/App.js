@@ -91,7 +91,6 @@ class App extends Component {
       image: null,
       detectionSetList: [],
       detections: {},
-      currentSelection: new Selection(),
       receiveTime: null,
       displayButtons: false,
       buttonStyles: {
@@ -141,16 +140,11 @@ class App extends Component {
   }
 
 
-  getAlgorithmForPos(pos) {
-    let currentDetectionSet = this.state.currentSelection.detectionSetIndex + pos;
+  getAlgorithmForPos(deltaPos) {
+    this.currentSelection.set(this.currentSelection.detectionSetIndex + deltaPos);
     this.setState({
-      currentSelection: {
-        detectionSetIndex: currentDetectionSet,
-        detectionIndex: constants.selection.NO_SELECTION
-      },
-      algorithm: this.state.detectionSetList[currentDetectionSet].algorithm
+      algorithm: this.currentSelection.getAlgorithm()
     }, () => {
-      //this.state.currentSelection.detectionSetIndex = currentDetectionSet;
       // remove button to iterate through algorithms if there are no more after the current one
       this.updateNavigationBtnState();
       this.displayDICOSimage();
@@ -213,10 +207,10 @@ class App extends Component {
   onNoImageLeft(){
     console.log('No next image to display');
     this.state.imageViewport.style.visibility = 'hidden'
+    this.currentSelection.clear();
     this.setState({
       selectedFile: null,
-      displayNext: false,
-      currentSelection: { detectionSetIndex: 0, detectionIndex: constants.selection.NO_SELECTION }
+      displayNext: false
     });
   }
 
@@ -258,14 +252,12 @@ class App extends Component {
               // Once we have all the layers...
               promiseOfList.then(() => {
                 this.state.openRasterData = listOfLayers;
+                this.currentSelection.clear();
                 this.setState({
                   selectedFile: this.state.openRasterData[0],
                   image: imgBuf,
                   displayNext: false,
-                  receiveTime: Date.now(),
-                  currentSelection: {
-                    detectionSetIndex: 0,
-                    detectionIndex: constants.selection.NO_SELECTION }
+                  receiveTime: Date.now()
                   }, () => {
                    this.loadAndViewImage();
                  });
@@ -289,7 +281,7 @@ class App extends Component {
    */
   updateNavigationBtnState() {
     const algorithmCount = this.state.detectionSetList.length;
-    const currentAlgorithmIndex = this.state.currentSelection.detectionSetIndex;
+    const currentAlgorithmIndex = this.currentSelection.detectionSetIndex;
     this.state.nextAlgBtnEnabled = (currentAlgorithmIndex < (algorithmCount - 1));
     this.state.prevAlgBtnEnabled = currentAlgorithmIndex > 0;
   }
@@ -486,14 +478,8 @@ class App extends Component {
         reader.addEventListener("loadend", function() {
           const view = new Uint8Array(reader.result);
           var image = dicomParser.parseDicom(view);
-
+          self.currentSelection.clear();
           self.setState({
-            // What was this used for?
-            // detections: null,
-            currentSelection : {
-              detectionIndex: constants.selection.NO_SELECTION,
-              detectionSetIndex: 0
-            },
             threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
             algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
             type: image.string(Dicos.dictionary['DetectorType'].tag),
@@ -591,8 +577,8 @@ class App extends Component {
   renderDetections(data, context) {
 
     let B_BOX_COORDS = 4;
-    let currDataSetIndex = this.state.currentSelection.detectionSetIndex;
-    let currDataIndex = this.state.currentSelection.detectionIndex;
+    let currDataSetIndex = this.currentSelection.detectionSetIndex;
+    let currDataIndex = this.currentSelection.detectionIndex;
     context.clearRect(0, 0, context.width, context.height);
 
     if (data === null || data.length === 0) {
@@ -630,7 +616,7 @@ class App extends Component {
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
 
       // Line rendering
-      if (j === this.state.currentSelection.detectionIndex) {
+      if (j === this.currentSelection.detectionIndex) {
         const buttonGap = (BUTTONS_GAP - BUTTON_HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)
@@ -668,14 +654,14 @@ class App extends Component {
       this.renderButtons(e);
     });
 
-    var selectedIndex = this.state.currentSelection.detectionIndex;
-    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
+    var selectedIndex = this.currentSelection.detectionIndex;
+    var detectionSetIndex = this.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
 
     if(selectedIndex !== constants.selection.NO_SELECTION){
       if(detectionList[detectionSetIndex].detections[selectedIndex]){
         detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-        this.setState({currentSelection: {detectionIndex: constants.selection.NO_SELECTION, detectionSetIndex: detectionSetIndex}})
+        this.currentSelection.clearDetection();
       }
     }
   }
@@ -691,8 +677,8 @@ class App extends Component {
       return;
     }
     var clickedPos = constants.selection.NO_SELECTION;
-    var selectedIndex = this.state.currentSelection.detectionIndex;
-    var detectionSetIndex = this.state.currentSelection.detectionSetIndex;
+    var selectedIndex = this.currentSelection.detectionIndex;
+    var detectionSetIndex = this.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
     let feedback = "";
 
@@ -708,12 +694,8 @@ class App extends Component {
       detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
       this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].feedback = feedback;
       this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].isValidated = true;
-
+      this.currentSelection.clearDetection();
       this.setState({
-        currentSelection: {
-          detectionIndex: constants.selection.NO_SELECTION,
-          detectionSetIndex: this.state.currentSelection.detectionSetIndex
-        },
         displayButtons: false,
       }, () => {
         if(this.validationCompleted()){
@@ -737,23 +719,23 @@ class App extends Component {
         }
       if(clickedPos === constants.selection.NO_SELECTION) {
         if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-        selectedIndex = constants.selection.NO_SELECTION;
-        this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
+        this.currentSelection.clearDetection();
+        this.setState({ displayButtons: false }, () => {
           this.renderButtons(e);
         });
       }
       else {
         if (clickedPos === selectedIndex){
           detectionList[detectionSetIndex].detections[clickedPos].selected = false;
-          selectedIndex = constants.selection.NO_SELECTION;
-          this.setState({ displayButtons: false,  currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
+          this.currentSelection.clearDetection();
+          this.setState({ displayButtons: false }, () => {
             this.renderButtons(e);
           });
         } else {
             if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
             detectionList[detectionSetIndex].detections[clickedPos].selected = true;
-            selectedIndex = clickedPos;
-            this.setState({displayButtons: true, currentSelection: { detectionIndex: selectedIndex, detectionSetIndex: this.state.currentSelection.detectionSetIndex } }, () => {
+            this.currentSelection.setDetection(clickedPos);
+            this.setState({ displayButtons: true }, () => {
               this.renderButtons(e);
             });
         }
@@ -783,7 +765,7 @@ class App extends Component {
       if(this.state.displayButtons !== false){
         const buttonGap = BUTTONS_GAP / this.state.zoomLevel;
         const marginLeft = BUTTON_MARGIN_LEFT / this.state.zoomLevel;
-        const boundingBoxCoords = this.state.detectionSetList[this.state.currentSelection.detectionSetIndex].detections[this.state.currentSelection.detectionIndex].boundingBox;
+        const boundingBoxCoords = this.state.detectionSetList[this.currentSelection.detectionSetIndex].detections[this.currentSelection.detectionIndex].boundingBox;
         var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
