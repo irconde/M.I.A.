@@ -121,7 +121,12 @@ class App extends Component {
     this.setupConerstoneJS(this.state.imageViewport);
   }
 
-
+  /**
+   * getAlgorithmForPos - Method triggered when there's a click event on the navigation buttons inside the Metadata widget.
+   *                    - It allows users to navigate to the next or previous algorithm
+   *
+   * @return {type}  None
+   */
   getAlgorithmForPos(deltaPos) {
     this.currentSelection.set(this.currentSelection.detectionSetIndex + deltaPos);
     this.setState({
@@ -294,7 +299,7 @@ class App extends Component {
    * nextImageClick() - When the operator taps next, we send to the file server to remove the
    *                  - current image, then when that is complete, we send the image to the command
    *                  - server. Finally, calling getNextImage to display another image if there is one
-   * @param {type} - None
+   * @param {type} - Event
    * @return {type} - None
    */
   nextImageClick(e) {

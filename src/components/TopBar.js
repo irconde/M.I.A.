@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * GUI widget that represents the bar displayed at the top of the screen and that
+ * contains several icons to provide the user with information regarding the status
+ * of the connection with the server side.
+ */
 class TopBar extends Component {
     constructor(props){
         super(props);

@@ -1,6 +1,6 @@
 import * as constants from './Constants';
 /**
- * Class that provides information on the selected detection
+ * Class that provides information on the selected algorithm
  */
 export default class Selection {
 

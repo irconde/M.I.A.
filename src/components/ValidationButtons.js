@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * GUI widget that provides the user with two buttons to validate (confirm or reject) detections
+ */
 class ValidationButtons extends Component {
 
     static propTypes = {
@@ -24,7 +27,5 @@ class ValidationButtons extends Component {
         }
     }
 }
-
-
 
 export default ValidationButtons;

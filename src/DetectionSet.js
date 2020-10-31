@@ -21,6 +21,12 @@ export default class DetectionSet {
     }
   }
 
+  /**
+   * getData - Method that provides the list of detections associated with a given view
+   *
+   * @param  {type} viewport  string value that indicates the viewport where the detections will be rendered
+   * @return {type}           Array of Detection objects
+   */
   getData(viewport) {
     if (viewport !== undefined) {
       return this.data[viewport];
@@ -28,6 +34,12 @@ export default class DetectionSet {
     return this.data[constants.viewport.TOP];
   }
 
+  /**
+   * getDataFromSelectedDetection - Method that provides all the data regarding
+   * a the currently selected detection
+   *
+   * @return {type}  Detection object
+   */
   getDataFromSelectedDetection() {
     let view = this.viewportSelected;
     if (this.viewportSelected === undefined) {
@@ -40,6 +52,13 @@ export default class DetectionSet {
     }
   }
 
+  /**
+   * validateSelectedDetection - Method used to validate a currently selected
+   * detection given the user feedback provided through the validation buttons
+   *
+   * @param  {type} feedback  boolean value that indicates whether the detection is right or wrong
+   * @return {type}           None
+   */
   validateSelectedDetection(feedback) {
     let view = this.viewportSelected;
     if (this.viewportSelected === undefined) {
@@ -49,6 +68,11 @@ export default class DetectionSet {
     this.clearSelection();
   }
 
+  /**
+   * clearSelection - Method that resets selection. Deselects the currently selected detection
+   *
+   * @return {type}  None
+   */
   clearSelection() {
     if (this.detectionSelected !== constants.selection.NO_SELECTION) {
       this.getData(this.viewportSelected)[this.detectionSelected].setSelected(false);
@@ -57,6 +81,13 @@ export default class DetectionSet {
     this.detectionSelected = constants.selection.NO_SELECTION;
   }
 
+  /**
+   * selectDetection - Method that selects a detection that is referenced by detectionIndex and rendered in the given viewport.
+   *
+   * @param  {type} detectionIndex  int value that indicates the index of the detection to be selected (the position of the detection in the associated array of detections)
+   * @param  {type} viewport  string value that indicates the viewport where the detection is rendered
+   * @return {type}  boolean value that indicates whether there's any detection selected or not
+   */
   selectDetection(detectionIndex, viewport){
     let view = constants.viewport.TOP;
     if (viewport !== undefined) {
@@ -77,6 +108,13 @@ export default class DetectionSet {
     }
   }
 
+  /**
+   * addDetection - Method that adds a given Detection object to the internal dataset (array of Detection objects).
+   *
+   * @param  {type} detection  Detection object to be added to the associated array of detections.
+   * @param  {type} view  string value that indicates the viewport where the detection is rendered
+   * @return {type} None
+   */
   addDetection(detection, view) {
     let viewport = constants.viewport.TOP;
     if (view !== undefined) {
@@ -96,8 +134,7 @@ export default class DetectionSet {
   /**
    * isValidated() - Returns true if all of the detections in all this set have been validated
    *
-   * @return {type}  None
-   * @returns {type} boolean
+   * @return {type} boolean
    */
   isValidated() {
     let result = true;
