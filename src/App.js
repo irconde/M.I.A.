@@ -105,6 +105,8 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
+    this.getFilesFromCommandServer();
+    this.updateNumberOfFiles();
   }
 
   /**
@@ -117,8 +119,6 @@ class App extends Component {
     this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-    this.getFilesFromCommandServer();
-    this.updateNumberOfFiles();
     this.setupConerstoneJS(this.state.imageViewport);
   }
 
@@ -325,7 +325,7 @@ class App extends Component {
         */
         for(var i = 1; i < this.state.openRasterData.length; i++){
           let imageData = this.state.openRasterData[i];
-          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(i-1)].getData(), imageData, Date.now(), !validationCompleted));
+          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(i-1)], imageData, Date.now(), !validationCompleted));
           let additionalLayer = stackXML.createElement('layer');
           additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
           stackElem.appendChild(additionalLayer);
@@ -445,6 +445,7 @@ class App extends Component {
    */
   loadDICOSdata(images) {
     const self = this;
+    self.state.detections = {};
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!

@@ -123,8 +123,9 @@ export default class Dicos {
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
     let detections = [];
-    if(detectionList.detections.length !== 0){
-      detections = detectionList.detections;
+
+    if(detectionList.getData().length !== 0){
+      detections = detectionList.getData();
     }
 
     var fileReader = new FileReader();
