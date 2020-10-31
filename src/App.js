@@ -680,20 +680,15 @@ class App extends Component {
     var selectedIndex = this.currentSelection.detectionIndex;
     var detectionSetIndex = this.currentSelection.detectionSetIndex;
     var detectionList = this.state.detectionSetList;
-    let feedback = "";
+    let feedback = undefined;
+
+    let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
 
     // User is submitting feedback through confirm or reject buttons
     if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
-      if(e.currentTarget.id === "confirm"){
-        feedback = true;
-      }
-      if(e.currentTarget.id === "reject"){
-        feedback = false;
-      }
-
-      detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-      this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].feedback = feedback;
-      this.state.detectionSetList[detectionSetIndex].detections[selectedIndex].isValidated = true;
+      if(e.currentTarget.id === "confirm"){ feedback = true; }
+      if(e.currentTarget.id === "reject"){ feedback = false; }
+      detectionSet.validateSelectedDetection(feedback);
       this.currentSelection.clearDetection();
       this.setState({
         displayButtons: false,
@@ -710,30 +705,31 @@ class App extends Component {
     // Handle regular click events for selecting and deselecting detections
     else{
       const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.page.x, y:e.detail.currentPoints.page.y});
-
-        for (var j = 0; j < detectionList[detectionSetIndex].detections.length; j++){
-          if(Utils.pointInRect(mousePos, detectionList[detectionSetIndex].detections[j].boundingBox)){
+      let detectionSetData = detectionSet.getData();
+      for (var j = 0; j < detectionSetData.length; j++){
+        if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
             clickedPos = j;
             break;
         }
-        }
+      }
+      // Click on an empty area
       if(clickedPos === constants.selection.NO_SELECTION) {
-        if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
+        detectionSet.clearSelection();
         this.currentSelection.clearDetection();
         this.setState({ displayButtons: false }, () => {
           this.renderButtons(e);
         });
       }
       else {
+        // Click on a detection already selected
         if (clickedPos === selectedIndex){
-          detectionList[detectionSetIndex].detections[clickedPos].selected = false;
+          detectionSet.clearSelection();
           this.currentSelection.clearDetection();
           this.setState({ displayButtons: false }, () => {
             this.renderButtons(e);
           });
         } else {
-            if (selectedIndex !== constants.selection.NO_SELECTION) detectionList[detectionSetIndex].detections[selectedIndex].selected = false;
-            detectionList[detectionSetIndex].detections[clickedPos].selected = true;
+            detectionSet.selectDetection(clickedPos);
             this.currentSelection.setDetection(clickedPos);
             this.setState({ displayButtons: true }, () => {
               this.renderButtons(e);
@@ -741,7 +737,6 @@ class App extends Component {
         }
       }
     }
-
   }
 
 

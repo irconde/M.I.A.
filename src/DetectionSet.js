@@ -8,6 +8,9 @@ export default class DetectionSet {
 
   constructor() {
     this.algorithm = "";
+    this.selected = false;
+    this.viewportSelected = undefined;
+    this.detectionSelected = constants.selection.NO_SELECTION;
     this.visible = true;
     // TODO. Delete this
     this.detections = [];
@@ -19,6 +22,39 @@ export default class DetectionSet {
     if (!(viewport in this.data)) {
       this.data[viewport] = [];
     }
+  }
+
+  getData(viewport) {
+    if (viewport !== undefined) {
+      return this.data[viewport];
+    }
+    return this.data[constants.viewport.TOP];
+  }
+
+  validateSelectedDetection(feedback) {
+    this.data[this.viewportSelected][this.detectionSelected].validate(feedback);
+    this.clearSelection();
+  }
+
+  clearSelection() {
+    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+      this.getData(this.viewportSelected)[this.detectionSelected].setSelected(false);
+    }
+    this.viewportSelected = undefined;
+    this.detectionSelected = constants.selection.NO_SELECTION;
+  }
+
+  selectDetection(detectionIndex, viewport){
+    this.viewportSelected = viewport;
+    let view = constants.viewport.TOP;
+    if (viewport !== undefined) {
+      view = viewport;
+    }
+    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+      this.data[view][this.detectionSelected].setSelected(false);
+    }
+    this.data[view][detectionIndex].setSelected(true);
+    this.detectionSelected = detectionIndex;
   }
 
   addDetection(detection, view) {
@@ -52,7 +88,7 @@ export default class DetectionSet {
     /*
     for (const [key, detectionList] of Object.entries(this.data)) {
       for (let i = 0; i < detectionList.length; i++){
-        if (detectionList[i].isValidated === false){
+        if (detectionList[i].isValidated() === false){
           result = false;
           break;
         }
@@ -60,7 +96,7 @@ export default class DetectionSet {
     }
     */
     for (let i = 0; i < this.detections.length; i++){
-      if (this.detections[i].isValidated === false){
+      if (this.detections[i].isValidated() === false){
         result = false;
         break;
       }
