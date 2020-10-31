@@ -3,21 +3,16 @@ import PropTypes from 'prop-types';
 
 class ValidationButtons extends Component {
 
-    constructor(props){
-        super(props);
-    }
-
     static propTypes = {
         displayButtons: PropTypes.bool.isRequired,
         onMouseClicked: PropTypes.func.isRequired,
         buttonStyles: PropTypes.object
     }
 
-
     render() {
         if ( this.props.displayButtons === false){
             return (
-                <div/>                    
+                <div/>
             );
         } else {
             return (

@@ -4,7 +4,6 @@ import {Component} from 'react';
 import * as cornerstone from "cornerstone-core";
 import * as cornerstoneTools from "cornerstone-tools";
 import dicomParser from 'dicom-parser';
-import ReactDOM from 'react-dom';
 import * as cornerstoneMath from "cornerstone-math";
 import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -189,11 +188,13 @@ class App extends Component {
    */
   onNoImageLeft(){
     console.log('No next image to display');
-    this.state.imageViewport.style.visibility = 'hidden'
+    let updateImageViewport = this.state.imageViewport;
+    updateImageViewport.style.visibility = 'hidden';
     this.currentSelection.clear();
     this.setState({
       selectedFile: null,
-      displayNext: false
+      displayNext: false,
+      imageViewport: updateImageViewport
     });
   }
 
@@ -265,8 +266,10 @@ class App extends Component {
   updateNavigationBtnState() {
     const algorithmCount = this.currentSelection.getAlgorithmCount();
     const currentAlgorithmIndex = this.currentSelection.detectionSetIndex;
-    this.state.nextAlgBtnEnabled = (currentAlgorithmIndex < (algorithmCount - 1));
-    this.state.prevAlgBtnEnabled = currentAlgorithmIndex > 0;
+    this.setState({
+      nextAlgBtnEnabled: (currentAlgorithmIndex < (algorithmCount - 1)),
+      prevAlgBtnEnabled: currentAlgorithmIndex > 0,
+    })
   }
 
   /**
@@ -623,16 +626,17 @@ class App extends Component {
       if(e.currentTarget.id === "confirm"){ feedback = true; }
       if(e.currentTarget.id === "reject"){ feedback = false; }
       detectionSet.validateSelectedDetection(feedback);
-      this.setState({
-        displayButtons: false,
-      }, () => {
-        if(this.validationCompleted()){
-          this.setState({
-            displayNext: true
-          });
-        }
-        this.renderButtons(e);
-      });
+      if(this.validationCompleted()){
+        this.setState({
+          displayButtons: false,
+          displayNext: true
+        });
+      } else {
+        this.setState({
+          displayButtons: false,
+        });
+      }
+      cornerstone.updateImage(this.state.imageViewport, true);
     }
 
     // Handle regular click events for selecting and deselecting detections

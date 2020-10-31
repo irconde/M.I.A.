@@ -1,4 +1,3 @@
-import Detection from "./Detection";
 import * as constants from "./Constants";
 
 /**
@@ -34,7 +33,7 @@ export default class DetectionSet {
     if (this.viewportSelected === undefined) {
       view = constants.viewport.TOP;
     }
-    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
       return this.data[view][this.detectionSelected];
     } else {
       return undefined;
@@ -51,7 +50,7 @@ export default class DetectionSet {
   }
 
   clearSelection() {
-    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
       this.getData(this.viewportSelected)[this.detectionSelected].setSelected(false);
     }
     this.viewportSelected = undefined;
@@ -63,7 +62,7 @@ export default class DetectionSet {
     if (viewport !== undefined) {
       view = viewport;
     }
-    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
       this.data[view][this.detectionSelected].setSelected(false);
     }
     if (this.viewportSelected === viewport  && this.detectionSelected === detectionIndex) {

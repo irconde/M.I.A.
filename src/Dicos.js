@@ -1,5 +1,4 @@
 import * as dcmjs from 'dcmjs';
-import Utils from "./Utils";
 
 /**
  * Class that emcompases any secondary method related to DICOS file management

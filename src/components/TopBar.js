@@ -52,8 +52,8 @@ class TopBar extends Component {
                         </g>
                         <text x="35%" y="53%" fontSize="10pt"  fill="black" dominantBaseline="middle" textAnchor="middle" style={{fontWeight: 600}}>{this.props.numberOfFiles}</text>
                     </svg>
-                    <img style={this.state.imgStyle} src='./img/ic_traffic_download_upload.svg' />
-                    <img style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
+                    <img style={this.state.imgStyle} src='./img/ic_traffic_download_upload.svg' alt=""/>
+                    <img style={this.state.lastIcon} alt="" src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
                 </div>
             );
         } else if (this.props.isUpload === true && this.props.isDownload === false ){
@@ -69,8 +69,8 @@ class TopBar extends Component {
                         </g>
                         <text x="35%" y="53%" fontSize="10pt"  fill="black" dominantBaseline="middle" textAnchor="middle" style={{fontWeight: 600}}>{this.props.numberOfFiles}</text>
                     </svg>
-                    <img style={this.state.imgStyle} src='./img/ic_traffic_upload.svg' />
-                    <img style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
+                    <img alt="" style={this.state.imgStyle} src='./img/ic_traffic_upload.svg' />
+                    <img alt="" style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
                 </div>
             );
         } else if (this.props.isUpload === false && this.props.isDownload === true ){
@@ -86,8 +86,8 @@ class TopBar extends Component {
                         </g>
                         <text x="35%" y="53%" fontSize="10pt"  fill="black" dominantBaseline="middle" textAnchor="middle" style={{fontWeight: 600}}>{this.props.numberOfFiles}</text>
                     </svg>
-                    <img style={this.state.imgStyle} src='./img/ic_traffic_download.svg' />
-                    <img style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
+                    <img alt="" style={this.state.imgStyle} src='./img/ic_traffic_download.svg' />
+                    <img alt="" style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
                 </div>
             );
         } else if (this.props.isUpload === false && this.props.isDownload === false){
@@ -103,8 +103,8 @@ class TopBar extends Component {
                         </g>
                         <text x="35%" y="53%" fontSize="10pt"  fill="black" dominantBaseline="middle" textAnchor="middle" style={{fontWeight: 600}}>{this.props.numberOfFiles}</text>
                     </svg>
-                    <img style={this.state.imgStyle} src='./img/ic_traffic_no_transmission.svg' />
-                    <img style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
+                    <img alt="" style={this.state.imgStyle} src='./img/ic_traffic_no_transmission.svg' />
+                    <img alt="" style={this.state.lastIcon} src={this.props.isConnected ? '/img/ic_connection.svg' : '/img/ic_no_connection.svg'} />
                 </div>
             );
         }

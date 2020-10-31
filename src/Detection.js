@@ -16,7 +16,7 @@ export default class Detection {
   getRenderColor() {
     if (this.selected) return constants.detectionStyle.SELECTED_COLOR;
     if (this.validation !== undefined) {
-      if (this.validation == true){
+      if (this.validation === true){
         return constants.detectionStyle.VALID_COLOR;
       }
       return constants.detectionStyle.INVALID_COLOR;

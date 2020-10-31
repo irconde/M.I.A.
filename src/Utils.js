@@ -1,5 +1,3 @@
-import JSZip from "jszip";
-
 /**
  * Class that emcompases any secondary method to support the primary features of the client
  */
