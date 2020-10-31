@@ -12,8 +12,6 @@ export default class DetectionSet {
     this.viewportSelected = undefined;
     this.detectionSelected = constants.selection.NO_SELECTION;
     this.visible = true;
-    // TODO. Delete this
-    this.detections = [];
     this.data = {};
     let viewport = constants.viewport.TOP;
     if (arguments.length > 0) {
@@ -31,8 +29,24 @@ export default class DetectionSet {
     return this.data[constants.viewport.TOP];
   }
 
+  getDataFromSelectedDetection() {
+    let view = this.viewportSelected;
+    if (this.viewportSelected === undefined) {
+      view = constants.viewport.TOP;
+    }
+    if (this.detectionSelected != constants.selection.NO_SELECTION) {
+      return this.data[view][this.detectionSelected];
+    } else {
+      return undefined;
+    }
+  }
+
   validateSelectedDetection(feedback) {
-    this.data[this.viewportSelected][this.detectionSelected].validate(feedback);
+    let view = this.viewportSelected;
+    if (this.viewportSelected === undefined) {
+      view = constants.viewport.TOP;
+    }
+    this.data[view][this.detectionSelected].validate(feedback);
     this.clearSelection();
   }
 
@@ -45,7 +59,6 @@ export default class DetectionSet {
   }
 
   selectDetection(detectionIndex, viewport){
-    this.viewportSelected = viewport;
     let view = constants.viewport.TOP;
     if (viewport !== undefined) {
       view = viewport;
@@ -53,8 +66,16 @@ export default class DetectionSet {
     if (this.detectionSelected != constants.selection.NO_SELECTION) {
       this.data[view][this.detectionSelected].setSelected(false);
     }
-    this.data[view][detectionIndex].setSelected(true);
-    this.detectionSelected = detectionIndex;
+    if (this.viewportSelected === viewport  && this.detectionSelected === detectionIndex) {
+      this.viewportSelected = undefined;
+      this.detectionSelected = constants.selection.NO_SELECTION;
+      return false;
+    } else {
+      this.data[view][detectionIndex].setSelected(true);
+      this.detectionSelected = detectionIndex;
+      this.viewportSelected = viewport;
+      return true;
+    }
   }
 
   addDetection(detection, view) {
@@ -63,8 +84,6 @@ export default class DetectionSet {
       viewport = view
     }
     this.data[viewport].push(detection);
-    // TODO. Delete this
-    this.detections.push(detection);
   }
 
   setVisibility(visibility) {
@@ -83,22 +102,12 @@ export default class DetectionSet {
    */
   isValidated() {
     let result = true;
-
-    // TODO. To be uncommented.
-    /*
     for (const [key, detectionList] of Object.entries(this.data)) {
       for (let i = 0; i < detectionList.length; i++){
         if (detectionList[i].isValidated() === false){
           result = false;
           break;
         }
-      }
-    }
-    */
-    for (let i = 0; i < this.detections.length; i++){
-      if (this.detections[i].isValidated() === false){
-        result = false;
-        break;
       }
     }
     return result;
