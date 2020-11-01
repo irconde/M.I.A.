@@ -573,7 +573,7 @@ class App extends Component {
       context.strokeStyle = color;
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
       // Line rendering
-      if (j === data[this.currentSelection.getAlgorithm()].detectionSelected) {
+      if (j === data[this.currentSelection.getAlgorithm()].selectedDetection) {
         const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT/2) / this.state.zoomLevel;
         context.beginPath();
         // Staring point (10,45)

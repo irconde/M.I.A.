@@ -7,6 +7,7 @@ export default class Detection {
   constructor(diagonalCoords, className, confidenceValue, isValidated) {
     this.boundingBox = diagonalCoords
     this.selected = false;
+    this.visible = true;
     this.class = className;
     this.confidence = confidenceValue;
     this.validation = undefined;
@@ -55,6 +56,10 @@ export default class Detection {
 
   getValidation() {
     return this.validation;
+  }
+
+  setVisibility(visibility) {
+    // TODO. To be implemented
   }
 
 }

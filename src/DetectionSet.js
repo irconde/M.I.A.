@@ -8,8 +8,8 @@ export default class DetectionSet {
   constructor() {
     this.algorithm = "";
     this.selected = false;
-    this.viewportSelected = undefined;
-    this.detectionSelected = constants.selection.NO_SELECTION;
+    this.selectedViewport = undefined;
+    this.selectedDetection = constants.selection.NO_SELECTION;
     this.visible = true;
     this.data = {};
     let viewport = constants.viewport.TOP;
@@ -41,12 +41,12 @@ export default class DetectionSet {
    * @return {type}  Detection object
    */
   getDataFromSelectedDetection() {
-    let view = this.viewportSelected;
-    if (this.viewportSelected === undefined) {
+    let view = this.selectedViewport;
+    if (this.selectedViewport === undefined) {
       view = constants.viewport.TOP;
     }
-    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
-      return this.data[view][this.detectionSelected];
+    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
+      return this.data[view][this.selectedDetection];
     } else {
       return undefined;
     }
@@ -60,11 +60,11 @@ export default class DetectionSet {
    * @return {type}           None
    */
   validateSelectedDetection(feedback) {
-    let view = this.viewportSelected;
-    if (this.viewportSelected === undefined) {
+    let view = this.selectedViewport;
+    if (this.selectedViewport === undefined) {
       view = constants.viewport.TOP;
     }
-    this.data[view][this.detectionSelected].validate(feedback);
+    this.data[view][this.selectedDetection].validate(feedback);
     this.clearSelection();
   }
 
@@ -74,11 +74,11 @@ export default class DetectionSet {
    * @return {type}  None
    */
   clearSelection() {
-    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
-      this.getData(this.viewportSelected)[this.detectionSelected].setSelected(false);
+    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
+      this.getData(this.selectedViewport)[this.selectedDetection].setSelected(false);
     }
-    this.viewportSelected = undefined;
-    this.detectionSelected = constants.selection.NO_SELECTION;
+    this.selectedViewport = undefined;
+    this.selectedDetection = constants.selection.NO_SELECTION;
   }
 
   /**
@@ -93,17 +93,17 @@ export default class DetectionSet {
     if (viewport !== undefined) {
       view = viewport;
     }
-    if (this.detectionSelected !== constants.selection.NO_SELECTION) {
-      this.data[view][this.detectionSelected].setSelected(false);
+    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
+      this.data[view][this.selectedDetection].setSelected(false);
     }
-    if (this.viewportSelected === viewport  && this.detectionSelected === detectionIndex) {
-      this.viewportSelected = undefined;
-      this.detectionSelected = constants.selection.NO_SELECTION;
+    if (this.selectedViewport === viewport  && this.selectedDetection === detectionIndex) {
+      this.selectedViewport = undefined;
+      this.selectedDetection = constants.selection.NO_SELECTION;
       return false;
     } else {
       this.data[view][detectionIndex].setSelected(true);
-      this.detectionSelected = detectionIndex;
-      this.viewportSelected = viewport;
+      this.selectedDetection = detectionIndex;
+      this.selectedViewport = viewport;
       return true;
     }
   }
