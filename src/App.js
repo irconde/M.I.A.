@@ -73,6 +73,9 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
+      // TODO:
+      // Once sending new formatted ORA files is completed
+      // Delete this state variable
       openRasterData: [],
       myOra: new ORA(),
       image: null,
@@ -450,9 +453,6 @@ class App extends Component {
     for(var i = 1; i < self.state.myOra.stackData[0].blobData.length; i++){
       dataImages[i - 1] = self.state.myOra.stackData[0].blobData[i];
     }
-    // for(var i = 1; i < self.state.openRasterData.length; i++){
-    //   dataImages[i - 1] = self.state.openRasterData[i];
-    // }
     self.loadDICOSdata(dataImages);
   }
 
