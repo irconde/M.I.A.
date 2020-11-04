@@ -8,6 +8,8 @@ import * as cornerstoneMath from "cornerstone-math";
 import Hammer from "hammerjs";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import socketIOClient from "socket.io-client";
+import ORA from './ORA.js';
+import Stack from './Stack.js';
 import Utils from "./Utils.js";
 import Dicos from "./Dicos.js";
 import Detection from "./Detection.js";
@@ -72,6 +74,7 @@ class App extends Component {
       date: null,
       time: null,
       openRasterData: [],
+      myOra: new ORA(),
       image: null,
       detections: {},
       receiveTime: null,
@@ -224,27 +227,49 @@ class App extends Component {
           this.onNoImageLeft();
         } else {
           const myZip = new JSZip();
-          var layerOrder = [];
           var listOfPromises = [];
-          var listOfLayers = [];
-          var imgBuf = null;
+          // This is our list of stacks we will append to the myOra object in our promise all
+          var listOfStacks = [];
+          // Lets load the compressed ORA file as base64
           myZip.loadAsync(res.data.b64, { base64: true }).then(() => {
+            // First, after loading, we need to check our stack.xml
             myZip.file('stack.xml').async('string').then( async (stackFile) => {
-              layerOrder = Utils.getLayerOrder(stackFile);
-              for (var i = 0; i < layerOrder.length; i++) {
-                await myZip.file(layerOrder[i]).async('base64').then((imageData) => {
-                  if (i===0) imgBuf=Utils.base64ToArrayBuffer(imageData);
-                  listOfLayers.push(Utils.b64toBlob(imageData));
-                })
+              const parser = new DOMParser();
+              const xmlDoc = parser.parseFromString(stackFile, 'text/xml');
+              const xmlStack = xmlDoc.getElementsByTagName('stack');
+              // We loop through each stack. Creating a new stack object to store our info
+              // for now, we are just grabbing the location of the dicos file in the ora file
+              for(let stackData of xmlStack){
+                let currentStack = new Stack(stackData.getAttribute('name'), stackData.getAttribute('view'));
+                let layerData = stackData.getElementsByTagName('layer');
+                for(let imageSrc of layerData){
+                  currentStack.rawData.push(imageSrc.getAttribute('src'));
+                }
+                // We have finished creating the current stack's object
+                // add it onto our holder variable for now
+                listOfStacks.push(currentStack);
+              }
+              // Now we loop through the data we have collected
+              // We know the first layer of each stack is pixel data, which we need as an array buffer
+              // Which we got from i===0. 
+              // No matter what however, every layer gets converted a blob and added to the data set
+              for (var j = 0; j < listOfStacks.length; j++){
+                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {
+                  await myZip.file(listOfStacks[j].rawData[i]).async('base64').then((imageData) => {
+                    if (i===0) listOfStacks[j].pixelData=Utils.base64ToArrayBuffer(imageData);
+                    listOfStacks[j].blobData.push(Utils.b64toBlob(imageData));
+                  })
+                }
               }
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
-                this.state.openRasterData = listOfLayers;
+                this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
+                
                 this.setState({
-                  selectedFile: this.state.openRasterData[0],
-                  image: imgBuf,
+                  selectedFile: this.state.myOra.getFirstImage(),
+                  image: this.state.myOra.getFirstPixelData(),
                   displayNext: false,
                   receiveTime: Date.now()
                   }, () => {
@@ -419,9 +444,15 @@ class App extends Component {
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
-    for(var i = 1; i< self.state.openRasterData.length; i++){
-      dataImages[i - 1] = self.state.openRasterData[i];
+
+    // NOTE from James:
+    // I currently just tell this to look at the top stack's blob
+    for(var i = 1; i < self.state.myOra.stackData[0].blobData.length; i++){
+      dataImages[i - 1] = self.state.myOra.stackData[0].blobData[i];
     }
+    // for(var i = 1; i < self.state.openRasterData.length; i++){
+    //   dataImages[i - 1] = self.state.openRasterData[i];
+    // }
     self.loadDICOSdata(dataImages);
   }
 
@@ -434,7 +465,7 @@ class App extends Component {
   displayDICOSimage() {
     // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
     const self = this;
-    const pixelData = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.openRasterData[0]);
+    const pixelData = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
     cornerstone.loadImage(pixelData).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
