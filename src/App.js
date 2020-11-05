@@ -24,6 +24,7 @@ import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
 const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
+const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -789,7 +790,7 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={ENABLE_NEXT===undefined ? this.state.displayNext : true} />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>
