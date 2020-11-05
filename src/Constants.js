@@ -38,3 +38,6 @@ export const detectionStyle = {
   LABEL_TEXT_COLOR: colors.WHITE,
   BORDER_WIDTH: 2
 }
+
+export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
+export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;

@@ -23,8 +23,6 @@ import DetectionSet from "./DetectionSet";
 import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
-const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
-const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -98,7 +96,7 @@ class App extends Component {
       numOfFilesInQueue: 0,
       isUpload: false,
       isDownload: false,
-      socketCommand: socketIOClient(COMMAND_SERVER),
+      socketCommand: socketIOClient(constants.COMMAND_SERVER),
       socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS)
     };
     this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
@@ -790,7 +788,7 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={ENABLE_NEXT===undefined ? this.state.displayNext : true} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT===undefined ? this.state.displayNext : true} />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>
