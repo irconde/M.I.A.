@@ -23,6 +23,7 @@ import DetectionSet from "./DetectionSet";
 import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
+const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -89,7 +90,8 @@ class App extends Component {
       fileInQueue: false,
       nextAlgBtnEnabled: false,
       prevAlgBtnEnabled: false,
-      zoomLevel: 1,
+      zoomLevelTop: 1,
+      zoomLevelSide: 1,
       imageViewportTop: document.getElementById('dicomImageLeft'),
       imageViewportSide: document.getElementById('dicomImageRight'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -97,7 +99,7 @@ class App extends Component {
       numOfFilesInQueue: 0,
       isUpload: false,
       isDownload: false,
-      socketCommand: socketIOClient(constants.COMMAND_SERVER),
+      socketCommand: socketIOClient(COMMAND_SERVER),
       socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS)
     };
     this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
@@ -122,9 +124,15 @@ class App extends Component {
   componentDidMount() {
     this.state.imageViewportTop.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
+
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
@@ -630,7 +638,12 @@ class App extends Component {
    */
   onImageRendered(e) {
     const eventData = e.detail;
-    this.setState({zoomLevel: eventData.viewport.scale.toFixed(2)});
+    if(e.detail.element.id === 'dicomImageLeft'){
+      this.setState({zoomLevelTop: eventData.viewport.scale.toFixed(2)});
+    }
+    else if(e.detail.element.id === 'dicomImageRight'){
+      this.setState({zoomLevelSide: eventData.viewport.scale.toFixed(2)});
+    }
     // set the canvas context to the image coordinate system
     //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
@@ -675,22 +688,39 @@ class App extends Component {
       context.strokeStyle = color;
       context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
       // Line rendering
-      if (j === data[this.currentSelection.getAlgorithm()].selectedDetection) {
-        const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT/2) / this.state.zoomLevel;
+    if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+        const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
         context.beginPath();
         // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
         // End point (180,47)
-        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] + buttonGap);
+        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] + buttonGap);
         // Make the line visible
         context.stroke();
         context.beginPath();
         // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2] - constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+        context.moveTo(boundingBoxCoords[2] - constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
         // End point (180,47)
-        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevel, boundingBoxCoords[1] - buttonGap);
+        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
         // Make the line visible
         context.stroke();
+      }
+      else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight') {
+        const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
+        context.beginPath();
+          // Staring point (10,45)
+          context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
+          // Make the line visible
+          context.stroke();
+          context.beginPath();
+          // Staring point (10,45)
+          context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
+          // Make the line visible
+          context.stroke();
       }
       // Label rendering
       context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
@@ -744,12 +774,18 @@ class App extends Component {
         });
       }
       cornerstone.updateImage(this.state.imageViewportTop, true);
+      cornerstone.updateImage(this.state.imageViewportSide, true);
     }
 
     // Handle regular click events for selecting and deselecting detections
     else{
-      const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.page.x, y:e.detail.currentPoints.page.y});
+      const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
       let detectionSetData = detectionSet.getData();
+      let viewport = constants.viewport.TOP;
+      if(e.detail.element.id === 'dicomImageRight'){
+        detectionSetData = detectionSet.getData(constants.viewport.SIDE);
+        viewport = constants.viewport.SIDE;
+      }
       for (var j = 0; j < detectionSetData.length; j++){
         if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
             clickedPos = j;
@@ -764,7 +800,7 @@ class App extends Component {
         });
       }
       else {
-        let anyDetection = detectionSet.selectDetection(clickedPos);
+        let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
         this.setState({ displayButtons: anyDetection }, () => {
           this.renderButtons(e);
         });
@@ -791,15 +827,23 @@ class App extends Component {
     var topRejectBtn = 0;
     if(e.detail !== null){
       if(this.state.displayButtons !== false){
-        const buttonGap = constants.buttonStyle.GAP / this.state.zoomLevel;
-        const marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevel;
+        const buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
+        const marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
         const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
         if (detectionData === undefined) return;
         const boundingBoxCoords = detectionData.boundingBox;
-        var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
+        let coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
+        let coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
+
+        if(e.detail.element.id === 'dicomImageRight'){
+          const buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
+          const marginLeft = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
+          coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:boundingBoxCoords[0] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
+          coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:boundingBoxCoords[0] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
+        }
+
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
-        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
         topRejectBtn = coordsRejectBtn.y;
       }
     }
@@ -818,6 +862,7 @@ class App extends Component {
       }
     }, () => {
       cornerstone.updateImage(this.state.imageViewportTop, true);
+      cornerstone.updateImage(this.state.imageViewportSide, true);
     })
   }
 
@@ -860,7 +905,7 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT===undefined ? this.state.displayNext : true} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>
