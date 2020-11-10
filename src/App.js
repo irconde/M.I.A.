@@ -16,6 +16,7 @@ import Detection from "./Detection.js";
 import axios from 'axios';
 import NextButton from './components/NextButton';
 import MetaData from './components/MetaData';
+import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar';
 import ValidationButtons from './components/ValidationButtons';
 import JSZip from "jszip";
@@ -942,7 +943,7 @@ class App extends Component {
             isDownload={this.state.isDownload}
             isConnected={this.state.isConnected}
           />
-          <MetaData
+          {/* <MetaData
             isVisible={this.state.fileInQueue}
             algorithmType={this.state.algorithm}
             detectorType={this.state.type}
@@ -952,7 +953,8 @@ class App extends Component {
             navigationBtnClick={this.getAlgorithmForPos}
             nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
             prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
-          />
+          /> */}
+          <SideMenu />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
           <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} />

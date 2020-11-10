@@ -26,6 +26,7 @@
     "react-cornerstone-viewport": "^2.3.9",
     "react-dom": "^16.2.0",
     "react-scripts": "^3.4.3",
+    "react-spring": "^8.0.27",
     "react-svg": "^11.0.38",
     "save-file": "^2.3.1",
     "socket.io": "^2.3.0",

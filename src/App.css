@@ -129,3 +129,23 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.treeview-main {
+  width: 20%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 95%;
+  display: flexbox;
+  background-color: #282828;  
+  line-height: 21px;
+}
+
+.treeview > .toggle {
+  pointer-events: all;
+  cursor: pointer;
+}
+.treeview > .toggle:hover {
+  color: #63b1de;
+  fill: #63b1de;
+}
