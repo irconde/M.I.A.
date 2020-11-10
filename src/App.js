@@ -90,7 +90,8 @@ class App extends Component {
       nextAlgBtnEnabled: false,
       prevAlgBtnEnabled: false,
       zoomLevel: 1,
-      imageViewport: document.getElementById('dicomImage'),
+      imageViewportTop: document.getElementById('dicomImageLeft'),
+      imageViewportSide: document.getElementById('dicomImageRight'),
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: false,
       numOfFilesInQueue: 0,
@@ -119,11 +120,12 @@ class App extends Component {
    * @return {type}  None
    */
   componentDidMount() {
-    this.state.imageViewport.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
-    this.state.imageViewport.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-    this.setupConerstoneJS(this.state.imageViewport);
+    this.state.imageViewportTop.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+    this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+    this.state.imageViewportTop.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
+    this.state.imageViewportTop.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
+    this.state.imageViewportTop.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+    this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
   /**
@@ -178,7 +180,7 @@ class App extends Component {
   async updateNumberOfFiles(){
     this.state.socketFS.on('numberOfFiles', data => {
       if (!this.state.fileInQueue && data > 0) {
-        this.state.imageViewport.style.visibility = 'visible'
+        this.state.imageViewportTop.style.visibility = 'visible'
         this.getNextImage();
       }
       this.setState({
@@ -198,13 +200,13 @@ class App extends Component {
    */
   onNoImageLeft(){
     console.log('No next image to display');
-    let updateImageViewport = this.state.imageViewport;
+    let updateImageViewport = this.state.imageViewportTop;
     updateImageViewport.style.visibility = 'hidden';
     this.currentSelection.clear();
     this.setState({
       selectedFile: null,
       displayNext: false,
-      imageViewport: updateImageViewport
+      imageViewportTop: updateImageViewport
     });
   }
 
@@ -253,7 +255,7 @@ class App extends Component {
               }
               // Now we loop through the data we have collected
               // We know the first layer of each stack is pixel data, which we need as an array buffer
-              // Which we got from i===0. 
+              // Which we got from i===0.
               // No matter what however, every layer gets converted a blob and added to the data set
               for (var j = 0; j < listOfStacks.length; j++){
                 for (var i = 0; i < listOfStacks[j].rawData.length; i++) {
@@ -268,7 +270,7 @@ class App extends Component {
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
-                
+
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
@@ -414,11 +416,14 @@ class App extends Component {
   /**
    * setupConerstoneJS - CornerstoneJS Tools are initialized
    *
-   * @param  {type} imageViewport DOM element where the x-ray image is rendered
+   * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
+   * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
    * @return {type}               None
    */
-  setupConerstoneJS(imageViewport) {
-    cornerstone.enable(imageViewport);
+  setupConerstoneJS(imageViewportTop, imageViewportSide) {
+    cornerstone.enable(imageViewportTop);
+    cornerstone.enable(imageViewportSide);
+
     const PanTool = cornerstoneTools.PanTool;
     cornerstoneTools.addTool(PanTool);
     cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
@@ -440,23 +445,28 @@ class App extends Component {
    */
   loadAndViewImage() {
     const self = this;
-    const dataImages = [];
+    const dataImagesLeft = [];
+    const dataImagesRight = [];
     self.displayDICOSimage();
     // all other images do not have pixel data -- cornerstoneJS will fail and send an error
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
-
-    // NOTE from James:
-    // I currently just tell this to look at the top stack's blob
     for(var i = 1; i < self.state.myOra.stackData[0].blobData.length; i++){
-      dataImages[i - 1] = self.state.myOra.stackData[0].blobData[i];
+      dataImagesLeft[i - 1] = self.state.myOra.stackData[0].blobData[i];
     }
-    self.loadDICOSdata(dataImages);
+
+    if(self.state.myOra.stackData[1] !== undefined){
+      for(var j = 1; j < self.state.myOra.stackData[1].blobData.length; j++){
+        dataImagesRight[j - 1] = self.state.myOra.stackData[1].blobData[j];
+      }
+    }
+
+    self.loadDICOSdata(dataImagesLeft, dataImagesRight);
   }
 
   /**
-   * displayDICOSinfo - Method that renders the x-ray image encoded in the DICOS+TDR file and
+   * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
    *
    * @param  {type} image DICOS+TDR data
    * @return {type}       None
@@ -464,15 +474,32 @@ class App extends Component {
   displayDICOSimage() {
     // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
     const self = this;
-    const pixelData = cornerstoneWADOImageLoader.wadouri.fileManager.add(this.state.selectedFile);
-    cornerstone.loadImage(pixelData).then(
+    const pixelDataTop = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[0].blobData[0]);
+
+    cornerstone.loadImage(pixelDataTop).then(
         function(image) {
-          const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewport, image);
-          viewport.scale = 1.4;
+          const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportTop, image);
+          viewport.scale = 1.0;
           viewport.translation.y = 50;
           self.setState({viewport: viewport})
-          cornerstone.displayImage(self.state.imageViewport, image, viewport);
+          cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
         });
+
+    if(self.state.myOra.stackData.length < 2) {
+      cornerstone.disable(this.state.imageViewportSide);
+    }
+    else {
+      cornerstone.enable(this.state.imageViewportSide);
+      const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[1].blobData[0]);
+      cornerstone.loadImage(pixelDataSide).then(
+          function(image) {
+            const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportSide, image);
+            viewport.scale = 1.0;
+            viewport.translation.y = 50;
+            self.setState({viewport: viewport});
+            cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
+          });
+    }
   }
 
   /**
@@ -481,7 +508,7 @@ class App extends Component {
    * @param  {type} images list of DICOS+TDR data from each algorithm
    * @return {type}       None
    */
-  loadDICOSdata(images) {
+  loadDICOSdata(imagesLeft, imagesRight) {
     const self = this;
     self.state.detections = {};
     var today = new Date();
@@ -489,33 +516,29 @@ class App extends Component {
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
 
-    for(var i=0; i<images.length;i++){
-      if(i===0){
-        const reader = new FileReader();
-        let self = this;
+    const reader = new FileReader();
+    reader.addEventListener("loadend", function() {
+      const view = new Uint8Array(reader.result);
+      var image = dicomParser.parseDicom(view);
+      self.currentSelection.clear();
+      self.setState({
+        threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
+        algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
+        type: image.string(Dicos.dictionary['DetectorType'].tag),
+        configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
+        station: image.string(Dicos.dictionary['StationName'].tag),
+        series: image.string(Dicos.dictionary['SeriesDescription'].tag),
+        study: image.string(Dicos.dictionary['StudyDescription'].tag),
+        time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
+        date: mm + '/' + dd + '/' + yyyy
+      });
+    });
+    reader.readAsArrayBuffer(imagesLeft[0]);
 
-        reader.addEventListener("loadend", function() {
-          const view = new Uint8Array(reader.result);
-          var image = dicomParser.parseDicom(view);
-          self.currentSelection.clear();
-          self.setState({
-            threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
-            algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
-            type: image.string(Dicos.dictionary['DetectorType'].tag),
-            configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
-            station: image.string(Dicos.dictionary['StationName'].tag),
-            series: image.string(Dicos.dictionary['SeriesDescription'].tag),
-            study: image.string(Dicos.dictionary['StudyDescription'].tag),
-            time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
-            date: mm + '/' + dd + '/' + yyyy
-          });
-        });
-        reader.readAsArrayBuffer(images[i]);
-      }
-
-      const reader = new FileReader();
-      reader.addEventListener("loadend", function() {
-        const view = new Uint8Array(reader.result);
+    for(var i=0; i<imagesLeft.length;i++){
+      const readFile = new FileReader();
+      readFile.addEventListener("loadend", function() {
+        const view = new Uint8Array(readFile.result);
         var image = dicomParser.parseDicom(view);
 
         let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
@@ -549,8 +572,53 @@ class App extends Component {
           self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
         }
       });
-      reader.readAsArrayBuffer(images[i]);
+      readFile.readAsArrayBuffer(imagesLeft[i]);
     }
+
+
+    for(var k=0; k<imagesRight.length;k++){
+      const read = new FileReader();
+      read.addEventListener("loadend", function() {
+        const view = new Uint8Array(read.result);
+        var image = dicomParser.parseDicom(view);
+
+        let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
+        let algorithmName = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+
+        if (!(algorithmName in self.state.detections)) {
+          self.state.detections[algorithmName] = new DetectionSet();
+          self.state.detections[algorithmName].setAlgorithmName(algorithmName);
+          self.currentSelection.addAlgorithm(algorithmName);
+          self.updateNavigationBtnState();
+        }
+
+        self.state.detections[algorithmName].data[constants.viewport.SIDE] = [];
+
+        // Threat Sequence information
+        const threatSequence = image.elements.x40101011;
+        if (threatSequence == null){
+          console.log("No Threat Sequence");
+          return;
+        }
+        if (image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === 0 || image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === undefined) {
+          console.log("No Potential Threat Objects detected");
+          this.setState({
+            displayNext: true
+          });
+          return;
+        }
+        // for every threat found, create a new Detection object and store all Detection
+        // objects in a DetectionSet object
+        for (var m = 0; m < threatsCount; m++) {
+          const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
+          const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
+          const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false), constants.viewport.SIDE);
+        }
+      });
+      read.readAsArrayBuffer(imagesRight[k]);
+    }
+
   }
 
   /**
@@ -584,6 +652,10 @@ class App extends Component {
     let B_BOX_COORDS = 4;
     // TODO. Note that in this version we get the detections of the top view only.
     let detectionList = data[this.currentSelection.getAlgorithm()].getData();
+    if(context.canvas.offsetParent.id === 'dicomImageRight'){
+      detectionList = data[this.currentSelection.getAlgorithm()].getData(constants.viewport.SIDE);
+    }
+
     if (detectionList === null || detectionList.length === 0) {
       return;
     }
@@ -671,7 +743,7 @@ class App extends Component {
           displayButtons: false,
         });
       }
-      cornerstone.updateImage(this.state.imageViewport, true);
+      cornerstone.updateImage(this.state.imageViewportTop, true);
     }
 
     // Handle regular click events for selecting and deselecting detections
@@ -724,10 +796,10 @@ class App extends Component {
         const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
         if (detectionData === undefined) return;
         const boundingBoxCoords = detectionData.boundingBox;
-        var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
+        var coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         leftAcceptBtn = coordsAcceptBtn.x ;
         topAcceptBtn = coordsAcceptBtn.y;
-        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewport, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
+        var coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
         topRejectBtn = coordsRejectBtn.y;
       }
     }
@@ -745,7 +817,7 @@ class App extends Component {
         }
       }
     }, () => {
-      cornerstone.updateImage(this.state.imageViewport, true);
+      cornerstone.updateImage(this.state.imageViewportTop, true);
     })
   }
 
