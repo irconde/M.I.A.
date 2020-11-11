@@ -638,10 +638,10 @@ class App extends Component {
    */
   onImageRendered(e) {
     const eventData = e.detail;
-    if(e.detail.element.id === 'dicomImageLeft'){
+    if(eventData.element.id === 'dicomImageLeft'){
       this.setState({zoomLevelTop: eventData.viewport.scale.toFixed(2)});
     }
-    else if(e.detail.element.id === 'dicomImageRight'){
+    else if(eventData.element.id === 'dicomImageRight'){
       this.setState({zoomLevelSide: eventData.viewport.scale.toFixed(2)});
     }
     // set the canvas context to the image coordinate system
@@ -827,22 +827,25 @@ class App extends Component {
     var topRejectBtn = 0;
     if(e.detail !== null){
       if(this.state.displayButtons !== false){
-        const buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
-        const marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
+        let buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
+        let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
         const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+        console.log(e);
+        console.log(e.target.offsetLeft);
         if (detectionData === undefined) return;
         const boundingBoxCoords = detectionData.boundingBox;
         let coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
         let coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
 
         if(e.detail.element.id === 'dicomImageRight'){
-          const buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
-          const marginLeft = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
-          coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:boundingBoxCoords[0] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
-          coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:boundingBoxCoords[0] + marginLeft, y:boundingBoxCoords[1]+buttonGap/2});
+          buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
+          let viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
+          let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
+          coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
+          coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
         }
 
-        leftAcceptBtn = coordsAcceptBtn.x ;
+        leftAcceptBtn = coordsAcceptBtn.x;
         topAcceptBtn = coordsAcceptBtn.y;
         topRejectBtn = coordsRejectBtn.y;
       }

@@ -23,7 +23,7 @@ export const colors = {
 
 export const buttonStyle = {
   MARGIN_LEFT: 60,
-  MARGIN_RIGHT:300,
+  MARGIN_RIGHT: 250,
   GAP: 120,
   HEIGHT: 60,
   LINE_GAP: 40
