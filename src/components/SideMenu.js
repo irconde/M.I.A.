@@ -28,6 +28,8 @@ class SideMenu extends Component {
     }
 
     render() {
+        // We can't use map on the this.props.detection in the return
+        // Therefore, we will populate the array myDetections with this data before returning
         let myDetections = [];
         for (const [key, detectionSet] of Object.entries(this.props.detections)) {
             myDetections.push({
@@ -37,15 +39,19 @@ class SideMenu extends Component {
         }
         return (
             <div className="treeview-main">
+                {/* Checking to see if there is any data in myDetections */}
                 <Tree 
                     content={myDetections.length !== 0 ? "Algorithms" : "No Image"}
                     canHide={myDetections.length !== 0 ? true : false}
                     open={myDetections.length !== 0 ? true : false}
                     style={this.state.treeStyles}
                 >
+                    {/* How we create the trees and their nodes is using map */}
                     {myDetections.map((value, index) => {
                         return (
+                            // Setting the Algorithm name, IE OTAP or Tiled 
                             <Tree key={index} content={value.algorithm} open canHide>
+                                {/* We then need to map each detection as a child node to the tree, checking if data exists again first */}
                                 {value.data.top !== undefined ? 
                                     value.data.top.map((value, index) => {
                                         return (
@@ -58,12 +64,14 @@ class SideMenu extends Component {
                                         )
                                     })
                                     : 
+                                    // If no data
                                     <Tree
                                         content="Loading"
                                         canHide
                                         visible={false}
                                     />
                                 }
+                                {/* Repeating the process for the side stack if it exists */}
                                 {value.data.side !== undefined ? 
                                     value.data.side.map((value, index) => {
                                         return (
@@ -76,6 +84,7 @@ class SideMenu extends Component {
                                         )
                                     })
                                     : 
+                                    // No data
                                     <Tree
                                         content="Loading"
                                         canHide
