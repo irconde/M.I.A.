@@ -9,7 +9,7 @@ class SideMenu extends Component {
         super(props);
         this.state ={
             treeStyles: {
-                position: 'absolute',
+                position: 'relative',
                 top: '3.75rem',
                 left: 20,
                 color: 'white',
@@ -24,21 +24,67 @@ class SideMenu extends Component {
     }
 
     static propTypes = {
-
+        detections: PropTypes.object.isRequired
     }
 
     render() {
+        let myDetections = [];
+        for (const [key, detectionSet] of Object.entries(this.props.detections)) {
+            myDetections.push({
+                algorithm: detectionSet.algorithm,
+                data: detectionSet.data
+            });
+        }
         return (
             <div className="treeview-main">
-                <Tree content="Algorithms" canHide open style={this.state.treeStyles}>
-                    <Tree content="Algorithm - Tiled 1.0" canHide>
-                        <Tree content="Apple 85%" canHide />
-                        <Tree content="ACOPS - 88%" canHide />
-                    </Tree>
-                    <Tree content="Algorithm - RCNN" canHide>
-                        <Tree content="Apple 25%" canHide />
-                        <Tree content="ACOPS - 78%" canHide />
-                    </Tree>
+                <Tree 
+                    content={myDetections.length !== 0 ? "Algorithms" : "No Image"}
+                    canHide={myDetections.length !== 0 ? true : false}
+                    open={myDetections.length !== 0 ? true : false}
+                    style={this.state.treeStyles}
+                >
+                    {myDetections.map((value, index) => {
+                        return (
+                            <Tree key={index} content={value.algorithm} open canHide>
+                                {value.data.top !== undefined ? 
+                                    value.data.top.map((value, index) => {
+                                        return (
+                                            <Tree
+                                                content={`${value.class} - ${value.confidence}%`}
+                                                canHide
+                                                visible={value.visible}
+                                                key={index}
+                                            />
+                                        )
+                                    })
+                                    : 
+                                    <Tree
+                                        content="Loading"
+                                        canHide
+                                        visible={false}
+                                    />
+                                }
+                                {value.data.side !== undefined ? 
+                                    value.data.side.map((value, index) => {
+                                        return (
+                                            <Tree
+                                                content={`${value.class} - ${value.confidence}%`}
+                                                canHide
+                                                visible={value.visible}
+                                                key={index}
+                                            />
+                                        )
+                                    })
+                                    : 
+                                    <Tree
+                                        content="Loading"
+                                        canHide
+                                        visible={false}
+                                    />
+                                }
+                            </Tree>
+                        )
+                    })}
                 </Tree>
                 
             </div>

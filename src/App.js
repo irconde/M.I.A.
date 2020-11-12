@@ -954,7 +954,7 @@ class App extends Component {
             nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
             prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           /> */}
-          <SideMenu />
+          <SideMenu detections={this.state.detections} />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
           <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} />

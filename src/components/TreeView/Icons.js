@@ -1,35 +1,45 @@
 import React from 'react'
 
 const MinusSquareO = props => (
-  <svg {...props} viewBox="64 -65 897 897">
-    <g>
-      <path
-        d="M888 760v0v0v-753v0h-752v0v753v0h752zM888 832h-752q-30 0 -51 -21t-21 -51v-753q0 -29 21 -50.5t51 -21.5h753q29 0 50.5 21.5t21.5 50.5v753q0 30 -21.5 51t-51.5 21v0zM732 347h-442q-14 0 -25 10.5t-11 25.5v0q0 15 11 25.5t25 10.5h442q14 0 25 -10.5t11 -25.5v0
-  q0 -15 -11 -25.5t-25 -10.5z"
-      />
+  <svg {...props} viewBox="0 0 24 24" transform="rotate(90) scale(2)">
+    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="arrow_right-24px-copy">
+            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
+            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
+        </g>
     </g>
   </svg>
 )
 
 const PlusSquareO = props => (
-  <svg {...props} viewBox="64 -65 897 897">
-    <g>
-      <path
-        d="M888 760v0v0v-753v0h-752v0v753v0h752zM888 832h-752q-30 0 -51 -21t-21 -51v-753q0 -29 21 -50.5t51 -21.5h753q29 0 50.5 21.5t21.5 50.5v753q0 30 -21.5 51t-51.5 21v0zM732 420h-184v183q0 15 -10.5 25.5t-25.5 10.5v0q-14 0 -25 -10.5t-11 -25.5v-183h-184
-  q-15 0 -25.5 -11t-10.5 -25v0q0 -15 10.5 -25.5t25.5 -10.5h184v-183q0 -15 11 -25.5t25 -10.5v0q15 0 25.5 10.5t10.5 25.5v183h184q15 0 25.5 10.5t10.5 25.5v0q0 14 -10.5 25t-25.5 11z"
-      />
+  <svg {...props} viewBox="0 0 24 24" transform="rotate(-90) scale(2)">
+    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="arrow_right-24px-copy">
+            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
+            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
+        </g>
     </g>
   </svg>
 )
 
 const EyeO = props => (
-  <svg {...props} viewBox="61 51 902 666">
-    <g>
-      <path
-        d="M963 384q0 14 -21 62q-26 65 -61 109q-57 71 -139 112q-99 50 -230 50t-231 -50q-80 -41 -138 -112q-34 -43 -61 -109q-21 -48 -21 -62v0v0v0v0q0 -14 21 -62q27 -66 61 -109q57 -71 139 -112q100 -50 230 -50t230 50q81 41 139 112q35 44 62 109q20 48 20 62v0v0v0v0z
-  M889 384q-25 -77 -64 -126h-1q-46 -59 -114 -93q-85 -42 -198.5 -42t-198.5 42q-67 34 -114 93q-40 49 -65 126q25 77 65 126q47 59 114 93q85 43 199 43t198 -43q67 -33 114 -93q40 -49 65 -126zM512 558q-72 0 -122.5 -50.5t-50.5 -122.5t50.5 -122.5t122.5 -50.5
-  t122.5 50.5t50.5 122.5t-50.5 122.5t-122.5 50.5zM614 385q0 -42 -30 -72t-72 -30t-72 30t-30 72t30 72t72 30t72 -30t30 -72z"
-      />
+  <svg {...props} viewBox="0 0 24 24" transform="scale(1.5)">
+    <g id="ic_visibility_on" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="visibility-24px">
+            <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+            <path d="M12,4 C7,4 2.73,7.11 1,11.5 C2.73,15.89 7,19 12,19 C17,19 21.27,15.89 23,11.5 C21.27,7.11 17,4 12,4 Z M12,16.5 C9.24,16.5 7,14.26 7,11.5 C7,8.74 9.24,6.5 12,6.5 C14.76,6.5 17,8.74 17,11.5 C17,14.26 14.76,16.5 12,16.5 Z M12,8.5 C10.34,8.5 9,9.84 9,11.5 C9,13.16 10.34,14.5 12,14.5 C13.66,14.5 15,13.16 15,11.5 C15,9.84 13.66,8.5 12,8.5 Z" id="Shape" fill="#AAAAAA" fillRule="nonzero"></path>
+        </g>
+    </g>
+  </svg>
+)
+
+const EyeC = props => (
+  <svg {...props} viewBox="0 0 24 24" transform="scale(1.5)">
+    <g id="ic_visibility_off" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="visibility_off-24px">
+            <path d="M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z" id="Shape"></path>
+            <path d="M12,7 C14.76,7 17,9.24 17,12 C17,12.65 16.87,13.26 16.64,13.83 L19.56,16.75 C21.07,15.49 22.26,13.86 22.99,12 C21.26,7.61 16.99,4.5 11.99,4.5 C10.59,4.5 9.25,4.75 8.01,5.2 L10.17,7.36 C10.74,7.13 11.35,7 12,7 Z M2,4.27 L4.28,6.55 L4.74,7.01 C3.08,8.3 1.78,10.02 1,12 C2.73,16.39 7,19.5 12,19.5 C13.55,19.5 15.03,19.2 16.38,18.66 L16.8,19.08 L19.73,22 L21,20.73 L3.27,3 L2,4.27 Z M7.53,9.8 L9.08,11.35 C9.03,11.56 9,11.78 9,12 C9,13.66 10.34,15 12,15 C12.22,15 12.44,14.97 12.65,14.92 L14.2,16.47 C13.53,16.8 12.79,17 12,17 C9.24,17 7,14.76 7,12 C7,11.21 7.2,10.47 7.53,9.8 L7.53,9.8 Z M11.84,9.02 L14.99,12.17 L15.01,12.01 C15.01,10.35 13.67,9.01 12.01,9.01 L11.84,9.02 Z" id="Shape" fill="#494949" fillRule="nonzero"></path>
+        </g>
     </g>
   </svg>
 )
@@ -37,12 +47,9 @@ const EyeO = props => (
 const CloseSquareO = props => (
   <svg {...props} viewBox="64 -65 897 897">
     <g>
-      <path
-        d="M717.5 589.5q-10.5 10.5 -25.5 10.5t-26 -10l-154 -155l-154 155q-11 10 -26 10t-25.5 -10.5t-10.5 -25.5t11 -25l154 -155l-154 -155q-11 -10 -11 -25t10.5 -25.5t25.5 -10.5t26 10l154 155l154 -155q11 -10 26 -10t25.5 10.5t10.5 25t-11 25.5l-154 155l154 155
-  q11 10 11 25t-10.5 25.5zM888 760v0v0v-753v0h-752v0v753v0h752zM888 832h-752q-30 0 -51 -21t-21 -51v-753q0 -29 21 -50.5t51 -21.5h753q29 0 50.5 21.5t21.5 50.5v753q0 30 -21.5 51t-51.5 21v0z"
-      />
+      
     </g>
   </svg>
 )
 
-export { PlusSquareO, MinusSquareO, CloseSquareO, EyeO }
+export { PlusSquareO, MinusSquareO, CloseSquareO, EyeO, EyeC }

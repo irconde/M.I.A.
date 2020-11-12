@@ -28,8 +28,7 @@ const styles = {
   contents: {
     willChange: 'transform, opacity, height',
     marginLeft: '0.5rem',
-    padding: '0.25rem 0rem 0rem 0.875rem',
-    borderLeft: '0.0625rem dashed rgba(255,255,255,0.4)',
+    padding: '0.25rem 0rem 0rem 0.875rem'
   },
 }
 
@@ -85,23 +84,35 @@ export default class Tree extends React.PureComponent {
         <span style={{ ...styles.type, marginRight: type ? 10 : 0 }}>
           {type}
         </span>
-        {canHide && (
+        { canHide && visible ? 
           <Icons.EyeO
             className="toggle"
-            style={{ ...styles.toggle, opacity: visible ? 1 : 0.4 }}
+            style={{ 
+              ...styles.toggle, 
+              opacity: visible ? 1 : 0.4
+            }}
             onClick={this.toggleVisibility}
-          />
-        )}
-        <span style={{ verticalAlign: 'middle' }}>{content}</span>        
+          /> 
+          :
+          <Icons.EyeC
+            className="toggle"
+            style={{ 
+              ...styles.toggle,
+              opacity: visible ? 1 : 0.4
+            }}
+            onClick={this.toggleVisibility}
+          /> 
+        }
+        <span style={{ verticalAlign: 'middle' }}>{content}</span>   
         <Spring
           native
           immediate={immediate}
           config={{ ...config.default, precision: 0.1 }}
-          from={{ height: 0, opacity: 0, transform: 'translate3d(20px,0,0)' }}
+          from={{ height: 0, opacity: 0, transform: 'translate3d(1.25rem,0,0)' }}
           to={{
             height: open ? 'auto' : 0,
             opacity: open ? 1 : 0,
-            transform: open ? 'translate3d(0px,0,0)' : 'translate3d(20px,0,0)',
+            transform: open ? 'translate3d(0rem,0,0)' : 'translate3d(1.25rem,0,0)',
           }}
           {...springConfig && springConfig(open)}>
           {style => (
