@@ -55,6 +55,7 @@ class SideMenu extends Component {
                                 {/* We then need to map each detection as a child node to the tree, checking if data exists again first */}
                                 {value.data.top !== undefined ? 
                                     value.data.top.map((value, index) => {
+                                        // Deciding what color to display next to the detection
                                         let detectionColor = null;
                                         if (value.selected === true){
                                             detectionColor = constants.detectionStyle.SELECTED_COLOR;
