@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Tree from '../components/TreeView/Tree';
 import '../App.css';
+import * as constants from '../Constants';
 
 class SideMenu extends Component {
 
@@ -11,7 +12,7 @@ class SideMenu extends Component {
             treeStyles: {
                 position: 'relative',
                 top: '3.75rem',
-                left: 20,
+                left: '1.25rem',
                 color: 'white',
                 fill: 'white',
                 width: '100%',
@@ -54,12 +55,32 @@ class SideMenu extends Component {
                                 {/* We then need to map each detection as a child node to the tree, checking if data exists again first */}
                                 {value.data.top !== undefined ? 
                                     value.data.top.map((value, index) => {
+                                        let detectionColor = null;
+                                        if (value.selected === true){
+                                            detectionColor = constants.detectionStyle.SELECTED_COLOR;
+                                        } else {
+                                            if (value.validation === undefined) {
+                                                detectionColor = constants.detectionStyle.NORMAL_COLOR;
+                                            } else if (value.validation === false) {
+                                                detectionColor = constants.detectionStyle.INVALID_COLOR;
+                                            } else if (value.validation === true) {
+                                                detectionColor = constants.detectionStyle.VALID_COLOR;
+                                            }
+                                        }
                                         return (
                                             <Tree
                                                 content={`${value.class} - ${value.confidence}%`}
                                                 canHide
                                                 visible={value.visible}
                                                 key={index}
+                                                type={<div style={{
+                                                    backgroundColor: detectionColor,
+                                                    width: '1rem',
+                                                    height: '1rem',
+                                                    display: 'inline-block',
+                                                    marginTop: '0.5rem',
+                                                    border: '0.0625rem solid white'
+                                                }}></div>}
                                             />
                                         )
                                     })
@@ -74,12 +95,33 @@ class SideMenu extends Component {
                                 {/* Repeating the process for the side stack if it exists */}
                                 {value.data.side !== undefined ? 
                                     value.data.side.map((value, index) => {
+                                        // Deciding what color to display next to the detection
+                                        let detectionColor = null;
+                                        if (value.selected === true){
+                                            detectionColor = constants.detectionStyle.SELECTED_COLOR;
+                                        } else {
+                                            if (value.validation === undefined) {
+                                                detectionColor = constants.detectionStyle.NORMAL_COLOR;
+                                            } else if (value.validation === false) {
+                                                detectionColor = constants.detectionStyle.INVALID_COLOR;
+                                            } else if (value.validation === true) {
+                                                detectionColor = constants.detectionStyle.VALID_COLOR;
+                                            }
+                                        }
                                         return (
                                             <Tree
                                                 content={`${value.class} - ${value.confidence}%`}
                                                 canHide
                                                 visible={value.visible}
                                                 key={index}
+                                                type={<div style={{
+                                                    backgroundColor: detectionColor,
+                                                    width: '1rem',
+                                                    height: '1rem',
+                                                    display: 'inline-block',
+                                                    marginTop: '0.5rem',
+                                                    border: '0.0625rem solid white'                                                    
+                                                }}></div>}
                                             />
                                         )
                                     })
@@ -94,8 +136,7 @@ class SideMenu extends Component {
                             </Tree>
                         )
                     })}
-                </Tree>
-                
+                </Tree>                
             </div>
         );
     }

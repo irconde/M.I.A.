@@ -21,7 +21,6 @@ const styles = {
   },
   type: {
     textTransform: 'uppercase',
-    fontFamily: 'monospace',
     fontSize: '0.6em',
     verticalAlign: 'middle',
   },
@@ -73,7 +72,12 @@ export default class Tree extends React.PureComponent {
     const { children, content, type, style, canHide, springConfig } = this.props
     const Icon =
       Icons[`${children ? (open ? 'Minus' : 'Plus') : 'Close'}SquareO`]
-
+    let marginRight = null;
+    if (open===false && children) {
+      marginRight = '1rem';
+    } else {
+      marginRight = '2rem';
+    }
     return (
       <div style={{ ...styles.tree, ...style }} className="treeview">
         <Icon
@@ -84,12 +88,16 @@ export default class Tree extends React.PureComponent {
         <span style={{ ...styles.type, marginRight: type ? 10 : 0 }}>
           {type}
         </span>
+        <span style={{ verticalAlign: 'middle' }}>{content}</span>
         { canHide && visible ? 
           <Icons.EyeO
             className="toggle"
             style={{ 
               ...styles.toggle, 
-              opacity: visible ? 1 : 0.4
+              opacity: visible ? 1 : 0.4,
+              float: 'right',
+              marginRight: marginRight,
+              marginTop: '0.5rem'
             }}
             onClick={this.toggleVisibility}
           /> 
@@ -98,16 +106,24 @@ export default class Tree extends React.PureComponent {
             className="toggle"
             style={{ 
               ...styles.toggle,
-              opacity: visible ? 1 : 0.4
+              opacity: visible ? 1 : 0.4,
+              float: 'right',
+              marginRight: marginRight,
+              marginTop: '0.5rem'
             }}
             onClick={this.toggleVisibility}
           /> 
         }
-        <span style={{ verticalAlign: 'middle' }}>{content}</span>   
         <Spring
           native
           immediate={immediate}
-          config={{ ...config.default, precision: 0.1 }}
+          config={{ 
+            ...config.default, 
+            precision: 0.5,
+            tension: 300,
+            velocity: -1000,
+            friction: 30
+          }}
           from={{ height: 0, opacity: 0, transform: 'translate3d(1.25rem,0,0)' }}
           to={{
             height: open ? 'auto' : 0,

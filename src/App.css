@@ -131,14 +131,14 @@ body {
 }
 
 .treeview-main {
-  width: 17%;
-  height: 100%;
+  width: 20vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
   opacity: 95%;
   display: flexbox;
   background-color: #282828;  
-  line-height: 21px;
+  line-height: 1.3125rem;
   overflow: hidden;
   
 }
