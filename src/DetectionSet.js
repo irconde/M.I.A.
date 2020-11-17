@@ -8,7 +8,7 @@ export default class DetectionSet {
   constructor() {
     this.algorithm = "";
     this.selected = false;
-    this.selectedViewport = undefined;
+    this.selectedViewport = 0;
     this.selectedDetection = constants.selection.NO_SELECTION;
     this.visible = true;
     this.data = {};

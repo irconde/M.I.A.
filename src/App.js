@@ -94,6 +94,7 @@ class App extends Component {
       zoomLevelSide: 1,
       imageViewportTop: document.getElementById('dicomImageLeft'),
       imageViewportSide: document.getElementById('dicomImageRight'),
+      singleViewport: true,
       viewport: cornerstone.getDefaultViewport(null, undefined),
       isConnected: false,
       numOfFilesInQueue: 0,
@@ -123,17 +124,18 @@ class App extends Component {
    */
   componentDidMount() {
     this.state.imageViewportTop.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-    this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+
+    if(this.state.singleViewport === false) {
+      this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+      this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
+      this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
+      this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+    }
 
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
-    this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
-
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-
-    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
-    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-    this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+    // this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
   /**
@@ -276,6 +278,31 @@ class App extends Component {
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
+                this.state.detections = {};
+                this.currentSelection.availableAlgorithms = [];
+                let viewport = document.getElementById('dicomImageLeft');
+                let viewportSide = document.getElementById('dicomImageRight');
+                let singleViewport = false;
+
+                if(listOfStacks.length < 2){
+                  viewport.classList.remove('twoViewportsTop');
+                  viewport.classList.add('singleViewportTop');
+
+                  viewportSide.classList.remove('twoViewportsSide');
+                  viewportSide.classList.add('singleViewportSide');
+                  singleViewport = true;
+                }
+                else{
+                  viewport.classList.remove('singleViewportTop');
+                  viewport.classList.add('twoViewportsTop');
+
+                  viewportSide.classList.remove('singleViewportSide');
+                  viewportSide.classList.add('twoViewportsSide');
+                  singleViewport = false;
+                }
+
+                this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+
                 this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
 
@@ -283,6 +310,7 @@ class App extends Component {
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
                   displayNext: false,
+                  singleViewport: singleViewport,
                   receiveTime: Date.now()
                   }, () => {
                    this.loadAndViewImage();
@@ -430,7 +458,9 @@ class App extends Component {
    */
   setupConerstoneJS(imageViewportTop, imageViewportSide) {
     cornerstone.enable(imageViewportTop);
-    cornerstone.enable(imageViewportSide);
+    if(this.state.singleViewport === false){
+      cornerstone.enable(imageViewportSide);
+    }
 
     const PanTool = cornerstoneTools.PanTool;
     cornerstoneTools.addTool(PanTool);
@@ -464,9 +494,11 @@ class App extends Component {
       dataImagesLeft[i - 1] = self.state.myOra.stackData[0].blobData[i];
     }
 
-    if(self.state.myOra.stackData[1] !== undefined){
-      for(var j = 1; j < self.state.myOra.stackData[1].blobData.length; j++){
-        dataImagesRight[j - 1] = self.state.myOra.stackData[1].blobData[j];
+    if(this.state.singleViewport === false) {
+      if(self.state.myOra.stackData[1] !== undefined){
+        for(var j = 1; j < self.state.myOra.stackData[1].blobData.length; j++){
+          dataImagesRight[j - 1] = self.state.myOra.stackData[1].blobData[j];
+        }
       }
     }
 
@@ -492,11 +524,9 @@ class App extends Component {
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
         });
+     // cornerstone.disable(this.state.imageViewportSide);
 
-    if(self.state.myOra.stackData.length < 2) {
-      cornerstone.disable(this.state.imageViewportSide);
-    }
-    else {
+    if(this.state.singleViewport === false) {
       cornerstone.enable(this.state.imageViewportSide);
       const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[1].blobData[0]);
       cornerstone.loadImage(pixelDataSide).then(
@@ -518,7 +548,7 @@ class App extends Component {
    */
   loadDICOSdata(imagesLeft, imagesRight) {
     const self = this;
-    self.state.detections = {};
+    // self.state.detections = {};
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -583,48 +613,49 @@ class App extends Component {
       readFile.readAsArrayBuffer(imagesLeft[i]);
     }
 
+    if(this.state.singleViewport === false) {
+      for(var k=0; k<imagesRight.length;k++){
+        const read = new FileReader();
+        read.addEventListener("loadend", function() {
+          const view = new Uint8Array(read.result);
+          var image = dicomParser.parseDicom(view);
 
-    for(var k=0; k<imagesRight.length;k++){
-      const read = new FileReader();
-      read.addEventListener("loadend", function() {
-        const view = new Uint8Array(read.result);
-        var image = dicomParser.parseDicom(view);
+          let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
+          let algorithmName = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
 
-        let threatsCount = image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag);
-        let algorithmName = image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag);
+          if (!(algorithmName in self.state.detections)) {
+            self.state.detections[algorithmName] = new DetectionSet();
+            self.state.detections[algorithmName].setAlgorithmName(algorithmName);
+            self.currentSelection.addAlgorithm(algorithmName);
+            self.updateNavigationBtnState();
+          }
 
-        if (!(algorithmName in self.state.detections)) {
-          self.state.detections[algorithmName] = new DetectionSet();
-          self.state.detections[algorithmName].setAlgorithmName(algorithmName);
-          self.currentSelection.addAlgorithm(algorithmName);
-          self.updateNavigationBtnState();
-        }
+          self.state.detections[algorithmName].data[constants.viewport.SIDE] = [];
 
-        self.state.detections[algorithmName].data[constants.viewport.SIDE] = [];
-
-        // Threat Sequence information
-        const threatSequence = image.elements.x40101011;
-        if (threatSequence == null){
-          console.log("No Threat Sequence");
-          return;
-        }
-        if (image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === 0 || image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === undefined) {
-          console.log("No Potential Threat Objects detected");
-          this.setState({
-            displayNext: true
-          });
-          return;
-        }
-        // for every threat found, create a new Detection object and store all Detection
-        // objects in a DetectionSet object
-        for (var m = 0; m < threatsCount; m++) {
-          const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
-          const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
-          const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false), constants.viewport.SIDE);
-        }
-      });
-      read.readAsArrayBuffer(imagesRight[k]);
+          // Threat Sequence information
+          const threatSequence = image.elements.x40101011;
+          if (threatSequence == null){
+            console.log("No Threat Sequence");
+            return;
+          }
+          if (image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === 0 || image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) === undefined) {
+            console.log("No Potential Threat Objects detected");
+            this.setState({
+              displayNext: true
+            });
+            return;
+          }
+          // for every threat found, create a new Detection object and store all Detection
+          // objects in a DetectionSet object
+          for (var m = 0; m < threatsCount; m++) {
+            const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
+            const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
+            const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false), constants.viewport.SIDE);
+          }
+        });
+        read.readAsArrayBuffer(imagesRight[k]);
+      }
     }
 
   }
@@ -638,19 +669,22 @@ class App extends Component {
    */
   onImageRendered(e) {
     const eventData = e.detail;
+
     if(eventData.element.id === 'dicomImageLeft'){
+      const context = eventData.canvasContext;
       this.setState({zoomLevelTop: eventData.viewport.scale.toFixed(2)});
+      this.renderDetections(this.state.detections, context);
     }
-    else if(eventData.element.id === 'dicomImageRight'){
+    else if(eventData.element.id === 'dicomImageRight' && this.state.singleViewport === false){
+      const context = eventData.canvasContext;
       this.setState({zoomLevelSide: eventData.viewport.scale.toFixed(2)});
+      this.renderDetections(this.state.detections, context);
     }
     // set the canvas context to the image coordinate system
     //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
     // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
-    const context = eventData.canvasContext;
-    this.renderDetections(this.state.detections, context);
   }
 
 
@@ -662,13 +696,18 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
+    if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
+      return;
+    }
     let B_BOX_COORDS = 4;
     // TODO. Note that in this version we get the detections of the top view only.
     let detectionList = data[this.currentSelection.getAlgorithm()].getData();
-    if(context.canvas.offsetParent.id === 'dicomImageRight'){
+    console.log(context);
+    if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
+      console.log("side view render");
       detectionList = data[this.currentSelection.getAlgorithm()].getData(constants.viewport.SIDE);
     }
-
+    console.log(detectionList);
     if (detectionList === null || detectionList.length === 0) {
       return;
     }
@@ -705,10 +744,10 @@ class App extends Component {
         // Make the line visible
         context.stroke();
       }
-      else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight') {
+      else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
         const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
-        context.beginPath();
-          // Staring point (10,45)
+      context.beginPath();
+          // Staring point (299, 301)
           context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
           // End point (180,47)
           context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
@@ -774,7 +813,10 @@ class App extends Component {
         });
       }
       cornerstone.updateImage(this.state.imageViewportTop, true);
-      cornerstone.updateImage(this.state.imageViewportSide, true);
+      if(this.state.singleViewport === false) {
+        cornerstone.updateImage(this.state.imageViewportSide, true);
+      }
+
     }
 
     // Handle regular click events for selecting and deselecting detections
@@ -782,7 +824,7 @@ class App extends Component {
       const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
       let detectionSetData = detectionSet.getData();
       let viewport = constants.viewport.TOP;
-      if(e.detail.element.id === 'dicomImageRight'){
+      if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
         detectionSetData = detectionSet.getData(constants.viewport.SIDE);
         viewport = constants.viewport.SIDE;
       }
@@ -830,8 +872,6 @@ class App extends Component {
         let buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
         let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
         const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-        console.log(e);
-        console.log(e.target.offsetLeft);
         if (detectionData === undefined) return;
         const boundingBoxCoords = detectionData.boundingBox;
         let coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft, y:boundingBoxCoords[1]-buttonGap});
@@ -865,7 +905,9 @@ class App extends Component {
       }
     }, () => {
       cornerstone.updateImage(this.state.imageViewportTop, true);
-      cornerstone.updateImage(this.state.imageViewportSide, true);
+      if(this.state.singleViewport === false) {
+        cornerstone.updateImage(this.state.imageViewportSide, true);
+      }
     })
   }
 

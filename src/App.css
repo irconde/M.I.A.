@@ -67,6 +67,40 @@ body {
   display: none !important;
 }
 
+.singleViewportTop {
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
+.singleViewportSide {
+  width: 0;
+  height: 0;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
+.twoViewportsTop {
+  width: 50vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
+.twoViewportsSide {
+  width: 50vw;
+  height: 100vh;
+  top: 0;
+  left: 50%;
+  position: absolute;
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
