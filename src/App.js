@@ -124,17 +124,14 @@ class App extends Component {
    */
   componentDidMount() {
     this.state.imageViewportTop.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-
-    if(this.state.singleViewport === false) {
-      this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
-      this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
-      this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
-      this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-    }
-
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+
+    this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
+    this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     // this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
@@ -211,12 +208,18 @@ class App extends Component {
   onNoImageLeft(){
     console.log('No next image to display');
     let updateImageViewport = this.state.imageViewportTop;
+    let updateImageViewportSide = this.state.imageViewportSide;
     updateImageViewport.style.visibility = 'hidden';
+    updateImageViewportSide.style.visibility = 'hidden';
     this.currentSelection.clear();
+
+    Utils.changeViewport(true);
+
     this.setState({
       selectedFile: null,
       displayNext: false,
-      imageViewportTop: updateImageViewport
+      imageViewportTop: updateImageViewport,
+      imageViewportSide: updateImageViewportSide
     });
   }
 
@@ -278,30 +281,9 @@ class App extends Component {
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
-                this.state.detections = {};
-                this.currentSelection.availableAlgorithms = [];
-                let viewport = document.getElementById('dicomImageLeft');
-                let viewportSide = document.getElementById('dicomImageRight');
-                let singleViewport = false;
+                let singleViewport;
 
-                if(listOfStacks.length < 2){
-                  viewport.classList.remove('twoViewportsTop');
-                  viewport.classList.add('singleViewportTop');
-
-                  viewportSide.classList.remove('twoViewportsSide');
-                  viewportSide.classList.add('singleViewportSide');
-                  singleViewport = true;
-                }
-                else{
-                  viewport.classList.remove('singleViewportTop');
-                  viewport.classList.add('twoViewportsTop');
-
-                  viewportSide.classList.remove('singleViewportSide');
-                  viewportSide.classList.add('twoViewportsSide');
-                  singleViewport = false;
-                }
-
-                this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+                singleViewport = listOfStacks.length < 2;
 
                 this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
@@ -313,8 +295,11 @@ class App extends Component {
                   singleViewport: singleViewport,
                   receiveTime: Date.now()
                   }, () => {
-                   this.loadAndViewImage();
-                 });
+                  Utils.changeViewport(this.state.singleViewport);
+                  this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+                  this.state.detections = {};
+                  this.currentSelection.availableAlgorithms = [];
+                });
               });
             })
           });
@@ -458,9 +443,7 @@ class App extends Component {
    */
   setupConerstoneJS(imageViewportTop, imageViewportSide) {
     cornerstone.enable(imageViewportTop);
-    if(this.state.singleViewport === false){
-      cornerstone.enable(imageViewportSide);
-    }
+    cornerstone.enable(imageViewportSide);
 
     const PanTool = cornerstoneTools.PanTool;
     cornerstoneTools.addTool(PanTool);
@@ -471,6 +454,8 @@ class App extends Component {
     const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
     cornerstoneTools.addTool(ZoomTouchPinchTool);
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+
+    this.loadAndViewImage();
   };
 
 
@@ -702,12 +687,9 @@ class App extends Component {
     let B_BOX_COORDS = 4;
     // TODO. Note that in this version we get the detections of the top view only.
     let detectionList = data[this.currentSelection.getAlgorithm()].getData();
-    console.log(context);
     if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
-      console.log("side view render");
       detectionList = data[this.currentSelection.getAlgorithm()].getData(constants.viewport.SIDE);
     }
-    console.log(detectionList);
     if (detectionList === null || detectionList.length === 0) {
       return;
     }

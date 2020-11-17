@@ -133,4 +133,29 @@ export default class Utils {
     }
     return layerOrder;
   }
+
+  static changeViewport(singleViewport){
+    let viewportTop = document.getElementById('dicomImageLeft');
+    let viewportSide = document.getElementById('dicomImageRight');
+
+    if(singleViewport === true){
+      viewportTop.classList.remove('twoViewportsTop');
+      viewportTop.classList.remove('singleViewportTop');
+      viewportTop.classList.add('singleViewportTop');
+
+      viewportSide.classList.remove('twoViewportsSide');
+      viewportSide.classList.remove('singleViewportSide');
+      viewportSide.classList.add('singleViewportSide');
+    }
+    else {
+      viewportTop.classList.remove('singleViewportTop');
+      viewportTop.classList.remove('twoViewportsTop');
+      viewportTop.classList.add('twoViewportsTop');
+
+      viewportSide.classList.remove('singleViewportSide');
+      viewportSide.classList.remove('twoViewportsSide');
+      viewportSide.classList.add('twoViewportsSide');
+    }
+  }
+
 }
