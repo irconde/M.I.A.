@@ -15,7 +15,7 @@ import Dicos from "./Dicos.js";
 import Detection from "./Detection.js";
 import axios from 'axios';
 import NextButton from './components/NextButton';
-import MetaData from './components/MetaData';
+// import MetaData from './components/MetaData';
 import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar';
 import ValidationButtons from './components/ValidationButtons';

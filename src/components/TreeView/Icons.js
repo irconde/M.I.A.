@@ -12,7 +12,7 @@ const MinusSquareO = props => (
 )
 
 const PlusSquareO = props => (
-  <svg {...props} viewBox="0 0 24 24" transform="rotate(-90) scale(2)">
+  <svg {...props} viewBox="0 0 24 24" transform="rotate(90)">
     <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="arrow_right-24px-copy">
             <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
@@ -23,7 +23,7 @@ const PlusSquareO = props => (
 )
 
 const EyeO = props => (
-  <svg {...props} viewBox="0 0 24 24" transform="scale(1.5)">
+  <svg {...props} viewBox="0 0 24 24">
     <g id="ic_visibility_on" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="visibility-24px">
             <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
@@ -34,7 +34,7 @@ const EyeO = props => (
 )
 
 const EyeC = props => (
-  <svg {...props} viewBox="0 0 24 24" transform="scale(1.5)">
+  <svg {...props} viewBox="0 0 24 24">
     <g id="ic_visibility_off" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="visibility_off-24px">
             <path d="M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z" id="Shape"></path>
