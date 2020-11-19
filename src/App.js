@@ -89,8 +89,8 @@ class App extends Component {
       fileInQueue: false,
       nextAlgBtnEnabled: false,
       prevAlgBtnEnabled: false,
-      zoomLevelTop: 1,
-      zoomLevelSide: 1,
+      zoomLevelTop: constants.viewportStyle.ZOOM,
+      zoomLevelSide: constants.viewportStyle.ZOOM,
       imageViewportTop: document.getElementById('dicomImageLeft'),
       imageViewportSide: document.getElementById('dicomImageRight'),
       singleViewport: true,
@@ -131,7 +131,6 @@ class App extends Component {
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-    // this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
   /**
@@ -519,7 +518,8 @@ class App extends Component {
     cornerstone.loadImage(pixelDataTop).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportTop, image);
-          viewport.translation.y = 50;
+          viewport.translation.y = constants.viewportStyle.ORIGIN;
+          viewport.scale = self.state.zoomLevelTop;
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
         });
@@ -529,7 +529,8 @@ class App extends Component {
       cornerstone.loadImage(pixelDataSide).then(
           function(image) {
             const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportSide, image);
-            viewport.translation.y = 50;
+            viewport.translation.y = constants.viewportStyle.ORIGIN;
+            viewport.scale = self.state.zoomLevelSide;
             self.setState({viewport: viewport});
             cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
           });
@@ -668,12 +669,10 @@ class App extends Component {
 
     if(eventData.element.id === 'dicomImageLeft'){
       const context = eventData.canvasContext;
-      this.setState({zoomLevelTop: eventData.viewport.scale.toFixed(2)});
       this.renderDetections(this.state.detections, context);
     }
     else if(eventData.element.id === 'dicomImageRight' && this.state.singleViewport === false){
       const context = eventData.canvasContext;
-      this.setState({zoomLevelSide: eventData.viewport.scale.toFixed(2)});
       this.renderDetections(this.state.detections, context);
     }
     // set the canvas context to the image coordinate system

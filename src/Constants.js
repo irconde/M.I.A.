@@ -40,5 +40,10 @@ export const detectionStyle = {
   BORDER_WIDTH: 2
 }
 
+export const viewportStyle = {
+  ZOOM: 1.4,
+  ORIGIN: 50
+}
+
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
