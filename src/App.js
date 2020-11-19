@@ -835,12 +835,10 @@ class App extends Component {
         });
       }
       else {
-        console.log('else');
         if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
             e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
           detectionSet.clearSelection();
         }
-
         let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
         this.setState({ displayButtons: anyDetection }, () => {
           this.renderButtons(e);
