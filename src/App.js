@@ -272,7 +272,7 @@ class App extends Component {
               // Which we got from i===0.
               // No matter what however, every layer gets converted a blob and added to the data set
               for (var j = 0; j < listOfStacks.length; j++){
-                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {
+                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {                  
                   await myZip.file(listOfStacks[j].rawData[i]).async('base64').then((imageData) => {
                     if (i===0) listOfStacks[j].pixelData=Utils.base64ToArrayBuffer(imageData);
                     listOfStacks[j].blobData.push(Utils.b64toBlob(imageData));
@@ -282,10 +282,8 @@ class App extends Component {
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
-
                 this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
-
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
@@ -350,46 +348,65 @@ class App extends Component {
    * @param {type} - Event
    * @return {type} - None
    */
-  nextImageClick(e) {
+  nextImageClick(e) {    
     axios.get(`${constants.server.FILE_SERVER_ADDRESS}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
         this.setState({
           algorithm: null
         })
         let validationCompleted = this.validationCompleted();
-        let image = this.state.openRasterData[0];
-
         const stackXML = document.implementation.createDocument("", "", null);
         const prolog = '<?xml version="1.0" encoding="utf-8"?>';
         const imageElem = stackXML.createElement('image');
-        const stackElem = stackXML.createElement('stack');
-
         const mimeType = new Blob(['image/openraster'], {type: "text/plain;charset=utf-8"});
         const newOra = new JSZip();
-
         newOra.file('mimetype', mimeType, { compression: null });
-        newOra.file('data/pixel_data.dcs', image);
-
-        const pixelLayer = stackXML.createElement('layer');
-        pixelLayer.setAttribute('src', 'data/pixel_data.dcs');
-        stackElem.appendChild(pixelLayer);
-
-        /*
-        *  Third parameter is the "abort flag": True / False
-        *  True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-        *  False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-        */
-        for(var i = 1; i < this.state.openRasterData.length; i++){
-          let imageData = this.state.openRasterData[i];
-          newOra.file(`data/additional_data_${i}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(i-1)], imageData, Date.now(), !validationCompleted));
-          let additionalLayer = stackXML.createElement('layer');
-          additionalLayer.setAttribute('src', `data/additional_data_${i}.dcs`);
-          stackElem.appendChild(additionalLayer);
-        }
-        imageElem.appendChild(stackElem);
+        let topCounter = 1;
+        let sideCounter = 1;
+        let stackCounter = 1;
+        // Loop through each stack, being either top or side currently
+        this.state.myOra.stackData.forEach((stack) => {
+          const stackElem = stackXML.createElement('stack');
+          stackElem.setAttribute('name', `SOP Instance UID #${stackCounter}`);
+          stackElem.setAttribute('view', stack.view);
+          const pixelLayer = stackXML.createElement('layer');
+          // We always know the first element in the stack.blob data is pixel element
+          pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.dcs`);
+          newOra.file(`data/${stack.view}_pixel_data.dcs`, stack.blobData[0]);
+          stackElem.appendChild(pixelLayer);
+          if (stack.view === 'top'){
+            // Loop through each detection and only the top view of the detection
+            for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+              if (detectionSet.data.top !== undefined) {
+                for (let j = 0; j < detectionSet.data.top.length; j++){
+                  newOra.file(`data/${stack.view}_threat_detection_${topCounter}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(topCounter-1)], stack.blobData[j+topCounter], Date.now(), !validationCompleted));
+                  let newLayer = stackXML.createElement('layer');
+                  newLayer.setAttribute('src', `data/${stack.view}_threat_detection_${topCounter}.dcs`);
+                  stackElem.appendChild(newLayer);
+                  topCounter++;
+                }
+              }     
+            }
+            // Loop through each detection and only the side view of the detection
+          } else if (stack.view === 'side'){
+            for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+              if (detectionSet.data.side !== undefined) {
+                for (let j = 0; j < detectionSet.data.side.length; j++){
+                  newOra.file(`data/${stack.view}_threat_detection_${sideCounter}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(sideCounter-1)], stack.blobData[j+sideCounter], Date.now(), !validationCompleted));
+                  let newLayer = stackXML.createElement('layer');
+                  newLayer.setAttribute('src', `data/${stack.view}_threat_detection_${sideCounter}.dcs`);
+                  stackElem.appendChild(newLayer);
+                  sideCounter++;
+                }
+              }      
+            }
+          }
+          stackCounter++;
+          imageElem.appendChild(stackElem);
+        })
         stackXML.appendChild(imageElem);
         newOra.file('stack.xml', new Blob([prolog + new XMLSerializer().serializeToString(stackXML)], { type: 'application/xml '}));
-        newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
+        newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {  
           this.sendImageToCommandServer(oraBlob).then((res) => {
             this.hideButtons(e);
             this.setState({
@@ -816,13 +833,11 @@ class App extends Component {
       // Click on an empty area
       if(clickedPos === constants.selection.NO_SELECTION) {
         detectionSet.clearSelection();
-        console.log('clear selection');
         this.setState({ displayButtons: false }, () => {
           this.renderButtons(e);
         });
       }
       else {
-        console.log('else');
         let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
         this.setState({ displayButtons: anyDetection }, () => {
           this.renderButtons(e);
@@ -931,7 +946,7 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={this.state.displayNext} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : true} />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>
