@@ -519,20 +519,16 @@ class App extends Component {
     cornerstone.loadImage(pixelDataTop).then(
         function(image) {
           const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportTop, image);
-          viewport.scale = 1.0;
           viewport.translation.y = 50;
           self.setState({viewport: viewport})
           cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
         });
-     // cornerstone.disable(this.state.imageViewportSide);
 
     if(this.state.singleViewport === false) {
-      cornerstone.enable(this.state.imageViewportSide);
       const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[1].blobData[0]);
       cornerstone.loadImage(pixelDataSide).then(
           function(image) {
             const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportSide, image);
-            viewport.scale = 1.0;
             viewport.translation.y = 50;
             self.setState({viewport: viewport});
             cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
@@ -818,6 +814,7 @@ class App extends Component {
     // Handle regular click events for selecting and deselecting detections
     else{
       const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
+
       let detectionSetData = detectionSet.getData();
       let viewport = constants.viewport.TOP;
       if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
@@ -838,6 +835,12 @@ class App extends Component {
         });
       }
       else {
+        console.log('else');
+        if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
+            e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
+          detectionSet.clearSelection();
+        }
+
         let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
         this.setState({ displayButtons: anyDetection }, () => {
           this.renderButtons(e);
