@@ -23,7 +23,6 @@ import DetectionSet from "./DetectionSet";
 import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
-const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -100,7 +99,7 @@ class App extends Component {
       numOfFilesInQueue: 0,
       isUpload: false,
       isDownload: false,
-      socketCommand: socketIOClient(COMMAND_SERVER),
+      socketCommand: socketIOClient(constants.COMMAND_SERVER),
       socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS)
     };
     this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
@@ -147,6 +146,8 @@ class App extends Component {
       algorithm: this.currentSelection.getAlgorithm()
     }, () => {
       // remove button to iterate through algorithms if there are no more after the current one
+      this.setState({ displayButtons: false });
+      this.state.detections[this.currentSelection.getAlgorithm()].clearSelection();
       this.updateNavigationBtnState();
       this.displayDICOSimage();
     });
@@ -281,9 +282,6 @@ class App extends Component {
               var promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
-                let singleViewport;
-
-                singleViewport = listOfStacks.length < 2;
 
                 this.state.myOra.stackData = listOfStacks;
                 this.currentSelection.clear();
@@ -292,7 +290,7 @@ class App extends Component {
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
                   displayNext: false,
-                  singleViewport: singleViewport,
+                  singleViewport: listOfStacks.length < 2,
                   receiveTime: Date.now()
                   }, () => {
                   Utils.changeViewport(this.state.singleViewport);
@@ -800,7 +798,6 @@ class App extends Component {
       }
 
     }
-
     // Handle regular click events for selecting and deselecting detections
     else{
       const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
@@ -819,11 +816,13 @@ class App extends Component {
       // Click on an empty area
       if(clickedPos === constants.selection.NO_SELECTION) {
         detectionSet.clearSelection();
+        console.log('clear selection');
         this.setState({ displayButtons: false }, () => {
           this.renderButtons(e);
         });
       }
       else {
+        console.log('else');
         let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
         this.setState({ displayButtons: anyDetection }, () => {
           this.renderButtons(e);
