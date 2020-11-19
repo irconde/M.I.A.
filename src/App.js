@@ -669,10 +669,12 @@ class App extends Component {
 
     if(eventData.element.id === 'dicomImageLeft'){
       const context = eventData.canvasContext;
+      this.setState({zoomLevelTop: eventData.viewport.scale});
       this.renderDetections(this.state.detections, context);
     }
     else if(eventData.element.id === 'dicomImageRight' && this.state.singleViewport === false){
       const context = eventData.canvasContext;
+      this.setState({zoomLevelSide: eventData.viewport.scale});
       this.renderDetections(this.state.detections, context);
     }
     // set the canvas context to the image coordinate system

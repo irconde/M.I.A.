@@ -41,8 +41,8 @@ export const detectionStyle = {
 }
 
 export const viewportStyle = {
-  ZOOM: 1.4,
-  ORIGIN: 50
+  ZOOM: 1.5,
+  ORIGIN: 25
 }
 
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
