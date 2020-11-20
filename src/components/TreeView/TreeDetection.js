@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
+import { detectionStyle } from '../../Constants';
 
 class TreeDetection extends Component {
     constructor(props){
@@ -48,6 +49,12 @@ class TreeDetection extends Component {
     }
 
     render() {
+        let textColor = 'white';
+        if (this.props.detection.validation === true && this.props.detection.validation !== undefined){
+            textColor = detectionStyle.VALID_COLOR;
+        } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
+            textColor = detectionStyle.INVALID_COLOR;
+        }
         return (
             <div style={this.props.selected ? {
                 ...this.state.containerStyle,
