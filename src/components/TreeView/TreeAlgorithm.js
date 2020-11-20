@@ -41,7 +41,8 @@ class TreeAlgorithm extends Component {
         this.setSelected = this.setSelected.bind(this);
     }
     static propTypes = {
-        algorithm: PropTypes.object.isRequired
+        algorithm: PropTypes.object.isRequired,
+        configurationInfo: PropTypes.object.isRequired
     }
 
     setVisibility(){
@@ -56,10 +57,16 @@ class TreeAlgorithm extends Component {
         this.setState({ isSelected: !this.state.isSelected });
     }
 
-    render() {
-        // console.log(this.props.algorithm);
+    render() {        
         return (
             <div>
+                <MetaData 
+                    isVisible={this.state.isSelected}
+                    detectorType={this.props.configurationInfo.type}
+                    detectorConfigType={this.props.configurationInfo.configuration}
+                    seriesType={this.props.configurationInfo.series}
+                    studyType={this.props.configurationInfo.study}
+                />
                 <div style={this.state.isSelected ? {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'

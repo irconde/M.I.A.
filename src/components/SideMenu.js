@@ -18,7 +18,8 @@ class SideMenu extends Component {
     }
 
     static propTypes = {
-        detections: PropTypes.object.isRequired
+        detections: PropTypes.object.isRequired,
+        configurationInfo: PropTypes.object.isRequired
     }
 
     render() {
@@ -45,7 +46,7 @@ class SideMenu extends Component {
                         {myDetections.map((value, index) => {
                             return (
                                 // Setting the Algorithm name, IE OTAP or Tiled 
-                                <TreeAlgorithm key={index} algorithm={value} />
+                                <TreeAlgorithm key={index} algorithm={value} configurationInfo={this.props.configurationInfo} />
                             )
                         })} 
                     </div>              

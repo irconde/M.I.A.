@@ -73,10 +73,7 @@ class App extends Component {
       study: null,
       date: null,
       time: null,
-      // TODO:
-      // Once sending new formatted ORA files is completed
-      // Delete this state variable
-      openRasterData: [],
+      configurationInfo: {},
       myOra: new ORA(),
       image: null,
       detections: {},
@@ -570,7 +567,14 @@ class App extends Component {
         series: image.string(Dicos.dictionary['SeriesDescription'].tag),
         study: image.string(Dicos.dictionary['StudyDescription'].tag),
         time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
-        date: mm + '/' + dd + '/' + yyyy
+        date: mm + '/' + dd + '/' + yyyy,
+        configurationInfo: {
+          type: image.string(Dicos.dictionary['DetectorType'].tag),
+          configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
+          station: image.string(Dicos.dictionary['StationName'].tag),
+          series: image.string(Dicos.dictionary['SeriesDescription'].tag),
+          study: image.string(Dicos.dictionary['StudyDescription'].tag),
+        }
       });
     });
     reader.readAsArrayBuffer(imagesLeft[0]);
@@ -954,7 +958,7 @@ class App extends Component {
             nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
             prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
           /> */}
-          <SideMenu detections={this.state.detections} />
+          <SideMenu detections={this.state.detections} configurationInfo={this.state.configurationInfo} />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
           <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} />
