@@ -112,8 +112,6 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
-    this.getFilesFromCommandServer();
-    this.updateNumberOfFiles();
   }
 
   /**
@@ -126,11 +124,13 @@ class App extends Component {
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportTop.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
-
     this.state.imageViewportSide.addEventListener('cornerstoneimagerendered', this.onImageRendered);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+    this.getFilesFromCommandServer();
+    this.updateNumberOfFiles();
+    this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
   /**
@@ -206,7 +206,6 @@ class App extends Component {
    * @return {type} -  None
    */
   onNoImageLeft(){
-    console.log('No next image to display');
     let updateImageViewport = this.state.imageViewportTop;
     let updateImageViewportSide = this.state.imageViewportSide;
     updateImageViewport.style.visibility = 'hidden';
@@ -291,9 +290,9 @@ class App extends Component {
                   receiveTime: Date.now()
                   }, () => {
                   Utils.changeViewport(this.state.singleViewport);
-                  this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
                   this.state.detections = {};
                   this.currentSelection.availableAlgorithms = [];
+                  this.loadAndViewImage();
                 });
               });
             })
@@ -458,7 +457,6 @@ class App extends Component {
   setupConerstoneJS(imageViewportTop, imageViewportSide) {
     cornerstone.enable(imageViewportTop);
     cornerstone.enable(imageViewportSide);
-
     const PanTool = cornerstoneTools.PanTool;
     cornerstoneTools.addTool(PanTool);
     cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
@@ -468,8 +466,6 @@ class App extends Component {
     const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
     cornerstoneTools.addTool(ZoomTouchPinchTool);
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-
-    this.loadAndViewImage();
   };
 
 
@@ -525,6 +521,7 @@ class App extends Component {
         });
 
     if(this.state.singleViewport === false) {
+      this.state.imageViewportSide.style.visibility = 'visible';
       const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[1].blobData[0]);
       cornerstone.loadImage(pixelDataSide).then(
           function(image) {
