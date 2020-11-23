@@ -142,19 +142,23 @@ export default class Utils {
       viewportTop.classList.remove('twoViewportsTop');
       viewportTop.classList.remove('singleViewportTop');
       viewportTop.classList.add('singleViewportTop');
+      viewportTop.style.visibility = 'visible';
 
       viewportSide.classList.remove('twoViewportsSide');
       viewportSide.classList.remove('singleViewportSide');
       viewportSide.classList.add('singleViewportSide');
+      viewportSide.style.visibility = 'hidden'
     }
     else {
       viewportTop.classList.remove('singleViewportTop');
       viewportTop.classList.remove('twoViewportsTop');
       viewportTop.classList.add('twoViewportsTop');
+      viewportTop.style.visibility = 'visible';
 
       viewportSide.classList.remove('singleViewportSide');
       viewportSide.classList.remove('twoViewportsSide');
       viewportSide.classList.add('twoViewportsSide');
+      viewportSide.style.visibility = 'visible';
     }
   }
 

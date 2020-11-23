@@ -130,7 +130,7 @@ class App extends Component {
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
     this.getFilesFromCommandServer();
     this.updateNumberOfFiles();
-    this.setupConerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+    this.setupCornerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
   }
 
   /**
@@ -211,9 +211,6 @@ class App extends Component {
     updateImageViewport.style.visibility = 'hidden';
     updateImageViewportSide.style.visibility = 'hidden';
     this.currentSelection.clear();
-
-    Utils.changeViewport(true);
-
     this.setState({
       selectedFile: null,
       displayNext: false,
@@ -281,15 +278,21 @@ class App extends Component {
               // Once we have all the layers...
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;
+                
                 this.currentSelection.clear();
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
                   displayNext: false,
                   singleViewport: listOfStacks.length < 2,
-                  receiveTime: Date.now()
+                  receiveTime: Date.now(),
                   }, () => {
                   Utils.changeViewport(this.state.singleViewport);
+                  if (this.state.singleViewport) {
+                    cornerstone.resize(this.state.imageViewportTop, true);
+                  } else {
+                    cornerstone.resize(this.state.imageViewportTop);
+                  }
                   this.state.detections = {};
                   this.currentSelection.availableAlgorithms = [];
                   this.loadAndViewImage();
@@ -409,7 +412,8 @@ class App extends Component {
             this.hideButtons(e);
             this.setState({
               selectedFile: null,
-              isUpload: false
+              isUpload: false,
+              displayNext: false,
             });
             this.getNextImage();
           });
@@ -448,13 +452,13 @@ class App extends Component {
   }
 
   /**
-   * setupConerstoneJS - CornerstoneJS Tools are initialized
+   * setupCornerstoneJS - CornerstoneJS Tools are initialized
    *
    * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
    * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
    * @return {type}               None
    */
-  setupConerstoneJS(imageViewportTop, imageViewportSide) {
+  setupCornerstoneJS(imageViewportTop, imageViewportSide) {
     cornerstone.enable(imageViewportTop);
     cornerstone.enable(imageViewportSide);
     const PanTool = cornerstoneTools.PanTool;
@@ -534,7 +538,7 @@ class App extends Component {
           cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
         }
       );
-    }
+    } 
   }
 
   /**
@@ -654,7 +658,6 @@ class App extends Component {
         read.readAsArrayBuffer(imagesRight[k]);
       }
     }
-
   }
 
   /**
