@@ -23,6 +23,7 @@ import DetectionSet from "./DetectionSet";
 import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
+import { data } from 'dcmjs';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -485,10 +486,13 @@ class App extends Component {
     // if pixel data is missing in the dicom/dicos file. To parse out only the data,
     // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
     // the file data and call loadDICOSdata() to store the data in a DetectionSet
-    for(var i = 1; i < self.state.myOra.stackData[0].blobData.length; i++){
-      dataImagesLeft[i - 1] = self.state.myOra.stackData[0].blobData[i];
+    if (self.state.myOra.stackData[0].blobData.length === 1) {
+      dataImagesLeft[0] = self.state.myOra.stackData[0].blobData[0];
+    } else {
+      for(var i = 1; i < self.state.myOra.stackData[0].blobData.length; i++){
+        dataImagesLeft[i - 1] = self.state.myOra.stackData[0].blobData[i];
+      }
     }
-
     if(this.state.singleViewport === false) {
       if(self.state.myOra.stackData[1] !== undefined){
         for(var j = 1; j < self.state.myOra.stackData[1].blobData.length; j++){
@@ -496,7 +500,6 @@ class App extends Component {
         }
       }
     }
-
     self.loadDICOSdata(dataImagesLeft, dataImagesRight);
   }
 
@@ -512,25 +515,26 @@ class App extends Component {
     const pixelDataTop = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[0].blobData[0]);
 
     cornerstone.loadImage(pixelDataTop).then(
-        function(image) {
-          const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportTop, image);
-          viewport.translation.y = constants.viewportStyle.ORIGIN;
-          viewport.scale = self.state.zoomLevelTop;
-          self.setState({viewport: viewport})
-          cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
-        });
-
+      function(image) {
+        const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportTop, image);
+        viewport.translation.y = constants.viewportStyle.ORIGIN;
+        viewport.scale = self.state.zoomLevelTop;
+        self.setState({viewport: viewport})
+        cornerstone.displayImage(self.state.imageViewportTop, image, viewport);
+      }
+    );
     if(this.state.singleViewport === false) {
       this.state.imageViewportSide.style.visibility = 'visible';
       const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(self.state.myOra.stackData[1].blobData[0]);
       cornerstone.loadImage(pixelDataSide).then(
-          function(image) {
-            const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportSide, image);
-            viewport.translation.y = constants.viewportStyle.ORIGIN;
-            viewport.scale = self.state.zoomLevelSide;
-            self.setState({viewport: viewport});
-            cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
-          });
+        function(image) {
+          const viewport = cornerstone.getDefaultViewportForImage(self.state.imageViewportSide, image);
+          viewport.translation.y = constants.viewportStyle.ORIGIN;
+          viewport.scale = self.state.zoomLevelSide;
+          self.setState({viewport: viewport});
+          cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
+        }
+      );
     }
   }
 
@@ -699,8 +703,12 @@ class App extends Component {
     if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
       detectionList = data[this.currentSelection.getAlgorithm()].getData(constants.viewport.SIDE);
     }
-    if (detectionList === null || detectionList.length === 0) {
+    if (detectionList === undefined) {
       return;
+    } else {
+      if (detectionList === null || detectionList.length === 0) {
+        return;
+      }
     }
     for(var j = 0; j < detectionList.length; j++) {
       const boundingBoxCoords = detectionList[j].boundingBox;
@@ -945,7 +953,7 @@ class App extends Component {
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : true} />
+          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>
