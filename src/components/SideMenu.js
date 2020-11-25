@@ -11,8 +11,7 @@ class SideMenu extends Component {
                 top: '0',
                 color: 'white',
                 fill: 'white',
-                width: '100%',
-                marginTop: '1rem'
+                width: '100%'
             },
         }
     }
@@ -35,12 +34,7 @@ class SideMenu extends Component {
         return (
             <div className="treeview-main">
                 {/* Checking to see if there is any data in myDetections */}
-                {/* <Tree 
-                    content={myDetections.length !== 0 ? "Algorithms" : "No Image"}
-                    canHide={myDetections.length !== 0 ? true : false}
-                    open={myDetections.length !== 0 ? true : false}
-                    style={this.state.treeStyles}
-                > */}
+                    {/* TODO: How to display no alg when no images are left to display */}
                     {/* How we create the trees and their nodes is using map */}
                     <div style={this.state.treeStyle}>
                         {myDetections.map((value, index) => {

@@ -30,48 +30,60 @@ class TreeAlgorithm extends Component {
             },
             containerStyle: {
                 height: '2.375rem',
-                paddingBottom: '0.15rem'
+                paddingBottom: '0.15rem',
+                paddingTop: '0.5rem'
             },
-            isVisible: true,
+            isExpanded: true,
             isEnabled: true,
             isSelected: false
         }
-        this.setVisibility = this.setVisibility.bind(this);
+        this.setExpanded = this.setExpanded.bind(this);
         this.setEnabled = this.setEnabled.bind(this);
         this.setSelected = this.setSelected.bind(this);
+        this.updateEnabled = this.updateEnabled.bind(this);
     }
     static propTypes = {
         algorithm: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired
     }
 
-    setVisibility(){
-        this.setState({isVisible: !this.state.isVisible});
+    setExpanded(){
+        this.setState({isExpanded: !this.state.isExpanded});
     }
 
     setEnabled(){
-        this.setState({isEnabled: !this.state.isEnabled});
+        this.setState({isEnabled: !this.state.isEnabled}, () => {
+            if (this.state.isEnabled === false && this.state.isSelected === true){
+                this.setState({ isSelected: !this.state.isSelected});
+            }
+        });
+    }
+
+    updateEnabled(bool){
+        this.setState({ isEnabled: !this.state.isEnabled});
     }
 
     setSelected(){
-        this.setState({ isSelected: !this.state.isSelected });
+        if (this.state.isEnabled) {
+            this.setState({ isSelected: !this.state.isSelected });
+        }
     }
 
-    render() {        
+    render() {
         return (
             <div>
                 <MetaData 
-                    isVisible={this.state.isSelected}
+                    isVisible={this.state.isEnabled ? this.state.isSelected : false}
                     detectorType={this.props.configurationInfo.type}
                     detectorConfigType={this.props.configurationInfo.configuration}
                     seriesType={this.props.configurationInfo.series}
                     studyType={this.props.configurationInfo.study}
                 />
-                <div style={this.state.isSelected ? {
+                <div style={this.state.isSelected && this.state.isEnabled ? {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
-                    <svg style={this.state.arrowStyle} onClick={this.setVisibility} transform="rotate(90)" viewBox="0 0 24 24">
+                    <svg style={this.state.arrowStyle} onClick={this.setExpanded} transform={this.state.isExpanded ? "rotate(90)" : ""} viewBox="0 0 24 24">
                         <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
                             <g id="arrow_right-24px-copy">
                                 <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
@@ -79,11 +91,18 @@ class TreeAlgorithm extends Component {
                             </g>
                         </g>
                     </svg>
-                    <div onClick={this.setSelected} style={this.state.typeStyles}>Algorithm - {this.props.algorithm.algorithm}</div>
-                    {this.state.isEnabled ? <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} /> : <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />}
+                    <div onClick={this.setSelected} style={ this.state.isEnabled ? this.state.typeStyles :  {
+                        ...this.state.typeStyles,
+                        color: 'gray'
+                    } }>Algorithm - {this.props.algorithm.algorithm}</div>
+                    {this.state.isEnabled ? 
+                        <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
+                        : 
+                        <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    }
                 </div>                
                 <div id='detection-holder'>
-                    {this.props.algorithm.data.top !== undefined && this.state.isVisible===true ? 
+                    {this.props.algorithm.data.top !== undefined && this.state.isExpanded===true ? 
                         this.props.algorithm.data.top.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
@@ -99,7 +118,14 @@ class TreeAlgorithm extends Component {
                                 }
                             }
                             return (
-                                <TreeDetection detection={value} selected={this.state.isSelected} enabled={this.state.isEnabled} detectionColor={detectionColor} key={index} />
+                                <TreeDetection 
+                                    detection={value} 
+                                    selected={this.state.isEnabled ? this.state.isSelected : false} 
+                                    enabled={this.state.isEnabled} 
+                                    updateEnabled={this.updateEnabled}
+                                    detectionColor={detectionColor} 
+                                    key={index}
+                                />
                             )
                         })
                         : 
@@ -107,7 +133,7 @@ class TreeAlgorithm extends Component {
                         <span></span>
                     }
                     {/* Repeating the process for the side stack if it exists */}
-                    {this.props.algorithm.data.side !== undefined && this.state.isVisible===true ? 
+                    {this.props.algorithm.data.side !== undefined && this.state.isExpanded===true ? 
                         this.props.algorithm.data.side.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
@@ -123,7 +149,14 @@ class TreeAlgorithm extends Component {
                                 }
                             }
                             return (
-                                <TreeDetection detection={value} selected={this.state.isSelected} enabled={this.state.isEnabled} detectionColor={detectionColor} key={index} />
+                                <TreeDetection
+                                    detection={value}
+                                    selected={this.state.isEnabled ? this.state.isSelected : false} 
+                                    enabled={this.state.isEnabled} 
+                                    updateEnabled={this.updateEnabled}
+                                    detectionColor={detectionColor} 
+                                    key={index} 
+                                />
                             )
                         })
                         : 
