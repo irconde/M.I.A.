@@ -31,21 +31,24 @@ class SideMenu extends Component {
                 data: detectionSet.data
             });
         }
-        return (
-            <div className="treeview-main">
-                {/* Checking to see if there is any data in myDetections */}
-                    {/* TODO: How to display no alg when no images are left to display */}
-                    {/* How we create the trees and their nodes is using map */}
-                    <div style={this.state.treeStyle}>
-                        {myDetections.map((value, index) => {
-                            return (
-                                // Setting the Algorithm name, IE OTAP or Tiled 
-                                <TreeAlgorithm key={index} algorithm={value} configurationInfo={this.props.configurationInfo} />
-                            )
-                        })} 
-                    </div>              
-            </div>
-        );
+        if (myDetections.length !== 0){
+            return (
+                <div className="treeview-main">
+                    {/* Checking to see if there is any data in myDetections */}
+                        {/* How we create the trees and their nodes is using map */}
+                        <div style={this.state.treeStyle}>
+                            {myDetections.map((value, index) => {
+                                return (
+                                    // Setting the Algorithm name, IE OTAP or Tiled 
+                                    <TreeAlgorithm key={index} algorithm={value} configurationInfo={this.props.configurationInfo} />
+                                )
+                            })} 
+                        </div>              
+                </div>
+            );
+        } else {
+            return null;
+        }
     }
 }
 

@@ -59,7 +59,7 @@ class TreeAlgorithm extends Component {
         });
     }
 
-    updateEnabled(bool){
+    updateEnabled(){
         this.setState({ isEnabled: !this.state.isEnabled});
     }
 
