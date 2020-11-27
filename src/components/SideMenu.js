@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
-import { withTheme } from 'styled-components';
 
 class SideMenu extends Component {
-    
     constructor(props){
         super(props);
         this.state = {
@@ -15,22 +13,33 @@ class SideMenu extends Component {
                 fill: 'white',
                 width: '100%'
             },
-            algSelected: new Array()
+            selectedAlgorithm: []
         }            
         this.updateSelected = this.updateSelected.bind(this);
-    }
-
-    updateSelected(index, bool) {
-        if (bool){
-            this.state.algSelected.fill(false);
-        }
-        this.state.algSelected[index] = bool;        
-        this.forceUpdate();
     }
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired
+    }
+
+    /**
+     * updateSelected - Is a function that controls which algorithm is currently selected.
+     *                  How it works is we have an array called selectedAlgorithm, which holds
+     *                  Boolean values. We always set the entire array to be false, so that only
+     *                  one value is ever true. Which we set right afterwards based on the algorithm
+     *                  index clicked in the TreeAlgorithm component. We use forceUpdate here, as
+     *                  manipulating state arrays is not so straight forward when using setState.
+     * 
+     * @param {bool} bool 
+     * @returns {type} none 
+     */
+    updateSelected(index, bool) {
+        if (bool){
+            this.state.selectedAlgorithm.fill(false);
+        }
+        this.state.selectedAlgorithm[index] = bool;        
+        this.forceUpdate();
     }
 
     render() {
@@ -43,7 +52,6 @@ class SideMenu extends Component {
                 data: detectionSet.data
             });   
         }
-        // this.state.algSelected = new Array();
         if (myDetections.length !== 0 && this.props.enableMenu){
             return (
                 <div className="treeview-main">
@@ -51,7 +59,6 @@ class SideMenu extends Component {
                         {/* How we create the trees and their nodes is using map */}
                         <div style={this.state.treeStyle}>
                             {myDetections.map((value, index) => {
-                                // this.state.algSelected.push(false);
                                 return (
                                     // Setting the Algorithm name, IE OTAP or Tiled 
                                     <TreeAlgorithm 
@@ -59,7 +66,7 @@ class SideMenu extends Component {
                                         myKey={index}
                                         algorithm={value} 
                                         updateSelected={this.updateSelected} 
-                                        selectionControl={this.state.algSelected[index]}
+                                        selectionControl={this.state.selectedAlgorithm[index]}
                                         configurationInfo={this.props.configurationInfo} 
                                     />
                                 )

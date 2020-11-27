@@ -48,10 +48,22 @@ class TreeAlgorithm extends Component {
         algKey: PropTypes.number.isRequired
     }
 
+    /**
+     * setExpanded - Function that controls if the current algorithm is
+     *               displaying as a list or collapsed down.
+     */
     setExpanded(){
         this.setState({isExpanded: !this.state.isExpanded});
     }
 
+    /**
+     * setEnabled - Is the function that controls the eye visibility. There is
+     *              a special case when if we click the eye to disable the algorithm,
+     *              then we need to set the selected value to false if it is true.
+     * 
+     * @param {type} none 
+     * @returns {type} none
+     */
     setEnabled(){
         this.setState({isEnabled: !this.state.isEnabled}, () => {
             if (this.state.isEnabled === false && this.props.selectionControl === true){
@@ -60,10 +72,29 @@ class TreeAlgorithm extends Component {
         });
     }
 
+    /**
+     * updateEnabled - Function is for the TreeDetection component, we pass this in as a prop.
+     *                 Because, this is how we control if we need to re-enable the entire algorithm.
+     *                 If in the case that the algorithm is was set to disabled and we clicked one
+     *                 of the individual detections eye in the algorithm, then we want to re-enable the
+     *                 algorithm.
+     * 
+     * @param {bool} bool 
+     * @returns {type} none
+     */
     updateEnabled(){
         this.setState({ isEnabled: !this.state.isEnabled});
     }
 
+    /**
+     * setSelected - Is the function that will set our algorithm to be selected or not,
+     *               that is when you click the algorithm name and the color of it and
+     *               its detection are changed. We call the passed in function letting it
+     *               know which algorithm to change its value based on the algorithm index.
+     * 
+     * @param {none} none 
+     * @returns {type} none
+     */
     setSelected(){
         if (this.state.isEnabled) {
             this.props.updateSelected(this.props.myKey, !this.props.selectionControl);

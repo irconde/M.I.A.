@@ -48,11 +48,11 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 
 class App extends Component {
   /**
-   * constructor - All the related elements of the class are intialized:
+   * constructor - All the related elements of the class are initialized:
    * Callback methods are bound to the class
    * The state is initialized
    * A click listener is bound to the image viewport in order to detect click events
-   * A cornerstoneimagerendered listener is bound to the image viewport to trigger some actions in response to the image rendering
+   * A cornerstoneImageRendered listener is bound to the image viewport to trigger some actions in response to the image rendering
    * CornerstoneJS Tools are initialized
    *
    * @param  {type} props None
@@ -65,11 +65,6 @@ class App extends Component {
       threatsCount: 0,
       selectedFile: null,
       algorithm: null,
-      type: null,
-      configuration: null,
-      station: null,
-      series: null,
-      study: null,
       date: null,
       time: null,
       configurationInfo: {},
@@ -197,7 +192,7 @@ class App extends Component {
 
   /**
    * onNoImageLeft - Method invoked when there isn't any file in the file queue.
-   * A 'No file' image is displayed insted of the cornerstonejs canvas
+   * A 'No file' image is displayed instead of the cornerstoneJs canvas
    *
    * @param {type}  - None
    * @return {type} -  None
@@ -217,7 +212,7 @@ class App extends Component {
   }
 
   /**
-   * getNextImage() - Attempts to retreive the next image from the file server via get request
+   * getNextImage() - Attempts to retrieve the next image from the file server via get request
    *                - Then sets the state to the blob and calls the loadAndViewImage() function
    * @param {type} - None
    * @return {type} - None
@@ -416,7 +411,7 @@ class App extends Component {
           });
         })
       } else if (res.data.confirm === 'image-not-removed') {
-        console.log('File server couldnt remove the next image');
+        console.log('File server couldn\'t remove the next image');
       } else if (res.data.confirm === 'no-next-image'){
         alert('No next image');
         this.setState({selectedFile: null});
@@ -428,7 +423,7 @@ class App extends Component {
 
 
   /**
-   * sendImageToFileServer - Socket IO to send an imge to the file server
+   * sendImageToFileServer - Socket IO to send an image to the file server
    * @param {type} - file - which file we are sending
    * @return {type} - None
    */
@@ -560,11 +555,6 @@ class App extends Component {
       self.setState({
         threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
         algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
-        type: image.string(Dicos.dictionary['DetectorType'].tag),
-        configuration: image.string(Dicos.dictionary['DetectorConfiguration'].tag),
-        station: image.string(Dicos.dictionary['StationName'].tag),
-        series: image.string(Dicos.dictionary['SeriesDescription'].tag),
-        study: image.string(Dicos.dictionary['StudyDescription'].tag),
         time: today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(),
         date: mm + '/' + dd + '/' + yyyy,
         configurationInfo: {
@@ -957,21 +947,21 @@ class App extends Component {
             isDownload={this.state.isDownload}
             isConnected={this.state.isConnected}
           />
-          {/* <MetaData
-            isVisible={this.state.fileInQueue}
-            algorithmType={this.state.algorithm}
-            detectorType={this.state.type}
-            detectorConfigType={this.state.configuration}
-            seriesType={this.state.series}
-            studyType={this.state.study}
-            navigationBtnClick={this.getAlgorithmForPos}
-            nextAlgBtnEnabled={this.state.nextAlgBtnEnabled}
-            prevAlgBtnEnabled={this.state.prevAlgBtnEnabled}
-          /> */}
-          <SideMenu detections={this.state.detections} configurationInfo={this.state.configurationInfo} enableMenu={this.state.fileInQueue} />
+          <SideMenu 
+            detections={this.state.detections} 
+            configurationInfo={this.state.configurationInfo} 
+            enableMenu={this.state.fileInQueue} 
+          />
           <div id="algorithm-outputs"> </div>
-          <ValidationButtons displayButtons={this.state.displayButtons} buttonStyles={this.state.buttonStyles} onMouseClicked={this.onMouseClicked} />
-          <NextButton nextImageClick={this.nextImageClick} displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} />
+          <ValidationButtons 
+            displayButtons={this.state.displayButtons} 
+            buttonStyles={this.state.buttonStyles} 
+            onMouseClicked={this.onMouseClicked} 
+          />
+          <NextButton 
+            nextImageClick={this.nextImageClick} 
+            displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} 
+          />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
       </div>

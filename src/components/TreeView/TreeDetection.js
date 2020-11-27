@@ -47,6 +47,14 @@ class TreeDetection extends Component {
         updateEnabled: PropTypes.func.isRequired
     }
 
+    /**
+     * setEnabled - Is how we control the eye visibility for each detection.
+     *              We use a variable called isChanging, to control the eye
+     *              in the TreeAlgorithm Component. 
+     * 
+     * @param {none} none 
+     * @returns {type} none
+     */
     setEnabled(){
         if (this.props.enabled === false && this.state.isEnabled === true) {
             this.props.updateEnabled();
@@ -65,6 +73,7 @@ class TreeDetection extends Component {
     }
 
     render() {
+        // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         if (this.props.detection.validation === true && this.props.detection.validation !== undefined){
             textColor = detectionStyle.VALID_COLOR;
@@ -73,7 +82,8 @@ class TreeDetection extends Component {
         } else if (!this.props.enabled || !this.state.isEnabled){
             textColor = 'gray';
         }
-        if (this.props.enabled === true && this.state.isEnabled === true && this.isChanging === true) {
+        // We only display an open eye if both algorithm and detection are enabled.
+        if (this.props.enabled === true && this.state.isEnabled === true) {
             return (            
                 <div style={this.props.selected ? 
                     {...this.state.containerStyle,
@@ -91,115 +101,7 @@ class TreeDetection extends Component {
                     <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
                 </div>
             );
-        }else if (this.props.enabled === true && this.state.isEnabled === true && this.isChanging === false) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        } else if (this.props.enabled === true && this.state.isEnabled === false && this.isChanging === true) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        } else if (this.props.enabled === true && this.state.isEnabled === false && this.isChanging === false) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        } else if (this.props.enabled === false && this.state.isEnabled === true && this.isChanging === false) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        }  else if (this.props.enabled === false && this.state.isEnabled === false && this.isChanging === true) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        } else if (this.props.enabled === false && this.state.isEnabled === false && this.isChanging === true) {
-            return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
-                    }}></div>
-                    <span style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
-                </div>
-            );
-        } else if (this.props.enabled === false && this.state.isEnabled === false && this.isChanging === false) {
+        } else {
             return (            
                 <div style={this.props.selected ? 
                     {...this.state.containerStyle,
