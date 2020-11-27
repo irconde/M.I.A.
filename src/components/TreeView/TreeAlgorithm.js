@@ -4,7 +4,6 @@ import MetaData from '../Snackbars/MetaData';
 import TreeDetection from './TreeDetection';
 import * as Icons from './Icons';
 import * as constants from '../../Constants';
-import { Spring } from 'react-spring/renderprops';
 
 class TreeAlgorithm extends Component {
     constructor(props){
@@ -34,8 +33,7 @@ class TreeAlgorithm extends Component {
                 paddingTop: '0.5rem'
             },
             isExpanded: true,
-            isEnabled: true,
-            isSelected: false
+            isEnabled: true
         }
         this.setExpanded = this.setExpanded.bind(this);
         this.setEnabled = this.setEnabled.bind(this);
@@ -44,7 +42,10 @@ class TreeAlgorithm extends Component {
     }
     static propTypes = {
         algorithm: PropTypes.object.isRequired,
-        configurationInfo: PropTypes.object.isRequired
+        configurationInfo: PropTypes.object.isRequired,
+        updateSelected: PropTypes.func.isRequired,
+        selectionControl: PropTypes.bool.isRequired,
+        algKey: PropTypes.number.isRequired
     }
 
     setExpanded(){
@@ -53,8 +54,8 @@ class TreeAlgorithm extends Component {
 
     setEnabled(){
         this.setState({isEnabled: !this.state.isEnabled}, () => {
-            if (this.state.isEnabled === false && this.state.isSelected === true){
-                this.setState({ isSelected: !this.state.isSelected});
+            if (this.state.isEnabled === false && this.props.selectionControl === true){
+                this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
             }
         });
     }
@@ -65,7 +66,7 @@ class TreeAlgorithm extends Component {
 
     setSelected(){
         if (this.state.isEnabled) {
-            this.setState({ isSelected: !this.state.isSelected });
+            this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
         }
     }
 
@@ -73,13 +74,13 @@ class TreeAlgorithm extends Component {
         return (
             <div>
                 <MetaData 
-                    isVisible={this.state.isEnabled ? this.state.isSelected : false}
+                    isVisible={this.state.isEnabled ? this.props.selectionControl : false}
                     detectorType={this.props.configurationInfo.type}
                     detectorConfigType={this.props.configurationInfo.configuration}
                     seriesType={this.props.configurationInfo.series}
                     studyType={this.props.configurationInfo.study}
                 />
-                <div style={this.state.isSelected && this.state.isEnabled ? {
+                <div style={this.props.selectionControl && this.state.isEnabled ? {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
@@ -120,7 +121,7 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection 
                                     detection={value} 
-                                    selected={this.state.isEnabled ? this.state.isSelected : false} 
+                                    selected={this.state.isEnabled ? this.props.selectionControl : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
@@ -151,7 +152,7 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    selected={this.state.isEnabled ? this.state.isSelected : false} 
+                                    selected={this.state.isEnabled ? this.props.selectionControl : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
