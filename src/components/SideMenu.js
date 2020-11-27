@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
+import { withTheme } from 'styled-components';
 
 class SideMenu extends Component {
     constructor(props){
@@ -31,7 +32,7 @@ class SideMenu extends Component {
                 data: detectionSet.data
             });
         }
-        if (myDetections.length !== 0){
+        if (myDetections.length !== 0 && this.props.enableMenu){
             return (
                 <div className="treeview-main">
                     {/* Checking to see if there is any data in myDetections */}
@@ -47,7 +48,7 @@ class SideMenu extends Component {
                 </div>
             );
         } else {
-            return null;
+            return <div/>;
         }
     }
 }
