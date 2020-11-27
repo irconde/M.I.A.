@@ -1,27 +1,5 @@
 import React from 'react'
 
-const MinusSquareO = props => (
-  <svg {...props} viewBox="0 0 24 24" transform="rotate(90) scale(2)">
-    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-        <g id="arrow_right-24px-copy">
-            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
-            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
-        </g>
-    </g>
-  </svg>
-)
-
-const PlusSquareO = props => (
-  <svg {...props} viewBox="0 0 24 24" transform="rotate(90)">
-    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-        <g id="arrow_right-24px-copy">
-            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
-            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
-        </g>
-    </g>
-  </svg>
-)
-
 const EyeO = props => (
   <svg {...props} viewBox="0 0 24 24">
     <g id="ic_visibility_on" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
@@ -44,14 +22,6 @@ const EyeC = props => (
   </svg>
 )
 
-const CloseSquareO = props => (
-  <svg {...props} viewBox="64 -65 897 897">
-    <g>
-      
-    </g>
-  </svg>
-)
-
 const Info = props => (
   <svg {...props} width="1.5rem" height="1.5rem" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>ic_info</title>
@@ -64,4 +34,26 @@ const Info = props => (
 </svg>
 )
 
-export { PlusSquareO, MinusSquareO, CloseSquareO, EyeO, EyeC, Info }
+const CollapsedArrow = props => (
+  <svg {...props} viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="arrow_right-24px-copy">
+            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
+            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
+        </g>
+    </g>
+</svg>
+)
+
+const ExpendedArrow = props => (
+  <svg {...props} viewBox="0 0 24 24" transform="rotate(90)" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+        <g id="arrow_right-24px-copy">
+            <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
+            <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
+        </g>
+    </g>
+</svg>
+)
+
+export { EyeO, EyeC, Info, CollapsedArrow, ExpendedArrow }

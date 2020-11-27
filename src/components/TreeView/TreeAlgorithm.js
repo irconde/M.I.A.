@@ -115,14 +115,16 @@ class TreeAlgorithm extends Component {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
-                    <svg style={this.state.arrowStyle} onClick={this.setExpanded} transform={this.state.isExpanded ? "rotate(90)" : ""} viewBox="0 0 24 24">
-                        <g id="ic_menu_arrow" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                            <g id="arrow_right-24px-copy">
-                                <polygon id="Path" fill="#FFFFFF" fillRule="nonzero" points="10 17 15 12 10 7"></polygon>
-                                <polygon id="Path" points="0 24 0 0 24 0 24 24"></polygon>
-                            </g>
-                        </g>
-                    </svg>
+                    {this.state.isExpanded ? 
+                        <Icons.ExpendedArrow 
+                            style={this.state.arrowStyle} 
+                            onClick={this.setExpanded}
+                        /> 
+                        : 
+                        <Icons.CollapsedArrow 
+                            style={this.state.arrowStyle} 
+                            onClick={this.setExpanded} 
+                        />}
                     <div onClick={this.setSelected} style={ this.state.isEnabled ? this.state.typeStyles :  {
                         ...this.state.typeStyles,
                         color: 'gray'
