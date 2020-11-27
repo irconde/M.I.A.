@@ -31,7 +31,8 @@ class SideMenu extends Component {
      *                  index clicked in the TreeAlgorithm component. We use forceUpdate here, as
      *                  manipulating state arrays is not so straight forward when using setState.
      * 
-     * @param {bool} bool 
+     * @param {type} index 
+     * @param {type} bool 
      * @returns {type} none 
      */
     updateSelected(index, bool) {
@@ -52,10 +53,10 @@ class SideMenu extends Component {
                 data: detectionSet.data
             });   
         }
+        // Checking to see if there is any data in myDetections
         if (myDetections.length !== 0 && this.props.enableMenu){
             return (
-                <div className="treeview-main">
-                    {/* Checking to see if there is any data in myDetections */}
+                <div className="treeview-main">                    
                         {/* How we create the trees and their nodes is using map */}
                         <div style={this.state.treeStyle}>
                             {myDetections.map((value, index) => {

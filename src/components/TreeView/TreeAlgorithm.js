@@ -40,6 +40,7 @@ class TreeAlgorithm extends Component {
         this.setSelected = this.setSelected.bind(this);
         this.updateEnabled = this.updateEnabled.bind(this);
     }
+    
     static propTypes = {
         algorithm: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
@@ -51,6 +52,9 @@ class TreeAlgorithm extends Component {
     /**
      * setExpanded - Function that controls if the current algorithm is
      *               displaying as a list or collapsed down.
+     * 
+     * @param {type} none 
+     * @returns {type} none
      */
     setExpanded(){
         this.setState({isExpanded: !this.state.isExpanded});
@@ -79,7 +83,7 @@ class TreeAlgorithm extends Component {
      *                 of the individual detections eye in the algorithm, then we want to re-enable the
      *                 algorithm.
      * 
-     * @param {bool} bool 
+     * @param {type} none 
      * @returns {type} none
      */
     updateEnabled(){
@@ -92,7 +96,7 @@ class TreeAlgorithm extends Component {
      *               its detection are changed. We call the passed in function letting it
      *               know which algorithm to change its value based on the algorithm index.
      * 
-     * @param {none} none 
+     * @param {type} none 
      * @returns {type} none
      */
     setSelected(){

@@ -52,7 +52,7 @@ class TreeDetection extends Component {
      *              We use a variable called isChanging, to control the eye
      *              in the TreeAlgorithm Component. 
      * 
-     * @param {none} none 
+     * @param {type} none 
      * @returns {type} none
      */
     setEnabled(){
