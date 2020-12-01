@@ -1,4 +1,4 @@
-# Pilot GUI version 1.1.1
+# Pilot GUI version 1.2.1
 
 The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple detections or objects identified as potentially of interest by the system itself.
 
@@ -33,7 +33,7 @@ npm install
 Again, using terminal and being at the root folder of the project, it is possible to start the client in development mode by using this command:
 
 ```
-REACT_APP_COMMAND_SERVER=http://<SERVER_IP>:<SERVER_PORT> npm start
+REACT_APP_COMMAND_SERVER=http://<SERVER_IP>:<SERVER_PORT> REACT_APP_ENABLE_NEXT=[true/false] npm start
 ```
 
 Note that we use the environment variable  REACT_APP_COMMAND_SERVER to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service runing on a machine with the 127.0.0.1 ip number and through the 4001 port,  the command to be used is:
@@ -41,6 +41,8 @@ Note that we use the environment variable  REACT_APP_COMMAND_SERVER to launch th
 ```
 REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 npm start
 ```
+
+Furthermore, an additional environment variable, REACT_APP_ENABLE_NEXT, can be used to bypass the requirement of validating all the detections in a file to navigate to the next one.
 
 ## Building the client
 

@@ -1,5 +1,3 @@
-import JSZip from "jszip";
-
 /**
  * Class that emcompases any secondary method to support the primary features of the client
  */
@@ -135,4 +133,33 @@ export default class Utils {
     }
     return layerOrder;
   }
+
+  static changeViewport(singleViewport){
+    let viewportTop = document.getElementById('dicomImageLeft');
+    let viewportSide = document.getElementById('dicomImageRight');
+
+    if(singleViewport === true){
+      viewportTop.classList.remove('twoViewportsTop');
+      viewportTop.classList.remove('singleViewportTop');
+      viewportTop.classList.add('singleViewportTop');
+      viewportTop.style.visibility = 'visible';
+
+      viewportSide.classList.remove('twoViewportsSide');
+      viewportSide.classList.remove('singleViewportSide');
+      viewportSide.classList.add('singleViewportSide');
+      viewportSide.style.visibility = 'hidden'
+    }
+    else {
+      viewportTop.classList.remove('singleViewportTop');
+      viewportTop.classList.remove('twoViewportsTop');
+      viewportTop.classList.add('twoViewportsTop');
+      viewportTop.style.visibility = 'visible';
+
+      viewportSide.classList.remove('singleViewportSide');
+      viewportSide.classList.remove('twoViewportsSide');
+      viewportSide.classList.add('twoViewportsSide');
+      viewportSide.style.visibility = 'visible';
+    }
+  }
+
 }

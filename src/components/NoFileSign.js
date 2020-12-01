@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * GUI widget that provides displays an image in the middle of the screen to
+ * provide user with feedback when there are no pending files on the file queue
+ */
 class NoFileSign extends Component {
   constructor(props){
       super(props);
@@ -29,7 +33,6 @@ class NoFileSign extends Component {
             height: '90%'
           }
       }
-
   }
 
   static propTypes = {
@@ -40,12 +43,11 @@ class NoFileSign extends Component {
       if (!this.props.isVisible) return (<div></div>);
       return (
           <div style={this.state.divStyle}>
-            <img style={this.state.imgStyle} src='./img/ic_no_files.svg' />
+            <img style={this.state.imgStyle} src='./img/ic_no_files.svg' alt=""/>
             <p style={this.state.paragraphStyle}> · No file available ·</p>
           </div>
       );
   }
-
 }
 
 export default NoFileSign;

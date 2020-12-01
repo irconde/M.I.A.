@@ -1,5 +1,4 @@
 import * as dcmjs from 'dcmjs';
-import Utils from "./Utils";
 
 /**
  * Class that emcompases any secondary method related to DICOS file management
@@ -117,14 +116,15 @@ export default class Dicos {
    *                               False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
    * @return {type}                Blob with data for the creation of the amended DICOS file.
    */
-  static dataToBlob(validationList, image, startTime, abort= false) {
+  static dataToBlob(detectionList, image, startTime, abort= false) {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    let validations = [];
-    if(validationList !== null){
-      validations = validationList;
+    let detections = [];
+
+    if(detectionList.getData().length !== 0){
+      detections = detectionList.getData();
     }
 
     var fileReader = new FileReader();
@@ -177,8 +177,8 @@ export default class Dicos {
         copiedData.AdditionalScreeningPerformed = "YES";
         copiedData.AdditionalInspectionSelectionCriteria = "RANDOM";
 
-        if(validations.length>1) {
-          for (var i = 0; i < validations.length; i++) {
+        if(detections.length>1) {
+          for (var i = 0; i < detections.length; i++) {
             if (copiedData.ThreatSequence[i]) {
               copiedData.ThreatSequence[i]['ReferencedPTOSequence'] = {
                 'vrMap': {},
@@ -190,13 +190,13 @@ export default class Dicos {
                 }
               }
             }
-            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations[i];
+            copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ThreatCategoryDescription'] = detections[i].feedback ? "CONFIRM" : "REJECT";
             copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
 
-            if (validations[i] === "CONFIRM") {
+            if (detections[i].feedback === true) {
               copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
               copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
-            } else if (validations[i] === "REJECT") {
+            } else if (detections[i].feedback === false) {
               copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
               copiedData.ThreatSequence[i]['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
               numberAlarmObjs = numberAlarmObjs - 1;
@@ -204,8 +204,8 @@ export default class Dicos {
               copiedData.NumberOfAlarmObjects = numberAlarmObjs;
               copiedData.NumberOfTotalObjects = numberTotalObjs;
             }
-          } //end for loop through validations
-        } // end if validations.length>1
+          } //end for loop through detections
+        } // end if detections.length>1
 
         else {
           if (copiedData.ThreatSequence) {
@@ -219,13 +219,13 @@ export default class Dicos {
               }
             }
           }
-          copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = validations;
+          copiedData.ThreatSequence['ATDAssessmentSequence']['ThreatCategoryDescription'] = detections[0].feedback ? "CONFIRM" : "REJECT";
           copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentProbability'] = 1;
 
-          if (validations[i] === "CONFIRM") {
+          if (detections[0].feedback === true) {
             copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "THREAT";
             copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
-          } else if (validations === "REJECT") {
+          } else if (detections[0].feedback === false) {
             copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAssessmentFlag'] = "NO_THREAT";
             copiedData.ThreatSequence['ATDAssessmentSequence']['ATDAbilityAssessment'] = "NO_INTERFERENCE";
             numberAlarmObjs = numberAlarmObjs - 1;
