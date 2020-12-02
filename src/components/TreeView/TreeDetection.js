@@ -23,7 +23,7 @@ class TreeDetection extends Component {
                 fontFamily: 'Noto Sans JP Regular',
             },
             containerStyle: {
-                height: '2.375rem',
+                // height: '2.375rem',
                 paddingTop: '0.45rem'
             },
             eyeStyle: {

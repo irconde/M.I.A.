@@ -28,7 +28,7 @@ class TreeAlgorithm extends Component {
                 margin: 'auto'
             },
             containerStyle: {
-                height: '2.375rem',
+                // height: '2.375rem',
                 paddingBottom: '0.15rem',
                 paddingTop: '0.5rem'
             },

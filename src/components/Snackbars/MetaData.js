@@ -38,9 +38,7 @@ class MetaData extends Component {
                 justifyContent: 'center',
                 textAlign: 'left',
                 color: '#ffffff',
-                width: 'max-content',
-                height: '2.8125rem',
-                
+                width: 'max-content'                
             },
         }
     }
