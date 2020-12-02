@@ -25,7 +25,8 @@ class TreeAlgorithm extends Component {
                 verticalAlign: 'super',
                 fontFamily: 'Noto Sans JP Medium',
                 display: 'inline-block',
-                margin: 'auto'
+                margin: 'auto',
+                cursor: 'default'
             },
             containerStyle: {
                 paddingBottom: '0.15rem',

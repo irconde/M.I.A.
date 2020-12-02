@@ -21,6 +21,7 @@ class TreeDetection extends Component {
                 verticalAlign: 'top',
                 textTransform: 'uppercase',
                 fontFamily: 'Noto Sans JP Regular',
+                cursor: 'default'
             },
             containerStyle: {
                 paddingTop: '0.45rem'
