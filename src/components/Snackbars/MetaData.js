@@ -32,13 +32,13 @@ class MetaData extends Component {
                 paddingRight: '1rem',
                 position: 'fixed',
                 top: '5rem',
-                left: '30%',
+                left: '60%',
                 backgroundColor: 'rgba(38, 38, 38, 0.5)',
                 borderRadius: '1.375rem',
-                justifyContent: 'center',
                 textAlign: 'left',
                 color: '#ffffff',
-                width: 'max-content'                
+                width: 'max-content',
+                transform: 'translateX(-50%)'
             },
         }
     }
