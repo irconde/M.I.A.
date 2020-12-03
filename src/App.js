@@ -693,74 +693,76 @@ class App extends Component {
     if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
       return;
     }
-    let B_BOX_COORDS = 4;
-    // TODO. Note that in this version we get the detections of the top view only.
-    let detectionList = data[this.currentSelection.getAlgorithm()].getData();
-    if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
-      detectionList = data[this.currentSelection.getAlgorithm()].getData(constants.viewport.SIDE);
-    }
-    if (detectionList === undefined) {
-      return;
-    } else {
-      if (detectionList === null || detectionList.length === 0) {
+    for (const [key, detectionSet] of Object.entries(data)) {
+      let B_BOX_COORDS = 4;
+      // TODO. Note that in this version we get the detections of the top view only.
+      let detectionList = detectionSet.getData();
+      if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
+        detectionList = detectionSet.getData(constants.viewport.SIDE);
+      }
+      if (detectionList === undefined) {
         return;
+      } else {
+        if (detectionList === null || detectionList.length === 0) {
+          return;
+        }
       }
-    }
-    for(var j = 0; j < detectionList.length; j++) {
-      const boundingBoxCoords = detectionList[j].boundingBox;
-      let color = detectionList[j].getRenderColor();
-      if (boundingBoxCoords.length < B_BOX_COORDS) return;
-      context.font = constants.detectionStyle.LABEL_FONT;
-      context.strokeStyle = color;
-      context.fillStyle = color;
-      context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
-      const boundingBoxWidth = Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]);
-      const boundingBoxHeight = Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]);
-      const detectionLabel = Utils.formatDetectionLabel(detectionList[j].class, detectionList[j].confidence);
-      const labelSize = Utils.getTextLabelSize(context, detectionLabel, constants.detectionStyle.LABEL_PADDING);
-      context.fillStyle = color;
-      context.strokeStyle = color;
-      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
-      // Line rendering
-    if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
-        const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
-        context.beginPath();
-        // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
-        // End point (180,47)
-        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] + buttonGap);
-        // Make the line visible
-        context.stroke();
-        context.beginPath();
-        // Staring point (10,45)
-        context.moveTo(boundingBoxCoords[2] - constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
-        // End point (180,47)
-        context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
-        // Make the line visible
-        context.stroke();
-      }
-      else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
-        const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
-      context.beginPath();
-          // Staring point (299, 301)
-          context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+      for(var j = 0; j < detectionList.length; j++) {
+        const boundingBoxCoords = detectionList[j].boundingBox;
+        let color = detectionList[j].getRenderColor();
+        if (boundingBoxCoords.length < B_BOX_COORDS) return;
+        context.font = constants.detectionStyle.LABEL_FONT;
+        context.strokeStyle = color;
+        context.fillStyle = color;
+        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        const boundingBoxWidth = Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]);
+        const boundingBoxHeight = Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]);
+        const detectionLabel = Utils.formatDetectionLabel(detectionList[j].class, detectionList[j].confidence);
+        const labelSize = Utils.getTextLabelSize(context, detectionLabel, constants.detectionStyle.LABEL_PADDING);
+        context.fillStyle = color;
+        context.strokeStyle = color;
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
+        // Line rendering
+      if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+          const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
+          context.beginPath();
+          // Staring point (10,45)
+          context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
           // End point (180,47)
-          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
+          context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] + buttonGap);
           // Make the line visible
           context.stroke();
           context.beginPath();
           // Staring point (10,45)
-          context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+          context.moveTo(boundingBoxCoords[2] - constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
           // End point (180,47)
-          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
+          context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
           // Make the line visible
           context.stroke();
+        }
+        else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
+          const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
+        context.beginPath();
+            // Staring point (299, 301)
+            context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+            // End point (180,47)
+            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
+            // Make the line visible
+            context.stroke();
+            context.beginPath();
+            // Staring point (10,45)
+            context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+            // End point (180,47)
+            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
+            // Make the line visible
+            context.stroke();
+        }
+        // Label rendering
+        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
       }
-      // Label rendering
-      context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-      context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-      context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-      context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
     }
   };
 
