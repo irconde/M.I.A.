@@ -13,7 +13,7 @@ class TreeDetection extends Component {
                 height: '0.75rem',
                 display: 'inline-block',
                 marginBottom: '0.15rem',
-                border: '0.0625rem solid white',
+                border: '0.0625rem solid rgba(220,220,220,0.4)',
                 marginLeft: '2rem',
                 marginRight: '0.5rem'
             },
@@ -34,17 +34,20 @@ class TreeDetection extends Component {
                 marginRight: '0.5rem',
                 marginBottom: '0.25rem'
             },
-            isEnabled: true
+            isEnabled: true,
+            isSelected: false
         }
         this.isChanging = false;
         this.setEnabled = this.setEnabled.bind(this);
+        this.setSelected = this.setSelected.bind(this);
     }
     static propTypes = {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
         enabled: PropTypes.bool.isRequired,
         selected: PropTypes.bool.isRequired,
-        updateEnabled: PropTypes.func.isRequired
+        updateEnabled: PropTypes.func.isRequired,
+        updateSelected: PropTypes.func.isRequired
     }
 
     /**
@@ -72,9 +75,15 @@ class TreeDetection extends Component {
         
     }
 
+    setSelected() {
+        this.setState({ isSelected: !this.state.isSelected });
+    }
+
     render() {
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
+        let selectionColor;
+        let colorSelection = false;
         if (this.props.detection.validation === true && this.props.detection.validation !== undefined){
             textColor = detectionStyle.VALID_COLOR;
         } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
@@ -82,12 +91,26 @@ class TreeDetection extends Component {
         } else if (!this.props.enabled || !this.state.isEnabled){
             textColor = 'gray';
         }
+        if (this.props.selected === true && this.state.isSelected === true) {
+            selectionColor = 'rgba(54, 126, 255, 0.2)';
+            colorSelection = true;
+            this.state.isSelected = false;
+        } else if (this.props.selected === false && this.state.isSelected === true) {
+            selectionColor = 'rgb(54, 126, 255)';
+            colorSelection = true;
+        } else if (this.props.selected === undefined && this.state.isSelected === true) {
+            selectionColor = 'rgb(54, 126, 255)';
+            colorSelection = true;
+        } else if (this.props.selected === true && this.state.isSelected === false) {
+            selectionColor = 'rgba(54, 126, 255, 0.2)';
+            colorSelection = true;
+        }
         // We only display an open eye if both algorithm and detection are enabled.
         if (this.props.enabled === true && this.state.isEnabled === true) {
             return (            
-                <div style={this.props.selected ? 
+                <div onClick={this.setSelected} style={colorSelection ? 
                     {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
+                    backgroundColor: selectionColor,} 
                     : 
                     this.state.containerStyle}>
                     <div style={{
@@ -103,11 +126,7 @@ class TreeDetection extends Component {
             );
         } else {
             return (            
-                <div style={this.props.selected ? 
-                    {...this.state.containerStyle,
-                    backgroundColor: 'rgba(54, 126, 255, 0.2)',} 
-                    : 
-                    this.state.containerStyle}>
+                <div style={this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor,                                                 

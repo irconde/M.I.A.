@@ -33,7 +33,8 @@ class TreeAlgorithm extends Component {
                 paddingTop: '0.5rem'
             },
             isExpanded: true,
-            isEnabled: true
+            isEnabled: true,
+            isSelected: false
         }
         this.setExpanded = this.setExpanded.bind(this);
         this.setEnabled = this.setEnabled.bind(this);
@@ -57,7 +58,11 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     setExpanded(){
-        this.setState({isExpanded: !this.state.isExpanded});
+        this.setState({isExpanded: !this.state.isExpanded}, () => {
+            if (this.state.isExpanded === false && this.props.selectionControl) {
+                this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+            }
+        });
     }
 
     /**
@@ -90,6 +95,10 @@ class TreeAlgorithm extends Component {
         this.setState({ isEnabled: !this.state.isEnabled});
     }
 
+    updateSelected() {
+        this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+    }
+
     /**
      * setSelected - Is the function that will set our algorithm to be selected or not,
      *               that is when you click the algorithm name and the color of it and
@@ -99,9 +108,11 @@ class TreeAlgorithm extends Component {
      * @param {type} none 
      * @returns {type} none
      */
-    setSelected(){
-        if (this.state.isEnabled) {
-            this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+    setSelected(e){
+        if (e.target.id !== 'Path' && e.target.id !== 'arrow' && this.state.isExpanded) {
+            if (this.state.isEnabled) {
+                this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+            }
         }
     }
 
@@ -115,21 +126,24 @@ class TreeAlgorithm extends Component {
                     seriesType={this.props.configurationInfo.series}
                     studyType={this.props.configurationInfo.study}
                 />
-                <div style={this.props.selectionControl && this.state.isEnabled ? {
+                <div onClick={this.setSelected} style={this.props.selectionControl && this.state.isEnabled ? {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
+                    
                     {this.state.isExpanded ? 
                         <Icons.ExpendedArrow 
+                            id="arrow"
                             style={this.state.arrowStyle} 
                             onClick={this.setExpanded}
                         /> 
                         : 
                         <Icons.CollapsedArrow 
+                            id="arrow"
                             style={this.state.arrowStyle} 
                             onClick={this.setExpanded} 
                         />}
-                    <div onClick={this.setSelected} style={ this.state.isEnabled ? this.state.typeStyles :  {
+                    <div style={ this.state.isEnabled ? this.state.typeStyles :  {
                         ...this.state.typeStyles,
                         color: 'gray'
                     } }>Algorithm - {this.props.algorithm.algorithm}</div>
@@ -144,16 +158,12 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.top.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.selected === true){
-                                detectionColor = constants.detectionStyle.SELECTED_COLOR;
-                            } else {
-                                if (value.validation === undefined) {
-                                    detectionColor = constants.detectionStyle.NORMAL_COLOR;
-                                } else if (value.validation === false) {
-                                    detectionColor = constants.detectionStyle.INVALID_COLOR;
-                                } else if (value.validation === true) {
-                                    detectionColor = constants.detectionStyle.VALID_COLOR;
-                                }
+                            if (value.validation === undefined) {
+                                detectionColor = 'black';
+                            } else if (value.validation === false) {
+                                detectionColor = constants.detectionStyle.INVALID_COLOR;
+                            } else if (value.validation === true) {
+                                detectionColor = constants.detectionStyle.VALID_COLOR;
                             }
                             return (
                                 <TreeDetection 
@@ -163,6 +173,7 @@ class TreeAlgorithm extends Component {
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
                                     key={index}
+                                    updateSelected={this.updateSelected}
                                 />
                             )
                         })
@@ -175,17 +186,13 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.side.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.selected === true){
-                                detectionColor = constants.detectionStyle.SELECTED_COLOR;
-                            } else {
-                                if (value.validation === undefined) {
-                                    detectionColor = constants.detectionStyle.NORMAL_COLOR;
-                                } else if (value.validation === false) {
-                                    detectionColor = constants.detectionStyle.INVALID_COLOR;
-                                } else if (value.validation === true) {
-                                    detectionColor = constants.detectionStyle.VALID_COLOR;
-                                }
-                            }
+                            if (value.validation === undefined) {
+                                detectionColor = 'black'
+                            } else if (value.validation === false) {
+                                detectionColor = constants.detectionStyle.INVALID_COLOR;
+                            } else if (value.validation === true) {
+                                detectionColor = constants.detectionStyle.VALID_COLOR;
+                            }                            
                             return (
                                 <TreeDetection
                                     detection={value}
@@ -194,6 +201,7 @@ class TreeAlgorithm extends Component {
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
                                     key={index} 
+                                    updateSelected={this.updateSelected}
                                 />
                             )
                         })
