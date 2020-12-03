@@ -4,14 +4,14 @@ import * as constants from "./Constants";
  */
 export default class Detection {
 
-  constructor(diagonalCoords, className, confidenceValue, isValidated) {
+  constructor(diagonalCoords, className, confidenceValue, color, isValidated) {
     this.boundingBox = diagonalCoords
     this.selected = false;
     this.visible = true;
     this.class = className;
     this.confidence = confidenceValue;
     this.validation = undefined;
-    this.color = constants.detectionStyle.NORMAL_COLOR;
+    this.color = color;
   }
 
   /**

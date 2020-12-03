@@ -267,7 +267,7 @@ class App extends Component {
               // Which we got from i===0.
               // No matter what however, every layer gets converted a blob and added to the data set
               for (var j = 0; j < listOfStacks.length; j++){
-                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {                  
+                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {
                   await myZip.file(listOfStacks[j].rawData[i]).async('base64').then((imageData) => {
                     if (i===0) listOfStacks[j].pixelData=Utils.base64ToArrayBuffer(imageData);
                     listOfStacks[j].blobData.push(Utils.b64toBlob(imageData));
@@ -278,7 +278,7 @@ class App extends Component {
               // Once we have all the layers...
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;
-                
+
                 this.currentSelection.clear();
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
@@ -349,7 +349,7 @@ class App extends Component {
    * @param {type} - Event
    * @return {type} - None
    */
-  nextImageClick(e) {    
+  nextImageClick(e) {
     axios.get(`${constants.server.FILE_SERVER_ADDRESS}/confirm`).then((res) => {
       if (res.data.confirm === 'image-removed'){
         this.setState({
@@ -386,7 +386,7 @@ class App extends Component {
                   stackElem.appendChild(newLayer);
                   topCounter++;
                 }
-              }     
+              }
             }
             // Loop through each detection and only the side view of the detection
           } else if (stack.view === 'side'){
@@ -399,7 +399,7 @@ class App extends Component {
                   stackElem.appendChild(newLayer);
                   sideCounter++;
                 }
-              }      
+              }
             }
           }
           stackCounter++;
@@ -407,7 +407,7 @@ class App extends Component {
         })
         stackXML.appendChild(imageElem);
         newOra.file('stack.xml', new Blob([prolog + new XMLSerializer().serializeToString(stackXML)], { type: 'application/xml '}));
-        newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {  
+        newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
           this.sendImageToCommandServer(oraBlob).then((res) => {
             this.hideButtons(e);
             this.setState({
@@ -538,7 +538,7 @@ class App extends Component {
           cornerstone.displayImage(self.state.imageViewportSide, image, viewport);
         }
       );
-    } 
+    }
   }
 
   /**
@@ -608,7 +608,13 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
+
+          let classColor = constants.detectionStyle.NORMAL_COLOR;
+          if(constants.classList.includes(objectClass.toUpperCase())){
+            let color_string = objectClass.toUpperCase().replace(/ /g,"_") + '_COLOR';
+            classColor = constants.detectionStyle[color_string];
+          }
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, classColor, false));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
