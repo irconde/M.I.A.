@@ -12,19 +12,19 @@ class TreeDetection extends Component {
                 width: '0.75rem',
                 height: '0.75rem',
                 display: 'inline-block',
-                marginBottom: '0.15rem',
                 border: '0.0625rem solid rgba(220,220,220,0.4)',
                 marginLeft: '2rem',
-                marginRight: '0.5rem'
+                marginRight: '0.5rem',
+                verticalAlign: 'middle'
             },
             typeStyle: {
-                verticalAlign: 'top',
                 textTransform: 'uppercase',
                 fontFamily: 'Noto Sans JP Regular',
                 cursor: 'default'
             },
             containerStyle: {
-                paddingTop: '0.45rem'
+                paddingTop: '0.45rem',
+                paddingBottom: '0.45rem'
             },
             eyeStyle: {
                 height: '1.5rem',

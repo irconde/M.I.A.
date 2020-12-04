@@ -29,7 +29,7 @@ class TreeAlgorithm extends Component {
                 cursor: 'default'
             },
             containerStyle: {
-                paddingBottom: '0.15rem',
+                paddingBottom: '0.5rem',
                 paddingTop: '0.5rem'
             },
             isExpanded: true,
@@ -47,7 +47,7 @@ class TreeAlgorithm extends Component {
         configurationInfo: PropTypes.object.isRequired,
         updateSelected: PropTypes.func.isRequired,
         selectionControl: PropTypes.bool.isRequired,
-        algKey: PropTypes.number.isRequired
+        myKey: PropTypes.number.isRequired
     }
 
     /**
@@ -109,10 +109,8 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     setSelected(e){
-        if (e.target.id !== 'Path' && e.target.id !== 'arrow' && this.state.isExpanded) {
-            if (this.state.isEnabled) {
-                this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
-            }
+        if (e.target.id !== 'Path' && e.target.id !== 'arrow' && this.state.isExpanded && this.state.isEnabled) {
+            this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
         }
     }
 
