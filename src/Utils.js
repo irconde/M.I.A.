@@ -137,6 +137,7 @@ export default class Utils {
   static changeViewport(singleViewport){
     let viewportTop = document.getElementById('dicomImageLeft');
     let viewportSide = document.getElementById('dicomImageRight');
+    let verticalDivider = document.getElementById('verticalDivider');
 
     if(singleViewport === true){
       viewportTop.classList.remove('twoViewportsTop');
@@ -148,6 +149,9 @@ export default class Utils {
       viewportSide.classList.remove('singleViewportSide');
       viewportSide.classList.add('singleViewportSide');
       viewportSide.style.visibility = 'hidden'
+
+      verticalDivider.classList.add("dividerHidden");
+      verticalDivider.classList.remove("dividerVisible");
     }
     else {
       viewportTop.classList.remove('singleViewportTop');
@@ -159,6 +163,9 @@ export default class Utils {
       viewportSide.classList.remove('twoViewportsSide');
       viewportSide.classList.add('twoViewportsSide');
       viewportSide.style.visibility = 'visible';
+
+      verticalDivider.classList.remove("dividerHidden");
+      verticalDivider.classList.add("dividerVisible");
     }
   }
 
