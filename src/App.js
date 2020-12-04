@@ -608,13 +608,7 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-
-          let classColor = constants.detectionStyle.NORMAL_COLOR;
-          if(constants.classList.includes(objectClass.toUpperCase())){
-            let color_string = objectClass.toUpperCase().replace(/ /g,"_") + '_COLOR';
-            classColor = constants.detectionStyle[color_string];
-          }
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, classColor, false));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -658,14 +652,7 @@ class App extends Component {
             const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
-
-            let classColor = constants.detectionStyle.NORMAL_COLOR;
-            if(constants.classList.includes(objectClass.toUpperCase())){
-              let color_string = objectClass.toUpperCase().replace(/ /g,"_") + '_COLOR';
-              classColor = constants.detectionStyle[color_string];
-            }
-
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, classColor , false), constants.viewport.SIDE);
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);

@@ -1,17 +1,19 @@
 import * as constants from "./Constants";
+var randomColor = require("randomcolor");
+
 /**
  * Class that represents a detected protential threat to be rendered
  */
 export default class Detection {
 
-  constructor(diagonalCoords, className, confidenceValue, color, isValidated) {
+  constructor(diagonalCoords, className, confidenceValue, isValidated) {
     this.boundingBox = diagonalCoords
     this.selected = false;
     this.visible = true;
     this.class = className;
     this.confidence = confidenceValue;
     this.validation = undefined;
-    this.color = color;
+    this.color = randomColor({seed: className});
   }
 
   /**
