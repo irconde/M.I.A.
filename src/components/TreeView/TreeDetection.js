@@ -47,7 +47,9 @@ class TreeDetection extends Component {
         enabled: PropTypes.bool.isRequired,
         selected: PropTypes.bool.isRequired,
         updateEnabled: PropTypes.func.isRequired,
-        updateSelected: PropTypes.func.isRequired
+        updateSelected: PropTypes.func.isRequired,
+        updateSelectedDetection: PropTypes.func.isRequired,
+        detectionIndex: PropTypes.number.isRequired
     }
 
     /**
@@ -76,7 +78,9 @@ class TreeDetection extends Component {
     }
 
     setSelected() {
-        this.setState({ isSelected: !this.state.isSelected });
+        this.setState({ isSelected: !this.state.isSelected }, () => {
+            this.props.updateSelectedDetection(this.props.detectionIndex, this.state.isSelected);
+        });
     }
 
     render() {
@@ -92,7 +96,7 @@ class TreeDetection extends Component {
             textColor = 'gray';
         }
         if (this.props.selected === true && this.state.isSelected === true) {
-            selectionColor = 'rgba(54, 126, 255, 0.2)';
+            selectionColor = 'rgba(54, 126, 255, 1)';
             colorSelection = true;
             this.state.isSelected = false;
         } else if (this.props.selected === false && this.state.isSelected === true) {

@@ -40,13 +40,19 @@ class TreeAlgorithm extends Component {
         this.setEnabled = this.setEnabled.bind(this);
         this.setSelected = this.setSelected.bind(this);
         this.updateEnabled = this.updateEnabled.bind(this);
+        this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
+        this.updateSelected = this.updateSelected.bind(this);
     }
     
+    numDetections;
+
     static propTypes = {
         algorithm: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
         updateSelected: PropTypes.func.isRequired,
+        updateSelectedDetection: PropTypes.func.isRequired,
         selectionControl: PropTypes.bool.isRequired,
+        selectionDetectionControl: PropTypes.array.isRequired,
         myKey: PropTypes.number.isRequired
     }
 
@@ -99,6 +105,11 @@ class TreeAlgorithm extends Component {
         this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
     }
 
+    updateSelectedDetection(detectionIndex, bool) {
+        
+        this.props.updateSelectedDetection(this.props.myKey, detectionIndex, bool, this.numDetections);
+    }
+
     /**
      * setSelected - Is the function that will set our algorithm to be selected or not,
      *               that is when you click the algorithm name and the color of it and
@@ -115,6 +126,8 @@ class TreeAlgorithm extends Component {
     }
 
     render() {
+        this.numDetections = -1;
+        
         return (
             <div>
                 <MetaData 
@@ -163,15 +176,18 @@ class TreeAlgorithm extends Component {
                             } else if (value.validation === true) {
                                 detectionColor = constants.detectionStyle.VALID_COLOR;
                             }
+                            this.numDetections++;
                             return (
                                 <TreeDetection 
                                     detection={value} 
-                                    selected={this.state.isEnabled ? this.props.selectionControl : false} 
+                                    selected={this.state.isEnabled ? this.props.selectionDetectionControl[this.numDetections] : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
                                     key={index}
+                                    detectionIndex={this.numDetections}
                                     updateSelected={this.updateSelected}
+                                    updateSelectedDetection={this.updateSelectedDetection}
                                 />
                             )
                         })
@@ -190,16 +206,19 @@ class TreeAlgorithm extends Component {
                                 detectionColor = constants.detectionStyle.INVALID_COLOR;
                             } else if (value.validation === true) {
                                 detectionColor = constants.detectionStyle.VALID_COLOR;
-                            }                            
+                            }         
+                            this.numDetections++;
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    selected={this.state.isEnabled ? this.props.selectionControl : false} 
+                                    selected={this.state.isEnabled ? this.props.selectionDetectionControl[this.numDetections] : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
                                     key={index} 
+                                    detectionIndex={this.numDetections}
                                     updateSelected={this.updateSelected}
+                                    updateSelectedDetection={this.updateSelectedDetection}
                                 />
                             )
                         })
