@@ -199,7 +199,6 @@ class TreeAlgorithm extends Component {
                                     detectionColor={detectionColor} 
                                     key={index}
                                     detectionIndex={this.numDetections}
-                                    updateSelected={this.updateSelected}
                                     updateSelectedDetection={this.updateSelectedDetection}
                                     algorithmSelected={this.props.selectionControl}
                                 />

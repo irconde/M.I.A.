@@ -99,10 +99,6 @@ class SideMenu extends Component {
         this.forceUpdate();
     }
 
-    invertedSelectionDetection(booleans) {
-        return booleans.map(function(bool) {return !bool})
-    }
-
     render() {
         // We can't use map on the this.props.detection in the return
         // Therefore, we will populate the array myDetections with this data before returning
