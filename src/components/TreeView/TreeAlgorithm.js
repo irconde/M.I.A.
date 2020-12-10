@@ -101,13 +101,27 @@ class TreeAlgorithm extends Component {
         this.setState({ isEnabled: !this.state.isEnabled});
     }
 
+
+    /**
+     * updateSelected() - Control how each algorithm is selected and deselected
+     * 
+     * @param {type} none 
+     * @returns {type} none 
+     */
     updateSelected() {
         this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
     }
 
-    updateSelectedDetection(detectionIndex, bool) {
-        
-        this.props.updateSelectedDetection(this.props.myKey, detectionIndex, bool, this.numDetections);
+    /**
+     * updateSelectedDetection() - Is the controller between the TreeDetection Component and
+     *                             SideMenu Component that contains the control logic for selecting
+     *                             detection. The TreeDetection component passes in its current index
+     * 
+     * 
+     * @param {type} detectionIndex 
+     */
+    updateSelectedDetection(detectionIndex) {
+        this.props.updateSelectedDetection(this.props.myKey, detectionIndex, this.numDetections);
     }
 
     /**
@@ -127,7 +141,6 @@ class TreeAlgorithm extends Component {
 
     render() {
         this.numDetections = -1;
-        
         return (
             <div>
                 <MetaData 
@@ -180,7 +193,7 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection 
                                     detection={value} 
-                                    selected={this.state.isEnabled ? this.props.selectionDetectionControl[this.numDetections] : false} 
+                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
@@ -188,6 +201,7 @@ class TreeAlgorithm extends Component {
                                     detectionIndex={this.numDetections}
                                     updateSelected={this.updateSelected}
                                     updateSelectedDetection={this.updateSelectedDetection}
+                                    algorithmSelected={this.props.selectionControl}
                                 />
                             )
                         })
@@ -211,14 +225,14 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    selected={this.state.isEnabled ? this.props.selectionDetectionControl[this.numDetections] : false} 
+                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false} 
                                     enabled={this.state.isEnabled} 
                                     updateEnabled={this.updateEnabled}
                                     detectionColor={detectionColor} 
                                     key={index} 
                                     detectionIndex={this.numDetections}
-                                    updateSelected={this.updateSelected}
                                     updateSelectedDetection={this.updateSelectedDetection}
+                                    algorithmSelected={this.props.selectionControl}
                                 />
                             )
                         })

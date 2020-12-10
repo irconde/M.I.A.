@@ -874,7 +874,6 @@ class App extends Component {
         let coordsRejectBtn;
         let buttonGap;
         let viewportOffset;
-        console.log(e.target);
         if(e.detail.element.id === 'dicomImageLeft'){
           buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
           viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;

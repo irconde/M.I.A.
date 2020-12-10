@@ -4,7 +4,6 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 
 class SideMenu extends Component {
-    numberOfAlgorithms;
     constructor(props){
         super(props);
         this.state = {
@@ -15,9 +14,11 @@ class SideMenu extends Component {
                 width: '100%'
             },
             selectedAlgorithm: [],
-            selectedDetection: [[], []]
+            selectedDetection: [],
+            lastSelection: false,
+            lastCoords: [],
+            algorithmSelected: false
         }            
-        this.numberOfAlgorithms = 0;
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
     }
@@ -42,53 +43,64 @@ class SideMenu extends Component {
     updateSelected(index, bool) {
         if (bool){
             this.state.selectedAlgorithm.fill(false);
+            this.state.algorithmSelected = true;
+        } else {
+            this.state.algorithmSelected = false;
         }
-        
-        this.state.selectedAlgorithm[index] = bool;    
-        for (let i = 0; i < this.state.selectedAlgorithm.length; i++) {
-            if (i === index) {
-                this.state.selectedDetection[i] = [bool, bool];
-            } else {
-                this.state.selectedDetection[i] = [false, false];
-            }
-        }   
+        this.state.selectedAlgorithm[index] = bool;
+        if (this.state.lastSelection) {
+            this.state.lastSelection = false;
+        }
+        for (let i = 0; i < this.state.selectedDetection.length; i++) {
+            this.state.selectedDetection[i] = new Array();
+            this.state.selectedDetection[i].fill(false);
+        }
         this.forceUpdate();
     }
 
     /**
-     * updateSelectedDetection - Is a function that controls which algorithm is currently selected.
-     *                  How it works is we have an array called selectedAlgorithm, which holds
-     *                  Boolean values. We always set the entire array to be false, so that only
-     *                  one value is ever true. Which we set right afterwards based on the algorithm
-     *                  index clicked in the TreeAlgorithm component. We use forceUpdate here, as
-     *                  manipulating state arrays is not so straight forward when using setState.
+     * updateSelectedDetection - Is a function that controls which detection is currently selected.
+     *                          How it works is we have an array called selectedDetection, which is an array
+     *                          that contains an array at each element. This is representing each algorithm
+     *                          as an element, with its subsequent detections as the array of booleans in that
+     *                          element. We always set the entire array to be false, so that only
+     *                          one value is ever true. Which we set right afterwards based on the detection
+     *                          index clicked in the TreeDetection component. We use forceUpdate here, as
+     *                          manipulating state arrays is not so straight forward when using setState.
      * 
-     * @param {type} index 
-     * @param {type} bool 
+     * @param {type} algorithmIndex 
+     * @param {type} detectionIndex 
+     * @param {type} numDetections 
      * @returns {type} none 
      */
-    updateSelectedDetection(algorithmIndex, detectionIndex, bool, numDetections) {
-        
-        let myArray = new Array(numDetections);
-        myArray.fill(false);
-        if (this.state.selectedAlgorithm[algorithmIndex] && bool === false) {
-            this.state.selectedAlgorithm[algorithmIndex] = false;
-            myArray[detectionIndex] = true;
+    updateSelectedDetection(algorithmIndex, detectionIndex, numDetections) {
+        if (this.state.algorithmSelected) {
+            this.state.algorithmSelected = false;
+            this.state.selectedAlgorithm.fill(false);
+        }
+        if (this.state.lastCoords[0] === algorithmIndex && this.state.lastCoords[1] === detectionIndex) {
+            // Clicked same detection
+            this.state.lastSelection = !this.state.lastSelection;
         } else {
-            if (bool) {            
-                myArray[detectionIndex] = true;
+            if (this.state.lastSelection === false) {
+                this.state.lastSelection = true;
             }
         }
-        
-        
-        for (let i = 0; i < this.state.selectedDetection.length; i++) {
-            if (i === algorithmIndex) {
-                this.state.selectedDetection[i] = myArray;
-            } else {
+        this.state.lastCoords[0] = algorithmIndex;
+        this.state.lastCoords[1] = detectionIndex;
+        if (this.state.selectedDetection.length >= 0) {
+            for (let i = 0; i < this.state.selectedDetection.length; i++) {
+                this.state.selectedDetection[i] = new Array();
                 this.state.selectedDetection[i].fill(false);
             }
         }
+        this.state.selectedDetection[algorithmIndex] = new Array(numDetections+1);
+        this.state.selectedDetection[algorithmIndex][detectionIndex] = this.state.lastSelection;
         this.forceUpdate();
+    }
+
+    invertedSelectionDetection(booleans) {
+        return booleans.map(function(bool) {return !bool})
     }
 
     render() {
@@ -100,11 +112,9 @@ class SideMenu extends Component {
                 algorithm: detectionSet.algorithm,
                 data: detectionSet.data
             });   
-            this.numberOfAlgorithms++;
         }
         // Checking to see if there is any data in myDetections
         if (myDetections.length !== 0 && this.props.enableMenu){
-            
             return (
                 <div className="treeview-main">                    
                         {/* How we create the trees and their nodes is using map */}
@@ -121,6 +131,7 @@ class SideMenu extends Component {
                                         selectionControl={this.state.selectedAlgorithm[index]}
                                         selectionDetectionControl={this.state.selectedDetection[index]}
                                         configurationInfo={this.props.configurationInfo} 
+                                        
                                     />
                                 )
                             })} 
