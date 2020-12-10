@@ -825,11 +825,15 @@ class App extends Component {
         detectionSetData = detectionSet.getData(constants.viewport.SIDE);
         viewport = constants.viewport.SIDE;
       }
-      for (var j = 0; j < detectionSetData.length; j++){
-        if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
-            clickedPos = j;
-            break;
+      if (detectionSetData !== undefined) {
+        for (var j = 0; j < detectionSetData.length; j++){
+          if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
+              clickedPos = j;
+              break;
+          }
         }
+      } else {
+        return;
       }
       // Click on an empty area
       if(clickedPos === constants.selection.NO_SELECTION) {
