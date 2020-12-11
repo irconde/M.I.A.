@@ -12,9 +12,10 @@ class TreeDetection extends Component {
                 height: '0.75rem',
                 display: 'inline-block',
                 border: '0.0625rem solid rgba(220,220,220,0.4)',
-                marginLeft: '2rem',
-                marginRight: '0.5rem',
-                verticalAlign: 'middle'
+                marginLeft: '2.4rem',
+                marginRight: '0.75rem',
+                verticalAlign: 'middle',
+                marginTop: '-0.2rem'
             },
             typeStyle: {
                 textTransform: 'uppercase',
@@ -30,7 +31,7 @@ class TreeDetection extends Component {
                 width: '1.5rem',
                 display: 'inline-block',
                 float: 'right',
-                marginRight: '0.5rem',
+                marginRight: '1.0rem',
                 marginBottom: '0.25rem'
             },
             isEnabled: true
@@ -52,9 +53,9 @@ class TreeDetection extends Component {
     /**
      * setEnabled - Is how we control the eye visibility for each detection.
      *              We use a variable called isChanging, to control the eye
-     *              in the TreeAlgorithm Component. 
-     * 
-     * @param {type} none 
+     *              in the TreeAlgorithm Component.
+     *
+     * @param {type} none
      * @returns {type} none
      */
     setEnabled(){
@@ -67,13 +68,13 @@ class TreeDetection extends Component {
                 this.props.updateEnabled();
             }
         });
-        
+
     }
 
     /**
      * setSelected() - Simply tells our controller to update the selected detection
-     * 
-     * @param {type} none 
+     *
+     * @param {type} none
      * @returns {type} none
      */
     setSelected() {
@@ -102,15 +103,15 @@ class TreeDetection extends Component {
         }
         // We only display an open eye if both algorithm and detection are enabled.
         if (this.props.enabled === true && this.state.isEnabled === true) {
-            return (            
-                <div onClick={this.setSelected} style={colorSelection ? 
+            return (
+                <div onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,
-                    backgroundColor: selectionColor,} 
-                    : 
+                    backgroundColor: selectionColor,}
+                    :
                     this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
+                        backgroundColor: this.props.detectionColor,
                     }}></div>
                     <span style={{
                         ...this.state.typeStyle,
@@ -120,11 +121,11 @@ class TreeDetection extends Component {
                 </div>
             );
         } else {
-            return (            
+            return (
                 <div style={this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,                                                 
+                        backgroundColor: this.props.detectionColor,
                     }}></div>
                     <span style={{
                         ...this.state.typeStyle,

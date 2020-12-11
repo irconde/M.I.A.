@@ -41,7 +41,7 @@ export const detectionStyle = {
 }
 
 export const viewportStyle = {
-  ZOOM: 1.4,
+  ZOOM: 1.2,
   ORIGIN: 25
 }
 

@@ -34,7 +34,7 @@ class MetaData extends Component {
                 top: '5rem',
                 left: '60%',
                 backgroundColor: 'rgba(38, 38, 38, 0.5)',
-                borderRadius: '1.375rem',
+                borderRadius: '2.0rem',
                 textAlign: 'left',
                 color: '#ffffff',
                 width: 'max-content',

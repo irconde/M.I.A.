@@ -12,13 +12,15 @@ class TreeAlgorithm extends Component {
             arrowStyle: {
                 height: '1.5rem',
                 width: '1.5rem',
+                marginLeft: '0.5rem',
+                marginRight: '0.5rem'
             },
             eyeStyle: {
                 height: '1.5rem',
                 width: '1.5rem',
                 display: 'inline-block',
                 float: 'right',
-                marginRight: '0.5rem',
+                marginRight: '1.0rem',
             },
             typeStyles: {
                 fontSize: 14,
@@ -29,8 +31,8 @@ class TreeAlgorithm extends Component {
                 cursor: 'default'
             },
             containerStyle: {
-                paddingBottom: '0.5rem',
-                paddingTop: '0.5rem'
+                paddingBottom: '0.75rem',
+                paddingTop: '0.75rem'
             },
             isExpanded: true,
             isEnabled: true,
@@ -43,7 +45,7 @@ class TreeAlgorithm extends Component {
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
         this.updateSelected = this.updateSelected.bind(this);
     }
-    
+
     numDetections;
 
     static propTypes = {
@@ -59,8 +61,8 @@ class TreeAlgorithm extends Component {
     /**
      * setExpanded - Function that controls if the current algorithm is
      *               displaying as a list or collapsed down.
-     * 
-     * @param {type} none 
+     *
+     * @param {type} none
      * @returns {type} none
      */
     setExpanded(){
@@ -75,8 +77,8 @@ class TreeAlgorithm extends Component {
      * setEnabled - Is the function that controls the eye visibility. There is
      *              a special case when if we click the eye to disable the algorithm,
      *              then we need to set the selected value to false if it is true.
-     * 
-     * @param {type} none 
+     *
+     * @param {type} none
      * @returns {type} none
      */
     setEnabled(){
@@ -93,8 +95,8 @@ class TreeAlgorithm extends Component {
      *                 If in the case that the algorithm is was set to disabled and we clicked one
      *                 of the individual detections eye in the algorithm, then we want to re-enable the
      *                 algorithm.
-     * 
-     * @param {type} none 
+     *
+     * @param {type} none
      * @returns {type} none
      */
     updateEnabled(){
@@ -104,9 +106,9 @@ class TreeAlgorithm extends Component {
 
     /**
      * updateSelected() - Control how each algorithm is selected and deselected
-     * 
-     * @param {type} none 
-     * @returns {type} none 
+     *
+     * @param {type} none
+     * @returns {type} none
      */
     updateSelected() {
         this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
@@ -116,9 +118,9 @@ class TreeAlgorithm extends Component {
      * updateSelectedDetection() - Is the controller between the TreeDetection Component and
      *                             SideMenu Component that contains the control logic for selecting
      *                             detection. The TreeDetection component passes in its current index
-     * 
-     * 
-     * @param {type} detectionIndex 
+     *
+     *
+     * @param {type} detectionIndex
      */
     updateSelectedDetection(detectionIndex) {
         this.props.updateSelectedDetection(this.props.myKey, detectionIndex, this.numDetections);
@@ -129,8 +131,8 @@ class TreeAlgorithm extends Component {
      *               that is when you click the algorithm name and the color of it and
      *               its detection are changed. We call the passed in function letting it
      *               know which algorithm to change its value based on the algorithm index.
-     * 
-     * @param {type} none 
+     *
+     * @param {type} none
      * @returns {type} none
      */
     setSelected(e){
@@ -143,7 +145,7 @@ class TreeAlgorithm extends Component {
         this.numDetections = -1;
         return (
             <div>
-                <MetaData 
+                <MetaData
                     isVisible={this.state.isEnabled ? this.props.selectionControl : false}
                     detectorType={this.props.configurationInfo.type}
                     detectorConfigType={this.props.configurationInfo.configuration}
@@ -154,31 +156,31 @@ class TreeAlgorithm extends Component {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
-                    
-                    {this.state.isExpanded ? 
-                        <Icons.ExpendedArrow 
+
+                    {this.state.isExpanded ?
+                        <Icons.ExpendedArrow
                             id="arrow"
-                            style={this.state.arrowStyle} 
+                            style={this.state.arrowStyle}
                             onClick={this.setExpanded}
-                        /> 
-                        : 
-                        <Icons.CollapsedArrow 
+                        />
+                        :
+                        <Icons.CollapsedArrow
                             id="arrow"
-                            style={this.state.arrowStyle} 
-                            onClick={this.setExpanded} 
+                            style={this.state.arrowStyle}
+                            onClick={this.setExpanded}
                         />}
                     <div style={ this.state.isEnabled ? this.state.typeStyles :  {
                         ...this.state.typeStyles,
                         color: 'gray'
                     } }>Algorithm - {this.props.algorithm.algorithm}</div>
-                    {this.state.isEnabled ? 
+                    {this.state.isEnabled ?
                         <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
-                        : 
+                        :
                         <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
                     }
-                </div>                
+                </div>
                 <div id='detection-holder'>
-                    {this.props.algorithm.data.top !== undefined && this.state.isExpanded===true ? 
+                    {this.props.algorithm.data.top !== undefined && this.state.isExpanded===true ?
                         this.props.algorithm.data.top.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
@@ -191,12 +193,12 @@ class TreeAlgorithm extends Component {
                             }
                             this.numDetections++;
                             return (
-                                <TreeDetection 
-                                    detection={value} 
-                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false} 
-                                    enabled={this.state.isEnabled} 
+                                <TreeDetection
+                                    detection={value}
+                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false}
+                                    enabled={this.state.isEnabled}
                                     updateEnabled={this.updateEnabled}
-                                    detectionColor={detectionColor} 
+                                    detectionColor={detectionColor}
                                     key={index}
                                     detectionIndex={this.numDetections}
                                     updateSelectedDetection={this.updateSelectedDetection}
@@ -204,12 +206,12 @@ class TreeAlgorithm extends Component {
                                 />
                             )
                         })
-                        : 
+                        :
                         // If no data
                         <span></span>
                     }
                     {/* Repeating the process for the side stack if it exists */}
-                    {this.props.algorithm.data.side !== undefined && this.state.isExpanded===true ? 
+                    {this.props.algorithm.data.side !== undefined && this.state.isExpanded===true ?
                         this.props.algorithm.data.side.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
@@ -219,23 +221,23 @@ class TreeAlgorithm extends Component {
                                 detectionColor = constants.detectionStyle.INVALID_COLOR;
                             } else if (value.validation === true) {
                                 detectionColor = constants.detectionStyle.VALID_COLOR;
-                            }         
+                            }
                             this.numDetections++;
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false} 
-                                    enabled={this.state.isEnabled} 
+                                    selected={this.state.isEnabled && this.props.selectionDetectionControl !== undefined ? this.props.selectionDetectionControl[this.numDetections] : false}
+                                    enabled={this.state.isEnabled}
                                     updateEnabled={this.updateEnabled}
-                                    detectionColor={detectionColor} 
-                                    key={index} 
+                                    detectionColor={detectionColor}
+                                    key={index}
                                     detectionIndex={this.numDetections}
                                     updateSelectedDetection={this.updateSelectedDetection}
                                     algorithmSelected={this.props.selectionControl}
                                 />
                             )
                         })
-                        : 
+                        :
                         // No data
                         <span></span>
                     }
