@@ -4,6 +4,7 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 
 class SideMenu extends Component {
+    numberOfAlgorithms = 0;
     constructor(props){
         super(props);
         this.state = {
@@ -14,6 +15,7 @@ class SideMenu extends Component {
                 width: '100%'
             },
             selectedAlgorithm: [],
+            enabledAlgorithm: [],
             selectedDetection: [],
             lastSelection: false,
             lastCoords: [],
@@ -21,11 +23,28 @@ class SideMenu extends Component {
         }            
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
+        this.setEnabledData = this.setEnabledData.bind(this);
     }
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired
+    }
+
+    setEnabledData(algorithmIndex, bool) {
+        let startIndex, endIndex = null;
+        for (let i = 0; i < this.numberOfAlgorithms; i++) {
+            if (i === algorithmIndex) {
+                this.state.enabledAlgorithm[i] = bool;
+            }
+            if (i === this.numberOfAlgorithms -1 && this.state.enabledAlgorithm[i] === true) {
+                endIndex = i;
+            } else if (this.state.enabledAlgorithm[i] === true) {
+                startIndex = i;
+            } 
+        }
+        console.log(this.state.enabledAlgorithm);
+        console.log(`Start: ${startIndex} | End: ${endIndex}`);
     }
 
     /**
@@ -100,6 +119,7 @@ class SideMenu extends Component {
     }
 
     render() {
+        this.numberOfAlgorithms = 0;
         // We can't use map on the this.props.detection in the return
         // Therefore, we will populate the array myDetections with this data before returning
         let myDetections = [];
@@ -116,6 +136,7 @@ class SideMenu extends Component {
                         {/* How we create the trees and their nodes is using map */}
                         <div style={this.state.treeStyle}>
                             {myDetections.map((value, index) => {      
+                                this.numberOfAlgorithms++;
                                 return (
                                     // Setting the Algorithm name, IE OTAP or Tiled 
                                     <TreeAlgorithm 
@@ -127,7 +148,7 @@ class SideMenu extends Component {
                                         selectionControl={this.state.selectedAlgorithm[index]}
                                         selectionDetectionControl={this.state.selectedDetection[index]}
                                         configurationInfo={this.props.configurationInfo} 
-                                        
+                                        setEnabledData={this.setEnabledData}
                                     />
                                 )
                             })} 

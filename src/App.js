@@ -682,6 +682,10 @@ class App extends Component {
   }
 
 
+  updateDetectionVisibility(startIndex, endIndex) {
+    
+  }
+
   /**
    * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
    *

@@ -52,6 +52,7 @@ class TreeAlgorithm extends Component {
         algorithm: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
         updateSelected: PropTypes.func.isRequired,
+        setEnabledData: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
         selectionControl: PropTypes.bool.isRequired,
         selectionDetectionControl: PropTypes.array.isRequired,
@@ -142,6 +143,7 @@ class TreeAlgorithm extends Component {
     }
 
     render() {
+        this.props.setEnabledData(this.props.myKey, this.state.isEnabled);
         this.numDetections = -1;
         return (
             <div>
