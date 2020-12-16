@@ -1,5 +1,5 @@
 /**
- * Class that emcompases any secondary method to support the primary features of the client
+ * Class that encompasses any secondary method to support the primary features of the client
  */
 export default class Utils {
 
@@ -18,7 +18,7 @@ export default class Utils {
    * detection label, providing information regarding both the type of threat and the associated confidence level
    *
    * @param  {type} objectClass     string value that indicates the threat type
-   * @param  {type} confidenceLevel int valye that indicates the confidence level in the form of a percentage
+   * @param  {type} confidenceLevel int value that indicates the confidence level in the form of a percentage
    * @return {type}                 resulting string to be used as detection label
    */
   static formatDetectionLabel(objectClass, confidenceLevel) {
@@ -35,7 +35,7 @@ export default class Utils {
    */
   static getTextLabelSize(context, labelText, padding) {
     const textSize = context.measureText(labelText);
-    // Aproximation to estimate the text height
+    // Approximation to estimate the text height
     const lineHeight = context.measureText('M').width
     return {'width': textSize.width + 2 * padding, 'height': lineHeight + 2 * padding};
   }
@@ -45,7 +45,7 @@ export default class Utils {
    * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
    *
    * @param  {type} point 2D point with two coordinates, x and y
-   * @param  {type} rect  rectangle defined as a floar array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+   * @param  {type} rect  rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
    * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise
    */
   static pointInRect(point, rect) {

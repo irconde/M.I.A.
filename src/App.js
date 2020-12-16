@@ -104,6 +104,7 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
+    this.updateDetectionVisibility = this.updateDetectionVisibility.bind(this);
   }
 
   /**
@@ -567,7 +568,7 @@ class App extends Component {
       });
     });
     reader.readAsArrayBuffer(imagesLeft[0]);
-
+    
     for(var i=0; i<imagesLeft.length;i++){
       const readFile = new FileReader();
       readFile.addEventListener("loadend", function() {
@@ -580,6 +581,7 @@ class App extends Component {
         if (!(algorithmName in self.state.detections)) {
           self.state.detections[algorithmName] = new DetectionSet();
           self.state.detections[algorithmName].setAlgorithmName(algorithmName);
+          self.state.detections[algorithmName].visibility = true;
           self.currentSelection.addAlgorithm(algorithmName);
           self.updateNavigationBtnState();
         }
@@ -682,8 +684,16 @@ class App extends Component {
   }
 
 
-  updateDetectionVisibility(startIndex, endIndex) {
-    
+  updateDetectionVisibility(enabledAlgorithm) {
+    let numberOfAlgorithms = -1;
+    if (enabledAlgorithm !== null && enabledAlgorithm !== undefined && enabledAlgorithm.length > 0) {
+      for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+        numberOfAlgorithms++;
+        detectionSet.visibility = enabledAlgorithm[numberOfAlgorithms];
+      }
+    }
+    cornerstone.updateImage(this.state.imageViewportTop, true);
+    cornerstone.updateImage(this.state.imageViewportSide, true);
   }
 
   /**
@@ -698,6 +708,11 @@ class App extends Component {
       return;
     }
     for (const [key, detectionSet] of Object.entries(data)) {
+      // console.log(`${detectionSet.algorithm} | Visibility: ${detectionSet.visibility}`)
+      if (detectionSet.visibility !== true) {
+        // console.log("continuing")
+        continue;
+      }
       let B_BOX_COORDS = 4;
       // TODO. Note that in this version we get the detections of the top view only.
       let detectionList = detectionSet.getData();
@@ -960,6 +975,7 @@ class App extends Component {
             detections={this.state.detections} 
             configurationInfo={this.state.configurationInfo} 
             enableMenu={this.state.fileInQueue} 
+            updateDetectionVisibility={this.updateDetectionVisibility}
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons 

@@ -28,23 +28,22 @@ class SideMenu extends Component {
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
-        configurationInfo: PropTypes.object.isRequired
+        configurationInfo: PropTypes.object.isRequired,
+        updateDetectionVisibility: PropTypes.func.isRequired
     }
 
     setEnabledData(algorithmIndex, bool) {
-        let startIndex, endIndex = null;
         for (let i = 0; i < this.numberOfAlgorithms; i++) {
             if (i === algorithmIndex) {
                 this.state.enabledAlgorithm[i] = bool;
             }
-            if (i === this.numberOfAlgorithms -1 && this.state.enabledAlgorithm[i] === true) {
-                endIndex = i;
-            } else if (this.state.enabledAlgorithm[i] === true) {
-                startIndex = i;
-            } 
+            if (this.state.enabledAlgorithm[i] === undefined) {
+                this.state.enabledAlgorithm[i] = true;
+            }
         }
-        console.log(this.state.enabledAlgorithm);
-        console.log(`Start: ${startIndex} | End: ${endIndex}`);
+        if (this.state.enabledAlgorithm.length === this.numberOfAlgorithms) {
+            this.props.updateDetectionVisibility(this.state.enabledAlgorithm);
+        }
     }
 
     /**
