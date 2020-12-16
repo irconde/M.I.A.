@@ -739,9 +739,7 @@ class App extends Component {
       return;
     }
     for (const [key, detectionSet] of Object.entries(data)) {
-      // console.log(`${detectionSet.algorithm} | Visibility: ${detectionSet.visibility}`)
       if (detectionSet.visibility !== true) {
-        // console.log("continuing")
         continue;
       }
       let B_BOX_COORDS = 4;
@@ -844,67 +842,71 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    var clickedPos = constants.selection.NO_SELECTION;
-    let feedback = undefined;
-    let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
+    for (let z = 0; z < this.currentSelection.availableAlgorithms.length; z++) {
+      this.currentSelection.detectionSetIndex = z;
+    
+      var clickedPos = constants.selection.NO_SELECTION;
+      let feedback = undefined;
+      let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
 
-    // User is submitting feedback through confirm or reject buttons
-    if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
-      if(e.currentTarget.id === "confirm"){ feedback = true; }
-      if(e.currentTarget.id === "reject"){ feedback = false; }
-      detectionSet.validateSelectedDetection(feedback);
-      if(this.validationCompleted()){
-        this.setState({
-          displayButtons: false,
-          displayNext: true
-        });
-      } else {
-        this.setState({
-          displayButtons: false,
-        });
-      }
-      cornerstone.updateImage(this.state.imageViewportTop, true);
-      if(this.state.singleViewport === false) {
-        cornerstone.updateImage(this.state.imageViewportSide, true);
-      }
+      // User is submitting feedback through confirm or reject buttons
+      if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
+        if(e.currentTarget.id === "confirm"){ feedback = true; }
+        if(e.currentTarget.id === "reject"){ feedback = false; }
+        detectionSet.validateSelectedDetection(feedback);
+        if(this.validationCompleted()){
+          this.setState({
+            displayButtons: false,
+            displayNext: true
+          });
+        } else {
+          this.setState({
+            displayButtons: false,
+          });
+        }
+        cornerstone.updateImage(this.state.imageViewportTop, true);
+        if(this.state.singleViewport === false) {
+          cornerstone.updateImage(this.state.imageViewportSide, true);
+        }
 
-    }
-    // Handle regular click events for selecting and deselecting detections
-    else{
-      const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
-
-      let detectionSetData = detectionSet.getData();
-      let viewport = constants.viewport.TOP;
-      if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
-        detectionSetData = detectionSet.getData(constants.viewport.SIDE);
-        viewport = constants.viewport.SIDE;
       }
-      if (detectionSetData !== undefined) {
-        for (var j = 0; j < detectionSetData.length; j++){
-          if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
-              clickedPos = j;
-              break;
+      // Handle regular click events for selecting and deselecting detections
+      else{
+        const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
+
+        let detectionSetData = detectionSet.getData();
+        let viewport = constants.viewport.TOP;
+        if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
+          detectionSetData = detectionSet.getData(constants.viewport.SIDE);
+          viewport = constants.viewport.SIDE;
+        }
+        if (detectionSetData !== undefined) {
+          for (var j = 0; j < detectionSetData.length; j++){
+            if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
+                clickedPos = j;
+                break;
+            }
           }
+        } else {
+          return;
         }
-      } else {
-        return;
-      }
-      // Click on an empty area
-      if(clickedPos === constants.selection.NO_SELECTION) {
-        detectionSet.clearSelection();
-        this.setState({ displayButtons: false }, () => {
-          this.renderButtons(e);
-        });
-      }
-      else {
-        if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
-            e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
+        // Click on an empty area
+        if(clickedPos === constants.selection.NO_SELECTION) {
           detectionSet.clearSelection();
+          this.setState({ displayButtons: false }, () => {
+            this.renderButtons(e);
+          });
         }
-        let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
-        this.setState({ displayButtons: anyDetection }, () => {
-          this.renderButtons(e);
-        });
+        else {
+          if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
+              e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
+            detectionSet.clearSelection();
+          }
+          let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+          this.setState({ displayButtons: anyDetection }, () => {
+            this.renderButtons(e);
+          });
+        }
       }
     }
   }
@@ -923,6 +925,7 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
+    console.log(this.currentSelection);
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;
