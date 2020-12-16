@@ -87,6 +87,7 @@ class TreeAlgorithm extends Component {
             if (this.state.isEnabled === false && this.props.selectionControl === true){
                 this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
             }
+            this.props.setEnabledData(this.props.myKey, this.state.isEnabled);
         });
     }
 
@@ -143,7 +144,7 @@ class TreeAlgorithm extends Component {
     }
 
     render() {
-        this.props.setEnabledData(this.props.myKey, this.state.isEnabled);
+        
         this.numDetections = -1;
         return (
             <div>
