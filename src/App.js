@@ -695,7 +695,9 @@ class App extends Component {
       }
     }
     cornerstone.updateImage(this.state.imageViewportTop, true);
-    cornerstone.updateImage(this.state.imageViewportSide, true);
+    if (this.state.singleViewport === false) {
+      cornerstone.updateImage(this.state.imageViewportSide, true);
+    }
   }
 
   /**
