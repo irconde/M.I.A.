@@ -683,7 +683,12 @@ class App extends Component {
     // right.
   }
 
-
+  /**
+   * updateDetectionVisibility - Function that receives updates from SideMenu on visibility
+   * 
+   * @param {type} enabledAlgorithm 
+   * @returns {type}   None
+   */
   updateDetectionVisibility(enabledAlgorithm) {
     let numberOfAlgorithms = -1;
     if (enabledAlgorithm !== null && enabledAlgorithm !== undefined && enabledAlgorithm.length > 0) {
@@ -815,7 +820,7 @@ class App extends Component {
       var clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
-
+      console.log(detectionSet);
       // User is submitting feedback through confirm or reject buttons
       if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
         if(e.currentTarget.id === "confirm"){ feedback = true; }
@@ -869,10 +874,15 @@ class App extends Component {
               e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
             detectionSet.clearSelection();
           }
-          let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
-          this.setState({ displayButtons: anyDetection }, () => {
-            this.renderButtons(e);
-          });
+          if (detectionSet.visibility !== false) {
+            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+            this.setState({ displayButtons: anyDetection }, () => {
+              this.renderButtons(e);
+            });
+            if (anyDetection !== undefined || anyDetection !== null) {
+              break;
+            }
+          }
         }
       }
     }
@@ -892,7 +902,7 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    console.log(this.currentSelection);
+    //console.log(this.currentSelection);
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;

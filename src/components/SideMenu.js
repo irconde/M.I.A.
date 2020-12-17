@@ -32,6 +32,14 @@ class SideMenu extends Component {
         updateDetectionVisibility: PropTypes.func.isRequired
     }
 
+    /**
+     * setEnabledData - Receives updates from TreeAlgorithm, passing in it's index and visibility 
+     *                  boolean value.
+     * 
+     * @param {type} algorithmIndex 
+     * @param {type} bool 
+     * @returns {type}   None
+     */
     setEnabledData(algorithmIndex, bool) {
         for (let i = 0; i < this.numberOfAlgorithms; i++) {
             if (i === algorithmIndex) {
