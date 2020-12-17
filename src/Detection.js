@@ -2,7 +2,7 @@ import * as constants from "./Constants";
 var randomColor = require("randomcolor");
 
 /**
- * Class that represents a detected protential threat to be rendered
+ * Class that represents a detected potential threat to be rendered
  */
 export default class Detection {
 
