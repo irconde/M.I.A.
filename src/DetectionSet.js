@@ -61,11 +61,15 @@ export default class DetectionSet {
    */
   validateSelectedDetection(feedback) {
     let view = this.selectedViewport;
-    if (this.selectedViewport === undefined) {
+    if (view === undefined || view === 0) {
       view = constants.viewport.TOP;
+    }
+    if (this.selectedDetection === -1) {
+      return;
     }
     this.data[view][this.selectedDetection].validate(feedback);
     this.clearSelection();
+    
   }
 
   /**

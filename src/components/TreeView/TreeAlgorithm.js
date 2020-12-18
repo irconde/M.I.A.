@@ -144,7 +144,6 @@ class TreeAlgorithm extends Component {
     }
 
     render() {
-        
         this.numDetections = -1;
         return (
             <div>

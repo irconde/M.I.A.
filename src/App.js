@@ -850,7 +850,6 @@ class App extends Component {
     }
     for (let z = 0; z < this.currentSelection.availableAlgorithms.length; z++) {
       this.currentSelection.detectionSetIndex = z;
-    
       var clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
@@ -858,6 +857,7 @@ class App extends Component {
       if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
         if(e.currentTarget.id === "confirm"){ feedback = true; }
         if(e.currentTarget.id === "reject"){ feedback = false; }
+        
         detectionSet.validateSelectedDetection(feedback);
         if(this.validationCompleted()){
           this.setState({
@@ -908,13 +908,13 @@ class App extends Component {
             detectionSet.clearSelection();
           }
           if (detectionSet.visibility !== false) {
-          let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
-          this.setState({ displayButtons: anyDetection }, () => {
-            this.renderButtons(e);
-          });
-          if (anyDetection !== undefined || anyDetection !== null) {
-            break;
-          }
+            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+            this.setState({ displayButtons: anyDetection }, () => {
+              this.renderButtons(e);
+            });
+            if (anyDetection !== undefined || anyDetection !== null) {
+              break;
+            }
           }
         }
       }
