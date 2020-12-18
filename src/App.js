@@ -104,6 +104,7 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
+    this.updateAlgorithmDetectionVisibility = this.updateAlgorithmDetectionVisibility.bind(this);
     this.updateDetectionVisibility = this.updateDetectionVisibility.bind(this);
   }
 
@@ -689,7 +690,7 @@ class App extends Component {
    * @param {type} enabledAlgorithm 
    * @returns {type}   None
    */
-  updateDetectionVisibility(enabledAlgorithm) {
+  updateAlgorithmDetectionVisibility(enabledAlgorithm) {
     let numberOfAlgorithms = -1;
     if (enabledAlgorithm !== null && enabledAlgorithm !== undefined && enabledAlgorithm.length > 0) {
       for (const [key, detectionSet] of Object.entries(this.state.detections)) {
@@ -701,6 +702,10 @@ class App extends Component {
     if (this.state.singleViewport === false) {
       cornerstone.updateImage(this.state.imageViewportSide, true);
     }
+  }
+
+  updateDetectionVisibility(detections) {
+
   }
 
   /**
@@ -746,8 +751,14 @@ class App extends Component {
         context.fillStyle = color;
         context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
+        
+        // Label rendering
+        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
         // Line rendering
-      if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+        if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {      
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
           context.beginPath();
           // Staring point (10,45)
@@ -763,29 +774,23 @@ class App extends Component {
           context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
           // Make the line visible
           context.stroke();
-        }
-        else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
+        } else if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
-        context.beginPath();
-            // Staring point (299, 301)
-            context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
-            // End point (180,47)
-            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
-            // Make the line visible
-            context.stroke();
-            context.beginPath();
-            // Staring point (10,45)
-            context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
-            // End point (180,47)
-            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
-            // Make the line visible
-            context.stroke();
-        }
-        // Label rendering
-        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
+          context.beginPath();
+          // Staring point (299, 301)
+          context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
+          // Make the line visible
+          context.stroke();
+          context.beginPath();
+          // Staring point (10,45)
+          context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
+          // Make the line visible
+          context.stroke();
+        }        
       }
     }
   };
@@ -820,7 +825,6 @@ class App extends Component {
       var clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
-      console.log(detectionSet);
       // User is submitting feedback through confirm or reject buttons
       if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
         if(e.currentTarget.id === "confirm"){ feedback = true; }
@@ -875,13 +879,13 @@ class App extends Component {
             detectionSet.clearSelection();
           }
           if (detectionSet.visibility !== false) {
-            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
-            this.setState({ displayButtons: anyDetection }, () => {
-              this.renderButtons(e);
-            });
-            if (anyDetection !== undefined || anyDetection !== null) {
-              break;
-            }
+          let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+          this.setState({ displayButtons: anyDetection }, () => {
+            this.renderButtons(e);
+          });
+          if (anyDetection !== undefined || anyDetection !== null) {
+            break;
+          }
           }
         }
       }
@@ -902,7 +906,6 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    //console.log(this.currentSelection);
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;
@@ -990,6 +993,7 @@ class App extends Component {
             detections={this.state.detections} 
             configurationInfo={this.state.configurationInfo} 
             enableMenu={this.state.fileInQueue} 
+            updateAlgorithmDetectionVisibility={this.updateAlgorithmDetectionVisibility}
             updateDetectionVisibility={this.updateDetectionVisibility}
           />
           <div id="algorithm-outputs"> </div>

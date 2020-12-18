@@ -59,6 +59,7 @@ class TreeDetection extends Component {
      * @returns {type} none
      */
     setEnabled(){
+        this.props.detection.visible = !this.props.detection.visible;
         if (this.props.enabled === false && this.state.isEnabled === true) {
             this.props.updateEnabled();
             return;
@@ -79,6 +80,7 @@ class TreeDetection extends Component {
      */
     setSelected() {
         this.props.updateSelectedDetection(this.props.detectionIndex);
+        this.props.detection.selected = !this.props.detection.selected;
     }
 
     render() {
@@ -93,7 +95,7 @@ class TreeDetection extends Component {
         } else if (!this.props.enabled || !this.state.isEnabled){
             textColor = 'gray';
         }
-        if (this.props.selected === true) {
+        if (this.props.selected === true || this.props.detection.selected) {
             selectionColor = 'rgba(54, 126, 255, 1)';
             colorSelection = true;
         }
