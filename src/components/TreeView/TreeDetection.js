@@ -84,6 +84,7 @@ class TreeDetection extends Component {
     }
 
     render() {
+        
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         let selectionColor;
@@ -113,7 +114,7 @@ class TreeDetection extends Component {
                     this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,
+                        backgroundColor: this.props.detectionColor === "black" ? this.props.detection.color : this.props.detectionColor,
                     }}></div>
                     <span style={{
                         ...this.state.typeStyle,
