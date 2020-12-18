@@ -750,7 +750,9 @@ class App extends Component {
     if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
       return;
     }
+    let counter = 0;
     for (const [key, detectionSet] of Object.entries(data)) {
+      
       if (detectionSet.visibility !== true) {
         continue;
       }
@@ -770,6 +772,10 @@ class App extends Component {
       for(var j = 0; j < detectionList.length; j++) {
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
+        if (color === "#F7B500" && counter == 1) {
+          color = "#21af28";
+          detectionList[j].selected = false;
+        }
         if (boundingBoxCoords.length < B_BOX_COORDS) return;
         context.font = constants.detectionStyle.LABEL_FONT;
         context.strokeStyle = color;
@@ -804,6 +810,10 @@ class App extends Component {
           // Make the line visible
           context.stroke();
         } else if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
+          counter++;
+          if (counter === 2){
+            break;
+          }
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
           context.beginPath();
           // Staring point (299, 301)
