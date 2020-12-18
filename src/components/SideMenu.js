@@ -29,7 +29,7 @@ class SideMenu extends Component {
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
-        updateDetectionVisibility: PropTypes.func.isRequired
+        updateAlgorithmDetectionVisibility: PropTypes.func.isRequired
     }
 
     /**
@@ -50,7 +50,7 @@ class SideMenu extends Component {
             }
         }
         if (this.state.enabledAlgorithm.length === this.numberOfAlgorithms) {
-            this.props.updateDetectionVisibility(this.state.enabledAlgorithm);
+            this.props.updateAlgorithmDetectionVisibility(this.state.enabledAlgorithm);
         }
     }
 
