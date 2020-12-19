@@ -7,6 +7,18 @@ export default class Dicos {
 
   static get dictionary() {
     return {
+      "ThreatROIBase": {
+        tag: "x40101004",
+        name: "ThreatROIBase"
+      },
+      "ThreatROIExtents": {
+        tag: "x40101005",
+        name: "ThreatROIExtents"
+      },
+      "ThreatROIBitmap": {
+        tag: "x40101006",
+        name: "ThreatROIBitmap"
+      },
       "BoundingPolygon": {
         tag: "x4010101d",
         name: "BoundingPolygon"
@@ -62,6 +74,7 @@ export default class Dicos {
     let BYTES_PER_FLOAT = 4;
     let B_BOX_POINT_COUNT = 2;
     const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
+    console.log(bBoxDataSet);
     const bBoxByteArraySize = bBoxDataSet.elements[Dicos.dictionary['BoundingPolygon'].tag].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
@@ -79,6 +92,59 @@ export default class Dicos {
       bBoxIndex++;
     }
     return bBoxCoords;
+  }
+
+
+  /**
+   * retrieveMaskData - Method that parses a DICOS+TDR file to pull the bitmap mask data
+   *
+   * @param  {type} image DICOS+TDR image data
+   * @param  {type} data  DICOS+TDR pixel data
+   * @return {type}       Integer array with the bitmap mask data.
+   *
+   */
+  static retrieveMaskData(image, data) {
+    let BYTES_PER_FLOAT = 4;
+    let B_BOX_POINT_COUNT = 2;
+
+    const baseDataSet = image.dataSet.elements.x40101037.items[0].dataSet.elements.x40101001.items[0].dataSet;
+    const baseByteArraySize = baseDataSet.elements[Dicos.dictionary['ThreatROIBase'].tag].length;
+    const bBoxBytesCount = baseByteArraySize / BYTES_PER_FLOAT;
+    // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
+    const bBoxComponentsCount = B_BOX_POINT_COUNT * bBoxBytesCount / 3;
+    var baseCoords = new Array(bBoxComponentsCount);
+    var bBoxIndex = 0;
+    var componentCount = 0;
+
+    for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
+      if (componentCount === B_BOX_POINT_COUNT) {
+        componentCount = -1;
+        continue;
+      }
+      baseCoords[bBoxIndex] = baseDataSet.float(Dicos.dictionary['ThreatROIBase'].tag, i);
+      bBoxIndex++;
+    }
+
+    const extentsByteArraySize = baseDataSet.elements[Dicos.dictionary['ThreatROIExtents'].tag].length;
+    const extentsBytesCount = extentsByteArraySize / BYTES_PER_FLOAT;
+    // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
+    const extentsComponentsCount = B_BOX_POINT_COUNT * extentsBytesCount / 3;
+    var extentsCoords = new Array(extentsComponentsCount);
+    var bBoxIndex = 0;
+    var componentCount = 0;
+
+    for (var j = 0; j < extentsBytesCount; j++,componentCount++) {
+      if (componentCount === B_BOX_POINT_COUNT) {
+        componentCount = -1;
+        continue;
+      }
+      extentsCoords[bBoxIndex] = baseDataSet.float(Dicos.dictionary['ThreatROIExtents'].tag, j);
+      bBoxIndex++;
+    }
+    const pixelDataElement = image.dataSet.elements.x40101037.items[0].dataSet.elements.x40101001.items[0].dataSet.elements.x40101006;
+    let pixelData = new Uint8Array(data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length/2);
+
+    return [pixelData, baseCoords, extentsCoords];
   }
 
 

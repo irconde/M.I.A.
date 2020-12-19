@@ -462,6 +462,9 @@ class App extends Component {
     const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
     cornerstoneTools.addTool(ZoomTouchPinchTool);
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+    const brushTool = cornerstoneTools.BrushTool;
+    cornerstoneTools.addTool(brushTool);
+    cornerstoneTools.setToolActive('Brush', {});
   };
 
 
@@ -602,7 +605,10 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false));
+          // const maskData = Dicos.retrieveMaskData(image);
+          const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
+
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -646,7 +652,10 @@ class App extends Component {
             const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false), constants.viewport.SIDE);
+
+            var pixelData = Dicos.retrieveMaskData(image)
+
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);
@@ -680,6 +689,18 @@ class App extends Component {
     // to location 0,0 will be the top left of the image and rows,columns is the bottom
     // right.
   }
+
+
+  /**
+   * renderDetectionMasks - Method that renders the several annotations in a given DICOS+TDR file
+   *
+   * @param  {type} data    DICOS+TDR data
+   * @param  {type} context Rendering context
+   * @return {type}         None
+   */
+  renderDetectionMasks(data, context) {
+
+  };
 
 
   /**
@@ -722,6 +743,40 @@ class App extends Component {
         context.fillStyle = color;
         context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
+
+        // START MASK RENDERING
+        let uInt8Array = detectionList[j].maskBitmap[0];
+        context.beginPath();
+        context.moveTo(detectionList[j].maskBitmap[1][0], detectionList[j].maskBitmap[1][1]);
+
+        let maskCoords = new Array(uInt8Array.length);
+        let baseX = detectionList[j].maskBitmap[1][0];
+        let baseY = detectionList[j].maskBitmap[1][1];
+        let maskWidth = detectionList[j].maskBitmap[2][0];
+        let maskHeight = detectionList[j].maskBitmap[2][1];
+
+        // // Get canvas pixels where mask should be--we can use this to manipulate these pixels, if necessary
+        // const imgData = context.getImageData(baseX, baseY, maskWidth, maskHeight);
+        // const data = imgData.data;
+
+        // Loop through canvas pixel data, starting at the base points
+        // If bitmap data has value > 1, then 'lineTo' that position in the pixel data
+        // Cannot get the logic for this correct
+        for(var i=0; i<detectionList[j].maskBitmap[2][1];i++){
+          for(var k=0; k<detectionList[j].maskBitmap[2][0]; k++) {
+            if(uInt8Array[i] | uInt8Array[k] > 0){
+              context.lineTo((baseX + i), (baseY + k));
+            }
+          }
+        }
+        context.stroke();
+        context.fill();
+
+        // ROI Bounding box built with base coordinates and extents--used this for testing the 'Base' and 'Extents' coordinates
+        // context.strokeRect(detectionList[j].maskBitmap[1][0], detectionList[j].maskBitmap[1][1], detectionList[j].maskBitmap[2][0], detectionList[j].maskBitmap[2][1]);
+        // END MASK RENDERING
+
+
         // Line rendering
       if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
@@ -952,20 +1007,20 @@ class App extends Component {
             isDownload={this.state.isDownload}
             isConnected={this.state.isConnected}
           />
-          <SideMenu 
-            detections={this.state.detections} 
-            configurationInfo={this.state.configurationInfo} 
-            enableMenu={this.state.fileInQueue} 
+          <SideMenu
+            detections={this.state.detections}
+            configurationInfo={this.state.configurationInfo}
+            enableMenu={this.state.fileInQueue}
           />
           <div id="algorithm-outputs"> </div>
-          <ValidationButtons 
-            displayButtons={this.state.displayButtons} 
-            buttonStyles={this.state.buttonStyles} 
-            onMouseClicked={this.onMouseClicked} 
+          <ValidationButtons
+            displayButtons={this.state.displayButtons}
+            buttonStyles={this.state.buttonStyles}
+            onMouseClicked={this.onMouseClicked}
           />
-          <NextButton 
-            nextImageClick={this.nextImageClick} 
-            displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)} 
+          <NextButton
+            nextImageClick={this.nextImageClick}
+            displayNext={constants.ENABLE_NEXT === undefined ? this.state.displayNext : Boolean(constants.ENABLE_NEXT)}
           />
           <NoFileSign isVisible={!this.state.fileInQueue} />
         </div>
