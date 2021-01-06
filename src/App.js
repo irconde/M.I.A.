@@ -930,7 +930,9 @@ class App extends Component {
             detectionSet.clearSelection();
           }
           if (detectionSet.visibility !== false) {
-            detectionSet.clearSelection();
+            for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
+              myDetectionSet.clearSelection();
+            }
             let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
             this.setState({ displayButtons: anyDetection }, () => {
               this.renderButtons(e);
