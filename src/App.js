@@ -462,9 +462,6 @@ class App extends Component {
     const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
     cornerstoneTools.addTool(ZoomTouchPinchTool);
     cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-    const brushTool = cornerstoneTools.BrushTool;
-    cornerstoneTools.addTool(brushTool);
-    cornerstoneTools.setToolActive('Brush', {});
   };
 
 
@@ -605,9 +602,7 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-          // const maskData = Dicos.retrieveMaskData(image);
           const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
-
           self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false));
         }
       });
@@ -652,9 +647,7 @@ class App extends Component {
             const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
-
             var pixelData = Dicos.retrieveMaskData(image)
-
             self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false), constants.viewport.SIDE);
           }
         });
@@ -699,7 +692,21 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetectionMasks(data, context) {
-
+    const baseX = data[1][0];
+    const baseY = data[1][1];
+    const maskWidth = data[2][0];
+    const maskHeight = data[2][1];
+    const pixelData = data[0];
+    context.globalAlpha = 0.5;
+    context.imageSmoothingEnabled = true;
+    for (var y = 0; y < maskHeight; y++)
+      for(var x = 0; x < maskWidth; x++) {
+        if (pixelData[x + y * maskWidth] === 1) {
+          context.fillRect( baseX + x, baseY + y, 1, 1 );
+        }
+      }
+    context.globalAlpha = 1.0;
+    context.imageSmoothingEnabled = false;
   };
 
 
@@ -744,41 +751,11 @@ class App extends Component {
         context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
 
-        // START MASK RENDERING
-        let uInt8Array = detectionList[j].maskBitmap[0];
-        context.beginPath();
-        context.moveTo(detectionList[j].maskBitmap[1][0], detectionList[j].maskBitmap[1][1]);
-
-        let maskCoords = new Array(uInt8Array.length);
-        let baseX = detectionList[j].maskBitmap[1][0];
-        let baseY = detectionList[j].maskBitmap[1][1];
-        let maskWidth = detectionList[j].maskBitmap[2][0];
-        let maskHeight = detectionList[j].maskBitmap[2][1];
-
-        // // Get canvas pixels where mask should be--we can use this to manipulate these pixels, if necessary
-        // const imgData = context.getImageData(baseX, baseY, maskWidth, maskHeight);
-        // const data = imgData.data;
-
-        // Loop through canvas pixel data, starting at the base points
-        // If bitmap data has value > 1, then 'lineTo' that position in the pixel data
-        // Cannot get the logic for this correct
-        for(var i=0; i<detectionList[j].maskBitmap[2][1];i++){
-          for(var k=0; k<detectionList[j].maskBitmap[2][0]; k++) {
-            if(uInt8Array[i] | uInt8Array[k] > 0){
-              context.lineTo((baseX + i), (baseY + k));
-            }
-          }
-        }
-        context.stroke();
-        context.fill();
-
-        // ROI Bounding box built with base coordinates and extents--used this for testing the 'Base' and 'Extents' coordinates
-        // context.strokeRect(detectionList[j].maskBitmap[1][0], detectionList[j].maskBitmap[1][1], detectionList[j].maskBitmap[2][0], detectionList[j].maskBitmap[2][1]);
-        // END MASK RENDERING
-
+        // Mask rendering
+        this.renderDetectionMasks(detectionList[j].maskBitmap, context)
 
         // Line rendering
-      if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+        if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
           context.beginPath();
           // Staring point (10,45)

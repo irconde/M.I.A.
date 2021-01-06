@@ -168,5 +168,4 @@ export default class Utils {
       verticalDivider.classList.add("dividerVisible");
     }
   }
-
 }

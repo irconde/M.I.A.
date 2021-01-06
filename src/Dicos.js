@@ -74,7 +74,6 @@ export default class Dicos {
     let BYTES_PER_FLOAT = 4;
     let B_BOX_POINT_COUNT = 2;
     const bBoxDataSet = image.dataSet.elements.x40101037.items[0].dataSet;
-    console.log(bBoxDataSet);
     const bBoxByteArraySize = bBoxDataSet.elements[Dicos.dictionary['BoundingPolygon'].tag].length
     const bBoxBytesCount = bBoxByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
@@ -107,7 +106,9 @@ export default class Dicos {
     let BYTES_PER_FLOAT = 4;
     let B_BOX_POINT_COUNT = 2;
 
-    const baseDataSet = image.dataSet.elements.x40101037.items[0].dataSet.elements.x40101001.items[0].dataSet;
+    const dataSet = image.dataSet;
+    if (dataSet === undefined) return;
+    const baseDataSet = dataSet.elements.x40101037.items[0].dataSet.elements.x40101001.items[0].dataSet;
     const baseByteArraySize = baseDataSet.elements[Dicos.dictionary['ThreatROIBase'].tag].length;
     const bBoxBytesCount = baseByteArraySize / BYTES_PER_FLOAT;
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
@@ -142,7 +143,7 @@ export default class Dicos {
       bBoxIndex++;
     }
     const pixelDataElement = image.dataSet.elements.x40101037.items[0].dataSet.elements.x40101001.items[0].dataSet.elements.x40101006;
-    let pixelData = new Uint8Array(data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length/2);
+    let pixelData = new Uint8Array(data.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
 
     return [pixelData, baseCoords, extentsCoords];
   }
