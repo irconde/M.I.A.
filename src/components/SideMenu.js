@@ -29,7 +29,8 @@ class SideMenu extends Component {
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
-        updateAlgorithmDetectionVisibility: PropTypes.func.isRequired
+        updateAlgorithmDetectionVisibility: PropTypes.func.isRequired,
+        appForceUpdate: PropTypes.func.isRequired
     }
 
     /**
@@ -122,7 +123,9 @@ class SideMenu extends Component {
         }
         this.state.selectedDetection[algorithmIndex] = new Array(numDetections+1);
         this.state.selectedDetection[algorithmIndex][detectionIndex] = this.state.lastSelection;
-        this.forceUpdate();
+        this.forceUpdate(() => {
+            this.props.appForceUpdate();
+        });        
     }
 
     render() {
