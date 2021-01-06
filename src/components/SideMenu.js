@@ -67,7 +67,7 @@ class SideMenu extends Component {
      * @param {type} bool 
      * @returns {type} none 
      */
-    updateSelected(index, bool) {
+    updateSelected(index, bool, algorithm) {
         if (bool){
             this.state.selectedAlgorithm.fill(false);
             this.state.algorithmSelected = true;
@@ -82,7 +82,18 @@ class SideMenu extends Component {
             this.state.selectedDetection[i] = new Array();
             this.state.selectedDetection[i].fill(false);
         }
-        this.forceUpdate();
+        for (const [key, myDetectionSet] of Object.entries(this.props.detections)) {
+            if (key === algorithm) {
+                myDetectionSet.selected = bool;
+                myDetectionSet.selectAlgorithm(bool);
+            } else {
+                myDetectionSet.selected = false;
+                myDetectionSet.selectAlgorithm(false);
+            }
+        }
+        this.forceUpdate(() => {
+            this.props.appForceUpdate();
+        });
     }
 
     /**
