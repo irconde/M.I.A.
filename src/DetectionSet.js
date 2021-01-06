@@ -12,6 +12,7 @@ export default class DetectionSet {
     this.selectedDetection = constants.selection.NO_SELECTION;
     this.visible = true;
     this.data = {};
+    this.anotherSelected = false;
     let viewport = constants.viewport.TOP;
     if (arguments.length > 0) {
       viewport = arguments[0];
