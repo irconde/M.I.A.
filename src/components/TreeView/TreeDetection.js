@@ -79,12 +79,11 @@ class TreeDetection extends Component {
      * @returns {type} none
      */
     setSelected() {
-        this.props.updateSelectedDetection(this.props.detectionIndex);
         this.props.detection.selected = !this.props.detection.selected;
+        this.props.updateSelectedDetection(this.props.detectionIndex);        
     }
 
     render() {
-        
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         let selectionColor;
@@ -96,7 +95,7 @@ class TreeDetection extends Component {
         } else if (!this.props.enabled || !this.state.isEnabled){
             textColor = 'gray';
         }
-        if (this.props.selected === true || this.props.detection.selected) {
+        if (this.props.detection.selected) {
             selectionColor = 'rgba(54, 126, 255, 1)';
             colorSelection = true;
         }

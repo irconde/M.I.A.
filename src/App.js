@@ -106,6 +106,7 @@ class App extends Component {
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
     this.updateAlgorithmDetectionVisibility = this.updateAlgorithmDetectionVisibility.bind(this);
     this.updateDetectionVisibility = this.updateDetectionVisibility.bind(this);
+    this.appForceUpdate = this.appForceUpdate.bind(this);
   }
 
   /**
@@ -706,8 +707,15 @@ class App extends Component {
     }
   }
 
-  updateDetectionVisibility(detections) {
+  appForceUpdate(){
+    cornerstone.updateImage(this.state.imageViewportTop, true);
+    if (this.state.singleViewport === false) {
+      cornerstone.updateImage(this.state.imageViewportSide, true);
+    }
+  }
 
+  updateDetectionVisibility(detections) {
+    this.forceUpdate();
   }
 
   /**
@@ -775,6 +783,10 @@ class App extends Component {
         if (color === "#F7B500" && counter == 1) {
           color = "#21af28";
           detectionList[j].selected = false;
+          cornerstone.updateImage(this.state.imageViewportTop, true);
+          if (this.state.singleViewport === false) {
+            cornerstone.updateImage(this.state.imageViewportSide, true);
+          }
         }
         if (boundingBoxCoords.length < B_BOX_COORDS) return;
         context.font = constants.detectionStyle.LABEL_FONT;
@@ -918,6 +930,7 @@ class App extends Component {
             detectionSet.clearSelection();
           }
           if (detectionSet.visibility !== false) {
+            detectionSet.clearSelection();
             let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
             this.setState({ displayButtons: anyDetection }, () => {
               this.renderButtons(e);
@@ -1034,6 +1047,7 @@ class App extends Component {
             enableMenu={this.state.fileInQueue} 
             updateAlgorithmDetectionVisibility={this.updateAlgorithmDetectionVisibility}
             updateDetectionVisibility={this.updateDetectionVisibility}
+            appForceUpdate={this.appForceUpdate}
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons
