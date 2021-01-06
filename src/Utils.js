@@ -82,7 +82,7 @@ export default class Utils {
   /**
    * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
    *
-   * @param {type} base64 Binary 64 string to convert to ArrayBuffer
+   * @param {string} base64 Binary 64 string to convert to ArrayBuffer
    * @return {type} ArrayBuffer
    */
   static base64ToArrayBuffer(base64) {

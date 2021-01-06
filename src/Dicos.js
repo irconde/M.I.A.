@@ -117,7 +117,7 @@ export default class Dicos {
     var bBoxIndex = 0;
     var componentCount = 0;
 
-    for (var i = 0; i < bBoxBytesCount; i++,componentCount++) {
+    for (let i = 0; i < bBoxBytesCount; i++,componentCount++) {
       if (componentCount === B_BOX_POINT_COUNT) {
         componentCount = -1;
         continue;
@@ -131,8 +131,8 @@ export default class Dicos {
     // NOTE: The z component is not necessary, so we get rid of the third component in every trio of values
     const extentsComponentsCount = B_BOX_POINT_COUNT * extentsBytesCount / 3;
     var extentsCoords = new Array(extentsComponentsCount);
-    var bBoxIndex = 0;
-    var componentCount = 0;
+    bBoxIndex = 0;
+    componentCount = 0;
 
     for (var j = 0; j < extentsBytesCount; j++,componentCount++) {
       if (componentCount === B_BOX_POINT_COUNT) {

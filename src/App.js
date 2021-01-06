@@ -258,15 +258,15 @@ class App extends Component {
               // We know the first layer of each stack is pixel data, which we need as an array buffer
               // Which we got from i===0.
               // No matter what however, every layer gets converted a blob and added to the data set
-              for (var j = 0; j < listOfStacks.length; j++){
-                for (var i = 0; i < listOfStacks[j].rawData.length; i++) {
+              for (let j = 0; j < listOfStacks.length; j++){
+                for (let i = 0; i < listOfStacks[j].rawData.length; i++) {
                   await myZip.file(listOfStacks[j].rawData[i]).async('base64').then((imageData) => {
                     if (i===0) listOfStacks[j].pixelData=Utils.base64ToArrayBuffer(imageData);
                     listOfStacks[j].blobData.push(Utils.b64toBlob(imageData));
                   })
                 }
               }
-              var promiseOfList = Promise.all(listOfPromises);
+              const promiseOfList = Promise.all(listOfPromises);
               // Once we have all the layers...
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;

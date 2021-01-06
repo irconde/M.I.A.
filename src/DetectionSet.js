@@ -134,7 +134,7 @@ export default class DetectionSet {
   /**
    * isValidated() - Returns true if all of the detections in all this set have been validated
    *
-   * @return {type} boolean
+   * @return {boolean} result
    */
   isValidated() {
     let result = true;
