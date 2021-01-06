@@ -135,6 +135,19 @@ export default class DetectionSet {
     this.algorithm = algorithm;
   }
 
+  selectAlgorithm(bool) {
+    if (this.data.top !== undefined) {
+      for (let i = 0; i < this.data.top.length; i++) {
+        this.data.top[i].selected = bool;
+      }
+    }
+    if (this.data.side !== undefined) {
+      for (let i = 0; i < this.data.side.length; i++) {
+        this.data.side[i].selected = bool;
+      }
+    }
+  }
+
   /**
    * isValidated() - Returns true if all of the detections in all this set have been validated
    *

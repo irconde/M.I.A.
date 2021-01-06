@@ -85,7 +85,7 @@ class TreeAlgorithm extends Component {
     setEnabled(){
         this.setState({isEnabled: !this.state.isEnabled}, () => {
             if (this.state.isEnabled === false && this.props.selectionControl === true){
-                this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+                this.props.updateSelected(this.props.myKey, !this.props.selectionControl, this.props.algorithm.algorithm);
             }
             this.props.setEnabledData(this.props.myKey, this.state.isEnabled);
         });
@@ -113,7 +113,7 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     updateSelected() {
-        this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+        this.props.updateSelected(this.props.myKey, !this.props.selectionControl, this.props.algorithm.algorithm);
     }
 
     /**
@@ -139,11 +139,12 @@ class TreeAlgorithm extends Component {
      */
     setSelected(e){
         if (e.target.id !== 'Path' && e.target.id !== 'arrow' && this.state.isExpanded && this.state.isEnabled) {
-            this.props.updateSelected(this.props.myKey, !this.props.selectionControl);
+            this.props.updateSelected(this.props.myKey, !this.props.selectionControl, this.props.algorithm.algorithm);
         }
     }
 
     render() {
+        
         this.numDetections = -1;
         return (
             <div>
