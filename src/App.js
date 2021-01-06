@@ -749,15 +749,19 @@ class App extends Component {
       for(var j = 0; j < detectionList.length; j++) {
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
-        if (color === "#F7B500" && counter == 1) {
-          color = "#21af28";
+        if (color === constants.detectionStyle.SELECTED_COLOR && counter == 1) {
           detectionList[j].selected = false;
+          color = detectionList[j].getRenderColor();
           cornerstone.updateImage(this.state.imageViewportTop, true);
           if (this.state.singleViewport === false) {
             cornerstone.updateImage(this.state.imageViewportSide, true);
           }
         }
         if (boundingBoxCoords.length < B_BOX_COORDS) return;
+        if (detectionSet.anotherSelected === true) {
+          let rgbColor = Utils.hexToRgb(color);
+          color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
+        }
         context.font = constants.detectionStyle.LABEL_FONT;
         context.strokeStyle = color;
         context.fillStyle = color;

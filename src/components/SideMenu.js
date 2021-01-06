@@ -89,8 +89,13 @@ class SideMenu extends Component {
             } else {
                 myDetectionSet.selected = false;
                 myDetectionSet.selectAlgorithm(false);
+                if (bool === true) {
+                    myDetectionSet.anotherSelected = true;
+                } else {
+                    myDetectionSet.anotherSelected = false;
+                }
             }
-        }
+        }        
         this.forceUpdate(() => {
             this.props.appForceUpdate();
         });
