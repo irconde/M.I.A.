@@ -692,6 +692,9 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetectionMasks(data, context) {
+    if (data === undefined || data === null || data.length === 0 ) {
+      return;
+    }
     const baseX = data[1][0];
     const baseY = data[1][1];
     const maskWidth = data[2][0];
