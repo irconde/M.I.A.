@@ -14,7 +14,8 @@ export default class Detection {
     this.class = className;
     this.confidence = confidenceValue;
     this.validation = undefined;
-    this.color = randomColor({seed: className});
+    this.algorithm = algorithm;
+    this.color = randomColor({seed: algorithm});
   }
 
   /**

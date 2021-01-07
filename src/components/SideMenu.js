@@ -86,6 +86,9 @@ class SideMenu extends Component {
             if (key === algorithm) {
                 myDetectionSet.selected = bool;
                 myDetectionSet.selectAlgorithm(bool);
+                if (bool === true) {
+                    myDetectionSet.anotherSelected = false;
+                }
             } else {
                 myDetectionSet.selected = false;
                 myDetectionSet.selectAlgorithm(false);
