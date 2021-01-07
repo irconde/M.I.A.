@@ -43,10 +43,8 @@ class TreeDetection extends Component {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
         enabled: PropTypes.bool.isRequired,
-        selected: PropTypes.bool.isRequired,
         updateEnabled: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
-        detectionIndex: PropTypes.number.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
 
@@ -80,7 +78,7 @@ class TreeDetection extends Component {
      */
     setSelected() {
         this.props.detection.selected = !this.props.detection.selected;
-        this.props.updateSelectedDetection(this.props.detectionIndex);        
+        this.props.updateSelectedDetection(this.props.detection);        
     }
 
     render() {

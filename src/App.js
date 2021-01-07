@@ -606,7 +606,7 @@ class App extends Component {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false, algorithmName));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false, algorithmName, constants.viewport.TOP));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -650,7 +650,7 @@ class App extends Component {
             const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[m]);
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false, algorithmName), constants.viewport.SIDE);
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, objectClass, confidenceLevel, false, algorithmName, constants.viewport.SIDE), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);
