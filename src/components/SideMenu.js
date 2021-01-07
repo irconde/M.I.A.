@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
-import * as constants from "../Constants";
 
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
@@ -15,16 +14,12 @@ class SideMenu extends Component {
                 fill: 'white',
                 width: '100%'
             },
-            selectedAlgorithm: [],
             enabledAlgorithm: [],
-            selectedDetection: [],
-            lastSelection: false,
-            lastCoords: [],
             algorithmSelected: false
         }            
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
-        this.setEnabledData = this.setEnabledData.bind(this);
+        this.setVisibilityData = this.setVisibilityData.bind(this);
     }
 
     static propTypes = {
@@ -35,25 +30,31 @@ class SideMenu extends Component {
     }
 
     /**
-     * setEnabledData - Receives updates from TreeAlgorithm, passing in it's index and visibility 
+     * setVisibilityData - Receives updates from TreeAlgorithm, passing in it's index and visibility 
      *                  boolean value.
      * 
      * @param {type} algorithmIndex 
      * @param {type} bool 
      * @returns {type}   None
      */
-    setEnabledData(algorithmIndex, bool) {
-        for (let i = 0; i < this.numberOfAlgorithms; i++) {
-            if (i === algorithmIndex) {
-                this.state.enabledAlgorithm[i] = bool;
+    setVisibilityData(algorithm, bool) {
+        for (const [key, detectionSet] of Object.entries(this.props.detections)) {
+            if (key === algorithm) {
+                detectionSet.visibility = !bool;
+                if (detectionSet.visibility === false) {
+                    detectionSet.selected = false;
+                    detectionSet.anotherSelected = false;
+                    detectionSet.selectAlgorithm(false);
+                } else {
+                    //detectionSet.setDetectionVisibility(true);
+                }
+            } else if (key !== algorithm && bool === true) {
+                detectionSet.anotherSelected = false;
             }
-            if (this.state.enabledAlgorithm[i] === undefined) {
-                this.state.enabledAlgorithm[i] = true;
-            }
-        }
-        if (this.state.enabledAlgorithm.length === this.numberOfAlgorithms) {
-            this.props.updateAlgorithmDetectionVisibility(this.state.enabledAlgorithm);
-        }
+        } 
+        this.forceUpdate(() => {
+            this.props.appForceUpdate();
+        });
     }
 
     /**
@@ -86,38 +87,7 @@ class SideMenu extends Component {
                 detectionSet.selectAlgorithm(false);
                 detectionSet.anotherSelected = false;
             }
-        }
-        // if (bool){
-        //     this.state.selectedAlgorithm.fill(false);
-        //     this.state.algorithmSelected = true;
-        // } else {
-        //     this.state.algorithmSelected = false;
-        // }
-        // this.state.selectedAlgorithm[index] = bool;
-        // if (this.state.lastSelection) {
-        //     this.state.lastSelection = false;
-        // }
-        // for (let i = 0; i < this.state.selectedDetection.length; i++) {
-        //     this.state.selectedDetection[i] = new Array();
-        //     this.state.selectedDetection[i].fill(false);
-        // }
-        // for (const [key, myDetectionSet] of Object.entries(this.props.detections)) {
-        //     if (key === algorithm) {
-        //         myDetectionSet.selected = bool;
-        //         myDetectionSet.selectAlgorithm(bool);
-        //         if (bool === true) {
-        //             myDetectionSet.anotherSelected = false;
-        //         }
-        //     } else {
-        //         myDetectionSet.selected = false;
-        //         myDetectionSet.selectAlgorithm(false);
-        //         if (bool === true) {
-        //             myDetectionSet.anotherSelected = true;
-        //         } else {
-        //             myDetectionSet.anotherSelected = false;
-        //         }
-        //     }
-        // }        
+        }      
         this.forceUpdate(() => {
             this.props.appForceUpdate();
         });
@@ -143,7 +113,6 @@ class SideMenu extends Component {
         }        
         if (this.state.algorithmSelected) {
             this.state.algorithmSelected = false;
-            this.state.selectedAlgorithm.fill(false);
         }
         this.forceUpdate(() => {
             this.props.appForceUpdate();
@@ -159,7 +128,8 @@ class SideMenu extends Component {
             myDetections.push({
                 algorithm: detectionSet.algorithm,
                 data: detectionSet.data,
-                selected: detectionSet.selected
+                selected: detectionSet.selected,
+                visibility: detectionSet.visibility
             });   
         }
         // Checking to see if there is any data in myDetections
@@ -179,7 +149,7 @@ class SideMenu extends Component {
                                         updateSelected={this.updateSelected} 
                                         updateSelectedDetection={this.updateSelectedDetection}
                                         configurationInfo={this.props.configurationInfo} 
-                                        setEnabledData={this.setEnabledData}
+                                        setVisibilityData={this.setVisibilityData}
                                     />
                                 )
                             })} 

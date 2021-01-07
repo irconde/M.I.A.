@@ -136,6 +136,20 @@ export default class DetectionSet {
     this.algorithm = algorithm;
   }
 
+  setDetectionVisibility(bool) {
+    console.log(`Setting all detections visible to : ${bool}`)
+    if (this.data.top !== undefined) {
+      for (let i = 0; i < this.data.top.length; i++) {
+        this.data.top[i].visible = bool;
+      }
+    }
+    if (this.data.side !== undefined) {
+      for (let i = 0; i < this.data.side.length; i++) {
+        this.data.side[i].visible = bool;
+      }
+    }
+  }
+
   selectAlgorithm(bool) {
     if (this.data.top !== undefined) {
       for (let i = 0; i < this.data.top.length; i++) {

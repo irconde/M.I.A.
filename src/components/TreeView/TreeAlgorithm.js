@@ -35,13 +35,12 @@ class TreeAlgorithm extends Component {
                 paddingTop: '0.75rem'
             },
             isExpanded: true,
-            isEnabled: true,
             isSelected: false
         }
         this.setExpanded = this.setExpanded.bind(this);
-        this.setEnabled = this.setEnabled.bind(this);
+        this.setVisibility = this.setVisibility.bind(this);
         this.setSelected = this.setSelected.bind(this);
-        this.updateEnabled = this.updateEnabled.bind(this);
+        this.updateVisibility = this.updateVisibility.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
         this.updateSelected = this.updateSelected.bind(this);
     }
@@ -49,7 +48,7 @@ class TreeAlgorithm extends Component {
         algorithm: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
         updateSelected: PropTypes.func.isRequired,
-        setEnabledData: PropTypes.func.isRequired,
+        setVisibilityData: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
         myKey: PropTypes.number.isRequired
     }
@@ -70,24 +69,19 @@ class TreeAlgorithm extends Component {
     }
 
     /**
-     * setEnabled - Is the function that controls the eye visibility. There is
+     * setVisibility - Is the function that controls the eye visibility. There is
      *              a special case when if we click the eye to disable the algorithm,
      *              then we need to set the selected value to false if it is true.
      *
      * @param {type} none
      * @returns {type} none
      */
-    setEnabled(){
-        this.setState({isEnabled: !this.state.isEnabled}, () => {
-            if (this.state.isEnabled === false && this.props.algorithm.selected === true){
-                this.props.updateSelected(!this.props.algorithm.selected, this.props.algorithm.algorithm);
-            }
-            this.props.setEnabledData(this.props.myKey, this.state.isEnabled);
-        });
+    setVisibility(){
+        this.props.setVisibilityData(this.props.algorithm.algorithm, this.props.algorithm.visibility);
     }
 
     /**
-     * updateEnabled - Function is for the TreeDetection component, we pass this in as a prop.
+     * updateVisibility - Function is for the TreeDetection component, we pass this in as a prop.
      *                 Because, this is how we control if we need to re-enable the entire algorithm.
      *                 If in the case that the algorithm is was set to disabled and we clicked one
      *                 of the individual detections eye in the algorithm, then we want to re-enable the
@@ -96,8 +90,8 @@ class TreeAlgorithm extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    updateEnabled(){
-        this.setState({ isEnabled: !this.state.isEnabled});
+    updateVisibility(){
+        this.props.setVisibilityData(this.props.algorithm.algorithm, this.props.algorithm.visibility);
     }
 
 
@@ -129,12 +123,14 @@ class TreeAlgorithm extends Component {
      *               its detection are changed. We call the passed in function letting it
      *               know which algorithm to change its value based on the algorithm index.
      *
-     * @param {type} none
+     * @param {Event} e
      * @returns {type} none
      */
     setSelected(e){
-        if (e.target.id !== 'Path' && e.target.id !== 'arrow' && this.state.isExpanded && this.state.isEnabled) {
-            this.props.updateSelected(!this.props.algorithm.selected, this.props.algorithm.algorithm);
+        if (this.props.algorithm.visibility === true) {
+            if (e.target.id !== 'Path' && e.target.id !== 'eye' && e.target.id !== 'Shape' && e.target.id !== 'arrow' && this.state.isExpanded) {
+                this.props.updateSelected(!this.props.algorithm.selected, this.props.algorithm.algorithm);
+            }
         }
     }
 
@@ -142,13 +138,13 @@ class TreeAlgorithm extends Component {
         return (
             <div>
                 <MetaData
-                    isVisible={this.state.isEnabled ? this.props.algorithm.selected : false}
+                    isVisible={this.props.algorithm.visibility ? this.props.algorithm.selected : false}
                     detectorType={this.props.configurationInfo.type}
                     detectorConfigType={this.props.configurationInfo.configuration}
                     seriesType={this.props.configurationInfo.series}
                     studyType={this.props.configurationInfo.study}
                 />
-                <div onClick={this.setSelected} style={this.props.algorithm.selected && this.state.isEnabled ? {
+                <div onClick={this.setSelected} style={this.props.algorithm.selected && this.props.algorithm.visibility ? {
                         ...this.state.containerStyle,
                         backgroundColor: '#367EFF'
                     } : this.state.containerStyle}>
@@ -165,14 +161,14 @@ class TreeAlgorithm extends Component {
                             style={this.state.arrowStyle}
                             onClick={this.setExpanded}
                         />}
-                    <div style={ this.state.isEnabled ? this.state.typeStyles :  {
+                    <div id="algorithm-name" style={ this.props.algorithm.visibility ? this.state.typeStyles :  {
                         ...this.state.typeStyles,
                         color: 'gray'
                     } }>Algorithm - {this.props.algorithm.algorithm}</div>
-                    {this.state.isEnabled ?
-                        <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    {this.props.algorithm.visibility ?
+                        <Icons.EyeO id="eye" onClick={this.setVisibility} style={this.state.eyeStyle} />
                         :
-                        <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
+                        <Icons.EyeC id="eye" onClick={this.setVisibility} style={this.state.eyeStyle} />
                     }
                 </div>
                 <div id='detection-holder'>
@@ -190,8 +186,8 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    enabled={this.state.isEnabled}
-                                    updateEnabled={this.updateEnabled}
+                                    enabled={this.props.algorithm.visibility}
+                                    updateVisibility={this.updateVisibility}
                                     detectionColor={detectionColor}
                                     key={index}
                                     updateSelectedDetection={this.updateSelectedDetection}
@@ -218,8 +214,8 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    enabled={this.state.isEnabled}
-                                    updateEnabled={this.updateEnabled}
+                                    enabled={this.props.algorithm.visibility}
+                                    updateVisibility={this.updateVisibility}
                                     detectionColor={detectionColor}
                                     key={index}
                                     updateSelectedDetection={this.updateSelectedDetection}

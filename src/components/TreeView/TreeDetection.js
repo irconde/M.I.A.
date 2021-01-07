@@ -43,7 +43,7 @@ class TreeDetection extends Component {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
         enabled: PropTypes.bool.isRequired,
-        updateEnabled: PropTypes.func.isRequired,
+        updateVisibility: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
@@ -56,18 +56,19 @@ class TreeDetection extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    setEnabled(){
-        this.props.detection.visible = !this.props.detection.visible;
-        if (this.props.enabled === false && this.state.isEnabled === true) {
-            this.props.updateEnabled();
-            return;
-        }
-        this.setState({ isEnabled: !this.state.isEnabled }, () => {
-            if (this.props.enabled === false && (this.state.isEnabled === true || this.state.isEnabled === false) ) {
-                this.props.updateEnabled();
+    setEnabled(e){
+        if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
+            this.props.detection.visible = !this.props.detection.visible;
+            if (this.props.enabled === false && this.state.isEnabled === true) {
+                this.props.updateVisibility();
+                return;
             }
-        });
-
+            this.setState({ isEnabled: !this.state.isEnabled }, () => {
+                if (this.props.enabled === false && (this.state.isEnabled === true || this.state.isEnabled === false) ) {
+                    this.props.updateVisibility();
+                }
+            });
+        }
     }
 
     /**
@@ -76,9 +77,11 @@ class TreeDetection extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    setSelected() {
-        this.props.detection.selected = !this.props.detection.selected;
-        this.props.updateSelectedDetection(this.props.detection);        
+    setSelected(e) {
+        if (e.target.id !== "Shape" && e.target.id !== "eye") {
+            this.props.detection.selected = !this.props.detection.selected;
+            this.props.updateSelectedDetection(this.props.detection);
+        }
     }
 
     render() {
@@ -104,34 +107,34 @@ class TreeDetection extends Component {
         // We only display an open eye if both algorithm and detection are enabled.
         if (this.props.enabled === true && this.state.isEnabled === true) {
             return (
-                <div onClick={this.setSelected} style={colorSelection ?
+                <div id="container" onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,
                     backgroundColor: selectionColor,}
                     :
                     this.state.containerStyle}>
-                    <div style={{
+                    <div id="detectionBG" style={{
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor === "black" ? this.props.detection.color : this.props.detectionColor,
                     }}></div>
-                    <span style={{
+                    <span id="span" style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeO id="eye" onClick={this.setEnabled} style={this.state.eyeStyle} />
                 </div>
             );
         } else {
             return (
-                <div style={this.state.containerStyle}>
+                <div id="hidden-container" style={this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor,
                     }}></div>
-                    <span style={{
+                    <span id="hidden-span" style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeC id="hidden-eye" onClick={this.setEnabled} style={this.state.eyeStyle} />
                 </div>
             );
         }
