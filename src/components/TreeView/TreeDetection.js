@@ -34,37 +34,36 @@ class TreeDetection extends Component {
                 marginRight: '1.0rem',
                 marginBottom: '0.25rem'
             },
-            isEnabled: true
+            isVisible: true
         }
-        this.setEnabled = this.setEnabled.bind(this);
+        this.setVisible = this.setVisible.bind(this);
         this.setSelected = this.setSelected.bind(this);
     }
     static propTypes = {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
-        enabled: PropTypes.bool.isRequired,
+        visible: PropTypes.bool.isRequired,
         updateVisibility: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
 
     /**
-     * setEnabled - Is how we control the eye visibility for each detection.
-     *              We use a variable called isChanging, to control the eye
-     *              in the TreeAlgorithm Component.
+     * setVisible - Is how we control the eye visibility for each detection.
+     *              
      *
      * @param {type} none
      * @returns {type} none
      */
-    setEnabled(e){
+    setVisible(e){
         if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
             this.props.detection.visible = !this.props.detection.visible;
-            if (this.props.enabled === false && this.state.isEnabled === true) {
+            if (this.props.visible === false && this.state.isVisible === true) {
                 this.props.updateVisibility();
                 return;
             }
-            this.setState({ isEnabled: !this.state.isEnabled }, () => {
-                if (this.props.enabled === false && (this.state.isEnabled === true || this.state.isEnabled === false) ) {
+            this.setState({ isVisible: !this.state.isVisible }, () => {
+                if (this.props.visible === false && (this.state.isVisible === true || this.state.isVisible === false) ) {
                     this.props.updateVisibility();
                 }
             });
@@ -93,7 +92,7 @@ class TreeDetection extends Component {
             textColor = detectionStyle.VALID_COLOR;
         } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
             textColor = detectionStyle.INVALID_COLOR;
-        } else if (!this.props.enabled || !this.state.isEnabled){
+        } else if (!this.props.visible || !this.state.isVisible){
             textColor = 'gray';
         }
         if (this.props.detection.selected) {
@@ -104,8 +103,8 @@ class TreeDetection extends Component {
             selectionColor = 'rgba(54, 126, 255, 0.2)';
             colorSelection = true;
         }
-        // We only display an open eye if both algorithm and detection are enabled.
-        if (this.props.enabled === true && this.state.isEnabled === true) {
+        // We only display an open eye if both algorithm and detection are visible.
+        if (this.props.visible === true && this.state.isVisible === true) {
             return (
                 <div id="container" onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,
@@ -120,7 +119,7 @@ class TreeDetection extends Component {
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeO id="eye" onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeO id="eye" onClick={this.setVisible} style={this.state.eyeStyle} />
                 </div>
             );
         } else {
@@ -134,7 +133,7 @@ class TreeDetection extends Component {
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC id="hidden-eye" onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeC id="hidden-eye" onClick={this.setVisible} style={this.state.eyeStyle} />
                 </div>
             );
         }

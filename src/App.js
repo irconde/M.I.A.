@@ -104,9 +104,7 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
-    this.updateAlgorithmDetectionVisibility = this.updateAlgorithmDetectionVisibility.bind(this);
-    this.updateDetectionVisibility = this.updateDetectionVisibility.bind(this);
-    this.appForceUpdate = this.appForceUpdate.bind(this);
+    this.appUpdateImage = this.appUpdateImage.bind(this);
   }
 
   /**
@@ -686,34 +684,16 @@ class App extends Component {
   }
 
   /**
-   * updateDetectionVisibility - Function that receives updates from SideMenu on visibility
+   * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
    * 
-   * @param {type} enabledAlgorithm 
-   * @returns {type}   None
+   * @param  {none} None
+   * @return {none} None
    */
-  updateAlgorithmDetectionVisibility(enabledAlgorithm) {
-    let numberOfAlgorithms = -1;
-    if (enabledAlgorithm !== null && enabledAlgorithm !== undefined && enabledAlgorithm.length > 0) {
-      for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-        numberOfAlgorithms++;
-        detectionSet.visibility = enabledAlgorithm[numberOfAlgorithms];
-      }
-    }
+  appUpdateImage(){
     cornerstone.updateImage(this.state.imageViewportTop, true);
     if (this.state.singleViewport === false) {
       cornerstone.updateImage(this.state.imageViewportSide, true);
     }
-  }
-
-  appForceUpdate(){
-    cornerstone.updateImage(this.state.imageViewportTop, true);
-    if (this.state.singleViewport === false) {
-      cornerstone.updateImage(this.state.imageViewportSide, true);
-    }
-  }
-
-  updateDetectionVisibility(detections) {
-    this.forceUpdate();
   }
 
   /**
@@ -752,10 +732,7 @@ class App extends Component {
         if (color === constants.detectionStyle.SELECTED_COLOR && counter == 1) {
           detectionList[j].selected = false;
           color = detectionList[j].getRenderColor();
-          cornerstone.updateImage(this.state.imageViewportTop, true);
-          if (this.state.singleViewport === false) {
-            cornerstone.updateImage(this.state.imageViewportSide, true);
-          }
+          this.appUpdateImage();
         }
         if (boundingBoxCoords.length < B_BOX_COORDS) return;
         if (detectionSet.anotherSelected === true) {
@@ -871,11 +848,7 @@ class App extends Component {
             displayButtons: false,
           });
         }
-        cornerstone.updateImage(this.state.imageViewportTop, true);
-        if(this.state.singleViewport === false) {
-          cornerstone.updateImage(this.state.imageViewportSide, true);
-        }
-
+        this.appUpdateImage();
       }
       // Handle regular click events for selecting and deselecting detections
       else{
@@ -990,10 +963,7 @@ class App extends Component {
         }
       }
     }, () => {
-      cornerstone.updateImage(this.state.imageViewportTop, true);
-      if(this.state.singleViewport === false) {
-        cornerstone.updateImage(this.state.imageViewportSide, true);
-      }
+      this.appUpdateImage();
     })
   }
 
@@ -1027,9 +997,7 @@ class App extends Component {
             detections={this.state.detections} 
             configurationInfo={this.state.configurationInfo} 
             enableMenu={this.state.fileInQueue} 
-            updateAlgorithmDetectionVisibility={this.updateAlgorithmDetectionVisibility}
-            updateDetectionVisibility={this.updateDetectionVisibility}
-            appForceUpdate={this.appForceUpdate}
+            appUpdateImage={this.appUpdateImage}
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons 

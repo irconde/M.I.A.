@@ -136,6 +136,12 @@ export default class DetectionSet {
     this.algorithm = algorithm;
   }
 
+  /**
+   * setDetectionVisibility - Is a function that will turn all the visible parameter of its held
+   *                          detections to the passed in boolean value.
+   * 
+   * @param {Boolean} bool 
+   */
   setDetectionVisibility(bool) {
     console.log(`Setting all detections visible to : ${bool}`)
     if (this.data.top !== undefined) {
@@ -150,6 +156,12 @@ export default class DetectionSet {
     }
   }
 
+  /**
+   * selectAlgorithm - Is a function that will set all of it's held detection selected value
+   *                   to the passed in boolean value.
+   * 
+   * @param {Boolean} bool 
+   */
   selectAlgorithm(bool) {
     if (this.data.top !== undefined) {
       for (let i = 0; i < this.data.top.length; i++) {
