@@ -605,7 +605,7 @@ class App extends Component {
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false, algorithmName));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -650,7 +650,7 @@ class App extends Component {
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
             var pixelData = Dicos.retrieveMaskData(image)
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false), constants.viewport.SIDE);
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false, algorithmName), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);
@@ -738,7 +738,6 @@ class App extends Component {
     if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
       return;
     }
-    let counter = 0;
     for (const [key, detectionSet] of Object.entries(data)) {
       
       if (detectionSet.visibility !== true) {
@@ -760,7 +759,7 @@ class App extends Component {
       for(var j = 0; j < detectionList.length; j++) {
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
-        if (color === constants.detectionStyle.SELECTED_COLOR && counter == 1) {
+        if (color === constants.detectionStyle.SELECTED_COLOR && j > 0) {
           detectionList[j].selected = false;
           color = detectionList[j].getRenderColor();
           this.appUpdateImage();
@@ -781,12 +780,16 @@ class App extends Component {
         context.fillStyle = color;
         context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
-
+        // Label rendering
+        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
         // Mask rendering
         this.renderDetectionMasks(detectionList[j].maskBitmap, context)
 
         // Line rendering
-        if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+        if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
           context.beginPath();
           // Staring point (10,45)
@@ -803,10 +806,6 @@ class App extends Component {
           // Make the line visible
           context.stroke();
         } else if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
-          counter++;
-          if (counter === 2){
-            break;
-          }
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
           context.beginPath();
           // Staring point (299, 301)
