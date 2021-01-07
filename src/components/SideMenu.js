@@ -14,7 +14,6 @@ class SideMenu extends Component {
                 fill: 'white',
                 width: '100%'
             },
-            enabledAlgorithm: [],
             algorithmSelected: false
         }            
         this.updateSelected = this.updateSelected.bind(this);
@@ -25,16 +24,14 @@ class SideMenu extends Component {
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
-        updateAlgorithmDetectionVisibility: PropTypes.func.isRequired,
-        appForceUpdate: PropTypes.func.isRequired
+        appUpdateImage: PropTypes.func.isRequired
     }
 
     /**
-     * setVisibilityData - Receives updates from TreeAlgorithm, passing in it's index and visibility 
-     *                  boolean value.
+     * setVisibilityData - Receives updates from TreeAlgorithm, passing in it's algorithm and boolean value
      * 
-     * @param {type} algorithmIndex 
-     * @param {type} bool 
+     * @param {Number} algorithmIndex 
+     * @param {Boolean} bool 
      * @returns {type}   None
      */
     setVisibilityData(algorithm, bool) {
@@ -45,25 +42,20 @@ class SideMenu extends Component {
                     detectionSet.selected = false;
                     detectionSet.anotherSelected = false;
                     detectionSet.selectAlgorithm(false);
-                } else {
-                    //detectionSet.setDetectionVisibility(true);
                 }
             } else if (key !== algorithm && bool === true) {
                 detectionSet.anotherSelected = false;
             }
         } 
         this.forceUpdate(() => {
-            this.props.appForceUpdate();
+            this.props.appUpdateImage();
         });
     }
 
     /**
-     * updateSelected - Is a function that controls which algorithm is currently selected.
-     *                  How it works is we have an array called selectedAlgorithm, which holds
-     *                  Boolean values. We always set the entire array to be false, so that only
-     *                  one value is ever true. Which we set right afterwards based on the algorithm
-     *                  index clicked in the TreeAlgorithm component. We use forceUpdate here, as
-     *                  manipulating state arrays is not so straight forward when using setState.
+     * updateSelected - This function is how we control which algorithm is selected. We loop
+     *                  through each detection set, controlling which algorithm/detection set is
+     *                  selected. As well, with controlling the selection of those algorithm's detections.
      * 
      * @param {type} index 
      * @param {type} bool 
@@ -89,12 +81,14 @@ class SideMenu extends Component {
             }
         }      
         this.forceUpdate(() => {
-            this.props.appForceUpdate();
+            this.props.appUpdateImage();
         });
     }
 
     /**
-     * updateSelectedDetection - 
+     * updateSelectedDetection - This function ensures that only one detection is selected at a time.
+     *                           When called, each time turns all other values to false. At the end,
+     *                           it updates the component and cornerstone image.
      * 
      * @param {Detection} detection 
      * @returns {type} none 
@@ -115,7 +109,7 @@ class SideMenu extends Component {
             this.state.algorithmSelected = false;
         }
         this.forceUpdate(() => {
-            this.props.appForceUpdate();
+            this.props.appUpdateImage();
         });      
     }
 

@@ -69,9 +69,7 @@ class TreeAlgorithm extends Component {
     }
 
     /**
-     * setVisibility - Is the function that controls the eye visibility. There is
-     *              a special case when if we click the eye to disable the algorithm,
-     *              then we need to set the selected value to false if it is true.
+     * setVisibility - Is the function that controls the eye visibility.
      *
      * @param {type} none
      * @returns {type} none
@@ -108,7 +106,7 @@ class TreeAlgorithm extends Component {
     /**
      * updateSelectedDetection() - Is the controller between the TreeDetection Component and
      *                             SideMenu Component that contains the control logic for selecting
-     *                             detection. The TreeDetection component passes in its current index
+     *                             detection. The TreeDetection component passes in its current detection
      *
      *
      * @param {Detection} detection
@@ -121,7 +119,7 @@ class TreeAlgorithm extends Component {
      * setSelected - Is the function that will set our algorithm to be selected or not,
      *               that is when you click the algorithm name and the color of it and
      *               its detection are changed. We call the passed in function letting it
-     *               know which algorithm to change its value based on the algorithm index.
+     *               know which algorithm to change its value the current components algorithm object
      *
      * @param {Event} e
      * @returns {type} none
@@ -186,7 +184,7 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    enabled={this.props.algorithm.visibility}
+                                    visible={this.props.algorithm.visibility}
                                     updateVisibility={this.updateVisibility}
                                     detectionColor={detectionColor}
                                     key={index}
@@ -214,7 +212,7 @@ class TreeAlgorithm extends Component {
                             return (
                                 <TreeDetection
                                     detection={value}
-                                    enabled={this.props.algorithm.visibility}
+                                    visible={this.props.algorithm.visibility}
                                     updateVisibility={this.updateVisibility}
                                     detectionColor={detectionColor}
                                     key={index}

@@ -13,6 +13,12 @@ export default class Utils {
     return Math.floor(num * 100);
   }
 
+  /**
+   * hexToRgb - Take in a string hex value such as '#F7B500' and will return an object containing
+   *            the red (r), green (g), and blue (b) properties with its correct values.
+   * 
+   * @param {String} hex 
+   */
   static hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
