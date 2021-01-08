@@ -12,6 +12,7 @@ export default class DetectionSet {
     this.selectedDetection = constants.selection.NO_SELECTION;
     this.visible = true;
     this.data = {};
+    this.anotherSelected = false;
     let viewport = constants.viewport.TOP;
     if (arguments.length > 0) {
       viewport = arguments[0];
@@ -61,11 +62,15 @@ export default class DetectionSet {
    */
   validateSelectedDetection(feedback) {
     let view = this.selectedViewport;
-    if (this.selectedViewport === undefined) {
+    if (view === undefined || view === 0) {
       view = constants.viewport.TOP;
+    }
+    if (this.selectedDetection === -1) {
+      return;
     }
     this.data[view][this.selectedDetection].validate(feedback);
     this.clearSelection();
+    
   }
 
   /**
@@ -129,6 +134,45 @@ export default class DetectionSet {
 
   setAlgorithmName(algorithm) {
     this.algorithm = algorithm;
+  }
+
+  /**
+   * setDetectionVisibility - Is a function that will turn all the visible parameter of its held
+   *                          detections to the passed in boolean value.
+   * 
+   * @param {Boolean} bool 
+   */
+  setDetectionVisibility(bool) {
+    console.log(`Setting all detections visible to : ${bool}`)
+    if (this.data.top !== undefined) {
+      for (let i = 0; i < this.data.top.length; i++) {
+        this.data.top[i].visible = bool;
+      }
+    }
+    if (this.data.side !== undefined) {
+      for (let i = 0; i < this.data.side.length; i++) {
+        this.data.side[i].visible = bool;
+      }
+    }
+  }
+
+  /**
+   * selectAlgorithm - Is a function that will set all of it's held detection selected value
+   *                   to the passed in boolean value.
+   * 
+   * @param {Boolean} bool 
+   */
+  selectAlgorithm(bool) {
+    if (this.data.top !== undefined) {
+      for (let i = 0; i < this.data.top.length; i++) {
+        this.data.top[i].selected = bool;
+      }
+    }
+    if (this.data.side !== undefined) {
+      for (let i = 0; i < this.data.side.length; i++) {
+        this.data.side[i].selected = bool;
+      }
+    }
   }
 
   /**

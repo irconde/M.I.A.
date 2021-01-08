@@ -1,5 +1,5 @@
 /**
- * Class that emcompases any secondary method to support the primary features of the client
+ * Class that encompasses any secondary method to support the primary features of the client
  */
 export default class Utils {
 
@@ -14,11 +14,27 @@ export default class Utils {
   }
 
   /**
+   * hexToRgb - Take in a string hex value such as '#F7B500' and will return an object containing
+   *            the red (r), green (g), and blue (b) properties with its correct values.
+   * 
+   * @param {String} hex 
+   */
+  static hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+  
+
+  /**
    * @static formatDetectionLabel - Method that creates a string to be used as
    * detection label, providing information regarding both the type of threat and the associated confidence level
    *
    * @param  {type} objectClass     string value that indicates the threat type
-   * @param  {type} confidenceLevel int valye that indicates the confidence level in the form of a percentage
+   * @param  {type} confidenceLevel int value that indicates the confidence level in the form of a percentage
    * @return {type}                 resulting string to be used as detection label
    */
   static formatDetectionLabel(objectClass, confidenceLevel) {
@@ -35,7 +51,7 @@ export default class Utils {
    */
   static getTextLabelSize(context, labelText, padding) {
     const textSize = context.measureText(labelText);
-    // Aproximation to estimate the text height
+    // Approximation to estimate the text height
     const lineHeight = context.measureText('M').width
     return {'width': textSize.width + 2 * padding, 'height': lineHeight + 2 * padding};
   }
@@ -45,7 +61,7 @@ export default class Utils {
    * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
    *
    * @param  {type} point 2D point with two coordinates, x and y
-   * @param  {type} rect  rectangle defined as a floar array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+   * @param  {type} rect  rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
    * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise
    */
   static pointInRect(point, rect) {

@@ -104,6 +104,7 @@ class App extends Component {
     this.onMouseClicked = this.onMouseClicked.bind(this);
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
+    this.appUpdateImage = this.appUpdateImage.bind(this);
   }
 
   /**
@@ -567,7 +568,7 @@ class App extends Component {
       });
     });
     reader.readAsArrayBuffer(imagesLeft[0]);
-
+    
     for(var i=0; i<imagesLeft.length;i++){
       const readFile = new FileReader();
       readFile.addEventListener("loadend", function() {
@@ -580,6 +581,7 @@ class App extends Component {
         if (!(algorithmName in self.state.detections)) {
           self.state.detections[algorithmName] = new DetectionSet();
           self.state.detections[algorithmName].setAlgorithmName(algorithmName);
+          self.state.detections[algorithmName].visibility = true;
           self.currentSelection.addAlgorithm(algorithmName);
           self.updateNavigationBtnState();
         }
@@ -603,7 +605,7 @@ class App extends Component {
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false, algorithmName));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -648,7 +650,7 @@ class App extends Component {
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
             var pixelData = Dicos.retrieveMaskData(image)
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false), constants.viewport.SIDE);
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false, algorithmName), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);
@@ -683,6 +685,18 @@ class App extends Component {
     // right.
   }
 
+  /**
+   * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
+   * 
+   * @param  {none} None
+   * @return {none} None
+   */
+  appUpdateImage(){
+    cornerstone.updateImage(this.state.imageViewportTop, true);
+    if (this.state.singleViewport === false) {
+      cornerstone.updateImage(this.state.imageViewportSide, true);
+    }
+  }
 
   /**
    * renderDetectionMasks - Method that renders the several annotations in a given DICOS+TDR file
@@ -725,6 +739,10 @@ class App extends Component {
       return;
     }
     for (const [key, detectionSet] of Object.entries(data)) {
+      
+      if (detectionSet.visibility !== true) {
+        continue;
+      }
       let B_BOX_COORDS = 4;
       // TODO. Note that in this version we get the detections of the top view only.
       let detectionList = detectionSet.getData();
@@ -741,7 +759,16 @@ class App extends Component {
       for(var j = 0; j < detectionList.length; j++) {
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
+        if (color === constants.detectionStyle.SELECTED_COLOR && j > 0) {
+          detectionList[j].selected = false;
+          color = detectionList[j].getRenderColor();
+          this.appUpdateImage();
+        }
         if (boundingBoxCoords.length < B_BOX_COORDS) return;
+        if (detectionSet.anotherSelected === true) {
+          let rgbColor = Utils.hexToRgb(color);
+          color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
+        }
         context.font = constants.detectionStyle.LABEL_FONT;
         context.strokeStyle = color;
         context.fillStyle = color;
@@ -753,12 +780,16 @@ class App extends Component {
         context.fillStyle = color;
         context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
-
+        // Label rendering
+        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
+        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
         // Mask rendering
         this.renderDetectionMasks(detectionList[j].maskBitmap, context)
 
         // Line rendering
-        if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
+        if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
           context.beginPath();
           // Staring point (10,45)
@@ -774,29 +805,23 @@ class App extends Component {
           context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
           // Make the line visible
           context.stroke();
-        }
-        else if (j === data[this.currentSelection.getAlgorithm()].selectedDetection && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
+        } else if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
           const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
-        context.beginPath();
-            // Staring point (299, 301)
-            context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
-            // End point (180,47)
-            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
-            // Make the line visible
-            context.stroke();
-            context.beginPath();
-            // Staring point (10,45)
-            context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
-            // End point (180,47)
-            context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
-            // Make the line visible
-            context.stroke();
-        }
-        // Label rendering
-        context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
-        context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-        context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
+          context.beginPath();
+          // Staring point (299, 301)
+          context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
+          // Make the line visible
+          context.stroke();
+          context.beginPath();
+          // Staring point (10,45)
+          context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
+          // End point (180,47)
+          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
+          // Make the line visible
+          context.stroke();
+        }        
       }
     }
   };
@@ -825,67 +850,74 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    var clickedPos = constants.selection.NO_SELECTION;
-    let feedback = undefined;
-    let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
-
-    // User is submitting feedback through confirm or reject buttons
-    if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
-      if(e.currentTarget.id === "confirm"){ feedback = true; }
-      if(e.currentTarget.id === "reject"){ feedback = false; }
-      detectionSet.validateSelectedDetection(feedback);
-      if(this.validationCompleted()){
-        this.setState({
-          displayButtons: false,
-          displayNext: true
-        });
-      } else {
-        this.setState({
-          displayButtons: false,
-        });
+    for (let z = 0; z < this.currentSelection.availableAlgorithms.length; z++) {
+      this.currentSelection.detectionSetIndex = z;
+      var clickedPos = constants.selection.NO_SELECTION;
+      let feedback = undefined;
+      let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
+      // User is submitting feedback through confirm or reject buttons
+      if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
+        if(e.currentTarget.id === "confirm"){ feedback = true; }
+        if(e.currentTarget.id === "reject"){ feedback = false; }
+        
+        detectionSet.validateSelectedDetection(feedback);
+        if(this.validationCompleted()){
+          this.setState({
+            displayButtons: false,
+            displayNext: true
+          });
+        } else {
+          this.setState({
+            displayButtons: false,
+          });
+        }
+        this.appUpdateImage();
       }
-      cornerstone.updateImage(this.state.imageViewportTop, true);
-      if(this.state.singleViewport === false) {
-        cornerstone.updateImage(this.state.imageViewportSide, true);
-      }
+      // Handle regular click events for selecting and deselecting detections
+      else{
+        const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
 
-    }
-    // Handle regular click events for selecting and deselecting detections
-    else{
-      const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
-
-      let detectionSetData = detectionSet.getData();
-      let viewport = constants.viewport.TOP;
-      if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
-        detectionSetData = detectionSet.getData(constants.viewport.SIDE);
-        viewport = constants.viewport.SIDE;
-      }
-      if (detectionSetData !== undefined) {
-        for (var j = 0; j < detectionSetData.length; j++){
-          if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
-              clickedPos = j;
+        let detectionSetData = detectionSet.getData();
+        let viewport = constants.viewport.TOP;
+        if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
+          detectionSetData = detectionSet.getData(constants.viewport.SIDE);
+          viewport = constants.viewport.SIDE;
+        }
+        if (detectionSetData !== undefined) {
+          for (var j = 0; j < detectionSetData.length; j++){
+            if(Utils.pointInRect(mousePos, detectionSetData[j].boundingBox)){
+                clickedPos = j;
+                break;
+            }
+          }
+        } else {
+          return;
+        }
+        // Click on an empty area
+        if(clickedPos === constants.selection.NO_SELECTION) {
+          detectionSet.clearSelection();
+          this.setState({ displayButtons: false }, () => {
+            this.renderButtons(e);
+          });
+        }
+        else {
+          if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
+              e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
+            detectionSet.clearSelection();
+          }
+          if (detectionSet.visibility !== false) {
+            for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
+              myDetectionSet.clearSelection();
+            }
+            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+            this.setState({ displayButtons: anyDetection }, () => {
+              this.renderButtons(e);
+            });
+            if (anyDetection !== undefined || anyDetection !== null) {
               break;
+            }
           }
         }
-      } else {
-        return;
-      }
-      // Click on an empty area
-      if(clickedPos === constants.selection.NO_SELECTION) {
-        detectionSet.clearSelection();
-        this.setState({ displayButtons: false }, () => {
-          this.renderButtons(e);
-        });
-      }
-      else {
-        if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
-            e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
-          detectionSet.clearSelection();
-        }
-        let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
-        this.setState({ displayButtons: anyDetection }, () => {
-          this.renderButtons(e);
-        });
       }
     }
   }
@@ -954,10 +986,7 @@ class App extends Component {
         }
       }
     }, () => {
-      cornerstone.updateImage(this.state.imageViewportTop, true);
-      if(this.state.singleViewport === false) {
-        cornerstone.updateImage(this.state.imageViewportSide, true);
-      }
+      this.appUpdateImage();
     })
   }
 
@@ -987,10 +1016,11 @@ class App extends Component {
             isDownload={this.state.isDownload}
             isConnected={this.state.isConnected}
           />
-          <SideMenu
-            detections={this.state.detections}
-            configurationInfo={this.state.configurationInfo}
-            enableMenu={this.state.fileInQueue}
+          <SideMenu 
+            detections={this.state.detections} 
+            configurationInfo={this.state.configurationInfo} 
+            enableMenu={this.state.fileInQueue} 
+            appUpdateImage={this.appUpdateImage}
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons

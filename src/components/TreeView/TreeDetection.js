@@ -34,41 +34,40 @@ class TreeDetection extends Component {
                 marginRight: '1.0rem',
                 marginBottom: '0.25rem'
             },
-            isEnabled: true
+            isVisible: true
         }
-        this.setEnabled = this.setEnabled.bind(this);
+        this.setVisible = this.setVisible.bind(this);
         this.setSelected = this.setSelected.bind(this);
     }
     static propTypes = {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
-        enabled: PropTypes.bool.isRequired,
-        selected: PropTypes.bool.isRequired,
-        updateEnabled: PropTypes.func.isRequired,
+        visible: PropTypes.bool.isRequired,
+        updateVisibility: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
-        detectionIndex: PropTypes.number.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
 
     /**
-     * setEnabled - Is how we control the eye visibility for each detection.
-     *              We use a variable called isChanging, to control the eye
-     *              in the TreeAlgorithm Component.
+     * setVisible - Is how we control the eye visibility for each detection.
+     *              
      *
      * @param {type} none
      * @returns {type} none
      */
-    setEnabled(){
-        if (this.props.enabled === false && this.state.isEnabled === true) {
-            this.props.updateEnabled();
-            return;
-        }
-        this.setState({ isEnabled: !this.state.isEnabled }, () => {
-            if (this.props.enabled === false && (this.state.isEnabled === true || this.state.isEnabled === false) ) {
-                this.props.updateEnabled();
+    setVisible(e){
+        if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
+            this.props.detection.visible = !this.props.detection.visible;
+            if (this.props.visible === false && this.state.isVisible === true) {
+                this.props.updateVisibility();
+                return;
             }
-        });
-
+            this.setState({ isVisible: !this.state.isVisible }, () => {
+                if (this.props.visible === false && (this.state.isVisible === true || this.state.isVisible === false) ) {
+                    this.props.updateVisibility();
+                }
+            });
+        }
     }
 
     /**
@@ -77,8 +76,11 @@ class TreeDetection extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    setSelected() {
-        this.props.updateSelectedDetection(this.props.detectionIndex);
+    setSelected(e) {
+        if (e.target.id !== "Shape" && e.target.id !== "eye") {
+            this.props.detection.selected = !this.props.detection.selected;
+            this.props.updateSelectedDetection(this.props.detection);
+        }
     }
 
     render() {
@@ -90,10 +92,10 @@ class TreeDetection extends Component {
             textColor = detectionStyle.VALID_COLOR;
         } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
             textColor = detectionStyle.INVALID_COLOR;
-        } else if (!this.props.enabled || !this.state.isEnabled){
+        } else if (!this.props.visible || !this.state.isVisible){
             textColor = 'gray';
         }
-        if (this.props.selected === true) {
+        if (this.props.detection.selected) {
             selectionColor = 'rgba(54, 126, 255, 1)';
             colorSelection = true;
         }
@@ -101,37 +103,37 @@ class TreeDetection extends Component {
             selectionColor = 'rgba(54, 126, 255, 0.2)';
             colorSelection = true;
         }
-        // We only display an open eye if both algorithm and detection are enabled.
-        if (this.props.enabled === true && this.state.isEnabled === true) {
+        // We only display an open eye if both algorithm and detection are visible.
+        if (this.props.visible === true && this.state.isVisible === true) {
             return (
-                <div onClick={this.setSelected} style={colorSelection ?
+                <div id="container" onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,
                     backgroundColor: selectionColor,}
                     :
                     this.state.containerStyle}>
-                    <div style={{
+                    <div id="detectionBG" style={{
                         ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,
+                        backgroundColor: this.props.detectionColor === "black" ? this.props.detection.color : this.props.detectionColor,
                     }}></div>
-                    <span style={{
+                    <span id="span" style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeO onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeO id="eye" onClick={this.setVisible} style={this.state.eyeStyle} />
                 </div>
             );
         } else {
             return (
-                <div style={this.state.containerStyle}>
+                <div id="hidden-container" style={this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor,
                     }}></div>
-                    <span style={{
+                    <span id="hidden-span" style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC onClick={this.setEnabled} style={this.state.eyeStyle} />
+                    <Icons.EyeC id="hidden-eye" onClick={this.setVisible} style={this.state.eyeStyle} />
                 </div>
             );
         }

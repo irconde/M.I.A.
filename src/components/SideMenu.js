@@ -4,6 +4,7 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 
 class SideMenu extends Component {
+    numberOfAlgorithms = 0;
     constructor(props){
         super(props);
         this.state = {
@@ -13,100 +14,116 @@ class SideMenu extends Component {
                 fill: 'white',
                 width: '100%'
             },
-            selectedAlgorithm: [],
-            selectedDetection: [],
-            lastSelection: false,
-            lastCoords: [],
             algorithmSelected: false
         }            
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
+        this.setVisibilityData = this.setVisibilityData.bind(this);
     }
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
-        configurationInfo: PropTypes.object.isRequired
+        configurationInfo: PropTypes.object.isRequired,
+        appUpdateImage: PropTypes.func.isRequired
     }
 
     /**
-     * updateSelected - Is a function that controls which algorithm is currently selected.
-     *                  How it works is we have an array called selectedAlgorithm, which holds
-     *                  Boolean values. We always set the entire array to be false, so that only
-     *                  one value is ever true. Which we set right afterwards based on the algorithm
-     *                  index clicked in the TreeAlgorithm component. We use forceUpdate here, as
-     *                  manipulating state arrays is not so straight forward when using setState.
+     * setVisibilityData - Receives updates from TreeAlgorithm, passing in it's algorithm and boolean value
+     * 
+     * @param {Number} algorithmIndex 
+     * @param {Boolean} bool 
+     * @returns {type}   None
+     */
+    setVisibilityData(algorithm, bool) {
+        for (const [key, detectionSet] of Object.entries(this.props.detections)) {
+            if (key === algorithm) {
+                detectionSet.visibility = !bool;
+                if (detectionSet.visibility === false) {
+                    detectionSet.selected = false;
+                    detectionSet.anotherSelected = false;
+                    detectionSet.selectAlgorithm(false);
+                }
+            } else if (key !== algorithm && bool === true) {
+                detectionSet.anotherSelected = false;
+            }
+        } 
+        this.forceUpdate(() => {
+            this.props.appUpdateImage();
+        });
+    }
+
+    /**
+     * updateSelected - This function is how we control which algorithm is selected. We loop
+     *                  through each detection set, controlling which algorithm/detection set is
+     *                  selected. As well, with controlling the selection of those algorithm's detections.
      * 
      * @param {type} index 
      * @param {type} bool 
      * @returns {type} none 
      */
-    updateSelected(index, bool) {
-        if (bool){
-            this.state.selectedAlgorithm.fill(false);
-            this.state.algorithmSelected = true;
-        } else {
-            this.state.algorithmSelected = false;
-        }
-        this.state.selectedAlgorithm[index] = bool;
-        if (this.state.lastSelection) {
-            this.state.lastSelection = false;
-        }
-        for (let i = 0; i < this.state.selectedDetection.length; i++) {
-            this.state.selectedDetection[i] = new Array();
-            this.state.selectedDetection[i].fill(false);
-        }
-        this.forceUpdate();
+    updateSelected(bool, algorithm) {
+        this.state.algorithmSelected = bool;
+        for (const [key, detectionSet] of Object.entries(this.props.detections)) {
+            if (bool === true) {
+                if (key === algorithm) {
+                    detectionSet.selected = true;
+                    detectionSet.selectAlgorithm(true);
+                    detectionSet.anotherSelected = false;
+                } else {
+                    detectionSet.selectAlgorithm(false);
+                    detectionSet.anotherSelected = true;
+                    detectionSet.selected = false;
+                }
+            } else {
+                detectionSet.selected = false;
+                detectionSet.selectAlgorithm(false);
+                detectionSet.anotherSelected = false;
+            }
+        }      
+        this.forceUpdate(() => {
+            this.props.appUpdateImage();
+        });
     }
 
     /**
-     * updateSelectedDetection - Is a function that controls which detection is currently selected.
-     *                          How it works is we have an array called selectedDetection, which is an array
-     *                          that contains an array at each element. This is representing each algorithm
-     *                          as an element, with its subsequent detections as the array of booleans in that
-     *                          element. We always set the entire array to be false, so that only
-     *                          one value is ever true. Which we set right afterwards based on the detection
-     *                          index clicked in the TreeDetection component. We use forceUpdate here, as
-     *                          manipulating state arrays is not so straight forward when using setState.
+     * updateSelectedDetection - This function ensures that only one detection is selected at a time.
+     *                           When called, each time turns all other values to false. At the end,
+     *                           it updates the component and cornerstone image.
      * 
-     * @param {type} algorithmIndex 
-     * @param {type} detectionIndex 
-     * @param {type} numDetections 
+     * @param {Detection} detection 
      * @returns {type} none 
      */
-    updateSelectedDetection(algorithmIndex, detectionIndex, numDetections) {
+    updateSelectedDetection(detection) {
+        if (this.state.algorithmSelected) {
+            detection.selected = true;
+        }
+        if (detection.selected === true) {
+            for (const [key, detectionSet] of Object.entries(this.props.detections)) {
+                detectionSet.anotherSelected = false;
+                detectionSet.selectAlgorithm(false);
+                detectionSet.selected = false;
+            }
+            detection.selected = true;
+        }        
         if (this.state.algorithmSelected) {
             this.state.algorithmSelected = false;
-            this.state.selectedAlgorithm.fill(false);
         }
-        if (this.state.lastCoords[0] === algorithmIndex && this.state.lastCoords[1] === detectionIndex) {
-            // Clicked same detection
-            this.state.lastSelection = !this.state.lastSelection;
-        } else {
-            if (this.state.lastSelection === false) {
-                this.state.lastSelection = true;
-            }
-        }
-        this.state.lastCoords[0] = algorithmIndex;
-        this.state.lastCoords[1] = detectionIndex;
-        if (this.state.selectedDetection.length >= 0) {
-            for (let i = 0; i < this.state.selectedDetection.length; i++) {
-                this.state.selectedDetection[i] = new Array();
-                this.state.selectedDetection[i].fill(false);
-            }
-        }
-        this.state.selectedDetection[algorithmIndex] = new Array(numDetections+1);
-        this.state.selectedDetection[algorithmIndex][detectionIndex] = this.state.lastSelection;
-        this.forceUpdate();
+        this.forceUpdate(() => {
+            this.props.appUpdateImage();
+        });      
     }
 
     render() {
+        this.numberOfAlgorithms = 0;
         // We can't use map on the this.props.detection in the return
         // Therefore, we will populate the array myDetections with this data before returning
         let myDetections = [];
         for (const [key, detectionSet] of Object.entries(this.props.detections)) {
             myDetections.push({
                 algorithm: detectionSet.algorithm,
-                data: detectionSet.data
+                data: detectionSet.data,
+                selected: detectionSet.selected,
+                visibility: detectionSet.visibility
             });   
         }
         // Checking to see if there is any data in myDetections
@@ -116,18 +133,17 @@ class SideMenu extends Component {
                         {/* How we create the trees and their nodes is using map */}
                         <div style={this.state.treeStyle}>
                             {myDetections.map((value, index) => {      
+                                this.numberOfAlgorithms++;
                                 return (
                                     // Setting the Algorithm name, IE OTAP or Tiled 
                                     <TreeAlgorithm 
                                         key={index} 
                                         myKey={index}
-                                        algorithm={value} 
+                                        algorithm={value}
                                         updateSelected={this.updateSelected} 
                                         updateSelectedDetection={this.updateSelectedDetection}
-                                        selectionControl={this.state.selectedAlgorithm[index]}
-                                        selectionDetectionControl={this.state.selectedDetection[index]}
                                         configurationInfo={this.props.configurationInfo} 
-                                        
+                                        setVisibilityData={this.setVisibilityData}
                                     />
                                 )
                             })} 
