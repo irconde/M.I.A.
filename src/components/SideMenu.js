@@ -25,7 +25,10 @@ class SideMenu extends Component {
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
-        appUpdateImage: PropTypes.func.isRequired
+        appUpdateImage: PropTypes.func.isRequired,
+        appUpdateButtons: PropTypes.func.isRequired,
+        hideButtons: PropTypes.func.isRequired,
+        renderButtons: PropTypes.func.isRequired
     }
 
     /**
@@ -98,7 +101,7 @@ class SideMenu extends Component {
      * @param {Detection} detection 
      * @returns {type} none 
      */
-    updateSelectedDetection(detection) {
+    updateSelectedDetection(detection, e) {
         if (this.state.algorithmSelected) {
             detection.selected = true;
         }
@@ -113,9 +116,10 @@ class SideMenu extends Component {
         if (this.state.algorithmSelected) {
             this.state.algorithmSelected = false;
         }
-        this.forceUpdate(() => {
-            this.props.appUpdateImage();
-        });      
+
+        if (detection.selected === false) this.props.hideButtons(e);
+        else this.props.appUpdateButtons(e);
+        this.props.appUpdateImage();     
     }
 
     render() {

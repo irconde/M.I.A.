@@ -105,6 +105,7 @@ class App extends Component {
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
     this.appUpdateImage = this.appUpdateImage.bind(this);
+    this.appUpdateButtons = this.appUpdateButtons.bind(this);
   }
 
   /**
@@ -605,7 +606,7 @@ class App extends Component {
           const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
-          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false, algorithmName));
+          self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false, algorithmName, constants.viewport.TOP));
         }
       });
       readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -650,7 +651,7 @@ class App extends Component {
             const objectClass = Dicos.retrieveObjectClass(threatSequence.items[m]);
             const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[m]));
             var pixelData = Dicos.retrieveMaskData(image)
-            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false, algorithmName), constants.viewport.SIDE);
+            self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, pixelData, objectClass, confidenceLevel, false, algorithmName, constants.viewport.SIDE), constants.viewport.SIDE);
           }
         });
         read.readAsArrayBuffer(imagesRight[k]);
@@ -696,6 +697,10 @@ class App extends Component {
     if (this.state.singleViewport === false) {
       cornerstone.updateImage(this.state.imageViewportSide, true);
     }
+  }
+
+  appUpdateButtons(e) {
+    this.renderButtons(e);
   }
 
   /**
@@ -835,10 +840,14 @@ class App extends Component {
    * @return {type}  None
    */
   hideButtons(e){
+    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+      detectionSet.clearSelection();
+      detectionSet.selectAlgorithm(false);
+    }
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
     });
-    this.state.detections[this.currentSelection.getAlgorithm()].clearSelection();
+    
   }
 
   /**
@@ -896,7 +905,10 @@ class App extends Component {
         }
         // Click on an empty area
         if(clickedPos === constants.selection.NO_SELECTION) {
-          detectionSet.clearSelection();
+          //detectionSet.clearSelection();
+          detectionSet.selectAlgorithm(false);
+          detectionSet.selected = false;
+          detectionSet.anotherSelected = false;
           this.setState({ displayButtons: false }, () => {
             this.renderButtons(e);
           });
@@ -938,45 +950,84 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
-    
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
     if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
-      console.log("returning")
       return;
     }
     var leftAcceptBtn = 0;
     var topAcceptBtn = 0;
     var topRejectBtn = 0;
     if(e.detail !== null){
+      if ((e.target.id === "top-span" || e.target.id === "side-span" || e.target.id === "top-container" || e.target.id === "side-container")) {
+        this.state.displayButtons = true;
+        // console.log(this.currentSelection);
+        // console.log(this.currentSelection.getAlgorithm());
+        // console.log(e.target.id);
+        // console.log(e.detail);
+        // console.log(this.state.detections)
+        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData());
+        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm);
+        // console.log(this.state.detections[this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm]); 
+        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData().length - 1);
+        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].view)
+        // this.state.detections[this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm].selectDetection(this.state.detections[this.currentSelection.getAlgorithm()].getData().length - 1, this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].view);       
+      }
       if(this.state.displayButtons !== false){
         let coordsAcceptBtn;
         let coordsRejectBtn;
         let buttonGap;
         let viewportOffset;
-        if(e.detail.element.id === 'dicomImageLeft'){
-          buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
-          viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;
-          let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
-          const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-          if (detectionData === undefined) return;
-          const boundingBoxCoords = detectionData.boundingBox;
-          coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]-buttonGap});
-          coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]+buttonGap/2});
-        }
+        if (e.detail.element !== undefined) {
+          if(e.detail.element.id === 'dicomImageLeft'){
+            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
+            viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;
+            let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
+            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+            console.log(detectionData);
+            if (detectionData === undefined) return;
+            const boundingBoxCoords = detectionData.boundingBox;
+            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]-buttonGap});
+            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]+buttonGap/2});
+          }
 
-        if(e.detail.element.id === 'dicomImageRight'){
-          buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
-          viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
-          let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
-          const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-          if (detectionData === undefined) return;
-          const boundingBoxCoords = detectionData.boundingBox;
-          coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
-          coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
-        }
+          if (e.detail.element.id === 'dicomImageRight') {
+            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
+            viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
+            let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
+            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+            console.log(detectionData);
+            if (detectionData === undefined) return;
+            const boundingBoxCoords = detectionData.boundingBox;
+            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
+            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
+          }
+        } else {
+          if (e.target.id === "top-span" || e.target.id === "top-container") {
+            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
+            viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;
+            let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
+            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+            console.log(detectionData);
+            if (detectionData === undefined) return;
+            const boundingBoxCoords = detectionData.boundingBox;
+            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]-buttonGap});
+            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]+buttonGap/2});
+          }
 
+          if (e.target.id === "side-span" || e.target.id === "side-container") {
+            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
+            viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
+            let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
+            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+            console.log(detectionData);
+            if (detectionData === undefined) return;
+            const boundingBoxCoords = detectionData.boundingBox;
+            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
+            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
+          }
+        }
         leftAcceptBtn = coordsAcceptBtn.x;
         topAcceptBtn = coordsAcceptBtn.y;
         topRejectBtn = coordsRejectBtn.y;
@@ -1031,6 +1082,9 @@ class App extends Component {
             configurationInfo={this.state.configurationInfo} 
             enableMenu={this.state.fileInQueue} 
             appUpdateImage={this.appUpdateImage}
+            appUpdateButtons={this.appUpdateButtons}
+            hideButtons={this.hideButtons}
+            renderButtons={this.onMouseClicked}
           />
           <div id="algorithm-outputs"> </div>
           <ValidationButtons

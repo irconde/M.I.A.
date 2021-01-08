@@ -58,15 +58,6 @@ class TreeDetection extends Component {
         if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
             this.props.detection.visible = !this.props.detection.visible;
             this.props.updateImage();
-            // if (this.props.visible === false && this.state.isVisible === true) {
-            //     this.props.updateVisibility();
-            //     return;
-            // }
-            // this.setState({ isVisible: !this.state.isVisible }, () => {
-            //     if (this.props.visible === false && (this.state.isVisible === true || this.state.isVisible === false) ) {
-            //         this.props.updateVisibility();
-            //     }
-            // });
         }
     }
 
@@ -78,13 +69,13 @@ class TreeDetection extends Component {
      */
     setSelected(e) {
         if (e.target.id !== "Shape" && e.target.id !== "eye") {
-            this.props.detection.selected = !this.props.detection.selected;
-            this.props.updateSelectedDetection(this.props.detection);
+            this.props.detection.selected = !this.props.detection.selected;            
+            this.props.updateSelectedDetection(this.props.detection, e);
         }
     }
 
     render() {
-        //console.log(this.props);
+        // console.log(this.props.detection)
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         let selectionColor;
@@ -107,7 +98,7 @@ class TreeDetection extends Component {
         // We only display an open eye if both algorithm and detection are visible.
         if (this.props.detection.visible === true) {
             return (
-                <div id="container" onClick={this.setSelected} style={colorSelection ?
+                <div id={`${this.props.detection.view}-container`} onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,
                     backgroundColor: selectionColor,}
                     :
@@ -116,7 +107,7 @@ class TreeDetection extends Component {
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor === "black" ? this.props.detection.color : this.props.detectionColor,
                     }}></div>
-                    <span id="span" style={{
+                    <span id={`${this.props.detection.view}-span`} style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
@@ -125,12 +116,12 @@ class TreeDetection extends Component {
             );
         } else {
             return (
-                <div id="hidden-container" style={this.state.containerStyle}>
+                <div id={`${this.props.detection.view}-hidden-container`} style={this.state.containerStyle}>
                     <div style={{
                         ...this.state.detectionBGStyle,
                         backgroundColor: this.props.detectionColor,
                     }}></div>
-                    <span id="hidden-span" style={{
+                    <span id={`${this.props.detection.view}-hidden-span`} style={{
                         ...this.state.typeStyle,
                         color: textColor
                     }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>

@@ -6,7 +6,7 @@ var randomColor = require("randomcolor");
  */
 export default class Detection {
 
-  constructor(diagonalCoords, maskBitMap, className, confidenceValue, isValidated, algorithm) {
+  constructor(diagonalCoords, maskBitMap, className, confidenceValue, isValidated, algorithm, view) {
     this.boundingBox = diagonalCoords
     this.maskBitmap = maskBitMap;
     this.selected = false;
@@ -15,6 +15,7 @@ export default class Detection {
     this.confidence = confidenceValue;
     this.validation = undefined;
     this.algorithm = algorithm;
+    this.view = view;
     this.color = randomColor({seed: className});
   }
 

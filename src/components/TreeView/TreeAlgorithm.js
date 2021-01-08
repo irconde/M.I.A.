@@ -40,7 +40,6 @@ class TreeAlgorithm extends Component {
         this.setExpanded = this.setExpanded.bind(this);
         this.setVisibility = this.setVisibility.bind(this);
         this.setSelected = this.setSelected.bind(this);
-        this.updateVisibility = this.updateVisibility.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
         this.updateSelected = this.updateSelected.bind(this);
     }
@@ -80,22 +79,6 @@ class TreeAlgorithm extends Component {
     }
 
     /**
-     * updateVisibility - Function is for the TreeDetection component, we pass this in as a prop.
-     *                 Because, this is how we control if we need to re-enable the entire algorithm.
-     *                 If in the case that the algorithm is was set to disabled and we clicked one
-     *                 of the individual detections eye in the algorithm, then we want to re-enable the
-     *                 algorithm.
-     *
-     * @param {type} none
-     * @returns {type} none
-     */
-    updateVisibility(){
-        console.log("update vis")
-        this.props.setVisibilityData(this.props.algorithm.algorithm, this.props.algorithm.visibility);
-    }
-
-
-    /**
      * updateSelected() - Control how each algorithm is selected and deselected
      *
      * @param {type} none
@@ -113,8 +96,9 @@ class TreeAlgorithm extends Component {
      *
      * @param {Detection} detection
      */
-    updateSelectedDetection(detection) {
-        this.props.updateSelectedDetection(detection);
+    updateSelectedDetection(detection, e) {
+    
+        this.props.updateSelectedDetection(detection, e);
     }
 
     /**
