@@ -34,7 +34,6 @@ class TreeDetection extends Component {
                 marginRight: '1.0rem',
                 marginBottom: '0.25rem'
             },
-            isVisible: true
         }
         this.setVisible = this.setVisible.bind(this);
         this.setSelected = this.setSelected.bind(this);
@@ -43,7 +42,7 @@ class TreeDetection extends Component {
         detection: PropTypes.object.isRequired,
         detectionColor: PropTypes.string,
         visible: PropTypes.bool.isRequired,
-        updateVisibility: PropTypes.func.isRequired,
+        updateImage: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
@@ -58,15 +57,16 @@ class TreeDetection extends Component {
     setVisible(e){
         if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
             this.props.detection.visible = !this.props.detection.visible;
-            if (this.props.visible === false && this.state.isVisible === true) {
-                this.props.updateVisibility();
-                return;
-            }
-            this.setState({ isVisible: !this.state.isVisible }, () => {
-                if (this.props.visible === false && (this.state.isVisible === true || this.state.isVisible === false) ) {
-                    this.props.updateVisibility();
-                }
-            });
+            this.props.updateImage();
+            // if (this.props.visible === false && this.state.isVisible === true) {
+            //     this.props.updateVisibility();
+            //     return;
+            // }
+            // this.setState({ isVisible: !this.state.isVisible }, () => {
+            //     if (this.props.visible === false && (this.state.isVisible === true || this.state.isVisible === false) ) {
+            //         this.props.updateVisibility();
+            //     }
+            // });
         }
     }
 
@@ -84,6 +84,7 @@ class TreeDetection extends Component {
     }
 
     render() {
+        //console.log(this.props);
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         let selectionColor;
@@ -92,7 +93,7 @@ class TreeDetection extends Component {
             textColor = detectionStyle.VALID_COLOR;
         } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
             textColor = detectionStyle.INVALID_COLOR;
-        } else if (!this.props.visible || !this.state.isVisible){
+        } else if (!this.props.detection.visible){
             textColor = 'gray';
         }
         if (this.props.detection.selected) {
@@ -104,7 +105,7 @@ class TreeDetection extends Component {
             colorSelection = true;
         }
         // We only display an open eye if both algorithm and detection are visible.
-        if (this.props.visible === true && this.state.isVisible === true) {
+        if (this.props.detection.visible === true) {
             return (
                 <div id="container" onClick={this.setSelected} style={colorSelection ?
                     {...this.state.containerStyle,

@@ -757,6 +757,7 @@ class App extends Component {
         }
       }
       for(var j = 0; j < detectionList.length; j++) {
+        if (detectionList[j].visible !== true) continue;
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
         if (color === constants.detectionStyle.SELECTED_COLOR && j > 0) {
@@ -909,7 +910,11 @@ class App extends Component {
             for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
               myDetectionSet.clearSelection();
             }
-            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);
+            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);            
+            if (detectionSet.getDataFromSelectedDetection().visible === false) {
+              detectionSet.getDataFromSelectedDetection().selected= false;
+              return;
+            }
             this.setState({ displayButtons: anyDetection }, () => {
               this.renderButtons(e);
             });
@@ -933,7 +938,12 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
+    
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
+      return;
+    }
+    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
+      console.log("returning")
       return;
     }
     var leftAcceptBtn = 0;

@@ -19,6 +19,7 @@ class SideMenu extends Component {
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
         this.setVisibilityData = this.setVisibilityData.bind(this);
+        this.updateImage = this.updateImage.bind(this);
     }
 
     static propTypes = {
@@ -46,10 +47,14 @@ class SideMenu extends Component {
             } else if (key !== algorithm && bool === true) {
                 detectionSet.anotherSelected = false;
             }
-        } 
+        }
         this.forceUpdate(() => {
             this.props.appUpdateImage();
         });
+    }
+
+    updateImage() {
+        this.props.appUpdateImage();
     }
 
     /**
@@ -144,6 +149,7 @@ class SideMenu extends Component {
                                         updateSelectedDetection={this.updateSelectedDetection}
                                         configurationInfo={this.props.configurationInfo} 
                                         setVisibilityData={this.setVisibilityData}
+                                        updateImage={this.updateImage}
                                     />
                                 )
                             })} 

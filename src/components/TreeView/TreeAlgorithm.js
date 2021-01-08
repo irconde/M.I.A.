@@ -50,7 +50,8 @@ class TreeAlgorithm extends Component {
         updateSelected: PropTypes.func.isRequired,
         setVisibilityData: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
-        myKey: PropTypes.number.isRequired
+        myKey: PropTypes.number.isRequired,
+        updateImage: PropTypes.func.isRequired
     }
 
     /**
@@ -89,6 +90,7 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     updateVisibility(){
+        console.log("update vis")
         this.props.setVisibilityData(this.props.algorithm.algorithm, this.props.algorithm.visibility);
     }
 
@@ -185,7 +187,7 @@ class TreeAlgorithm extends Component {
                                 <TreeDetection
                                     detection={value}
                                     visible={this.props.algorithm.visibility}
-                                    updateVisibility={this.updateVisibility}
+                                    updateImage={this.props.updateImage}
                                     detectionColor={detectionColor}
                                     key={index}
                                     updateSelectedDetection={this.updateSelectedDetection}
@@ -213,7 +215,7 @@ class TreeAlgorithm extends Component {
                                 <TreeDetection
                                     detection={value}
                                     visible={this.props.algorithm.visibility}
-                                    updateVisibility={this.updateVisibility}
+                                    updateImage={this.props.updateImage}
                                     detectionColor={detectionColor}
                                     key={index}
                                     updateSelectedDetection={this.updateSelectedDetection}
