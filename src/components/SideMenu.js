@@ -48,6 +48,7 @@ class SideMenu extends Component {
                     detectionSet.anotherSelected = false;
                     detectionSet.selectAlgorithm(false);
                 }
+                detectionSet.setDetectionVisibility(detectionSet.visibility);
             } else if (key !== algorithm && bool === true) {
                 detectionSet.anotherSelected = false;
             }
@@ -154,6 +155,7 @@ class SideMenu extends Component {
                                         configurationInfo={this.props.configurationInfo} 
                                         setVisibilityData={this.setVisibilityData}
                                         updateImage={this.updateImage}
+                                        hideButtons={this.props.hideButtons}
                                     />
                                 )
                             })} 

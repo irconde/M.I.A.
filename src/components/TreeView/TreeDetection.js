@@ -44,6 +44,7 @@ class TreeDetection extends Component {
         visible: PropTypes.bool.isRequired,
         updateImage: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
+        hideButtons: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired
     }
 
@@ -57,6 +58,9 @@ class TreeDetection extends Component {
     setVisible(e){
         if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
             this.props.detection.visible = !this.props.detection.visible;
+            if (this.props.detection.visible === false) {
+                this.props.hideButtons(e);
+            }
             this.props.updateImage();
         }
     }

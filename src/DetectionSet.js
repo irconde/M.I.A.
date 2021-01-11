@@ -149,7 +149,6 @@ export default class DetectionSet {
    * @param {Boolean} bool 
    */
   setDetectionVisibility(bool) {
-    console.log(`Setting all detections visible to : ${bool}`)
     if (this.data.top !== undefined) {
       for (let i = 0; i < this.data.top.length; i++) {
         this.data.top[i].visible = bool;
