@@ -1,4 +1,5 @@
 import * as constants from "./Constants";
+import Detection from "./Detection";
 
 /**
  * Class that represents a set of detections returned by an object detection algorithm
@@ -9,7 +10,8 @@ export default class DetectionSet {
     this.algorithm = "";
     this.selected = false;
     this.selectedViewport = 0;
-    this.selectedDetection = constants.selection.NO_SELECTION;
+    this.selectedDetectionIndex = constants.selection.NO_SELECTION;
+    this.selectedDetection = undefined;
     this.visible = true;
     this.data = {};
     this.anotherSelected = false;
@@ -42,15 +44,7 @@ export default class DetectionSet {
    * @return {type}  Detection object
    */
   getDataFromSelectedDetection() {
-    let view = this.selectedViewport;
-    if (this.selectedViewport === undefined) {
-      view = constants.viewport.TOP;
-    }
-    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
-      return this.data[view][this.selectedDetection];
-    } else {
-      return undefined;
-    }
+    return this.selectedDetection;
   }
 
   /**
@@ -61,16 +55,10 @@ export default class DetectionSet {
    * @return {type}           None
    */
   validateSelectedDetection(feedback) {
-    let view = this.selectedViewport;
-    if (view === undefined || view === 0) {
-      view = constants.viewport.TOP;
+    if (this.selectedDetection !== undefined) {
+      this.selectedDetection.validate(feedback);
+      this.clearSelection();
     }
-    if (this.selectedDetection === -1) {
-      return;
-    }
-    this.data[view][this.selectedDetection].validate(feedback);
-    this.clearSelection();
-    
   }
 
   /**
@@ -79,11 +67,30 @@ export default class DetectionSet {
    * @return {type}  None
    */
   clearSelection() {
-    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
-      this.getData(this.selectedViewport)[this.selectedDetection].setSelected(false);
-    }
+    if (this.selectedDetection != undefined) this.selectedDetection.setSelected(false);
+    this.selected = false;
     this.selectedViewport = undefined;
-    this.selectedDetection = constants.selection.NO_SELECTION;
+    this.selectedDetectionIndex = constants.selection.NO_SELECTION;
+    this.selectedDetection = undefined;
+    this.anotherSelected = false;
+  }
+
+  /**
+   * clearAll - Method that resets selection.
+   *
+   * @return {type}  None
+   */
+  clearAll() {
+    this.selected = false;
+    this.selectedViewport = undefined;
+    this.selectedDetection = undefined;
+    this.anotherSelected = false;
+    this.selectedDetectionIndex = constants.selection.NO_SELECTION;
+    for (let [key, detectionList] of Object.entries(this.data)) {
+      for (let detection of detectionList) {
+        detection.setSelected(false);
+      }
+    }
   }
 
   /**
@@ -98,16 +105,15 @@ export default class DetectionSet {
     if (viewport !== undefined) {
       view = viewport;
     }
-    if (this.selectedDetection !== constants.selection.NO_SELECTION) {
-      this.data[view][this.selectedDetection].setSelected(false);
-    }
-    if (this.selectedViewport === viewport  && this.selectedDetection === detectionIndex) {
+    if (this.selectedDetection !== undefined) this.selectedDetection.setSelected(false);
+    if (this.selectedViewport === viewport  && this.selectedDetectionIndex === detectionIndex) {
       this.selectedViewport = undefined;
-      this.selectedDetection = constants.selection.NO_SELECTION;
+      this.selectedDetectionIndex = constants.selection.NO_SELECTION;
       return false;
     } else {
       this.data[view][detectionIndex].setSelected(true);
-      this.selectedDetection = detectionIndex;
+      this.selectedDetection = this.data[view][detectionIndex];
+      this.selectedDetectionIndex = detectionIndex;
       this.selectedViewport = viewport;
       return true;
     }
@@ -120,7 +126,7 @@ export default class DetectionSet {
    * @param  {type} view  string value that indicates the viewport where the detection is rendered
    * @return {type} None
    */
-  addDetection(detection, view) {
+  addDetection(detection: Detection, view) {
     let viewport = constants.viewport.TOP;
     if (view !== undefined) {
       viewport = view
@@ -173,6 +179,7 @@ export default class DetectionSet {
         this.data.side[i].selected = bool;
       }
     }
+    this.selectedDetection = undefined;
   }
 
   /**

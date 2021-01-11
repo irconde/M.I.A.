@@ -23,6 +23,7 @@ import DetectionSet from "./DetectionSet";
 import Selection from "./Selection";
 import NoFileSign from "./components/NoFileSign";
 import * as constants from './Constants';
+import PropTypes from "prop-types";
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -105,7 +106,8 @@ class App extends Component {
     this.hideButtons = this.hideButtons.bind(this);
     this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
     this.appUpdateImage = this.appUpdateImage.bind(this);
-    this.appUpdateButtons = this.appUpdateButtons.bind(this);
+    this.onDetectionSelected = this.onDetectionSelected.bind(this);
+    this.onAlgorithmSelected = this.onAlgorithmSelected.bind(this);
   }
 
   /**
@@ -570,7 +572,7 @@ class App extends Component {
     });
     reader.readAsArrayBuffer(imagesLeft[0]);
     
-    for(var i=0; i<imagesLeft.length;i++){
+    for(let i=0; i<imagesLeft.length;i++){
       const readFile = new FileReader();
       readFile.addEventListener("loadend", function() {
         const view = new Uint8Array(readFile.result);
@@ -603,7 +605,7 @@ class App extends Component {
         // objects in a DetectionSet object
         for (var j = 0; j < threatsCount; j++) {
           const boundingBoxCoords = Dicos.retrieveBoundingBoxData(threatSequence.items[j]);
-          const objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
+          let objectClass = Dicos.retrieveObjectClass(threatSequence.items[j]);
           const confidenceLevel = Utils.decimalToPercentage(Dicos.retrieveConfidenceLevel(threatSequence.items[j]));
           const maskData = Dicos.retrieveMaskData(threatSequence.items[j], image);
           self.state.detections[algorithmName].addDetection(new Detection(boundingBoxCoords, maskData, objectClass, confidenceLevel, false, algorithmName, constants.viewport.TOP));
@@ -688,8 +690,7 @@ class App extends Component {
 
   /**
    * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
-   * 
-   * @param  {none} None
+   *
    * @return {none} None
    */
   appUpdateImage(){
@@ -699,8 +700,31 @@ class App extends Component {
     }
   }
 
-  appUpdateButtons(e) {
-    this.renderButtons(e);
+  /**
+   * onAlgorithmSelected - It updates detection sets' visualization
+   *
+   * @return {none} None
+   * @param selected {boolean} - Indicates whether the algorithm was selected or not
+   * @param algorithm {string} - Algorithm's name
+   */
+  onAlgorithmSelected(selected, algorithm) {
+    this.setState({ displayButtons: false}, () => {
+      this.appUpdateImage();
+    });
+  }
+
+  /**
+   * onDetectioSeleted - It updates validation button visualization.
+   *
+   * @return {none} None
+   * @param detection {Detection} - detection-related data used as reference for buttons' location
+   */
+  onDetectionSelected(detection:Detection) {
+    this.state.detections[detection.algorithm].selectedDetection = detection;
+    const viewportInfo = Utils.getDataFromViewport(detection.view, document);
+    this.setState({ displayButtons: true }, () => {
+      this.renderButtonsFromRef(viewportInfo, detection);
+    });
   }
 
   /**
@@ -743,14 +767,16 @@ class App extends Component {
     if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
       return;
     }
+    const B_BOX_COORDS = 4;
+    let detectionList;
+    context.font = constants.detectionStyle.LABEL_FONT;
+    context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+
     for (const [key, detectionSet] of Object.entries(data)) {
-      
       if (detectionSet.visibility !== true) {
         continue;
       }
-      let B_BOX_COORDS = 4;
-      // TODO. Note that in this version we get the detections of the top view only.
-      let detectionList = detectionSet.getData();
+      detectionList = detectionSet.getData();
       if(context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false){
         detectionList = detectionSet.getData(constants.viewport.SIDE);
       }
@@ -761,7 +787,7 @@ class App extends Component {
           return;
         }
       }
-      for(var j = 0; j < detectionList.length; j++) {
+      for(let j = 0; j < detectionList.length; j++) {
         if (detectionList[j].visible !== true) continue;
         const boundingBoxCoords = detectionList[j].boundingBox;
         let color = detectionList[j].getRenderColor();
@@ -775,59 +801,27 @@ class App extends Component {
           let rgbColor = Utils.hexToRgb(color);
           color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
         }
-        context.font = constants.detectionStyle.LABEL_FONT;
         context.strokeStyle = color;
         context.fillStyle = color;
-        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
         const boundingBoxWidth = Math.abs(boundingBoxCoords[2] - boundingBoxCoords[0]);
         const boundingBoxHeight = Math.abs(boundingBoxCoords[3] - boundingBoxCoords[1]);
         const detectionLabel = Utils.formatDetectionLabel(detectionList[j].class, detectionList[j].confidence);
         const labelSize = Utils.getTextLabelSize(context, detectionLabel, constants.detectionStyle.LABEL_PADDING);
-        context.fillStyle = color;
-        context.strokeStyle = color;
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1], boundingBoxWidth, boundingBoxHeight);
+
+        // Mask rendering
+        this.renderDetectionMasks(detectionList[j].maskBitmap, context)
+
+        // Line rendering
+        if (detectionList[j].selected && this.state.displayButtons === true) {
+          this.renderLinesFromRect(detectionList[j], context);
+        }
+
         // Label rendering
         context.fillRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
         context.strokeRect(boundingBoxCoords[0], boundingBoxCoords[1] - labelSize["height"], labelSize["width"], labelSize["height"]);
         context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
         context.fillText(detectionLabel, boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING, boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING);
-        // Mask rendering
-        this.renderDetectionMasks(detectionList[j].maskBitmap, context)
-
-        // Line rendering
-        if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP && context.canvas.offsetParent.id === 'dicomImageLeft') {
-          const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelTop;
-          context.beginPath();
-          // Staring point (10,45)
-          context.moveTo(boundingBoxCoords[2], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
-          // End point (180,47)
-          context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] + buttonGap);
-          // Make the line visible
-          context.stroke();
-          context.beginPath();
-          // Staring point (10,45)
-          context.moveTo(boundingBoxCoords[2] - constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
-          // End point (180,47)
-          context.lineTo(boundingBoxCoords[2] + constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop, boundingBoxCoords[1] - buttonGap);
-          // Make the line visible
-          context.stroke();
-        } else if (detectionList[j].selected === true && data[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && context.canvas.offsetParent.id === 'dicomImageRight' && this.state.singleViewport === false) {
-          const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / this.state.zoomLevelSide;
-          context.beginPath();
-          // Staring point (299, 301)
-          context.moveTo(boundingBoxCoords[0], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP/2);
-          // End point (180,47)
-          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] + buttonGap);
-          // Make the line visible
-          context.stroke();
-          context.beginPath();
-          // Staring point (10,45)
-          context.moveTo(boundingBoxCoords[0] + constants.buttonStyle.LINE_GAP/2, boundingBoxCoords[1]);
-          // End point (180,47)
-          context.lineTo(boundingBoxCoords[0] - constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelSide, boundingBoxCoords[1] - buttonGap);
-          // Make the line visible
-          context.stroke();
-        }        
       }
     }
   };
@@ -862,14 +856,13 @@ class App extends Component {
     }
     for (let z = 0; z < this.currentSelection.availableAlgorithms.length; z++) {
       this.currentSelection.detectionSetIndex = z;
-      var clickedPos = constants.selection.NO_SELECTION;
+      let clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
       // User is submitting feedback through confirm or reject buttons
       if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
         if(e.currentTarget.id === "confirm"){ feedback = true; }
         if(e.currentTarget.id === "reject"){ feedback = false; }
-        
         detectionSet.validateSelectedDetection(feedback);
         if(this.validationCompleted()){
           this.setState({
@@ -886,7 +879,6 @@ class App extends Component {
       // Handle regular click events for selecting and deselecting detections
       else{
         const mousePos = cornerstone.canvasToPixel(e.target, {x:e.detail.currentPoints.canvas.x, y:e.detail.currentPoints.canvas.y});
-
         let detectionSetData = detectionSet.getData();
         let viewport = constants.viewport.TOP;
         if(e.detail.element.id === 'dicomImageRight' && this.state.singleViewport === false){
@@ -905,7 +897,6 @@ class App extends Component {
         }
         // Click on an empty area
         if(clickedPos === constants.selection.NO_SELECTION) {
-          //detectionSet.clearSelection();
           detectionSet.selectAlgorithm(false);
           detectionSet.selected = false;
           detectionSet.anotherSelected = false;
@@ -914,14 +905,11 @@ class App extends Component {
           });
         }
         else {
-          if((this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.TOP &&
-              e.detail.element.id === 'dicomImageRight') || (this.state.detections[this.currentSelection.getAlgorithm()].selectedViewport === constants.viewport.SIDE && e.detail.element.id === 'dicomImageLeft')){
-            detectionSet.clearSelection();
+          detectionSet.selectAlgorithm(false);
+          for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
+            myDetectionSet.clearAll();
           }
           if (detectionSet.visibility !== false) {
-            for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
-              myDetectionSet.clearSelection();
-            }
             let anyDetection = detectionSet.selectDetection(clickedPos, viewport);            
             if (detectionSet.getDataFromSelectedDetection().visible === false) {
               detectionSet.getDataFromSelectedDetection().selected= false;
@@ -941,93 +929,35 @@ class App extends Component {
 
 
   /**
-   * renderButtons - Function that handles the logic behind whether or not to display
-   * the feedback buttons and where to display those buttons depending on the current
-   * zoom level in the window
+   * renderButtonsFromRef - Function that display validations buttons depending on the current
+   * zoom level in the window and the given reference rectangle
    *
-   * @param  {type} e Event data passed from the onMouseClick function,
-   * such as the mouse cursor position, mouse button clicked, etc.
-   * @return {type}   None
+   * @param  {dictionary} viewportInfo - It provides information about the current viewport and its offset
+   * @return {Detection} detectionData - Detection object that represents the reference used for button rendering
    */
-  renderButtons(e) {
-    if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
-      return;
-    }
-    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
-      return;
-    }
-    var leftAcceptBtn = 0;
-    var topAcceptBtn = 0;
-    var topRejectBtn = 0;
-    if(e.detail !== null){
-      if ((e.target.id === "top-span" || e.target.id === "side-span" || e.target.id === "top-container" || e.target.id === "side-container")) {
-        this.state.displayButtons = true;
-        // console.log(this.currentSelection);
-        // console.log(this.currentSelection.getAlgorithm());
-        // console.log(e.target.id);
-        // console.log(e.detail);
-        // console.log(this.state.detections)
-        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData());
-        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm);
-        // console.log(this.state.detections[this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm]); 
-        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData().length - 1);
-        // console.log(this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].view)
-        // this.state.detections[this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].algorithm].selectDetection(this.state.detections[this.currentSelection.getAlgorithm()].getData().length - 1, this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].view);       
-      }
+  renderButtonsFromRef(viewportInfo, detectionData) {
+    let leftAcceptBtn, topAcceptBtn, topRejectBtn = 0 ;
+    if(viewportInfo.viewport !== null){
       if(this.state.displayButtons !== false){
-        let coordsAcceptBtn;
-        let coordsRejectBtn;
-        let buttonGap;
-        let viewportOffset;
-        if (e.detail.element !== undefined) {
-          if(e.detail.element.id === 'dicomImageLeft'){
-            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
-            viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;
-            let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
-            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-            console.log(detectionData);
-            if (detectionData === undefined) return;
-            const boundingBoxCoords = detectionData.boundingBox;
-            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]-buttonGap});
-            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]+buttonGap/2});
-          }
-
-          if (e.detail.element.id === 'dicomImageRight') {
-            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
-            viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
-            let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
-            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-            console.log(detectionData);
-            if (detectionData === undefined) return;
-            const boundingBoxCoords = detectionData.boundingBox;
-            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
-            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
-          }
+        let coordsAcceptBtn, coordsRejectBtn, zoomLevel, margin, buttonGap, btnOriginCoordX, btnOriginGap, viewport;
+        if (viewportInfo.viewport === constants.viewport.TOP) {
+          zoomLevel = this.state.zoomLevelTop;
+          margin = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
+          btnOriginCoordX = 2;
+          btnOriginGap = margin + viewportInfo.offset / this.state.zoomLevelTop;
+          viewport = this.state.imageViewportTop;
         } else {
-          if (e.target.id === "top-span" || e.target.id === "top-container") {
-            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelTop;
-            viewportOffset = e.target.offsetLeft / this.state.zoomLevelTop;
-            let marginLeft = constants.buttonStyle.MARGIN_LEFT / this.state.zoomLevelTop;
-            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-            console.log(detectionData);
-            if (detectionData === undefined) return;
-            const boundingBoxCoords = detectionData.boundingBox;
-            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]-buttonGap});
-            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportTop, {x:boundingBoxCoords[2] + marginLeft + viewportOffset, y:boundingBoxCoords[1]+buttonGap/2});
-          }
-
-          if (e.target.id === "side-span" || e.target.id === "side-container") {
-            buttonGap = constants.buttonStyle.GAP / this.state.zoomLevelSide;
-            viewportOffset = e.target.offsetLeft / this.state.zoomLevelSide;
-            let marginRight = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
-            const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-            console.log(detectionData);
-            if (detectionData === undefined) return;
-            const boundingBoxCoords = detectionData.boundingBox;
-            coordsAcceptBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]-buttonGap});
-            coordsRejectBtn =  cornerstone.pixelToCanvas(this.state.imageViewportSide, {x:(boundingBoxCoords[0] + viewportOffset) - marginRight, y:boundingBoxCoords[1]+buttonGap/2});
-          }
+          zoomLevel = this.state.zoomLevelSide;
+          margin = constants.buttonStyle.MARGIN_RIGHT / this.state.zoomLevelSide;
+          btnOriginCoordX = 0;
+          btnOriginGap = viewportInfo.offset / this.state.zoomLevelSide - margin;
+          viewport = this.state.imageViewportSide;
         }
+        buttonGap = constants.buttonStyle.GAP / zoomLevel;
+        if (detectionData === undefined) return;
+        const boundingBoxCoords = detectionData.boundingBox;
+        coordsAcceptBtn =  cornerstone.pixelToCanvas(viewport, {x:boundingBoxCoords[btnOriginCoordX] + btnOriginGap, y:boundingBoxCoords[1] - buttonGap});
+        coordsRejectBtn =  cornerstone.pixelToCanvas(viewport, {x:boundingBoxCoords[btnOriginCoordX] + btnOriginGap, y:boundingBoxCoords[1] + buttonGap/2});
         leftAcceptBtn = coordsAcceptBtn.x;
         topAcceptBtn = coordsAcceptBtn.y;
         topRejectBtn = coordsRejectBtn.y;
@@ -1050,6 +980,66 @@ class App extends Component {
       this.appUpdateImage();
     })
   }
+
+
+  /**
+   * renderButtons - Function that handles the logic behind whether or not to display
+   * the feedback buttons and where to display those buttons depending on the current
+   * zoom level in the window
+   *
+   * @param  {type} e Event data passed from the onMouseClick function,
+   * such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}   None
+   */
+  renderButtons(e) {
+    if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
+      return;
+    }
+    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
+      return;
+    }
+    const viewportInfo = Utils.eventToViewportInfo(e)
+    const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+    this.renderButtonsFromRef(viewportInfo, detectionData);
+  }
+
+
+  /**
+   * renderLinesFromRect - render lines than link validation buttons to the bounding box of the selected detection
+   *
+   * @return {type}   None
+   * @param detectionData - Detection object that represents the selected detection. Its bounding box is use as reference
+   * to calculate lines' end points
+   * @param context - canvas' rendering context
+   */
+  renderLinesFromRect(detectionData:Detection, context) {
+    let zoomLevel;
+    let bboxCoordXIndex;
+    let factor = 1;
+    const boundingBoxCoords = detectionData.boundingBox;
+    if (detectionData.view === "top") {
+      zoomLevel = this.state.zoomLevelTop;
+      bboxCoordXIndex = 2;
+    } else {
+      zoomLevel = this.state.zoomLevelSide;
+      bboxCoordXIndex = 0;
+      factor = -1;
+    }
+    const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / zoomLevel;
+    context.beginPath();
+    context.moveTo(boundingBoxCoords[bboxCoordXIndex], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
+    context.lineTo(
+        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
+        boundingBoxCoords[1] + buttonGap);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(boundingBoxCoords[bboxCoordXIndex] - factor * constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
+    context.lineTo(
+        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
+        boundingBoxCoords[1] - buttonGap);
+    context.stroke();
+  }
+
 
   render() {
     return (
@@ -1078,11 +1068,12 @@ class App extends Component {
             isConnected={this.state.isConnected}
           />
           <SideMenu 
-            detections={this.state.detections} 
-            configurationInfo={this.state.configurationInfo} 
+            detections={this.state.detections}
+            configurationInfo={this.state.configurationInfo}
             enableMenu={this.state.fileInQueue} 
             appUpdateImage={this.appUpdateImage}
-            appUpdateButtons={this.appUpdateButtons}
+            onAlgorithmSelected={this.onAlgorithmSelected}
+            onDetectionSelected={this.onDetectionSelected}
             hideButtons={this.hideButtons}
             renderButtons={this.onMouseClicked}
           />

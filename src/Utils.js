@@ -1,6 +1,8 @@
 /**
  * Class that encompasses any secondary method to support the primary features of the client
  */
+import * as constants from "./Constants";
+
 export default class Utils {
 
   /**
@@ -27,7 +29,6 @@ export default class Utils {
       b: parseInt(result[3], 16)
     } : null;
   }
-  
 
   /**
    * @static formatDetectionLabel - Method that creates a string to be used as
@@ -56,7 +57,6 @@ export default class Utils {
     return {'width': textSize.width + 2 * padding, 'height': lineHeight + 2 * padding};
   }
 
-
   /**
    * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
    *
@@ -69,6 +69,22 @@ export default class Utils {
   }
 
   /**
+   * @static rectAreEquals - Method that indicates whether the two given rectangles are the equals or not
+   *
+   * @return {boolean} boolean value: true if the corner points of the two rectangles have the same coordinates. False, otherwise.
+   * @param {array} rectA rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+   * @param {array} rectB rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+   */
+  static rectAreEquals(rectA , rectB) {
+    for (let index = 0; index < rectA.length; index++) {
+      if (rectA[index] !== rectB[index]){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * b64toBlob - Converts binary64 encoding to a blob to display
    *
    * @param  {type} b64Data Binary string
@@ -78,19 +94,15 @@ export default class Utils {
   static b64toBlob = (b64Data, contentType='', sliceSize=512) => {
     const byteCharacters = atob(b64Data);
     const byteArrays = [];
-
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
       const slice = byteCharacters.slice(offset, offset + sliceSize);
-
       const byteNumbers = new Array(slice.length);
       for (let i = 0; i < slice.length; i++) {
         byteNumbers[i] = slice.charCodeAt(i);
       }
-
       const byteArray = new Uint8Array(byteNumbers);
       byteArrays.push(byteArray);
     }
-
     const blob = new Blob(byteArrays, {type: contentType});
     return blob;
   };
@@ -102,52 +114,13 @@ export default class Utils {
    * @return {type} ArrayBuffer
    */
   static base64ToArrayBuffer(base64) {
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
       bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
-  }
-
-  /**
-   * validateRegExp - Takes in the string(path) we are going to test the regular expression(regExp) with
-   *
-   * @param {type} path - What we are testing on
-   * @param {type} regExp - The regular expression
-   *
-   * @return {type} true/false
-   */
-  static validateRegExp(path, regExp){
-    if(regExp.test(path)){
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * getLayerOrder - This function takes in the stack.xml file to learn the order of the
-   *                 DICOS-TDR images. It then returns an array of the order of the stack
-   *                 file, which the first layer is always the pixel data.
-   *
-   * @param {type} stackFile
-   *
-   * @returns {type} array
-   */
-  static getLayerOrder(stackFile){
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(stackFile, 'text/xml');
-    const myStack = xmlDoc.getElementsByTagName('stack');
-    const layerOrder = [];
-    for (const layer of myStack) {
-      const data = layer.getElementsByTagName('layer');
-      for (const image of data){
-        layerOrder.push(image.getAttribute('src'));
-      }
-    }
-    return layerOrder;
   }
 
   static changeViewport(singleViewport){
@@ -183,5 +156,63 @@ export default class Utils {
       verticalDivider.classList.remove("dividerHidden");
       verticalDivider.classList.add("dividerVisible");
     }
+  }
+
+  /**
+   * getDataFromViewport - Get data required for validation buttons' proper rendering
+   *
+   * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
+   * @param viewportName {string} - Viewport's name
+   * @param DOM {Document} - HTML DOM
+   */
+  static getDataFromViewport(viewportName, DOM) {
+    let viewportInfo = {}
+    let viewport = undefined;
+    let offsetLeft = 0;
+    let viewportElement;
+    const viewportId = viewportName === "top" ? 'dicomImageLeft' : viewportName === "side" ? 'dicomImageRight' : undefined;
+    if (viewportId !== undefined) viewportElement = DOM.getElementById(viewportId);
+    if (viewportElement !== undefined) {
+      offsetLeft = viewportElement.offsetLeft;
+      viewport = viewportName === "top" ? constants.viewport.TOP : viewportName === "side" ? constants.viewport.SIDE : undefined;
+    }
+    viewportInfo["viewport"] = viewport;
+    viewportInfo["offset"] = offsetLeft;
+    return viewportInfo;
+  }
+
+
+  /**
+   * eventToViewportInfo - Get data required for validation buttons' proper rendering from mouse event
+   *
+   * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
+   * @param e {MouseEvent} - Mouse event
+   */
+  static eventToViewportInfo(e) {
+    let viewportInfo = {}
+    let viewport = undefined;
+    let offsetLeft = 0;
+    if(e.detail !== null){
+      if (e.detail.element !== undefined) {
+        if(e.detail.element.id === 'dicomImageLeft'){
+          viewport = constants.viewport.TOP;
+          offsetLeft = e.target.offsetLeft;
+        } else if(e.detail.element.id === 'dicomImageRight'){
+          viewport = constants.viewport.SIDE;
+          offsetLeft = e.target.offsetLeft;
+        }
+      } else {
+        if (e.target.id === "top-span" || e.target.id === "top-container") {
+          viewport = constants.viewport.TOP;
+          offsetLeft = e.target.offsetLeft;
+        } else if (e.target.id === "side-span" || e.target.id === "side-container") {
+          viewport = constants.viewport.SIDE;
+          offsetLeft = e.target.offsetLeft;
+        }
+      }
+    }
+    viewportInfo["viewport"] = viewport;
+    viewportInfo["offset"] = offsetLeft;
+    return viewportInfo;
   }
 }

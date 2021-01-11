@@ -26,7 +26,8 @@ class SideMenu extends Component {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
         appUpdateImage: PropTypes.func.isRequired,
-        appUpdateButtons: PropTypes.func.isRequired,
+        onAlgorithmSelected: PropTypes.func.isRequired,
+        onDetectionSelected: PropTypes.func.isRequired,
         hideButtons: PropTypes.func.isRequired,
         renderButtons: PropTypes.func.isRequired
     }
@@ -89,7 +90,7 @@ class SideMenu extends Component {
             }
         }      
         this.forceUpdate(() => {
-            this.props.appUpdateImage();
+            this.props.onAlgorithmSelected(bool, algorithm);
         });
     }
 
@@ -118,8 +119,7 @@ class SideMenu extends Component {
         }
 
         if (detection.selected === false) this.props.hideButtons(e);
-        else this.props.appUpdateButtons(e);
-        this.props.appUpdateImage();     
+        else this.props.onDetectionSelected(detection);
     }
 
     render() {

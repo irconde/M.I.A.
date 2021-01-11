@@ -31,7 +31,7 @@ export const buttonStyle = {
 
 export const detectionStyle = {
   NORMAL_COLOR: colors.BLUE,
-  SELECTED_COLOR: colors.YELLOW,
+  SELECTED_COLOR: colors.BLUE,
   VALID_COLOR: colors.GREEN,
   INVALID_COLOR: colors.RED,
   LABEL_PADDING: 4,
