@@ -5,8 +5,24 @@ import * as constants from './Constants';
 export default class Selection {
 
   constructor() {
-    this.detectionSetIndex = constants.selection.NO_SELECTION;
+    this.currentAlgorithm = constants.selection.NO_SELECTION;
     this.availableAlgorithms = [];
+  }
+
+  selectDetection(algorithm, detectionIndex, view) {
+    if (view === constants.viewport.TOP) {
+      this.availableAlgorithms[algorithm].data.top[detectionIndex].selected = true;
+      this.availableAlgorithms[algorithm].selectedViewport = constants.viewport.TOP;
+      this.availableAlgorithms[algorithm].selectedDetection = this.availableAlgorithms[algorithm].data.top[detectionIndex];
+      this.availableAlgorithms[algorithm].selectedDetectionIndex = detectionIndex;
+      return this.availableAlgorithms[algorithm].data.top[detectionIndex].selected;
+    } else if (view === constants.viewport.SIDE) {
+      this.availableAlgorithms[algorithm].data.side[detectionIndex].selected = true;
+      this.availableAlgorithms[algorithm].selectedViewport = constants.viewport.SIDE;
+      this.availableAlgorithms[algorithm].selectedDetection = this.availableAlgorithms[algorithm].data.side[detectionIndex];
+      this.availableAlgorithms[algorithm].selectedDetectionIndex = detectionIndex;
+      return this.availableAlgorithms[algorithm].data.side[detectionIndex].selected;
+    }
   }
 
   getAlgorithmCount() {
@@ -14,23 +30,29 @@ export default class Selection {
   }
 
   addAlgorithm(algorithm) {
-    this.availableAlgorithms.push(algorithm);
+    if (this.availableAlgorithms.length === 0) this.currentAlgorithm = algorithm.algorithm;
+    this.availableAlgorithms[algorithm.algorithm] = algorithm;
   }
 
-  getAlgorithm() {
-    return this.availableAlgorithms[this.detectionSetIndex];
+  getAlgorithm() {   
+    try {
+      return this.availableAlgorithms[this.currentAlgorithm].algorithm;
+    } catch (e) {
+      return false;
+    }
   }
 
   getAlgorithmForPos(index) {
     return this.availableAlgorithms[index];
   }
 
-  set(detectionSetIndex) {
-    this.detectionSetIndex = detectionSetIndex;
+  set(currentAlgorithm) {
+    this.currentAlgorithm = currentAlgorithm;
   }
 
   clear() {
-    this.detectionSetIndex = constants.selection.FIRST_ELEMENT;
+    this.currentAlgorithm = "";
+    this.availableAlgorithms = [];
   }
 
 }

@@ -94,32 +94,6 @@ export default class DetectionSet {
   }
 
   /**
-   * selectDetection - Method that selects a detection that is referenced by detectionIndex and rendered in the given viewport.
-   *
-   * @param  {type} detectionIndex  int value that indicates the index of the detection to be selected (the position of the detection in the associated array of detections)
-   * @param  {type} viewport  string value that indicates the viewport where the detection is rendered
-   * @return {type}  boolean value that indicates whether there's any detection selected or not
-   */
-  selectDetection(detectionIndex, viewport){
-    let view = constants.viewport.TOP;
-    if (viewport !== undefined) {
-      view = viewport;
-    }
-    if (this.selectedDetection !== undefined) this.selectedDetection.setSelected(false);
-    if (this.selectedViewport === viewport  && this.selectedDetectionIndex === detectionIndex) {
-      this.selectedViewport = undefined;
-      this.selectedDetectionIndex = constants.selection.NO_SELECTION;
-      return false;
-    } else {
-      this.data[view][detectionIndex].setSelected(true);
-      this.selectedDetection = this.data[view][detectionIndex];
-      this.selectedDetectionIndex = detectionIndex;
-      this.selectedViewport = viewport;
-      return true;
-    }
-  }
-
-  /**
    * addDetection - Method that adds a given Detection object to the internal dataset (array of Detection objects).
    *
    * @param  {type} detection  Detection object to be added to the associated array of detections.

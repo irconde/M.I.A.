@@ -224,7 +224,7 @@ class App extends Component {
     let updateImageViewportSide = this.state.imageViewportSide;
     updateImageViewport.style.visibility = 'hidden';
     updateImageViewportSide.style.visibility = 'hidden';
-    this.currentSelection.clear();
+    //this.currentSelection.clear();
     this.setState({
       selectedFile: null,
       displayNext: false,
@@ -293,7 +293,7 @@ class App extends Component {
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;
 
-                this.currentSelection.clear();
+                //this.currentSelection.clear();
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
@@ -359,7 +359,7 @@ class App extends Component {
             for (const [key, detectionSet] of Object.entries(this.state.detections)) {
               if (detectionSet.data.top !== undefined) {
                 for (let j = 0; j < detectionSet.data.top.length; j++){
-                  newOra.file(`data/${stack.view}_threat_detection_${topCounter}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(topCounter-1)], stack.blobData[j+topCounter], Date.now(), !validationCompleted));
+                  newOra.file(`data/${stack.view}_threat_detection_${topCounter}.dcs`, Dicos.dataToBlob(detectionSet, stack.blobData[j+topCounter], Date.now(), !validationCompleted));
                   let newLayer = stackXML.createElement('layer');
                   newLayer.setAttribute('src', `data/${stack.view}_threat_detection_${topCounter}.dcs`);
                   stackElem.appendChild(newLayer);
@@ -372,7 +372,7 @@ class App extends Component {
             for (const [key, detectionSet] of Object.entries(this.state.detections)) {
               if (detectionSet.data.side !== undefined) {
                 for (let j = 0; j < detectionSet.data.side.length; j++){
-                  newOra.file(`data/${stack.view}_threat_detection_${sideCounter}.dcs`, Dicos.dataToBlob(this.state.detections[this.currentSelection.getAlgorithmForPos(sideCounter-1)], stack.blobData[j+sideCounter], Date.now(), !validationCompleted));
+                  newOra.file(`data/${stack.view}_threat_detection_${sideCounter}.dcs`, Dicos.dataToBlob(detectionSet, stack.blobData[j+sideCounter], Date.now(), !validationCompleted));
                   let newLayer = stackXML.createElement('layer');
                   newLayer.setAttribute('src', `data/${stack.view}_threat_detection_${sideCounter}.dcs`);
                   stackElem.appendChild(newLayer);
@@ -511,7 +511,7 @@ class App extends Component {
     reader.addEventListener("loadend", function() {
       const view = new Uint8Array(reader.result);
       var image = dicomParser.parseDicom(view);
-      self.currentSelection.clear();
+      self.currentSelection = new Selection();
       self.setState({
         threatsCount: image.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag),
         algorithm: image.string(Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag),
@@ -540,7 +540,7 @@ class App extends Component {
           self.state.detections[algorithmName] = new DetectionSet();
           self.state.detections[algorithmName].setAlgorithmName(algorithmName);
           self.state.detections[algorithmName].visibility = true;
-          self.currentSelection.addAlgorithm(algorithmName);
+          self.currentSelection.addAlgorithm(self.state.detections[algorithmName]);
         }
         // Threat Sequence information
         const threatSequence = image.elements.x40101011;
@@ -581,7 +581,7 @@ class App extends Component {
           if (!(algorithmName in self.state.detections)) {
             self.state.detections[algorithmName] = new DetectionSet();
             self.state.detections[algorithmName].setAlgorithmName(algorithmName);
-            self.currentSelection.addAlgorithm(algorithmName);
+            self.currentSelection.addAlgorithm(self.state.detections[algorithmName]);
           }
 
           self.state.detections[algorithmName].data[constants.viewport.SIDE] = [];
@@ -661,7 +661,7 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-    if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined){
+    if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined || this.currentSelection.getAlgorithm() === false){
       return;
     }
     const B_BOX_COORDS = 4;
@@ -797,11 +797,10 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    for (let z = 0; z < this.currentSelection.availableAlgorithms.length; z++) {
-      this.currentSelection.detectionSetIndex = z;
+    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+      this.currentSelection.set(key);
       let clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
-      let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
       // User is submitting feedback through confirm or reject buttons
       if(e.currentTarget.id === "confirm" || e.currentTarget.id === "reject"){
         if(e.currentTarget.id === "confirm"){ feedback = true; }
@@ -853,9 +852,9 @@ class App extends Component {
             myDetectionSet.clearAll();
           }
           if (detectionSet.visibility !== false) {
-            let anyDetection = detectionSet.selectDetection(clickedPos, viewport);            
+            let anyDetection = this.currentSelection.selectDetection(detectionSet.algorithm, clickedPos, viewport);            
             if (detectionSet.getDataFromSelectedDetection().visible === false) {
-              detectionSet.getDataFromSelectedDetection().selected= false;
+              detectionSet.getDataFromSelectedDetection().selected = false;
               return;
             }
             this.setState({ displayButtons: anyDetection }, () => {
