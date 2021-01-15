@@ -46,7 +46,6 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
   },
 });
 
-
 class App extends Component {
   /**
    * constructor - All the related elements of the class are initialized:
@@ -95,7 +94,6 @@ class App extends Component {
       socketCommand: socketIOClient(constants.COMMAND_SERVER),
       socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS)
     };
-    this.getAlgorithmForPos = this.getAlgorithmForPos.bind(this);
     this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
     this.sendImageToCommandServer = this.sendImageToCommandServer.bind(this);
     this.nextImageClick = this.nextImageClick.bind(this);
@@ -130,24 +128,25 @@ class App extends Component {
   }
 
   /**
-   * getAlgorithmForPos - Method triggered when there's a click event on the navigation buttons inside the Metadata widget.
-   *                    - It allows users to navigate to the next or previous algorithm
+   * setupCornerstoneJS - CornerstoneJS Tools are initialized
    *
-   * @return {type}  None
+   * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
+   * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
+   * @return {type}               None
    */
-  getAlgorithmForPos(deltaPos) {
-    this.currentSelection.set(this.currentSelection.detectionSetIndex + deltaPos);
-    this.setState({
-      algorithm: this.currentSelection.getAlgorithm()
-    }, () => {
-      // remove button to iterate through algorithms if there are no more after the current one
-      this.setState({ displayButtons: false });
-      this.state.detections[this.currentSelection.getAlgorithm()].clearSelection();
-      this.updateNavigationBtnState();
-      this.displayDICOSimage();
-    });
-  }
-
+  setupCornerstoneJS(imageViewportTop, imageViewportSide) {
+    cornerstone.enable(imageViewportTop);
+    cornerstone.enable(imageViewportSide);
+    const PanTool = cornerstoneTools.PanTool;
+    cornerstoneTools.addTool(PanTool);
+    cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+    const Zoom = cornerstoneTools.ZoomMouseWheelTool;
+    cornerstoneTools.addTool(Zoom);
+    cornerstoneTools.setToolActive("ZoomMouseWheel", {});
+    const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
+    cornerstoneTools.addTool(ZoomTouchPinchTool);
+    cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+  };
 
   /**
    * getFilesFromCommandServer - Socket Listener to get files from command server then send them
@@ -193,6 +192,25 @@ class App extends Component {
     })
   }
 
+  /**
+   * sendImageToFileServer - Socket IO to send an image to the file server
+   * @param {type} - file - which file we are sending
+   * @return {type} - None
+   */
+  async sendImageToFileServer(file){
+    this.setState({ isDownload: true });
+    this.state.socketFS.binary(true).emit("fileFromClient", file);
+  }
+
+  /**
+   * sendImageToCommandServer - Socket IO to send a file to the server
+   * @param {type} - file - which file we are sending
+   * @return {type} - None
+   */
+  async sendImageToCommandServer(file){
+    this.setState({ isUpload: true });
+    this.state.socketCommand.binary(true).emit("fileFromClient", file);
+  }
 
   /**
    * onNoImageLeft - Method invoked when there isn't any file in the file queue.
@@ -303,41 +321,6 @@ class App extends Component {
 
   }
 
-
-  /**
-   * * updateNavigationBtnState - Method that enables/disables the buttons for
-   *  navigating through the several algorithms
-   *
-   * @param  - None
-   * @return - None
-   */
-  updateNavigationBtnState() {
-    const algorithmCount = this.currentSelection.getAlgorithmCount();
-    const currentAlgorithmIndex = this.currentSelection.detectionSetIndex;
-    this.setState({
-      nextAlgBtnEnabled: (currentAlgorithmIndex < (algorithmCount - 1)),
-      prevAlgBtnEnabled: currentAlgorithmIndex > 0,
-    })
-  }
-
-  /**
-   * * validationCompleted - Method that indicates is the operator has finished validating detections
-   *
-   * @param  {type} validationList array sized with the number of detections. Every position
-   * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
-   * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
-   */
-  validationCompleted() {
-    let result = true;
-    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-      if (detectionSet.isValidated() === false) {
-        result = false;
-        break;
-      }
-    }
-    return result;
-  }
-
   /**
    * nextImageClick() - When the operator taps next, we send to the file server to remove the
    *                  - current image, then when that is complete, we send the image to the command
@@ -425,49 +408,23 @@ class App extends Component {
     })
   }
 
-
   /**
-   * sendImageToFileServer - Socket IO to send an image to the file server
-   * @param {type} - file - which file we are sending
-   * @return {type} - None
-   */
-  async sendImageToFileServer(file){
-    this.setState({ isDownload: true });
-    this.state.socketFS.binary(true).emit("fileFromClient", file);
-  }
-
-
-  /**
-   * sendImageToCommandServer - Socket IO to send a file to the server
-   * @param {type} - file - which file we are sending
-   * @return {type} - None
-   */
-  async sendImageToCommandServer(file){
-    this.setState({ isUpload: true });
-    this.state.socketCommand.binary(true).emit("fileFromClient", file);
-  }
-
-  /**
-   * setupCornerstoneJS - CornerstoneJS Tools are initialized
+   * * validationCompleted - Method that indicates is the operator has finished validating detections
    *
-   * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
-   * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
-   * @return {type}               None
+   * @param  {type} validationList array sized with the number of detections. Every position
+   * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
+   * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
    */
-  setupCornerstoneJS(imageViewportTop, imageViewportSide) {
-    cornerstone.enable(imageViewportTop);
-    cornerstone.enable(imageViewportSide);
-    const PanTool = cornerstoneTools.PanTool;
-    cornerstoneTools.addTool(PanTool);
-    cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
-    const Zoom = cornerstoneTools.ZoomMouseWheelTool;
-    cornerstoneTools.addTool(Zoom);
-    cornerstoneTools.setToolActive("ZoomMouseWheel", {});
-    const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
-    cornerstoneTools.addTool(ZoomTouchPinchTool);
-    cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-  };
-
+  validationCompleted() {
+    let result = true;
+    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+      if (detectionSet.isValidated() === false) {
+        result = false;
+        break;
+      }
+    }
+    return result;
+  }
 
   /**
    * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
@@ -550,7 +507,6 @@ class App extends Component {
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-
     const reader = new FileReader();
     reader.addEventListener("loadend", function() {
       const view = new Uint8Array(reader.result);
@@ -570,8 +526,7 @@ class App extends Component {
         }
       });
     });
-    reader.readAsArrayBuffer(imagesLeft[0]);
-    
+    reader.readAsArrayBuffer(imagesLeft[0]);    
     for(let i=0; i<imagesLeft.length;i++){
       const readFile = new FileReader();
       readFile.addEventListener("loadend", function() {
@@ -586,7 +541,6 @@ class App extends Component {
           self.state.detections[algorithmName].setAlgorithmName(algorithmName);
           self.state.detections[algorithmName].visibility = true;
           self.currentSelection.addAlgorithm(algorithmName);
-          self.updateNavigationBtnState();
         }
         // Threat Sequence information
         const threatSequence = image.elements.x40101011;
@@ -628,7 +582,6 @@ class App extends Component {
             self.state.detections[algorithmName] = new DetectionSet();
             self.state.detections[algorithmName].setAlgorithmName(algorithmName);
             self.currentSelection.addAlgorithm(algorithmName);
-            self.updateNavigationBtnState();
           }
 
           self.state.detections[algorithmName].data[constants.viewport.SIDE] = [];
@@ -701,62 +654,6 @@ class App extends Component {
   }
 
   /**
-   * onAlgorithmSelected - It updates detection sets' visualization
-   *
-   * @return {none} None
-   * @param selected {boolean} - Indicates whether the algorithm was selected or not
-   * @param algorithm {string} - Algorithm's name
-   */
-  onAlgorithmSelected(selected, algorithm) {
-    this.setState({ displayButtons: false}, () => {
-      this.appUpdateImage();
-    });
-  }
-
-  /**
-   * onDetectioSeleted - It updates validation button visualization.
-   *
-   * @return {none} None
-   * @param detection {Detection} - detection-related data used as reference for buttons' location
-   */
-  onDetectionSelected(detection) {
-    this.state.detections[detection.algorithm].selectedDetection = detection;
-    const viewportInfo = Utils.getDataFromViewport(detection.view, document);
-    this.setState({ displayButtons: true }, () => {
-      this.renderButtonsFromRef(viewportInfo, detection);
-    });
-  }
-
-  /**
-   * renderDetectionMasks - Method that renders the several annotations in a given DICOS+TDR file
-   *
-   * @param  {type} data    DICOS+TDR data
-   * @param  {type} context Rendering context
-   * @return {type}         None
-   */
-  renderDetectionMasks(data, context) {
-    if (data === undefined || data === null || data.length === 0 ) {
-      return;
-    }
-    const baseX = data[1][0];
-    const baseY = data[1][1];
-    const maskWidth = data[2][0];
-    const maskHeight = data[2][1];
-    const pixelData = data[0];
-    context.globalAlpha = 0.5;
-    context.imageSmoothingEnabled = true;
-    for (var y = 0; y < maskHeight; y++)
-      for(var x = 0; x < maskWidth; x++) {
-        if (pixelData[x + y * maskWidth] === 1) {
-          context.fillRect( baseX + x, baseY + y, 1, 1 );
-        }
-      }
-    context.globalAlpha = 1.0;
-    context.imageSmoothingEnabled = false;
-  };
-
-
-  /**
    * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
    *
    * @param  {type} data    DICOS+TDR data
@@ -826,22 +723,68 @@ class App extends Component {
     }
   };
 
+  /**
+   * renderDetectionMasks - Method that renders the several annotations in a given DICOS+TDR file
+   *
+   * @param  {type} data    DICOS+TDR data
+   * @param  {type} context Rendering context
+   * @return {type}         None
+   */
+  renderDetectionMasks(data, context) {
+    if (data === undefined || data === null || data.length === 0 ) {
+      return;
+    }
+    const baseX = data[1][0];
+    const baseY = data[1][1];
+    const maskWidth = data[2][0];
+    const maskHeight = data[2][1];
+    const pixelData = data[0];
+    context.globalAlpha = 0.5;
+    context.imageSmoothingEnabled = true;
+    for (var y = 0; y < maskHeight; y++)
+      for(var x = 0; x < maskWidth; x++) {
+        if (pixelData[x + y * maskWidth] === 1) {
+          context.fillRect( baseX + x, baseY + y, 1, 1 );
+        }
+      }
+    context.globalAlpha = 1.0;
+    context.imageSmoothingEnabled = false;
+  };
 
   /**
-   * hideButtons - Unselect the selected detection and hide the two "feedback" buttons.
+   * renderLinesFromRect - render lines than link validation buttons to the bounding box of the selected detection
    *
-   * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
-   * @return {type}  None
+   * @param {Detection} detectionData - Detection object that represents the selected detection. Its bounding box is use as reference
+   * to calculate lines' end points
+   * @param {Event.eventData.canvasContext} context - canvas' rendering context
+   * @return {type}   None
    */
-  hideButtons(e){
-    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-      detectionSet.clearSelection();
-      detectionSet.selectAlgorithm(false);
+  renderLinesFromRect(detectionData, context) {
+    let zoomLevel;
+    let bboxCoordXIndex;
+    let factor = 1;
+    const boundingBoxCoords = detectionData.boundingBox;
+    if (detectionData.view === "top") {
+      zoomLevel = this.state.zoomLevelTop;
+      bboxCoordXIndex = 2;
+    } else {
+      zoomLevel = this.state.zoomLevelSide;
+      bboxCoordXIndex = 0;
+      factor = -1;
     }
-    this.setState({ displayButtons: false }, () => {
-      this.renderButtons(e);
-    });
-    
+    const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / zoomLevel;
+    context.beginPath();
+    context.moveTo(boundingBoxCoords[bboxCoordXIndex], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
+    context.lineTo(
+        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
+        boundingBoxCoords[1] + buttonGap);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(boundingBoxCoords[bboxCoordXIndex] - factor * constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
+    context.lineTo(
+        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
+        boundingBoxCoords[1] - buttonGap);
+    context.stroke();
   }
 
   /**
@@ -927,6 +870,43 @@ class App extends Component {
     }
   }
 
+  /**
+   * hideButtons - Unselect the selected detection and hide the two "feedback" buttons.
+   *
+   * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}  None
+   */
+  hideButtons(e){
+    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+      detectionSet.clearSelection();
+      detectionSet.selectAlgorithm(false);
+    }
+    this.setState({ displayButtons: false }, () => {
+      this.renderButtons(e);
+    });
+    
+  }
+
+  /**
+   * renderButtons - Function that handles the logic behind whether or not to display
+   * the feedback buttons and where to display those buttons depending on the current
+   * zoom level in the window
+   *
+   * @param  {Event} e Event data passed from the onMouseClick function,
+   * such as the mouse cursor position, mouse button clicked, etc.
+   * @return {type}   None
+   */
+  renderButtons(e) {
+    if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
+      return;
+    }
+    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
+      return;
+    }
+    const viewportInfo = Utils.eventToViewportInfo(e)
+    const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
+    this.renderButtonsFromRef(viewportInfo, detectionData);
+  }
 
   /**
    * renderButtonsFromRef - Function that display validations buttons depending on the current
@@ -981,65 +961,32 @@ class App extends Component {
     })
   }
 
-
   /**
-   * renderButtons - Function that handles the logic behind whether or not to display
-   * the feedback buttons and where to display those buttons depending on the current
-   * zoom level in the window
+   * onAlgorithmSelected - It updates detection sets' visualization
    *
-   * @param  {type} e Event data passed from the onMouseClick function,
-   * such as the mouse cursor position, mouse button clicked, etc.
-   * @return {type}   None
+   * @return {none} None
+   * @param selected {boolean} - Indicates whether the algorithm was selected or not
+   * @param algorithm {string} - Algorithm's name
    */
-  renderButtons(e) {
-    if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
-      return;
-    }
-    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
-      return;
-    }
-    const viewportInfo = Utils.eventToViewportInfo(e)
-    const detectionData = this.state.detections[this.currentSelection.getAlgorithm()].getDataFromSelectedDetection();
-    this.renderButtonsFromRef(viewportInfo, detectionData);
+  onAlgorithmSelected(selected, algorithm) {
+    this.setState({ displayButtons: false}, () => {
+      this.appUpdateImage();
+    });
   }
 
-
   /**
-   * renderLinesFromRect - render lines than link validation buttons to the bounding box of the selected detection
+   * onDetectionSelected - It updates validation button visualization.
    *
-   * @return {type}   None
-   * @param detectionData - Detection object that represents the selected detection. Its bounding box is use as reference
-   * to calculate lines' end points
-   * @param context - canvas' rendering context
+   * @return {none} None
+   * @param detection {Detection} - detection-related data used as reference for buttons' location
    */
-  renderLinesFromRect(detectionData, context) {
-    let zoomLevel;
-    let bboxCoordXIndex;
-    let factor = 1;
-    const boundingBoxCoords = detectionData.boundingBox;
-    if (detectionData.view === "top") {
-      zoomLevel = this.state.zoomLevelTop;
-      bboxCoordXIndex = 2;
-    } else {
-      zoomLevel = this.state.zoomLevelSide;
-      bboxCoordXIndex = 0;
-      factor = -1;
-    }
-    const buttonGap = (constants.buttonStyle.GAP - constants.buttonStyle.HEIGHT / 2) / zoomLevel;
-    context.beginPath();
-    context.moveTo(boundingBoxCoords[bboxCoordXIndex], boundingBoxCoords[1] + constants.buttonStyle.LINE_GAP / 2);
-    context.lineTo(
-        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
-        boundingBoxCoords[1] + buttonGap);
-    context.stroke();
-    context.beginPath();
-    context.moveTo(boundingBoxCoords[bboxCoordXIndex] - factor * constants.buttonStyle.LINE_GAP / 2, boundingBoxCoords[1]);
-    context.lineTo(
-        boundingBoxCoords[bboxCoordXIndex] + factor * constants.buttonStyle.MARGIN_LEFT / zoomLevel,
-        boundingBoxCoords[1] - buttonGap);
-    context.stroke();
+  onDetectionSelected(detection) {
+    this.state.detections[detection.algorithm].selectedDetection = detection;
+    const viewportInfo = Utils.getDataFromViewport(detection.view, document);
+    this.setState({ displayButtons: true }, () => {
+      this.renderButtonsFromRef(viewportInfo, detection);
+    });
   }
-
 
   render() {
     return (
