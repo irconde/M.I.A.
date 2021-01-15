@@ -719,7 +719,7 @@ class App extends Component {
    * @return {none} None
    * @param detection {Detection} - detection-related data used as reference for buttons' location
    */
-  onDetectionSelected(detection:Detection) {
+  onDetectionSelected(detection) {
     this.state.detections[detection.algorithm].selectedDetection = detection;
     const viewportInfo = Utils.getDataFromViewport(detection.view, document);
     this.setState({ displayButtons: true }, () => {
@@ -1012,7 +1012,7 @@ class App extends Component {
    * to calculate lines' end points
    * @param context - canvas' rendering context
    */
-  renderLinesFromRect(detectionData:Detection, context) {
+  renderLinesFromRect(detectionData, context) {
     let zoomLevel;
     let bboxCoordXIndex;
     let factor = 1;
