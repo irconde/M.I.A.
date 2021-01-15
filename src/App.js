@@ -224,7 +224,7 @@ class App extends Component {
     let updateImageViewportSide = this.state.imageViewportSide;
     updateImageViewport.style.visibility = 'hidden';
     updateImageViewportSide.style.visibility = 'hidden';
-    //this.currentSelection.clear();
+    this.currentSelection = new Selection();
     this.setState({
       selectedFile: null,
       displayNext: false,
@@ -292,8 +292,6 @@ class App extends Component {
               // Once we have all the layers...
               promiseOfList.then(() => {
                 this.state.myOra.stackData = listOfStacks;
-
-                //this.currentSelection.clear();
                 this.setState({
                   selectedFile: this.state.myOra.getFirstImage(),
                   image: this.state.myOra.getFirstPixelData(),
@@ -798,7 +796,7 @@ class App extends Component {
       return;
     }
     for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-      this.currentSelection.set(key);
+      this.currentSelection.setCurrentAlgorithm(key);
       let clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       // User is submitting feedback through confirm or reject buttons

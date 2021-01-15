@@ -9,6 +9,14 @@ export default class Selection {
     this.availableAlgorithms = [];
   }
 
+  /**
+   * selectDetection - Selects the detection from the available algorithms based on the passed in parameters.
+   *
+   * @param {String}  - Name of the Algorithm that contains the detection to be selected
+   * @param {Number} - Index of the detection
+   * @param {constants.viewport} - Constant string dictating if the detection is in the top or side view
+   * @return {Boolean} -  Returns the selected detections selected value - true
+   */
   selectDetection(algorithm, detectionIndex, view) {
     if (view === constants.viewport.TOP) {
       this.availableAlgorithms[algorithm].data.top[detectionIndex].selected = true;
@@ -25,34 +33,43 @@ export default class Selection {
     }
   }
 
+  /**
+   * getAlgorithmCount - Returns the length of the available algorithms
+   * @param {type} - None
+   * @returns {Number} - Length of our available algorithms
+   */
   getAlgorithmCount() {
     return this.availableAlgorithms.length;
   }
 
+  /**
+   * addAlgorithm - Adds the passed in algorithm into the available algorithms array at the index of the algorithm's name.
+   *                We set the current algorithm to the first algorithm to be added.
+   * 
+   * @param {Detection} algorithm 
+   */
   addAlgorithm(algorithm) {
     if (this.availableAlgorithms.length === 0) this.currentAlgorithm = algorithm.algorithm;
     this.availableAlgorithms[algorithm.algorithm] = algorithm;
   }
 
+  /**
+   * getAlgorithm - Returns the current algorithm name if it exists, otherwise returns false.
+   */
   getAlgorithm() {   
-    try {
-      return this.availableAlgorithms[this.currentAlgorithm].algorithm;
-    } catch (e) {
+    if (this.availableAlgorithms[this.currentAlgorithm] === undefined) {
       return false;
+    } else {
+      return this.availableAlgorithms[this.currentAlgorithm].algorithm;
     }
   }
 
-  getAlgorithmForPos(index) {
-    return this.availableAlgorithms[index];
-  }
-
-  set(currentAlgorithm) {
+  /**
+   * setCurrentAlgorithm - Sets our place holder currentAlgorithm to the passed in string value.
+   * 
+   * @param {String} currentAlgorithm to be set
+   */
+  setCurrentAlgorithm(currentAlgorithm) {
     this.currentAlgorithm = currentAlgorithm;
   }
-
-  clear() {
-    this.currentAlgorithm = "";
-    this.availableAlgorithms = [];
-  }
-
 }
