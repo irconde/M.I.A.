@@ -7,6 +7,7 @@ export default class Selection {
   constructor() {
     this.currentAlgorithm = constants.selection.NO_SELECTION;
     this.availableAlgorithms = [];
+    this.algorithmNames = [];
   }
 
   /**
@@ -39,7 +40,7 @@ export default class Selection {
    * @returns {Number} - Length of our available algorithms
    */
   getAlgorithmCount() {
-    return this.availableAlgorithms.length;
+    return this.algorithmNames.length;
   }
 
   /**
@@ -49,18 +50,78 @@ export default class Selection {
    * @param {Detection} algorithm 
    */
   addAlgorithm(algorithm) {
-    if (this.availableAlgorithms.length === 0) this.currentAlgorithm = algorithm.algorithm;
     this.availableAlgorithms[algorithm.algorithm] = algorithm;
+    this.algorithmNames.push({
+      algorithm: algorithm.algorithm
+    });
+    this.currentAlgorithm = this.algorithmNames.length - 1;
+  }
+
+  /**
+   * selectPriorAlgorithm - Is a function that will set our index to the prior algorithm if we are not
+   *                        already at the start. It will return true if we moved a position and false 
+   *                        if we are at the start and therefore can go no further.
+   * @param {type} none
+   * @returns {Boolean} Our boolean value indicating if we moved a position our not.
+   */
+  selectPriorAlgorithm() {
+    if (this.currentAlgorithm > 0) {
+      this.currentAlgorithm--;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * selectNextAlgorithm - Is a function that will set our index to the next algorithm if we are not
+   *                        already at the end. It will return true if we moved a position and false 
+   *                        if we are at the end and therefore can go no further.
+   * @param {type} none
+   * @returns {Boolean} Our boolean value indicating if we moved a position our not.
+   */
+  selectNextAlgorithm() {
+    if (this.currentAlgorithm < this.algorithmNames.length - 1) {
+      this.currentAlgorithm++;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * resetAlgorithmPositionToEnd - Function that will set our current position to the highest index in our
+   *                               algorithmNames variable.
+   * 
+   * @param {type} none
+   * @returns {null} null
+   */
+  resetAlgorithmPositionToEnd() {
+    this.currentAlgorithm = this.algorithmNames.length - 1;
+  }
+
+  /**
+   * resetAlgorithmPositionToStart - Function that will set our current position to 0 or the beginning of our
+   *                                 available algorithms.
+   * 
+   * @param {type} none
+   * @returns {null} null
+   */
+  resetAlgorithmPositionToStart() {
+    this.currentAlgorithm = 0;
   }
 
   /**
    * getAlgorithm - Returns the current algorithm name if it exists, otherwise returns false.
+   * 
+   * @param {type} None
+   * @returns {Boolean || String}
    */
   getAlgorithm() {   
-    if (this.availableAlgorithms[this.currentAlgorithm] === undefined) {
+    if (this.availableAlgorithms[this.algorithmNames[this.currentAlgorithm].algorithm] === undefined) {
       return false;
     } else {
-      return this.availableAlgorithms[this.currentAlgorithm].algorithm;
+      return this.availableAlgorithms[this.algorithmNames[this.currentAlgorithm].algorithm].algorithm;
     }
   }
 

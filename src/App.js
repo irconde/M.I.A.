@@ -659,14 +659,13 @@ class App extends Component {
    * @return {type}         None
    */
   renderDetections(data, context) {
-    if(this.state.detections === {} || data[this.currentSelection.getAlgorithm()] === undefined || this.currentSelection.getAlgorithm() === false){
+    if(this.state.detections === {} || this.currentSelection.getAlgorithm() === undefined || data[this.currentSelection.getAlgorithm()] === undefined || this.currentSelection.getAlgorithm() === false){
       return;
     }
     const B_BOX_COORDS = 4;
     let detectionList;
     context.font = constants.detectionStyle.LABEL_FONT;
     context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
-
     for (const [key, detectionSet] of Object.entries(data)) {
       if (detectionSet.visibility !== true) {
         continue;
@@ -795,8 +794,8 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
-    for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-      this.currentSelection.setCurrentAlgorithm(key);
+    do {
+      let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
       let clickedPos = constants.selection.NO_SELECTION;
       let feedback = undefined;
       // User is submitting feedback through confirm or reject buttons
@@ -837,23 +836,20 @@ class App extends Component {
         }
         // Click on an empty area
         if(clickedPos === constants.selection.NO_SELECTION) {
-          detectionSet.selectAlgorithm(false);
-          detectionSet.selected = false;
-          detectionSet.anotherSelected = false;
+          detectionSet.clearAll();
           this.setState({ displayButtons: false }, () => {
             this.renderButtons(e);
           });
         }
         else {
-          detectionSet.selectAlgorithm(false);
           for (const [key, myDetectionSet] of Object.entries(this.state.detections)) {
-            myDetectionSet.clearAll();
+            myDetectionSet.selectAlgorithm(false);
           }
           if (detectionSet.visibility !== false) {
             let anyDetection = this.currentSelection.selectDetection(detectionSet.algorithm, clickedPos, viewport);            
             if (detectionSet.getDataFromSelectedDetection().visible === false) {
               detectionSet.getDataFromSelectedDetection().selected = false;
-              return;
+              continue;
             }
             this.setState({ displayButtons: anyDetection }, () => {
               this.renderButtons(e);
@@ -864,7 +860,8 @@ class App extends Component {
           }
         }
       }
-    }
+    } while (this.currentSelection.selectPriorAlgorithm() === true);
+    this.currentSelection.resetAlgorithmPositionToEnd();
   }
 
   /**
@@ -894,10 +891,7 @@ class App extends Component {
    * @return {type}   None
    */
   renderButtons(e) {
-    if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
-      return;
-    }
-    if (this.state.detections[this.currentSelection.getAlgorithm()].getData()[0].visible === false) {
+    if (this.state.detections === null || this.currentSelection.getAlgorithm() === undefined || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0) {
       return;
     }
     const viewportInfo = Utils.eventToViewportInfo(e)
