@@ -794,6 +794,7 @@ class App extends Component {
     if (this.state.detections === null || this.state.detections[this.currentSelection.getAlgorithm()].getData().length === 0){
       return;
     }
+    this.currentSelection.resetAlgorithmPositionToEnd();
     do {
       let detectionSet = this.state.detections[this.currentSelection.getAlgorithm()];
       let clickedPos = constants.selection.NO_SELECTION;
