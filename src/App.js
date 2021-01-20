@@ -106,6 +106,7 @@ class App extends Component {
     this.appUpdateImage = this.appUpdateImage.bind(this);
     this.onDetectionSelected = this.onDetectionSelected.bind(this);
     this.onAlgorithmSelected = this.onAlgorithmSelected.bind(this);
+    this.resizeListener = this.resizeListener.bind(this);
   }
 
   /**
@@ -122,9 +123,28 @@ class App extends Component {
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmouseclick', this.onMouseClicked);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousedrag', this.hideButtons);
     this.state.imageViewportSide.addEventListener('cornerstonetoolsmousewheel', this.hideButtons);
+    window.addEventListener('resize', this.resizeListener);
     this.getFilesFromCommandServer();
     this.updateNumberOfFiles();
     this.setupCornerstoneJS(this.state.imageViewportTop, this.state.imageViewportSide);
+  }
+
+  /**
+   * resizeListener - Function event listener for the window resize event. If a detection is selected,
+   *                  we clear the detections and hide the buttons.
+   * 
+   * @param {Event} e 
+   * @returns {type} None
+   */
+  resizeListener(e) {
+    if (this.state.displayButtons === true) {
+      for (const [key, detectionSet] of Object.entries(this.state.detections)) {
+        detectionSet.clearAll();
+      }
+      this.setState({ displayButtons: false }, () => {
+        this.appUpdateImage();
+      });
+    }
   }
 
   /**
@@ -873,8 +893,7 @@ class App extends Component {
    */
   hideButtons(e){
     for (const [key, detectionSet] of Object.entries(this.state.detections)) {
-      detectionSet.clearSelection();
-      detectionSet.selectAlgorithm(false);
+      detectionSet.clearAll();
     }
     this.setState({ displayButtons: false }, () => {
       this.renderButtons(e);
