@@ -658,7 +658,10 @@ class App extends Component {
             );
         });
         if (this.state.singleViewport === false) {
-            this.state.imageViewportSide.style.visibility = 'visible';
+            const updatedImageViewportSide = this.state.imageViewportSide;
+            updatedImageViewportSide.style.visibility = 'visible';
+            this.setState({ updatedImageViewportSide });
+
             const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
                 self.state.myOra.stackData[1].blobData[0]
             );
@@ -1379,9 +1382,9 @@ class App extends Component {
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
     onDetectionSelected(detection) {
-        this.state.detections[
-            detection.algorithm
-        ].selectedDetection = detection;
+        const updatedDetections = this.state.detections;
+        updatedDetections[detection.algorithm].selectedDetection = detection;
+        this.setState({ updatedDetections });
         const viewportInfo = Utils.getDataFromViewport(
             detection.view,
             document
