@@ -1382,9 +1382,10 @@ class App extends Component {
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
     onDetectionSelected(detection) {
+        const prevState = this.state;
         const updatedDetections = this.state.detections;
         updatedDetections[detection.algorithm].selectedDetection = detection;
-        this.setState({ updatedDetections });
+        this.setState({ ...prevState, updatedDetections });
         const viewportInfo = Utils.getDataFromViewport(
             detection.view,
             document
