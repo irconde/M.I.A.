@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import nextIcon from '../icons/navigate_next.png';
 class NextButton extends Component {
-    constructor(props){
-        super(props)
+    constructor(props) {
+        super(props);
         this.state = {
-            hover: false
-        }
+            hover: false,
+        };
         this.toggleHoverNext = this.toggleHoverNext.bind(this);
     }
     static propTypes = {
         nextImageClick: PropTypes.func.isRequired,
-        displayNext: PropTypes.bool.isRequired
-    }
-    toggleHoverNext(){
-        this.setState({hover: !this.state.hover});
+        displayNext: PropTypes.bool.isRequired,
+    };
+    toggleHoverNext() {
+        this.setState({ hover: !this.state.hover });
     }
     render() {
-        if (this.props.displayNext === true){
+        if (this.props.displayNext === true) {
             var nextStyle;
-            if (this.state.hover){
+            if (this.state.hover) {
                 nextStyle = {
                     width: '10vw',
                     height: '100vh',
@@ -28,8 +28,8 @@ class NextButton extends Component {
                     position: 'absolute',
                     top: '0',
                     right: '0',
-                    display: 'block'
-                }
+                    display: 'block',
+                };
             } else {
                 nextStyle = {
                     width: '10vw',
@@ -39,36 +39,34 @@ class NextButton extends Component {
                     position: 'absolute',
                     top: '0',
                     right: '0',
-                    display: 'block'
-                }
+                    display: 'block',
+                };
             }
             return (
-                <div className="overlay"
-                onClick={this.props.nextImageClick}
-                onMouseEnter={this.toggleHoverNext}
-                onMouseLeave={this.toggleHoverNext}
-                style={nextStyle}
-                >
-                <img
-                src="./img/navigate_next.png"
-                style={{
-                        position: 'absolute',
-                        top: '0',
-                        bottom: '0',
-                        left: '0',
-                        right: '0',
-                        width: '75%',
-                        maxWidth: '7.8125rem',
-                        margin: 'auto'
+                <div
+                    className="overlay"
+                    onClick={this.props.nextImageClick}
+                    onMouseEnter={this.toggleHoverNext}
+                    onMouseLeave={this.toggleHoverNext}
+                    style={nextStyle}>
+                    <img
+                        src={nextIcon}
+                        style={{
+                            position: 'absolute',
+                            top: '0',
+                            bottom: '0',
+                            left: '0',
+                            right: '0',
+                            width: '75%',
+                            maxWidth: '7.8125rem',
+                            margin: 'auto',
                         }}
-                alt="arrow icon" />
-
+                        alt="arrow icon"
+                    />
                 </div>
             );
         } else {
-            return (
-                <div className="next-place-holder"></div>
-            );
+            return <div className="next-place-holder"></div>;
         }
     }
 }
