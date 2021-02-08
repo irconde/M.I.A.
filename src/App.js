@@ -16,7 +16,7 @@ import Detection from './Detection.js';
 import axios from 'axios';
 import NextButton from './components/NextButton';
 import SideMenu from './components/SideMenu';
-import TopBar from './components/TopBar';
+import TopBar from './components/TopBar/TopBar';
 import ValidationButtons from './components/ValidationButtons';
 import JSZip from 'jszip';
 import DetectionSet from './DetectionSet';
