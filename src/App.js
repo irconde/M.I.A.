@@ -23,6 +23,17 @@ import DetectionSet from './DetectionSet';
 import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
+import { connect } from 'react-redux';
+import {
+    commandServer,
+    fileServer,
+    setCommandServerConnection,
+    setFileServerConnection,
+    setUpload,
+    setDownload,
+    setIsFileInQueue,
+    setNumFilesInQueue,
+} from './redux/slices/serverSlice';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -44,6 +55,9 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
         },
     },
 });
+
+//TODO: re-add PropTypes and prop validation
+/* eslint-disable react/prop-types */
 
 class App extends Component {
     /**
@@ -77,7 +91,7 @@ class App extends Component {
                 reject: {},
             },
             displayNext: false,
-            fileInQueue: false,
+            //fileInQueue: false,
             nextAlgBtnEnabled: false,
             prevAlgBtnEnabled: false,
             zoomLevelTop: constants.viewportStyle.ZOOM,
@@ -86,12 +100,12 @@ class App extends Component {
             imageViewportSide: document.getElementById('dicomImageRight'),
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            isConnected: false,
-            numOfFilesInQueue: 0,
-            isUpload: false,
-            isDownload: false,
-            socketCommand: socketIOClient(constants.COMMAND_SERVER),
-            socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS),
+            //isConnected: false,
+            //numOfFilesInQueue: 0,
+            //isUpload: false,
+            //isDownload: false,
+            //socketCommand: socketIOClient(constants.COMMAND_SERVER),
+            //socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS),
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -149,6 +163,9 @@ class App extends Component {
             this.hideButtons
         );
         window.addEventListener('resize', this.resizeListener);
+
+        this.props.setCommandServerConnection('connect');
+        this.props.setFileServerConnection('connect');
         this.getFilesFromCommandServer();
         this.updateNumberOfFiles();
         this.setupCornerstoneJS(
@@ -205,23 +222,35 @@ class App extends Component {
      * @return {type} - Promise
      */
     async getFilesFromCommandServer() {
-        this.state.socketCommand.on('connect', () => {
-            this.setState({ isConnected: true });
-        });
-        this.state.socketCommand.on('img', (data) => {
+        commandServer.on('img', (data) => {
             this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
                 // If we got an image and we are null, we know we can now fetch one
-                // This is how it triggers to display a new file if none existed and a new one
-                // was added
-                this.setState({ isDownload: false });
+                // This is how it triggers to display a new file if none existed and a new one was added
+                this.props.setDownload(false);
                 if (this.state.selectedFile === null) {
                     this.getNextImage();
                 }
             });
         });
-        this.state.socketCommand.on('disconnect', () => {
-            this.setState({ isConnected: false });
-        });
+
+        // OLD CODE
+        // this.state.socketCommand.on('connect', () => {
+        //     this.setState({ isConnected: true });
+        // });
+        // this.state.socketCommand.on('img', (data) => {
+        //     this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
+        //         // If we got an image and we are null, we know we can now fetch one
+        //         // This is how it triggers to display a new file if none existed and a new one
+        //         // was added
+        //         this.setState({ isDownload: false });
+        //         if (this.state.selectedFile === null) {
+        //             this.getNextImage();
+        //         }
+        //     });
+        // });
+        // this.state.socketCommand.on('disconnect', () => {
+        //     this.setState({ isConnected: false });
+        // });
     }
 
     /**
@@ -230,16 +259,31 @@ class App extends Component {
      * @return {type} - Promise
      */
     async updateNumberOfFiles() {
-        this.state.socketFS.on('numberOfFiles', (data) => {
-            if (!this.state.fileInQueue && data > 0) {
-                this.state.imageViewportTop.style.visibility = 'visible';
+        fileServer.on('numberOfFiles', (data) => {
+            if (!this.props.isFileInQueue && data > 0) {
+                const updateImageViewportTop = this.state.imageViewportTop;
+                updateImageViewportTop.style.visibility = 'visible';
+                this.setState({
+                    imageViewportTop: updateImageViewportTop,
+                });
                 this.getNextImage();
+
+                this.props.setNumFilesInQueue(data);
+                this.props.setIsFileInQueue(data > 0);
             }
-            this.setState({
-                numberOfFilesInQueue: data,
-                fileInQueue: data > 0,
-            });
         });
+
+        // OLD CODE
+        // this.state.socketFS.on('numberOfFiles', (data) => {
+        //     if (!this.state.fileInQueue && data > 0) {
+        //         this.state.imageViewportTop.style.visibility = 'visible';
+        //         this.getNextImage();
+        //     }
+        //     this.setState({
+        //         numberOfFilesInQueue: data,
+        //         fileInQueue: data > 0,
+        //     });
+        // });
     }
 
     /**
@@ -248,8 +292,11 @@ class App extends Component {
      * @return {type} - None
      */
     async sendImageToFileServer(file) {
-        this.setState({ isDownload: true });
-        this.state.socketFS.binary(true).emit('fileFromClient', file);
+        this.props.setDownload(true);
+        fileServer.emit('fileFromClient', file);
+        // OLD CODE
+        // this.setState({ isDownload: true });
+        // this.state.socketFS.binary(true).emit('fileFromClient', file);
     }
 
     /**
@@ -258,8 +305,11 @@ class App extends Component {
      * @return {type} - None
      */
     async sendImageToCommandServer(file) {
-        this.setState({ isUpload: true });
-        this.state.socketCommand.binary(true).emit('fileFromClient', file);
+        this.props.setUpload(true);
+        commandServer.emit('fileFromClient', file);
+        // OLD CODE
+        // this.setState({ isUpload: true });
+        // this.state.socketCommand.binary(true).emit('fileFromClient', file);
     }
 
     /**
@@ -549,9 +599,10 @@ class App extends Component {
                             this.hideButtons(e);
                             this.setState({
                                 selectedFile: null,
-                                isUpload: false,
+                                //isUpload: false,
                                 displayNext: false,
                             });
+                            this.props.setUpload(false);
                             this.getNextImage();
                         });
                     });
@@ -1417,15 +1468,15 @@ class App extends Component {
                     }}
                     onMouseDown={(e) => e.preventDefault()}>
                     <TopBar
-                        numberOfFiles={this.state.numberOfFilesInQueue}
-                        isUpload={this.state.isUpload}
-                        isDownload={this.state.isDownload}
-                        isConnected={this.state.isConnected}
+                        numberOfFiles={this.props.numFilesInQueue}
+                        isUpload={this.props.isUpload}
+                        isDownload={this.props.isDownload}
+                        isConnected={this.props.isConnected}
                     />
                     <SideMenu
                         detections={this.state.detections}
                         configurationInfo={this.state.configurationInfo}
-                        enableMenu={this.state.fileInQueue}
+                        enableMenu={this.props.isFileInQueue}
                         appUpdateImage={this.appUpdateImage}
                         onAlgorithmSelected={this.onAlgorithmSelected}
                         onDetectionSelected={this.onDetectionSelected}
@@ -1446,11 +1497,29 @@ class App extends Component {
                                 : Boolean(constants.ENABLE_NEXT)
                         }
                     />
-                    <NoFileSign isVisible={!this.state.fileInQueue} />
+                    <NoFileSign isVisible={!this.props.isFileInQueue} />
                 </div>
             </div>
         );
     }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+    const { server } = state;
+    return {
+        isConnected: server.isConnected,
+        isDownload: server.isDownload,
+        isUpload: server.isUpload,
+        isFileInQueue: server.isFileInQueue,
+        numFilesInQueue: server.numFilesInQueue,
+    };
+};
+
+export default connect(mapStateToProps, {
+    setCommandServerConnection,
+    setFileServerConnection,
+    setDownload,
+    setUpload,
+    setIsFileInQueue,
+    setNumFilesInQueue,
+})(App);

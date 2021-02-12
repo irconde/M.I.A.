@@ -2,46 +2,23 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import io from 'socket.io-client';
 import { COMMAND_SERVER, server } from '../../Constants';
 
+// Socket.io clients for command & file server
 export const commandServer = io(COMMAND_SERVER, { autoConnect: false });
 export const fileServer = io(server.FILE_SERVER_ADDRESS, {
     autoConnect: false,
 });
 
-export const connectCommandServer = createAsyncThunk(
-    'commandServer/connect',
-    async () => {
-        commandServer.connect();
-    }
-);
-export const disconnectCommandServer = createAsyncThunk(
-    'commandServer/disconnect',
-    async () => {
-        commandServer.disconnect();
-    }
-);
-
-export const connectFileServer = createAsyncThunk(
-    'fileServer/connect',
-    async () => {
-        fileServer.connect();
-    }
-);
-export const disconnectFileServer = createAsyncThunk(
-    'fileServer/disconnect',
-    async () => {
-        fileServer.disconnect();
-    }
-);
+// Redux Slice
 const serverSlice = createSlice({
     name: 'server',
     initialState: {
         numFilesInQueue: 0,
+        isFileInQueue: false,
         isConnected: false,
         isUpload: false,
         isDownload: false,
     },
     reducers: {
-        // Set connection status (connected, upload, download)
         setConnected: (state, action) => {
             state.isConnected = action.payload;
         },
@@ -51,23 +28,34 @@ const serverSlice = createSlice({
         setDownload: (state, action) => {
             state.isDownload = action.payload;
         },
+        setIsFileInQueue: (state, action) => {
+            state.isFileInQueue = action.payload;
+        },
         setNumFilesInQueue: (state, action) => {
             state.numFilesInQueue = action.payload;
         },
-        // SocketIO
-        // Command Server
-
-        // Triggered by socket.on('img')
-        sendImageToFileServer: (state, action) => {},
-    },
-    extraReducers: {
-        [connectCommandServer.fulfilled]: (state, action) => {
-            state.isConnected = true;
+        setCommandServerConnection: (state, action) => {
+            const { payload } = action;
+            // action payload is either connect or disconnect
+            if (payload.toLowerCase() === 'connect') {
+                commandServer.connect();
+                state.isConnected = true;
+            } else {
+                commandServer.disconnect();
+                state.isConnected = false;
+            }
         },
-        [disconnectCommandServer.fulfilled]: (state, action) => {
-            state.isConnected = false;
+        setFileServerConnection: (state, action) => {
+            const { payload } = action;
+            // action payload is either connect or disconnect
+            if (payload.toLowerCase() === 'connect') {
+                //TODO: Do we want to keep track of file server connection status in the store?
+                // Currently, in `App.js` we are only updating `isConnected` for command server
+                fileServer.connect();
+            } else {
+                fileServer.disconnect();
+            }
         },
-        [connectFileServer.fulfilled]: (state, action) => {},
     },
 });
 
@@ -76,7 +64,10 @@ export const {
     setConnected,
     setUpload,
     setDownload,
+    setIsFileInQueue,
     setNumFilesInQueue,
+    setCommandServerConnection,
+    setFileServerConnection,
 } = serverSlice.actions;
 
 // Selectors
