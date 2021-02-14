@@ -179,7 +179,8 @@ router.get("/next", (req, res) => {
                         res.send({ response: 'error'});
                     } else {
                         res.send({ 
-                            b64: Buffer.from(data).toString('base64')
+                            b64: Buffer.from(data).toString('base64'),
+							fileNameProcessing:fileQueue[0]
                         });
                     }
                 })
@@ -191,7 +192,8 @@ router.get("/next", (req, res) => {
                             console.log(err);
                             res.send({ response: 'error'});
                         } else {
-                            res.send({ b64: Buffer.from(data).toString('base64')});
+                            res.send({ b64: Buffer.from(data).toString('base64'),
+							fileNameProcessing:fileQueue[0]});
                         }
                     })
                 } else {
