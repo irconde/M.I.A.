@@ -91,7 +91,7 @@ class App extends Component {
             isUpload: false,
             isDownload: false,
             socketCommand: socketIOClient(constants.COMMAND_SERVER),
-            socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS),
+            socketFS: null
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -165,12 +165,26 @@ class App extends Component {
             this.hideButtons
         );
         window.addEventListener('resize', this.resizeListener);
-        this.getFilesFromCommandServer();
+		
+		
+		/*Removing hardcoded dependency of File server --> changes for DNAATTR-112*/
+		var host=window.location.hostname;
+		constants.server.FILE_SERVER_ADDRESS=constants.PROTOCOL+host+constants.FILE_SERVER_PORT;
+		this.state.processingHost=constants.server.FILE_SERVER_ADDRESS;
+		var reactObj=this;
+		this.setState({socketFS:socketIOClient(constants.server.FILE_SERVER_ADDRESS)},()=>{
+			reactObj.getFilesFromCommandServer();
+			reactObj.updateNumberOfFiles();
+			reactObj.setupCornerstoneJS(reactObj.state.imageViewportTop, reactObj.state.imageViewportSide);	
+			
+		});
+		
+        /*this.getFilesFromCommandServer();
         this.updateNumberOfFiles();
         this.setupCornerstoneJS(
             this.state.imageViewportTop,
             this.state.imageViewportSide
-        );
+        );*/
     }
 
     /**
