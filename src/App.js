@@ -179,12 +179,7 @@ class App extends Component {
 			
 		});
 		
-        /*this.getFilesFromCommandServer();
-        this.updateNumberOfFiles();
-        this.setupCornerstoneJS(
-            this.state.imageViewportTop,
-            this.state.imageViewportSide
-        );*/
+       
     }
 
     /**
