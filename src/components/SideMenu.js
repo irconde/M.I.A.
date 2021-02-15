@@ -4,11 +4,6 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 import NextButton from './NextButton';
 
-const styles = {
-    display: 'flex',
-    flexDirection: 'column',
-};
-
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
     constructor(props) {
