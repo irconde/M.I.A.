@@ -421,13 +421,13 @@ class App extends Component {
                     imageViewportTop: updateImageViewportTop,
                 });
                 this.getNextImage();
-
-                this.props.setNumFilesInQueue(data);
-                this.props.setIsFileInQueue(data > 0);
             }
             this.setState({
                 isFABVisible: data > 0,
             });
+
+            this.props.setNumFilesInQueue(data);
+            this.props.setIsFileInQueue(data > 0);
         });
     }
 
@@ -875,7 +875,7 @@ class App extends Component {
         if (this.state.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
-            this.setState({ updatedImageViewportSide });
+            this.setState({ imageViewportSide: updatedImageViewportSide });
 
             const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
                 self.state.myOra.stackData[1].blobData[0]
@@ -1700,10 +1700,9 @@ class App extends Component {
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
     onDetectionSelected(detection) {
-        const prevState = this.state;
         const updatedDetections = this.state.detections;
         updatedDetections[detection.algorithm].selectedDetection = detection;
-        this.setState({ ...prevState, updatedDetections });
+        this.setState({ detections: updatedDetections });
         const viewportInfo = Utils.getDataFromViewport(
             detection.view,
             document
