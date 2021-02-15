@@ -1,74 +1,46 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 import nextIcon from '../icons/navigate_next.png';
-class NextButton extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            hover: false,
-        };
-        this.toggleHoverNext = this.toggleHoverNext.bind(this);
+import PropTypes from 'prop-types';
+
+const NextButtonContainer = styled.div`
+    display: flex;
+    align-items: center;
+    align-self: flex-end;
+    justify-content: center;
+    background-color: #367eff;
+
+    opacity: ${(props) => (props.disabled ? '38%' : '100%')};
+    p {
+        flex: 1;
+        text-transform: uppercase;
+        text-align: center;
+        color: white;
     }
-    static propTypes = {
-        nextImageClick: PropTypes.func.isRequired,
-        displayNext: PropTypes.bool.isRequired,
-    };
-    toggleHoverNext() {
-        this.setState({ hover: !this.state.hover });
+
+    img {
+        height: 2em;
+        width: auto;
     }
-    render() {
-        if (this.props.displayNext === true) {
-            var nextStyle;
-            if (this.state.hover) {
-                nextStyle = {
-                    width: '10vw',
-                    height: '100vh',
-                    opacity: '85%',
-                    backgroundColor: '#282828',
-                    position: 'absolute',
-                    top: '0',
-                    right: '0',
-                    display: 'block',
-                };
-            } else {
-                nextStyle = {
-                    width: '10vw',
-                    height: '100vh',
-                    opacity: '70%',
-                    backgroundColor: '#282828',
-                    position: 'absolute',
-                    top: '0',
-                    right: '0',
-                    display: 'block',
-                };
-            }
-            return (
-                <div
-                    className="overlay"
-                    onClick={this.props.nextImageClick}
-                    onMouseEnter={this.toggleHoverNext}
-                    onMouseLeave={this.toggleHoverNext}
-                    style={nextStyle}>
-                    <img
-                        src={nextIcon}
-                        style={{
-                            position: 'absolute',
-                            top: '0',
-                            bottom: '0',
-                            left: '0',
-                            right: '0',
-                            width: '75%',
-                            maxWidth: '7.8125rem',
-                            margin: 'auto',
-                        }}
-                        alt="arrow icon"
-                    />
-                </div>
-            );
-        } else {
-            return <div className="next-place-holder"></div>;
+`;
+
+const NextButton = ({ displayNext, nextImageClick }) => {
+    const handleClick = (e) => {
+        if (displayNext) {
+            nextImageClick(e);
         }
-    }
-}
+    };
+    return (
+        <NextButtonContainer disabled={!displayNext} onClick={handleClick}>
+            <p>Next</p>
+            <img src={nextIcon} />
+        </NextButtonContainer>
+    );
+};
+
+NextButton.propTypes = {
+    displayNext: PropTypes.bool.isRequired,
+    nextImageClick: PropTypes.func.isRequired,
+};
 
 export default NextButton;
