@@ -2,6 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
+import NextButton from './NextButton';
+
+const styles = {
+    display: 'flex',
+    flexDirection: 'column',
+};
 
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
@@ -175,6 +181,10 @@ class SideMenu extends Component {
                             );
                         })}
                     </div>
+                    <NextButton
+                        displayNext={this.props.displayNext}
+                        nextImageClick={this.props.nextImageClick}
+                    />
                 </div>
             );
         } else {
@@ -182,5 +192,10 @@ class SideMenu extends Component {
         }
     }
 }
+
+SideMenu.propTypes = {
+    displayNext: PropTypes.bool.isRequired,
+    nextImageClick: PropTypes.func.isRequired,
+};
 
 export default SideMenu;

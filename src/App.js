@@ -14,7 +14,6 @@ import Utils from './Utils.js';
 import Dicos from './Dicos.js';
 import Detection from './Detection.js';
 import axios from 'axios';
-import NextButton from './components/NextButton';
 import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import ValidationButtons from './components/ValidationButtons';
@@ -1450,20 +1449,18 @@ class App extends Component {
                         onDetectionSelected={this.onDetectionSelected}
                         hideButtons={this.hideButtons}
                         renderButtons={this.onMouseClicked}
-                    />
-                    <div id="algorithm-outputs"> </div>
-                    <ValidationButtons
-                        displayButtons={this.state.displayButtons}
-                        buttonStyles={this.state.buttonStyles}
-                        onMouseClicked={this.onMouseClicked}
-                    />
-                    <NextButton
                         nextImageClick={this.nextImageClick}
                         displayNext={
                             constants.ENABLE_NEXT === undefined
                                 ? this.state.displayNext
                                 : Boolean(constants.ENABLE_NEXT)
                         }
+                    />
+                    <div id="algorithm-outputs"> </div>
+                    <ValidationButtons
+                        displayButtons={this.state.displayButtons}
+                        buttonStyles={this.state.buttonStyles}
+                        onMouseClicked={this.onMouseClicked}
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
                 </div>
