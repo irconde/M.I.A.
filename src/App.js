@@ -122,8 +122,6 @@ class App extends Component {
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
     }
 
-    
-
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
@@ -204,9 +202,9 @@ class App extends Component {
                 );
             }
         );
-        
-        this.setState({ 
-            isFABVisible: true
+
+        this.setState({
+            isFABVisible: true,
         });
     }
 
@@ -1199,6 +1197,114 @@ class App extends Component {
                     boundingBoxCoords[1] -
                         constants.detectionStyle.LABEL_PADDING
                 );
+                if (this.state.singleViewport === true) {
+                    // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                    cornerstoneTools.addToolState(
+                        document.getElementById('dicomImageLeft'),
+                        'BoundingBoxDrawing',
+                        {
+                            visible: true,
+                            active: true,
+                            color: undefined,
+                            invalidated: true,
+                            handles: {
+                                start: {
+                                    x: boundingBoxCoords[0] - 50,
+                                    y: boundingBoxCoords[1] - 50,
+                                    highlight: true,
+                                    active: false,
+                                },
+                                end: {
+                                    x: boundingBoxCoords[2],
+                                    y: boundingBoxCoords[3],
+                                    highlight: true,
+                                    active: false,
+                                },
+                                initialRotation: 0,
+                                textBox: {
+                                    active: true,
+                                    hasMoved: false,
+                                    movesIndependently: false,
+                                    drawnIndependently: true,
+                                    allowedOutsideImage: true,
+                                    hasBoundingBox: true,
+                                },
+                            },
+                        }
+                    );
+                } else if (this.state.singleViewport === false) {
+                    if (selectedViewport === constants.viewport.TOP) {
+                        // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                        cornerstoneTools.addToolState(
+                            document.getElementById('dicomImageLeft'),
+                            'BoundingBoxDrawing',
+                            {
+                                visible: true,
+                                active: true,
+                                color: undefined,
+                                invalidated: true,
+                                handles: {
+                                    start: {
+                                        x: boundingBoxCoords[0] - 50,
+                                        y: boundingBoxCoords[1] - 50,
+                                        highlight: true,
+                                        active: false,
+                                    },
+                                    end: {
+                                        x: boundingBoxCoords[2],
+                                        y: boundingBoxCoords[3],
+                                        highlight: true,
+                                        active: false,
+                                    },
+                                    initialRotation: 0,
+                                    textBox: {
+                                        active: true,
+                                        hasMoved: false,
+                                        movesIndependently: false,
+                                        drawnIndependently: true,
+                                        allowedOutsideImage: true,
+                                        hasBoundingBox: true,
+                                    },
+                                },
+                            }
+                        );
+                    } else if (selectedViewport === constants.viewport.SIDE) {
+                        // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                        cornerstoneTools.addToolState(
+                            document.getElementById('dicomImageRight'),
+                            'BoundingBoxDrawing',
+                            {
+                                visible: true,
+                                active: true,
+                                color: undefined,
+                                invalidated: true,
+                                handles: {
+                                    start: {
+                                        x: boundingBoxCoords[0] - 50,
+                                        y: boundingBoxCoords[1] - 50,
+                                        highlight: true,
+                                        active: false,
+                                    },
+                                    end: {
+                                        x: boundingBoxCoords[2],
+                                        y: boundingBoxCoords[3],
+                                        highlight: true,
+                                        active: false,
+                                    },
+                                    initialRotation: 0,
+                                    textBox: {
+                                        active: true,
+                                        hasMoved: false,
+                                        movesIndependently: false,
+                                        drawnIndependently: true,
+                                        allowedOutsideImage: true,
+                                        hasBoundingBox: true,
+                                    },
+                                },
+                            }
+                        );
+                    }
+                }
             }
         }
     }
@@ -1573,14 +1679,19 @@ class App extends Component {
      * @param {none} None
      */
     onBoundingBoxSelected() {
-        if (this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION) {
-            this.setState({
-                cornerstoneMode: constants.cornerstoneMode.ANNOTATION
-            }, () => {
-                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                    mouseButtonMask: 1,
-                });
-            })
+        if (
+            this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
+        ) {
+            this.setState(
+                {
+                    cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                },
+                () => {
+                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                        mouseButtonMask: 1,
+                    });
+                }
+            );
         }
     }
 
@@ -1593,7 +1704,6 @@ class App extends Component {
         //TODO
     }
 
-    
     render() {
         return (
             <div>
