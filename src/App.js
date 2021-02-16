@@ -136,6 +136,10 @@ class App extends Component {
             'cornerstonetoolsmousewheel',
             this.hideButtons
         );
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolstouchpinch',
+            this.hideButtons
+        );
         this.state.imageViewportSide.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -154,6 +158,10 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
+            this.hideButtons
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolstouchpinch',
             this.hideButtons
         );
         window.addEventListener('resize', this.resizeListener);
