@@ -125,6 +125,10 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+        this.state.imageViewportTop.addEventListener(
             'cornerstonetoolsmousedrag',
             this.hideButtons
         );
@@ -138,6 +142,10 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolstouchstart',
             this.onMouseClicked
         );
         this.state.imageViewportSide.addEventListener(
