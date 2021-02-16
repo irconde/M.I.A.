@@ -10,7 +10,9 @@ export const selection = {
 }
 
 export const server = {
-  FILE_SERVER_ADDRESS: "http://127.0.0.1:4002"
+  FILE_SERVER_ADDRESS: "http://127.0.0.1:4002",
+  PROTOCOL: 'http://',
+  FILE_SERVER_PORT: ':4002'
 }
 
 export const colors = {
@@ -47,5 +49,3 @@ export const viewportStyle = {
 
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
-export const PROTOCOL = 'http://';
-export const FILE_SERVER_PORT = ':4002';
