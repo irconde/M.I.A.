@@ -49,5 +49,11 @@ export const viewportStyle = {
 
 export const RESOLUTION_UNIT = 'px';
 export const sideMenuWidth = 285;
+export const cornerstoneMode = {
+    SELECTION: 'selection',
+    ANNOTATION: 'annotation',
+    EDITION: 'edition',
+};
+
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
