@@ -1259,6 +1259,107 @@ class App extends Component {
                     boundingBoxCoords[1] -
                         constants.detectionStyle.LABEL_PADDING
                 );
+                if (this.state.singleViewport === true) {
+                    // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                    cornerstoneTools.addToolState(document.getElementById("dicomImageLeft"), "BoundingBoxDrawing",
+                    {
+                        visible: true,
+                        active: true,
+                        color: undefined,
+                        invalidated: true,
+                        handles: {
+                        start: {
+                            x: boundingBoxCoords[0] - 50,
+                            y: boundingBoxCoords[1] - 50,
+                            highlight: true,
+                            active: false,
+                        },
+                        end: {
+                            x: boundingBoxCoords[2],
+                            y: boundingBoxCoords[3],
+                            highlight: true,
+                            active: false,
+                        },
+                        initialRotation: 0,
+                        textBox: {
+                            active: true,
+                            hasMoved: false,
+                            movesIndependently: false,
+                            drawnIndependently: true,
+                            allowedOutsideImage: true,
+                            hasBoundingBox: true,
+                        },
+                        },
+                    });
+                } else if (this.state.singleViewport === false) {
+                    if (selectedViewport === constants.viewport.TOP) {
+                        // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                        cornerstoneTools.addToolState(document.getElementById("dicomImageLeft"), "BoundingBoxDrawing",
+                        {
+                            visible: true,
+                            active: true,
+                            color: undefined,
+                            invalidated: true,
+                            handles: {
+                            start: {
+                                x: boundingBoxCoords[0] - 50,
+                                y: boundingBoxCoords[1] - 50,
+                                highlight: true,
+                                active: false,
+                            },
+                            end: {
+                                x: boundingBoxCoords[2],
+                                y: boundingBoxCoords[3],
+                                highlight: true,
+                                active: false,
+                            },
+                            initialRotation: 0,
+                            textBox: {
+                                active: true,
+                                hasMoved: false,
+                                movesIndependently: false,
+                                drawnIndependently: true,
+                                allowedOutsideImage: true,
+                                hasBoundingBox: true,
+                            },
+                            },
+                        });
+                    } else if (selectedViewport === constants.viewport.SIDE) {
+                        // TODO irconde: this how we add a new bounding box to the BoundingBoxDrawing tool, given some data extracted from a DICOS file
+                        cornerstoneTools.addToolState(document.getElementById("dicomImageRight"), "BoundingBoxDrawing",
+                        {
+                            visible: true,
+                            active: true,
+                            color: undefined,
+                            invalidated: true,
+                            handles: {
+                            start: {
+                                x: boundingBoxCoords[0] - 50,
+                                y: boundingBoxCoords[1] - 50,
+                                highlight: true,
+                                active: false,
+                            },
+                            end: {
+                                x: boundingBoxCoords[2],
+                                y: boundingBoxCoords[3],
+                                highlight: true,
+                                active: false,
+                            },
+                            initialRotation: 0,
+                            textBox: {
+                                active: true,
+                                hasMoved: false,
+                                movesIndependently: false,
+                                drawnIndependently: true,
+                                allowedOutsideImage: true,
+                                hasBoundingBox: true,
+                            },
+                            },
+                        });
+                    }
+                    
+                }
+                
             }
         }
     }
