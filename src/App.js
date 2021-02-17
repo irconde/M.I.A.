@@ -90,6 +90,8 @@ class App extends Component {
             numOfFilesInQueue: 0,
             isUpload: false,
             isDownload: false,
+            currentProcessingFile:null,
+			processingHost:null,
             socketCommand: socketIOClient(constants.COMMAND_SERVER),
             socketFS: null
         };
@@ -168,6 +170,7 @@ class App extends Component {
 
 		const hostname = window.location.hostname;
 		constants.server.FILE_SERVER_ADDRESS = constants.server.PROTOCOL + hostname + constants.server.FILE_SERVER_PORT;
+        this.setState({processingHost:constants.server.FILE_SERVER_ADDRESS});
 		let reactObj = this;
 		this.setState({socketFS:socketIOClient(constants.server.FILE_SERVER_ADDRESS)},()=>{
 			reactObj.getFilesFromCommandServer();
@@ -324,6 +327,8 @@ class App extends Component {
                     // Need to clear the canvas here or make a no image to load display
                     this.onNoImageLeft();
                 } else {
+					var fileNameProcessing=Utils.fileNameSplit(res.data.fileNameProcessing);
+					this.state.currentProcessingFile=fileNameProcessing;
                     const myZip = new JSZip();
                     var listOfPromises = [];
                     // This is our list of stacks we will append to the myOra object in our promise all
@@ -1455,6 +1460,8 @@ class App extends Component {
                         isUpload={this.state.isUpload}
                         isDownload={this.state.isDownload}
                         isConnected={this.state.isConnected}
+						connectedServer={this.state.processingHost}
+						processingFile={this.state.currentProcessingFile}
                     />
                     <SideMenu
                         detections={this.state.detections}

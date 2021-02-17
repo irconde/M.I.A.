@@ -182,6 +182,32 @@ export default class Utils {
   }
 
 
+static fileNameSplit(fileNmae) {
+  var userAgent = window.navigator.userAgent,
+      platform = window.navigator.platform,
+      macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+      windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+      iosPlatforms = ['iPhone', 'iPad', 'iPod'],
+      os = null,
+	  fileName=null;
+  if (macosPlatforms.indexOf(platform) !== -1) {
+    os = 'Mac';
+	fileName=(fileNmae.split("/"))[1];
+  } else if (iosPlatforms.indexOf(platform) !== -1) {
+    os = 'iOS';
+	fileName=(fileNmae.split("/"))[1];
+  } else if (windowsPlatforms.indexOf(platform) !== -1) {
+    os = 'Windows';
+	fileName=(fileNmae.split("\\"))[1];
+  } else if (/Android/.test(userAgent)) {
+    os = 'Android';
+	fileName=(fileNmae.split("/"))[1];
+  } else if (!os && /Linux/.test(platform)) {
+    os = 'Linux';
+	fileName=(fileNmae.split("/"))[1];
+  }
+  return fileName;
+}
   /**
    * eventToViewportInfo - Get data required for validation buttons' proper rendering from mouse event
    *
