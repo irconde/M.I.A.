@@ -327,7 +327,7 @@ class App extends Component {
                     // Need to clear the canvas here or make a no image to load display
                     this.onNoImageLeft();
                 } else {
-                    var fileNameProcessing=Utils.fileNameSplit(res.data.fileNameProcessing);
+                    var fileNameProcessing=Utils.getFilenameFromURI(res.data.fileNameProcessing);
                     this.state.currentProcessingFile=fileNameProcessing;
                     const myZip = new JSZip();
                     var listOfPromises = [];
