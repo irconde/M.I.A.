@@ -20,21 +20,21 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             color: 'white',
             boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
         },
-		div1:{	
+        titleLabelContainer:{
 			  position: 'absolute',
             display: 'flex',
             height: '3.375rem',
             backgroundColor: '#2b2b2b',
             left: '0',
             top: '0',
-            width: '65%',
+            width: '100%',
             zIndex: '999',
             alignItems: 'center',
             color: 'white',
-			justifyContent: 'flex-end',
+			justifyContent: 'center',
            	
 		},
-		div2:{	
+        connectionStatusIconsContainer:{
 			  position: 'absolute',
             display: 'flex',
             height: '3.375rem',
@@ -67,16 +67,15 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
 
     return (
 		<div >
-        <div style={styles.div1}>
+        <div style={styles.titleLabelContainer}>
 			<p style={styles.connectionFile}>Connected to </p>&nbsp;&nbsp;
-			
 			<h4 >{connectedServer}</h4> &nbsp;&nbsp;
 			<p>/</p>&nbsp;&nbsp;
 			<p style={styles.connectionFile}>Processing</p>&nbsp;&nbsp;
 			<h4 >{processingFile}</h4>
         </div>
 		
-	    <div style={styles.div2}>
+	    <div style={styles.connectionStatusIconsContainer}>
 				<FileQueueIcon
 					title="Number of Files"
 					numberOfFiles={numberOfFiles}
