@@ -97,8 +97,8 @@ class App extends Component {
             socketCommand: null,
             socketFS: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
-            isDrawingBoundingBox: false,
             isFABVisible: false,
+            isDetectionEditing: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -1678,6 +1678,7 @@ class App extends Component {
      * @param {none} None
      */
     onBoundingBoxSelected() {
+<<<<<<< HEAD
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
@@ -1697,6 +1698,9 @@ class App extends Component {
 
     addNewDetection(algorithm, { classname, score }) {
         console.log('add new detection!');
+=======
+        //TODO
+>>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
     }
 
     /**
@@ -1764,9 +1768,15 @@ class App extends Component {
                         onMouseClicked={this.onMouseClicked}
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
+<<<<<<< HEAD
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
+=======
+                    <FAB
+                        isVisible={this.state.isFABVisible}
+                        isEditing={this.state.isDetectionEditing}
+>>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
