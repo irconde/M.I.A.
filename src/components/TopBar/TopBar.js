@@ -21,7 +21,7 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
         },
         titleLabelContainer:{
-			  position: 'absolute',
+            position: 'absolute',
             display: 'flex',
             height: '3.375rem',
             backgroundColor: '#2b2b2b',
@@ -35,10 +35,9 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
            	
 		},
         connectionStatusIconsContainer:{
-			  position: 'absolute',
+            position: 'absolute',
             display: 'flex',
             height: '3.375rem',
-            backgroundColor: '#2b2b2b',
             left: '0',
             top: '0',
             width: '35%',
@@ -59,10 +58,7 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
         },
 		connectionFile: {
 			color: '#C3C3C3',
-			
         }
-		
-		
     };
 
     return (
