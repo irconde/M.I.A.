@@ -24,6 +24,7 @@ import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
 // TODO irconde: We import the new Tool
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
+import FAB from './components/FAB';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -96,6 +97,9 @@ class App extends Component {
             processingHost: null,
             socketCommand: null,
             socketFS: null,
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            isFABVisible: false,
+            isDetectionEditing: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -115,6 +119,8 @@ class App extends Component {
         this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
             this
         );
+        this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
+        this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
     }
 
     /**
@@ -197,6 +203,7 @@ class App extends Component {
                 );
             }
         );
+        this.setState({ isFABVisible: true });
     }
 
     /**
@@ -1556,6 +1563,24 @@ class App extends Component {
         });
     }
 
+    /**
+     * Invoked when user selects bounding box option from FAB
+     * @return {none} None
+     * @param {none} None
+     */
+    onBoundingBoxSelected() {
+        //TODO
+    }
+
+    /**
+     * Invoked when user selects polygon mask option from FAB
+     * @return {none} None
+     * @param {none} None
+     */
+    onPolygonMaskSelected() {
+        //TODO
+    }
+
     render() {
         return (
             <div>
@@ -1607,6 +1632,12 @@ class App extends Component {
                         onMouseClicked={this.onMouseClicked}
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
+                    <FAB
+                        isVisible={this.state.isFABVisible}
+                        isEditing={this.state.isDetectionEditing}
+                        onBoundingSelect={this.onBoundingBoxSelected}
+                        onPolygonSelect={this.onPolygonMaskSelected}
+                    />
                 </div>
             </div>
         );
