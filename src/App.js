@@ -1246,7 +1246,7 @@ class App extends Component {
                         constants.detectionStyle.LABEL_PADDING,
                     boundingBoxCoords[1] -
                         constants.detectionStyle.LABEL_PADDING
-                );                
+                );
             }
         }
     }
