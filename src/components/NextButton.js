@@ -11,7 +11,8 @@ const NextButtonContainer = styled.div`
     justify-content: center;
     background-color: #367eff;
     margin-bottom: 3em;
-
+    height: 75px;
+  
     opacity: ${(props) => (props.disabled ? '38%' : '100%')};
     p {
         flex: 1;
@@ -23,6 +24,7 @@ const NextButtonContainer = styled.div`
     img {
         height: 2em;
         width: auto;
+        margin-right: .5em;
     }
 `;
 
