@@ -4,11 +4,13 @@ import nextIcon from '../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 
 const NextButtonContainer = styled.div`
+    width: inherit;
     display: flex;
     align-items: center;
     align-self: flex-end;
     justify-content: center;
     background-color: #367eff;
+    margin-bottom: 3em;
 
     opacity: ${(props) => (props.disabled ? '38%' : '100%')};
     p {
