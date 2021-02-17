@@ -24,14 +24,17 @@ const NextButtonContainer = styled.div`
     }
 `;
 
-const NextButton = ({ displayNext, nextImageClick }) => {
+const NextButton = ({ enableNextButton, nextImageClick }) => {
     const handleClick = (e) => {
-        if (displayNext) {
+        if (enableNextButton) {
             nextImageClick(e);
         }
     };
     return (
-        <NextButtonContainer disabled={!displayNext} onClick={handleClick}>
+        <NextButtonContainer
+            disabled={!enableNextButton}
+            onClick={handleClick}
+            id="nextButton">
             <p>Next</p>
             <img src={nextIcon} />
         </NextButtonContainer>
@@ -39,7 +42,7 @@ const NextButton = ({ displayNext, nextImageClick }) => {
 };
 
 NextButton.propTypes = {
-    displayNext: PropTypes.bool.isRequired,
+    enableNextButton: PropTypes.bool.isRequired,
     nextImageClick: PropTypes.func.isRequired,
 };
 
