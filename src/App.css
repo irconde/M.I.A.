@@ -145,7 +145,7 @@ body {
 }
 
 .treeview-main {
-    position: relative;
+    position: absolute;
     width: 300px;
     height: 98vh;
     top: 3.375rem;
