@@ -225,6 +225,7 @@ class App extends Component {
                 );
             }
         );
+        this.setState({ isFABVisible: true });
     }
 
     /**
