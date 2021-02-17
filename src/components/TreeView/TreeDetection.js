@@ -19,7 +19,7 @@ class TreeDetection extends Component {
             },
             typeStyle: {
                 textTransform: 'uppercase',
-                fontFamily: 'Noto Sans JP Regular',
+                fontFamily: 'Noto Sans JP',
                 cursor: 'default'
             },
             containerStyle: {
