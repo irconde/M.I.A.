@@ -69,6 +69,7 @@ class App extends Component {
             myOra: new ORA(),
             image: null,
             detections: {},
+            isEditingOrAnnotating: false, // To be used to keep track of when the new tool is open
             receiveTime: null,
             displayButtons: false,
             buttonStyles: {
@@ -1163,30 +1164,45 @@ class App extends Component {
             ];
             let clickedPos = constants.selection.NO_SELECTION;
             let feedback = undefined;
-            // User is submitting feedback through confirm or reject buttons
-            if (
-                e.currentTarget.id === 'confirm' ||
-                e.currentTarget.id === 'reject'
-            ) {
-                if (e.currentTarget.id === 'confirm') {
-                    feedback = true;
-                }
-                if (e.currentTarget.id === 'reject') {
-                    feedback = false;
-                }
-                detectionSet.validateSelectedDetection(feedback);
-                if (this.validationCompleted()) {
-                    this.setState({
-                        displayButtons: false,
-                        displayNext: true,
+
+            // User selected 'next' button, update all detections as accepted
+            if (e.currentTarget.id === 'nextButton') {
+                let updatedDetections = this.state.detections;
+                Object.keys(updatedDetections).forEach((algo) => {
+                    const { data } = updatedDetections[algo];
+                    Object.keys(data).forEach((detection) => {
+                        data[detection].forEach((view) => {
+                            view.validation = true;
+                        });
                     });
-                } else {
-                    this.setState({
-                        displayButtons: false,
-                    });
+                });
+            } else if (['confirm', 'reject'].includes(e.currentTarget.id)) {
+                // User is submitting feedback through confirm or reject buttons
+                if (
+                    e.currentTarget.id === 'confirm' ||
+                    e.currentTarget.id === 'reject'
+                ) {
+                    if (e.currentTarget.id === 'confirm') {
+                        feedback = true;
+                    }
+                    if (e.currentTarget.id === 'reject') {
+                        feedback = false;
+                    }
+                    detectionSet.validateSelectedDetection(feedback);
+                    if (this.validationCompleted()) {
+                        this.setState({
+                            displayButtons: false,
+                            displayNext: true,
+                        });
+                    } else {
+                        this.setState({
+                            displayButtons: false,
+                        });
+                    }
+                    this.appUpdateImage();
                 }
-                this.appUpdateImage();
             }
+
             // Handle regular click events for selecting and deselecting detections
             else {
                 const mousePos = cornerstone.canvasToPixel(e.target, {
@@ -1450,10 +1466,9 @@ class App extends Component {
                         hideButtons={this.hideButtons}
                         renderButtons={this.onMouseClicked}
                         nextImageClick={this.nextImageClick}
-                        displayNext={
-                            constants.ENABLE_NEXT === undefined
-                                ? this.state.displayNext
-                                : Boolean(constants.ENABLE_NEXT)
+                        enableNextButton={
+                            !this.state.isEditingOrAnnotating &&
+                            !this.state.displayButtons
                         }
                     />
                     <div id="algorithm-outputs"> </div>
