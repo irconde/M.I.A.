@@ -99,6 +99,7 @@ class App extends Component {
             socketFS: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isFABVisible: false,
+            isDetectionEditing: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
