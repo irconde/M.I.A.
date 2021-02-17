@@ -11,6 +11,8 @@ const NextButtonContainer = styled.div`
     justify-content: center;
     background-color: #367eff;
     margin-bottom: 3em;
+    font-weight: bold;
+    font-size: 12pt;
     height: 75px;
   
     opacity: ${(props) => (props.disabled ? '38%' : '100%')};

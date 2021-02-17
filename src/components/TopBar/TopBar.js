@@ -32,7 +32,8 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             alignItems: 'center',
             color: 'white',
             justifyContent: 'center',
-
+            fontWeight: 500,
+            fontSize: '10pt',
         },
         connectionStatusIconsContainer:{
             position: 'absolute',
@@ -54,19 +55,25 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
         lastIcon: {
             margin: '0.5rem 2.5rem 0.5rem 0rem',
         },
-        connectionFile: {
+        typeInfo: {
             color: '#C3C3C3',
+        },
+        divider: {
+            color: '#6A6A6A',
+            fontWeight: 'bold',
         }
     };
 
     return (
         <div >
             <div style={styles.titleLabelContainer}>
-                <p style={styles.connectionFile}>Connected to </p>&nbsp;&nbsp;
-                <h4 >{connectedServer}</h4> &nbsp;&nbsp;
-                <p>/</p>&nbsp;&nbsp;
-                <p style={styles.connectionFile}>Processing</p>&nbsp;&nbsp;
-                <h4 >{processingFile}</h4>
+                <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
+                <span style={styles.typeInfo}>Connected to </span>&nbsp;&nbsp;
+                {connectedServer} &nbsp;
+                <span style={styles.divider}>/</span>&nbsp;
+                <span style={styles.typeInfo}>Processing</span>&nbsp;&nbsp;
+                {processingFile} &nbsp;
+                <span style={styles.typeInfo}>file</span>
             </div>
             <div style={styles.connectionStatusIconsContainer}>
                 <FileQueueIcon
