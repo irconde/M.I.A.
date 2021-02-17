@@ -145,7 +145,6 @@ body {
 }
 
 .treeview-main {
-    order: 1; /* anchors sidebar to right side of screen */
     position: relative;
     width: 350px;
     height: 98vh;
