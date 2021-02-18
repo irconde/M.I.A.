@@ -89,7 +89,6 @@ const BoundPolyFAB = ({
     } else if (Utils.inRange(width, 2001, 3000)) {
         leftPX = '51.5%';
     }
-
     let fabOpacity;
     if (
         cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
