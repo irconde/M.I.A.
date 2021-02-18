@@ -124,6 +124,8 @@ class App extends Component {
         this.onDragEnd = this.onDragEnd.bind(this);
     }
 
+    
+
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
@@ -225,7 +227,10 @@ class App extends Component {
                 );
             }
         );
-        this.setState({ isFABVisible: true });
+        
+        this.setState({ 
+            isFABVisible: true
+        });
     }
 
     /**
@@ -1753,6 +1758,7 @@ class App extends Component {
         //TODO
     }
 
+    
     render() {
         return (
             <div>
