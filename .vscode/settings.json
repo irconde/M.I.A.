@@ -26,6 +26,14 @@
         "wado",
         "wadouri"
         "cornerstonetoolstouchpinch",
-        "cornerstonetoolstouchstart"
+        "cornerstonetoolstouchstart",
+        "dicom",
+        "fadein",
+        "irconde",
+        "jszip",
+        "openraster",
+        "textbox",
+        "wado",
+        "wadouri"
     ]
 }
