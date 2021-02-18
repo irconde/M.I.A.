@@ -1769,11 +1769,15 @@ class App extends Component {
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
 =======
                     <FAB
+=======
+                    <BoundPolyFAB
+>>>>>>> c515cd5... Modified file structure. Added Utility function to Obtain Users Screen size.
                         isVisible={this.state.isFABVisible}
                         isEditing={this.state.isDetectionEditing}
 >>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
