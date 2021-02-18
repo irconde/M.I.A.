@@ -61,24 +61,30 @@ const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect 
     
     //TODO: James; We need to update the left property in your styled div component
     //             based on the screen size here. I have it outlined, just needs to be implemented.
-    const [width] = Utils.getScreenSize();
-    let left = '50%';
+    let leftPX = '50%';
+    let userScreenWidth = Utils.getScreenSize();
+    let [width] = userScreenWidth;
     if (width < 800) {
-        left = '36%';
+        leftPX = '36%';
     } else if (width < 1200) {
-        left = '41.5%';
+        leftPX = '41.5%';
     } else if (width < 1500) {
-        left = '46%';
+        leftPX = '46%';
     } else if (width < 2000) {
-        left = '49%';
+        leftPX = '49%';
     } else if (width < 3000) {
-        left = '51.5%';
+        leftPX = '51.5%';
     }
 
-
-    console.log(left);
     return (
-        <FABContainer disabled={isEditing}>
+        <FABContainer
+            style={
+                FABContainer.componentStyle === undefined ? {} :
+                {
+                    left: leftPX,
+                }
+            }
+            disabled={isEditing}>
             <div
                 className="fabOption"
                 onClick={(e) => handleClick(e, onBoundingSelect)}>
@@ -102,7 +108,7 @@ BoundPolyFAB.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     isEditing: PropTypes.bool.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
-    onPolygonSelect: PropTypes.func.isRequired,
+    onPolygonSelect: PropTypes.func.isRequired
 };
 
 export default BoundPolyFAB;

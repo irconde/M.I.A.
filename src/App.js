@@ -123,6 +123,8 @@ class App extends Component {
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
     }
 
+    
+
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
@@ -203,7 +205,10 @@ class App extends Component {
                 );
             }
         );
-        this.setState({ isFABVisible: true });
+        
+        this.setState({ 
+            isFABVisible: true
+        });
     }
 
     /**
@@ -1569,7 +1574,15 @@ class App extends Component {
      * @param {none} None
      */
     onBoundingBoxSelected() {
-        //TODO
+        if (this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION) {
+            this.setState({
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION
+            }, () => {
+                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                    mouseButtonMask: 1,
+                });
+            })
+        }
     }
 
     /**
@@ -1581,6 +1594,7 @@ class App extends Component {
         //TODO
     }
 
+    
     render() {
         return (
             <div>
