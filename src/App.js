@@ -24,7 +24,7 @@ import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
 // TODO irconde: We import the new Tool
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
-import FAB from './components/FAB';
+import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -1632,7 +1632,7 @@ class App extends Component {
                         onMouseClicked={this.onMouseClicked}
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
-                    <FAB
+                    <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         isEditing={this.state.isDetectionEditing}
                         onBoundingSelect={this.onBoundingBoxSelected}

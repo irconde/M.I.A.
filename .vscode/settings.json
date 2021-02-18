@@ -1,6 +1,29 @@
 {
     "cSpell.words": [
+        "Algorithmand",
+        "Coord",
+        "DICO",
+        "Dicos",
+        "Ibar",
+        "Sdata",
+        "Simage",
+        "Sinfo",
+        "Viewport's",
+        "Viewports",
+        "bbox",
+        "cornerstoneimagerendered",
+        "cornerstonetoolsmouseclick",
+        "cornerstonetoolsmousedrag",
+        "cornerstonetoolsmousewheel",
         "cornerstonetoolstouchpinch",
-        "cornerstonetoolstouchstart"
+        "cornerstonetoolstouchstart",
+        "dicom",
+        "fadein",
+        "irconde",
+        "jszip",
+        "openraster",
+        "textbox",
+        "wado",
+        "wadouri"
     ]
 }

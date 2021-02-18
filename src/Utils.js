@@ -2,6 +2,7 @@
  * Class that encompasses any secondary method to support the primary features of the client
  */
 import * as constants from "./Constants";
+import { useLayoutEffect, useState } from "react";
 
 export default class Utils {
 
@@ -247,4 +248,21 @@ export default class Utils {
     viewportInfo["offset"] = offsetLeft;
     return viewportInfo;
   }
+
+  static getScreenSize() {
+    const [screenSize, setScreenSize] = useState([0, 0]);
+    
+    useLayoutEffect(() => {
+      function updateScreenSize() {
+        setScreenSize([window.innerWidth, window.innerHeight]);
+      }
+      window.addEventListener("resize", updateScreenSize);
+      updateScreenSize();
+      return () => window.removeEventListener("resize", updateScreenSize);
+    }, []);
+    
+    return screenSize;
+  }
+
 }
+

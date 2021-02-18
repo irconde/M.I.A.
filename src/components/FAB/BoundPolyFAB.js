@@ -1,13 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { ReactComponent as PolygonIcon } from '../icons/ic_polygon_dark.svg';
-import { ReactComponent as RectangleIcon } from '../icons/ic_rectangle_dark.svg';
+import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
+import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
+import Utils from '../../Utils';
 
 const FABContainer = styled.div`
     position: absolute;
     left: 50%;
-    bottom: 2%;
+    
+    bottom: 5%;
     padding: 1rem;
     background-color: #414141;
     color: #fff;
@@ -50,12 +52,31 @@ const FABContainer = styled.div`
  * GUI widget that allows user to select a new detection/annotation type.
  *
  */
-const FAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect }) => {
+const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect }) => {
     const handleClick = (e, cb) => {
         if (isVisible && !isEditing) {
             cb(e);
         }
     };
+    
+    //TODO: James; We need to update the left property in your styled div component
+    //             based on the screen size here. I have it outlined, just needs to be implemented.
+    const [width] = Utils.getScreenSize();
+    let left = '50%';
+    if (width < 800) {
+        left = '36%';
+    } else if (width < 1200) {
+        left = '41.5%';
+    } else if (width < 1500) {
+        left = '46%';
+    } else if (width < 2000) {
+        left = '49%';
+    } else if (width < 3000) {
+        left = '51.5%';
+    }
+
+
+    console.log(left);
     return (
         <FABContainer disabled={isEditing}>
             <div
@@ -77,11 +98,11 @@ const FAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect }) => {
     );
 };
 
-FAB.propTypes = {
+BoundPolyFAB.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     isEditing: PropTypes.bool.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
     onPolygonSelect: PropTypes.func.isRequired,
 };
 
-export default FAB;
+export default BoundPolyFAB;
