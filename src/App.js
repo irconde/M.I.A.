@@ -98,7 +98,6 @@ class App extends Component {
             socketFS: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isFABVisible: false,
-            isDetectionEditing: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -124,8 +123,6 @@ class App extends Component {
         this.addNewDetection = this.addNewDetection.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
     }
-
-    
 
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
@@ -1084,22 +1081,10 @@ class App extends Component {
 
         if (eventData.element.id === 'dicomImageLeft') {
             const context = eventData.canvasContext;
-<<<<<<< HEAD
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
             );
-=======
-            // TODO irconde. This is how we access data used to render bounding boxes with the BoundingBoxDrawing tool
-<<<<<<< HEAD
-            const toolData = cornerstoneTools.getToolState(e.currentTarget, "BoundingBoxDrawing");
->>>>>>> f9bdbf0... Added the BoundingBoxTool from the proof of concept branch custom-cornerstone-tool. Modified parts to support two-viewport model. Several bugs to be worked out still.
-=======
-            const toolData = cornerstoneTools.getToolState(
-                e.currentTarget,
-                'BoundingBoxDrawing'
-            );
->>>>>>> 92ace49... Added Cornerstone Modes to the Constants file. New state variable to manage this mode in App.js. Created skeleton for the FAB for the Bounding Box Annotation and Polygon Mask tools.
             this.setState({ zoomLevelTop: eventData.viewport.scale });
             this.renderDetections(this.state.detections, context);
         } else if (
@@ -1107,10 +1092,6 @@ class App extends Component {
             this.state.singleViewport === false
         ) {
             const context = eventData.canvasContext;
-<<<<<<< HEAD
-=======
-            // TODO irconde. This is how we access data used to render bounding boxes with the BoundingBoxDrawing tool
->>>>>>> 92ace49... Added Cornerstone Modes to the Constants file. New state variable to manage this mode in App.js. Created skeleton for the FAB for the Bounding Box Annotation and Polygon Mask tools.
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
@@ -1680,8 +1661,6 @@ class App extends Component {
      * @param {none} None
      */
     onBoundingBoxSelected() {
-<<<<<<< HEAD
-<<<<<<< HEAD
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
@@ -1701,20 +1680,6 @@ class App extends Component {
 
     addNewDetection(algorithm, { classname, score }) {
         console.log('add new detection!');
-=======
-        //TODO
->>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
-=======
-        if (this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION) {
-            this.setState({
-                cornerstoneMode: constants.cornerstoneMode.ANNOTATION
-            }, () => {
-                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                    mouseButtonMask: 1,
-                });
-            })
-        }
->>>>>>> 5ab3db5... Bounding Polygon FAB centers based on screen size. ANNOTATION mode can be enabled but not disabled.
     }
 
     /**
@@ -1726,7 +1691,6 @@ class App extends Component {
         //TODO
     }
 
-    
     render() {
         return (
             <div>
@@ -1783,19 +1747,9 @@ class App extends Component {
                         onMouseClicked={this.onMouseClicked}
                     />
                     <NoFileSign isVisible={!this.state.fileInQueue} />
-<<<<<<< HEAD
-<<<<<<< HEAD
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
-=======
-                    <FAB
-=======
-                    <BoundPolyFAB
->>>>>>> c515cd5... Modified file structure. Added Utility function to Obtain Users Screen size.
-                        isVisible={this.state.isFABVisible}
-                        isEditing={this.state.isDetectionEditing}
->>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
