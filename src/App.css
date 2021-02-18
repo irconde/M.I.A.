@@ -146,7 +146,7 @@ body {
 
 .treeview-main {
     position: absolute;
-    width: 300px;
+    width: 285px;
     height: 98vh;
     top: 3.375rem;
     opacity: 100%;
@@ -156,6 +156,7 @@ body {
     background-color: #1f1f1f;
     overflow: hidden;
     padding-top: 1.25vh;
+    font-size: 10pt;
 }
 
 .treeview > .toggle {
