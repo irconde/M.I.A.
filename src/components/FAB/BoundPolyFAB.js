@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import Utils from '../../Utils';
+import * as constants from '../../Constants';
 
 const FABContainer = styled.div`
     position: absolute;
@@ -16,7 +17,7 @@ const FABContainer = styled.div`
     border: 1px solid #414141;
     border-radius: 60px;
     display: flex;
-    opacity: ${(props) => (props.disabled ? '38%' : '100%')};
+    opacity: ${(props) => (props.fabOpacity ? '100%' : '38%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
 
     @keyframes fadein {
@@ -52,9 +53,9 @@ const FABContainer = styled.div`
  * GUI widget that allows user to select a new detection/annotation type.
  *
  */
-const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect }) => {
+const BoundPolyFAB = ({ isVisible, cornerstoneMode, onBoundingSelect, onPolygonSelect }) => {
     const handleClick = (e, cb) => {
-        if (isVisible && !isEditing) {
+        if (isVisible && cornerstoneMode === constants.cornerstoneMode.SELECTION ) {
             cb(e);
         }
     };
@@ -75,7 +76,12 @@ const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect 
     } else if (width < 3000) {
         leftPX = '51.5%';
     }
-
+    let fabOpacity;
+    if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
+        fabOpacity = false;
+    } else {
+        fabOpacity = true;
+    }
     return (
         <FABContainer
             style={
@@ -84,7 +90,7 @@ const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect 
                     left: leftPX,
                 }
             }
-            disabled={isEditing}>
+            fabOpacity={fabOpacity}>
             <div
                 className="fabOption"
                 onClick={(e) => handleClick(e, onBoundingSelect)}>
@@ -106,7 +112,7 @@ const BoundPolyFAB = ({ isVisible, isEditing, onBoundingSelect, onPolygonSelect 
 
 BoundPolyFAB.propTypes = {
     isVisible: PropTypes.bool.isRequired,
-    isEditing: PropTypes.bool.isRequired,
+    cornerstoneMode: PropTypes.string.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
     onPolygonSelect: PropTypes.func.isRequired
 };

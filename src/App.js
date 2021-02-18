@@ -99,7 +99,6 @@ class App extends Component {
             socketFS: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isFABVisible: false,
-            isDetectionEditing: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -1648,7 +1647,7 @@ class App extends Component {
                     <NoFileSign isVisible={!this.state.fileInQueue} />
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
-                        isEditing={this.state.isDetectionEditing}
+                        cornerstoneMode={this.state.cornerstoneMode}
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
