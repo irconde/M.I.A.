@@ -1,8 +1,13 @@
 /**
  * Class that encompasses any secondary method to support the primary features of the client
  */
+<<<<<<< HEAD
 import * as constants from './Constants';
 import { useLayoutEffect, useState } from 'react';
+=======
+import * as constants from "./Constants";
+import { useLayoutEffect, useState } from "react";
+>>>>>>> be6df2b... Modified file structure. Added Utility function to Obtain Users Screen size.
 
 export default class Utils {
     /**
@@ -406,3 +411,4 @@ export default class Utils {
         return (value - min) * (value - max) <= 0;
     }
 }
+
