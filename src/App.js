@@ -125,6 +125,8 @@ class App extends Component {
         this.onDragEnd = this.onDragEnd.bind(this);
     }
 
+    
+
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
@@ -1679,6 +1681,7 @@ class App extends Component {
      */
     onBoundingBoxSelected() {
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
@@ -1701,6 +1704,17 @@ class App extends Component {
 =======
         //TODO
 >>>>>>> bab7246... Update App.js to include FAB, new state values, and new methods
+=======
+        if (this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION) {
+            this.setState({
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION
+            }, () => {
+                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                    mouseButtonMask: 1,
+                });
+            })
+        }
+>>>>>>> 5ab3db5... Bounding Polygon FAB centers based on screen size. ANNOTATION mode can be enabled but not disabled.
     }
 
     /**
@@ -1712,6 +1726,7 @@ class App extends Component {
         //TODO
     }
 
+    
     render() {
         return (
             <div>
