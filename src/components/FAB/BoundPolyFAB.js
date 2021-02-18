@@ -125,7 +125,7 @@ BoundPolyFAB.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     cornerstoneMode: PropTypes.string.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
-    onPolygonSelect: PropTypes.func.isRequired,
+    onPolygonSelect: PropTypes.func.isRequired
 };
 
 export default BoundPolyFAB;
