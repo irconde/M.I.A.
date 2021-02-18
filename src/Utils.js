@@ -406,3 +406,4 @@ export default class Utils {
         return (value - min) * (value - max) <= 0;
     }
 }
+
