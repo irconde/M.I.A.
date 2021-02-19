@@ -6,6 +6,13 @@ import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.s
 import Utils from '../../Utils';
 import * as constants from '../../Constants';
 
+/**
+ * FABContainer - Styled div for the FAB Button. Takes in props to control the look
+ *                depending on certain properties.
+ *
+ * @property {leftPX} - Prop to control the horizontal alignment dynamically
+ * @property {fabOpacity} - Prop to control opacity based on the current cornerstoneMode
+ */
 const FABContainer = styled.div`
     position: absolute;
     left: ${(props) => props.leftPX};
@@ -50,7 +57,7 @@ const FABContainer = styled.div`
 `;
 
 /**
- * GUI widget that allows user to select a new detection/annotation type.
+ * GUI widget that allows user to create a new detection and its polygon mask.
  *
  */
 const BoundPolyFAB = ({
@@ -67,29 +74,29 @@ const BoundPolyFAB = ({
             cb(e);
         }
     };
-
-    //TODO: James; We need to update the left property in your styled div component
-    //             based on the screen size here. I have it outlined, just needs to be implemented.
+    // Calculating screen size and setting horizontal value accordingly.
     let leftPX = '50%';
     const userScreenWidth = Utils.getScreenSize();
     let [width] = userScreenWidth;
-    if (width < 800) {
+    if (Utils.inRange(width, 0, 800)) {
         leftPX = '36%';
-    } else if (width < 1200) {
+    } else if (Utils.inRange(width, 801, 1200)) {
         leftPX = '41.5%';
-    } else if (width < 1500) {
+    } else if (Utils.inRange(width, 1201, 1500)) {
         leftPX = '46%';
-    } else if (width < 2000) {
-        leftPX = '49%';
-    } else if (width < 3000) {
+    } else if (Utils.inRange(width, 1501, 2000)) {
+        leftPX = '47%';
+    } else if (Utils.inRange(width, 2001, 3000)) {
         leftPX = '51.5%';
     }
+
     let fabOpacity;
     if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
         fabOpacity = false;
     } else {
         fabOpacity = true;
     }
+
     return (
         <FABContainer leftPX={leftPX} fabOpacity={fabOpacity}>
             <div
