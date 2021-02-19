@@ -1,4 +1,4 @@
-import csTools from 'cornerstone-tools'
+import csTools from 'cornerstone-tools';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getROITextBoxCoords = csTools.importInternal('util/getROITextBoxCoords');
@@ -11,203 +11,211 @@ const drawLinkedTextBox = csTools.importInternal('drawing/drawLinkedTextBox');
 
 // TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
-  constructor(props = {}) {
-
-    const defaultProps = {
-      name: 'BoundingBoxDrawing',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      configuration: {
-        drawHandles: true,
-        drawHandlesOnHover: true,
-        hideHandlesIfMoving: true,
-        renderDashed: true,
-      },
-      // TODO irconde. Customize the cursor
-      //svgCursor: rectangleRoiCursor,
-    };
-
-    super(props, defaultProps);
-  }
-
-  // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
-  //  over (or close to) the rectangle's border
-  pointNearTool(element, data, coords, interactionType) {
-
-    const hasStartAndEndHandles =
-        data && data.handles && data.handles.start && data.handles.end;
-    const validParameters = hasStartAndEndHandles;
-
-    if (!validParameters) {
-      console.log("invalid parameters supplied to tool's pointNearTool");
-    }
-
-    if (!validParameters || data.visible === false) {
-      return false;
-    }
-
-    const distance = interactionType === 'mouse' ? 15 : 25;
-    const startCanvas = csTools.external.cornerstone.pixelToCanvas(
-        element,
-        data.handles.start
-    );
-    const endCanvas = csTools.external.cornerstone.pixelToCanvas(
-        element,
-        data.handles.end
-    );
-
-    const rect = {
-      left: Math.min(startCanvas.x, endCanvas.x),
-      top: Math.min(startCanvas.y, endCanvas.y),
-      width: Math.abs(startCanvas.x - endCanvas.x),
-      height: Math.abs(startCanvas.y - endCanvas.y),
-    };
-
-    const distanceToPoint = csTools.external.cornerstoneMath.rect.distanceToPoint(
-        rect,
-        coords
-    );
-
-    return distanceToPoint < distance;
-  }
-
-  // TODO irconde. Abstract method. Automatically invoked to render all the widgets that comprise a detection
-
-  renderToolData(evt) {
-    const toolData = csTools.getToolState(evt.currentTarget, this.name);
-    if (!toolData) {
-      console.log("No tool data");
-      return;
-    }
-
-    const eventData = evt.detail;
-    const { image, element } = eventData;
-    const lineWidth = csTools.toolStyle.getToolWidth();
-
-    const lineDash = csTools.getModule('globalConfiguration').configuration.lineDash;
-    const {
-      handleRadius,
-      drawHandlesOnHover,
-      hideHandlesIfMoving,
-      renderDashed,
-    } = this.configuration;
-
-    const context = getNewContext(eventData.canvasContext.canvas);
-
-    draw(context, context => {
-      // If we have tool data for this element - iterate over each set and draw it
-      for (let i = 0; i < toolData.data.length; i++) {
-        const data = toolData.data[i];
-        if (data.visible === false) {
-          continue;
-        }
-        // Configure
-        const color = csTools.toolColors.getColorIfActive(data);
-        const handleOptions = {
-          color,
-          handleRadius,
-          drawHandlesIfActive: drawHandlesOnHover,
-          hideHandlesIfMoving,
+    constructor(props = {}) {
+        const defaultProps = {
+            name: 'BoundingBoxDrawing',
+            supportedInteractionTypes: ['Mouse', 'Touch'],
+            configuration: {
+                drawHandles: true,
+                drawHandlesOnHover: true,
+                hideHandlesIfMoving: true,
+                renderDashed: true,
+            },
+            // TODO irconde. Customize the cursor
+            //svgCursor: rectangleRoiCursor,
         };
-        setShadow(context, this.configuration);
-        const rectOptions = { color };
 
-        if (renderDashed) {
-          rectOptions.lineDash = lineDash;
-        }
-
-        // Draw bounding box
-        drawRect(
-            context,
-            element,
-            data.handles.start,
-            data.handles.end,
-            rectOptions,
-            'pixel',
-            data.handles.initialRotation
-        );
-
-        // Draw handles
-        if (this.configuration.drawHandles) {
-          drawHandles(context, eventData, data.handles, handleOptions);
-        }
-
-        // Default to textbox on right side of ROI
-        if (!data.handles.textBox.hasMoved) {
-          const defaultCoords = getROITextBoxCoords(
-            eventData.viewport,
-            data.handles
-          );
-
-          Object.assign(data.handles.textBox, defaultCoords);
-        }
-
-        const textBoxAnchorPoints = handles =>
-          _findTextBoxAnchorPoints(handles.start, handles.end);
-
-        // TODO irconde. Hardcoded detection info. It should be added later on, after creating the bounding box
-        const textBoxContent = _createTextBoxContent(
-          context, {className: "apple", score: "30"},
-          this.configuration
-        );
-
-        drawLinkedTextBox(
-          context,
-          element,
-          data.handles.textBox,
-          textBoxContent,
-          data.handles,
-          textBoxAnchorPoints,
-          color,
-          lineWidth,
-          10,
-          true
-        );
-      }
-    });
-
-  }
-
-  // TODO irconde: abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
-  createNewMeasurement(eventData) {
-    console.log("createNewMeasurement");
-    const goodEventData =
-        eventData && eventData.currentPoints && eventData.currentPoints.image;
-
-    if (!goodEventData) {
-      console.log("required eventData not supplied to tool's createNewMeasurement");
-      return;
+        super(props, defaultProps);
     }
 
-    return {
-      visible: true,
-      active: true,
-      color: undefined,
-      invalidated: true,
-      handles: {
-        start: {
-          x: eventData.currentPoints.image.x,
-          y: eventData.currentPoints.image.y,
-          highlight: true,
-          active: false,
-        },
-        end: {
-          x: eventData.currentPoints.image.x,
-          y: eventData.currentPoints.image.y,
-          highlight: true,
-          active: true,
-        },
-        initialRotation: eventData.viewport.rotation,
-        textBox: {
-          active: false,
-          hasMoved: false,
-          movesIndependently: false,
-          drawnIndependently: true,
-          allowedOutsideImage: true,
-          hasBoundingBox: true,
-        },
-      },
-    };
-  }
+    // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
+    //  over (or close to) the rectangle's border
+    pointNearTool(element, data, coords, interactionType) {
+        const hasStartAndEndHandles =
+            data && data.handles && data.handles.start && data.handles.end;
+        const validParameters = hasStartAndEndHandles;
+
+        if (!validParameters) {
+            console.log("invalid parameters supplied to tool's pointNearTool");
+        }
+
+        if (!validParameters || data.visible === false) {
+            return false;
+        }
+
+        const distance = interactionType === 'mouse' ? 15 : 25;
+        const startCanvas = csTools.external.cornerstone.pixelToCanvas(
+            element,
+            data.handles.start
+        );
+        const endCanvas = csTools.external.cornerstone.pixelToCanvas(
+            element,
+            data.handles.end
+        );
+
+        const rect = {
+            left: Math.min(startCanvas.x, endCanvas.x),
+            top: Math.min(startCanvas.y, endCanvas.y),
+            width: Math.abs(startCanvas.x - endCanvas.x),
+            height: Math.abs(startCanvas.y - endCanvas.y),
+        };
+
+        const distanceToPoint = csTools.external.cornerstoneMath.rect.distanceToPoint(
+            rect,
+            coords
+        );
+
+        return distanceToPoint < distance;
+    }
+
+    // TODO irconde. Abstract method. Automatically invoked to render all the widgets that comprise a detection
+
+    renderToolData(evt) {
+        const toolData = csTools.getToolState(evt.currentTarget, this.name);
+        if (!toolData) {
+            console.log('No tool data');
+            return;
+        }
+
+        const eventData = evt.detail;
+        const { image, element } = eventData;
+        const lineWidth = csTools.toolStyle.getToolWidth();
+
+        const lineDash = csTools.getModule('globalConfiguration').configuration
+            .lineDash;
+        const {
+            handleRadius,
+            drawHandlesOnHover,
+            hideHandlesIfMoving,
+            renderDashed,
+        } = this.configuration;
+
+        const context = getNewContext(eventData.canvasContext.canvas);
+
+        draw(context, (context) => {
+            // If we have tool data for this element - iterate over each set and draw it
+            for (let i = 0; i < toolData.data.length; i++) {
+                const data = toolData.data[i];
+                if (data.visible === false) {
+                    continue;
+                }
+                // Configure
+                const color = csTools.toolColors.getColorIfActive(data);
+                const handleOptions = {
+                    color,
+                    handleRadius,
+                    drawHandlesIfActive: drawHandlesOnHover,
+                    hideHandlesIfMoving,
+                };
+                setShadow(context, this.configuration);
+                const rectOptions = { color };
+
+                if (renderDashed) {
+                    rectOptions.lineDash = lineDash;
+                }
+
+                // Draw bounding box
+                drawRect(
+                    context,
+                    element,
+                    data.handles.start,
+                    data.handles.end,
+                    rectOptions,
+                    'pixel',
+                    data.handles.initialRotation
+                );
+
+                // Draw handles
+                if (this.configuration.drawHandles) {
+                    drawHandles(
+                        context,
+                        eventData,
+                        data.handles,
+                        handleOptions
+                    );
+                }
+
+                // Default to textbox on right side of ROI
+                if (!data.handles.textBox.hasMoved) {
+                    const defaultCoords = getROITextBoxCoords(
+                        eventData.viewport,
+                        data.handles
+                    );
+
+                    Object.assign(data.handles.textBox, defaultCoords);
+                }
+
+                const textBoxAnchorPoints = (handles) =>
+                    _findTextBoxAnchorPoints(handles.start, handles.end);
+
+                // TODO irconde. Hardcoded detection info. It should be added later on, after creating the bounding box
+                const textBoxContent = _createTextBoxContent(
+                    context,
+                    { className: 'banana', score: '60' },
+                    this.configuration
+                );
+
+                drawLinkedTextBox(
+                    context,
+                    element,
+                    data.handles.textBox,
+                    textBoxContent,
+                    data.handles,
+                    textBoxAnchorPoints,
+                    color,
+                    lineWidth,
+                    10,
+                    true
+                );
+            }
+        });
+    }
+
+    // TODO irconde: abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
+    createNewMeasurement(eventData) {
+        console.log('createNewMeasurement');
+        const goodEventData =
+            eventData &&
+            eventData.currentPoints &&
+            eventData.currentPoints.image;
+
+        if (!goodEventData) {
+            console.log(
+                "required eventData not supplied to tool's createNewMeasurement"
+            );
+            return;
+        }
+
+        return {
+            visible: true,
+            active: true,
+            color: undefined,
+            invalidated: true,
+            handles: {
+                start: {
+                    x: eventData.currentPoints.image.x,
+                    y: eventData.currentPoints.image.y,
+                    highlight: true,
+                    active: false,
+                },
+                end: {
+                    x: eventData.currentPoints.image.x,
+                    y: eventData.currentPoints.image.y,
+                    highlight: true,
+                    active: true,
+                },
+                initialRotation: eventData.viewport.rotation,
+                textBox: {
+                    active: false,
+                    hasMoved: false,
+                    movesIndependently: false,
+                    drawnIndependently: true,
+                    allowedOutsideImage: true,
+                    hasBoundingBox: true,
+                },
+            },
+        };
+    }
 }
 
 /**
@@ -218,14 +226,13 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
  */
 
 function _getRectangleImageCoordinates(startHandle, endHandle) {
-  return {
-    left: Math.min(startHandle.x, endHandle.x),
-    top: Math.min(startHandle.y, endHandle.y),
-    width: Math.abs(startHandle.x - endHandle.x),
-    height: Math.abs(startHandle.y - endHandle.y),
-  };
+    return {
+        left: Math.min(startHandle.x, endHandle.x),
+        top: Math.min(startHandle.y, endHandle.y),
+        width: Math.abs(startHandle.x - endHandle.x),
+        height: Math.abs(startHandle.y - endHandle.y),
+    };
 }
-
 
 /**
  *
@@ -236,10 +243,10 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
  */
 
 function _createTextBoxContent(context, { className, score }, options = {}) {
-  const textLines = [];
-  const classInfoString = `${className} - ${score}%`;
-  textLines.push(classInfoString);
-  return textLines;
+    const textLines = [];
+    const classInfoString = `${className} - ${score}%`;
+    textLines.push(classInfoString);
+    return textLines;
 }
 
 /**
@@ -251,31 +258,31 @@ function _createTextBoxContent(context, { className, score }, options = {}) {
  */
 
 function _findTextBoxAnchorPoints(startHandle, endHandle) {
-  const { left, top, width, height } = _getRectangleImageCoordinates(
-    startHandle,
-    endHandle
-  );
+    const { left, top, width, height } = _getRectangleImageCoordinates(
+        startHandle,
+        endHandle
+    );
 
-  return [
-    {
-      // Top middle point of rectangle
-      x: left + width / 2,
-      y: top,
-    },
-    {
-      // Left middle point of rectangle
-      x: left,
-      y: top + height / 2,
-    },
-    {
-      // Bottom middle point of rectangle
-      x: left + width / 2,
-      y: top + height,
-    },
-    {
-      // Right middle point of rectangle
-      x: left + width,
-      y: top + height / 2,
-    },
-  ];
+    return [
+        {
+            // Top middle point of rectangle
+            x: left + width / 2,
+            y: top,
+        },
+        {
+            // Left middle point of rectangle
+            x: left,
+            y: top + height / 2,
+        },
+        {
+            // Bottom middle point of rectangle
+            x: left + width / 2,
+            y: top + height,
+        },
+        {
+            // Right middle point of rectangle
+            x: left + width,
+            y: top + height / 2,
+        },
+    ];
 }
