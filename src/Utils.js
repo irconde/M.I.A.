@@ -170,33 +170,6 @@ export default class Utils {
         return fileName;
     }
 
-    /**
-     * b64toBlob - Converts binary64 encoding to a blob to display
-     *
-     * @param  {type} b64Data Binary string
-     * @param  {type} contentType The MIMI type, image/dcs
-     * @return {type}               blob
-     */
-    static b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
-        const byteCharacters = atob(b64Data);
-        const byteArrays = [];
-        for (
-            let offset = 0;
-            offset < byteCharacters.length;
-            offset += sliceSize
-        ) {
-            const slice = byteCharacters.slice(offset, offset + sliceSize);
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-        const blob = new Blob(byteArrays, { type: contentType });
-        return blob;
-    };
-
     static changeViewport(singleViewport) {
         let viewportTop = document.getElementById('dicomImageLeft');
         let viewportSide = document.getElementById('dicomImageRight');
@@ -262,52 +235,6 @@ export default class Utils {
             fileName = fileSrcPath.split('/')[1];
         }
         return fileName;
-    }
-
-
-    }
-
-    /**
-     * b64toBlob - Converts binary64 encoding to a blob to display
-     *
-     * @param  {type} b64Data Binary string
-     * @param  {type} contentType The MIMI type, image/dcs
-     * @return {type}               blob
-     */
-    static b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
-        const byteCharacters = atob(b64Data);
-        const byteArrays = [];
-        for (
-            let offset = 0;
-            offset < byteCharacters.length;
-            offset += sliceSize
-        ) {
-            const slice = byteCharacters.slice(offset, offset + sliceSize);
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-        const blob = new Blob(byteArrays, { type: contentType });
-        return blob;
-    };
-
-    /**
-     * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
-     *
-     * @param {string} base64 Binary 64 string to convert to ArrayBuffer
-     * @return {type} ArrayBuffer
-     */
-    static base64ToArrayBuffer(base64) {
-        const binary_string = window.atob(base64);
-        const len = binary_string.length;
-        let bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
     }
 
     static changeViewport(singleViewport) {
@@ -413,74 +340,6 @@ export default class Utils {
                     offsetLeft = e.target.offsetLeft;
                 }
             }
-        }
-        viewportInfo['viewport'] = viewport;
-        viewportInfo['offset'] = offsetLeft;
-        return viewportInfo;
-    }
-
-    static changeViewport(singleViewport) {
-        let viewportTop = document.getElementById('dicomImageLeft');
-        let viewportSide = document.getElementById('dicomImageRight');
-        let verticalDivider = document.getElementById('verticalDivider');
-
-        if (singleViewport === true) {
-            viewportTop.classList.remove('twoViewportsTop');
-            viewportTop.classList.remove('singleViewportTop');
-            viewportTop.classList.add('singleViewportTop');
-            viewportTop.style.visibility = 'visible';
-
-            viewportSide.classList.remove('twoViewportsSide');
-            viewportSide.classList.remove('singleViewportSide');
-            viewportSide.classList.add('singleViewportSide');
-            viewportSide.style.visibility = 'hidden';
-
-            verticalDivider.classList.add('dividerHidden');
-            verticalDivider.classList.remove('dividerVisible');
-        } else {
-            viewportTop.classList.remove('singleViewportTop');
-            viewportTop.classList.remove('twoViewportsTop');
-            viewportTop.classList.add('twoViewportsTop');
-            viewportTop.style.visibility = 'visible';
-
-            viewportSide.classList.remove('singleViewportSide');
-            viewportSide.classList.remove('twoViewportsSide');
-            viewportSide.classList.add('twoViewportsSide');
-            viewportSide.style.visibility = 'visible';
-
-            verticalDivider.classList.remove('dividerHidden');
-            verticalDivider.classList.add('dividerVisible');
-        }
-    }
-
-    /**
-     * getDataFromViewport - Get data required for validation buttons' proper rendering
-     *
-     * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
-     * @param viewportName {string} - Viewport's name
-     * @param DOM {Document} - HTML DOM
-     */
-    static getDataFromViewport(viewportName, DOM) {
-        let viewportInfo = {};
-        let viewport = undefined;
-        let offsetLeft = 0;
-        let viewportElement;
-        const viewportId =
-            viewportName === 'top'
-                ? 'dicomImageLeft'
-                : viewportName === 'side'
-                ? 'dicomImageRight'
-                : undefined;
-        if (viewportId !== undefined)
-            viewportElement = DOM.getElementById(viewportId);
-        if (viewportElement !== undefined) {
-            offsetLeft = viewportElement.offsetLeft;
-            viewport =
-                viewportName === 'top'
-                    ? constants.viewport.TOP
-                    : viewportName === 'side'
-                    ? constants.viewport.SIDE
-                    : undefined;
         }
         viewportInfo['viewport'] = viewport;
         viewportInfo['offset'] = offsetLeft;
