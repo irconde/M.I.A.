@@ -113,12 +113,14 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     drawHandlesIfActive: drawHandlesOnHover,
                     hideHandlesIfMoving,
                 };
+
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
 
                 if (renderDashed) {
                     rectOptions.lineDash = lineDash;
                 }
+                rectOptions.lineWidth = lineWidth;
 
                 // Draw bounding box
                 drawRect(
