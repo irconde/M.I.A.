@@ -22,7 +22,6 @@ import DetectionSet from './DetectionSet';
 import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
-// TODO irconde: We import the new Tool
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 
@@ -324,7 +323,6 @@ class App extends Component {
         const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-        // TODO irconde: We add the tool to our instance of Cornerstone Tools
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
@@ -1044,7 +1042,6 @@ class App extends Component {
 
         if (eventData.element.id === 'dicomImageLeft') {
             const context = eventData.canvasContext;
-            // TODO irconde. This is how we access data used to render bounding boxes with the BoundingBoxDrawing tool
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
@@ -1056,7 +1053,6 @@ class App extends Component {
             this.state.singleViewport === false
         ) {
             const context = eventData.canvasContext;
-            // TODO irconde. This is how we access data used to render bounding boxes with the BoundingBoxDrawing tool
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
@@ -1372,7 +1368,11 @@ class App extends Component {
                     return;
                 }
                 // Click on an empty area
-                if (clickedPos === constants.selection.NO_SELECTION) {
+                if (
+                    clickedPos === constants.selection.NO_SELECTION &&
+                    this.state.cornerstoneMode !==
+                        constants.cornerstoneMode.ANNOTATION
+                ) {
                     detectionSet.clearAll();
                     this.setState({ displayButtons: false }, () => {
                         this.renderButtons(e);
@@ -1383,7 +1383,11 @@ class App extends Component {
                     )) {
                         myDetectionSet.selectAlgorithm(false);
                     }
-                    if (detectionSet.visibility !== false) {
+                    if (
+                        detectionSet.visibility !== false &&
+                        this.state.cornerstoneMode !==
+                            constants.cornerstoneMode.ANNOTATION
+                    ) {
                         let anyDetection = this.currentSelection.selectDetection(
                             detectionSet.algorithm,
                             clickedPos,
@@ -1577,6 +1581,7 @@ class App extends Component {
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                    displayButtons: true,
                 },
                 () => {
                     cornerstoneTools.setToolActive('BoundingBoxDrawing', {
@@ -1635,10 +1640,7 @@ class App extends Component {
                         hideButtons={this.hideButtons}
                         renderButtons={this.onMouseClicked}
                         nextImageClick={this.nextImageClick}
-                        enableNextButton={
-                            !this.state.isEditingOrAnnotating &&
-                            !this.state.displayButtons
-                        }
+                        enableNextButton={!this.state.displayButtons}
                     />
                     <div id="algorithm-outputs"> </div>
                     <ValidationButtons

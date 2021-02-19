@@ -143,7 +143,7 @@ export default class Utils {
      * @param {String} uri - String value that represents the location of a img file within an ORA file
      * @return {MouseEvent} fileName - String value with the name of the file
      */
-    static getFilenameFromURI(fileNmae) {
+    static getFilenameFromURI(fileSrcPath) {
         const userAgent = window.navigator.userAgent,
             platform = window.navigator.platform,
             macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
@@ -153,19 +153,19 @@ export default class Utils {
         let fileName = null;
         if (macosPlatforms.indexOf(platform) !== -1) {
             os = 'Mac';
-            fileName = fileNmae.split('/')[1];
+            fileName = fileSrcPath.split('/')[1];
         } else if (iosPlatforms.indexOf(platform) !== -1) {
             os = 'iOS';
-            fileName = fileNmae.split('/')[1];
+            fileName = fileSrcPath.split('/')[1];
         } else if (windowsPlatforms.indexOf(platform) !== -1) {
             os = 'Windows';
-            fileName = fileNmae.split('\\')[1];
+            fileName = fileSrcPath.split('\\')[1];
         } else if (/Android/.test(userAgent)) {
             os = 'Android';
-            fileName = fileNmae.split('/')[1];
+            fileName = fileSrcPath.split('/')[1];
         } else if (!os && /Linux/.test(platform)) {
             os = 'Linux';
-            fileName = fileNmae.split('/')[1];
+            fileName = fileSrcPath.split('/')[1];
         }
         return fileName;
     }
@@ -189,8 +189,25 @@ export default class Utils {
                     viewport = constants.viewport.SIDE;
                     offsetLeft = e.target.offsetLeft;
                 }
+            } else {
+                if (
+                    e.target.id === 'top-span' ||
+                    e.target.id === 'top-container'
+                ) {
+                    viewport = constants.viewport.TOP;
+                    offsetLeft = e.target.offsetLeft;
+                } else if (
+                    e.target.id === 'side-span' ||
+                    e.target.id === 'side-container'
+                ) {
+                    viewport = constants.viewport.SIDE;
+                    offsetLeft = e.target.offsetLeft;
+                }
             }
         }
+        viewportInfo['viewport'] = viewport;
+        viewportInfo['offset'] = offsetLeft;
+        return viewportInfo;
     }
 
     static changeViewport(singleViewport) {

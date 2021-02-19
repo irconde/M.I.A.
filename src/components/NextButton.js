@@ -14,8 +14,8 @@ const NextButtonContainer = styled.div`
     font-weight: bold;
     font-size: 12pt;
     height: 75px;
-  
-    opacity: ${(props) => (props.disabled ? '38%' : '100%')};
+
+    opacity: ${(props) => (props.enabled ? '100%' : '38%')};
     p {
         flex: 1;
         text-transform: uppercase;
@@ -26,7 +26,7 @@ const NextButtonContainer = styled.div`
     img {
         height: 2em;
         width: auto;
-        margin-right: .5em;
+        margin-right: 0.5em;
     }
 `;
 
@@ -38,7 +38,7 @@ const NextButton = ({ enableNextButton, nextImageClick }) => {
     };
     return (
         <NextButtonContainer
-            disabled={!enableNextButton}
+            enabled={enableNextButton}
             onClick={handleClick}
             id="nextButton">
             <p>Next</p>
