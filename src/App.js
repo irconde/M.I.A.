@@ -1407,15 +1407,31 @@ class App extends Component {
                     return;
                 }
                 // Click on an empty area
-                if (
-                    clickedPos === constants.selection.NO_SELECTION &&
-                    this.state.cornerstoneMode !==
+                if (clickedPos === constants.selection.NO_SELECTION) {
+                    if (
+                        this.state.cornerstoneMode !==
                         constants.cornerstoneMode.ANNOTATION
-                ) {
-                    detectionSet.clearAll();
-                    this.setState({ displayButtons: false }, () => {
-                        this.renderButtons(e);
-                    });
+                    ) {
+                        detectionSet.clearAll();
+                        this.setState({ displayButtons: false }, () => {
+                            this.renderButtons(e);
+                        });
+                    }
+                    // User is in annotation mode, reset tool to default selection
+                    else if (
+                        this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.ANNOTATION
+                    ) {
+                        this.setState(
+                            {
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.SELECTION,
+                            },
+                            () => {
+                                this.resetCornerstoneTool();
+                            }
+                        );
+                    }
                 } else {
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
