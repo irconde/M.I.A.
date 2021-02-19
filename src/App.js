@@ -22,6 +22,7 @@ import DetectionSet from './DetectionSet';
 import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
+import * as mixins from './cornerstone-tools/mixins/index';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 
@@ -338,6 +339,15 @@ class App extends Component {
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
         cornerstone.enable(imageViewportSide);
+        const boundingBoxDrawingToolMixin = cornerstoneTools.importInternal(
+            './cornerstone-tools/mixins/boundingBoxDrawingTool'
+        );
+        cornerstoneTools.register(
+            'mixin',
+            'boundingBoxDrawingTool',
+            boundingBoxDrawingToolMixin,
+            true
+        );
         const PanTool = cornerstoneTools.PanTool;
         cornerstoneTools.addTool(PanTool);
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
