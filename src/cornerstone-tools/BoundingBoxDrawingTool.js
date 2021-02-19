@@ -23,30 +23,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 renderDashed: false,
                 renderClassName: false,
             },
-            mixins: ['boundingBoxDrawingTool'],
+            mixins: ['boundingBoxDrawingToolMixin'],
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
-        this._boundingMixing = csTools.getModule('boundingBoxDrawingTool');
-    }
-
-    _boundingBox() {
-        console.log('bounding box');
     }
 
     postMouseDownCallback(evt) {
-        this._boundingBox();
         console.log(this);
-        console.log('Hello cornerstoneTools!');
-    }
-
-    activeCallback(element) {
-        console.log(`Hello element ${element.uuid}!`);
-    }
-
-    disabledCallback(element) {
-        console.log(`Goodbye element ${element.uuid}!`);
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
