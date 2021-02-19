@@ -41,7 +41,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         console.log(`Goodbye element ${element.uuid}!`);
     }
 
-    preMouseDownCallback(evt) {
+    postMouseDownCallback(evt) {
+        this._boundingBox();
+        console.log(this);
         console.log('Hello cornerstoneTools!');
     }
 
