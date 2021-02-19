@@ -8,8 +8,8 @@ import * as constants from '../../Constants';
 
 const FABContainer = styled.div`
     position: absolute;
-    left: 50%;
-    
+    left: ${(props) => props.leftPX};
+
     bottom: 5%;
     padding: 1rem;
     background-color: #414141;
@@ -53,17 +53,25 @@ const FABContainer = styled.div`
  * GUI widget that allows user to select a new detection/annotation type.
  *
  */
-const BoundPolyFAB = ({ isVisible, cornerstoneMode, onBoundingSelect, onPolygonSelect }) => {
+const BoundPolyFAB = ({
+    isVisible,
+    cornerstoneMode,
+    onBoundingSelect,
+    onPolygonSelect,
+}) => {
     const handleClick = (e, cb) => {
-        if (isVisible && cornerstoneMode === constants.cornerstoneMode.SELECTION ) {
+        if (
+            isVisible &&
+            cornerstoneMode === constants.cornerstoneMode.SELECTION
+        ) {
             cb(e);
         }
     };
-    
+
     //TODO: James; We need to update the left property in your styled div component
     //             based on the screen size here. I have it outlined, just needs to be implemented.
     let leftPX = '50%';
-    let userScreenWidth = Utils.getScreenSize();
+    const userScreenWidth = Utils.getScreenSize();
     let [width] = userScreenWidth;
     if (width < 800) {
         leftPX = '36%';
@@ -83,14 +91,7 @@ const BoundPolyFAB = ({ isVisible, cornerstoneMode, onBoundingSelect, onPolygonS
         fabOpacity = true;
     }
     return (
-        <FABContainer
-            style={
-                FABContainer.componentStyle === undefined ? {} :
-                {
-                    left: leftPX,
-                }
-            }
-            fabOpacity={fabOpacity}>
+        <FABContainer leftPX={leftPX} fabOpacity={fabOpacity}>
             <div
                 className="fabOption"
                 onClick={(e) => handleClick(e, onBoundingSelect)}>
@@ -114,7 +115,7 @@ BoundPolyFAB.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     cornerstoneMode: PropTypes.string.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
-    onPolygonSelect: PropTypes.func.isRequired
+    onPolygonSelect: PropTypes.func.isRequired,
 };
 
 export default BoundPolyFAB;
