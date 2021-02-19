@@ -1,4 +1,5 @@
 import csTools from 'cornerstone-tools';
+import * as constants from '../Constants';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getROITextBoxCoords = csTools.importInternal('util/getROITextBoxCoords');
@@ -8,6 +9,7 @@ const setShadow = csTools.importInternal('drawing/setShadow');
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
 const drawLinkedTextBox = csTools.importInternal('drawing/drawLinkedTextBox');
+import * as mixins from './mixins/index';
 
 // TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -19,13 +21,27 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 drawHandles: true,
                 drawHandlesOnHover: true,
                 hideHandlesIfMoving: true,
-                renderDashed: true,
+                renderDashed: false,
+                renderClassName: false,
             },
+            mixins,
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
 
         super(props, defaultProps);
+    }
+
+    preMouseDownCallback(evt) {
+        console.log('Hello cornerstoneTools!');
+    }
+
+    activeCallback(element) {
+        console.log(`Hello element ${element.uuid}!`);
+    }
+
+    disabledCallback(element) {
+        console.log(`Goodbye element ${element.uuid}!`);
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
@@ -79,7 +95,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
         const eventData = evt.detail;
         const { image, element } = eventData;
-        const lineWidth = csTools.toolStyle.getToolWidth();
+        const lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        this.initialConfiguration.mixins.default.boundingBoxDrawingTool
+            .boundingBoxDrawingTool;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -100,7 +118,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     continue;
                 }
                 // Configure
-                const color = csTools.toolColors.getColorIfActive(data);
+                const color = constants.detectionStyle.NORMAL_COLOR;
                 const handleOptions = {
                     color,
                     handleRadius,
@@ -136,13 +154,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
 
                 // Default to textbox on right side of ROI
-                if (!data.handles.textBox.hasMoved) {
-                    const defaultCoords = getROITextBoxCoords(
-                        eventData.viewport,
-                        data.handles
-                    );
+                if (this.configuration.renderClassName === true) {
+                    if (!data.handles.textBox.hasMoved) {
+                        const defaultCoords = getROITextBoxCoords(
+                            eventData.viewport,
+                            data.handles
+                        );
 
-                    Object.assign(data.handles.textBox, defaultCoords);
+                        Object.assign(data.handles.textBox, defaultCoords);
+                    }
                 }
 
                 const textBoxAnchorPoints = (handles) =>
@@ -151,7 +171,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 // TODO irconde. Hardcoded detection info. It should be added later on, after creating the bounding box
                 const textBoxContent = _createTextBoxContent(
                     context,
-                    { className: 'banana', score: '60' },
+                    {
+                        className: constants.commonDetections.UNKNOWN,
+                        score: '100',
+                    },
                     this.configuration
                 );
 

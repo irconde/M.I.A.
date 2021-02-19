@@ -119,6 +119,7 @@ class App extends Component {
         );
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
+        this.addNewDetection = this.addNewDetection.bind(this);
     }
 
     /**
@@ -1590,6 +1591,10 @@ class App extends Component {
                 }
             );
         }
+    }
+
+    addNewDetection(algorithm, { classname, score }) {
+        console.log('add new detection!');
     }
 
     /**
