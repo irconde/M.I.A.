@@ -90,10 +90,10 @@ class App extends Component {
             numOfFilesInQueue: 0,
             isUpload: false,
             isDownload: false,
-            currentProcessingFile:null,
-            processingHost:null,
-            socketCommand: socketIOClient(constants.COMMAND_SERVER),
-            socketFS: null
+            currentProcessingFile: null,
+            processingHost: null,
+            socketCommand: null,
+            socketFS: null,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -169,14 +169,26 @@ class App extends Component {
         window.addEventListener('resize', this.resizeListener);
 
         const hostname = window.location.hostname;
-        constants.server.FILE_SERVER_ADDRESS = constants.server.PROTOCOL + hostname + constants.server.FILE_SERVER_PORT;
-        this.setState({processingHost:hostname});
+        constants.server.FILE_SERVER_ADDRESS =
+            constants.server.PROTOCOL +
+            hostname +
+            constants.server.FILE_SERVER_PORT;
+        this.setState({ processingHost: hostname });
         let reactObj = this;
-        this.setState({socketFS:socketIOClient(constants.server.FILE_SERVER_ADDRESS)},()=>{
-            reactObj.getFilesFromCommandServer();
-            reactObj.updateNumberOfFiles();
-            reactObj.setupCornerstoneJS(reactObj.state.imageViewportTop, reactObj.state.imageViewportSide);
+        this.setState({
+            socketCommand: socketIOClient(constants.COMMAND_SERVER),
         });
+        this.setState(
+            { socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS) },
+            () => {
+                reactObj.getFilesFromCommandServer();
+                reactObj.updateNumberOfFiles();
+                reactObj.setupCornerstoneJS(
+                    reactObj.state.imageViewportTop,
+                    reactObj.state.imageViewportSide
+                );
+            }
+        );
     }
 
     /**
@@ -327,8 +339,10 @@ class App extends Component {
                     // Need to clear the canvas here or make a no image to load display
                     this.onNoImageLeft();
                 } else {
-                    var fileNameProcessing=Utils.getFilenameFromURI(res.data.fileNameProcessing);
-                    this.state.currentProcessingFile=fileNameProcessing;
+                    var fileNameProcessing = Utils.getFilenameFromURI(
+                        res.data.fileNameProcessing
+                    );
+                    this.state.currentProcessingFile = fileNameProcessing;
                     const myZip = new JSZip();
                     var listOfPromises = [];
                     // This is our list of stacks we will append to the myOra object in our promise all
@@ -384,7 +398,7 @@ class App extends Component {
                                                 if (i === 0)
                                                     listOfStacks[
                                                         j
-                                                        ].pixelData = Utils.base64ToArrayBuffer(
+                                                    ].pixelData = Utils.base64ToArrayBuffer(
                                                         imageData
                                                     );
                                                 listOfStacks[j].blobData.push(
@@ -561,9 +575,9 @@ class App extends Component {
                         new Blob(
                             [
                                 prolog +
-                                new XMLSerializer().serializeToString(
-                                    stackXML
-                                ),
+                                    new XMLSerializer().serializeToString(
+                                        stackXML
+                                    ),
                             ],
                             { type: 'application/xml ' }
                         )
@@ -847,7 +861,7 @@ class App extends Component {
                     if (!(algorithmName in self.state.detections)) {
                         self.state.detections[
                             algorithmName
-                            ] = new DetectionSet();
+                        ] = new DetectionSet();
                         self.state.detections[algorithmName].setAlgorithmName(
                             algorithmName
                         );
@@ -858,7 +872,7 @@ class App extends Component {
 
                     self.state.detections[algorithmName].data[
                         constants.viewport.SIDE
-                        ] = [];
+                    ] = [];
 
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
@@ -1062,9 +1076,9 @@ class App extends Component {
                 context.fillText(
                     detectionLabel,
                     boundingBoxCoords[0] +
-                    constants.detectionStyle.LABEL_PADDING,
+                        constants.detectionStyle.LABEL_PADDING,
                     boundingBoxCoords[1] -
-                    constants.detectionStyle.LABEL_PADDING
+                        constants.detectionStyle.LABEL_PADDING
                 );
             }
         }
@@ -1129,19 +1143,19 @@ class App extends Component {
         );
         context.lineTo(
             boundingBoxCoords[bboxCoordXIndex] +
-            (factor * constants.buttonStyle.MARGIN_LEFT) / zoomLevel,
+                (factor * constants.buttonStyle.MARGIN_LEFT) / zoomLevel,
             boundingBoxCoords[1] + buttonGap
         );
         context.stroke();
         context.beginPath();
         context.moveTo(
             boundingBoxCoords[bboxCoordXIndex] -
-            (factor * constants.buttonStyle.LINE_GAP) / 2,
+                (factor * constants.buttonStyle.LINE_GAP) / 2,
             boundingBoxCoords[1]
         );
         context.lineTo(
             boundingBoxCoords[bboxCoordXIndex] +
-            (factor * constants.buttonStyle.MARGIN_LEFT) / zoomLevel,
+                (factor * constants.buttonStyle.MARGIN_LEFT) / zoomLevel,
             boundingBoxCoords[1] - buttonGap
         );
         context.stroke();
@@ -1158,7 +1172,7 @@ class App extends Component {
             this.state.detections === null ||
             this.state.detections[
                 this.currentSelection.getAlgorithm()
-                ].getData().length === 0
+            ].getData().length === 0
         ) {
             return;
         }
@@ -1166,7 +1180,7 @@ class App extends Component {
         do {
             let detectionSet = this.state.detections[
                 this.currentSelection.getAlgorithm()
-                ];
+            ];
             let clickedPos = constants.selection.NO_SELECTION;
             let feedback = undefined;
 
@@ -1313,14 +1327,14 @@ class App extends Component {
             this.currentSelection.getAlgorithm() === undefined ||
             this.state.detections[
                 this.currentSelection.getAlgorithm()
-                ].getData().length === 0
+            ].getData().length === 0
         ) {
             return;
         }
         const viewportInfo = Utils.eventToViewportInfo(e);
         const detectionData = this.state.detections[
             this.currentSelection.getAlgorithm()
-            ].getDataFromSelectedDetection();
+        ].getDataFromSelectedDetection();
         this.renderButtonsFromRef(viewportInfo, detectionData);
     }
 
@@ -1450,9 +1464,9 @@ class App extends Component {
                     unselectable="off"
                     ref={(el) => {
                         el &&
-                        el.addEventListener('selectstart', (e) => {
-                            e.preventDefault();
-                        });
+                            el.addEventListener('selectstart', (e) => {
+                                e.preventDefault();
+                            });
                     }}
                     onMouseDown={(e) => e.preventDefault()}>
                     <TopBar
