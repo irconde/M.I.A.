@@ -1,9 +1,9 @@
 let count = 0;
-function boundingBoxDrawingTool() {
+function boundingBoxDrawingToolMixin() {
     count++;
     console.log(`Count: ${count}`);
 }
 
 export default {
-    boundingBoxDrawingTool,
+    boundingBoxDrawingToolMixin,
 };

@@ -1,6 +1,6 @@
-import boundingBoxDrawingTool from './boundingBoxDrawingTool';
+import boundingBoxDrawingToolMixin from './boundingBoxDrawingToolMixin';
 
 export default {
     // Other registered functions...
-    boundingBoxDrawingTool,
+    boundingBoxDrawingToolMixin,
 };

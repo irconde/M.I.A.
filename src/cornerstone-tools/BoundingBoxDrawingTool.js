@@ -22,16 +22,11 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 renderDashed: false,
                 renderClassName: false,
             },
-            mixins: ['boundingBoxDrawingTool'],
+            mixins: ['boundingBoxDrawingToolMixin'],
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
-        this._boundingMixing = csTools.getModule('boundingBoxDrawingTool');
-    }
-
-    _boundingBox() {
-        console.log('bounding box');
     }
 
     activeCallback(element) {

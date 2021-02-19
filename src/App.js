@@ -340,11 +340,11 @@ class App extends Component {
         cornerstone.enable(imageViewportTop);
         cornerstone.enable(imageViewportSide);
         const boundingBoxDrawingToolMixin = cornerstoneTools.importInternal(
-            './cornerstone-tools/mixins/boundingBoxDrawingTool'
+            './cornerstone-tools/mixins/boundingBoxDrawingToolMixin'
         );
         cornerstoneTools.register(
             'mixin',
-            'boundingBoxDrawingTool',
+            'boundingBoxDrawingToolMixin',
             boundingBoxDrawingToolMixin,
             true
         );
