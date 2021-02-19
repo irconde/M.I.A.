@@ -1747,6 +1747,10 @@ class App extends Component {
         }
     }
 
+    addNewDetection(algorithm, { classname, score }) {
+        console.log('add new detection!');
+    }
+
     /**
      * Invoked when user selects polygon mask option from FAB
      * @return {none} None
