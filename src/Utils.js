@@ -232,37 +232,36 @@ export default class Utils {
     }
 
     /**
-     * getDataFromViewport - Get data required for validation buttons' proper rendering
+     * getFilenameFromURI - Methods that extracts the name of a file for the corresponding given Uri
      *
-     * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
-     * @param viewportName {string} - Viewport's name
-     * @param DOM {Document} - HTML DOM
+     * @param {String} uri - String value that represents the location of a img file within an ORA file
+     * @return {MouseEvent} fileName - String value with the name of the file
      */
-    static getDataFromViewport(viewportName, DOM) {
-        let viewportInfo = {};
-        let viewport = undefined;
-        let offsetLeft = 0;
-        let viewportElement;
-        const viewportId =
-            viewportName === 'top'
-                ? 'dicomImageLeft'
-                : viewportName === 'side'
-                ? 'dicomImageRight'
-                : undefined;
-        if (viewportId !== undefined)
-            viewportElement = DOM.getElementById(viewportId);
-        if (viewportElement !== undefined) {
-            offsetLeft = viewportElement.offsetLeft;
-            viewport =
-                viewportName === 'top'
-                    ? constants.viewport.TOP
-                    : viewportName === 'side'
-                    ? constants.viewport.SIDE
-                    : undefined;
+    static getFilenameFromURI(fileSrcPath) {
+        const userAgent = window.navigator.userAgent,
+            platform = window.navigator.platform,
+            macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+            windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+            iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+        let os = null;
+        let fileName = null;
+        if (macosPlatforms.indexOf(platform) !== -1) {
+            os = 'Mac';
+            fileName = fileSrcPath.split('/')[1];
+        } else if (iosPlatforms.indexOf(platform) !== -1) {
+            os = 'iOS';
+            fileName = fileSrcPath.split('/')[1];
+        } else if (windowsPlatforms.indexOf(platform) !== -1) {
+            os = 'Windows';
+            fileName = fileSrcPath.split('\\')[1];
+        } else if (/Android/.test(userAgent)) {
+            os = 'Android';
+            fileName = fileSrcPath.split('/')[1];
+        } else if (!os && /Linux/.test(platform)) {
+            os = 'Linux';
+            fileName = fileSrcPath.split('/')[1];
         }
-        viewportInfo['viewport'] = viewport;
-        viewportInfo['offset'] = offsetLeft;
-        return viewportInfo;
+        return fileName;
     }
 
     /**
@@ -299,6 +298,74 @@ export default class Utils {
                     offsetLeft = e.target.offsetLeft;
                 }
             }
+        }
+        viewportInfo['viewport'] = viewport;
+        viewportInfo['offset'] = offsetLeft;
+        return viewportInfo;
+    }
+
+    static changeViewport(singleViewport) {
+        let viewportTop = document.getElementById('dicomImageLeft');
+        let viewportSide = document.getElementById('dicomImageRight');
+        let verticalDivider = document.getElementById('verticalDivider');
+
+        if (singleViewport === true) {
+            viewportTop.classList.remove('twoViewportsTop');
+            viewportTop.classList.remove('singleViewportTop');
+            viewportTop.classList.add('singleViewportTop');
+            viewportTop.style.visibility = 'visible';
+
+            viewportSide.classList.remove('twoViewportsSide');
+            viewportSide.classList.remove('singleViewportSide');
+            viewportSide.classList.add('singleViewportSide');
+            viewportSide.style.visibility = 'hidden';
+
+            verticalDivider.classList.add('dividerHidden');
+            verticalDivider.classList.remove('dividerVisible');
+        } else {
+            viewportTop.classList.remove('singleViewportTop');
+            viewportTop.classList.remove('twoViewportsTop');
+            viewportTop.classList.add('twoViewportsTop');
+            viewportTop.style.visibility = 'visible';
+
+            viewportSide.classList.remove('singleViewportSide');
+            viewportSide.classList.remove('twoViewportsSide');
+            viewportSide.classList.add('twoViewportsSide');
+            viewportSide.style.visibility = 'visible';
+
+            verticalDivider.classList.remove('dividerHidden');
+            verticalDivider.classList.add('dividerVisible');
+        }
+    }
+
+    /**
+     * getDataFromViewport - Get data required for validation buttons' proper rendering
+     *
+     * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
+     * @param viewportName {string} - Viewport's name
+     * @param DOM {Document} - HTML DOM
+     */
+    static getDataFromViewport(viewportName, DOM) {
+        let viewportInfo = {};
+        let viewport = undefined;
+        let offsetLeft = 0;
+        let viewportElement;
+        const viewportId =
+            viewportName === 'top'
+                ? 'dicomImageLeft'
+                : viewportName === 'side'
+                ? 'dicomImageRight'
+                : undefined;
+        if (viewportId !== undefined)
+            viewportElement = DOM.getElementById(viewportId);
+        if (viewportElement !== undefined) {
+            offsetLeft = viewportElement.offsetLeft;
+            viewport =
+                viewportName === 'top'
+                    ? constants.viewport.TOP
+                    : viewportName === 'side'
+                    ? constants.viewport.SIDE
+                    : undefined;
         }
         viewportInfo['viewport'] = viewport;
         viewportInfo['offset'] = offsetLeft;
