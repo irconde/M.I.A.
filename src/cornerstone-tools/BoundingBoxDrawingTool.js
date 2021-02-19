@@ -9,6 +9,7 @@ const setShadow = csTools.importInternal('drawing/setShadow');
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
 const drawLinkedTextBox = csTools.importInternal('drawing/drawLinkedTextBox');
+import * as mixins from './mixins/index';
 
 // TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -41,6 +42,18 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 this.element.id
             );
         }
+    }
+
+    preMouseDownCallback(evt) {
+        console.log('Hello cornerstoneTools!');
+    }
+
+    activeCallback(element) {
+        console.log(`Hello element ${element.uuid}!`);
+    }
+
+    disabledCallback(element) {
+        console.log(`Goodbye element ${element.uuid}!`);
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
