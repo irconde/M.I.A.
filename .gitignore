@@ -27,3 +27,6 @@ yarn-error.log*
 
 # Any file inside the img folder of the file queue server
 /server/img/
+
+# .idea folder
+/.idea
