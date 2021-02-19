@@ -42,17 +42,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     }
 
     postMouseDownCallback(evt) {
-        this._boundingBox();
         console.log(this);
-        console.log('Hello cornerstoneTools!');
-    }
-
-    activeCallback(element) {
-        console.log(`Hello element ${element.uuid}!`);
-    }
-
-    disabledCallback(element) {
-        console.log(`Goodbye element ${element.uuid}!`);
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
