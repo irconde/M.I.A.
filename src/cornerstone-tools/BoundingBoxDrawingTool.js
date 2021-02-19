@@ -41,6 +41,18 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         console.log(`Goodbye element ${element.uuid}!`);
     }
 
+    preMouseDownCallback(evt) {
+        console.log('Hello cornerstoneTools!');
+    }
+
+    activeCallback(element) {
+        console.log(`Hello element ${element.uuid}!`);
+    }
+
+    disabledCallback(element) {
+        console.log(`Goodbye element ${element.uuid}!`);
+    }
+
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
     //  over (or close to) the rectangle's border
     pointNearTool(element, data, coords, interactionType) {
