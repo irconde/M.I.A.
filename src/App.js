@@ -120,7 +120,7 @@ class App extends Component {
         );
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
-        this.addNewDetection = this.addNewDetection.bind(this);
+        this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
     }
 
     /**
@@ -342,6 +342,19 @@ class App extends Component {
                 mouseButtonMask: 1,
             });
         }
+    }
+
+    /**
+     * resetCornerstoneTool - Reset Cornerstone Tools to their default state.
+     * Invoked when user leaves annotation or edition mode
+     * @param   {type} None
+     * @return   {type} None
+     */
+
+    resetCornerstoneTool() {
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+        cornerstoneTools.setToolActive('ZoomMouseWheel', {});
+        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     }
 
     /**
@@ -1379,15 +1392,31 @@ class App extends Component {
                     return;
                 }
                 // Click on an empty area
-                if (
-                    clickedPos === constants.selection.NO_SELECTION &&
-                    this.state.cornerstoneMode !==
+                if (clickedPos === constants.selection.NO_SELECTION) {
+                    if (
+                        this.state.cornerstoneMode !==
                         constants.cornerstoneMode.ANNOTATION
-                ) {
-                    detectionSet.clearAll();
-                    this.setState({ displayButtons: false }, () => {
-                        this.renderButtons(e);
-                    });
+                    ) {
+                        detectionSet.clearAll();
+                        this.setState({ displayButtons: false }, () => {
+                            this.renderButtons(e);
+                        });
+                    }
+                    // User is in annotation mode, reset tool to default selection
+                    else if (
+                        this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.ANNOTATION
+                    ) {
+                        this.setState(
+                            {
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.SELECTION,
+                            },
+                            () => {
+                                this.resetCornerstoneTool();
+                            }
+                        );
+                    }
                 } else {
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
