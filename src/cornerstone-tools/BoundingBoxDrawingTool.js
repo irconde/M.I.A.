@@ -116,6 +116,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     drawHandlesIfActive: drawHandlesOnHover,
                     hideHandlesIfMoving,
                 };
+
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
 
