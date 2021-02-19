@@ -1659,7 +1659,11 @@ class App extends Component {
                     />
                     <div id="algorithm-outputs"> </div>
                     <ValidationButtons
-                        displayButtons={this.state.displayButtons}
+                        displayButtons={
+                            this.state.displayButtons &&
+                            this.state.cornerstoneMode ===
+                                constants.cornerstoneMode.SELECTION
+                        }
                         buttonStyles={this.state.buttonStyles}
                         onMouseClicked={this.onMouseClicked}
                     />
