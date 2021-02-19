@@ -1684,7 +1684,11 @@ class App extends Component {
                         hideButtons={this.hideButtons}
                         renderButtons={this.onMouseClicked}
                         nextImageClick={this.nextImageClick}
-                        enableNextButton={!this.state.displayButtons}
+                        enableNextButton={
+                            !this.state.displayButtons &&
+                            this.state.cornerstoneMode ===
+                                constants.cornerstoneMode.SELECTION
+                        }
                     />
                     <div id="algorithm-outputs"> </div>
                     <ValidationButtons
