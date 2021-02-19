@@ -9,7 +9,6 @@ const setShadow = csTools.importInternal('drawing/setShadow');
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
 const drawLinkedTextBox = csTools.importInternal('drawing/drawLinkedTextBox');
-import * as mixins from './mixins/index';
 
 // TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -24,15 +23,21 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 renderDashed: false,
                 renderClassName: false,
             },
-            mixins,
+            mixins: ['boundingBoxDrawingTool'],
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
-
         super(props, defaultProps);
+        this._boundingMixing = csTools.getModule('boundingBoxDrawingTool');
     }
 
-    preMouseDownCallback(evt) {
+    _boundingBox() {
+        console.log('bounding box');
+    }
+
+    postMouseDownCallback(evt) {
+        this._boundingBox();
+        console.log(this);
         console.log('Hello cornerstoneTools!');
     }
 
@@ -96,8 +101,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         const { image, element } = eventData;
         const lineWidth = constants.detectionStyle.BORDER_WIDTH;
-        this.initialConfiguration.mixins.default.boundingBoxDrawingTool
-            .boundingBoxDrawingTool;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
