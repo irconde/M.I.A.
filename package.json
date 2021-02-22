@@ -37,7 +37,7 @@
         "react-dev-utils": "^10.2.1"
     },
     "scripts": {
-        "start": "npm-run-all -p server react",
+        "start": "REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 FAST_REFRESH=false npm-run-all -p server react",
         "react": "react-scripts start",
         "server": "cd server && node server.js",
         "build": "react-scripts build",
