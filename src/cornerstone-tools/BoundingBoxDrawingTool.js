@@ -28,10 +28,19 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
+        this.newDetection = {
+            className: constants.commonDetections.UNKNOWN,
+            score: '100',
+        };
     }
 
     postMouseDownCallback(evt) {
-        console.log(this);
+        if (this.newDetection !== undefined) {
+            this.default.boundingBoxDrawingToolMixin.boundingBoxDrawingToolMixin(
+                this.newDetection,
+                this.element.id
+            );
+        }
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
@@ -159,11 +168,16 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     _findTextBoxAnchorPoints(handles.start, handles.end);
 
                 // TODO irconde. Hardcoded detection info. It should be added later on, after creating the bounding box
+                // TODO james. Change the generic object to the Detection class we have created.
+                this.newDetection = {
+                    className: constants.commonDetections.UNKNOWN,
+                    score: '100',
+                };
                 const textBoxContent = _createTextBoxContent(
                     context,
                     {
-                        className: constants.commonDetections.UNKNOWN,
-                        score: '100',
+                        className: this.newDetection.className,
+                        score: this.newDetection.score,
                     },
                     this.configuration
                 );
@@ -198,7 +212,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             );
             return;
         }
-
         return {
             visible: true,
             active: true,
