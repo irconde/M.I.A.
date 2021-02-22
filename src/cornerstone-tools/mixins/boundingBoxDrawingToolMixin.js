@@ -1,7 +1,7 @@
-let count = 0;
-function boundingBoxDrawingToolMixin() {
-    count++;
-    console.log(`Count: ${count}`);
+function boundingBoxDrawingToolMixin(newDetection, viewport) {
+    console.log(
+        `Class: ${newDetection.className} | Score: ${newDetection.score} | Viewport: ${viewport}`
+    );
 }
 
 export default {

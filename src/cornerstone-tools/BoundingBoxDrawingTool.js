@@ -27,6 +27,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
+        this.newDetection = {
+            className: constants.commonDetections.UNKNOWN,
+            score: '100',
+        };
     }
 
     activeCallback(element) {

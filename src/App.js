@@ -345,7 +345,7 @@ class App extends Component {
         cornerstoneTools.register(
             'mixin',
             'boundingBoxDrawingToolMixin',
-            boundingBoxDrawingToolMixin,
+            mixins,
             true
         );
         const PanTool = cornerstoneTools.PanTool;
