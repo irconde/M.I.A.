@@ -42,7 +42,12 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     }
 
     postMouseDownCallback(evt) {
-        console.log(this);
+        if (this.newDetection !== undefined) {
+            this.default.boundingBoxDrawingToolMixin.boundingBoxDrawingToolMixin(
+                this.newDetection,
+                this.element.id
+            );
+        }
     }
 
     // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
