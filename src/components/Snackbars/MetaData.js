@@ -7,16 +7,16 @@ import { Info } from '../TreeView/Icons';
  * object detection algorithm
  */
 class MetaData extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             slashLineStyle: {
                 fontFamily: 'Noto Sans JP Black',
                 color: '#367FFF',
-                display: 'inline-block'
+                display: 'inline-block',
             },
             spanHeadStyle: {
-                fontFamily: 'Noto Sans JP '
+                fontFamily: 'Noto Sans JP ',
             },
             spanBodyStyle: {
                 fontFamily: 'Noto Sans JP ',
@@ -25,7 +25,7 @@ class MetaData extends Component {
                 margin: '0.6rem 0.6rem 0.6rem 0.6rem',
                 display: 'inline-block',
                 fontSize: '14',
-                color: 'white'
+                color: 'white',
             },
             divStyle: {
                 paddingLeft: '1rem',
@@ -38,9 +38,9 @@ class MetaData extends Component {
                 textAlign: 'left',
                 color: '#ffffff',
                 width: 'max-content',
-                transform: 'translateX(-50%)'
+                transform: 'translateX(-50%)',
             },
-        }
+        };
     }
 
     static propTypes = {
@@ -48,32 +48,46 @@ class MetaData extends Component {
         detectorType: PropTypes.string,
         detectorConfigType: PropTypes.string,
         seriesType: PropTypes.string,
-        studyType: PropTypes.string
-    }
+        studyType: PropTypes.string,
+    };
 
     render() {
-        if (!this.props.isVisible) return (<div></div>);
+        if (!this.props.isVisible) return <div></div>;
         return (
             <div style={this.state.divStyle}>
-                <Info style={{verticalAlign: 'text-top'}} />
-               <p style={this.state.paragraphStyle}>
-                   <span style={this.state.spanHeadStyle}>Detector Type:</span>
-                    <span style={this.state.spanBodyStyle}> {this.props.detectorType}</span>
+                <Info style={{ verticalAlign: 'text-top' }} />
+                <p style={this.state.paragraphStyle}>
+                    <span style={this.state.spanHeadStyle}>Detector Type:</span>
+                    <span style={this.state.spanBodyStyle}>
+                        {' '}
+                        {this.props.detectorType}
+                    </span>
                 </p>
                 <p style={this.state.slashLineStyle}>/</p>
-               <p style={this.state.paragraphStyle}>
-                   <span style={this.state.spanHeadStyle}>Detector Configuration:</span>
-                    <span style={this.state.spanBodyStyle}> {this.props.detectorConfigType}</span>
+                <p style={this.state.paragraphStyle}>
+                    <span style={this.state.spanHeadStyle}>
+                        Detector Configuration:
+                    </span>
+                    <span style={this.state.spanBodyStyle}>
+                        {' '}
+                        {this.props.detectorConfigType}
+                    </span>
                 </p>
                 <p style={this.state.slashLineStyle}>/</p>
-               <p style={this.state.paragraphStyle}>
-                   <span style={this.state.spanHeadStyle}>Series:</span>
-                   <span style={this.state.spanBodyStyle}> {this.props.seriesType}</span>
+                <p style={this.state.paragraphStyle}>
+                    <span style={this.state.spanHeadStyle}>Series:</span>
+                    <span style={this.state.spanBodyStyle}>
+                        {' '}
+                        {this.props.seriesType}
+                    </span>
                 </p>
                 <p style={this.state.slashLineStyle}>/</p>
-               <p style={this.state.paragraphStyle}>
-                   <span style={this.state.spanHeadStyle}>Study:</span>
-                   <span style={this.state.spanBodyStyle}> {this.props.studyType}</span>
+                <p style={this.state.paragraphStyle}>
+                    <span style={this.state.spanHeadStyle}>Study:</span>
+                    <span style={this.state.spanBodyStyle}>
+                        {' '}
+                        {this.props.studyType}
+                    </span>
                 </p>
             </div>
         );
