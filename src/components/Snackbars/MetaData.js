@@ -16,12 +16,10 @@ class MetaData extends Component {
                 display: 'inline-block'
             },
             spanHeadStyle: {
-				/*Modifying Font family from Noto Sans JP Medium to Noto Sans JP */
                 fontFamily: 'Noto Sans JP '
             },
             spanBodyStyle: {
-				/*Modifying Font family from Noto Sans JP Regular to Noto Sans JP */
-                fontFamily: 'Noto Sans JP Regular',
+                fontFamily: 'Noto Sans JP ',
             },
             paragraphStyle: {
                 margin: '0.6rem 0.6rem 0.6rem 0.6rem',
