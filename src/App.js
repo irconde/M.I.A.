@@ -97,6 +97,7 @@ class App extends Component {
             socketCommand: null,
             socketFS: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            isDrawingBoundingBox: false,
             isFABVisible: false,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
@@ -1416,21 +1417,31 @@ class App extends Component {
                         this.setState({ displayButtons: false }, () => {
                             this.renderButtons(e);
                         });
-                    }
-                    // User is in annotation mode, reset tool to default selection
-                    else if (
+                    } else if (
                         this.state.cornerstoneMode ===
                         constants.cornerstoneMode.ANNOTATION
                     ) {
-                        this.setState(
-                            {
-                                cornerstoneMode:
-                                    constants.cornerstoneMode.SELECTION,
-                            },
-                            () => {
-                                this.resetCornerstoneTool();
-                            }
-                        );
+                        // User completed drawing a bounding box, return to selection mode
+                        if (this.state.isDrawingBoundingBox) {
+                            this.setState(
+                                {
+                                    cornerstoneMode:
+                                        constants.cornerstoneMode.SELECTION,
+                                    isDrawingBoundingBox: false,
+                                },
+                                () => {
+                                    this.resetCornerstoneTool();
+                                    console.log('resetting');
+                                }
+                            );
+                            return;
+                        }
+                        // User clicked once while in annotation mode
+                        // stay in this mode until they click again
+                        else {
+                            this.setState({ isDrawingBoundingBox: true });
+                            return;
+                        }
                     }
                 } else {
                     for (const [key, myDetectionSet] of Object.entries(
