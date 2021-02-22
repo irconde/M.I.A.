@@ -191,6 +191,58 @@ class App extends Component {
         );
     }
 
+    componentWillUnmount() {
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstoneimagerendered',
+            this.onImageRendered
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmousedrag',
+            this.hideButtons
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.hideButtons
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolstouchpinch',
+            this.hideButtons
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstoneimagerendered',
+            this.onImageRendered
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmousedrag',
+            this.hideButtons
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.hideButtons
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolstouchpinch',
+            this.hideButtons
+        );
+        window.removeEventListener('resize', this.resizeListener);
+    }
+
     /**
      * resizeListener - Function event listener for the window resize event. If a detection is selected,
      *                  we clear the detections and hide the buttons.
