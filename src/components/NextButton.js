@@ -4,7 +4,7 @@ import nextIcon from '../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 
 const NextButtonContainer = styled.div`
-    width: inherit;
+    width: 100%;
     display: flex;
     align-items: center;
     align-self: flex-end;
