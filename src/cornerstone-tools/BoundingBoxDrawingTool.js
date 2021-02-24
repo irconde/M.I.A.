@@ -181,19 +181,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     },
                     this.configuration
                 );
-
-                drawLinkedTextBox(
-                    context,
-                    element,
-                    data.handles.textBox,
-                    textBoxContent,
-                    data.handles,
-                    textBoxAnchorPoints,
-                    color,
-                    lineWidth,
-                    10,
-                    true
-                );
             }
         });
     }
