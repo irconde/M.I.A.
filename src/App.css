@@ -94,10 +94,10 @@ body {
 }
 
 .twoViewportsTop {
-    width: 42%;
+    width: 44%;
     height: 100vh;
     top: 0;
-    left: 16%;
+    left: 15%;
     position: absolute;
 }
 
@@ -146,7 +146,7 @@ body {
 
 .treeview-main {
     position: absolute;
-    width: 16%;
+    width: 285px;
     height: 98vh;
     top: 3.375rem;
     opacity: 100%;
