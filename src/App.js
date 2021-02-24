@@ -191,6 +191,10 @@ class App extends Component {
             this.onDragEnd(this.state.imageViewportSide);
         });
         this.state.imageViewportSide.addEventListener(
+            'mouseup',
+            this.onDragEnd
+        );
+        this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
             this.hideButtons
         );
@@ -1439,32 +1443,33 @@ class App extends Component {
                         this.setState({ displayButtons: false }, () => {
                             this.renderButtons(e);
                         });
-                    } else if (
-                        this.state.cornerstoneMode ===
-                        constants.cornerstoneMode.ANNOTATION
-                    ) {
-                        // User completed drawing a bounding box, return to selection mode
-                        if (this.state.isDrawingBoundingBox) {
-                            this.setState(
-                                {
-                                    cornerstoneMode:
-                                        constants.cornerstoneMode.SELECTION,
-                                    isDrawingBoundingBox: false,
-                                },
-                                () => {
-                                    this.resetCornerstoneTool();
-                                    console.log('resetting');
-                                }
-                            );
-                            return;
-                        }
-                        // User clicked once while in annotation mode
-                        // stay in this mode until they click again
-                        else {
-                            this.setState({ isDrawingBoundingBox: true });
-                            return;
-                        }
                     }
+                    // else if (
+                    //     this.state.cornerstoneMode ===
+                    //     constants.cornerstoneMode.ANNOTATION
+                    // ) {
+                    //     // User completed drawing a bounding box, return to selection mode
+                    //     if (this.state.isDrawingBoundingBox) {
+                    //         this.setState(
+                    //             {
+                    //                 cornerstoneMode:
+                    //                     constants.cornerstoneMode.SELECTION,
+                    //                 isDrawingBoundingBox: false,
+                    //             },
+                    //             () => {
+                    //                 this.resetCornerstoneTool();
+                    //                 console.log('resetting');
+                    //             }
+                    //         );
+                    //         return;
+                    //     }
+                    //     // User clicked once while in annotation mode
+                    //     // stay in this mode until they click again
+                    //     else {
+                    //         this.setState({ isDrawingBoundingBox: true });
+                    //         return;
+                    //     }
+                    // }
                 } else {
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
