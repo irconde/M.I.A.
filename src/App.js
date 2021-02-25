@@ -94,6 +94,10 @@ class App extends Component {
             processingHost: null,
             socketCommand: null,
             socketFS: null,
+			dividerLeftProp:((screen.width -285)/2 + 285)+"px",
+			twoViewportsTopWidth:((screen.width -285)/2)+"px",
+			twoViewportsSideLeftProp:((screen.width -285)/2 +286)+"px",
+			twoViewportsSideWidth:((screen.width -285)/2)+"px"
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -167,13 +171,22 @@ class App extends Component {
             this.hideButtons
         );
         window.addEventListener('resize', this.resizeListener);
+		
+		
+		/* Setting View ports Left and width property */
+		document.getElementsByClassName('twoViewportsSide')[0].style.left=this.state.twoViewportsSideLeftProp;
+		document.getElementsByClassName('twoViewportsSide')[0].style.width=this.state.twoViewportsSideWidth;
+		document.getElementsByClassName("twoViewportsTop")[0].style.width=this.state.twoViewportsTopWidth;
+		document.getElementById("verticalDivider").style.left=this.state.dividerLeftProp;
 
+		/*Calculations for Title Bar Host Name*/
         const hostname = window.location.hostname;
         constants.server.FILE_SERVER_ADDRESS =
             constants.server.PROTOCOL +
             hostname +
             constants.server.FILE_SERVER_PORT;
         this.setState({ processingHost: hostname });
+		
         let reactObj = this;
         this.setState({
             socketCommand: socketIOClient(constants.COMMAND_SERVER),
@@ -190,6 +203,10 @@ class App extends Component {
             }
         );
     }
+	
+	
+	
+	
 
     componentWillUnmount() {
         this.state.imageViewportTop.removeEventListener(
