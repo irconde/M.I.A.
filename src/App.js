@@ -94,10 +94,6 @@ class App extends Component {
             processingHost: null,
             socketCommand: null,
             socketFS: null,
-			dividerLeftProp:((screen.width -285)/2 + 285)+"px",
-			twoViewportsTopWidth:((screen.width -285)/2)+"px",
-			twoViewportsSideLeftProp:((screen.width -285)/2 +286)+"px",
-			twoViewportsSideWidth:((screen.width -285)/2)+"px"
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -114,6 +110,7 @@ class App extends Component {
         this.onDetectionSelected = this.onDetectionSelected.bind(this);
         this.onAlgorithmSelected = this.onAlgorithmSelected.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
+		this.calculateviewPortWidthAndHeight=this.calculateviewPortWidthAndHeight.bind(this);
     }
 
     /**
@@ -172,12 +169,7 @@ class App extends Component {
         );
         window.addEventListener('resize', this.resizeListener);
 		
-		
-		/* Setting View ports Left and width property */
-		document.getElementsByClassName('twoViewportsSide')[0].style.left=this.state.twoViewportsSideLeftProp;
-		document.getElementsByClassName('twoViewportsSide')[0].style.width=this.state.twoViewportsSideWidth;
-		document.getElementsByClassName("twoViewportsTop")[0].style.width=this.state.twoViewportsTopWidth;
-		document.getElementById("verticalDivider").style.left=this.state.dividerLeftProp;
+		this.calculateviewPortWidthAndHeight();
 
 		/*Calculations for Title Bar Host Name*/
         const hostname = window.location.hostname;
@@ -202,6 +194,23 @@ class App extends Component {
                 );
             }
         );
+    }
+	
+	
+	/**
+     * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
+     *
+     * @param  None
+     * @returns {type} None
+     */
+    calculateviewPortWidthAndHeight() {
+		
+		document.getElementsByClassName('twoViewportsSide')[0].style.left=((window.innerWidth -285)/2 +286)+"px";
+		document.getElementsByClassName('twoViewportsSide')[0].style.width=((window.innerWidth -285)/2)+"px";
+		document.getElementsByClassName("twoViewportsTop")[0].style.width=((window.innerWidth -285)/2)+"px";
+		document.getElementById("verticalDivider").style.left=((window.innerWidth -285)/2 + 285)+"px";
+		
+		
     }
 	
 	
@@ -268,6 +277,10 @@ class App extends Component {
      * @returns {type} None
      */
     resizeListener(e) {
+		
+		this.calculateviewPortWidthAndHeight();
+		
+		
         if (this.state.displayButtons === true) {
             for (const [key, detectionSet] of Object.entries(
                 this.state.detections
