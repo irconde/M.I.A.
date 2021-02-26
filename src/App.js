@@ -1502,16 +1502,43 @@ class App extends Component {
             const { start, end } = handles;
             const coords = [start.x, start.y, end.x, end.y];
 
-            //TODO: Complete data for new detection
-            let newDetection = new Detection();
+            // Create new user-created detection
+            const operator = 'OPERATOR';
+            let newDetection = new Detection(
+                coords,
+                null,
+                'UNKNOWN',
+                100,
+                true,
+                operator
+            );
             newDetection.view =
-                viewport === this.state.imageViewportTop ? 'top' : 'side';
+                viewport === this.state.imageViewportTop
+                    ? constants.viewport.TOP
+                    : constants.viewport.SIDE;
+
+            let updatedDetections = this.state.detections;
+            // add new DetectionSet if it doesn't exist
+            if (!(operator in this.state.detections)) {
+                let newDetectionSet = new DetectionSet();
+                newDetectionSet.setAlgorithmName(operator);
+                newDetectionSet.addDetection(newDetection);
+                newDetectionSet.visibility = true;
+                this.currentSelection.addAlgorithm(operator);
+
+                updatedDetections[operator] = newDetectionSet;
+            }
+            // Operator DetectionSet exists, add new detection to set
+            else {
+                updatedDetections[operator].addDetection(newDetection);
+                this.currentSelection.setCurrentAlgorithm(operator);
+            }
 
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     displayButtons: false,
-                    //detections: { ...this.state.detections, newDetection },
+                    detections: updatedDetections,
                 },
                 () => {
                     this.resetCornerstoneTool();
