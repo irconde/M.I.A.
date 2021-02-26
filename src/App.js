@@ -1479,11 +1479,7 @@ class App extends Component {
         this.currentSelection.resetAlgorithmPositionToEnd();
     }
     /**
-<<<<<<< HEAD
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
-=======
-     * Invoked when user stops dragging mouse or finger on touch device
->>>>>>> Get Bounding Box data from event on dragend
      * @param {*}  Viewport The Cornerstone Viewport containing the event
      * @return {type} None
      */
