@@ -145,13 +145,17 @@ class App extends Component {
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolstouchdragend',
-            this.onDragEnd
+            () => {
+                this.onDragEnd(this.state.imageViewportTop);
+            }
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolsmousedrag',
             this.hideButtons
         );
-        this.state.imageViewportTop.addEventListener('mouseup', this.onDragEnd);
+        this.state.imageViewportTop.addEventListener('mouseup', () => {
+            this.onDragEnd(this.state.imageViewportTop);
+        });
 
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolsmousewheel',
@@ -175,16 +179,17 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolstouchdragend',
-            this.onDragEnd
+            () => {
+                this.onDragEnd(this.state.imageViewportSide);
+            }
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousedrag',
             this.hideButtons
         );
-        this.state.imageViewportSide.addEventListener(
-            'mouseup',
-            this.onDragEnd
-        );
+        this.state.imageViewportSide.addEventListener('mouseup', () => {
+            this.onDragEnd(this.state.imageViewportSide);
+        });
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
             this.hideButtons
@@ -205,11 +210,13 @@ class App extends Component {
         this.setState({ processingHost: hostname });
 
         let reactObj = this;
-        this.setState({
-            socketCommand: socketIOClient(constants.COMMAND_SERVER),
-        });
+
         this.setState(
-            { socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS) },
+            {
+                socketCommand: socketIOClient(constants.COMMAND_SERVER),
+                socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS),
+                isFABVisible: true,
+            },
             () => {
                 reactObj.getFilesFromCommandServer();
                 reactObj.updateNumberOfFiles();
@@ -219,10 +226,6 @@ class App extends Component {
                 );
             }
         );
-
-        this.setState({
-            isFABVisible: true,
-        });
     }
 
     /**
@@ -1483,17 +1486,32 @@ class App extends Component {
     }
     /**
      * Invoked when user stops dragging mouse or finger on touch device
-     * @param {type}  None
+     * @param {*}  Viewport The Cornerstone Viewport containing the event
      * @return {type} None
      */
-    onDragEnd() {
+    onDragEnd(viewport) {
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
         ) {
+            const { data } = cornerstoneTools.getToolState(
+                viewport,
+                'BoundingBoxDrawing'
+            );
+            // Destructure data needed from event
+            const { handles } = data[0];
+            const { start, end } = handles;
+            const coords = [start.x, start.y, end.x, end.y];
+
+            //TODO: Complete data for new detection
+            let newDetection = new Detection();
+            newDetection.view =
+                viewport === this.state.imageViewportTop ? 'top' : 'side';
+
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     displayButtons: false,
+                    //detections: { ...this.state.detections, newDetection },
                 },
                 () => {
                     this.resetCornerstoneTool();
