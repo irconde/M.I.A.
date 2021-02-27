@@ -371,6 +371,17 @@ class App extends Component {
      */
 
     resetCornerstoneTool() {
+        cornerstoneTools.clearToolState(
+            this.state.imageViewportTop,
+            'BoundingBoxDrawing'
+        );
+        if (this.state.singleViewport !== true) {
+            cornerstoneTools.clearToolState(
+                this.state.imageViewportSide,
+                'BoundingBoxDrawing'
+            );
+        }
+        cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
@@ -1520,7 +1531,7 @@ class App extends Component {
             // add new DetectionSet if it doesn't exist
             if (!(operator in this.state.detections)) {
                 let newDetectionSet = new DetectionSet();
-                newDetectionSet.setAlgorithmName('OPERATOR');
+                newDetectionSet.setAlgorithmName(operator);
                 newDetectionSet.visibility = true;
                 newDetectionSet.addDetection(newDetection, newDetection.view);
                 this.currentSelection.addAlgorithm(newDetectionSet);
