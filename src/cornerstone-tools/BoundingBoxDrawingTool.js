@@ -96,7 +96,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {
-            console.log('No tool data');
+            // console.log('No tool data');
             return;
         }
 

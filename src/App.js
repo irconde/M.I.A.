@@ -1516,22 +1516,22 @@ class App extends Component {
                 viewport === this.state.imageViewportTop
                     ? constants.viewport.TOP
                     : constants.viewport.SIDE;
-
             let updatedDetections = this.state.detections;
             // add new DetectionSet if it doesn't exist
             if (!(operator in this.state.detections)) {
                 let newDetectionSet = new DetectionSet();
-                newDetectionSet.setAlgorithmName(operator);
-                newDetectionSet.addDetection(newDetection);
+                newDetectionSet.setAlgorithmName('OPERATOR');
                 newDetectionSet.visibility = true;
-                this.currentSelection.addAlgorithm(operator);
-
+                newDetectionSet.addDetection(newDetection, newDetection.view);
+                this.currentSelection.addAlgorithm(newDetectionSet);
                 updatedDetections[operator] = newDetectionSet;
             }
             // Operator DetectionSet exists, add new detection to set
             else {
-                updatedDetections[operator].addDetection(newDetection);
-                this.currentSelection.setCurrentAlgorithm(operator);
+                updatedDetections[operator].addDetection(
+                    newDetection,
+                    newDetection.view
+                );
             }
 
             this.setState(
