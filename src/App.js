@@ -212,7 +212,6 @@ class App extends Component {
             hostname +
             constants.server.FILE_SERVER_PORT;
         this.setState({ processingHost: hostname });
-
         let reactObj = this;
         this.setState(
             {
