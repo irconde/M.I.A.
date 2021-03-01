@@ -1511,8 +1511,17 @@ class App extends Component {
             // Destructure data needed from event
             const { handles } = data[0];
             const { start, end } = handles;
-            const coords = [start.x, start.y, end.x, end.y];
-
+            let coords = [];
+            // Fix flipped rectangle issues
+            if (start.x > end.x && start.y > end.y) {
+                coords = [end.x, end.y, start.x, start.y];
+            } else if (start.x > end.x) {
+                coords = [end.x, start.y, start.x, end.y];
+            } else if (start.y > end.y) {
+                coords = [start.x, end.y, end.x, start.y];
+            } else {
+                coords = [start.x, start.y, end.x, end.y];
+            }
             // Create new user-created detection
             const operator = 'OPERATOR';
             let newDetection = new Detection(
