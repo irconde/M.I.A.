@@ -173,7 +173,6 @@ class App extends Component {
 
         this.calculateviewPortWidthAndHeight();
 
-        /*Calculations for Title Bar Host Name*/
         const hostname = window.location.hostname;
         constants.server.FILE_SERVER_ADDRESS =
             constants.server.PROTOCOL +
@@ -323,7 +322,6 @@ class App extends Component {
      * @return {type} - Promise
      */
     async getFilesFromCommandServer() {
-        console.log('pppp', document.getElementsByClassName('treeview-main'));
         this.state.socketCommand.on('connect', () => {
             this.setState({ isConnected: true });
         });
@@ -1564,7 +1562,6 @@ class App extends Component {
                         processingFile={this.state.currentProcessingFile}
                     />
                     <SideMenu
-                        ref={this.aRef}
                         detections={this.state.detections}
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.state.fileInQueue}
