@@ -672,7 +672,12 @@ class App extends Component {
                                             `data/${stack.view}_threat_detection_${topCounter}.dcs`,
                                             Dicos.dataToBlob(
                                                 detectionSet,
-                                                stack.blobData[j + topCounter],
+                                                detectionSet.algorithm ===
+                                                    'OPERATOR'
+                                                    ? stack.blobData[j]
+                                                    : stack.blobData[
+                                                          j + topCounter
+                                                      ],
                                                 Date.now(),
                                                 !validationCompleted
                                             )
@@ -704,7 +709,12 @@ class App extends Component {
                                             `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
                                             Dicos.dataToBlob(
                                                 detectionSet,
-                                                stack.blobData[j + sideCounter],
+                                                detectionSet.algorithm ===
+                                                    'OPERATOR'
+                                                    ? stack.blobData[j]
+                                                    : stack.blobData[
+                                                          j + sideCounter
+                                                      ],
                                                 Date.now(),
                                                 !validationCompleted
                                             )
