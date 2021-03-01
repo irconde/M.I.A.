@@ -110,7 +110,9 @@ class App extends Component {
         this.onDetectionSelected = this.onDetectionSelected.bind(this);
         this.onAlgorithmSelected = this.onAlgorithmSelected.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-		this.calculateviewPortWidthAndHeight=this.calculateviewPortWidthAndHeight.bind(this);
+        this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
+            this
+        );
     }
 
     /**
@@ -168,17 +170,17 @@ class App extends Component {
             this.hideButtons
         );
         window.addEventListener('resize', this.resizeListener);
-		
-		this.calculateviewPortWidthAndHeight();
 
-		/*Calculations for Title Bar Host Name*/
+        this.calculateviewPortWidthAndHeight();
+
+        /*Calculations for Title Bar Host Name*/
         const hostname = window.location.hostname;
         constants.server.FILE_SERVER_ADDRESS =
             constants.server.PROTOCOL +
             hostname +
             constants.server.FILE_SERVER_PORT;
         this.setState({ processingHost: hostname });
-		
+
         let reactObj = this;
         this.setState({
             socketCommand: socketIOClient(constants.COMMAND_SERVER),
@@ -195,27 +197,29 @@ class App extends Component {
             }
         );
     }
-	
-	
-	/**
+
+    /**
      * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
      *
      * @param  None
      * @returns {type} None
      */
     calculateviewPortWidthAndHeight() {
-		
-		document.getElementsByClassName('twoViewportsSide')[0].style.left=((window.innerWidth -285)/2 +286)+"px";
-		document.getElementsByClassName('twoViewportsSide')[0].style.width=((window.innerWidth -285)/2)+"px";
-		document.getElementsByClassName("twoViewportsTop")[0].style.width=((window.innerWidth -285)/2)+"px";
-		document.getElementById("verticalDivider").style.left=((window.innerWidth -285)/2 + 285)+"px";
-		
-		
+        document.getElementsByClassName('twoViewportsSide')[0].style.left =
+            (window.innerWidth - constants.sideMenuWidth) / 2 +
+            constants.sideMenuWidth +
+            constants.RESOLUTION_UNIT;
+        document.getElementsByClassName('twoViewportsSide')[0].style.width =
+            (window.innerWidth - constants.sideMenuWidth) / 2 +
+            constants.RESOLUTION_UNIT;
+        document.getElementsByClassName('twoViewportsTop')[0].style.width =
+            (window.innerWidth - constants.sideMenuWidth) / 2 +
+            constants.RESOLUTION_UNIT;
+        document.getElementById('verticalDivider').style.left =
+            (window.innerWidth - constants.sideMenuWidth) / 2 +
+            constants.sideMenuWidth +
+            constants.RESOLUTION_UNIT;
     }
-	
-	
-	
-	
 
     componentWillUnmount() {
         this.state.imageViewportTop.removeEventListener(
@@ -277,10 +281,8 @@ class App extends Component {
      * @returns {type} None
      */
     resizeListener(e) {
-		
-		this.calculateviewPortWidthAndHeight();
-		
-		
+        this.calculateviewPortWidthAndHeight();
+
         if (this.state.displayButtons === true) {
             for (const [key, detectionSet] of Object.entries(
                 this.state.detections
@@ -321,9 +323,11 @@ class App extends Component {
      * @return {type} - Promise
      */
     async getFilesFromCommandServer() {
+        console.log('pppp', document.getElementsByClassName('treeview-main'));
         this.state.socketCommand.on('connect', () => {
             this.setState({ isConnected: true });
         });
+
         this.state.socketCommand.on('img', (data) => {
             this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
                 // If we got an image and we are null, we know we can now fetch one
@@ -1560,6 +1564,7 @@ class App extends Component {
                         processingFile={this.state.currentProcessingFile}
                     />
                     <SideMenu
+                        ref={this.aRef}
                         detections={this.state.detections}
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.state.fileInQueue}

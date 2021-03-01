@@ -3,11 +3,13 @@ import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 import NextButton from './NextButton';
+import * as constants from '../Constants';
 
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
     constructor(props) {
         super(props);
+
         this.state = {
             treeStyle: {
                 top: '0',
@@ -16,7 +18,9 @@ class SideMenu extends Component {
                 width: '100%',
             },
             algorithmSelected: false,
+            sideMenuWidth: constants.sideMenuWidth + constants.RESOLUTION_UNIT,
         };
+
         this.updateSelected = this.updateSelected.bind(this);
         this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
         this.setVisibilityData = this.setVisibilityData.bind(this);
@@ -151,7 +155,9 @@ class SideMenu extends Component {
         // Checking to see if there is any data in myDetections
         if (myDetections.length !== 0 && this.props.enableMenu) {
             return (
-                <div className="treeview-main">
+                <div
+                    className="treeview-main"
+                    style={{ width: this.state.sideMenuWidth }}>
                     {/* How we create the trees and their nodes is using map */}
                     <div style={this.state.treeStyle}>
                         {myDetections.map((value, index) => {
