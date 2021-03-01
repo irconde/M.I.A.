@@ -1178,14 +1178,6 @@ class App extends Component {
                 if (detectionList[j].visible !== true) continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = detectionList[j].getRenderColor();
-                if (
-                    color === constants.detectionStyle.SELECTED_COLOR &&
-                    j > 0
-                ) {
-                    detectionList[j].selected = false;
-                    color = detectionList[j].getRenderColor();
-                    this.appUpdateImage();
-                }
                 if (boundingBoxCoords.length < B_BOX_COORDS) return;
                 if (detectionSet.anotherSelected === true) {
                     let rgbColor = Utils.hexToRgb(color);

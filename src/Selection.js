@@ -137,7 +137,6 @@ export default class Selection {
      * @returns {Boolean || String}
      */
     getAlgorithm() {
-        // console.log(this.currentAlgorithm);
         if (
             this.availableAlgorithms[
                 this.algorithmNames[this.currentAlgorithm].algorithm
