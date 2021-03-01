@@ -91,7 +91,10 @@ const BoundPolyFAB = ({
     }
 
     let fabOpacity;
-    if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
+    if (
+        cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
+        isVisible === false
+    ) {
         fabOpacity = false;
     } else {
         fabOpacity = true;

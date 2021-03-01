@@ -89,7 +89,7 @@ class App extends Component {
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
             isConnected: false,
-            numOfFilesInQueue: 0,
+            numberOfFilesInQueue: 0,
             isUpload: false,
             isDownload: false,
             currentProcessingFile: null,
@@ -210,12 +210,12 @@ class App extends Component {
         this.setState({ processingHost: hostname });
 
         let reactObj = this;
-
         this.setState(
             {
                 socketCommand: socketIOClient(constants.COMMAND_SERVER),
                 socketFS: socketIOClient(constants.server.FILE_SERVER_ADDRESS),
-                isFABVisible: true,
+                isFABVisible:
+                    this.state.numberOfFilesInQueue > 0 ? true : false,
             },
             () => {
                 reactObj.getFilesFromCommandServer();
@@ -428,6 +428,7 @@ class App extends Component {
             this.setState({
                 numberOfFilesInQueue: data,
                 fileInQueue: data > 0,
+                isFABVisible: data > 0,
             });
         });
     }
@@ -470,6 +471,7 @@ class App extends Component {
             displayNext: false,
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
+            isFABVisible: false,
         });
     }
 
