@@ -1413,7 +1413,7 @@ class App extends Component {
                         }
                     }
                 } else {
-                    return;
+                    continue;
                 }
                 // Click on an empty area
                 if (clickedPos === constants.selection.NO_SELECTION) {
@@ -1729,6 +1729,12 @@ class App extends Component {
                     displayButtons: true,
                 },
                 () => {
+                    for (const [key, myDetectionSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        myDetectionSet.selectAlgorithm(false);
+                    }
+                    this.appUpdateImage();
                     cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                         mouseButtonMask: 1,
                     });
