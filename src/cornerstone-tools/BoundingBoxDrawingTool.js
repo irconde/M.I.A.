@@ -22,7 +22,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 renderDashed: false,
                 renderClassName: false,
             },
-            mixins: ['boundingBoxDrawingToolMixin'],
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
