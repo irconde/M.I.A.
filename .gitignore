@@ -31,3 +31,6 @@ yarn-error.log*
 
 # .idea folder
 /.idea
+
+# VSCode Settings
+.vscode\settings.json
