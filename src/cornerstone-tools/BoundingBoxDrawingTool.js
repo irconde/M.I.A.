@@ -94,7 +94,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {
-            // console.log('No tool data');
+            // No tool data
             return;
         }
 
@@ -193,7 +193,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
     // TODO irconde: abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
-        console.log('createNewMeasurement');
         const goodEventData =
             eventData &&
             eventData.currentPoints &&

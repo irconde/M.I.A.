@@ -120,7 +120,6 @@ class App extends Component {
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
-        this.addNewDetection = this.addNewDetection.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
     }
 
@@ -1481,6 +1480,11 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             // Destructure data needed from event
+            if (data === undefined) {
+                return;
+            } else if (data[0] === undefined) {
+                return;
+            }
             const { handles } = data[0];
             const { start, end } = handles;
             let coords = [];
