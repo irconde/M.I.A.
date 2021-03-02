@@ -8,7 +8,6 @@ const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
-const drawLinkedTextBox = csTools.importInternal('drawing/drawLinkedTextBox');
 
 // TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -23,24 +22,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 renderDashed: false,
                 renderClassName: false,
             },
-            mixins: ['boundingBoxDrawingToolMixin'],
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
-        this.newDetection = {
-            className: constants.commonDetections.UNKNOWN,
-            score: '100',
-        };
-    }
-
-    postMouseDownCallback(evt) {
-        if (this.newDetection !== undefined) {
-            this.default.boundingBoxDrawingToolMixin.boundingBoxDrawingToolMixin(
-                this.newDetection,
-                this.element.id
-            );
-        }
     }
 
     activeCallback(element) {
