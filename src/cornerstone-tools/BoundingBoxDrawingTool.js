@@ -9,7 +9,7 @@ const setShadow = csTools.importInternal('drawing/setShadow');
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
 
-// TODO irconde: We define the new annotation tool by extending BaseAnnotationTool class
+// We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
@@ -49,7 +49,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         }
     }
 
-    // TODO irconde. Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
+    // Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
     //  over (or close to) the rectangle's border
     pointNearTool(element, data, coords, interactionType) {
         const hasStartAndEndHandles =
@@ -89,8 +89,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         return distanceToPoint < distance;
     }
 
-    // TODO irconde. Abstract method. Automatically invoked to render all the widgets that comprise a detection
-
+    // Abstract method. Automatically invoked to render all the widgets that comprise a detection
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {
@@ -173,12 +172,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 const textBoxAnchorPoints = (handles) =>
                     _findTextBoxAnchorPoints(handles.start, handles.end);
 
-                // TODO irconde. Hardcoded detection info. It should be added later on, after creating the bounding box
-                // TODO james. Change the generic object to the Detection class we have created.
-                this.newDetection = {
-                    className: constants.commonDetections.UNKNOWN,
-                    score: '100',
-                };
                 const textBoxContent = _createTextBoxContent(
                     context,
                     {
@@ -191,7 +184,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         });
     }
 
-    // TODO irconde: abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
+    // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
         const goodEventData =
             eventData &&
