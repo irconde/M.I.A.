@@ -32,23 +32,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         };
     }
 
-    activeCallback(element) {
-        console.log(`Hello element ${element.uuid}!`);
-    }
-
-    disabledCallback(element) {
-        console.log(`Goodbye element ${element.uuid}!`);
-    }
-
-    postMouseDownCallback(evt) {
-        if (this.newDetection !== undefined) {
-            this.default.boundingBoxDrawingToolMixin.boundingBoxDrawingToolMixin(
-                this.newDetection,
-                this.element.id
-            );
-        }
-    }
-
     // Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
     //  over (or close to) the rectangle's border
     pointNearTool(element, data, coords, interactionType) {
