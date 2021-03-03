@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
-import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
+import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
+import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import Utils from '../../Utils';
 import * as constants from '../../Constants';
 
