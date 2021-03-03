@@ -189,10 +189,6 @@ class App extends Component {
             this.onDragEnd(this.state.imageViewportSide);
         });
         this.state.imageViewportSide.addEventListener(
-            'mouseup',
-            this.onDragEnd
-        );
-        this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
             this.hideButtons
         );
