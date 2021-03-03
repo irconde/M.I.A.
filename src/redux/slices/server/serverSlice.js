@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import io from 'socket.io-client';
-import { COMMAND_SERVER, server } from '../../Constants';
+import { COMMAND_SERVER, server } from '../../../Constants';
 
 // Socket.io clients for command & file server
 export const commandServer = io(COMMAND_SERVER, { autoConnect: false });
