@@ -147,18 +147,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         Object.assign(data.handles.textBox, defaultCoords);
                     }
                 }
-
-                const textBoxAnchorPoints = (handles) =>
-                    _findTextBoxAnchorPoints(handles.start, handles.end);
-
-                // const textBoxContent = _createTextBoxContent(
-                //     context,
-                //     {
-                //         className: this.newDetection.className,
-                //         score: this.newDetection.score,
-                //     },
-                //     this.configuration
-                // );
             }
         });
     }
@@ -205,7 +193,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 },
             },
             algorithm: 'OPERATOR',
-            class: 'UNKNOWN',
+            class: constants.commonDetections.UNKNOWN,
             confidence: 100,
             updating: false,
         };

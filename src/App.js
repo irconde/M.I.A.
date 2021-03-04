@@ -9,7 +9,6 @@ import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import socketIOClient from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
-import * as cloneDeep from 'lodash.clonedeep';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
@@ -1380,11 +1379,6 @@ class App extends Component {
                         );
                     }
                 } else {
-                    // for (const [key, myDetectionSet] of Object.entries(
-                    //     this.state.detections
-                    // )) {
-                    //     myDetectionSet.selectAlgorithm(false);
-                    // }
                     if (
                         detectionSet.visibility !== false &&
                         this.state.cornerstoneMode !==
@@ -1588,11 +1582,11 @@ class App extends Component {
                                 y: detectionBoxCoords[1],
                             },
                         },
+                        uuid: detectionData.uuid,
                         algorithm: detectionData.algorithm,
                         class: detectionData.class,
                         confidence: detectionData.confidence,
                         updating: true,
-                        uuid: detectionData.uuid,
                     };
                     if (view === constants.viewport.TOP) {
                         cornerstoneTools.addToolState(
@@ -1611,7 +1605,6 @@ class App extends Component {
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
                     )) {
-                        // myDetectionSet.selectAlgorithm(false);
                         myDetectionSet.lowerOpacity = true;
                     }
                     detectionData.visible = false;
