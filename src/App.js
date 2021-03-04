@@ -1459,7 +1459,7 @@ class App extends Component {
                 data[0].uuid
             );
             let updatedDetections = this.state.detections;
-            if (data[0].updating === false) {
+            if (data[0].updatingDetection === false) {
                 // Need to determine if updating operator or new
                 // Create new user-created detection
                 const operator = constants.OPERATOR;
@@ -1586,7 +1586,7 @@ class App extends Component {
                         algorithm: detectionData.algorithm,
                         class: detectionData.class,
                         confidence: detectionData.confidence,
-                        updating: true,
+                        updatingDetection: true,
                     };
                     if (view === constants.viewport.TOP) {
                         cornerstoneTools.addToolState(
