@@ -4,7 +4,7 @@ import * as Icons from './Icons';
 import { detectionStyle } from '../../Constants';
 
 class TreeDetection extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             detectionBGStyle: {
@@ -15,16 +15,16 @@ class TreeDetection extends Component {
                 marginLeft: '2.4rem',
                 marginRight: '0.75rem',
                 verticalAlign: 'middle',
-                marginTop: '-0.2rem'
+                marginTop: '-0.2rem',
             },
             typeStyle: {
                 textTransform: 'uppercase',
                 fontFamily: 'Noto Sans JP',
-                cursor: 'default'
+                cursor: 'default',
             },
             containerStyle: {
                 paddingTop: '0.45rem',
-                paddingBottom: '0.45rem'
+                paddingBottom: '0.45rem',
             },
             eyeStyle: {
                 height: '1.5rem',
@@ -32,9 +32,9 @@ class TreeDetection extends Component {
                 display: 'inline-block',
                 float: 'right',
                 marginRight: '1.0rem',
-                marginBottom: '0.25rem'
+                marginBottom: '0.25rem',
             },
-        }
+        };
         this.setVisible = this.setVisible.bind(this);
         this.setSelected = this.setSelected.bind(this);
     }
@@ -44,22 +44,26 @@ class TreeDetection extends Component {
         visible: PropTypes.bool.isRequired,
         updateImage: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
-        hideButtons: PropTypes.func.isRequired,
-        algorithmSelected: PropTypes.bool.isRequired
-    }
+        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
+        algorithmSelected: PropTypes.bool.isRequired,
+    };
 
     /**
      * setVisible - Is how we control the eye visibility for each detection.
-     *              
+     *
      *
      * @param {type} none
      * @returns {type} none
      */
-    setVisible(e){
-        if (e.target.id === "Shape" || e.target.id === "eye" || e.target.id === "hidden-eye") {
+    setVisible(e) {
+        if (
+            e.target.id === 'Shape' ||
+            e.target.id === 'eye' ||
+            e.target.id === 'hidden-eye'
+        ) {
             this.props.detection.visible = !this.props.detection.visible;
             if (this.props.detection.visible === false) {
-                this.props.hideButtons(e);
+                this.props.resetSelectedDetectionBoxes(e);
             }
             this.props.updateImage();
         }
@@ -72,8 +76,8 @@ class TreeDetection extends Component {
      * @returns {type} none
      */
     setSelected(e) {
-        if (e.target.id !== "Shape" && e.target.id !== "eye") {
-            this.props.detection.selected = !this.props.detection.selected;            
+        if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
+            this.props.detection.selected = !this.props.detection.selected;
             this.props.updateSelectedDetection(this.props.detection, e);
         }
     }
@@ -84,11 +88,17 @@ class TreeDetection extends Component {
         let textColor = 'white';
         let selectionColor;
         let colorSelection = false;
-        if (this.props.detection.validation === true && this.props.detection.validation !== undefined){
+        if (
+            this.props.detection.validation === true &&
+            this.props.detection.validation !== undefined
+        ) {
             textColor = detectionStyle.VALID_COLOR;
-        } else if (this.props.detection.validation === false && this.props.detection.validation !== undefined){
+        } else if (
+            this.props.detection.validation === false &&
+            this.props.detection.validation !== undefined
+        ) {
             textColor = detectionStyle.INVALID_COLOR;
-        } else if (!this.props.detection.visible){
+        } else if (!this.props.detection.visible) {
             textColor = 'gray';
         }
         if (this.props.detection.selected) {
@@ -102,34 +112,60 @@ class TreeDetection extends Component {
         // We only display an open eye if both algorithm and detection are visible.
         if (this.props.detection.visible === true) {
             return (
-                <div id={`${this.props.detection.view}-container`} onClick={this.setSelected} style={colorSelection ?
-                    {...this.state.containerStyle,
-                    backgroundColor: selectionColor,}
-                    :
-                    this.state.containerStyle}>
-                    <div id="detectionBG" style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor === "black" ? this.props.detection.color : this.props.detectionColor,
-                    }}></div>
-                    <span id={`${this.props.detection.view}-span`} style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeO id="eye" onClick={this.setVisible} style={this.state.eyeStyle} />
+                <div
+                    id={`${this.props.detection.view}-container`}
+                    onClick={this.setSelected}
+                    style={
+                        colorSelection
+                            ? {
+                                  ...this.state.containerStyle,
+                                  backgroundColor: selectionColor,
+                              }
+                            : this.state.containerStyle
+                    }>
+                    <div
+                        id="detectionBG"
+                        style={{
+                            ...this.state.detectionBGStyle,
+                            backgroundColor:
+                                this.props.detectionColor === 'black'
+                                    ? this.props.detection.color
+                                    : this.props.detectionColor,
+                        }}></div>
+                    <span
+                        id={`${this.props.detection.view}-span`}
+                        style={{
+                            ...this.state.typeStyle,
+                            color: textColor,
+                        }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
+                    <Icons.EyeO
+                        id="eye"
+                        onClick={this.setVisible}
+                        style={this.state.eyeStyle}
+                    />
                 </div>
             );
         } else {
             return (
-                <div id={`${this.props.detection.view}-hidden-container`} style={this.state.containerStyle}>
-                    <div style={{
-                        ...this.state.detectionBGStyle,
-                        backgroundColor: this.props.detectionColor,
-                    }}></div>
-                    <span id={`${this.props.detection.view}-hidden-span`} style={{
-                        ...this.state.typeStyle,
-                        color: textColor
-                    }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
-                    <Icons.EyeC id="hidden-eye" onClick={this.setVisible} style={this.state.eyeStyle} />
+                <div
+                    id={`${this.props.detection.view}-hidden-container`}
+                    style={this.state.containerStyle}>
+                    <div
+                        style={{
+                            ...this.state.detectionBGStyle,
+                            backgroundColor: this.props.detectionColor,
+                        }}></div>
+                    <span
+                        id={`${this.props.detection.view}-hidden-span`}
+                        style={{
+                            ...this.state.typeStyle,
+                            color: textColor,
+                        }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
+                    <Icons.EyeC
+                        id="hidden-eye"
+                        onClick={this.setVisible}
+                        style={this.state.eyeStyle}
+                    />
                 </div>
             );
         }
