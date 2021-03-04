@@ -208,6 +208,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
+            algorithm: 'OPERATOR',
+            class: 'UNKNOWN',
         };
     }
 }

@@ -1429,8 +1429,6 @@ class App extends Component {
                 viewport,
                 'BoundingBoxDrawing'
             );
-            console.log(data);
-            console.log(cornerstoneTools);
             // Destructure data needed from event
             if (data === undefined) {
                 return;
@@ -1450,48 +1448,65 @@ class App extends Component {
             } else {
                 coords = [start.x, start.y, end.x, end.y];
             }
-            // Create new user-created detection
-            const operator = 'OPERATOR';
-            let newDetection = new Detection(
-                coords,
-                null,
-                'UNKNOWN',
-                100,
-                true,
-                operator
-            );
-            newDetection.view =
-                viewport === this.state.imageViewportTop
-                    ? constants.viewport.TOP
-                    : constants.viewport.SIDE;
-            let updatedDetections = this.state.detections;
-            // add new DetectionSet if it doesn't exist
-            if (!(operator in this.state.detections)) {
-                let newDetectionSet = new DetectionSet();
-                newDetectionSet.setAlgorithmName(operator);
-                newDetectionSet.visibility = true;
-                newDetectionSet.addDetection(newDetection, newDetection.view);
-                this.currentSelection.addAlgorithm(newDetectionSet);
-                updatedDetections[operator] = newDetectionSet;
-            }
-            // Operator DetectionSet exists, add new detection to set
-            else {
-                updatedDetections[operator].addDetection(
-                    newDetection,
-                    newDetection.view
+            if (data[0].algorithm === 'OPERATOR') {
+                console.log('operator det');
+                // Create new user-created detection
+                const operator = 'OPERATOR';
+                let newDetection = new Detection(
+                    coords,
+                    null,
+                    'UNKNOWN',
+                    100,
+                    true,
+                    operator
+                );
+                newDetection.view =
+                    viewport === this.state.imageViewportTop
+                        ? constants.viewport.TOP
+                        : constants.viewport.SIDE;
+                let updatedDetections = this.state.detections;
+                // add new DetectionSet if it doesn't exist
+                if (!(operator in this.state.detections)) {
+                    let newDetectionSet = new DetectionSet();
+                    newDetectionSet.setAlgorithmName(operator);
+                    newDetectionSet.visibility = true;
+                    newDetectionSet.addDetection(
+                        newDetection,
+                        newDetection.view
+                    );
+                    this.currentSelection.addAlgorithm(newDetectionSet);
+                    updatedDetections[operator] = newDetectionSet;
+                }
+                // Operator DetectionSet exists, add new detection to set
+                else {
+                    updatedDetections[operator].addDetection(
+                        newDetection,
+                        newDetection.view
+                    );
+                }
+
+                this.setState(
+                    {
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        displaySelectedBoundingBox: false,
+                        detections: updatedDetections,
+                    },
+                    () => {
+                        this.resetCornerstoneTool();
+                    }
+                );
+            } else {
+                console.log('dicos det');
+                this.setState(
+                    {
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        displaySelectedBoundingBox: false,
+                    },
+                    () => {
+                        this.resetCornerstoneTool();
+                    }
                 );
             }
-
-            this.setState(
-                {
-                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                    displaySelectedBoundingBox: false,
-                    detections: updatedDetections,
-                },
-                () => {
-                    this.resetCornerstoneTool();
-                }
-            );
         }
     }
 
@@ -1563,6 +1578,8 @@ class App extends Component {
                                 y: detectionBoxCoords[1],
                             },
                         },
+                        algorithm: detectionData.algorithm,
+                        className: detectionData.class,
                     };
                     if (view === constants.viewport.TOP) {
                         cornerstoneTools.addToolState(
