@@ -13,7 +13,7 @@ export default class DetectionSet {
         this.selectedDetection = undefined;
         this.visible = true;
         this.data = {};
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
         let viewport = constants.viewport.TOP;
         if (arguments.length > 0) {
             viewport = arguments[0];
@@ -72,7 +72,7 @@ export default class DetectionSet {
         this.selectedViewport = undefined;
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
         this.selectedDetection = undefined;
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
     }
 
     /**
@@ -84,7 +84,7 @@ export default class DetectionSet {
         this.selected = false;
         this.selectedViewport = undefined;
         this.selectedDetection = undefined;
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
         for (let [key, detectionList] of Object.entries(this.data)) {
             for (let detection of detectionList) {

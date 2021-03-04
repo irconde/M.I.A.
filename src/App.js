@@ -1188,7 +1188,7 @@ class App extends Component {
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = detectionList[j].getRenderColor();
                 if (boundingBoxCoords.length < B_BOX_COORDS) return;
-                if (detectionSet.anotherSelected === true) {
+                if (detectionSet.lowerOpacity === true) {
                     let rgbColor = Utils.hexToRgb(color);
                     color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
                 }
@@ -1456,7 +1456,7 @@ class App extends Component {
                 coords,
                 null,
                 data[0].class,
-                100,
+                data[0].confidence,
                 true,
                 data[0].algorithm,
                 viewport === this.state.imageViewportTop
@@ -1465,7 +1465,7 @@ class App extends Component {
                 data[0].uuid
             );
             let updatedDetections = this.state.detections;
-            if (data[0].algorithm === 'OPERATOR') {
+            if (data[0].updating === false) {
                 // Need to determine if updating operator or new
                 // Create new user-created detection
                 const operator = 'OPERATOR';
@@ -1483,58 +1483,42 @@ class App extends Component {
                 }
                 // Operator DetectionSet exists, add new detection to set
                 else {
-                    if (data[0].updating === false) {
-                        updatedDetections[operator].addDetection(
-                            newDetection,
-                            newDetection.view
-                        );
-                    } else {
-                        // Need to update the operator detection already in the set
-                        if (newDetection.view === constants.viewport.TOP) {
-                            const detectionIndex = updatedDetections[
-                                operator
-                            ].data.top.findIndex((det) => {
-                                return data[0].uuid === det.uuid;
-                            });
-                            updatedDetections[operator].data.top[
-                                detectionIndex
-                            ] = newDetection;
-                        } else if (
-                            newDetection.view === constants.viewport.SIDE
-                        ) {
-                            const detectionIndex = updatedDetections[
-                                operator
-                            ].data.side.findIndex((det) => {
-                                return data[0].uuid === det.uuid;
-                            });
-                            updatedDetections[operator].data.side[
-                                detectionIndex
-                            ] = newDetection;
-                        }
-                    }
+                    updatedDetections[operator].addDetection(
+                        newDetection,
+                        newDetection.view
+                    );
                 }
-                this.setState(
-                    {
-                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                        displaySelectedBoundingBox: false,
-                        detections: updatedDetections,
-                    },
-                    () => {
-                        this.resetCornerstoneTool();
-                    }
-                );
             } else {
-                this.setState(
-                    {
-                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                        displaySelectedBoundingBox: false,
-                        detections: updatedDetections,
-                    },
-                    () => {
-                        this.resetCornerstoneTool();
-                    }
-                );
+                if (newDetection.view === constants.viewport.TOP) {
+                    const detectionIndex = updatedDetections[
+                        newDetection.algorithm
+                    ].data.top.findIndex((det) => {
+                        return data[0].uuid === det.uuid;
+                    });
+                    updatedDetections[newDetection.algorithm].data.top[
+                        detectionIndex
+                    ] = newDetection;
+                } else if (newDetection.view === constants.viewport.SIDE) {
+                    const detectionIndex = updatedDetections[
+                        newDetection.algorithm
+                    ].data.side.findIndex((det) => {
+                        return data[0].uuid === det.uuid;
+                    });
+                    updatedDetections[newDetection.algorithm].data.side[
+                        detectionIndex
+                    ] = newDetection;
+                }
             }
+            this.setState(
+                {
+                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                    displaySelectedBoundingBox: false,
+                    detections: updatedDetections,
+                },
+                () => {
+                    this.resetCornerstoneTool();
+                }
+            );
         }
     }
 
@@ -1606,6 +1590,7 @@ class App extends Component {
                         },
                         algorithm: detectionData.algorithm,
                         class: detectionData.class,
+                        confidence: detectionData.confidence,
                         updating: true,
                         uuid: detectionData.uuid,
                     };
@@ -1627,7 +1612,7 @@ class App extends Component {
                         this.state.detections
                     )) {
                         // myDetectionSet.selectAlgorithm(false);
-                        myDetectionSet.anotherSelected = true;
+                        myDetectionSet.lowerOpacity = true;
                     }
                     detectionData.visible = false;
                     this.appUpdateImage();

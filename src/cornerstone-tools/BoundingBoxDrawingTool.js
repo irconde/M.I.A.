@@ -26,10 +26,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
-        this.newDetection = {
-            className: constants.commonDetections.UNKNOWN,
-            score: '100',
-        };
     }
 
     // Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
@@ -155,14 +151,14 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 const textBoxAnchorPoints = (handles) =>
                     _findTextBoxAnchorPoints(handles.start, handles.end);
 
-                const textBoxContent = _createTextBoxContent(
-                    context,
-                    {
-                        className: this.newDetection.className,
-                        score: this.newDetection.score,
-                    },
-                    this.configuration
-                );
+                // const textBoxContent = _createTextBoxContent(
+                //     context,
+                //     {
+                //         className: this.newDetection.className,
+                //         score: this.newDetection.score,
+                //     },
+                //     this.configuration
+                // );
             }
         });
     }
@@ -210,8 +206,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             },
             algorithm: 'OPERATOR',
             class: 'UNKNOWN',
+            confidence: 100,
             updating: false,
-            index: -1,
         };
     }
 }
