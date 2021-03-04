@@ -210,6 +210,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             },
             algorithm: 'OPERATOR',
             class: 'UNKNOWN',
+            updating: false,
+            index: -1,
         };
     }
 }

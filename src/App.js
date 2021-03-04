@@ -8,6 +8,8 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import socketIOClient from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
+import * as cloneDeep from 'lodash.clonedeep';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
@@ -996,7 +998,8 @@ class App extends Component {
                             confidenceLevel,
                             false,
                             algorithmName,
-                            constants.viewport.TOP
+                            constants.viewport.TOP,
+                            uuidv4()
                         )
                     );
                 }
@@ -1078,7 +1081,8 @@ class App extends Component {
                                 confidenceLevel,
                                 false,
                                 algorithmName,
-                                constants.viewport.SIDE
+                                constants.viewport.SIDE,
+                                uuidv4()
                             ),
                             constants.viewport.SIDE
                         );
@@ -1376,11 +1380,11 @@ class App extends Component {
                         );
                     }
                 } else {
-                    for (const [key, myDetectionSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        myDetectionSet.selectAlgorithm(false);
-                    }
+                    // for (const [key, myDetectionSet] of Object.entries(
+                    //     this.state.detections
+                    // )) {
+                    //     myDetectionSet.selectAlgorithm(false);
+                    // }
                     if (
                         detectionSet.visibility !== false &&
                         this.state.cornerstoneMode !==
@@ -1448,23 +1452,23 @@ class App extends Component {
             } else {
                 coords = [start.x, start.y, end.x, end.y];
             }
+            let newDetection = new Detection(
+                coords,
+                null,
+                data[0].class,
+                100,
+                true,
+                data[0].algorithm,
+                viewport === this.state.imageViewportTop
+                    ? constants.viewport.TOP
+                    : constants.viewport.SIDE,
+                data[0].uuid
+            );
+            let updatedDetections = this.state.detections;
             if (data[0].algorithm === 'OPERATOR') {
-                console.log('operator det');
+                // Need to determine if updating operator or new
                 // Create new user-created detection
                 const operator = 'OPERATOR';
-                let newDetection = new Detection(
-                    coords,
-                    null,
-                    'UNKNOWN',
-                    100,
-                    true,
-                    operator
-                );
-                newDetection.view =
-                    viewport === this.state.imageViewportTop
-                        ? constants.viewport.TOP
-                        : constants.viewport.SIDE;
-                let updatedDetections = this.state.detections;
                 // add new DetectionSet if it doesn't exist
                 if (!(operator in this.state.detections)) {
                     let newDetectionSet = new DetectionSet();
@@ -1479,12 +1483,36 @@ class App extends Component {
                 }
                 // Operator DetectionSet exists, add new detection to set
                 else {
-                    updatedDetections[operator].addDetection(
-                        newDetection,
-                        newDetection.view
-                    );
+                    if (data[0].updating === false) {
+                        updatedDetections[operator].addDetection(
+                            newDetection,
+                            newDetection.view
+                        );
+                    } else {
+                        // Need to update the operator detection already in the set
+                        if (newDetection.view === constants.viewport.TOP) {
+                            const detectionIndex = updatedDetections[
+                                operator
+                            ].data.top.findIndex((det) => {
+                                return data[0].uuid === det.uuid;
+                            });
+                            updatedDetections[operator].data.top[
+                                detectionIndex
+                            ] = newDetection;
+                        } else if (
+                            newDetection.view === constants.viewport.SIDE
+                        ) {
+                            const detectionIndex = updatedDetections[
+                                operator
+                            ].data.side.findIndex((det) => {
+                                return data[0].uuid === det.uuid;
+                            });
+                            updatedDetections[operator].data.side[
+                                detectionIndex
+                            ] = newDetection;
+                        }
+                    }
                 }
-
                 this.setState(
                     {
                         cornerstoneMode: constants.cornerstoneMode.SELECTION,
@@ -1496,11 +1524,11 @@ class App extends Component {
                     }
                 );
             } else {
-                console.log('dicos det');
                 this.setState(
                     {
                         cornerstoneMode: constants.cornerstoneMode.SELECTION,
                         displaySelectedBoundingBox: false,
+                        detections: updatedDetections,
                     },
                     () => {
                         this.resetCornerstoneTool();
@@ -1556,8 +1584,6 @@ class App extends Component {
                 viewportInfo.viewport === constants.viewport.TOP
                     ? constants.viewport.TOP
                     : constants.viewport.SIDE;
-            console.log(detectionBoxCoords);
-            console.log(view);
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
@@ -1579,7 +1605,9 @@ class App extends Component {
                             },
                         },
                         algorithm: detectionData.algorithm,
-                        className: detectionData.class,
+                        class: detectionData.class,
+                        updating: true,
+                        uuid: detectionData.uuid,
                     };
                     if (view === constants.viewport.TOP) {
                         cornerstoneTools.addToolState(
@@ -1598,7 +1626,7 @@ class App extends Component {
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
                     )) {
-                        myDetectionSet.selectAlgorithm(false);
+                        // myDetectionSet.selectAlgorithm(false);
                         myDetectionSet.anotherSelected = true;
                     }
                     detectionData.visible = false;
