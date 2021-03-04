@@ -192,7 +192,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
-            algorithm: 'OPERATOR',
+            algorithm: constants.OPERATOR,
             class: constants.commonDetections.UNKNOWN,
             confidence: 100,
             updating: false,

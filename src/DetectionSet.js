@@ -107,7 +107,7 @@ export default class DetectionSet {
         }
         if (
             this.data[viewport] === undefined &&
-            this.algorithm === 'OPERATOR'
+            this.algorithm === constants.OPERATOR
         ) {
             this.data[viewport] = [];
         }

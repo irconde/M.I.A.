@@ -669,7 +669,7 @@ class App extends Component {
                                             Dicos.dataToBlob(
                                                 detectionSet,
                                                 detectionSet.algorithm ===
-                                                    'OPERATOR'
+                                                    constants.OPERATOR
                                                     ? stack.blobData[j]
                                                     : stack.blobData[
                                                           j + topCounter
@@ -706,7 +706,7 @@ class App extends Component {
                                             Dicos.dataToBlob(
                                                 detectionSet,
                                                 detectionSet.algorithm ===
-                                                    'OPERATOR'
+                                                    constants.OPERATOR
                                                     ? stack.blobData[j]
                                                     : stack.blobData[
                                                           j + sideCounter
@@ -1462,7 +1462,7 @@ class App extends Component {
             if (data[0].updating === false) {
                 // Need to determine if updating operator or new
                 // Create new user-created detection
-                const operator = 'OPERATOR';
+                const operator = constants.OPERATOR;
                 // add new DetectionSet if it doesn't exist
                 if (!(operator in this.state.detections)) {
                     let newDetectionSet = new DetectionSet();
