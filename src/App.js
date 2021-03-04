@@ -1429,6 +1429,8 @@ class App extends Component {
                 viewport,
                 'BoundingBoxDrawing'
             );
+            console.log(data);
+            console.log(cornerstoneTools);
             // Destructure data needed from event
             if (data === undefined) {
                 return;
@@ -1533,16 +1535,60 @@ class App extends Component {
         const detectionData = this.state.detections[
             this.currentSelection.getAlgorithm()
         ].getDataFromSelectedDetection();
-        let detectionBoxCoords = new Array(4);
         if (detectionData !== undefined) {
-            detectionBoxCoords = detectionData.boundingBox;
+            const detectionBoxCoords = detectionData.boundingBox;
+            const view =
+                viewportInfo.viewport === constants.viewport.TOP
+                    ? constants.viewport.TOP
+                    : constants.viewport.SIDE;
+            console.log(detectionBoxCoords);
+            console.log(view);
+            this.setState(
+                {
+                    cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                    displaySelectedBoundingBox: true,
+                },
+                () => {
+                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                        mouseButtonMask: 1,
+                    });
+                    const data = {
+                        handles: {
+                            end: {
+                                x: detectionBoxCoords[2],
+                                y: detectionBoxCoords[3],
+                            },
+                            start: {
+                                x: detectionBoxCoords[0],
+                                y: detectionBoxCoords[1],
+                            },
+                        },
+                    };
+                    if (view === constants.viewport.TOP) {
+                        cornerstoneTools.addToolState(
+                            this.state.imageViewportTop,
+                            'BoundingBoxDrawing',
+                            data
+                        );
+                    } else if (view === constants.viewport.SIDE) {
+                        cornerstoneTools.addToolState(
+                            this.state.imageViewportSide,
+                            'BoundingBoxDrawing',
+                            data
+                        );
+                    }
+
+                    for (const [key, myDetectionSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        myDetectionSet.selectAlgorithm(false);
+                        myDetectionSet.anotherSelected = true;
+                    }
+                    detectionData.visible = false;
+                    this.appUpdateImage();
+                }
+            );
         }
-        const view =
-            viewportInfo.viewport === constants.viewport.TOP
-                ? constants.viewport.TOP
-                : constants.viewport.SIDE;
-        console.log(detectionBoxCoords);
-        console.log(view);
         this.appUpdateImage();
     }
 
