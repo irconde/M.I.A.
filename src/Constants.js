@@ -54,7 +54,12 @@ export const cornerstoneMode = {
     ANNOTATION: 'annotation',
     EDITION: 'edition',
 };
-
+export const editionMode = {
+  LABEL: 'label',
+  BOUNDING: 'bounding',
+  POLYGON: 'polygon',
+  DELETE: 'delete'
+}
 export const commonDetections = {
     APPLE: 'apple',
     BANANA: 'banana',
