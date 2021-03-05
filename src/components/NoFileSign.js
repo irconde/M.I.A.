@@ -48,7 +48,6 @@ class NoFileSign extends Component {
                     title="NoFilesAvalable"
                     style={this.state.imgStyle}
                 />
-
                 <p style={this.state.paragraphStyle}> · No file available ·</p>
             </div>
         );
