@@ -371,6 +371,9 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
         }
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+        });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
@@ -1356,10 +1359,13 @@ class App extends Component {
                         );
                     }
                 } else {
+                    console.log(this.state.cornerstoneMode);
                     if (
                         detectionSet.visibility !== false &&
-                        this.state.cornerstoneMode !==
-                            constants.cornerstoneMode.ANNOTATION
+                        (this.state.cornerstoneMode !==
+                            constants.cornerstoneMode.ANNOTATION ||
+                            this.state.cornerstoneMode !==
+                                constants.cornerstoneMode.EDITION)
                     ) {
                         let anyDetection = this.currentSelection.selectDetection(
                             detectionSet.algorithm,
@@ -1374,7 +1380,11 @@ class App extends Component {
                             continue;
                         }
                         this.setState(
-                            { displaySelectedBoundingBox: anyDetection },
+                            {
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.EDITION,
+                                displaySelectedBoundingBox: anyDetection,
+                            },
                             () => {
                                 this.onDetectionSelected(e);
                             }
@@ -1398,12 +1408,16 @@ class App extends Component {
      */
     onDragEnd(viewport) {
         if (
-            this.state.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
+            this.state.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION ||
+            this.state.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
-            const { data } = cornerstoneTools.getToolState(
+            const toolState = cornerstoneTools.getToolState(
                 viewport,
                 'BoundingBoxDrawing'
             );
+            if (toolState === undefined) return;
+            const { data } = toolState;
             // Destructure data needed from event
             if (data === undefined) {
                 return;
@@ -1480,6 +1494,8 @@ class App extends Component {
                     ] = newDetection;
                 }
             }
+            console.log(data[0]);
+            console.log(this);
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
@@ -1487,7 +1503,9 @@ class App extends Component {
                     detections: updatedDetections,
                 },
                 () => {
+                    console.log('reset mode to selection');
                     this.resetCornerstoneTool();
+                    this.appUpdateImage();
                 }
             );
         }
@@ -1541,13 +1559,9 @@ class App extends Component {
                     : constants.viewport.SIDE;
             this.setState(
                 {
-                    cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
                     displaySelectedBoundingBox: true,
                 },
                 () => {
-                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                        mouseButtonMask: 1,
-                    });
                     const data = {
                         handles: {
                             end: {
@@ -1585,6 +1599,13 @@ class App extends Component {
                         myDetectionSet.lowerOpacity = true;
                     }
                     detectionData.updatingDetection = true;
+                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                        mouseButtonMask: 1,
+                    });
+                    cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                        cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    });
+                    // console.log(cornerstoneTools);
                     this.appUpdateImage();
                 }
             );

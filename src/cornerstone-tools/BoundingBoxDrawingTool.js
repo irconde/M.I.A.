@@ -21,6 +21,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 hideHandlesIfMoving: true,
                 renderDashed: false,
                 renderClassName: false,
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
             },
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
@@ -153,17 +154,21 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
+        // console.log(this);
+        if (this._options.cornerstoneMode === constants.cornerstoneMode.EDITION)
+            return;
+
         const goodEventData =
             eventData &&
             eventData.currentPoints &&
             eventData.currentPoints.image;
-
         if (!goodEventData) {
             console.log(
                 "required eventData not supplied to tool's createNewMeasurement"
             );
             return;
         }
+        console.log('creating');
         return {
             visible: true,
             active: true,
