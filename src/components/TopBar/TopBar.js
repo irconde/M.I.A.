@@ -4,7 +4,14 @@ import FileQueueIcon from '../../icons/FileQueueIcon';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 
-const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedServer, processingFile }) => {
+const TopBar = ({
+    numberOfFiles,
+    isUpload,
+    isDownload,
+    isConnected,
+    connectedServer,
+    processingFile,
+}) => {
     const styles = {
         bar: {
             position: 'absolute',
@@ -20,7 +27,7 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             color: 'white',
             boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
         },
-        titleLabelContainer:{
+        titleLabelContainer: {
             position: 'absolute',
             display: 'flex',
             height: '3.375rem',
@@ -35,7 +42,7 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             fontWeight: 500,
             fontSize: '10pt',
         },
-        connectionStatusIconsContainer:{
+        connectionStatusIconsContainer: {
             position: 'absolute',
             display: 'flex',
             height: '3.375rem',
@@ -43,11 +50,10 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
             top: '0',
             width: '35%',
             zIndex: '999',
-            marginLeft:'65%',
+            marginLeft: '65%',
             alignItems: 'center',
             justifyContent: 'flex-end',
             color: 'white',
-
         },
         icon: {
             margin: '1.25rem',
@@ -61,11 +67,11 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
         divider: {
             color: '#6A6A6A',
             fontWeight: 'bold',
-        }
+        },
     };
 
-    return (
-        <div >
+    return processingFile ? (
+        <div>
             <div style={styles.titleLabelContainer}>
                 <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                 <span style={styles.typeInfo}>Connected to </span>&nbsp;&nbsp;
@@ -74,6 +80,30 @@ const TopBar = ({ numberOfFiles, isUpload, isDownload, isConnected , connectedSe
                 <span style={styles.typeInfo}>Processing</span>&nbsp;&nbsp;
                 {processingFile} &nbsp;
                 <span style={styles.typeInfo}>file</span>
+            </div>
+            <div style={styles.connectionStatusIconsContainer}>
+                <FileQueueIcon
+                    title="Number of Files"
+                    numberOfFiles={numberOfFiles}
+                    style={styles.icon}
+                />
+                <FileUploadStatus
+                    isDownload={isDownload}
+                    isUpload={isUpload}
+                    styles={styles.icon}
+                />
+                <ConnectionStatus
+                    isConnected={isConnected}
+                    style={styles.lastIcon}
+                />
+            </div>
+        </div>
+    ) : (
+        <div>
+            <div style={styles.titleLabelContainer}>
+                <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
+                <span style={styles.typeInfo}>Connected to </span>&nbsp;&nbsp;
+                {connectedServer} &nbsp;
             </div>
             <div style={styles.connectionStatusIconsContainer}>
                 <FileQueueIcon
@@ -101,7 +131,7 @@ TopBar.propTypes = {
     isDownload: PropTypes.bool,
     isConnected: PropTypes.bool,
     connectedServer: PropTypes.string,
-    processingFile: PropTypes.string
+    processingFile: PropTypes.string,
 };
 
 export default TopBar;

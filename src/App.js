@@ -482,6 +482,10 @@ class App extends Component {
                 if (res.data.response === 'error ') {
                     console.log('Error getting next image');
                 } else if (res.data.response === 'no-next-image') {
+                    this.state.currentProcessingFile = null;
+                    document.getElementById(
+                        'verticalDivider'
+                    ).style.visibility = 'hidden';
                     // Need to clear the canvas here or make a no image to load display
                     this.onNoImageLeft();
                 } else {
