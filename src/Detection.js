@@ -13,7 +13,8 @@ export default class Detection {
         isValidated,
         algorithm,
         view,
-        uuid
+        uuid,
+        updatingDetection = false
     ) {
         this.boundingBox = diagonalCoords;
         this.maskBitmap = maskBitMap;
@@ -30,6 +31,7 @@ export default class Detection {
             luminosity: 'bright',
         });
         this.uuid = uuid;
+        this.updatingDetection = updatingDetection;
     }
 
     /**

@@ -1183,7 +1183,11 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
-                if (detectionList[j].visible !== true) continue;
+                if (
+                    detectionList[j].visible !== true ||
+                    detectionList[j].updatingDetection === true
+                )
+                    continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = detectionList[j].getRenderColor();
                 if (boundingBoxCoords.length < B_BOX_COORDS) return;
@@ -1292,7 +1296,6 @@ class App extends Component {
                 this.currentSelection.getAlgorithm()
             ];
             let clickedPos = constants.selection.NO_SELECTION;
-            let feedback = undefined;
 
             // User selected 'next' button, update all detections as accepted
             if (e.currentTarget.id === 'nextButton') {
@@ -1305,33 +1308,7 @@ class App extends Component {
                         });
                     });
                 });
-            } else if (['confirm', 'reject'].includes(e.currentTarget.id)) {
-                // User is submitting feedback through confirm or reject buttons
-                if (
-                    e.currentTarget.id === 'confirm' ||
-                    e.currentTarget.id === 'reject'
-                ) {
-                    if (e.currentTarget.id === 'confirm') {
-                        feedback = true;
-                    }
-                    if (e.currentTarget.id === 'reject') {
-                        feedback = false;
-                    }
-                    detectionSet.validateSelectedDetection(feedback);
-                    if (this.validationCompleted()) {
-                        this.setState({
-                            displaySelectedBoundingBox: false,
-                            displayNext: true,
-                        });
-                    } else {
-                        this.setState({
-                            displaySelectedBoundingBox: false,
-                        });
-                    }
-                    this.appUpdateImage();
-                }
             }
-
             // Handle regular click events for selecting and deselecting detections
             else {
                 const mousePos = cornerstone.canvasToPixel(e.target, {
@@ -1607,7 +1584,7 @@ class App extends Component {
                     )) {
                         myDetectionSet.lowerOpacity = true;
                     }
-                    detectionData.visible = false;
+                    detectionData.updatingDetection = true;
                     this.appUpdateImage();
                 }
             );
