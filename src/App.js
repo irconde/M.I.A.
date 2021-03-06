@@ -1499,7 +1499,7 @@ class App extends Component {
                 coords = [start.x, start.y, end.x, end.y];
             }
             // Create new user-created detection
-            const operator = 'OPERATOR';
+            const operator = 'BoundingBox-OPERATOR';
             let newDetection = new Detection(
                 coords,
                 null,
