@@ -1,5 +1,6 @@
 import csTools from 'cornerstone-tools';
 import * as constants from '../Constants';
+import Utils from '../Utils.js';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getROITextBoxCoords = csTools.importInternal('util/getROITextBoxCoords');
@@ -20,8 +21,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 drawHandlesOnHover: true,
                 hideHandlesIfMoving: true,
                 renderDashed: false,
-                renderClassName: false,
-                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                renderClassName: true,
             },
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
@@ -138,15 +138,38 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
 
                 // Default to textbox on right side of ROI
-                if (this.configuration.renderClassName === true) {
-                    if (!data.handles.textBox.hasMoved) {
-                        const defaultCoords = getROITextBoxCoords(
-                            eventData.viewport,
-                            data.handles
-                        );
-
-                        Object.assign(data.handles.textBox, defaultCoords);
-                    }
+                if (
+                    this.configuration.renderClassName === true &&
+                    data.updatingDetection === true
+                ) {
+                    context.font = constants.detectionStyle.LABEL_FONT;
+                    context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+                    context.strokeStyle = data.renderColor;
+                    context.fillStyle = data.renderColor;
+                    const detectionLabel = Utils.formatDetectionLabel(
+                        data.class,
+                        data.confidence
+                    );
+                    const labelSize = Utils.getTextLabelSize(
+                        context,
+                        detectionLabel,
+                        constants.detectionStyle.LABEL_PADDING
+                    );
+                    context.fillRect(
+                        data.handles.start.x,
+                        data.handles.start.y - labelSize['height'],
+                        labelSize['width'],
+                        labelSize['height']
+                    );
+                    context.fillStyle =
+                        constants.detectionStyle.LABEL_TEXT_COLOR;
+                    context.fillText(
+                        detectionLabel,
+                        data.handles.start.x +
+                            constants.detectionStyle.LABEL_PADDING,
+                        data.handles.start.y -
+                            constants.detectionStyle.LABEL_PADDING
+                    );
                 }
             }
         });
@@ -154,8 +177,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
-        // console.log(this);
-        if (this._options.cornerstoneMode === constants.cornerstoneMode.EDITION)
+        if (this.options.cornerstoneMode === constants.cornerstoneMode.EDITION)
             return;
 
         const goodEventData =
@@ -168,7 +190,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             );
             return;
         }
-        console.log('creating');
         return {
             visible: true,
             active: true,

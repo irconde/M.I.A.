@@ -1359,7 +1359,6 @@ class App extends Component {
                         );
                     }
                 } else {
-                    console.log(this.state.cornerstoneMode);
                     if (
                         detectionSet.visibility !== false &&
                         (this.state.cornerstoneMode !==
@@ -1494,8 +1493,6 @@ class App extends Component {
                     ] = newDetection;
                 }
             }
-            console.log(data[0]);
-            console.log(this);
             this.setState(
                 {
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
@@ -1503,7 +1500,6 @@ class App extends Component {
                     detections: updatedDetections,
                 },
                 () => {
-                    console.log('reset mode to selection');
                     this.resetCornerstoneTool();
                     this.appUpdateImage();
                 }
@@ -1576,6 +1572,7 @@ class App extends Component {
                         uuid: detectionData.uuid,
                         algorithm: detectionData.algorithm,
                         class: detectionData.class,
+                        renderColor: detectionData.getRenderColor(),
                         confidence: detectionData.confidence,
                         updatingDetection: true,
                     };
@@ -1605,7 +1602,6 @@ class App extends Component {
                     cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                         cornerstoneMode: constants.cornerstoneMode.EDITION,
                     });
-                    // console.log(cornerstoneTools);
                     this.appUpdateImage();
                 }
             );
