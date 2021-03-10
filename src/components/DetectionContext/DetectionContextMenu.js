@@ -5,29 +5,26 @@ import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
 import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
-import { editionMode } from '../../Constants';
-
-// Some useful style constants
-const widgetHeight = '30px';
-const white = '#dadada';
-const selectedColor = '#aeaeae';
+import { editionMode, detectionContextStyle } from '../../Constants';
 
 const Positioner = styled.div`
     position: absolute;
     top: ${(props) => `${props.position.top}px`};
+    left: ${(props) => `${props.position.left}px`};
     z-index: 500;
 `;
 const FlexContainer = styled.div`
     display: flex;
     align-items: center;
+    width: ${detectionContextStyle.WIDTH}px;
 `;
 const MainWidget = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: ${widgetHeight};
+    height: ${detectionContextStyle.HEIGHT}px;
     border-radius: 40px;
-    background-color: ${white};
+    background-color: ${detectionContextStyle.WHITE};
     overflow: hidden;
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
     /* make sure when either icon is selected, the color fills to the rounded corners */
@@ -47,27 +44,40 @@ const IconContainer = styled.div`
     align-items: center;
     justify-content: center;
     width: 40px;
-    height: ${widgetHeight};
-    background: ${(props) => (props.selected ? selectedColor : null)};
+    height: ${detectionContextStyle.HEIGHT}px;
+    background: ${(props) =>
+        props.selected ? detectionContextStyle.SELECTED_COLOR : null};
     &:active {
-        background: ${selectedColor};
+        background: ${detectionContextStyle.SELECTED_COLOR};
+    }
+
+    &:hover {
+        background: ${(props) =>
+            props.selected
+                ? detectionContextStyle.SELECTED_COLOR
+                : detectionContextStyle.HOVER_COLOR};
     }
 `;
 const DeleteWidget = styled.div`
-    height: ${widgetHeight};
+    height: ${detectionContextStyle.HEIGHT}px;
     width: 30px;
     border-radius: 15px;
     display: flex;
     margin-left: 0.45rem;
     align-items: center;
     justify-content: center;
-    background-color: ${white};
+    background-color: ${detectionContextStyle.WHITE};
+
+    &:hover {
+        background: ${detectionContextStyle.HOVER_COLOR};
+    }
 `;
 function DetectionContextMenu({
     position,
     isVisible,
     selectedOption,
     setSelectedOption,
+    onLabelClicked,
     onBoundingClicked,
     onPolygonClicked,
     onDeleteClicked,
@@ -81,6 +91,9 @@ function DetectionContextMenu({
             setSelectedOption(editionMode.POLYGON);
         } else if (type === editionMode.DELETE) {
             onDeleteClicked();
+        } else if (type === editionMode.LABEL) {
+            onLabelClicked();
+            setSelectedOption(editionMode.LABEL);
         } else {
             throw new Error(
                 `${type} is not a valid option for DetectionContextMenu click`
@@ -126,6 +139,7 @@ DetectionContextMenu.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     selectedOption: PropTypes.string.isRequired,
     setSelectedOption: PropTypes.func.isRequired,
+    onLabelClicked: PropTypes.func.isRequired,
     onBoundingClicked: PropTypes.func.isRequired,
     onPolygonClicked: PropTypes.func.isRequired,
     onDeleteClicked: PropTypes.func.isRequired,
