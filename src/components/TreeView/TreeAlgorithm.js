@@ -189,8 +189,10 @@ class TreeAlgorithm extends Component {
                                       color: 'gray',
                                   }
                         }>
-                        {this.props.algorithm.algorithm.includes('OPERATOR')
-                            ? this.props.algorithm.algorithm.split('-')[1]
+                        {this.props.algorithm.algorithm.localeCompare(
+                            'OPERATOR'
+                        ) == 0
+                            ? this.props.algorithm.algorithm
                             : constants.ALGORTIHM +
                               ' - ' +
                               this.props.algorithm.algorithm}
