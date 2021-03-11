@@ -3,7 +3,6 @@ import * as constants from '../Constants';
 import Utils from '../Utils.js';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
-const getROITextBoxCoords = csTools.importInternal('util/getROITextBoxCoords');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
@@ -137,7 +136,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     );
                 }
 
-                // Default to textbox on right side of ROI
+                // Label Rendering
                 if (
                     this.configuration.renderClassName === true &&
                     data.updatingDetection === true

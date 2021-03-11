@@ -1346,25 +1346,29 @@ class App extends Component {
                 }
                 // Click on an empty area
                 if (clickedPos === constants.selection.NO_SELECTION) {
-                    if (
-                        this.state.cornerstoneMode !==
-                        constants.cornerstoneMode.ANNOTATION
-                    ) {
-                        detectionSet.clearAll();
-                        this.setState(
-                            { displaySelectedBoundingBox: false },
-                            () => {
-                                this.onDetectionSelected(e);
-                            }
-                        );
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        detSet.clearAll();
                     }
+                    // detectionSet.clearAll();
+                    this.setState(
+                        {
+                            displaySelectedBoundingBox: false,
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                        },
+                        () => {
+                            this.onDetectionSelected(e);
+                            this.resetCornerstoneTool();
+                            this.appUpdateImage();
+                        }
+                    );
                 } else {
                     if (
                         detectionSet.visibility !== false &&
-                        (this.state.cornerstoneMode !==
-                            constants.cornerstoneMode.ANNOTATION ||
-                            this.state.cornerstoneMode !==
-                                constants.cornerstoneMode.EDITION)
+                        this.state.cornerstoneMode ===
+                            constants.cornerstoneMode.SELECTION
                     ) {
                         let anyDetection = this.currentSelection.selectDetection(
                             detectionSet.algorithm,
@@ -1415,7 +1419,9 @@ class App extends Component {
                 viewport,
                 'BoundingBoxDrawing'
             );
-            if (toolState === undefined) return;
+            if (toolState === undefined) {
+                return;
+            }
             const { data } = toolState;
             // Destructure data needed from event
             if (data === undefined) {
@@ -1501,6 +1507,11 @@ class App extends Component {
                 },
                 () => {
                     this.resetCornerstoneTool();
+                    for (const [key, detectionSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        detectionSet.clearAll();
+                    }
                     this.appUpdateImage();
                 }
             );
@@ -1514,14 +1525,18 @@ class App extends Component {
      * @return {type}  None
      */
     resetSelectedDetectionBoxes(e) {
-        for (const [key, detectionSet] of Object.entries(
-            this.state.detections
-        )) {
-            detectionSet.clearAll();
+        if (
+            this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
+        ) {
+            for (const [key, detectionSet] of Object.entries(
+                this.state.detections
+            )) {
+                detectionSet.clearAll();
+            }
+            this.setState({ displaySelectedBoundingBox: false }, () => {
+                this.onDetectionSelected(e);
+            });
         }
-        this.setState({ displaySelectedBoundingBox: false }, () => {
-            this.onDetectionSelected(e);
-        });
     }
 
     /**
