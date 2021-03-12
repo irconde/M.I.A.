@@ -439,9 +439,6 @@ class App extends Component {
     async sendImageToFileServer(file) {
         this.props.setDownload(true);
         fileServer.emit('fileFromClient', file);
-        // OLD CODE
-        // this.setState({ isDownload: true });
-        // this.state.socketFS.binary(true).emit('fileFromClient', file);
     }
 
     /**
@@ -452,9 +449,6 @@ class App extends Component {
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
         commandServer.emit('fileFromClient', file);
-        // OLD CODE
-        // this.setState({ isUpload: true });
-        // this.state.socketCommand.binary(true).emit('fileFromClient', file);
     }
 
     /**
