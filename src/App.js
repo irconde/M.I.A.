@@ -133,7 +133,7 @@ class App extends Component {
         this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
             this
         );
-        this.selectEditionOption = this.selectEditionOption.bind(this);
+        this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.editBoundingBox = this.editBoundingBox.bind(this);
         this.editPolygonMask = this.editPolygonMask.bind(this);
@@ -1372,6 +1372,7 @@ class App extends Component {
                             displaySelectedBoundingBox: false,
                             cornerstoneMode:
                                 constants.cornerstoneMode.SELECTION,
+                            editionMode: null,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
                                 top: 0,
@@ -1770,14 +1771,17 @@ class App extends Component {
         }
     }
     /**
-     * Invoked when user selects an edition option from DetectionContextMenu
-     * @param {string} option Edition option selected from menu
+     * Invoked when user selects an edition mode from DetectionContextMenu
+     * @param {string} newMode Edition mode selected from menu
      */
-    selectEditionOption(option) {
-        if ([...Object.values(constants.editionMode)].includes(option)) {
-            this.setState({
-                editionOption: option,
-            });
+    selectEditionMode(newMode) {
+        if ([...Object.values(constants.editionMode)].includes(newMode)) {
+            this.setState(
+                {
+                    editionMode: newMode,
+                },
+                () => this.appUpdateImage()
+            );
         }
     }
 
@@ -1861,7 +1865,7 @@ class App extends Component {
                         position={this.state.detectionContextPosition}
                         isVisible={this.state.isDetectionContextVisible}
                         selectedOption={this.state.editionMode}
-                        setSelectedOption={this.selectEditionOption}
+                        setSelectedOption={this.selectEditionMode}
                         onLabelClicked={this.editDetectionLabel}
                         onBoundingClicked={this.editBoundingBox}
                         onPolygonClicked={this.editPolygonMask}
