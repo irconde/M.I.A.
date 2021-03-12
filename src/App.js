@@ -24,6 +24,7 @@ import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
+import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -98,6 +99,12 @@ class App extends Component {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isDrawingBoundingBox: false,
             isFABVisible: false,
+            isDetectionContextVisible: false,
+            detectionContextPosition: {
+                top: 0,
+                left: 0,
+            },
+            editionMode: null,
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -123,6 +130,14 @@ class App extends Component {
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
+        this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
+            this
+        );
+        this.selectEditionOption = this.selectEditionOption.bind(this);
+        this.editDetectionLabel = this.editDetectionLabel.bind(this);
+        this.editBoundingBox = this.editBoundingBox.bind(this);
+        this.editPolygonMask = this.editPolygonMask.bind(this);
+        this.deleteDetection = this.deleteDetection.bind(this);
     }
 
     /**
@@ -1357,6 +1372,11 @@ class App extends Component {
                             displaySelectedBoundingBox: false,
                             cornerstoneMode:
                                 constants.cornerstoneMode.SELECTION,
+                            isDetectionContextVisible: false,
+                            detectionContextPosition: {
+                                top: 0,
+                                left: 0,
+                            },
                         },
                         () => {
                             this.onDetectionSelected(e);
@@ -1387,9 +1407,11 @@ class App extends Component {
                                 cornerstoneMode:
                                     constants.cornerstoneMode.EDITION,
                                 displaySelectedBoundingBox: anyDetection,
+                                isDetectionContextVisible: true,
                             },
                             () => {
                                 this.onDetectionSelected(e);
+                                this.renderDetectionContextMenu(e);
                             }
                         );
                         if (
@@ -1695,6 +1717,97 @@ class App extends Component {
         //TODO
     }
 
+    /**
+     * Invoked when user selects a detection (callback from onMouseClicked)
+     * @param {Event} event Related mouse click event to position the widget relative to detection
+     */
+    renderDetectionContextMenu(event) {
+        const viewportInfo = Utils.eventToViewportInfo(event);
+        const detectionData = this.state.detections[
+            this.currentSelection.getAlgorithm()
+        ].getDataFromSelectedDetection();
+
+        if (viewportInfo.viewport !== null) {
+            if (detectionData !== undefined) {
+                let detectionContextGap = 0;
+                let viewport, originCoordX;
+                const boundingBoxCoords = detectionData.boundingBox;
+                const boundingWidth = Math.abs(
+                    boundingBoxCoords[2] - boundingBoxCoords[0]
+                );
+                const boundingHeight = Math.abs(
+                    boundingBoxCoords[3] - boundingBoxCoords[1]
+                );
+
+                if (viewportInfo.viewport === constants.viewport.TOP) {
+                    detectionContextGap =
+                        viewportInfo.offset / this.state.zoomLevelTop -
+                        boundingWidth;
+                    originCoordX = 2;
+                    viewport = this.state.imageViewportTop;
+                } else {
+                    originCoordX = 0;
+                    detectionContextGap =
+                        viewportInfo.offset / this.state.zoomLevelSide -
+                        boundingHeight / boundingWidth;
+                    viewport = this.state.imageViewportSide;
+                }
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                    x: boundingBoxCoords[originCoordX] + detectionContextGap,
+                    y: boundingBoxCoords[1] + boundingHeight + 4,
+                });
+
+                this.setState(
+                    {
+                        detectionContextPosition: {
+                            top: y,
+                            left: x,
+                        },
+                    },
+                    () => this.appUpdateImage()
+                );
+            }
+        }
+    }
+    /**
+     * Invoked when user selects an edition option from DetectionContextMenu
+     * @param {string} option Edition option selected from menu
+     */
+    selectEditionOption(option) {
+        if ([...Object.values(constants.editionMode)].includes(option)) {
+            this.setState({
+                editionOption: option,
+            });
+        }
+    }
+
+    /**
+     * Invoked when user selects 'label' option from DetectionContextMenu
+     */
+    editDetectionLabel() {
+        console.log('label option selected');
+    }
+
+    /**
+     * Invoked when user selects 'bounding box' option from DetectionContextMenu
+     */
+    editBoundingBox() {
+        console.log('edit bounding box selected');
+    }
+
+    /**
+     * Invoked when user selects 'polygon mask' option from DetectionContextMenu
+     */
+    editPolygonMask() {
+        console.log('edit polygon mask selected');
+    }
+
+    /**
+     * Invoked when user selects 'delete' option from DetectionContextMenu
+     */
+    deleteDetection() {
+        console.log('delete detection selected');
+    }
     render() {
         return (
             <div>
@@ -1744,6 +1857,17 @@ class App extends Component {
                     />
                     <div id="algorithm-outputs"> </div>
                     <NoFileSign isVisible={!this.state.fileInQueue} />
+                    <DetectionContextMenu
+                        position={this.state.detectionContextPosition}
+                        isVisible={this.state.isDetectionContextVisible}
+                        selectedOption={this.state.editionMode}
+                        setSelectedOption={this.selectEditionOption}
+                        onLabelClicked={this.editDetectionLabel}
+                        onBoundingClicked={this.editBoundingBox}
+                        onPolygonClicked={this.editPolygonMask}
+                        onDeleteClicked={this.deleteDetection}
+                    />
+
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
