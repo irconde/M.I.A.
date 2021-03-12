@@ -160,16 +160,16 @@ class App extends Component {
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolstouchdragend',
-            () => {
-                this.onDragEnd(this.state.imageViewportTop);
+            (event) => {
+                this.onDragEnd(event, this.state.imageViewportTop);
             }
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolsmousedrag',
             this.resetSelectedDetectionBoxes
         );
-        this.state.imageViewportTop.addEventListener('mouseup', () => {
-            this.onDragEnd(this.state.imageViewportTop);
+        this.state.imageViewportTop.addEventListener('mouseup', (event) => {
+            this.onDragEnd(event, this.state.imageViewportTop);
         });
 
         this.state.imageViewportTop.addEventListener(
@@ -194,16 +194,16 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolstouchdragend',
-            () => {
-                this.onDragEnd(this.state.imageViewportSide);
+            (event) => {
+                this.onDragEnd(event, this.state.imageViewportSide);
             }
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousedrag',
             this.resetSelectedDetectionBoxes
         );
-        this.state.imageViewportSide.addEventListener('mouseup', () => {
-            this.onDragEnd(this.state.imageViewportSide);
+        this.state.imageViewportSide.addEventListener('mouseup', (event) => {
+            this.onDragEnd(event, this.state.imageViewportSide);
         });
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
@@ -1366,7 +1366,6 @@ class App extends Component {
                     )) {
                         detSet.clearAll();
                     }
-                    // detectionSet.clearAll();
                     this.setState(
                         {
                             displaySelectedBoundingBox: false,
@@ -1432,7 +1431,7 @@ class App extends Component {
      * @param {*}  Viewport The Cornerstone Viewport containing the event
      * @return {type} None
      */
-    onDragEnd(viewport) {
+    onDragEnd(event, viewport) {
         if (
             this.state.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION ||
@@ -1522,23 +1521,40 @@ class App extends Component {
                     ] = newDetection;
                 }
             }
-            this.setState(
-                {
-                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                    displaySelectedBoundingBox: false,
-                    detections: updatedDetections,
-                    isDetectionContextVisible: false,
-                },
-                () => {
-                    this.resetCornerstoneTool();
-                    for (const [key, detectionSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        detectionSet.clearAll();
+            if (
+                this.state.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION
+            ) {
+                this.setState(
+                    {
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        displaySelectedBoundingBox: false,
+                        detections: updatedDetections,
+                        isDetectionContextVisible: false,
+                    },
+                    () => {
+                        this.resetCornerstoneTool();
+                        for (const [key, detectionSet] of Object.entries(
+                            this.state.detections
+                        )) {
+                            detectionSet.clearAll();
+                        }
+                        this.appUpdateImage();
                     }
-                    this.appUpdateImage();
-                }
-            );
+                );
+            } else if (
+                this.state.cornerstoneMode === constants.cornerstoneMode.EDITION
+            ) {
+                newDetection.updatingDetection = true;
+                this.setState(
+                    {
+                        detections: updatedDetections,
+                    },
+                    () => {
+                        this.renderDetectionContextMenu(event);
+                    }
+                );
+            }
         }
     }
 
@@ -1724,11 +1740,12 @@ class App extends Component {
      * @param {Event} event Related mouse click event to position the widget relative to detection
      */
     renderDetectionContextMenu(event) {
+        //console.log(event);
         const viewportInfo = Utils.eventToViewportInfo(event);
         const detectionData = this.state.detections[
             this.currentSelection.getAlgorithm()
         ].getDataFromSelectedDetection();
-
+        //console.log(viewportInfo);
         if (viewportInfo.viewport !== null) {
             if (detectionData !== undefined) {
                 let detectionContextGap = 0;
@@ -1740,7 +1757,6 @@ class App extends Component {
                 const boundingHeight = Math.abs(
                     boundingBoxCoords[3] - boundingBoxCoords[1]
                 );
-
                 if (viewportInfo.viewport === constants.viewport.TOP) {
                     detectionContextGap =
                         viewportInfo.offset / this.state.zoomLevelTop -
@@ -1766,7 +1782,9 @@ class App extends Component {
                             left: x,
                         },
                     },
-                    () => this.appUpdateImage()
+                    () => {
+                        this.appUpdateImage();
+                    }
                 );
             }
         }

@@ -141,36 +141,66 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     this.configuration.renderClassName === true &&
                     data.updatingDetection === true
                 ) {
-                    const myCoords = cornerstone.pixelToCanvas(
-                        element,
-                        data.handles.start
-                    );
-                    context.font = constants.detectionStyle.LABEL_FONT;
-                    context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
-                    context.strokeStyle = data.renderColor;
-                    context.fillStyle = data.renderColor;
-                    const detectionLabel = Utils.formatDetectionLabel(
-                        data.class,
-                        data.confidence
-                    );
-                    const labelSize = Utils.getTextLabelSize(
-                        context,
-                        detectionLabel,
-                        constants.detectionStyle.LABEL_PADDING
-                    );
-                    context.fillRect(
-                        myCoords.x,
-                        myCoords.y - labelSize['height'],
-                        labelSize['width'],
-                        labelSize['height']
-                    );
-                    context.fillStyle =
-                        constants.detectionStyle.LABEL_TEXT_COLOR;
-                    context.fillText(
-                        detectionLabel,
-                        myCoords.x + constants.detectionStyle.LABEL_PADDING,
-                        myCoords.y - constants.detectionStyle.LABEL_PADDING
-                    );
+                    if (
+                        !data.handles.start.moving &&
+                        !data.handles.end.moving
+                    ) {
+                        let myCoords;
+                        if (
+                            data.handles.end.y < data.handles.start.y &&
+                            data.handles.end.x < data.handles.start.x
+                        ) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.end.x,
+                                y: data.handles.end.y,
+                            });
+                        } else if (
+                            data.handles.end.y > data.handles.start.y &&
+                            data.handles.end.x < data.handles.start.x
+                        ) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.end.x,
+                                y: data.handles.start.y,
+                            });
+                        } else if (data.handles.end.y < data.handles.start.y) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.start.x,
+                                y: data.handles.end.y,
+                            });
+                        } else {
+                            myCoords = cornerstone.pixelToCanvas(
+                                element,
+                                data.handles.start
+                            );
+                        }
+                        context.font = constants.detectionStyle.LABEL_FONT;
+                        context.lineWidth =
+                            constants.detectionStyle.BORDER_WIDTH;
+                        context.strokeStyle = data.renderColor;
+                        context.fillStyle = data.renderColor;
+                        const detectionLabel = Utils.formatDetectionLabel(
+                            data.class,
+                            data.confidence
+                        );
+                        const labelSize = Utils.getTextLabelSize(
+                            context,
+                            detectionLabel,
+                            constants.detectionStyle.LABEL_PADDING
+                        );
+                        context.fillRect(
+                            myCoords.x,
+                            myCoords.y - labelSize['height'],
+                            labelSize['width'],
+                            labelSize['height']
+                        );
+                        context.fillStyle =
+                            constants.detectionStyle.LABEL_TEXT_COLOR;
+                        context.fillText(
+                            detectionLabel,
+                            myCoords.x + constants.detectionStyle.LABEL_PADDING,
+                            myCoords.y - constants.detectionStyle.LABEL_PADDING
+                        );
+                    }
                 }
             }
         });
