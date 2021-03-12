@@ -277,7 +277,19 @@ export default class Utils {
         viewportInfo['offset'] = offsetLeft;
         return viewportInfo;
     }
+    /**
+     * Used to mock CustomEvents for mouse events that cornerstone does not have custom events for
+     * such as 'mouseup'
+     * @param {Event} e Mouse event data
+     * @param {HTMLElement} element on which the event happened
+     */
+    static mockCornerstoneEvent(e, element) {
+        let fakeEvent = { ...e };
+        fakeEvent.detail = { ...fakeEvent.detail, element: element };
+        fakeEvent.target = element;
 
+        return fakeEvent;
+    }
     /**
      * getScreenSize - Simply retrieves the device's screen size that is accessing the application.
      *
