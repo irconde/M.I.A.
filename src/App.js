@@ -34,7 +34,9 @@ import {
     setDownload,
     setIsFileInQueue,
     setNumFilesInQueue,
-} from './redux/slices/serverSlice';
+    setProcessingHost,
+    setCurrentProcessingFile,
+} from './redux/slices/server/serverSlice';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -100,8 +102,6 @@ class App extends Component {
             imageViewportSide: document.getElementById('dicomImageRight'),
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            currentProcessingFile: null,
-            processingHost: null,
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isDrawingBoundingBox: false,
             isFABVisible: false,
@@ -212,7 +212,7 @@ class App extends Component {
             constants.server.PROTOCOL +
             hostname +
             constants.server.FILE_SERVER_PORT;
-        this.setState({ processingHost: hostname });
+        this.props.setProcessingHost(hostname);
         let reactObj = this;
         this.setState(
             {
@@ -498,7 +498,7 @@ class App extends Component {
                 if (res.data.response === 'error ') {
                     console.log('Error getting next image');
                 } else if (res.data.response === 'no-next-image') {
-                    this.state.currentProcessingFile = null;
+                    this.props.setCurrentProcessingFile(null);
                     document.getElementById(
                         'verticalDivider'
                     ).style.visibility = 'hidden';
@@ -508,7 +508,7 @@ class App extends Component {
                     var fileNameProcessing = Utils.getFilenameFromURI(
                         res.data.fileNameProcessing
                     );
-                    this.state.currentProcessingFile = fileNameProcessing;
+                    this.props.setCurrentProcessingFile(fileNameProcessing);
                     const myZip = new JSZip();
                     var listOfPromises = [];
                     // This is our list of stacks we will append to the myOra object in our promise all
@@ -1772,8 +1772,8 @@ class App extends Component {
                     }}
                     onMouseDown={(e) => e.preventDefault()}>
                     <TopBar
-                        connectedServer={this.state.processingHost}
-                        processingFile={this.state.currentProcessingFile}
+                        connectedServer={this.props.processingHost}
+                        processingFile={this.props.currentProcessingFile}
                         numberOfFiles={this.props.numFilesInQueue}
                         isUpload={this.props.isUpload}
                         isDownload={this.props.isDownload}
@@ -1827,6 +1827,8 @@ const mapStateToProps = (state) => {
         isUpload: server.isUpload,
         isFileInQueue: server.isFileInQueue,
         numFilesInQueue: server.numFilesInQueue,
+        processingHost: server.processingHost,
+        currentProcessingFile: server.currentProcessingFile,
     };
 };
 
@@ -1837,4 +1839,6 @@ export default connect(mapStateToProps, {
     setUpload,
     setIsFileInQueue,
     setNumFilesInQueue,
+    setProcessingHost,
+    setCurrentProcessingFile,
 })(App);

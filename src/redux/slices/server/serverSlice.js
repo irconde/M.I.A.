@@ -17,6 +17,8 @@ const serverSlice = createSlice({
         isConnected: false,
         isUpload: false,
         isDownload: false,
+        processingHost: null,
+        currentProcessingFile: null,
     },
     reducers: {
         setConnected: (state, action) => {
@@ -33,6 +35,12 @@ const serverSlice = createSlice({
         },
         setNumFilesInQueue: (state, action) => {
             state.numFilesInQueue = action.payload;
+        },
+        setProcessingHost: (state, action) => {
+            state.processingHost = action.payload;
+        },
+        setCurrentProcessingFile: (state, action) => {
+            state.currentProcessingFile = action.payload;
         },
         setCommandServerConnection: (state, action) => {
             const { payload } = action;
@@ -66,6 +74,8 @@ export const {
     setDownload,
     setIsFileInQueue,
     setNumFilesInQueue,
+    setProcessingHost,
+    setCurrentProcessingFile,
     setCommandServerConnection,
     setFileServerConnection,
 } = serverSlice.actions;
