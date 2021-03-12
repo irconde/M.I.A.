@@ -169,7 +169,11 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         this.state.imageViewportTop.addEventListener('mouseup', (event) => {
-            this.onDragEnd(event, this.state.imageViewportTop);
+            const newEvent = Utils.mockCornerstoneEvent(
+                event,
+                this.state.imageViewportTop
+            );
+            this.onDragEnd(newEvent, this.state.imageViewportTop);
         });
 
         this.state.imageViewportTop.addEventListener(
@@ -203,7 +207,11 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         this.state.imageViewportSide.addEventListener('mouseup', (event) => {
-            this.onDragEnd(event, this.state.imageViewportSide);
+            const newEvent = Utils.mockCornerstoneEvent(
+                event,
+                this.state.imageViewportSide
+            );
+            this.onDragEnd(newEvent, this.state.imageViewportSide);
         });
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousewheel',
@@ -1551,7 +1559,7 @@ class App extends Component {
                         detections: updatedDetections,
                     },
                     () => {
-                        this.renderDetectionContextMenu(event);
+                        this.renderDetectionContextMenu(event, newDetection);
                     }
                 );
             }
@@ -1738,14 +1746,17 @@ class App extends Component {
     /**
      * Invoked when user selects a detection (callback from onMouseClicked)
      * @param {Event} event Related mouse click event to position the widget relative to detection
+     * @param {Detection} [ draggedData ] Optional detection data. In the case that
+     * a detection is moved during a drag event, the data in state is out of date until after this
+     * function is called. Use the param data to render the context menu.
      */
-    renderDetectionContextMenu(event) {
-        //console.log(event);
+    renderDetectionContextMenu(event, draggedData = undefined) {
         const viewportInfo = Utils.eventToViewportInfo(event);
-        const detectionData = this.state.detections[
-            this.currentSelection.getAlgorithm()
-        ].getDataFromSelectedDetection();
-        //console.log(viewportInfo);
+        const detectionData = draggedData
+            ? draggedData
+            : this.state.detections[
+                  this.currentSelection.getAlgorithm()
+              ].getDataFromSelectedDetection();
         if (viewportInfo.viewport !== null) {
             if (detectionData !== undefined) {
                 let detectionContextGap = 0;
