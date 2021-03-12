@@ -1527,6 +1527,7 @@ class App extends Component {
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     displaySelectedBoundingBox: false,
                     detections: updatedDetections,
+                    isDetectionContextVisible: false,
                 },
                 () => {
                     this.resetCornerstoneTool();

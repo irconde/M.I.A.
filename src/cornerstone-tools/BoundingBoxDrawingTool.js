@@ -1,6 +1,7 @@
 import csTools from 'cornerstone-tools';
 import * as constants from '../Constants';
 import Utils from '../Utils.js';
+import * as cornerstone from 'cornerstone-core';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
@@ -114,7 +115,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     rectOptions.lineDash = lineDash;
                 }
                 rectOptions.lineWidth = lineWidth;
-
                 // Draw bounding box
                 drawRect(
                     context,
@@ -141,6 +141,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     this.configuration.renderClassName === true &&
                     data.updatingDetection === true
                 ) {
+                    const myCoords = cornerstone.pixelToCanvas(
+                        element,
+                        data.handles.start
+                    );
                     context.font = constants.detectionStyle.LABEL_FONT;
                     context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
                     context.strokeStyle = data.renderColor;
@@ -155,8 +159,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         constants.detectionStyle.LABEL_PADDING
                     );
                     context.fillRect(
-                        data.handles.start.x,
-                        data.handles.start.y - labelSize['height'],
+                        myCoords.x,
+                        myCoords.y - labelSize['height'],
                         labelSize['width'],
                         labelSize['height']
                     );
@@ -164,15 +168,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         constants.detectionStyle.LABEL_TEXT_COLOR;
                     context.fillText(
                         detectionLabel,
-                        data.handles.start.x +
-                            constants.detectionStyle.LABEL_PADDING,
-                        data.handles.start.y -
-                            constants.detectionStyle.LABEL_PADDING
+                        myCoords.x + constants.detectionStyle.LABEL_PADDING,
+                        myCoords.y - constants.detectionStyle.LABEL_PADDING
                     );
                 }
             }
         });
     }
+
+    updateCachedStats(image, element, data) {}
 
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
