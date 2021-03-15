@@ -805,9 +805,15 @@ class App extends Component {
         for (const [key, detectionSet] of Object.entries(
             this.state.detections
         )) {
-            if (detectionSet.isValidated() === false) {
-                result = false;
-                break;
+            if (detectionSet.data.top !== undefined) {
+                detectionSet.data.top.forEach((detection) => {
+                    detection.validation = true;
+                });
+            }
+            if (detectionSet.data.side !== undefined) {
+                detectionSet.data.side.forEach((detection) => {
+                    detection.validation = true;
+                });
             }
         }
         return result;
