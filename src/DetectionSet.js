@@ -21,6 +21,8 @@ export default class DetectionSet {
         if (!(viewport in this.data)) {
             this.data[viewport] = [];
         }
+        this.numTopDetections = 0;
+        this.numSideDetections = 0;
     }
 
     /**
@@ -111,6 +113,13 @@ export default class DetectionSet {
             this.algorithm === constants.OPERATOR
         ) {
             this.data[viewport] = [];
+        }
+        if (viewport === constants.viewport.TOP) {
+            detection.detectionIndex = this.numTopDetections;
+            this.numTopDetections++;
+        } else if (viewport === constants.viewport.SIDE) {
+            detection.detectionIndex = this.numSideDetections;
+            this.numSideDetections++;
         }
         this.data[viewport].push(detection);
     }

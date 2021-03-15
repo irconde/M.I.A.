@@ -1316,123 +1316,90 @@ class App extends Component {
         ) {
             return;
         }
-        this.currentSelection.resetAlgorithmPositionToEnd();
-        do {
-            let detectionSet = this.state.detections[
-                this.currentSelection.getAlgorithm()
-            ];
+        let combinedDetections;
+        let viewport;
+        if (e.detail.element.id === 'dicomImageLeft') {
+            // top
+            combinedDetections = this.currentSelection.getDetectionsFromView(
+                constants.viewport.TOP
+            );
+            viewport = constants.viewport.TOP;
+        } else if (e.detail.element.id === 'dicomImageRight') {
+            // side
+            combinedDetections = this.currentSelection.getDetectionsFromView(
+                constants.viewport.SIDE
+            );
+            viewport = constants.viewport.SIDE;
+        }
+        if (combinedDetections.length > 0) {
+            const mousePos = cornerstone.canvasToPixel(e.target, {
+                x: e.detail.currentPoints.canvas.x,
+                y: e.detail.currentPoints.canvas.y,
+            });
             let clickedPos = constants.selection.NO_SELECTION;
-
-            // User selected 'next' button, update all detections as accepted
-            if (e.currentTarget.id === 'nextButton') {
-                let updatedDetections = this.state.detections;
-                Object.keys(updatedDetections).forEach((algorithm) => {
-                    const { data } = updatedDetections[algorithm];
-                    Object.keys(data).forEach((detection) => {
-                        data[detection].forEach((view) => {
-                            view.validation = true;
-                        });
-                    });
-                });
-            }
-            // Handle regular click events for selecting and deselecting detections
-            else {
-                const mousePos = cornerstone.canvasToPixel(e.target, {
-                    x: e.detail.currentPoints.canvas.x,
-                    y: e.detail.currentPoints.canvas.y,
-                });
-                let detectionSetData = detectionSet.getData();
-                let viewport = constants.viewport.TOP;
+            for (var j = combinedDetections.length - 1; j > -1; j--) {
                 if (
-                    e.detail.element.id === 'dicomImageRight' &&
-                    this.state.singleViewport === false
+                    Utils.pointInRect(
+                        mousePos,
+                        combinedDetections[j].boundingBox
+                    )
                 ) {
-                    detectionSetData = detectionSet.getData(
-                        constants.viewport.SIDE
+                    clickedPos = j;
+                    break;
+                }
+            }
+            // Click on an empty area
+            if (clickedPos === constants.selection.NO_SELECTION) {
+                for (const [key, detSet] of Object.entries(
+                    this.state.detections
+                )) {
+                    detSet.clearAll();
+                }
+                this.setState(
+                    {
+                        displaySelectedBoundingBox: false,
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        editionMode: null,
+                        isDetectionContextVisible: false,
+                        detectionContextPosition: {
+                            top: 0,
+                            left: 0,
+                        },
+                    },
+                    () => {
+                        this.onDetectionSelected(e);
+                        this.resetCornerstoneTool();
+                        this.appUpdateImage();
+                    }
+                );
+            } else {
+                // Clicked on detection
+                // console.log(`det click at ${clickedPos}`);
+                if (
+                    combinedDetections[clickedPos].visible !== false &&
+                    this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.SELECTION
+                ) {
+                    let anyDetection = this.currentSelection.selectDetection(
+                        combinedDetections[clickedPos].algorithm,
+                        combinedDetections[clickedPos].detectionIndex,
+                        viewport
                     );
-                    viewport = constants.viewport.SIDE;
-                }
-                if (detectionSetData !== undefined) {
-                    for (var j = 0; j < detectionSetData.length; j++) {
-                        if (
-                            Utils.pointInRect(
-                                mousePos,
-                                detectionSetData[j].boundingBox
-                            )
-                        ) {
-                            clickedPos = j;
-                            break;
-                        }
-                    }
-                } else {
-                    continue;
-                }
-                // Click on an empty area
-                if (clickedPos === constants.selection.NO_SELECTION) {
-                    for (const [key, detSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        detSet.clearAll();
-                    }
                     this.setState(
                         {
-                            displaySelectedBoundingBox: false,
-                            cornerstoneMode:
-                                constants.cornerstoneMode.SELECTION,
-                            editionMode: null,
-                            isDetectionContextVisible: false,
-                            detectionContextPosition: {
-                                top: 0,
-                                left: 0,
-                            },
+                            cornerstoneMode: constants.cornerstoneMode.EDITION,
+                            displaySelectedBoundingBox: anyDetection,
+                            isDetectionContextVisible: true,
                         },
                         () => {
                             this.onDetectionSelected(e);
-                            this.resetCornerstoneTool();
-                            this.appUpdateImage();
+                            this.renderDetectionContextMenu(e);
                         }
                     );
-                } else {
-                    if (
-                        detectionSet.visibility !== false &&
-                        this.state.cornerstoneMode ===
-                            constants.cornerstoneMode.SELECTION
-                    ) {
-                        let anyDetection = this.currentSelection.selectDetection(
-                            detectionSet.algorithm,
-                            clickedPos,
-                            viewport
-                        );
-                        if (
-                            detectionSet.getDataFromSelectedDetection()
-                                .visible === false
-                        ) {
-                            detectionSet.getDataFromSelectedDetection().selected = false;
-                            continue;
-                        }
-                        this.setState(
-                            {
-                                cornerstoneMode:
-                                    constants.cornerstoneMode.EDITION,
-                                displaySelectedBoundingBox: anyDetection,
-                                isDetectionContextVisible: true,
-                            },
-                            () => {
-                                this.onDetectionSelected(e);
-                                this.renderDetectionContextMenu(e);
-                            }
-                        );
-                        if (
-                            anyDetection !== undefined ||
-                            anyDetection !== null
-                        ) {
-                            break;
-                        }
-                    }
                 }
             }
-        } while (this.currentSelection.selectPriorAlgorithm() === true);
-        this.currentSelection.resetAlgorithmPositionToEnd();
+            clickedPos = constants.selection.NO_SELECTION;
+        }
     }
     /**
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
@@ -1509,12 +1476,14 @@ class App extends Component {
                     );
                 }
             } else {
+                newDetection.selected = true;
                 if (newDetection.view === constants.viewport.TOP) {
                     const detectionIndex = updatedDetections[
                         newDetection.algorithm
                     ].data.top.findIndex((det) => {
                         return data[0].uuid === det.uuid;
                     });
+                    newDetection.detectionIndex = detectionIndex;
                     updatedDetections[newDetection.algorithm].data.top[
                         detectionIndex
                     ] = newDetection;
@@ -1524,6 +1493,7 @@ class App extends Component {
                     ].data.side.findIndex((det) => {
                         return data[0].uuid === det.uuid;
                     });
+                    newDetection.detectionIndex = detectionIndex;
                     updatedDetections[newDetection.algorithm].data.side[
                         detectionIndex
                     ] = newDetection;
@@ -1652,7 +1622,6 @@ class App extends Component {
                             data
                         );
                     }
-
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
                     )) {
