@@ -91,14 +91,10 @@ class SideMenu extends Component {
                     detectionSet.selectAlgorithm(true);
                     detectionSet.lowerOpacity = false;
                 } else {
-                    detectionSet.selectAlgorithm(false);
-                    detectionSet.lowerOpacity = true;
-                    detectionSet.selected = false;
+                    detectionSet.clearAll();
                 }
             } else {
-                detectionSet.selected = false;
-                detectionSet.selectAlgorithm(false);
-                detectionSet.lowerOpacity = false;
+                detectionSet.clearAll();
             }
         }
         this.forceUpdate(() => {
@@ -122,8 +118,8 @@ class SideMenu extends Component {
             for (const [key, detectionSet] of Object.entries(
                 this.props.detections
             )) {
-                detectionSet.lowerOpacity = false;
                 detectionSet.selectAlgorithm(false);
+                detectionSet.lowerOpacity = true;
                 detectionSet.selected = false;
             }
             detection.selected = true;

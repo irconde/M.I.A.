@@ -63,7 +63,7 @@ class TreeDetection extends Component {
         ) {
             this.props.detection.visible = !this.props.detection.visible;
             if (this.props.detection.visible === false) {
-                this.props.resetSelectedDetectionBoxes(e);
+                this.props.resetSelectedDetectionBoxes(e, true);
             }
             this.props.updateImage();
         }
@@ -83,7 +83,6 @@ class TreeDetection extends Component {
     }
 
     render() {
-        // console.log(this.props.detection)
         // Figuring out what text color we need to display on the detection
         let textColor = 'white';
         let selectionColor;
