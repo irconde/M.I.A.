@@ -242,6 +242,12 @@ class TreeAlgorithm extends Component {
                                     resetSelectedDetectionBoxes={
                                         this.props.resetSelectedDetectionBoxes
                                     }
+                                    updateAlgorithmVisibility={
+                                        this.setVisibility
+                                    }
+                                    algorithmVisible={
+                                        this.props.algorithm.visibility
+                                    }
                                 />
                             );
                         })
@@ -279,6 +285,12 @@ class TreeAlgorithm extends Component {
                                     }
                                     resetSelectedDetectionBoxes={
                                         this.props.resetSelectedDetectionBoxes
+                                    }
+                                    updateAlgorithmVisibility={
+                                        this.setVisibility
+                                    }
+                                    algorithmVisible={
+                                        this.props.algorithm.visibility
                                     }
                                 />
                             );

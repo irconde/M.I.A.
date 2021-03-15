@@ -1718,7 +1718,9 @@ class App extends Component {
         this.setState(
             {
                 displaySelectedBoundingBox: false,
-                isDetectionContextVisible: !selected,
+                isDetectionContextVisible: false,
+                isFABVisible: selected,
+                cornerstoneMode: constants.cornerstoneMode.SELECTION,
             },
             () => {
                 this.resetCornerstoneTool();

@@ -161,11 +161,13 @@ export default class DetectionSet {
         if (this.data.top !== undefined) {
             for (let i = 0; i < this.data.top.length; i++) {
                 this.data.top[i].selected = bool;
+                this.data.top[i].updatingDetection = false;
             }
         }
         if (this.data.side !== undefined) {
             for (let i = 0; i < this.data.side.length; i++) {
                 this.data.side[i].selected = bool;
+                this.data.top[i].updatingDetection = false;
             }
         }
         this.selectedDetection = undefined;

@@ -46,6 +46,8 @@ class TreeDetection extends Component {
         updateSelectedDetection: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired,
+        algorithmVisible: PropTypes.bool.isRequired,
+        updateAlgorithmVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -64,6 +66,8 @@ class TreeDetection extends Component {
             this.props.detection.visible = !this.props.detection.visible;
             if (this.props.detection.visible === false) {
                 this.props.resetSelectedDetectionBoxes(e, true);
+            } else if (this.props.algorithmVisible === false) {
+                this.props.updateAlgorithmVisibility();
             }
             this.props.updateImage();
         }
