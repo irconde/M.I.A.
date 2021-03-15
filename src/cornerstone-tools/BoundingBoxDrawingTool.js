@@ -1,8 +1,9 @@
 import csTools from 'cornerstone-tools';
 import * as constants from '../Constants';
+import Utils from '../Utils.js';
+import * as cornerstone from 'cornerstone-core';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
-const getROITextBoxCoords = csTools.importInternal('util/getROITextBoxCoords');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
@@ -20,16 +21,12 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 drawHandlesOnHover: true,
                 hideHandlesIfMoving: true,
                 renderDashed: false,
-                renderClassName: false,
+                renderClassName: true,
             },
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
-        this.newDetection = {
-            className: constants.commonDetections.UNKNOWN,
-            score: '100',
-        };
     }
 
     // Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
@@ -118,7 +115,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     rectOptions.lineDash = lineDash;
                 }
                 rectOptions.lineWidth = lineWidth;
-
                 // Draw bounding box
                 drawRect(
                     context,
@@ -140,40 +136,87 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     );
                 }
 
-                // Default to textbox on right side of ROI
-                if (this.configuration.renderClassName === true) {
-                    if (!data.handles.textBox.hasMoved) {
-                        const defaultCoords = getROITextBoxCoords(
-                            eventData.viewport,
-                            data.handles
+                // Label Rendering
+                if (
+                    this.configuration.renderClassName === true &&
+                    data.updatingDetection === true
+                ) {
+                    if (
+                        !data.handles.start.moving &&
+                        !data.handles.end.moving
+                    ) {
+                        let myCoords;
+                        if (
+                            data.handles.end.y < data.handles.start.y &&
+                            data.handles.end.x < data.handles.start.x
+                        ) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.end.x,
+                                y: data.handles.end.y,
+                            });
+                        } else if (
+                            data.handles.end.y > data.handles.start.y &&
+                            data.handles.end.x < data.handles.start.x
+                        ) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.end.x,
+                                y: data.handles.start.y,
+                            });
+                        } else if (data.handles.end.y < data.handles.start.y) {
+                            myCoords = cornerstone.pixelToCanvas(element, {
+                                x: data.handles.start.x,
+                                y: data.handles.end.y,
+                            });
+                        } else {
+                            myCoords = cornerstone.pixelToCanvas(
+                                element,
+                                data.handles.start
+                            );
+                        }
+                        context.font = constants.detectionStyle.LABEL_FONT;
+                        context.lineWidth =
+                            constants.detectionStyle.BORDER_WIDTH;
+                        context.strokeStyle = data.renderColor;
+                        context.fillStyle = data.renderColor;
+                        const detectionLabel = Utils.formatDetectionLabel(
+                            data.class,
+                            data.confidence
                         );
-
-                        Object.assign(data.handles.textBox, defaultCoords);
+                        const labelSize = Utils.getTextLabelSize(
+                            context,
+                            detectionLabel,
+                            constants.detectionStyle.LABEL_PADDING
+                        );
+                        context.fillRect(
+                            myCoords.x,
+                            myCoords.y - labelSize['height'],
+                            labelSize['width'],
+                            labelSize['height']
+                        );
+                        context.fillStyle =
+                            constants.detectionStyle.LABEL_TEXT_COLOR;
+                        context.fillText(
+                            detectionLabel,
+                            myCoords.x + constants.detectionStyle.LABEL_PADDING,
+                            myCoords.y - constants.detectionStyle.LABEL_PADDING
+                        );
                     }
                 }
-
-                const textBoxAnchorPoints = (handles) =>
-                    _findTextBoxAnchorPoints(handles.start, handles.end);
-
-                const textBoxContent = _createTextBoxContent(
-                    context,
-                    {
-                        className: this.newDetection.className,
-                        score: this.newDetection.score,
-                    },
-                    this.configuration
-                );
             }
         });
     }
 
+    updateCachedStats(image, element, data) {}
+
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
     createNewMeasurement(eventData) {
+        if (this.options.cornerstoneMode === constants.cornerstoneMode.EDITION)
+            return;
+
         const goodEventData =
             eventData &&
             eventData.currentPoints &&
             eventData.currentPoints.image;
-
         if (!goodEventData) {
             console.log(
                 "required eventData not supplied to tool's createNewMeasurement"
@@ -208,6 +251,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
+            algorithm: constants.OPERATOR,
+            class: constants.commonDetections.UNKNOWN,
+            confidence: 100,
+            updatingDetection: false,
         };
     }
 }

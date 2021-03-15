@@ -42,6 +42,14 @@ export const detectionStyle = {
     BORDER_WIDTH: 2,
 };
 
+export const detectionContextStyle = {
+    HEIGHT: 30,
+    WIDTH: 160,
+    WHITE: '#dadada',
+    SELECTED_COLOR: '#aeaeae',
+    HOVER_COLOR: '#c7c7c7',
+};
+
 export const viewportStyle = {
     ZOOM: 1.2,
     ORIGIN: 25,
@@ -54,13 +62,20 @@ export const cornerstoneMode = {
     ANNOTATION: 'annotation',
     EDITION: 'edition',
 };
-
+export const editionMode = {
+    LABEL: 'label',
+    BOUNDING: 'bounding',
+    POLYGON: 'polygon',
+    DELETE: 'delete',
+};
 export const commonDetections = {
     APPLE: 'apple',
     BANANA: 'banana',
     ORANGE: 'orange',
     UNKNOWN: 'unknown',
 };
+
+export const OPERATOR = 'OPERATOR';
 
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;

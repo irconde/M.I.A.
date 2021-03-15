@@ -30,12 +30,12 @@ class SideMenu extends Component {
     static propTypes = {
         detections: PropTypes.object.isRequired,
         configurationInfo: PropTypes.object.isRequired,
+        enableMenu: PropTypes.bool.isRequired,
         appUpdateImage: PropTypes.func.isRequired,
         onAlgorithmSelected: PropTypes.func.isRequired,
+        onMenuDetectionSelected: PropTypes.func.isRequired,
+        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         onDetectionSelected: PropTypes.func.isRequired,
-        hideButtons: PropTypes.func.isRequired,
-        renderButtons: PropTypes.func.isRequired,
-        enableMenu: PropTypes.bool.isRequired,
     };
 
     /**
@@ -53,12 +53,12 @@ class SideMenu extends Component {
                 detectionSet.visibility = !bool;
                 if (detectionSet.visibility === false) {
                     detectionSet.selected = false;
-                    detectionSet.anotherSelected = false;
+                    detectionSet.lowerOpacity = false;
                     detectionSet.selectAlgorithm(false);
                 }
                 detectionSet.setDetectionVisibility(detectionSet.visibility);
             } else if (key !== algorithm && bool === true) {
-                detectionSet.anotherSelected = false;
+                detectionSet.lowerOpacity = false;
             }
         }
         this.forceUpdate(() => {
@@ -89,16 +89,16 @@ class SideMenu extends Component {
                 if (key === algorithm) {
                     detectionSet.selected = true;
                     detectionSet.selectAlgorithm(true);
-                    detectionSet.anotherSelected = false;
+                    detectionSet.lowerOpacity = false;
                 } else {
                     detectionSet.selectAlgorithm(false);
-                    detectionSet.anotherSelected = true;
+                    detectionSet.lowerOpacity = true;
                     detectionSet.selected = false;
                 }
             } else {
                 detectionSet.selected = false;
                 detectionSet.selectAlgorithm(false);
-                detectionSet.anotherSelected = false;
+                detectionSet.lowerOpacity = false;
             }
         }
         this.forceUpdate(() => {
@@ -122,7 +122,7 @@ class SideMenu extends Component {
             for (const [key, detectionSet] of Object.entries(
                 this.props.detections
             )) {
-                detectionSet.anotherSelected = false;
+                detectionSet.lowerOpacity = false;
                 detectionSet.selectAlgorithm(false);
                 detectionSet.selected = false;
             }
@@ -133,8 +133,9 @@ class SideMenu extends Component {
             this.setState({ ...prevState, algorithmSelected: false });
         }
 
-        if (detection.selected === false) this.props.hideButtons(e);
-        else this.props.onDetectionSelected(detection);
+        if (detection.selected === false)
+            this.props.resetSelectedDetectionBoxes(e);
+        else this.props.onMenuDetectionSelected(detection);
     }
 
     render() {
@@ -177,7 +178,9 @@ class SideMenu extends Component {
                                     }
                                     setVisibilityData={this.setVisibilityData}
                                     updateImage={this.updateImage}
-                                    hideButtons={this.props.hideButtons}
+                                    resetSelectedDetectionBoxes={
+                                        this.props.resetSelectedDetectionBoxes
+                                    }
                                 />
                             );
                         })}

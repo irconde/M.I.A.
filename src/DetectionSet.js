@@ -13,7 +13,7 @@ export default class DetectionSet {
         this.selectedDetection = undefined;
         this.visible = true;
         this.data = {};
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
         let viewport = constants.viewport.TOP;
         if (arguments.length > 0) {
             viewport = arguments[0];
@@ -72,7 +72,7 @@ export default class DetectionSet {
         this.selectedViewport = undefined;
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
         this.selectedDetection = undefined;
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
     }
 
     /**
@@ -84,11 +84,12 @@ export default class DetectionSet {
         this.selected = false;
         this.selectedViewport = undefined;
         this.selectedDetection = undefined;
-        this.anotherSelected = false;
+        this.lowerOpacity = false;
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
         for (let [key, detectionList] of Object.entries(this.data)) {
             for (let detection of detectionList) {
                 detection.setSelected(false);
+                detection.updatingDetection = false;
             }
         }
     }
@@ -107,7 +108,7 @@ export default class DetectionSet {
         }
         if (
             this.data[viewport] === undefined &&
-            this.algorithm === 'OPERATOR'
+            this.algorithm === constants.OPERATOR
         ) {
             this.data[viewport] = [];
         }
@@ -151,11 +152,13 @@ export default class DetectionSet {
         if (this.data.top !== undefined) {
             for (let i = 0; i < this.data.top.length; i++) {
                 this.data.top[i].selected = bool;
+                this.data.top[i].updatingDetection = bool;
             }
         }
         if (this.data.side !== undefined) {
             for (let i = 0; i < this.data.side.length; i++) {
                 this.data.side[i].selected = bool;
+                this.data.side[i].updatingDetection = bool;
             }
         }
         this.selectedDetection = undefined;

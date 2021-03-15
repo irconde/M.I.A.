@@ -51,7 +51,7 @@ class TreeAlgorithm extends Component {
         updateSelectedDetection: PropTypes.func.isRequired,
         myKey: PropTypes.number.isRequired,
         updateImage: PropTypes.func.isRequired,
-        hideButtons: PropTypes.func.isRequired,
+        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     };
 
     /**
@@ -239,7 +239,9 @@ class TreeAlgorithm extends Component {
                                     algorithmSelected={
                                         this.props.algorithm.selected
                                     }
-                                    hideButtons={this.props.hideButtons}
+                                    resetSelectedDetectionBoxes={
+                                        this.props.resetSelectedDetectionBoxes
+                                    }
                                 />
                             );
                         })
@@ -275,7 +277,9 @@ class TreeAlgorithm extends Component {
                                     algorithmSelected={
                                         this.props.algorithm.selected
                                     }
-                                    hideButtons={this.props.hideButtons}
+                                    resetSelectedDetectionBoxes={
+                                        this.props.resetSelectedDetectionBoxes
+                                    }
                                 />
                             );
                         })

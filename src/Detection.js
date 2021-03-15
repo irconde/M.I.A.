@@ -1,70 +1,83 @@
-import * as constants from "./Constants";
-var randomColor = require("randomcolor");
+import * as constants from './Constants';
+var randomColor = require('randomcolor');
 
 /**
  * Class that represents a detected potential threat to be rendered
  */
 export default class Detection {
-
-  constructor(diagonalCoords, maskBitMap, className, confidenceValue, isValidated, algorithm, view) {
-    this.boundingBox = diagonalCoords
-    this.maskBitmap = maskBitMap;
-    this.selected = false;
-    this.visible = true;
-    this.class = className;
-    this.confidence = confidenceValue;
-    this.validation = undefined;
-    this.algorithm = algorithm;
-    this.view = view;
-    this.color = randomColor({seed: className, hue: 'random', luminosity: 'bright'});
-  }
-
-  /**
-   * getRenderColor - Method that provides the color to be used to render the detection
-   *
-   * @return {type}  string value that represents the detection's color in hexadecimal format
-   */
-  getRenderColor() {
-    if (this.selected) return constants.detectionStyle.SELECTED_COLOR;
-    if (this.validation !== undefined) {
-      if (this.validation === true){
-        return constants.detectionStyle.VALID_COLOR;
-      }
-      return constants.detectionStyle.INVALID_COLOR;
+    constructor(
+        diagonalCoords,
+        maskBitMap,
+        className,
+        confidenceValue,
+        isValidated,
+        algorithm,
+        view,
+        uuid,
+        updatingDetection = false
+    ) {
+        this.boundingBox = diagonalCoords;
+        this.maskBitmap = maskBitMap;
+        this.selected = false;
+        this.visible = true;
+        this.class = className;
+        this.confidence = confidenceValue;
+        this.validation = undefined;
+        this.algorithm = algorithm;
+        this.view = view;
+        this.color = randomColor({
+            seed: className,
+            hue: 'random',
+            luminosity: 'bright',
+        });
+        this.uuid = uuid;
+        this.updatingDetection = updatingDetection;
     }
-    return this.color;
-  }
 
-  setSelected(selected) {
-    this.selected = selected;
-  }
+    /**
+     * getRenderColor - Method that provides the color to be used to render the detection
+     *
+     * @return {type}  string value that represents the detection's color in hexadecimal format
+     */
+    getRenderColor() {
+        if (this.selected) return constants.detectionStyle.SELECTED_COLOR;
+        if (this.validation !== undefined) {
+            if (this.validation === true) {
+                return constants.detectionStyle.VALID_COLOR;
+            }
+            return constants.detectionStyle.INVALID_COLOR;
+        }
+        return this.color;
+    }
 
-  isSelected() {
-    return this.selected;
-  }
+    setSelected(selected) {
+        this.selected = selected;
+    }
 
+    isSelected() {
+        return this.selected;
+    }
 
-  /**
-   * validate - Method used to validate a detection given the user feedback provided through the validation buttons
-   *
-   * @param  {type} feedback  boolean value that indicates whether the detection is right or wrong.
-   * @return {type}           None
-   */
-  validate(feedback) {
-    this.validation = feedback;
-    this.selected = false;
-  }
+    /**
+     * validate - Method used to validate a detection given the user feedback provided through the validation buttons
+     *
+     * @param  {type} feedback  boolean value that indicates whether the detection is right or wrong.
+     * @return {type}           None
+     */
+    validate(feedback) {
+        this.validation = feedback;
+        this.selected = false;
+    }
 
-  isValidated() {
-    return (this.validation !== undefined);
-  }
+    isValidated() {
+        return this.validation !== undefined;
+    }
 
-  getValidation() {
-    return this.validation;
-  }
+    getValidation() {
+        return this.validation;
+    }
 
-  setVisibility(visibility) {
-    // TODO. To be implemented
-  }
-
+    setVisibility(visibility) {
+        // TODO. To be implemented
+    }
 }
