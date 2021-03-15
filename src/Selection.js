@@ -166,6 +166,12 @@ export default class Selection {
         this.currentAlgorithm = currentAlgorithm;
     }
 
+    /**
+     * getDetectionsFromView - Returns an array with all the detections from the passed in view.
+     *
+     * @param {constants.viewport} viewport
+     * @returns {array} combinedDetections
+     */
     getDetectionsFromView(viewport) {
         const combinedDetections = [];
         for (const [key, detectionSet] of Object.entries(
