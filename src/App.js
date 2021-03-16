@@ -1435,6 +1435,36 @@ class App extends Component {
                             this.renderDetectionContextMenu(e);
                         }
                     );
+                } else if (
+                    combinedDetections[clickedPos].visible !== false &&
+                    this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.EDITION
+                ) {
+                    // We clicked a visible detection and are in edition mode
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        detSet.clearAll();
+                    }
+                    this.setState(
+                        {
+                            displaySelectedBoundingBox: false,
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                            editionMode: null,
+                            isFABVisible: true,
+                            isDetectionContextVisible: false,
+                            detectionContextPosition: {
+                                top: 0,
+                                left: 0,
+                            },
+                        },
+                        () => {
+                            this.onDetectionSelected(e);
+                            this.resetCornerstoneTool();
+                            this.appUpdateImage();
+                        }
+                    );
                 }
             }
             clickedPos = constants.selection.NO_SELECTION;
