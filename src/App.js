@@ -25,6 +25,7 @@ import * as constants from './Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
+import EditLabel from './components/EditLabel';
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -105,6 +106,12 @@ class App extends Component {
                 left: 0,
             },
             editionMode: null,
+            detectionLabels: [],
+            detectionLabelEditWidth: '0px',
+            detectionLabelEditPosition: {
+                top: 0,
+                left: 0,
+            },
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -134,10 +141,14 @@ class App extends Component {
             this
         );
         this.selectEditionMode = this.selectEditionMode.bind(this);
+        this.selectEditDetectionLabel = this.selectEditDetectionLabel.bind(
+            this
+        );
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.editBoundingBox = this.editBoundingBox.bind(this);
         this.editPolygonMask = this.editPolygonMask.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
+        this.getAllLabels = this.getAllLabels.bind(this);
     }
 
     /**
@@ -1953,10 +1964,25 @@ class App extends Component {
     }
 
     /**
+     * Invoked when user completes editing a detection's label
+     * @param {string} newLabel Updated label name from user interaction
+     */
+    editDetectionLabel(newLabel) {}
+    /**
      * Invoked when user selects 'label' option from DetectionContextMenu
      */
-    editDetectionLabel() {
-        console.log('label option selected');
+    selectEditDetectionLabel() {
+        const allLabels = this.getAllLabels();
+        this.setState(
+            {
+                isDetectionContextVisible: false,
+                editionMode: constants.editionMode.LABEL,
+                detectionLabels: allLabels,
+            },
+            () => {
+                this.appUpdateImage();
+            }
+        );
     }
 
     /**
@@ -1979,6 +2005,24 @@ class App extends Component {
     deleteDetection() {
         console.log('delete detection selected');
     }
+
+    /**
+     * Calls `DetectionSet` method `getClassNames` for each algorithm in detections state
+     * @returns {Array<string>} array of all unique class names
+     */
+    getAllLabels() {
+        let results = [];
+        const { detections } = this.state;
+        for (const algo in detections) {
+            const labels = detections[algo].getClassNames();
+            const uniqueLabels = labels.filter(
+                (label) => !results.find((existing) => existing === label)
+            );
+            results = [...results, ...uniqueLabels];
+        }
+        return results;
+    }
+
     render() {
         return (
             <div>
@@ -2033,12 +2077,19 @@ class App extends Component {
                         isVisible={this.state.isDetectionContextVisible}
                         selectedOption={this.state.editionMode}
                         setSelectedOption={this.selectEditionMode}
-                        onLabelClicked={this.editDetectionLabel}
+                        onLabelClicked={this.selectEditDetectionLabel}
                         onBoundingClicked={this.editBoundingBox}
                         onPolygonClicked={this.editPolygonMask}
                         onDeleteClicked={this.deleteDetection}
                     />
-
+                    <EditLabel
+                        isVisible={
+                            this.state.editionMode ===
+                            constants.editionMode.LABEL
+                        }
+                        labels={this.state.detectionLabels}
+                        onLabelChange={this.editDetectionLabel}
+                    />
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
