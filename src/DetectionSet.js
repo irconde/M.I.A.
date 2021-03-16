@@ -190,4 +190,24 @@ export default class DetectionSet {
         }
         return result;
     }
+
+    /**
+     * Get all unique class names for all views in a DetectionSet
+     * @return {Array<string>} array of classNames
+     */
+    getClassNames() {
+        let classNames = [];
+        for (const detectionList of Object.values(this.data)) {
+            detectionList.forEach((detection) => {
+                if (
+                    !classNames.find(
+                        (existingClass) => existingClass === detection.class
+                    )
+                ) {
+                    classNames.push(detection.class);
+                }
+            });
+        }
+        return classNames;
+    }
 }
