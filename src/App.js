@@ -26,7 +26,6 @@ import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
-
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -1653,7 +1652,10 @@ class App extends Component {
                 }
             );
         } else {
-            this.setState({ isDetectionContextVisible: false });
+            this.setState({
+                isDetectionContextVisible: false,
+                editionMode: null,
+            });
         }
     }
 
@@ -1894,7 +1896,7 @@ class App extends Component {
     /**
      * Invoked when user selects a detection (callback from onMouseClicked)
      * @param {Event} event Related mouse click event to position the widget relative to detection
-     * @param {Detection} [ draggedData ] Optional detection data. In the case that
+     * @param {Detection} [draggedData] Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      */
@@ -1967,22 +1969,133 @@ class App extends Component {
      * Invoked when user completes editing a detection's label
      * @param {string} newLabel Updated label name from user interaction
      */
-    editDetectionLabel(newLabel) {}
+    editDetectionLabel(newLabel) {
+        // Destructure and gather useful data from selected detection
+        const algo = this.currentSelection.getAlgorithm();
+        const { uuid, view } = this.state.detections[
+            algo
+        ].getDataFromSelectedDetection();
+
+        if (uuid && view) {
+            let updatedDetections = this.state.detections;
+            // Find index of selected detection by uuid
+            const idx = updatedDetections[algo].data[view].findIndex(
+                (detection) => (detection.uuid = uuid)
+            );
+
+            if (idx !== -1) {
+                // Update label and color of detection
+                updatedDetections[algo].data[view][idx].class = newLabel;
+                updatedDetections[algo].data[view][
+                    idx
+                ].color = Utils.getRandomColor(newLabel);
+
+                // Clear selections, etc. of all detections
+                for (const detectionSet of Object.values(updatedDetections)) {
+                    detectionSet.clearAll();
+                }
+                this.setState(
+                    {
+                        isFABVisible: true,
+                        detections: updatedDetections,
+                        editionMode: null,
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        detectionLabels: [],
+                        detectionLabelEditWidth: 0,
+                        detectionLabelEditPosition: { top: 0, left: 0 },
+                        displaySelectedBoundingBox: false,
+                    },
+                    () => {
+                        this.appUpdateImage();
+                        this.resetCornerstoneTool();
+                    }
+                );
+            }
+        }
+    }
     /**
      * Invoked when user selects 'label' option from DetectionContextMenu
+     * Renders and positions EditLabel widget relative to detection
      */
     selectEditDetectionLabel() {
-        const allLabels = this.getAllLabels();
-        this.setState(
-            {
-                isDetectionContextVisible: false,
-                editionMode: constants.editionMode.LABEL,
-                detectionLabels: allLabels,
-            },
-            () => {
-                this.appUpdateImage();
+        const detectionData = this.state.detections[
+            this.currentSelection.getAlgorithm()
+        ].getDataFromSelectedDetection();
+
+        if (detectionData) {
+            // Destructure relevant info related to selected detection
+            const {
+                boundingBox,
+                view,
+                class: label,
+                confidence,
+            } = detectionData;
+            if (boundingBox) {
+                // Get all detection label options for label list
+                const allLabels = this.getAllLabels();
+
+                const boundingHeight = Math.abs(
+                    boundingBox[3] - boundingBox[1]
+                );
+                const boundingWidth = Math.abs(boundingBox[2] - boundingBox[0]);
+
+                // Position component on top of existing detection label
+                let gap, viewport, labelHeight;
+                if (view === constants.viewport.TOP) {
+                    const canvas = this.state.imageViewportTop.children[0];
+                    const ctx = canvas.getContext('2d');
+                    const detectionLabel = Utils.formatDetectionLabel(
+                        label,
+                        confidence
+                    );
+                    const labelSize = Utils.getTextLabelSize(
+                        ctx,
+                        detectionLabel,
+                        constants.detectionStyle.LABEL_PADDING
+                    );
+                    const { offsetLeft } = this.state.imageViewportTop;
+                    gap = offsetLeft / this.state.zoomLevelTop;
+                    viewport = this.state.imageViewportTop;
+                    labelHeight = labelSize.height;
+                } else {
+                    const canvas = this.state.imageViewportSide.children[0];
+                    const ctx = canvas.getContext('2d');
+                    const detectionLabel = Utils.formatDetectionLabel(
+                        label,
+                        confidence
+                    );
+                    const labelSize = Utils.getTextLabelSize(
+                        ctx,
+                        detectionLabel,
+                        constants.detectionStyle.LABEL_PADDING
+                    );
+                    const { offsetLeft } = this.state.imageViewportSide;
+                    gap = offsetLeft / this.state.zoomLevelSide;
+                    viewport = this.state.imageViewportSide;
+                    labelHeight = labelSize.height;
+                }
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                    x: boundingBox[0] + gap,
+                    y: boundingBox[1] - labelHeight,
+                });
+                const widgetPosition = {
+                    top: y,
+                    left: x,
+                };
+                this.setState(
+                    {
+                        isDetectionContextVisible: false,
+                        editionMode: constants.editionMode.LABEL,
+                        detectionLabels: allLabels,
+                        detectionLabelEditWidth: boundingWidth,
+                        detectionLabelEditPosition: widgetPosition,
+                    },
+                    () => {
+                        this.appUpdateImage();
+                    }
+                );
             }
-        );
+        }
     }
 
     /**
@@ -2087,6 +2200,8 @@ class App extends Component {
                             this.state.editionMode ===
                             constants.editionMode.LABEL
                         }
+                        position={this.state.detectionLabelEditPosition}
+                        width={this.state.detectionLabelEditWidth}
                         labels={this.state.detectionLabels}
                         onLabelChange={this.editDetectionLabel}
                     />
