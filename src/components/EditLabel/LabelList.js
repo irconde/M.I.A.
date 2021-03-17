@@ -5,9 +5,8 @@ import * as constants from '../../Constants';
 
 const LabelListWrapper = styled.div`
     /* base container styles */
-    height: 80px;
-    width: ${(props) => props.width};
     padding: 0.5rem;
+    max-height: 50px;
     overflow-x: hidden;
     overflow-y: scroll;
     background: ${constants.colors.WHITE};
@@ -62,11 +61,10 @@ const LabelListWrapper = styled.div`
 /**
  * Displays list of available detection labels.
  * Visible after selecting a detection and selecting `label` from context menu.
- * @param {string} width Width in px of label
  * @param {Array<String>} labels Available detection labels
  * @param {function} onLabelSelect Called when label is selected
  */
-const LabelList = ({ width, labels, onLabelSelect }) => {
+const LabelList = ({ labels, onLabelSelect }) => {
     /**
      * Passes selected label to callback from `App` component
      * @param {number} i index of selected label name
@@ -75,7 +73,7 @@ const LabelList = ({ width, labels, onLabelSelect }) => {
         onLabelSelect(labels[i]);
     };
     return (
-        <LabelListWrapper width={width}>
+        <LabelListWrapper>
             <ul className="labels">
                 {labels &&
                     labels.map((label, i) => {
@@ -94,7 +92,6 @@ const LabelList = ({ width, labels, onLabelSelect }) => {
 };
 
 LabelList.propTypes = {
-    width: PropTypes.string,
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
     onLabelSelect: PropTypes.func.isRequired,
 };
