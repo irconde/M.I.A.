@@ -6,9 +6,13 @@ import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../Constants';
 
 const EditLabelWrapper = styled.div`
-    padding: 50px;
-    width: ${(props) => props.width};
-    z-index: 9999;
+    position: absolute;
+    width: ${(props) => `${props.width}px`};
+    min-width: 120px;
+    z-index: 500;
+    left: ${(props) => `${props.left}px`};
+    top: ${(props) => `${props.top}px`};
+    background: ${constants.colors.BLUE};
 
     .inputContainer {
         display: flex;
@@ -20,6 +24,7 @@ const EditLabelWrapper = styled.div`
             border: none;
             border-radius: 4px;
             user-select: none;
+            width: 100%;
             &:disabled {
                 background-color: rgba(0, 0, 0, 0.35);
             }
@@ -41,11 +46,12 @@ const EditLabelWrapper = styled.div`
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
  * @param {boolean} isVisible Determines whether widget should be displayed on screen
- * @param {string} width Width in pixels of selected detection
+ * @param {object} position Contains `top` and `left` properties to position widget
+ * @param {number} width Width in pixels of selected detection
  * @param {Array<string>} labels list of existing labels for other detections
  * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabel = ({ isVisible, width, labels, onLabelChange }) => {
+const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
     const [isListOpen, setIsListOpen] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);
@@ -56,12 +62,23 @@ const EditLabel = ({ isVisible, width, labels, onLabelChange }) => {
         DOWN: 'down',
     };
 
-    // When component is updated to be visible, focus the text input field for user input
+    // Clear input field when list is opened
     useEffect(() => {
-        if (isVisible) {
+        if (isListOpen) {
+            setNewLabel('');
+        }
+    }, [isListOpen]);
+    useEffect(() => {
+        // When component is updated to be visible or the label list is closed, focus the text input field for user input
+        if (isVisible && !isListOpen) {
             inputField.current.focus();
         }
-    }, [isVisible]);
+
+        // Reset label list visibility when component is hidden
+        if (!isVisible) {
+            setIsListOpen(false);
+        }
+    }, [isVisible, isListOpen]);
 
     /**
      * Select new label from list of existing detection labels
@@ -69,6 +86,7 @@ const EditLabel = ({ isVisible, width, labels, onLabelChange }) => {
      */
     const submitFromList = (label) => {
         onLabelChange(label);
+        setIsListOpen(false);
     };
     /**
      * Called on every keydown in label input field.
@@ -85,7 +103,10 @@ const EditLabel = ({ isVisible, width, labels, onLabelChange }) => {
 
     if (isVisible) {
         return (
-            <EditLabelWrapper width={width}>
+            <EditLabelWrapper
+                top={position.top}
+                left={position.left}
+                width={width}>
                 <div className="inputContainer">
                     <input
                         className="newLabelInput"
@@ -122,7 +143,8 @@ const EditLabel = ({ isVisible, width, labels, onLabelChange }) => {
 
 EditLabel.propTypes = {
     isVisible: PropTypes.bool.isRequired,
-    width: PropTypes.string.isRequired,
+    position: PropTypes.object.isRequired,
+    width: PropTypes.number.isRequired,
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
     onLabelChange: PropTypes.func.isRequired,
 };
