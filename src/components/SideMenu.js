@@ -4,6 +4,7 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 import NextButton from './NextButton';
 import * as constants from '../Constants';
+import Utils from '../Utils';
 
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
@@ -129,9 +130,16 @@ class SideMenu extends Component {
             this.setState({ ...prevState, algorithmSelected: false });
         }
 
-        if (detection.selected === false)
+        if (detection.selected === false) {
             this.props.resetSelectedDetectionBoxes(e);
-        else this.props.onMenuDetectionSelected(detection);
+        }
+        const newEvent = Utils.mockCornerstoneEvent(
+            e,
+            detection.view === constants.viewport.TOP
+                ? document.getElementById('dicomImageLeft')
+                : document.getElementById('dicomImageRight')
+        );
+        this.props.onMenuDetectionSelected(detection, newEvent);
     }
 
     render() {

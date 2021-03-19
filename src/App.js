@@ -1765,7 +1765,7 @@ class App extends Component {
      * @return {none} None
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
-    onMenuDetectionSelected(detection) {
+    onMenuDetectionSelected(detection, e) {
         const prevState = this.state;
         const updatedDetections = this.state.detections;
         updatedDetections[detection.algorithm].selectedDetection = detection;
@@ -1778,10 +1778,13 @@ class App extends Component {
         this.setState(
             {
                 displaySelectedBoundingBox: true,
-                cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                isDetectionContextVisible: false,
+                cornerstoneMode: detection.selected
+                    ? constants.cornerstoneMode.EDITION
+                    : constants.cornerstoneMode.SELECTION,
+                isDetectionContextVisible: detection.selected,
             },
             () => {
+                this.resetCornerstoneTool();
                 if (detection.selected === true) {
                     for (const [key, detSet] of Object.entries(
                         this.state.detections
@@ -1808,9 +1811,33 @@ class App extends Component {
                         }
                         detSet.lowerOpacity = true;
                     }
+                    this.currentSelection.selectDetection(
+                        detection.algorithm,
+                        detection.detectionIndex,
+                        detection.view
+                    );
+                    this.renderDetectionContextMenu(e);
+                } else {
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        detSet.clearAll();
+                    }
+                    this.setState(
+                        {
+                            editionMode: null,
+                            isFABVisible: true,
+                            detectionContextPosition: {
+                                top: 0,
+                                left: 0,
+                            },
+                        },
+                        () => {
+                            this.appUpdateImage();
+                        }
+                    );
                 }
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
+                this.onDetectionSelected(e);
             }
         );
     }
