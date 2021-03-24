@@ -1468,6 +1468,7 @@ class App extends Component {
                 }
             }
             clickedPos = constants.selection.NO_SELECTION;
+            this.currentSelection.resetAlgorithmPositionToEnd();
         }
     }
     /**
@@ -1476,6 +1477,7 @@ class App extends Component {
      * @return {type} None
      */
     onDragEnd(event, viewport) {
+        console.log('dragend', this.currentSelection);
         if (
             this.state.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION ||
@@ -1601,6 +1603,7 @@ class App extends Component {
                     },
                     () => {
                         this.renderDetectionContextMenu(event, newDetection);
+                        this.currentSelection.resetAlgorithmPositionToEnd();
                     }
                 );
             }
@@ -1977,7 +1980,37 @@ class App extends Component {
      * Invoked when user selects 'delete' option from DetectionContextMenu
      */
     deleteDetection() {
-        console.log('delete detection selected');
+        let updatedDetections = this.state.detections;
+        const selectedDetection = updatedDetections[
+            this.currentSelection.getAlgorithm()
+        ].getDataFromSelectedDetection();
+
+        if (selectedDetection) {
+            updatedDetections[selectedDetection.algorithm].deleteDetection(
+                selectedDetection
+            );
+            for (const [key, detectionSet] of Object.entries(
+                this.state.detections
+            )) {
+                detectionSet.clearAll();
+            }
+            this.currentSelection.resetAlgorithmPositionToEnd();
+        }
+
+        this.setState(
+            {
+                detections: updatedDetections,
+                isFABVisible: true,
+                isDetectionContextVisible: false,
+                isDrawingBoundingBox: false,
+                displaySelectedBoundingBox: false,
+                cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            },
+            () => {
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
+            }
+        );
     }
     render() {
         return (

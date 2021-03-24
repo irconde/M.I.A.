@@ -103,7 +103,7 @@ export default class DetectionSet {
      * @param  {type} view  string value that indicates the viewport where the detection is rendered
      * @return {type} None
      */
-    addDetection(detection: Detection, view) {
+    addDetection(detection, view) {
         let viewport = constants.viewport.TOP;
         if (view !== undefined) {
             viewport = view;
@@ -114,14 +114,35 @@ export default class DetectionSet {
         ) {
             this.data[viewport] = [];
         }
+        this.data[viewport].push(detection);
         if (viewport === constants.viewport.TOP) {
             detection.detectionIndex = this.numTopDetections;
-            this.numTopDetections++;
+            this.numTopDetections = this.data[viewport].length;
         } else if (viewport === constants.viewport.SIDE) {
             detection.detectionIndex = this.numSideDetections;
-            this.numSideDetections++;
+            this.numSideDetections = this.data[viewport].length;
         }
-        this.data[viewport].push(detection);
+    }
+
+    /**
+     * Delete detection from DetectionSet and update detection counts
+     * @param {Detection} detection detection to be deleted
+     * @returns {none} None
+     */
+    deleteDetection(detection) {
+        const viewport = detection.view;
+        const uuid = detection.uuid;
+
+        const filterOut = this.data[viewport].filter((detec) => {
+            detec.uuid !== uuid;
+        });
+        this.data[viewport] = filterOut;
+
+        if (viewport === constants.viewport.TOP) {
+            this.numTopDetections = this.data[viewport].length;
+        } else {
+            this.numSideDetections = this.data[viewport].length;
+        }
     }
 
     setVisibility(visibility) {
