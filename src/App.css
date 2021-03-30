@@ -80,6 +80,7 @@ body {
 
 .treeview-main {
     position: absolute;
+    height: 98vh;
     top: 3.375rem;
     opacity: 100%;
     display: flex;
@@ -89,17 +90,6 @@ body {
     overflow: hidden;
     padding-top: 1.25vh;
     font-size: 10pt;
-}
-@media (min-width: 768px) and (max-width: 1024px) {
-    .treeview-main {
-        height: 85vh;
-    }
-}
-
-@media (min-width: 1025px), (min-width: 1281px) {
-    .treeview-main {
-        height: 98vh;
-    }
 }
 
 .treeview > .toggle {

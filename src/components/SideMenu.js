@@ -162,7 +162,10 @@ class SideMenu extends Component {
             return (
                 <div
                     className="treeview-main"
-                    style={{ width: this.state.sideMenuWidth }}>
+                    style={{
+                        width: this.state.sideMenuWidth,
+                        height: document.documentElement.clientHeight - 54,
+                    }}>
                     {/* How we create the trees and their nodes is using map */}
                     <div style={this.state.treeStyle}>
                         {myDetections.map((value, index) => {
