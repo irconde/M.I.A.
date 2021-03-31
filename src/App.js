@@ -1518,6 +1518,9 @@ class App extends Component {
             } else {
                 coords = [start.x, start.y, end.x, end.y];
             }
+            let boundingBoxArea = Math.abs(
+                (coords[0] - coords[2]) * (coords[1] - coords[3])
+            );
             let newDetection = new Detection(
                 coords,
                 null,
@@ -1536,6 +1539,7 @@ class App extends Component {
                 // Create new user-created detection
                 const operator = constants.OPERATOR;
                 // add new DetectionSet if it doesn't exist
+                if(boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD){
                 if (!(operator in this.state.detections)) {
                     let newDetectionSet = new DetectionSet();
                     newDetectionSet.setAlgorithmName(operator);
@@ -1554,6 +1558,18 @@ class App extends Component {
                         newDetection.view
                     );
                 }
+            }else{
+
+                this.setState(
+                    {
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        displayButtons: false,
+                    },
+                    () => {
+                        this.resetCornerstoneTool();
+                    }
+                );
+            }
             } else {
                 newDetection.selected = true;
                 newDetection.updatingDetection = true;
