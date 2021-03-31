@@ -79,7 +79,6 @@ export default class Selection {
         this.algorithmNames.push({
             algorithm: algorithm.algorithm,
         });
-        console.log('pushing to algorithm names');
         this.currentAlgorithm = this.algorithmNames.length - 1;
     }
 
