@@ -670,6 +670,7 @@ class App extends Component {
                     let topCounter = 1;
                     let sideCounter = 1;
                     let stackCounter = 1;
+                    const listOfPromises = [];
                     // Loop through each stack, being either top or side currently
                     this.state.myOra.stackData.forEach((stack) => {
                         const stackElem = stackXML.createElement('stack');
@@ -700,29 +701,33 @@ class App extends Component {
                                         j < detectionSet.data.top.length;
                                         j++
                                     ) {
-                                        newOra.file(
-                                            `data/${stack.view}_threat_detection_${topCounter}.dcs`,
-                                            Dicos.dataToBlob(
-                                                detectionSet,
-                                                detectionSet.algorithm ===
-                                                    constants.OPERATOR
-                                                    ? stack.blobData[j]
-                                                    : stack.blobData[
-                                                          j + topCounter
-                                                      ],
-                                                Date.now(),
-                                                !validationCompleted
-                                            )
+                                        let threatPromise = Dicos.dataToBlob(
+                                            detectionSet,
+                                            detectionSet.algorithm ===
+                                                constants.OPERATOR
+                                                ? stack.blobData[j]
+                                                : stack.blobData[
+                                                      j + topCounter
+                                                  ],
+                                            Date.now(),
+                                            !validationCompleted,
+                                            function (threatBlob) {
+                                                newOra.file(
+                                                    `data/${stack.view}_threat_detection_${topCounter}.dcs`,
+                                                    threatBlob
+                                                );
+                                                let newLayer = stackXML.createElement(
+                                                    'layer'
+                                                );
+                                                newLayer.setAttribute(
+                                                    'src',
+                                                    `data/${stack.view}_threat_detection_${topCounter}.dcs`
+                                                );
+                                                stackElem.appendChild(newLayer);
+                                                topCounter++;
+                                            }
                                         );
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${stack.view}_threat_detection_${topCounter}.dcs`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        topCounter++;
+                                        listOfPromises.push(threatPromise);
                                     }
                                 }
                             }
@@ -737,29 +742,33 @@ class App extends Component {
                                         j < detectionSet.data.side.length;
                                         j++
                                     ) {
-                                        newOra.file(
-                                            `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
-                                            Dicos.dataToBlob(
-                                                detectionSet,
-                                                detectionSet.algorithm ===
-                                                    constants.OPERATOR
-                                                    ? stack.blobData[j]
-                                                    : stack.blobData[
-                                                          j + sideCounter
-                                                      ],
-                                                Date.now(),
-                                                !validationCompleted
-                                            )
+                                        let threatPromise = Dicos.dataToBlob(
+                                            detectionSet,
+                                            detectionSet.algorithm ===
+                                                constants.OPERATOR
+                                                ? stack.blobData[j]
+                                                : stack.blobData[
+                                                      j + sideCounter
+                                                  ],
+                                            Date.now(),
+                                            !validationCompleted,
+                                            function (threatBlob) {
+                                                newOra.file(
+                                                    `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
+                                                    threatBlob
+                                                );
+                                                let newLayer = stackXML.createElement(
+                                                    'layer'
+                                                );
+                                                newLayer.setAttribute(
+                                                    'src',
+                                                    `data/${stack.view}_threat_detection_${sideCounter}.dcs`
+                                                );
+                                                stackElem.appendChild(newLayer);
+                                                sideCounter++;
+                                            }
                                         );
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${stack.view}_threat_detection_${sideCounter}.dcs`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        sideCounter++;
+                                        listOfPromises.push(threatPromise);
                                     }
                                 }
                             }
@@ -767,29 +776,36 @@ class App extends Component {
                         stackCounter++;
                         imageElem.appendChild(stackElem);
                     });
-                    stackXML.appendChild(imageElem);
-                    newOra.file(
-                        'stack.xml',
-                        new Blob(
-                            [
-                                prolog +
-                                    new XMLSerializer().serializeToString(
-                                        stackXML
-                                    ),
-                            ],
-                            { type: 'application/xml ' }
-                        )
-                    );
-                    newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
-                        this.sendImageToCommandServer(oraBlob).then((res) => {
-                            this.resetSelectedDetectionBoxes(e);
-                            this.setState({
-                                selectedFile: null,
-                                isUpload: false,
-                                displayNext: false,
+                    const promiseOfList = Promise.all(listOfPromises);
+                    promiseOfList.then(() => {
+                        stackXML.appendChild(imageElem);
+                        newOra.file(
+                            'stack.xml',
+                            new Blob(
+                                [
+                                    prolog +
+                                        new XMLSerializer().serializeToString(
+                                            stackXML
+                                        ),
+                                ],
+                                { type: 'application/xml ' }
+                            )
+                        );
+                        newOra
+                            .generateAsync({ type: 'blob' })
+                            .then((oraBlob) => {
+                                this.sendImageToCommandServer(oraBlob).then(
+                                    (res) => {
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.setState({
+                                            selectedFile: null,
+                                            isUpload: false,
+                                            displayNext: false,
+                                        });
+                                        this.getNextImage();
+                                    }
+                                );
                             });
-                            this.getNextImage();
-                        });
                     });
                 } else if (res.data.confirm === 'image-not-removed') {
                     console.log("File server couldn't remove the next image");
