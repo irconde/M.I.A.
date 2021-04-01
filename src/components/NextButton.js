@@ -10,7 +10,6 @@ const NextButtonContainer = styled.div`
     align-self: flex-end;
     justify-content: center;
     background-color: #367eff;
-    margin-bottom: 3em;
     font-weight: bold;
     font-size: 12pt;
     height: 75px;
