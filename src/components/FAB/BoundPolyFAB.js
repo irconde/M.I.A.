@@ -19,8 +19,8 @@ const FABContainer = styled.div`
     bottom: 5%;
     padding-left: 1.25rem;
     padding-right: 1.25rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
     background-color: #313131;
     color: #fff;
     border: 1px solid #414141;
