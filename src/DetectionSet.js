@@ -12,15 +12,11 @@ export default class DetectionSet {
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
         this.selectedDetection = undefined;
         this.visible = true;
-        this.data = {};
+        this.data = {
+            top: [],
+            side: [],
+        };
         this.lowerOpacity = false;
-        let viewport = constants.viewport.TOP;
-        if (arguments.length > 0) {
-            viewport = arguments[0];
-        }
-        if (!(viewport in this.data)) {
-            this.data[viewport] = [];
-        }
         this.numTopDetections = 0;
         this.numSideDetections = 0;
     }
@@ -32,10 +28,7 @@ export default class DetectionSet {
      * @return {type}           Array of Detection objects
      */
     getData(viewport) {
-        if (viewport !== undefined) {
-            return this.data[viewport];
-        }
-        return this.data[constants.viewport.TOP];
+        return this.data[viewport];
     }
 
     /**
@@ -103,7 +96,7 @@ export default class DetectionSet {
      * @param  {type} view  string value that indicates the viewport where the detection is rendered
      * @return {type} None
      */
-    addDetection(detection: Detection, view) {
+    addDetection(detection, view) {
         let viewport = constants.viewport.TOP;
         if (view !== undefined) {
             viewport = view;
@@ -114,14 +107,52 @@ export default class DetectionSet {
         ) {
             this.data[viewport] = [];
         }
+        this.data[viewport].push(detection);
         if (viewport === constants.viewport.TOP) {
             detection.detectionIndex = this.numTopDetections;
-            this.numTopDetections++;
+            this.numTopDetections = this.data[viewport].length;
         } else if (viewport === constants.viewport.SIDE) {
             detection.detectionIndex = this.numSideDetections;
-            this.numSideDetections++;
+            this.numSideDetections = this.data[viewport].length;
         }
-        this.data[viewport].push(detection);
+    }
+
+    /**
+     * Delete detection from DetectionSet and update detection counts
+     * @param {Detection} detection detection to be deleted
+     * @returns {none} None
+     */
+    deleteDetection(detection) {
+        const viewport = detection.view;
+        const uuid = detection.uuid;
+
+        const filterOut = this.data[viewport].filter((detec) => {
+            detec.uuid !== uuid;
+        });
+        this.data[viewport] = filterOut;
+
+        if (viewport === constants.viewport.TOP) {
+            this.numTopDetections = this.data[viewport].length;
+        } else {
+            this.numSideDetections = this.data[viewport].length;
+        }
+    }
+
+    /**
+     * Determine if each view in a DetectionSet is empty of detections
+     * @returns {Boolean} true if all views contain no detections, false otherwise
+     *
+     */
+    isEmpty() {
+        let result = true;
+        const allData = this.data;
+        Object.keys(allData).forEach((view) => {
+            if (allData[view] && allData[view].length > 0) {
+                // detections exist, the DetectionSet is not empty
+                result = false;
+            }
+        });
+        return result;
     }
 
     setVisibility(visibility) {
@@ -158,13 +189,13 @@ export default class DetectionSet {
      * @param {Boolean} bool
      */
     selectAlgorithm(bool) {
-        if (this.data.top !== undefined) {
+        if (this.data.top !== undefined && this.data.top.length > 0) {
             for (let i = 0; i < this.data.top.length; i++) {
                 this.data.top[i].selected = bool;
                 this.data.top[i].updatingDetection = false;
             }
         }
-        if (this.data.side !== undefined) {
+        if (this.data.side !== undefined && this.data.top.length > 0) {
             for (let i = 0; i < this.data.side.length; i++) {
                 this.data.side[i].selected = bool;
                 this.data.top[i].updatingDetection = false;
