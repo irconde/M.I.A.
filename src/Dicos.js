@@ -391,4 +391,23 @@ export default class Dicos {
             fileReader.readAsArrayBuffer(image);
         });
     }
+
+    static detectionObjectToBlob(detection) {
+        // Create the new dataset with fields required
+        let dataset;
+        // TODO: Set the data fields
+
+        // Create the Dicom Dictionary file
+        let dicomDict = dcmjs.data.DicomDict;
+        dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
+            dataset
+        );
+        // Create the buffer from the denaturalized data set populated above
+        let new_file_WriterBuffer = dicomDict.write();
+        // Create a blob with this buffer
+        var file = new Blob([new_file_WriterBuffer], {
+            type: 'image/dcs',
+        });
+        return file;
+    }
 }

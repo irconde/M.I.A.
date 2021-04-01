@@ -1578,37 +1578,37 @@ class App extends Component {
                 // Create new user-created detection
                 const operator = constants.OPERATOR;
                 // add new DetectionSet if it doesn't exist
-                if(boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD){
-                if (!(operator in this.state.detections)) {
-                    let newDetectionSet = new DetectionSet();
-                    newDetectionSet.setAlgorithmName(operator);
-                    newDetectionSet.visibility = true;
-                    newDetectionSet.addDetection(
-                        newDetection,
-                        newDetection.view
-                    );
-                    this.currentSelection.addAlgorithm(newDetectionSet);
-                    updatedDetections[operator] = newDetectionSet;
-                }
-                // Operator DetectionSet exists, add new detection to set
-                else {
-                    updatedDetections[operator].addDetection(
-                        newDetection,
-                        newDetection.view
-                    );
-                }
-            }else{
-
-                this.setState(
-                    {
-                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                        displayButtons: false,
-                    },
-                    () => {
-                        this.resetCornerstoneTool();
+                if (boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD) {
+                    if (!(operator in this.state.detections)) {
+                        let newDetectionSet = new DetectionSet();
+                        newDetectionSet.setAlgorithmName(operator);
+                        newDetectionSet.visibility = true;
+                        newDetectionSet.addDetection(
+                            newDetection,
+                            newDetection.view
+                        );
+                        this.currentSelection.addAlgorithm(newDetectionSet);
+                        updatedDetections[operator] = newDetectionSet;
                     }
-                );
-            }
+                    // Operator DetectionSet exists, add new detection to set
+                    else {
+                        updatedDetections[operator].addDetection(
+                            newDetection,
+                            newDetection.view
+                        );
+                    }
+                } else {
+                    this.setState(
+                        {
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                            displayButtons: false,
+                        },
+                        () => {
+                            this.resetCornerstoneTool();
+                        }
+                    );
+                }
             } else {
                 newDetection.selected = true;
                 newDetection.updatingDetection = true;
