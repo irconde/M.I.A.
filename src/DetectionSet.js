@@ -126,9 +126,9 @@ export default class DetectionSet {
         const viewport = detection.view;
         const uuid = detection.uuid;
 
-        const filterOut = this.data[viewport].filter((detec) => {
-            detec.uuid !== uuid;
-        });
+        const filterOut = this.data[viewport].filter(
+            (detec) => detec.uuid !== uuid
+        );
         this.data[viewport] = filterOut;
 
         if (viewport === constants.viewport.TOP) {
@@ -146,8 +146,8 @@ export default class DetectionSet {
     isEmpty() {
         let result = true;
         const allData = this.data;
-        Object.keys(allData).forEach((view) => {
-            if (allData[view] && allData[view].length > 0) {
+        Object.values(allData).forEach((view) => {
+            if (view && view.length > 0) {
                 // detections exist, the DetectionSet is not empty
                 result = false;
             }
