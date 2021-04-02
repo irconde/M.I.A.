@@ -146,8 +146,8 @@ export default class DetectionSet {
     isEmpty() {
         let result = true;
         const allData = this.data;
-        Object.values(allData).forEach((view) => {
-            if (view && view.length > 0) {
+        Object.keys(allData).forEach((view) => {
+            if (allData[view] && allData[view].length > 0) {
                 // detections exist, the DetectionSet is not empty
                 result = false;
             }
@@ -220,5 +220,25 @@ export default class DetectionSet {
             }
         }
         return result;
+    }
+
+    /**
+     * Get all unique class names for all views in a DetectionSet
+     * @return {Array<string>} array of classNames
+     */
+    getClassNames() {
+        let classNames = [];
+        for (const detectionList of Object.values(this.data)) {
+            detectionList.forEach((detection) => {
+                if (
+                    !classNames.find(
+                        (existingClass) => existingClass === detection.class
+                    )
+                ) {
+                    classNames.push(detection.class);
+                }
+            });
+        }
+        return classNames;
     }
 }

@@ -16,10 +16,12 @@ import * as constants from '../../Constants';
 const FABContainer = styled.div`
     position: absolute;
     left: ${(props) => props.leftPX};
-
     bottom: 5%;
-    padding: 1rem;
-    background-color: #414141;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+    background-color: #313131;
     color: #fff;
     border: 1px solid #414141;
     border-radius: 60px;
@@ -40,8 +42,8 @@ const FABContainer = styled.div`
         cursor: pointer;
     }
     .divider {
-        height: 1.75rem;
-        border-left: 1px solid #e8e8e8;
+        height: 1.5rem;
+        border-left: 1px solid #575757;
         margin-left: 1rem;
         margin-right: 1rem;
     }
@@ -49,7 +51,6 @@ const FABContainer = styled.div`
         display: flex;
         align-items: center;
         justify-content: center;
-
         .icon {
             margin-right: 0.5rem;
         }

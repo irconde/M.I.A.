@@ -17,6 +17,7 @@ class SideMenu extends Component {
                 color: 'white',
                 fill: 'white',
                 width: '100%',
+                height: 'inherit',
             },
             algorithmSelected: false,
             sideMenuWidth: constants.sideMenuWidth + constants.RESOLUTION_UNIT,
@@ -162,8 +163,17 @@ class SideMenu extends Component {
             return (
                 <div
                     className="treeview-main"
-                    style={{ width: this.state.sideMenuWidth }}>
+                    style={{
+                        width: this.state.sideMenuWidth,
+                        height: document.documentElement.clientHeight,
+                    }}>
                     {/* How we create the trees and their nodes is using map */}
+                    <div
+                        style={{
+                            height:
+                                constants.sideMenuPaddingTop +
+                                constants.RESOLUTION_UNIT,
+                        }}></div>
                     <div style={this.state.treeStyle}>
                         {myDetections.map((value, index) => {
                             this.numberOfAlgorithms++;
