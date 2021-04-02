@@ -32,6 +32,9 @@ export default class Selection {
             this.availableAlgorithms[
                 algorithm
             ].selectedDetectionIndex = detectionIndex;
+            this.currentAlgorithm = this.algorithmNames.findIndex((alg) => {
+                return (alg.algorithm = algorithm);
+            });
             return this.availableAlgorithms[algorithm].data.top[detectionIndex]
                 .selected;
         } else if (view === constants.viewport.SIDE) {
@@ -48,6 +51,9 @@ export default class Selection {
             this.availableAlgorithms[
                 algorithm
             ].selectedDetectionIndex = detectionIndex;
+            this.currentAlgorithm = this.algorithmNames.findIndex((alg) => {
+                return (alg.algorithm = algorithm);
+            });
             return this.availableAlgorithms[algorithm].data.side[detectionIndex]
                 .selected;
         }
@@ -158,5 +164,33 @@ export default class Selection {
      */
     setCurrentAlgorithm(currentAlgorithm) {
         this.currentAlgorithm = currentAlgorithm;
+    }
+
+    /**
+     * getDetectionsFromView - Returns an array with all the detections from the passed in view.
+     *
+     * @param {constants.viewport} viewport
+     * @returns {array} combinedDetections
+     */
+    getDetectionsFromView(viewport) {
+        const combinedDetections = [];
+        for (const [key, detectionSet] of Object.entries(
+            this.availableAlgorithms
+        )) {
+            if (viewport === constants.viewport.TOP) {
+                if (detectionSet.data.top !== undefined) {
+                    detectionSet.data.top.forEach((detection) => {
+                        combinedDetections.push(detection);
+                    });
+                }
+            } else if (viewport === constants.viewport.SIDE) {
+                if (detectionSet.data.side !== undefined) {
+                    detectionSet.data.side.forEach((detection) => {
+                        combinedDetections.push(detection);
+                    });
+                }
+            }
+        }
+        return combinedDetections;
     }
 }

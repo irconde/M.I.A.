@@ -38,7 +38,7 @@ import {
     setCurrentProcessingFile,
 } from './redux/slices/server/serverSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
-
+import EditLabel from './components/EditLabel';
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -112,6 +112,12 @@ class App extends Component {
                 left: 0,
             },
             editionMode: null,
+            detectionLabels: [],
+            detectionLabelEditWidth: '0px',
+            detectionLabelEditPosition: {
+                top: 0,
+                left: 0,
+            },
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -141,10 +147,14 @@ class App extends Component {
             this
         );
         this.selectEditionMode = this.selectEditionMode.bind(this);
+        this.selectEditDetectionLabel = this.selectEditDetectionLabel.bind(
+            this
+        );
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.editBoundingBox = this.editBoundingBox.bind(this);
         this.editPolygonMask = this.editPolygonMask.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
+        this.getAllLabels = this.getAllLabels.bind(this);
     }
 
     /**
@@ -816,9 +826,15 @@ class App extends Component {
         for (const [key, detectionSet] of Object.entries(
             this.state.detections
         )) {
-            if (detectionSet.isValidated() === false) {
-                result = false;
-                break;
+            if (detectionSet.data.top !== undefined) {
+                detectionSet.data.top.forEach((detection) => {
+                    detection.validation = true;
+                });
+            }
+            if (detectionSet.data.side !== undefined) {
+                detectionSet.data.side.forEach((detection) => {
+                    detection.validation = true;
+                });
             }
         }
         return result;
@@ -922,7 +938,7 @@ class App extends Component {
     /**
      * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {type} images list of DICOS+TDR data from each algorithm
+     * @param  {type} images list of DICOS+TDR data from  algorithm
      * @return {type}       None
      */
     loadDICOSdata(imagesLeft, imagesRight) {
@@ -1203,20 +1219,20 @@ class App extends Component {
             if (detectionSet.visibility !== true) {
                 continue;
             }
-            detectionList = detectionSet.getData();
             selectedViewport = constants.viewport.TOP;
+            detectionList = detectionSet.getData(selectedViewport);
             if (
                 context.canvas.offsetParent.id === 'dicomImageRight' &&
                 this.state.singleViewport === false
             ) {
-                detectionList = detectionSet.getData(constants.viewport.SIDE);
                 selectedViewport = constants.viewport.SIDE;
+                detectionList = detectionSet.getData(selectedViewport);
             }
             if (detectionList === undefined) {
                 return;
             } else {
                 if (detectionList === null || detectionList.length === 0) {
-                    return;
+                    continue;
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
@@ -1227,8 +1243,13 @@ class App extends Component {
                     continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = detectionList[j].getRenderColor();
-                if (boundingBoxCoords.length < B_BOX_COORDS) return;
-                if (detectionSet.lowerOpacity === true) {
+                if (boundingBoxCoords.length < B_BOX_COORDS) {
+                    return;
+                }
+                if (
+                    detectionSet.lowerOpacity === true &&
+                    detectionList[j].selected === false
+                ) {
                     let rgbColor = Utils.hexToRgb(color);
                     color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
                 }
@@ -1319,67 +1340,150 @@ class App extends Component {
      * @return {type}   None
      */
     onMouseClicked(e) {
-        if (
-            this.state.detections === null ||
-            this.state.detections[
-                this.currentSelection.getAlgorithm()
-            ].getData().length === 0
-        ) {
+        let view;
+        if (e.detail.element.id === 'dicomImageLeft') {
+            view = constants.viewport.TOP;
+        } else if (e.detail.element.id === 'dicomImageRight') {
+            view = constants.viewport.SIDE;
+        }
+        if (this.state.detections === null) {
             return;
         }
-        this.currentSelection.resetAlgorithmPositionToEnd();
-        do {
-            let detectionSet = this.state.detections[
-                this.currentSelection.getAlgorithm()
-            ];
+        let combinedDetections;
+        let viewport;
+        if (e.detail.element.id === 'dicomImageLeft') {
+            // top
+            combinedDetections = this.currentSelection.getDetectionsFromView(
+                constants.viewport.TOP
+            );
+            viewport = constants.viewport.TOP;
+        } else if (e.detail.element.id === 'dicomImageRight') {
+            // side
+            combinedDetections = this.currentSelection.getDetectionsFromView(
+                constants.viewport.SIDE
+            );
+            viewport = constants.viewport.SIDE;
+        }
+        if (combinedDetections.length > 0) {
+            const mousePos = cornerstone.canvasToPixel(e.target, {
+                x: e.detail.currentPoints.canvas.x,
+                y: e.detail.currentPoints.canvas.y,
+            });
             let clickedPos = constants.selection.NO_SELECTION;
-
-            // User selected 'next' button, update all detections as accepted
-            if (e.currentTarget.id === 'nextButton') {
-                let updatedDetections = this.state.detections;
-                Object.keys(updatedDetections).forEach((algorithm) => {
-                    const { data } = updatedDetections[algorithm];
-                    Object.keys(data).forEach((detection) => {
-                        data[detection].forEach((view) => {
-                            view.validation = true;
-                        });
-                    });
-                });
-            }
-            // Handle regular click events for selecting and deselecting detections
-            else {
-                const mousePos = cornerstone.canvasToPixel(e.target, {
-                    x: e.detail.currentPoints.canvas.x,
-                    y: e.detail.currentPoints.canvas.y,
-                });
-                let detectionSetData = detectionSet.getData();
-                let viewport = constants.viewport.TOP;
+            for (var j = combinedDetections.length - 1; j > -1; j--) {
+                if (combinedDetections[j].visible === false) continue;
                 if (
-                    e.detail.element.id === 'dicomImageRight' &&
-                    this.state.singleViewport === false
+                    Utils.pointInRect(
+                        mousePos,
+                        combinedDetections[j].boundingBox
+                    )
                 ) {
-                    detectionSetData = detectionSet.getData(
-                        constants.viewport.SIDE
-                    );
-                    viewport = constants.viewport.SIDE;
+                    clickedPos = j;
+                    break;
                 }
-                if (detectionSetData !== undefined) {
-                    for (var j = 0; j < detectionSetData.length; j++) {
-                        if (
-                            Utils.pointInRect(
-                                mousePos,
-                                detectionSetData[j].boundingBox
-                            )
-                        ) {
-                            clickedPos = j;
-                            break;
+            }
+
+            // Click on an empty area
+            if (clickedPos === constants.selection.NO_SELECTION) {
+                for (const [key, detSet] of Object.entries(
+                    this.state.detections
+                )) {
+                    detSet.clearAll();
+                }
+                this.setState(
+                    {
+                        displaySelectedBoundingBox: false,
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        editionMode: null,
+                        isFABVisible: true,
+                        isDetectionContextVisible: false,
+                        detectionContextPosition: {
+                            top: 0,
+                            left: 0,
+                        },
+                    },
+                    () => {
+                        this.onDetectionSelected(e);
+                        this.resetCornerstoneTool();
+                        this.appUpdateImage();
+                    }
+                );
+            } else {
+                // Clicked on detection
+                if (
+                    combinedDetections[clickedPos].visible !== false &&
+                    this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.SELECTION
+                ) {
+                    let anyDetection = this.currentSelection.selectDetection(
+                        combinedDetections[clickedPos].algorithm,
+                        combinedDetections[clickedPos].detectionIndex,
+                        viewport
+                    );
+                    const selectedDetection = this.state.detections[
+                        this.currentSelection.getAlgorithm()
+                    ].getDataFromSelectedDetection();
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        if (selectedDetection.algorithm !== detSet.algorithm) {
+                            detSet.clearAll();
+                        } else {
+                            if (detSet.data.top !== undefined) {
+                                detSet.data.top.forEach((det) => {
+                                    if (det.uuid !== selectedDetection.uuid) {
+                                        det.selected = false;
+                                        det.updatingDetection = false;
+                                    }
+                                });
+                            }
+                            if (detSet.data.side !== undefined) {
+                                detSet.data.side.forEach((det) => {
+                                    if (det.uuid !== selectedDetection.uuid) {
+                                        det.selected = false;
+                                        det.updatingDetection = false;
+                                    }
+                                });
+                            }
                         }
                     }
-                } else {
-                    continue;
-                }
-                // Click on an empty area
-                if (clickedPos === constants.selection.NO_SELECTION) {
+                    this.setState(
+                        {
+                            cornerstoneMode: constants.cornerstoneMode.EDITION,
+                            displaySelectedBoundingBox: anyDetection,
+                            isDetectionContextVisible: true,
+                            isFABVisible: false,
+                        },
+                        () => {
+                            // This is needed because currentSelection's algorithmNames property
+                            // is being set inconsistently and the root cause was not located.
+                            // Here, we reset the algorithmNames property to contain all algorithmNames
+                            // from our state value, then update the currentSelection to be the current algorithm
+                            const algoNames = Object.values(
+                                this.state.detections
+                            ).map((algo) => {
+                                return {
+                                    algorithm: algo.algorithm,
+                                };
+                            });
+
+                            const ind = algoNames.findIndex(
+                                (algo) =>
+                                    algo.algorithm ===
+                                    selectedDetection.algorithm
+                            );
+                            this.currentSelection.algorithmNames = algoNames;
+                            this.currentSelection.setCurrentAlgorithm(ind);
+                            this.onDetectionSelected(e);
+                            this.renderDetectionContextMenu(e);
+                        }
+                    );
+                } else if (
+                    combinedDetections[clickedPos].visible !== false &&
+                    this.state.cornerstoneMode ===
+                        constants.cornerstoneMode.EDITION
+                ) {
+                    // We clicked a visible detection and are in edition mode
                     for (const [key, detSet] of Object.entries(
                         this.state.detections
                     )) {
@@ -1391,6 +1495,7 @@ class App extends Component {
                             cornerstoneMode:
                                 constants.cornerstoneMode.SELECTION,
                             editionMode: null,
+                            isFABVisible: true,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
                                 top: 0,
@@ -1403,47 +1508,11 @@ class App extends Component {
                             this.appUpdateImage();
                         }
                     );
-                } else {
-                    if (
-                        detectionSet.visibility !== false &&
-                        this.state.cornerstoneMode ===
-                            constants.cornerstoneMode.SELECTION
-                    ) {
-                        let anyDetection = this.currentSelection.selectDetection(
-                            detectionSet.algorithm,
-                            clickedPos,
-                            viewport
-                        );
-                        if (
-                            detectionSet.getDataFromSelectedDetection()
-                                .visible === false
-                        ) {
-                            detectionSet.getDataFromSelectedDetection().selected = false;
-                            continue;
-                        }
-                        this.setState(
-                            {
-                                cornerstoneMode:
-                                    constants.cornerstoneMode.EDITION,
-                                displaySelectedBoundingBox: anyDetection,
-                                isDetectionContextVisible: true,
-                            },
-                            () => {
-                                this.onDetectionSelected(e);
-                                this.renderDetectionContextMenu(e);
-                            }
-                        );
-                        if (
-                            anyDetection !== undefined ||
-                            anyDetection !== null
-                        ) {
-                            break;
-                        }
-                    }
                 }
             }
-        } while (this.currentSelection.selectPriorAlgorithm() === true);
-        this.currentSelection.resetAlgorithmPositionToEnd();
+            clickedPos = constants.selection.NO_SELECTION;
+            // this.currentSelection.resetAlgorithmPositionToEnd();
+        }
     }
     /**
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
@@ -1483,6 +1552,9 @@ class App extends Component {
             } else {
                 coords = [start.x, start.y, end.x, end.y];
             }
+            let boundingBoxArea = Math.abs(
+                (coords[0] - coords[2]) * (coords[1] - coords[3])
+            );
             let newDetection = new Detection(
                 coords,
                 null,
@@ -1501,31 +1573,47 @@ class App extends Component {
                 // Create new user-created detection
                 const operator = constants.OPERATOR;
                 // add new DetectionSet if it doesn't exist
-                if (!(operator in this.state.detections)) {
-                    let newDetectionSet = new DetectionSet();
-                    newDetectionSet.setAlgorithmName(operator);
-                    newDetectionSet.visibility = true;
-                    newDetectionSet.addDetection(
-                        newDetection,
-                        newDetection.view
-                    );
-                    this.currentSelection.addAlgorithm(newDetectionSet);
-                    updatedDetections[operator] = newDetectionSet;
-                }
-                // Operator DetectionSet exists, add new detection to set
-                else {
-                    updatedDetections[operator].addDetection(
-                        newDetection,
-                        newDetection.view
+                if (boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD) {
+                    if (!(operator in this.state.detections)) {
+                        let newDetectionSet = new DetectionSet();
+                        newDetectionSet.setAlgorithmName(operator);
+                        newDetectionSet.visibility = true;
+                        newDetectionSet.addDetection(
+                            newDetection,
+                            newDetection.view
+                        );
+                        this.currentSelection.addAlgorithm(newDetectionSet);
+                        updatedDetections[operator] = newDetectionSet;
+                    }
+                    // Operator DetectionSet exists, add new detection to set
+                    else {
+                        updatedDetections[operator].addDetection(
+                            newDetection,
+                            newDetection.view
+                        );
+                    }
+                } else {
+                    this.setState(
+                        {
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                            displayButtons: false,
+                        },
+                        () => {
+                            this.resetCornerstoneTool();
+                        }
                     );
                 }
             } else {
+                newDetection.selected = true;
+                newDetection.updatingDetection = true;
                 if (newDetection.view === constants.viewport.TOP) {
                     const detectionIndex = updatedDetections[
                         newDetection.algorithm
                     ].data.top.findIndex((det) => {
                         return data[0].uuid === det.uuid;
                     });
+                    newDetection.detectionIndex = detectionIndex;
                     updatedDetections[newDetection.algorithm].data.top[
                         detectionIndex
                     ] = newDetection;
@@ -1535,6 +1623,7 @@ class App extends Component {
                     ].data.side.findIndex((det) => {
                         return data[0].uuid === det.uuid;
                     });
+                    newDetection.detectionIndex = detectionIndex;
                     updatedDetections[newDetection.algorithm].data.side[
                         detectionIndex
                     ] = newDetection;
@@ -1568,9 +1657,11 @@ class App extends Component {
                 this.setState(
                     {
                         detections: updatedDetections,
+                        isDetectionContextVisible: true,
                     },
                     () => {
                         this.renderDetectionContextMenu(event, newDetection);
+                        // this.currentSelection.resetAlgorithmPositionToEnd();
                     }
                 );
             }
@@ -1583,17 +1674,38 @@ class App extends Component {
      * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {type}  None
      */
-    resetSelectedDetectionBoxes(e) {
+    resetSelectedDetectionBoxes(e, sideMenuUpdate = false) {
         if (
-            this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
+            this.state.cornerstoneMode ===
+                constants.cornerstoneMode.SELECTION ||
+            sideMenuUpdate === true
         ) {
             for (const [key, detectionSet] of Object.entries(
                 this.state.detections
             )) {
                 detectionSet.clearAll();
             }
-            this.setState({ displaySelectedBoundingBox: false }, () => {
-                this.onDetectionSelected(e);
+            this.setState(
+                {
+                    displaySelectedBoundingBox: false,
+                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                    editionMode: null,
+                    isDetectionContextVisible: false,
+                    detectionContextPosition: {
+                        top: 0,
+                        left: 0,
+                    },
+                },
+                () => {
+                    this.onDetectionSelected(e);
+                    this.resetCornerstoneTool();
+                    this.appUpdateImage();
+                }
+            );
+        } else {
+            this.setState({
+                isDetectionContextVisible: false,
+                editionMode: null,
             });
         }
     }
@@ -1608,25 +1720,27 @@ class App extends Component {
      * C
      */
     onDetectionSelected(e) {
+        const viewportInfo = Utils.eventToViewportInfo(e);
+        const view =
+            viewportInfo.viewport === constants.viewport.TOP
+                ? constants.viewport.TOP
+                : constants.viewport.SIDE;
         if (
             this.state.detections === null ||
             this.currentSelection.getAlgorithm() === undefined ||
-            this.state.detections[
-                this.currentSelection.getAlgorithm()
-            ].getData().length === 0
+            this.state.detections[this.currentSelection.getAlgorithm()] ===
+                undefined ||
+            this.state.detections[this.currentSelection.getAlgorithm()].getData(
+                view
+            ).length === 0
         ) {
             return;
         }
-        const viewportInfo = Utils.eventToViewportInfo(e);
         const detectionData = this.state.detections[
             this.currentSelection.getAlgorithm()
         ].getDataFromSelectedDetection();
         if (detectionData !== undefined) {
             const detectionBoxCoords = detectionData.boundingBox;
-            const view =
-                viewportInfo.viewport === constants.viewport.TOP
-                    ? constants.viewport.TOP
-                    : constants.viewport.SIDE;
             this.setState(
                 {
                     displaySelectedBoundingBox: true,
@@ -1663,7 +1777,6 @@ class App extends Component {
                             data
                         );
                     }
-
                     for (const [key, myDetectionSet] of Object.entries(
                         this.state.detections
                     )) {
@@ -1691,9 +1804,25 @@ class App extends Component {
      * @param algorithm {string} - Algorithm's name
      */
     onAlgorithmSelected(selected, algorithm) {
-        this.setState({ displaySelectedBoundingBox: false }, () => {
-            this.appUpdateImage();
-        });
+        if (selected === true) {
+            for (const [key, myDetectionSet] of Object.entries(
+                this.state.detections
+            )) {
+                myDetectionSet.lowerOpacity = true;
+            }
+        }
+        this.setState(
+            {
+                displaySelectedBoundingBox: false,
+                isDetectionContextVisible: false,
+                isFABVisible: selected,
+                cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            },
+            () => {
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
+            }
+        );
     }
 
     /**
@@ -1702,7 +1831,8 @@ class App extends Component {
      * @return {none} None
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
-    onMenuDetectionSelected(detection) {
+    onMenuDetectionSelected(detection, e) {
+        const prevState = this.state;
         const updatedDetections = this.state.detections;
         updatedDetections[detection.algorithm].selectedDetection = detection;
         this.setState({ detections: updatedDetections });
@@ -1710,8 +1840,71 @@ class App extends Component {
             detection.view,
             document
         );
-        this.setState({ displaySelectedBoundingBox: true }, () =>
-            this.appUpdateImage()
+
+        this.setState(
+            {
+                displaySelectedBoundingBox: true,
+                cornerstoneMode: detection.selected
+                    ? constants.cornerstoneMode.EDITION
+                    : constants.cornerstoneMode.SELECTION,
+                isDetectionContextVisible: detection.selected,
+            },
+            () => {
+                this.resetCornerstoneTool();
+                if (detection.selected === true) {
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        if (detection.algorithm !== detSet.algorithm) {
+                            detSet.clearAll();
+                        } else {
+                            if (detSet.data.top !== undefined) {
+                                detSet.data.top.forEach((det) => {
+                                    if (det.uuid !== detection.uuid) {
+                                        det.selected = false;
+                                        det.updatingDetection = false;
+                                    }
+                                });
+                            }
+                            if (detSet.data.side !== undefined) {
+                                detSet.data.side.forEach((det) => {
+                                    if (det.uuid !== detection.uuid) {
+                                        det.selected = false;
+                                        det.updatingDetection = false;
+                                    }
+                                });
+                            }
+                        }
+                        detSet.lowerOpacity = true;
+                    }
+                    this.currentSelection.selectDetection(
+                        detection.algorithm,
+                        detection.detectionIndex,
+                        detection.view
+                    );
+                    this.renderDetectionContextMenu(e);
+                } else {
+                    for (const [key, detSet] of Object.entries(
+                        this.state.detections
+                    )) {
+                        detSet.clearAll();
+                    }
+                    this.setState(
+                        {
+                            editionMode: null,
+                            isFABVisible: true,
+                            detectionContextPosition: {
+                                top: 0,
+                                left: 0,
+                            },
+                        },
+                        () => {
+                            this.appUpdateImage();
+                        }
+                    );
+                }
+                this.onDetectionSelected(e);
+            }
         );
     }
 
@@ -1756,7 +1949,7 @@ class App extends Component {
     /**
      * Invoked when user selects a detection (callback from onMouseClicked)
      * @param {Event} event Related mouse click event to position the widget relative to detection
-     * @param {Detection} [ draggedData ] Optional detection data. In the case that
+     * @param {Detection} [draggedData] Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      */
@@ -1826,10 +2019,136 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects 'label' option from DetectionContextMenu
+     * Invoked when user completes editing a detection's label
+     * @param {string} newLabel Updated label name from user interaction
      */
-    editDetectionLabel() {
-        console.log('label option selected');
+    editDetectionLabel(newLabel) {
+        // Destructure and gather useful data from selected detection
+        const algo = this.currentSelection.getAlgorithm();
+        const { uuid, view } = this.state.detections[
+            algo
+        ].getDataFromSelectedDetection();
+
+        if (uuid && view) {
+            let updatedDetections = this.state.detections;
+            // Find index of selected detection by uuid
+            const idx = updatedDetections[algo].data[view].findIndex(
+                (detection) => (detection.uuid = uuid)
+            );
+
+            if (idx !== -1) {
+                // Update label and color of detection
+                updatedDetections[algo].data[view][idx].class = newLabel;
+                updatedDetections[algo].data[view][
+                    idx
+                ].color = Utils.getRandomColor(newLabel);
+
+                // Clear selections, etc. of all detections
+                for (const detectionSet of Object.values(updatedDetections)) {
+                    detectionSet.clearAll();
+                }
+                this.setState(
+                    {
+                        isFABVisible: true,
+                        detections: updatedDetections,
+                        editionMode: null,
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        detectionLabels: [],
+                        detectionLabelEditWidth: 0,
+                        detectionLabelEditPosition: { top: 0, left: 0 },
+                        displaySelectedBoundingBox: false,
+                    },
+                    () => {
+                        this.appUpdateImage();
+                        this.resetCornerstoneTool();
+                    }
+                );
+            }
+        }
+    }
+    /**
+     * Invoked when user selects 'label' option from DetectionContextMenu
+     * Renders and positions EditLabel widget relative to detection
+     */
+    selectEditDetectionLabel() {
+        const detectionData = this.state.detections[
+            this.currentSelection.getAlgorithm()
+        ].getDataFromSelectedDetection();
+
+        if (detectionData) {
+            // Destructure relevant info related to selected detection
+            const {
+                boundingBox,
+                view,
+                class: label,
+                confidence,
+            } = detectionData;
+            if (boundingBox) {
+                // Get all detection label options for label list
+                const allLabels = this.getAllLabels();
+
+                const boundingHeight = Math.abs(
+                    boundingBox[3] - boundingBox[1]
+                );
+                const boundingWidth = Math.abs(boundingBox[2] - boundingBox[0]);
+
+                // Position component on top of existing detection label
+                let gap, viewport, labelHeight;
+                if (view === constants.viewport.TOP) {
+                    const canvas = this.state.imageViewportTop.children[0];
+                    const ctx = canvas.getContext('2d');
+                    const detectionLabel = Utils.formatDetectionLabel(
+                        label,
+                        confidence
+                    );
+                    const labelSize = Utils.getTextLabelSize(
+                        ctx,
+                        detectionLabel,
+                        constants.detectionStyle.LABEL_PADDING
+                    );
+                    const { offsetLeft } = this.state.imageViewportTop;
+                    gap = offsetLeft / this.state.zoomLevelTop;
+                    viewport = this.state.imageViewportTop;
+                    labelHeight = labelSize.height;
+                } else {
+                    const canvas = this.state.imageViewportSide.children[0];
+                    const ctx = canvas.getContext('2d');
+                    const detectionLabel = Utils.formatDetectionLabel(
+                        label,
+                        confidence
+                    );
+                    const labelSize = Utils.getTextLabelSize(
+                        ctx,
+                        detectionLabel,
+                        constants.detectionStyle.LABEL_PADDING
+                    );
+                    const { offsetLeft } = this.state.imageViewportSide;
+                    gap = offsetLeft / this.state.zoomLevelSide;
+                    viewport = this.state.imageViewportSide;
+                    labelHeight = labelSize.height;
+                }
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                    x: boundingBox[0] + gap,
+                    y: boundingBox[1] - labelHeight,
+                });
+                const widgetPosition = {
+                    top: y,
+                    left: x,
+                };
+                this.setState(
+                    {
+                        isDetectionContextVisible: false,
+                        editionMode: constants.editionMode.LABEL,
+                        detectionLabels: allLabels,
+                        detectionLabelEditWidth: boundingWidth,
+                        detectionLabelEditPosition: widgetPosition,
+                    },
+                    () => {
+                        this.appUpdateImage();
+                    }
+                );
+            }
+        }
     }
 
     /**
@@ -1850,8 +2169,73 @@ class App extends Component {
      * Invoked when user selects 'delete' option from DetectionContextMenu
      */
     deleteDetection() {
-        console.log('delete detection selected');
+        const updatedDetections = this.state.detections;
+        const selectedDetection = updatedDetections[
+            this.currentSelection.getAlgorithm()
+        ].getDataFromSelectedDetection();
+
+        // Detection is selected
+        if (selectedDetection) {
+            updatedDetections[selectedDetection.algorithm].deleteDetection(
+                selectedDetection
+            );
+
+            // Remove empty DetectionSet
+            if (updatedDetections[selectedDetection.algorithm].isEmpty()) {
+                delete updatedDetections[selectedDetection.algorithm];
+
+                this.currentSelection.availableAlgorithms = updatedDetections;
+                this.currentSelection.algorithmNames = Object.values(
+                    updatedDetections
+                ).map((detectionSet) => {
+                    return {
+                        algorithm: detectionSet.algorithm,
+                    };
+                });
+
+                this.currentSelection.resetAlgorithmPositionToEnd();
+            }
+
+            // Reset remaining DetectionSets to `un-selected` state
+            for (const [key, detectionSet] of Object.entries(
+                updatedDetections
+            )) {
+                detectionSet.clearAll();
+            }
+        }
+        this.setState(
+            {
+                detections: updatedDetections,
+                isFABVisible: true,
+                isDetectionContextVisible: false,
+                isDrawingBoundingBox: false,
+                displaySelectedBoundingBox: false,
+                cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            },
+            () => {
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
+            }
+        );
     }
+
+    /**
+     * Calls `DetectionSet` method `getClassNames` for each algorithm in detections state
+     * @returns {Array<string>} array of all unique class names
+     */
+    getAllLabels() {
+        let results = [];
+        const { detections } = this.state;
+        for (const algo in detections) {
+            const labels = detections[algo].getClassNames();
+            const uniqueLabels = labels.filter(
+                (label) => !results.find((existing) => existing === label)
+            );
+            results = [...results, ...uniqueLabels];
+        }
+        return results;
+    }
+
     render() {
         return (
             <div>
@@ -1905,12 +2289,21 @@ class App extends Component {
                         isVisible={this.state.isDetectionContextVisible}
                         selectedOption={this.state.editionMode}
                         setSelectedOption={this.selectEditionMode}
-                        onLabelClicked={this.editDetectionLabel}
+                        onLabelClicked={this.selectEditDetectionLabel}
                         onBoundingClicked={this.editBoundingBox}
                         onPolygonClicked={this.editPolygonMask}
                         onDeleteClicked={this.deleteDetection}
                     />
-
+                    <EditLabel
+                        isVisible={
+                            this.state.editionMode ===
+                            constants.editionMode.LABEL
+                        }
+                        position={this.state.detectionLabelEditPosition}
+                        width={this.state.detectionLabelEditWidth}
+                        labels={this.state.detectionLabels}
+                        onLabelChange={this.editDetectionLabel}
+                    />
                     <BoundPolyFAB
                         isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}

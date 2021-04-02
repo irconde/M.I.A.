@@ -3,6 +3,7 @@
  */
 import * as constants from './Constants';
 import { useLayoutEffect, useState } from 'react';
+import randomColor from 'randomcolor';
 
 export default class Utils {
     /**
@@ -30,6 +31,19 @@ export default class Utils {
                   b: parseInt(result[3], 16),
               }
             : null;
+    }
+
+    /**
+     * Get random hex color from given seed value.
+     * @param {string} seed seed value for random color generation
+     * @returns {string} hex color value string
+     */
+    static getRandomColor(seed) {
+        return randomColor({
+            seed: seed,
+            hue: 'random',
+            luminosity: 'bright',
+        });
     }
 
     /**

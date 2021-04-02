@@ -4,6 +4,7 @@ import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 import NextButton from './NextButton';
 import * as constants from '../Constants';
+import Utils from '../Utils';
 
 class SideMenu extends Component {
     numberOfAlgorithms = 0;
@@ -16,6 +17,7 @@ class SideMenu extends Component {
                 color: 'white',
                 fill: 'white',
                 width: '100%',
+                height: 'inherit',
             },
             algorithmSelected: false,
             sideMenuWidth: constants.sideMenuWidth + constants.RESOLUTION_UNIT,
@@ -91,14 +93,10 @@ class SideMenu extends Component {
                     detectionSet.selectAlgorithm(true);
                     detectionSet.lowerOpacity = false;
                 } else {
-                    detectionSet.selectAlgorithm(false);
-                    detectionSet.lowerOpacity = true;
-                    detectionSet.selected = false;
+                    detectionSet.clearAll();
                 }
             } else {
-                detectionSet.selected = false;
-                detectionSet.selectAlgorithm(false);
-                detectionSet.lowerOpacity = false;
+                detectionSet.clearAll();
             }
         }
         this.forceUpdate(() => {
@@ -122,8 +120,8 @@ class SideMenu extends Component {
             for (const [key, detectionSet] of Object.entries(
                 this.props.detections
             )) {
-                detectionSet.lowerOpacity = false;
                 detectionSet.selectAlgorithm(false);
+                detectionSet.lowerOpacity = true;
                 detectionSet.selected = false;
             }
             detection.selected = true;
@@ -133,9 +131,16 @@ class SideMenu extends Component {
             this.setState({ ...prevState, algorithmSelected: false });
         }
 
-        if (detection.selected === false)
+        if (detection.selected === false) {
             this.props.resetSelectedDetectionBoxes(e);
-        else this.props.onMenuDetectionSelected(detection);
+        }
+        const newEvent = Utils.mockCornerstoneEvent(
+            e,
+            detection.view === constants.viewport.TOP
+                ? document.getElementById('dicomImageLeft')
+                : document.getElementById('dicomImageRight')
+        );
+        this.props.onMenuDetectionSelected(detection, newEvent);
     }
 
     render() {
@@ -158,8 +163,17 @@ class SideMenu extends Component {
             return (
                 <div
                     className="treeview-main"
-                    style={{ width: this.state.sideMenuWidth }}>
+                    style={{
+                        width: this.state.sideMenuWidth,
+                        height: document.documentElement.clientHeight,
+                    }}>
                     {/* How we create the trees and their nodes is using map */}
+                    <div
+                        style={{
+                            height:
+                                constants.sideMenuPaddingTop +
+                                constants.RESOLUTION_UNIT,
+                        }}></div>
                     <div style={this.state.treeStyle}>
                         {myDetections.map((value, index) => {
                             this.numberOfAlgorithms++;

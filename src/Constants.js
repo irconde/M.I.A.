@@ -57,6 +57,7 @@ export const viewportStyle = {
 
 export const RESOLUTION_UNIT = 'px';
 export const sideMenuWidth = 285;
+export const sideMenuPaddingTop = 75;
 export const cornerstoneMode = {
     SELECTION: 'selection',
     ANNOTATION: 'annotation',
@@ -76,7 +77,7 @@ export const commonDetections = {
 };
 
 export const OPERATOR = 'OPERATOR';
-
+export const BOUNDING_BOX_AREA_THRESHOLD = 10;
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
 export const ALGORTIHM = 'Algorithm';

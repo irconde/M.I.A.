@@ -80,15 +80,13 @@ body {
 
 .treeview-main {
     position: absolute;
-    height: 98vh;
-    top: 3.375rem;
+    height: 100vh;
     opacity: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     background-color: #1f1f1f;
     overflow: hidden;
-    padding-top: 1.25vh;
     font-size: 10pt;
 }
 

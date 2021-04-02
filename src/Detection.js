@@ -32,6 +32,7 @@ export default class Detection {
         });
         this.uuid = uuid;
         this.updatingDetection = updatingDetection;
+        this.detectionIndex = -1;
     }
 
     /**
