@@ -379,7 +379,6 @@ export default class Dicos {
         const yyyy = today.getFullYear();
         // Create the new dataset with fields required
         let dataset = {};
-        // TODO: Set the data fields
         this.getInstanceNumber(image).then((instanceNumber) => {
             dataset.ImageType = ['ORIGINAL', 'PRIMARY', 'VOLUME', 'NONE'];
             dataset.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
