@@ -702,85 +702,61 @@ class App extends Component {
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
-                            for (const [key, detectionSet] of Object.entries(
-                                this.state.detections
-                            )) {
-                                if (detectionSet.data.top !== undefined) {
-                                    for (
-                                        let j = 0;
-                                        j < detectionSet.data.top.length;
-                                        j++
-                                    ) {
-                                        let threatPromise = Dicos.dataToBlob(
-                                            detectionSet,
-                                            detectionSet.algorithm ===
-                                                constants.OPERATOR
-                                                ? stack.blobData[j]
-                                                : stack.blobData[
-                                                      j + topCounter
-                                                  ],
-                                            Date.now(),
-                                            !validationCompleted,
-                                            function (threatBlob) {
-                                                newOra.file(
-                                                    `data/${stack.view}_threat_detection_${topCounter}.dcs`,
-                                                    threatBlob
-                                                );
-                                                let newLayer = stackXML.createElement(
-                                                    'layer'
-                                                );
-                                                newLayer.setAttribute(
-                                                    'src',
-                                                    `data/${stack.view}_threat_detection_${topCounter}.dcs`
-                                                );
-                                                stackElem.appendChild(newLayer);
-                                                topCounter++;
-                                            }
+                            const topDetections = this.currentSelection.getDetectionsFromView(
+                                constants.viewport.TOP
+                            );
+                            for (let j = 0; j < topDetections.length; j++) {
+                                let threatPromise = Dicos.dataToBlob(
+                                    topDetections[j],
+                                    stack.blobData[j + 1],
+                                    Date.now(),
+                                    !validationCompleted,
+                                    function (threatBlob) {
+                                        newOra.file(
+                                            `data/${stack.view}_threat_detection_${topCounter}.dcs`,
+                                            threatBlob
                                         );
-                                        listOfPromises.push(threatPromise);
+                                        let newLayer = stackXML.createElement(
+                                            'layer'
+                                        );
+                                        newLayer.setAttribute(
+                                            'src',
+                                            `data/${stack.view}_threat_detection_${topCounter}.dcs`
+                                        );
+                                        stackElem.appendChild(newLayer);
+                                        topCounter++;
                                     }
-                                }
+                                );
+                                listOfPromises.push(threatPromise);
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
-                            for (const [key, detectionSet] of Object.entries(
-                                this.state.detections
-                            )) {
-                                if (detectionSet.data.side !== undefined) {
-                                    for (
-                                        let j = 0;
-                                        j < detectionSet.data.side.length;
-                                        j++
-                                    ) {
-                                        let threatPromise = Dicos.dataToBlob(
-                                            detectionSet,
-                                            detectionSet.algorithm ===
-                                                constants.OPERATOR
-                                                ? stack.blobData[j]
-                                                : stack.blobData[
-                                                      j + sideCounter
-                                                  ],
-                                            Date.now(),
-                                            !validationCompleted,
-                                            function (threatBlob) {
-                                                newOra.file(
-                                                    `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
-                                                    threatBlob
-                                                );
-                                                let newLayer = stackXML.createElement(
-                                                    'layer'
-                                                );
-                                                newLayer.setAttribute(
-                                                    'src',
-                                                    `data/${stack.view}_threat_detection_${sideCounter}.dcs`
-                                                );
-                                                stackElem.appendChild(newLayer);
-                                                sideCounter++;
-                                            }
+                            const sideDetections = this.currentSelection.getDetectionsFromView(
+                                constants.viewport.SIDE
+                            );
+                            for (let j = 0; j < sideDetections.length; j++) {
+                                let threatPromise = Dicos.dataToBlob(
+                                    sideDetections[j],
+                                    stack.blobData[j + 1],
+                                    Date.now(),
+                                    !validationCompleted,
+                                    function (threatBlob) {
+                                        newOra.file(
+                                            `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
+                                            threatBlob
                                         );
-                                        listOfPromises.push(threatPromise);
+                                        let newLayer = stackXML.createElement(
+                                            'layer'
+                                        );
+                                        newLayer.setAttribute(
+                                            'src',
+                                            `data/${stack.view}_threat_detection_${sideCounter}.dcs`
+                                        );
+                                        stackElem.appendChild(newLayer);
+                                        sideCounter++;
                                     }
-                                }
+                                );
+                                listOfPromises.push(threatPromise);
                             }
                         }
                         stackCounter++;
@@ -1582,6 +1558,18 @@ class App extends Component {
                     : constants.viewport.SIDE,
                 data[0].uuid
             );
+            const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
+                return newDetection.view === stack.view;
+            });
+            let state = this.state;
+            Dicos.detectionObjectToBlob(
+                newDetection,
+                this.state.myOra.stackData[stackIndex].blobData[0],
+                function (newBlob) {
+                    state.myOra.stackData[stackIndex].blobData.push(newBlob);
+                }
+            );
+
             let updatedDetections = this.state.detections;
             if (data[0].updatingDetection === false) {
                 // Need to determine if updating operator or new

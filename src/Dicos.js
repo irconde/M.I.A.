@@ -197,7 +197,7 @@ export default class Dicos {
      * @static write - Method that takes validation information and the original
      * DICOS data and generates the data to be encoded in the amended DICOS file
      *
-     * @param  {type} validationList Array with information regarding the validations made on the detections
+     * @param  {type} detection Array with information regarding the validations made on the detections
      * @param  {type} image          Original DICOS data
      * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
      * @param  {type} abort= false   Boolean value that represents the abort flag.
@@ -206,7 +206,7 @@ export default class Dicos {
      * @return {type}                Blob with data for the creation of the amended DICOS file.
      */
     static async dataToBlob(
-        detectionList,
+        detection,
         image,
         startTime,
         abort = false,
@@ -216,11 +216,6 @@ export default class Dicos {
         var dd = String(today.getDate()).padStart(2, '0');
         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
         var yyyy = today.getFullYear();
-        let detections = [];
-
-        if (detectionList.getData().length !== 0) {
-            detections = detectionList.getData();
-        }
 
         var fileReader = new FileReader();
         return new Promise((resolve, reject) => {
@@ -280,104 +275,47 @@ export default class Dicos {
                     copiedData.abortFlag = 'SUCCESS';
                     copiedData.AdditionalScreeningPerformed = 'YES';
                     copiedData.AdditionalInspectionSelectionCriteria = 'RANDOM';
-
-                    if (detections.length > 1) {
-                        for (var i = 0; i < detections.length; i++) {
-                            if (copiedData.ThreatSequence[i]) {
-                                copiedData.ThreatSequence[i][
-                                    'ReferencedPTOSequence'
-                                ] = {
-                                    vrMap: {},
-                                    PotentialThreatObjectID:
-                                        copiedData.ThreatSequence[i][
-                                            'PotentialThreatObjectID'
-                                        ],
-                                    ReferencedTDRInstanceSequence: {
-                                        ReferencedSOPClassUID:
-                                            copiedData.SOPClassUID,
-                                        ReferencedSOPInstanceUID:
-                                            copiedData.SOPInstanceUID,
-                                        vrMap: {},
-                                    },
-                                };
-                            }
-                            copiedData.ThreatSequence[i][
-                                'ATDAssessmentSequence'
-                            ]['ThreatCategoryDescription'] = detections[i]
-                                .feedback
-                                ? 'CONFIRM'
-                                : 'REJECT';
-                            copiedData.ThreatSequence[i][
-                                'ATDAssessmentSequence'
-                            ]['ATDAssessmentProbability'] = 1;
-
-                            if (detections[i].feedback === true) {
-                                copiedData.ThreatSequence[i][
-                                    'ATDAssessmentSequence'
-                                ]['ATDAssessmentFlag'] = 'THREAT';
-                                copiedData.ThreatSequence[i][
-                                    'ATDAssessmentSequence'
-                                ]['ATDAbilityAssessment'] = 'NO_INTERFERENCE';
-                            } else if (detections[i].feedback === false) {
-                                copiedData.ThreatSequence[i][
-                                    'ATDAssessmentSequence'
-                                ]['ATDAssessmentFlag'] = 'NO_THREAT';
-                                copiedData.ThreatSequence[i][
-                                    'ATDAssessmentSequence'
-                                ]['ATDAbilityAssessment'] = 'NO_INTERFERENCE';
-                                numberAlarmObjs = numberAlarmObjs - 1;
-                                numberTotalObjs = numberTotalObjs - 1;
-                                copiedData.NumberOfAlarmObjects = numberAlarmObjs;
-                                copiedData.NumberOfTotalObjects = numberTotalObjs;
-                            }
-                        } //end for loop through detections
-                    } // end if detections.length>1
-                    else {
-                        if (copiedData.ThreatSequence) {
-                            copiedData.ThreatSequence[
-                                'ReferencedPTOSequence'
-                            ] = {
+                    if (copiedData.ThreatSequence) {
+                        copiedData.ThreatSequence['ReferencedPTOSequence'] = {
+                            vrMap: {},
+                            PotentialThreatObjectID:
+                                copiedData.ThreatSequence[
+                                    'PotentialThreatObjectID'
+                                ],
+                            ReferencedTDRInstanceSequence: {
+                                ReferencedSOPClassUID: copiedData.SOPClassUID,
+                                ReferencedSOPInstanceUID:
+                                    copiedData.SOPInstanceUID,
                                 vrMap: {},
-                                PotentialThreatObjectID:
-                                    copiedData.ThreatSequence[
-                                        'PotentialThreatObjectID'
-                                    ],
-                                ReferencedTDRInstanceSequence: {
-                                    ReferencedSOPClassUID:
-                                        copiedData.SOPClassUID,
-                                    ReferencedSOPInstanceUID:
-                                        copiedData.SOPInstanceUID,
-                                    vrMap: {},
-                                },
-                            };
-                        }
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ThreatCategoryDescription'
-                        ] = detections[0].feedback ? 'CONFIRM' : 'REJECT';
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ATDAssessmentProbability'
-                        ] = 1;
+                            },
+                        };
+                    }
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ThreatCategoryDescription'
+                    ] = detection.feedback ? 'CONFIRM' : 'REJECT';
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ATDAssessmentProbability'
+                    ] = 1;
 
-                        if (detections[0].feedback === true) {
-                            copiedData.ThreatSequence['ATDAssessmentSequence'][
-                                'ATDAssessmentFlag'
-                            ] = 'THREAT';
-                            copiedData.ThreatSequence['ATDAssessmentSequence'][
-                                'ATDAbilityAssessment'
-                            ] = 'NO_INTERFERENCE';
-                        } else if (detections[0].feedback === false) {
-                            copiedData.ThreatSequence['ATDAssessmentSequence'][
-                                'ATDAssessmentFlag'
-                            ] = 'NO_THREAT';
-                            copiedData.ThreatSequence['ATDAssessmentSequence'][
-                                'ATDAbilityAssessment'
-                            ] = 'NO_INTERFERENCE';
-                            numberAlarmObjs = numberAlarmObjs - 1;
-                            numberTotalObjs = numberTotalObjs - 1;
-                            copiedData.NumberOfAlarmObjects = numberAlarmObjs;
-                            copiedData.NumberOfTotalObjects = numberTotalObjs;
-                        }
-                    } // else
+                    if (detection.feedback === true) {
+                        copiedData.ThreatSequence['ATDAssessmentSequence'][
+                            'ATDAssessmentFlag'
+                        ] = 'THREAT';
+                        copiedData.ThreatSequence['ATDAssessmentSequence'][
+                            'ATDAbilityAssessment'
+                        ] = 'NO_INTERFERENCE';
+                    } else if (detection.feedback === false) {
+                        copiedData.ThreatSequence['ATDAssessmentSequence'][
+                            'ATDAssessmentFlag'
+                        ] = 'NO_THREAT';
+                        copiedData.ThreatSequence['ATDAssessmentSequence'][
+                            'ATDAbilityAssessment'
+                        ] = 'NO_INTERFERENCE';
+                        numberAlarmObjs = numberAlarmObjs - 1;
+                        numberTotalObjs = numberTotalObjs - 1;
+                        copiedData.NumberOfAlarmObjects = numberAlarmObjs;
+                        copiedData.NumberOfTotalObjects = numberTotalObjs;
+                    }
                 } //end else abort
                 dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
                     copiedData
@@ -392,22 +330,177 @@ export default class Dicos {
         });
     }
 
-    static detectionObjectToBlob(detection) {
-        // Create the new dataset with fields required
-        let dataset;
-        // TODO: Set the data fields
-
-        // Create the Dicom Dictionary file
-        let dicomDict = dcmjs.data.DicomDict;
-        dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
-            dataset
-        );
-        // Create the buffer from the denaturalized data set populated above
-        let new_file_WriterBuffer = dicomDict.write();
-        // Create a blob with this buffer
-        var file = new Blob([new_file_WriterBuffer], {
-            type: 'image/dcs',
+    static async getInstanceNumber(image) {
+        var fileReader = new FileReader();
+        return new Promise((resolve, reject) => {
+            fileReader.onerror = () => {
+                fileReader.abort();
+                reject('Unable to load file');
+            };
+            fileReader.onload = function (event) {
+                image = event.target.result;
+                var dicomDict = dcmjs.data.DicomMessage.readFile(image);
+                var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+                    dicomDict.dict
+                );
+                resolve(dataset.InstanceNumber);
+            };
+            fileReader.readAsArrayBuffer(image);
         });
-        return file;
+    }
+
+    static detectionObjectToBlob(detection, image, callback) {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = today.getFullYear();
+        // Create the new dataset with fields required
+        let dataset = {};
+        // TODO: Set the data fields
+        this.getInstanceNumber(image).then((instanceNumber) => {
+            dataset.ImageType = ['ORIGINAL', 'PRIMARY', 'VOLUME', 'NONE'];
+            dataset.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
+            dataset.InstanceCreationTime =
+                today.getHours() +
+                ':' +
+                today.getMinutes() +
+                ':' +
+                today.getSeconds();
+            dataset.SOPClassUID = '1.2.840.10008.5.1.4.1.1.501.2.1';
+            dataset.SOPInstanceUID =
+                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161';
+            dataset.StudyDate = '19700101';
+            dataset.SeriesDate = '19700101';
+            dataset.AcquisitionDate = '19700101';
+            dataset.ContentDate = '19700101';
+            dataset.AcquisitionDateTime = '19700101000000';
+            dataset.StudyTime = '000000';
+            dataset.SeriesTime = '000000';
+            dataset.AcquisitionTime = '000000';
+            dataset.ContentTime = '000000';
+            dataset.Modality = 'DX';
+            dataset.PresentationIntentType = 'FOR PROCESSING';
+            dataset.Manufacturer = 'Rapiscan Systems';
+            dataset.InstitutionName = 'Rapiscan Systems';
+            dataset.InstitutionAddress =
+                '2805 Columbia St, Torrance, CA 90503 U.S.A.';
+            dataset.StationName = 'unknown';
+            dataset.StudyDescription = 'Malibu v1.0';
+            dataset.SeriesDescription = 'unknown';
+            dataset.ManufacturerModelName = 'unknown';
+            dataset.PatientName = 'unknown';
+            dataset.PatientID = 'unknown';
+            dataset.IssuerOfPatientID = 'Rapiscan Systems';
+            dataset.TypeOfPatientID = 'TEXT';
+            dataset.PatientBirthDate = 'unknown';
+            dataset.PatientSex = 'U';
+            dataset.KVP = '0';
+            dataset.DeviceSerialNumber = '0000';
+            dataset.SoftwareVersions = '0000';
+            dataset.DistanceSourceToDetector = '0';
+            dataset.DateOfLastCalibration = '19700101';
+            dataset.TimeOfLastCalibration = '000000';
+            dataset.DetectorType = 'DIRECT';
+            dataset.DetectorConfiguration = 'SLOT';
+            dataset.DetectorDescription = 'DetectorDesc';
+            dataset.XRayTubeCurrentInuA = '0';
+            dataset.TableSpeed = 1;
+            dataset.StudyInstanceUID =
+                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771162';
+            dataset.SeriesInstanceUID =
+                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771163';
+            dataset.StudyID = 'Malibu v1.0';
+            dataset.AcquisitionNumber = '0';
+            dataset.InstanceNumber = instanceNumber;
+            dataset.ImagePositionPatient = '1\\1\\1';
+            dataset.ImageOrientationPatient = '1\\0\\0\\0\\1\\0';
+            dataset.SamplesPerPixel = 1;
+            dataset.PhotometricInterpretation = 'MONOCHROME2';
+            dataset.PlanarConfiguration = 0;
+            dataset.NumberOfFrames = '1';
+            dataset.Rows = 580;
+            dataset.Columns = 508;
+            dataset.BitsAllocated = 16;
+            dataset.BitsStored = 16;
+            dataset.HighBit = 15;
+            dataset.PixelRepresentation = 0;
+            dataset.BurnedInAnnotation = 'NO';
+            dataset.PixelIntensityRelationship = 'LIN';
+            dataset.PixelIntensityRelationshipSign = 1;
+            dataset.RescaleIntercept = '0';
+            dataset.RescaleSlope = '1';
+            dataset.RescaleType = 'HU';
+            dataset.LossyImageCompression = '00';
+            dataset.ThreatSequence = {
+                PotentialThreatObjectID: 0,
+                PTORepresentationSequence: {
+                    ReferencedInstanceSequence: [
+                        {
+                            ReferencedSOPClassUID:
+                                '1.2.840.10008.5.1.4.1.1.501.2.1',
+                            ReferencedSOPInstanceUID:
+                                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                        },
+                    ],
+                    // [x0, y0, z0, xf, yf, zf]
+                    BoundingPolygon: [
+                        detection.boundingBox[0],
+                        detection.boundingBox[1],
+                        0,
+                        detection.boundingBox[2],
+                        detection.boundingBox[3],
+                        0,
+                    ],
+                },
+                ATDAssessmentSequence: {
+                    ThreatCategory: 'ANOMALY',
+                    ThreatCategoryDescription: detection.class,
+                    ATDAbilityAssessment: 'SHIELD',
+                    ATDAssessmentFlag: 'THREAT',
+                    ATDAssessmentProbability: detection.confidence,
+                },
+            };
+            dataset.AcquisitionContextSequence = {
+                ConceptNameCodeSequence: {
+                    CodeMeaning: 0,
+                    CodeValue: 0,
+                    CodingSchemeDesignator: 0,
+                },
+            };
+            dataset.AlgorithmRoutingCodeSequence = [];
+            dataset.DetectorGeometrySequence = {
+                DistanceSourceToDetector: 0.0,
+                SourceOrientation: [1, 1, 1],
+                SourcePosition: [1, 1, 1],
+            };
+            dataset.PresentationLUTShape = 'IDENTITY';
+            dataset.OOIOwnerType = 'OwnerType';
+            dataset.TDRType = 'OPERATOR';
+            dataset.ThreatDetectionAlgorithmandVersion = 'OPERATOR';
+            dataset.AlarmDecisionTime = dataset.InstanceCreationTime;
+            dataset.AlarmDecision = 'ALARM';
+            dataset.NumberOfTotalObjects = 1;
+            dataset.NumberOfAlarmObjects = 1;
+            dataset.DICOSVersion = 'V02A';
+            dataset.OOIType = 'BAGGAGE';
+            dataset.OOISize = [1, 1, 1];
+            dataset.AcquisitionStatus = 'SUCCESSFUL';
+            dataset.ScanType = 'OPERATIONAL';
+            dataset.BeltHeight = 0;
+            dataset.NumberOfAlarmObjects = 1;
+            dataset.NumberOfTotalObjects = 1;
+            // Create the Dicom Dictionary file
+            let dicomDict = new dcmjs.data.DicomDict({});
+            dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
+                dataset
+            );
+            // Create the buffer from the denaturalized data set populated above
+            let new_file_WriterBuffer = dicomDict.write();
+            // Create a blob with this buffer
+            var file = new Blob([new_file_WriterBuffer], {
+                type: 'image/dcs',
+            });
+            callback(file);
+        });
     }
 }
