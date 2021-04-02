@@ -197,8 +197,8 @@ export default class Dicos {
      * @static write - Method that takes validation information and the original
      * DICOS data and generates the data to be encoded in the amended DICOS file
      *
-     * @param  {type} detection Array with information regarding the validations made on the detections
-     * @param  {type} image          Original DICOS data
+     * @param  {type} detection      Detection object we are using to make a DICOM blob
+     * @param  {type} image          Original DICOS Blob data
      * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
      * @param  {type} abort= false   Boolean value that represents the abort flag.
      *                               True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
@@ -316,6 +316,14 @@ export default class Dicos {
                         copiedData.NumberOfAlarmObjects = numberAlarmObjs;
                         copiedData.NumberOfTotalObjects = numberTotalObjs;
                     }
+                    copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon = [
+                        detection.boundingBox[0],
+                        detection.boundingBox[1],
+                        0,
+                        detection.boundingBox[2],
+                        detection.boundingBox[3],
+                        0,
+                    ];
                 } //end else abort
                 dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
                     copiedData
@@ -330,6 +338,12 @@ export default class Dicos {
         });
     }
 
+    /**
+     * getInstanceNumber - Will return the unique instance identifier for a given DICOM Image in blob format.
+     *
+     * @param {Blob} image
+     * @returns
+     */
     static async getInstanceNumber(image) {
         var fileReader = new FileReader();
         return new Promise((resolve, reject) => {
@@ -349,6 +363,15 @@ export default class Dicos {
         });
     }
 
+    /**
+     * detectionObjectToBlob - Function will take in a detection and its parent image, where the detection was located.
+     *                         It then generates the needed DICOM fields and uses the dcmjs library to create a blob
+     *                         based on the naturalized dataset we pass into the DICOM Dictionary.
+     *
+     * @param {Detection} detection
+     * @param {Blob} image
+     * @param {Function} callback
+     */
     static detectionObjectToBlob(detection, image, callback) {
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
@@ -412,8 +435,8 @@ export default class Dicos {
             dataset.StudyID = 'Malibu v1.0';
             dataset.AcquisitionNumber = '0';
             dataset.InstanceNumber = instanceNumber;
-            dataset.ImagePositionPatient = '1\\1\\1';
-            dataset.ImageOrientationPatient = '1\\0\\0\\0\\1\\0';
+            dataset.ImagePositionPatient = [1, 1, 1];
+            dataset.ImageOrientationPatient = [1, 0, 0, 0, 1, 0];
             dataset.SamplesPerPixel = 1;
             dataset.PhotometricInterpretation = 'MONOCHROME2';
             dataset.PlanarConfiguration = 0;
