@@ -126,9 +126,9 @@ export default class DetectionSet {
         const viewport = detection.view;
         const uuid = detection.uuid;
 
-        const filterOut = this.data[viewport].filter((detec) => {
-            detec.uuid !== uuid;
-        });
+        const filterOut = this.data[viewport].filter(
+            (detec) => detec.uuid !== uuid
+        );
         this.data[viewport] = filterOut;
 
         if (viewport === constants.viewport.TOP) {
