@@ -904,14 +904,15 @@ class App extends Component {
                 self.state.imageViewportTop,
                 image
             );
-            viewport.translation.y = constants.viewportStyle.ORIGIN;
-            viewport.scale = self.state.zoomLevelTop;
+            //viewport.translation.y = constants.viewportStyle.ORIGIN;
+            //viewport.scale = self.state.zoomLevelTop;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
                 image,
                 viewport
             );
+            cornerstone.fitToWindow(self.state.imageViewportTop);
         });
         if (this.state.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
@@ -926,14 +927,15 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
-                viewport.translation.y = constants.viewportStyle.ORIGIN;
-                viewport.scale = self.state.zoomLevelSide;
+               // viewport.translation.y = constants.viewportStyle.ORIGIN;
+                //viewport.scale = self.state.zoomLevelSide;
                 self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportSide,
                     image,
                     viewport
                 );
+                cornerstone.fitToWindow(self.state.imageViewportSide);
             });
         }
     }
