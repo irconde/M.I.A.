@@ -35,6 +35,14 @@ import {
     setProcessingHost,
     setCurrentProcessingFile,
 } from './redux/slices/server/serverSlice';
+import {
+    addDetection,
+    addDetectionSet,
+    areDetectionsValidated,
+    clearAllSelection,
+    clearSelectedDetection,
+    detectionsFromView,
+} from './redux/slices/detections/detectionsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 cornerstoneTools.external.cornerstone = cornerstone;
@@ -401,6 +409,9 @@ class App extends Component {
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
         if (this.state.displaySelectedBoundingBox === true) {
+            console.log('here');
+            //TODO redux
+            this.props.clearAllSelection();
             for (const [key, detectionSet] of Object.entries(
                 this.state.detections
             )) {
@@ -676,6 +687,7 @@ class App extends Component {
                                                     this.state.imageViewportTop
                                                 );
                                             }
+                                            //TODO redux: init not needed, just delete
                                             this.state.detections = {};
                                             this.currentSelection.availableAlgorithms = [];
                                             this.loadAndViewImage();
@@ -706,7 +718,10 @@ class App extends Component {
                     this.setState({
                         algorithm: null,
                     });
+                    //TODO redux
+                    // let validationCompleted = areDetectionsValidated(this.props.detections)
                     let validationCompleted = this.validationCompleted();
+                    console.log();
                     const stackXML = document.implementation.createDocument(
                         '',
                         '',
@@ -743,6 +758,7 @@ class App extends Component {
                         );
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
+                            // TODO redux
                             // Loop through each detection and only the top view of the detection
                             const topDetections = this.currentSelection.getDetectionsFromView(
                                 constants.viewport.TOP
@@ -771,6 +787,7 @@ class App extends Component {
                                 );
                                 listOfPromises.push(threatPromise);
                             }
+                            //TODO redux
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
                             const sideDetections = this.currentSelection.getDetectionsFromView(
@@ -1030,6 +1047,8 @@ class App extends Component {
                 );
 
                 if (!(algorithmName in self.state.detections)) {
+                    //TODO redux
+                    self.props.addDetectionSet({ algorithm: algorithmName });
                     self.state.detections[algorithmName] = new DetectionSet();
                     self.state.detections[algorithmName].setAlgorithmName(
                         algorithmName
@@ -1075,6 +1094,14 @@ class App extends Component {
                         threatSequence.items[j],
                         image
                     );
+                    //TODO redux
+                    self.props.addDetection({
+                        algorithm: algorithmName,
+                        boundingBox: boundingBoxCoords,
+                        className: objectClass,
+                        confidence: confidenceLevel,
+                        view: constants.viewport.TOP,
+                    });
                     self.state.detections[algorithmName].addDetection(
                         new Detection(
                             boundingBoxCoords,
@@ -1110,6 +1137,10 @@ class App extends Component {
                     );
 
                     if (!(algorithmName in self.state.detections)) {
+                        //TODO redux
+                        self.props.addDetectionSet({
+                            algorithm: algorithmName,
+                        });
                         self.state.detections[
                             algorithmName
                         ] = new DetectionSet();
@@ -1160,6 +1191,15 @@ class App extends Component {
                             )
                         );
                         var pixelData = Dicos.retrieveMaskData(image);
+                        //TODO redux
+                        self.props.addDetection({
+                            algorithm: algorithmName,
+                            maskBitmap: pixelData,
+                            boundingBox: boundingBoxCoords,
+                            className: objectClass,
+                            confidence: confidenceLevel,
+                            view: constants.viewport.SIDE,
+                        });
                         self.state.detections[algorithmName].addDetection(
                             new Detection(
                                 boundingBoxCoords,
@@ -1199,6 +1239,7 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             this.setState({ zoomLevelTop: eventData.viewport.scale });
+            //TODO redux
             this.renderDetections(this.state.detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
@@ -1210,6 +1251,7 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             this.setState({ zoomLevelSide: eventData.viewport.scale });
+            //TODO redux
             this.renderDetections(this.state.detections, context);
         }
         // set the canvas context to the image coordinate system
@@ -1239,6 +1281,7 @@ class App extends Component {
      * @return {type}         None
      */
     renderDetections(data, context) {
+        //TODO redux
         if (
             this.state.detections === {} ||
             this.currentSelection.getAlgorithm() === undefined ||
@@ -1383,6 +1426,7 @@ class App extends Component {
         } else if (e.detail.element.id === 'dicomImageRight') {
             view = constants.viewport.SIDE;
         }
+        //TODO redux
         if (this.state.detections === null) {
             return;
         }
@@ -1390,16 +1434,18 @@ class App extends Component {
         let viewport;
         if (e.detail.element.id === 'dicomImageLeft') {
             // top
-            combinedDetections = this.currentSelection.getDetectionsFromView(
+            combinedDetections = detectionsFromView(
+                this.props.detections,
                 constants.viewport.TOP
             );
             viewport = constants.viewport.TOP;
         } else if (e.detail.element.id === 'dicomImageRight') {
             // side
-            combinedDetections = this.currentSelection.getDetectionsFromView(
-                constants.viewport.SIDE
+            combinedDetections = detectionsFromView(
+                this.props.detections,
+                constants.viewport.TOP
             );
-            viewport = constants.viewport.SIDE;
+            viewport = constants.viewport.TOP;
         }
         if (combinedDetections.length > 0) {
             const mousePos = cornerstone.canvasToPixel(e.target, {
@@ -1428,6 +1474,8 @@ class App extends Component {
 
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
+                //TODO redux
+                this.props.clearAllSelection();
                 for (const [key, detSet] of Object.entries(
                     this.state.detections
                 )) {
@@ -1463,6 +1511,7 @@ class App extends Component {
                         combinedDetections[clickedPos].detectionIndex,
                         viewport
                     );
+                    //TODO redux
                     const selectedDetection = this.state.detections[
                         this.currentSelection.getAlgorithm()
                     ].getDataFromSelectedDetection();
@@ -2407,7 +2456,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server } = state;
+    const { server, detections } = state;
     return {
         isConnected: server.isConnected,
         isDownload: server.isDownload,
@@ -2416,6 +2465,7 @@ const mapStateToProps = (state) => {
         numFilesInQueue: server.numFilesInQueue,
         processingHost: server.processingHost,
         currentProcessingFile: server.currentProcessingFile,
+        detections: detections,
     };
 };
 
@@ -2428,4 +2478,8 @@ export default connect(mapStateToProps, {
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,
+    addDetection,
+    addDetectionSet,
+    clearAllSelection,
+    clearSelectedDetection,
 })(App);

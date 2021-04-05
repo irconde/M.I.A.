@@ -12,12 +12,12 @@ import './typedef';
  * Constructor function to create Detection object
  * @param {object} params
  * @param {Array<number>} params.boundingBox boundingBox xy coordinates of detection in format [x0, y0, x1, y1]
- * @param {Array<Array<number>>} params.maskBitmap 2D array of bitmap data
+ * @param {?Array<Array<number>>} params.maskBitmap 2D array of bitmap data
  * @param {boolean} params.selected is detection selected by user
  * @param {boolean} params.visible is detection visible on screen
  * @param {string} params.className description of detection object
  * @param {number} params.confidence confidence of algorithm in identifying an object
- * @param {boolean | undefined} params.validation has user finished validating detection
+ * @param {?boolean} params.validation has user finished validating detection
  * @param {boolean} params.isValidated has detection been validated by user
  * @param {string} params.algorithm name of algorithm used
  * @param {string} params.view the angle of the photo (ex. 'side', 'top')
@@ -26,12 +26,12 @@ import './typedef';
  */
 export function createDetection({
     boundingBox,
-    maskBitmap,
+    maskBitmap = null,
     selected = false,
     visible = true,
     className,
     confidence,
-    validation = undefined,
+    validation = null,
     isValidated,
     algorithm,
     view,
@@ -67,7 +67,7 @@ export function createDetection({
  */
 export function getRenderColor(detection) {
     if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
-    if (detection.validation !== undefined) {
+    if (detection.validation !== null) {
         if (detection.validation) {
             return constants.detectionStyle.VALID_COLOR;
         }
