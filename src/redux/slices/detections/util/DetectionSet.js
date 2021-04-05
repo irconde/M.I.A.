@@ -16,8 +16,8 @@ import cloneDeep from 'lodash.clonedeep';
  * @param {object} params object of initial/default props
  * @param {string} algorithm algorithm name
  * @param {boolean} selected whether the detection set has a detection that is selected
- * @param {string | undefined} selectedViewport if a detection is selected, which viewport it is in
- * @param {Detection | undefined} selectedDetection selected detection, if it exists
+ * @param {string | null} selectedViewport if a detection is selected, which viewport it is in
+ * @param {Detection | null} selectedDetection selected detection, if it exists
  * @param {boolean} visible whether the detection set is visible on screen
  * @param {object} data object of arrays of detection data by viewport
  * @param {boolean} lowerOpacity lower opacity when other detection set is selected
@@ -28,9 +28,10 @@ import cloneDeep from 'lodash.clonedeep';
 export function createDetectionSet({
     algorithm,
     selected = false,
-    selectedViewport = undefined,
+    selectedViewport = null,
     selectedDetectionIndex = constants.selection.NO_SELECTION,
-    selectedDetection = undefined,
+    selectedDetection = null,
+    visible = true,
     data = {
         top: [],
         side: [],
@@ -60,7 +61,7 @@ export function createDetectionSet({
  * @returns {DetectionSet} updated DetectionSet
  */
 export function validateSelectedDetection(detectionSet, feedback) {
-    if (detectionSet.selectedDetection !== undefined) {
+    if (detectionSet.selectedDetection !== null) {
         const updatedDetectionSet = cloneDeep(detectionSet);
         updatedDetectionSet.feedback = feedback;
 
@@ -75,13 +76,13 @@ export function validateSelectedDetection(detectionSet, feedback) {
  * @returns {DetectionSet} updated DetectionSet
  */
 export function clearSelection(detectionSet) {
-    if (detectionSet.selectedDetection !== undefined) {
+    if (detectionSet.selectedDetection !== null) {
         const updatedDetectionSet = cloneDeep(detectionSet);
         updatedDetectionSet.selected = false;
-        updatedDetectionSet.selectedViewport = undefined;
+        updatedDetectionSet.selectedViewport = null;
         updatedDetectionSet.selectedDetectionIndex =
             constants.selection.NO_SELECTION;
-        updatedDetectionSet.selectedDetection = undefined;
+        updatedDetectionSet.selectedDetection = null;
         updatedDetectionSet.lowerOpacity = false;
         return updatedDetectionSet;
     }
@@ -93,17 +94,22 @@ export function clearSelection(detectionSet) {
  * @returns {DetectionSet} updated DetectionSet
  */
 export function clearAll(detectionSet) {
+    // Clear DetectionSet-level selection data
     const updatedDetectionSet = cloneDeep(detectionSet);
     updatedDetectionSet.selected = false;
-    updatedDetectionSet.selectedDetection = undefined;
+    updatedDetectionSet.selectedDetection = null;
     updatedDetectionSet.lowerOpacity = false;
     updatedDetectionSet.selectedDetectionIndex =
         constants.selection.NO_SELECTION;
 
+    // Clear Detection-level selection data
     const updatedData = Object.values(updatedDetectionSet.data).map((view) => {
-        view.map((detection) => {
-            detection.selected = false;
-            detection.updatingDetection = false;
+        return view.map((detection) => {
+            return {
+                ...detection,
+                selected: false,
+                updatingDetection: false,
+            };
         });
     });
     updatedDetectionSet.data = updatedData;
@@ -116,7 +122,7 @@ export function clearAll(detectionSet) {
  * @param {Detection} detection new detection to be added
  * @returns {DetectionSet} updated detectionSet
  */
-export function addDetection(detectionSet, detection) {
+export function addDetectionToSet(detectionSet, detection) {
     const viewport = detection.view;
     const algo = detection.algorithm;
     const updatedDetectionSet = cloneDeep(detectionSet);
@@ -148,7 +154,7 @@ export function addDetection(detectionSet, detection) {
  * @param {DetectionSet} detectionSet detectionSet that contains detection
  * @param {Detection} detection detection to be deleted
  */
-export function deleteDetection(detectionSet, detection) {
+export function deleteDetectionFromSet(detectionSet, detection) {
     const viewport = detection.view;
     const uuid = detection.uuid;
     const updatedDetectionSet = cloneDeep(detectionSet);
@@ -183,4 +189,33 @@ export function isEmpty(detectionSet) {
         }
     });
     return result;
+}
+
+/**
+ * Determine if all detections in a DetectionSet have been validated
+ * @param {DetectionSet} detectionSet DetectionSet to query
+ * @returns {boolean} true if all detections have been validated, false otherwise
+ */
+export function isValidated(detectionSet) {
+    let result = true;
+
+    Object.values(detectionSet.data).forEach((view) => {
+        view.forEach((detection) => {
+            if (!detection.validation) {
+                result = false;
+            }
+        });
+    });
+
+    return result;
+}
+
+/**
+ * Get all detections from a specified view
+ * @param {DetectionSet} detectionSet DetectionSet to query
+ * @param {string} view view to query
+ * @returns {Array<Detection>}
+ */
+export function getDetectionsFromView(detectionSet, view) {
+    return detectionSet.data[view];
 }
