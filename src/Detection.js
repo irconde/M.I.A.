@@ -14,7 +14,8 @@ export default class Detection {
         algorithm,
         view,
         uuid,
-        updatingDetection = false
+        updatingDetection = false,
+        blobData
     ) {
         this.boundingBox = diagonalCoords;
         this.maskBitmap = maskBitMap;
@@ -33,6 +34,7 @@ export default class Detection {
         this.uuid = uuid;
         this.updatingDetection = updatingDetection;
         this.detectionIndex = -1;
+        this.blobData = blobData;
     }
 
     /**

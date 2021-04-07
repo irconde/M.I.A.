@@ -749,7 +749,7 @@ class App extends Component {
                             for (let j = 0; j < sideDetections.length; j++) {
                                 let threatPromise = Dicos.dataToBlob(
                                     sideDetections[j],
-                                    stack.blobData[j + 1],
+                                    sideDetections[j].blobData,
                                     Date.now(),
                                     !validationCompleted,
                                     function (threatBlob) {
@@ -1054,7 +1054,9 @@ class App extends Component {
                             false,
                             algorithmName,
                             constants.viewport.TOP,
-                            uuidv4()
+                            uuidv4(),
+                            false,
+                            new Blob([new Uint8Array(reader.result)])
                         )
                     );
                 }
@@ -1137,7 +1139,9 @@ class App extends Component {
                                 false,
                                 algorithmName,
                                 constants.viewport.SIDE,
-                                uuidv4()
+                                uuidv4(),
+                                false,
+                                new Blob([new Uint8Array(read.result)])
                             ),
                             constants.viewport.SIDE
                         );
@@ -1579,6 +1583,7 @@ class App extends Component {
                 this.state.myOra.stackData[stackIndex].blobData[0],
                 function (newBlob) {
                     state.myOra.stackData[stackIndex].blobData.push(newBlob);
+                    newDetection.blobData = newBlob;
                 }
             );
 
