@@ -52,7 +52,8 @@ export const detectionContextStyle = {
 
 export const viewportStyle = {
     ZOOM: 1.2,
-    ORIGIN: 25,
+    ORIGIN: 0,
+    REF_VIEWPORT_WIDTH: 753,
 };
 
 export const RESOLUTION_UNIT = 'px';
