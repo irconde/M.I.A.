@@ -90,3 +90,15 @@ export function validate(detection, feedback) {
         selected: false,
     };
 }
+
+/**
+ * Mark a detection as selected by the user
+ * @param {Detection} detection detection to be selected
+ * @returns {Detection} updated Detection
+ */
+export function selectDetection(detection) {
+    const updatedDetection = detection;
+    updatedDetection.selected = true;
+
+    return updatedDetection;
+}

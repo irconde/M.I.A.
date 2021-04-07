@@ -1,6 +1,7 @@
 import * as constants from '../../../../Constants';
 import './typedef';
 import cloneDeep from 'lodash.clonedeep';
+import { selectDetection } from './Detection';
 
 /*
  * Utility funcitons for the `DetectionSet` object
@@ -222,11 +223,32 @@ export function isValidated(detectionSet) {
 }
 
 /**
- * Get all detections from a specified view
- * @param {DetectionSet} detectionSet DetectionSet to query
- * @param {string} view view to query
- * @returns {Array<Detection>}
+ * Mark a detection in a set as selected by the user
+ * @param {DetectionSet} detectionSet detectionSet that contains the selected detection
+ * @param {string} view viewport where detection is rendered
+ * @param {string} uuid unique identifier of detection
+ * @returns {?DetectionSet} updated DetectionSet, or null in case of error
  */
-export function getDetectionsFromView(detectionSet, view) {
-    return detectionSet.data[view];
+export function selectDetectionInSet(detectionSet, view, uuid) {
+    const updatedDetectionSet = cloneDeep(detectionSet);
+    const updatedDetectionIndex = updatedDetectionSet.data[view].findIndex(
+        (detection) => detection.uuid === uuid
+    );
+
+    // View, uuid are valid and detection exists
+    if (updatedDetectionIndex !== -1) {
+        const selectedDetection = selectDetection(
+            updatedDetectionSet.data[view][updatedDetectionIndex]
+        );
+        updatedDetectionSet.selectedDetectionIndex = updatedDetectionIndex;
+        updatedDetectionSet.selectedDetection = selectedDetection;
+        updatedDetectionSet.data[view][
+            updatedDetectionIndex
+        ] = selectedDetection;
+
+        return updatedDetectionSet;
+    }
+
+    // There was an invalid parameter, no detection found
+    return null;
 }

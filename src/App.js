@@ -44,6 +44,7 @@ import {
     clearAllSelection,
     clearSelectedDetection,
     detectionsFromView,
+    selectDetection,
 } from './redux/slices/detections/detectionsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -1389,10 +1390,12 @@ class App extends Component {
         } else if (e.detail.element.id === 'dicomImageRight') {
             view = constants.viewport.SIDE;
         }
-        //TODO redux
-        if (this.state.detections === null) {
+        if (!this.props.detections) {
             return;
         }
+        // if (this.state.detections === null) {
+        //     return;
+        // }
         let combinedDetections;
         let viewport;
         if (e.detail.element.id === 'dicomImageLeft') {
@@ -1406,11 +1409,12 @@ class App extends Component {
             // side
             combinedDetections = detectionsFromView(
                 this.props.detections,
-                constants.viewport.TOP
+                constants.viewport.SIDE
             );
             viewport = constants.viewport.TOP;
         }
         if (combinedDetections.length > 0) {
+            console.log(combinedDetections);
             const mousePos = cornerstone.canvasToPixel(e.target, {
                 x: e.detail.currentPoints.canvas.x,
                 y: e.detail.currentPoints.canvas.y,
@@ -1431,12 +1435,12 @@ class App extends Component {
 
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
-                //TODO redux
-                this.props.clearAllSelection();
-                for (const [key, detSet] of Object.entries(
-                    this.state.detections
-                )) {
-                    detSet.clearAll();
+                // Only clear if a detection is selected
+                if (
+                    this.props.selectedAlgorithm !==
+                    constants.selection.NO_SELECTION
+                ) {
+                    this.props.clearAllSelection();
                 }
                 this.setState(
                     {
@@ -1463,15 +1467,21 @@ class App extends Component {
                     this.state.cornerstoneMode ===
                         constants.cornerstoneMode.SELECTION
                 ) {
+                    console.log(this.currentSelection);
+                    console.log(clickedPos);
                     let anyDetection = this.currentSelection.selectDetection(
                         combinedDetections[clickedPos].algorithm,
-                        combinedDetections[clickedPos].detectionIndex,
+                        clickedPos,
                         viewport
                     );
-                    //TODO redux
-                    const selectedDetection = this.state.detections[
-                        this.currentSelection.getAlgorithm()
-                    ].getDataFromSelectedDetection();
+                    //TODO erroring here
+                    // cannot read property 'data' of undefined
+                    this.props.selectDetection(
+                        combinedDetections[clickedPos].algorithm,
+                        viewport,
+                        combinedDetections[clickedPos].uuid
+                    );
+                    const selectedDetection = this.props.selectedDetection;
                     for (const [key, detSet] of Object.entries(
                         this.state.detections
                     )) {
@@ -2369,6 +2379,7 @@ class App extends Component {
 const mapStateToProps = (state) => {
     const { server, detections } = state;
     return {
+        // Socket connection state
         isConnected: server.isConnected,
         isDownload: server.isDownload,
         isUpload: server.isUpload,
@@ -2376,7 +2387,10 @@ const mapStateToProps = (state) => {
         numFilesInQueue: server.numFilesInQueue,
         processingHost: server.processingHost,
         currentProcessingFile: server.currentProcessingFile,
-        detections: detections,
+        // Detections and Selection state
+        detections: detections.data,
+        selectedAlgorithm: detections.selectedAlgorithm,
+        algorithmNames: detections.algorithmNames,
     };
 };
 
@@ -2393,4 +2407,5 @@ export default connect(mapStateToProps, {
     addDetectionSet,
     clearAllSelection,
     clearSelectedDetection,
+    selectDetection,
 })(App);
