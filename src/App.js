@@ -7,7 +7,7 @@ import dicomParser from 'dicom-parser';
 import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
-import socketIOClient from 'socket.io-client';
+import io from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
@@ -26,8 +26,6 @@ import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import {
-    commandServer,
-    fileServer,
     setCommandServerConnection,
     setFileServerConnection,
     setUpload,
@@ -62,6 +60,10 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
+
+// Socket IO
+let COMMAND_SERVER = null;
+let FILE_SERVER = null;
 
 class App extends Component {
     /**
@@ -163,6 +165,16 @@ class App extends Component {
      * @return {type}  None
      */
     componentDidMount() {
+        // Connect socket servers
+        const hostname = window.location.hostname;
+        constants.server.FILE_SERVER_ADDRESS =
+            constants.server.PROTOCOL +
+            hostname +
+            constants.server.FILE_SERVER_PORT;
+        FILE_SERVER = io(constants.server.FILE_SERVER_ADDRESS);
+        COMMAND_SERVER = io(constants.COMMAND_SERVER);
+
+        this.props.setProcessingHost(hostname);
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -242,12 +254,6 @@ class App extends Component {
 
         this.calculateviewPortWidthAndHeight();
 
-        const hostname = window.location.hostname;
-        constants.server.FILE_SERVER_ADDRESS =
-            constants.server.PROTOCOL +
-            hostname +
-            constants.server.FILE_SERVER_PORT;
-        this.props.setProcessingHost(hostname);
         let reactObj = this;
         this.setState(
             {
@@ -263,8 +269,14 @@ class App extends Component {
                 );
             }
         );
-        this.props.setCommandServerConnection('connect');
-        this.props.setFileServerConnection('connect');
+        this.props.setCommandServerConnection({
+            action: 'connect',
+            socket: COMMAND_SERVER,
+        });
+        this.props.setFileServerConnection({
+            action: 'connect',
+            socket: FILE_SERVER,
+        });
         this.getFilesFromCommandServer();
         this.updateNumberOfFiles();
         this.setupCornerstoneJS(
@@ -433,7 +445,7 @@ class App extends Component {
      * @return {type} - Promise
      */
     async getFilesFromCommandServer() {
-        commandServer.on('img', (data) => {
+        COMMAND_SERVER.on('img', (data) => {
             this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
@@ -451,7 +463,7 @@ class App extends Component {
      * @return {type} - Promise
      */
     async updateNumberOfFiles() {
-        fileServer.on('numberOfFiles', (data) => {
+        FILE_SERVER.on('numberOfFiles', (data) => {
             if (!this.props.isFileInQueue && data > 0) {
                 const updateImageViewportTop = this.state.imageViewportTop;
                 updateImageViewportTop.style.visibility = 'visible';
@@ -476,7 +488,7 @@ class App extends Component {
      */
     async sendImageToFileServer(file) {
         this.props.setDownload(true);
-        fileServer.emit('fileFromClient', file);
+        FILE_SERVER.emit('fileFromClient', file);
     }
 
     /**
@@ -486,7 +498,7 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        commandServer.emit('fileFromClient', file);
+        COMMAND_SERVER.emit('fileFromClient', file);
     }
 
     /**
