@@ -2193,12 +2193,27 @@ class App extends Component {
         const selectedDetection = updatedDetections[
             this.currentSelection.getAlgorithm()
         ].getDataFromSelectedDetection();
-
+        let updatedStack;
         // Detection is selected
         if (selectedDetection) {
             updatedDetections[selectedDetection.algorithm].deleteDetection(
                 selectedDetection
             );
+            if (selectedDetection.view === constants.viewport.TOP) {
+                this.state.myOra.setStackBlobData(
+                    0,
+                    this.state.myOra.stackData[0].blobData.filter(
+                        (blob) => blob.size !== selectedDetection.blobData.size
+                    )
+                );
+            } else if (selectedDetection.view === constants.viewport.SIDE) {
+                this.state.myOra.setStackBlobData(
+                    1,
+                    this.state.myOra.stackData[1].blobData.filter(
+                        (blob) => blob.size !== selectedDetection.blobData.size
+                    )
+                );
+            }
 
             // Remove empty DetectionSet
             if (updatedDetections[selectedDetection.algorithm].isEmpty()) {
