@@ -337,4 +337,16 @@ export default class Utils {
     static inRange(value, min, max) {
         return (value - min) * (value - max) <= 0;
     }
+
+    /**
+     * calculateZoomLevel - Computes zoom level for CornerstoneJS viewport based on the viewport's width.
+     *
+     * @param {number} width - Viewport's width
+     */
+    static calculateZoomLevel(width) {
+        return (
+            (constants.viewportStyle.ZOOM * parseInt(width, 10)) /
+            constants.viewportStyle.REF_VIEWPORT_WIDTH
+        );
+    }
 }

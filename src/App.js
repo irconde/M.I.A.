@@ -141,6 +141,7 @@ class App extends Component {
         this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
             this
         );
+        this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
@@ -283,6 +284,7 @@ class App extends Component {
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
+        this.recalculateZoomLevel();
     }
 
     /**
@@ -306,6 +308,35 @@ class App extends Component {
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.sideMenuWidth +
             constants.RESOLUTION_UNIT;
+    }
+
+    /**
+     * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
+     *
+     * @param  None
+     * @returns {type} None
+     */
+    recalculateZoomLevel() {
+        let canvasElements = document.getElementsByClassName(
+            'cornerstone-canvas'
+        );
+        let multipleViewports = canvasElements.length > 1;
+        const newZoomLevelTop = Utils.calculateZoomLevel(
+            canvasElements[0].style.width
+        );
+        const newZoomLevelSide = multipleViewports
+            ? Utils.calculateZoomLevel(canvasElements[1].style.width)
+            : 0;
+        const updateImageViewportTop = this.state.imageViewportTop;
+        const updateImageViewportSide = this.state.imageViewportSide;
+        updateImageViewportTop.scale = newZoomLevelTop;
+        updateImageViewportSide.scale = newZoomLevelSide;
+        this.setState({
+            zoomLevelTop: newZoomLevelTop,
+            zoomLevelSide: newZoomLevelSide,
+            imageViewportTop: updateImageViewportTop,
+            imageViewportSide: updateImageViewportSide,
+        });
     }
 
     componentWillUnmount() {
@@ -369,7 +400,6 @@ class App extends Component {
      */
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
-
         if (this.state.displaySelectedBoundingBox === true) {
             for (const [key, detectionSet] of Object.entries(
                 this.state.detections
