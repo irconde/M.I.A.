@@ -85,7 +85,7 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
      * @param {string} label New label passed up from `LabelList` component
      */
     const submitFromList = (label) => {
-        onLabelChange(label);
+        onLabelChange(label.toUpperCase());
         setIsListOpen(false);
     };
     /**
@@ -96,7 +96,7 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
      */
     const submitFromInput = (e) => {
         if (e.key === 'Enter') {
-            onLabelChange(newLabel);
+            onLabelChange(newLabel.toUpperCase());
             setNewLabel('');
         }
     };
@@ -112,7 +112,7 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
                         className="newLabelInput"
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
+                        onChange={(e) => setNewLabel(e.target.value.toUpperCase())}
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
                         ref={inputField}
