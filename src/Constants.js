@@ -80,5 +80,4 @@ export const commonDetections = {
 export const OPERATOR = 'OPERATOR';
 export const BOUNDING_BOX_AREA_THRESHOLD = 10;
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
-export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
 export const ALGORTIHM = 'Algorithm';
