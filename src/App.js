@@ -1564,7 +1564,7 @@ class App extends Component {
                 data[0].class,
                 data[0].confidence,
                 true,
-                (data[0].algorithm).toUpperCase(),
+                data[0].algorithm,
                 viewport === this.state.imageViewportTop
                     ? constants.viewport.TOP
                     : constants.viewport.SIDE,
