@@ -112,7 +112,9 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
                         className="newLabelInput"
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
+                        onChange={(e) =>
+                            setNewLabel(e.target.value.toUpperCase())
+                        }
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
                         ref={inputField}

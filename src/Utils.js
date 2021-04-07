@@ -55,7 +55,7 @@ export default class Utils {
      * @return {type}                 resulting string to be used as detection label
      */
     static formatDetectionLabel(objectClass, confidenceLevel) {
-        return objectClass + ' · ' + confidenceLevel + '%';
+        return objectClass.toUpperCase() + ' · ' + confidenceLevel + '%';
     }
 
     /**
