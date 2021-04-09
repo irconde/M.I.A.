@@ -349,4 +349,15 @@ export default class Utils {
             constants.viewportStyle.REF_VIEWPORT_WIDTH
         );
     }
+
+    /**
+     * truncateString - Truncate a given string.
+     *
+     * @param {string} originalString - original string value
+     * @param {number} numberOfChars - target maximum number of chars in string
+     */
+    static truncateString(originalString, numberOfChars) {
+        if (originalString.length <= numberOfChars) return originalString;
+        return originalString.substring(0, numberOfChars) + '...';
+    }
 }
