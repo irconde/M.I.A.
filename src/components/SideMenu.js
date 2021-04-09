@@ -155,7 +155,7 @@ class SideMenu extends Component {
                 algorithm: detectionSet.algorithm,
                 data: detectionSet.data,
                 selected: detectionSet.selected,
-                visibility: detectionSet.visibility,
+                visibility: detectionSet.visible,
             });
         }
         // Checking to see if there is any data in myDetections
