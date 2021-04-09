@@ -1,7 +1,7 @@
 import * as constants from '../../../../Constants';
 import './typedef';
 import cloneDeep from 'lodash.clonedeep';
-import { selectDetection } from './Detection';
+import { selectDetection, updateDetectionLabel } from './Detection';
 
 /*
  * Utility funcitons for the `DetectionSet` object
@@ -109,9 +109,9 @@ export function clearAll(detectionSet) {
             const newView = {};
             newView[view] = data.map((detection) => {
                 return {
+                    ...detection,
                     selected: false,
                     updatingDetection: false,
-                    ...detection,
                 };
             });
 
@@ -164,27 +164,29 @@ export function addDetectionToSet(detectionSet, detection) {
 /**
  * Delete detection from detectionSet and update detection counts
  * @param {DetectionSet} detectionSet detectionSet that contains detection
- * @param {Detection} detection detection to be deleted
+ * @param {string} view view where Detection is rendered
+ * @param {string} uuid identifier for Detection
+ * @returns {DetectionSet} updated DetectionSet
  */
-export function deleteDetectionFromSet(detectionSet, detection) {
-    const viewport = detection.view;
-    const uuid = detection.uuid;
+export function deleteDetectionFromSet(detectionSet, view, uuid) {
     const updatedDetectionSet = cloneDeep(detectionSet);
 
     // Remove detection by filtering by its uuid
-    const filterOut = updatedDetectionSet.data[viewport].filter((detec) => {
+    const filterOut = updatedDetectionSet.data[view].filter((detec) => {
         detec.uuid !== uuid;
     });
-    updatedDetectionSet.data[viewport] = filterOut;
+    updatedDetectionSet.data[view] = filterOut;
 
     // Update detection counts
-    if (viewport === constants.viewport.TOP) {
+    if (view === constants.viewport.TOP) {
         updatedDetectionSet.numTopDetections =
-            updatedDetectionSet.data[viewport].length;
+            updatedDetectionSet.data[view].length;
     } else {
         updatedDetectionSet.numSideDetections =
-            updatedDetectionSet.data[viewport].length;
+            updatedDetectionSet.data[view].length;
     }
+
+    return updatedDetectionSet;
 }
 
 /**
@@ -240,6 +242,8 @@ export function selectDetectionInSet(detectionSet, view, uuid) {
         const selectedDetection = selectDetection(
             updatedDetectionSet.data[view][updatedDetectionIndex]
         );
+        updatedDetectionSet.selected = true;
+        updatedDetectionSet.selectedViewport = selectedDetection.view;
         updatedDetectionSet.selectedDetectionIndex = updatedDetectionIndex;
         updatedDetectionSet.selectedDetection = selectedDetection;
         updatedDetectionSet.data[view][
@@ -251,4 +255,73 @@ export function selectDetectionInSet(detectionSet, view, uuid) {
 
     // There was an invalid parameter, no detection found
     return null;
+}
+
+/**
+ * Gets all unique class names from a DetectionSet
+ * @param {DetectionSet} detectionSet to query
+ * @returns {Array<string>} array of unique class names
+ */
+export function getClassNames(detectionSet) {
+    let classNames = [];
+    for (const detectionList of Object.values(detectionSet.data)) {
+        detectionList.forEach((detection) => {
+            if (
+                !classNames.find(
+                    (existingClass) => existingClass === detection.class
+                )
+            ) {
+                classNames.push(detection.class);
+            }
+        });
+    }
+
+    return classNames;
+}
+
+/**
+ * Sets all non-selected Detections in a DetectionSet as secondary for rendering the boundingBoxes
+ * @param {DetectionSet} detectionSet
+ * @returns {DetectionSet} Updated DetectionSet
+ */
+export function setLowerOpacity(detectionSet) {
+    const updatedDetectionSet = cloneDeep(detectionSet);
+    const selectedDetectionUuid = updatedDetectionSet.selectedDetection
+        ? updatedDetectionSet.selectedDetection.uuid
+        : null;
+    updatedDetectionSet.lowerOpacity = true;
+    for (const detectionList of Object.values(detectionSet.data)) {
+        detectionList.forEach((detection) => {
+            if (detection.uuid !== selectedDetectionUuid) {
+                detection.lowerOpacity = true;
+            }
+        });
+    }
+
+    return updatedDetectionSet;
+}
+
+/**
+ * Update the label for a Detection in a DetectionSet
+ * @param {DetectionSet} detectionSet
+ * @param {string} uuid uuid for Detection to update
+ * @param {string} view viewport where Detection is rendered
+ * @param {string} newLabel
+ * @returns {DetectionSet} updated DetectionSet
+ */
+export function updateDetectionLabelInSet(detectionSet, uuid, view, newLabel) {
+    const updatedDetectionSet = cloneDeep(detectionSet);
+
+    const ind = updatedDetectionSet.data[view].findIndex(
+        (detection) => detection.uuid === uuid
+    );
+
+    if (ind !== -1) {
+        const updatedDetection = updateDetectionLabel(
+            updatedDetectionSet.data[view][ind],
+            newLabel
+        );
+        updatedDetectionSet.data[view][ind] = updatedDetection;
+        return updatedDetectionSet;
+    }
 }
