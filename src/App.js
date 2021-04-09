@@ -1420,6 +1420,12 @@ class App extends Component {
                 }
             }
 
+            if (
+                this.state.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION
+            )
+                return;
+
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 for (const [key, detSet] of Object.entries(

@@ -198,7 +198,7 @@ export default class DetectionSet {
         if (this.data.side !== undefined && this.data.top.length > 0) {
             for (let i = 0; i < this.data.side.length; i++) {
                 this.data.side[i].selected = bool;
-                this.data.top[i].updatingDetection = false;
+                this.data.side[i].updatingDetection = false;
             }
         }
         this.selectedDetection = undefined;
