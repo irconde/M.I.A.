@@ -217,7 +217,7 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.top.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.validation === undefined) {
+                            if (value.validation === null) {
                                 detectionColor = 'black';
                             } else if (value.validation === false) {
                                 detectionColor =
@@ -261,7 +261,7 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.side.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.validation === undefined) {
+                            if (value.validation === null) {
                                 detectionColor = 'black';
                             } else if (value.validation === false) {
                                 detectionColor =
