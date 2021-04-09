@@ -40,7 +40,6 @@ body {
     width: 44%;
     height: 100vh;
     top: 0;
-    left: 285px;
     position: absolute;
 }
 
@@ -88,6 +87,7 @@ body {
     background-color: #1f1f1f;
     overflow: hidden;
     font-size: 10pt;
+    right: 0;
 }
 
 .treeview > .toggle {

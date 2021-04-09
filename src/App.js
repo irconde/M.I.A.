@@ -294,20 +294,20 @@ class App extends Component {
      * @returns {type} None
      */
     calculateviewPortWidthAndHeight() {
-        document.getElementsByClassName('twoViewportsSide')[0].style.left =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.sideMenuWidth +
-            constants.RESOLUTION_UNIT;
         document.getElementsByClassName('twoViewportsSide')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById('verticalDivider').style.left =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.sideMenuWidth +
-            constants.RESOLUTION_UNIT;
+        document.getElementById(
+            'verticalDivider'
+        ).style.left = document.getElementsByClassName(
+            'twoViewportsTop'
+        )[0].style.width;
+        document.getElementsByClassName('twoViewportsSide')[0].style.left =
+            document.getElementsByClassName('twoViewportsTop')[0].style.width +
+            document.getElementById('verticalDivider').style.width;
     }
 
     /**
