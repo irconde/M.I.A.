@@ -6,7 +6,7 @@
  * @property {Array<Array<number>>} maskBitmap 2D array of bitmap data
  * @property {boolean} selected is detection selected by user
  * @property {boolean} visible is detection visible on screen
- * @property {string} className description of detection object
+ * @property {string} class description of detection object
  * @property {number} confidence confidence of algorithm in identifying an object
  * @property {boolean | undefined} validation has user finished validating detection
  * @property {boolean} isValidated has detection been validated by user
