@@ -1,4 +1,5 @@
 import * as constants from '../../../../Constants';
+import Utils from '../../../../Utils';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
 import './typedef';
@@ -99,6 +100,21 @@ export function validate(detection, feedback) {
 export function selectDetection(detection) {
     const updatedDetection = detection;
     updatedDetection.selected = true;
+    updatedDetection.updatingDetection = true;
+
+    return updatedDetection;
+}
+
+/**
+ * Update a Detection's label
+ * @param {Detection} detection
+ * @param {string} newLabel
+ * @returns {Detection} updated Detection
+ */
+export function updateDetectionLabel(detection, newLabel) {
+    const updatedDetection = detection;
+    detection.class = newLabel;
+    detection.color = Utils.getRandomColor(newLabel);
 
     return updatedDetection;
 }
