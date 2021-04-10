@@ -128,8 +128,8 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
                         }}
                         direction={
                             isListOpen
-                                ? arrowOrientation.DOWN
-                                : arrowOrientation.UP
+                                ? arrowOrientation.UP
+                                : arrowOrientation.DOWN
                         }
                         color={constants.colors.WHITE}
                     />
