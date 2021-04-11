@@ -23,7 +23,7 @@ const FABContainer = styled.div`
     border: 1px solid #414141;
     border-radius: 60px;
     display: flex;
-    box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.8);
+    box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
     opacity: ${(props) => (props.fabOpacity ? '100%' : '38%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
 
