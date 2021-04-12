@@ -38,18 +38,21 @@ import {
     setCurrentProcessingFile,
 } from './redux/slices/server/serverSlice';
 import {
+    resetDetections,
     addDetection,
     addDetectionSet,
     areDetectionsValidated,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,
+    selectDetectionSet,
     getDetectionLabels,
     getDetectionColor,
     getDetectionsFromView,
     updateDetection,
     editDetectionLabel,
     deleteDetection,
+    validateDetections,
 } from './redux/slices/detections/detectionsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -651,9 +654,7 @@ class App extends Component {
                                                     this.state.imageViewportTop
                                                 );
                                             }
-                                            //TODO redux: init not needed, just delete
-                                            this.state.detections = {};
-                                            this.currentSelection.availableAlgorithms = [];
+                                            this.props.resetDetections();
                                             this.loadAndViewImage();
                                         }
                                     );
@@ -682,10 +683,8 @@ class App extends Component {
                     this.setState({
                         algorithm: null,
                     });
-                    //TODO redux
-                    // let validationCompleted = areDetectionsValidated(this.props.detections)
-                    let validationCompleted = this.validationCompleted();
-                    console.log();
+                    this.props.validateDetections();
+                    let validationCompleted = false;
                     const stackXML = document.implementation.createDocument(
                         '',
                         '',
@@ -724,7 +723,7 @@ class App extends Component {
                             // TODO redux
                             // Loop through each detection and only the top view of the detection
                             for (const [key, detectionSet] of Object.entries(
-                                this.state.detections
+                                this.props.detections
                             )) {
                                 if (detectionSet.data.top !== undefined) {
                                     for (
@@ -762,7 +761,7 @@ class App extends Component {
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
                             for (const [key, detectionSet] of Object.entries(
-                                this.state.detections
+                                this.props.detections
                             )) {
                                 if (detectionSet.data.side !== undefined) {
                                     for (
@@ -815,10 +814,10 @@ class App extends Component {
                     );
                     newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
                         this.sendImageToCommandServer(oraBlob).then((res) => {
+                            this.props.resetDetections();
                             this.resetSelectedDetectionBoxes(e);
                             this.setState({
                                 selectedFile: null,
-                                //isUpload: false,
                                 displayNext: false,
                             });
                             this.props.setUpload(false);
@@ -966,7 +965,6 @@ class App extends Component {
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
-        // self.state.detections = {};
         var today = new Date();
         var dd = String(today.getDate()).padStart(2, '0');
         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -1729,80 +1727,37 @@ class App extends Component {
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
     onMenuDetectionSelected(detection, e) {
-        const prevState = this.state;
-        const updatedDetections = this.state.detections;
-        updatedDetections[detection.algorithm].selectedDetection = detection;
-        this.setState({ detections: updatedDetections });
-        const viewportInfo = Utils.getDataFromViewport(
-            detection.view,
-            document
-        );
-
-        this.setState(
-            {
-                displaySelectedBoundingBox: true,
-                cornerstoneMode: detection.selected
-                    ? constants.cornerstoneMode.EDITION
-                    : constants.cornerstoneMode.SELECTION,
-                isDetectionContextVisible: detection.selected,
-            },
-            () => {
-                this.resetCornerstoneTool();
-                if (detection.selected === true) {
-                    for (const [key, detSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        if (detection.algorithm !== detSet.algorithm) {
-                            detSet.clearAll();
-                        } else {
-                            if (detSet.data.top !== undefined) {
-                                detSet.data.top.forEach((det) => {
-                                    if (det.uuid !== detection.uuid) {
-                                        det.selected = false;
-                                        det.updatingDetection = false;
-                                    }
-                                });
-                            }
-                            if (detSet.data.side !== undefined) {
-                                detSet.data.side.forEach((det) => {
-                                    if (det.uuid !== detection.uuid) {
-                                        det.selected = false;
-                                        det.updatingDetection = false;
-                                    }
-                                });
-                            }
-                        }
-                        detSet.lowerOpacity = true;
-                    }
-                    this.currentSelection.selectDetection(
-                        detection.algorithm,
-                        detection.detectionIndex,
-                        detection.view
-                    );
+        console.log(e);
+        // Selecting a Detection from Selection mode
+        if (!this.props.selectedDetection) {
+            this.props.selectDetection({
+                algorithm: detection.algorithm,
+                uuid: detection.uuid,
+                view: detection.view,
+            });
+            this.setState(
+                {
+                    displaySelectedBoundingBox: true,
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    isDetectionContextVisible: true,
+                },
+                () => {
+                    this.onDetectionSelected(e);
                     this.renderDetectionContextMenu(e);
-                } else {
-                    for (const [key, detSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        detSet.clearAll();
-                    }
-                    this.setState(
-                        {
-                            editionMode: null,
-                            isFABVisible: true,
-                            detectionContextPosition: {
-                                top: 0,
-                                left: 0,
-                            },
-                        },
-                        () => {
-                            this.appUpdateImage();
-                        }
-                    );
                 }
-                this.onDetectionSelected(e);
-            }
-        );
+            );
+        }
+        // Another Detection is selected and user is in Edition mode
+        else {
+            this.props.selectDetection({
+                algorithm: detection.algorithm,
+                uuid: detection.uuid,
+                view: detection.view,
+            });
+            this.onDetectionSelected(e);
+            this.resetCornerstoneTool();
+            this.renderDetectionContextMenu(e);
+        }
     }
 
     /**
@@ -2125,7 +2080,9 @@ class App extends Component {
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
-                        onDetectionSelected={this.onMouseClicked}
+                        setDetectionVisibility={this.props.updateDetection}
+                        onDetectionSetSelected={this.props.selectDetectionSet}
+                        onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
                         enableNextButton={
                             !this.state.displaySelectedBoundingBox &&
@@ -2196,11 +2153,15 @@ export default connect(mapStateToProps, {
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,
+    resetDetections,
+    updateDetection,
     addDetection,
     addDetectionSet,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,
+    selectDetectionSet,
     editDetectionLabel,
     deleteDetection,
+    validateDetections,
 })(App);
