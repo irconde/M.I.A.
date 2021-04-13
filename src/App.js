@@ -1991,6 +1991,24 @@ class App extends Component {
                 }
             );
         }
+
+        this.clearDetectionset(this.state.detections);
+    }
+
+    /**
+     * 
+     * Method invoked to clear detectionset
+     * 
+     */
+    clearDetectionset(listOfDetections) {
+
+        for (const [key, detectionSet] of Object.entries(
+            listOfDetections
+        )) {
+
+            detectionSet.clearAll();
+        }
+
     }
 
     /**
@@ -1999,7 +2017,7 @@ class App extends Component {
      * @param {none} None
      */
     onPolygonMaskSelected() {
-        //TODO
+        this.clearDetectionset(this.state.detections);
     }
 
     /**
