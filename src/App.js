@@ -1899,7 +1899,7 @@ class App extends Component {
 
         this.setState(
             {
-                displaySelectedBoundingBox: true,
+                displaySelectedBoundingBox: detection.selected,
                 cornerstoneMode: detection.selected
                     ? constants.cornerstoneMode.EDITION
                     : constants.cornerstoneMode.SELECTION,
