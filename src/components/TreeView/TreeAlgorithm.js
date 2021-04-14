@@ -52,6 +52,7 @@ class TreeAlgorithm extends Component {
         myKey: PropTypes.number.isRequired,
         updateImage: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
+        updateDetectionVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -248,6 +249,9 @@ class TreeAlgorithm extends Component {
                                     algorithmVisible={
                                         this.props.algorithm.visibility
                                     }
+                                    updateDetectionVisibility={
+                                        this.props.updateDetectionVisibility
+                                    }
                                 />
                             );
                         })
@@ -291,6 +295,9 @@ class TreeAlgorithm extends Component {
                                     }
                                     algorithmVisible={
                                         this.props.algorithm.visibility
+                                    }
+                                    updateDetectionVisibility={
+                                        this.props.updateDetectionVisibility
                                     }
                                 />
                             );

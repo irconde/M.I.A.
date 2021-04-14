@@ -98,6 +98,11 @@ const detectionsSlice = createSlice({
             const { payload } = action;
 
             if (state.data[payload.algorithm]) {
+                // Since this property typically only holds one Detection,
+                // just setting it the same as the algorithm seems the most logical
+                state.selectedDetection = payload.algorithm;
+                state.selectedAlgorithm = payload.algorithm;
+
                 state.algorithmNames.forEach((algo) => {
                     if (algo === payload.algorithm) {
                         state.data[algo] = DetectionSetUtil.selectDetectionSet(
@@ -106,7 +111,9 @@ const detectionsSlice = createSlice({
                     }
                     // Clear selection on other DetectionSets
                     else {
-                        state.data[algo].selected = false;
+                        state.data[algo] = DetectionSetUtil.setLowerOpacity(
+                            state.data[algo]
+                        );
                     }
                 });
             }
@@ -266,6 +273,33 @@ const detectionsSlice = createSlice({
                 );
             });
         },
+
+        // Update visibility on a DetectionSet
+        // action payload should contain:
+        // {string} algorithm - Name of algorithm for DetectionSet
+        // {boolean} isVisible - whether the DetectionSet is visible or not
+        updateDetectionSetVisibility: (state, action) => {
+            try {
+                const { payload } = action;
+
+                const detectionSet = state.data[payload.algorithm];
+
+                if (!detectionSet) {
+                    throw new Error(
+                        `DetectionSet visibility not updated. Check provided algorithm: ${payload.algorithm}`
+                    );
+                }
+
+                const updatedDetectionSet = DetectionSetUtil.updateDetectionSetVisibility(
+                    detectionSet,
+                    payload.isVisible
+                );
+
+                state.data[payload.algorithm] = updatedDetectionSet;
+            } catch (error) {
+                console.error(error);
+            }
+        },
     },
 });
 
@@ -346,6 +380,7 @@ export const {
     editDetectionLabel,
     deleteDetection,
     validateDetections,
+    updateDetectionSetVisibility,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

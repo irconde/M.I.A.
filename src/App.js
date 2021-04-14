@@ -54,6 +54,7 @@ import {
     editDetectionLabel,
     deleteDetection,
     validateDetections,
+    updateDetectionSetVisibility,
 } from './redux/slices/detections/detectionsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -173,6 +174,12 @@ class App extends Component {
         this.editPolygonMask = this.editPolygonMask.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
         this.updateDetectionVisibility = this.updateDetectionVisibility.bind(
+            this
+        );
+        this.updateDetectionSetVisibility = this.updateDetectionSetVisibility.bind(
+            this
+        );
+        this.onMenuDetectionSetSelected = this.onMenuDetectionSetSelected.bind(
             this
         );
     }
@@ -1201,9 +1208,11 @@ class App extends Component {
      * @return {type}         None
      */
     renderDetections(data, context) {
+        console.log(context);
         if (!data) {
             return;
         }
+        console.log(data);
         const B_BOX_COORDS = 4;
         let detectionList;
         let selectedViewport;
@@ -1215,12 +1224,16 @@ class App extends Component {
             }
             selectedViewport = constants.viewport.TOP;
             detectionList = getDetectionsFromView(data, selectedViewport);
+            console.log('top');
+            console.log(detectionList);
             if (
                 context.canvas.offsetParent.id === 'dicomImageRight' &&
                 this.state.singleViewport === false
             ) {
+                console.log('side');
                 selectedViewport = constants.viewport.SIDE;
                 detectionList = getDetectionsFromView(data, selectedViewport);
+                console.log(detectionList);
             }
             if (detectionList === undefined) {
                 return;
@@ -1382,7 +1395,10 @@ class App extends Component {
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
-                if (this.props.selectedDetection) {
+                if (
+                    this.props.selectedDetection ||
+                    this.props.selectedAlgorithm
+                ) {
                     this.props.clearAllSelection();
                 }
                 this.setState(
@@ -1425,6 +1441,7 @@ class App extends Component {
                         () => {
                             this.onDetectionSelected(e);
                             this.renderDetectionContextMenu(e);
+                            this.appUpdateImage();
                         }
                     );
                 } else if (
@@ -2047,6 +2064,11 @@ class App extends Component {
         );
     }
 
+    /**
+     * Update visibility of a single Detection
+     * @param {Detection} detection
+     * @param {boolean} isVisible
+     */
     updateDetectionVisibility(detection, isVisible) {
         this.props.updateDetection({
             reference: {
@@ -2058,6 +2080,25 @@ class App extends Component {
                 visible: isVisible,
             },
         });
+    }
+
+    /**
+     * Update visibility of DetectionSets and their Detections
+     * @param {string} algorithm
+     * @param {boolean} isVisible
+     */
+    updateDetectionSetVisibility(algorithm, isVisible) {
+        this.props.updateDetectionSetVisibility({
+            algorithm: algorithm,
+            isVisible: isVisible,
+        });
+
+        this.appUpdateImage();
+    }
+
+    onMenuDetectionSetSelected(algorithm) {
+        this.props.selectDetectionSet(algorithm);
+        this.appUpdateImage();
     }
 
     render() {
@@ -2102,7 +2143,10 @@ class App extends Component {
                         updateDetectionVisibility={
                             this.updateDetectionVisibility
                         }
-                        onDetectionSetSelected={this.props.selectDetectionSet}
+                        updateDetectionSetVisibility={
+                            this.updateDetectionSetVisibility
+                        }
+                        onDetectionSetSelected={this.onMenuDetectionSetSelected}
                         onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
                         enableNextButton={
@@ -2186,4 +2230,5 @@ export default connect(mapStateToProps, {
     editDetectionLabel,
     deleteDetection,
     validateDetections,
+    updateDetectionSetVisibility,
 })(App);
