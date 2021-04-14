@@ -392,4 +392,23 @@ export default class DetectionSetUtil {
         // At least one property in props did not exist on the DetectionSet
         return null;
     }
+
+    /**
+     * Update the visibility of a DetectionSet and its detections
+     * @param {DetectionSet} detectionSet
+     * @param {boolean} isVisible whether the DetectionSet is visible on screen
+     * @returns {DetectionSet} updated DetectionSet
+     */
+    static updateDetectionSetVisibility(detectionSet, isVisible) {
+        const updatedDetectionSet = cloneDeep(detectionSet);
+        updatedDetectionSet.visible = isVisible;
+
+        for (const detectionList of Object.values(updatedDetectionSet.data)) {
+            detectionList.forEach((detection) => {
+                detection.visible = isVisible;
+            });
+        }
+
+        return updatedDetectionSet;
+    }
 }
