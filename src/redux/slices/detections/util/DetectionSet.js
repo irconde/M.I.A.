@@ -363,4 +363,33 @@ export default class DetectionSetUtil {
         }
         return updatedDetectionSet;
     }
+
+    /**
+     * Modify a DetectionSet in a way not covered by other Util methods
+     * @param {DetectionSet} detectionSet
+     * @param {object} props key/value pairs to update on DetectionSet
+     * @returns {?DetectionSet} updated DetectionSet or null if any properties in `props` object did not exist on DetectionSet
+     */
+    static updateDetectionSet(detectionSet, props) {
+        let allPropsExist = true;
+        const updatedDetectionSet = cloneDeep(detectionSet);
+
+        // Loop over props and update DetectionSet if key exists
+        for (const key in props) {
+            if (
+                Object.prototype.hasOwnProperty.call(updatedDetectionSet, key)
+            ) {
+                updatedDetectionSet[key] = props[key];
+            } else {
+                allPropsExist = false;
+            }
+        }
+
+        if (allPropsExist) {
+            return updatedDetectionSet;
+        }
+
+        // At least one property in props did not exist on the DetectionSet
+        return null;
+    }
 }
