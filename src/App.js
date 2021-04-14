@@ -48,6 +48,7 @@ import {
     getDetectionColor,
     getDetectionsFromView,
     updateDetection,
+    updatedDetectionSet,
     editDetectionLabel,
     deleteDetection,
     validateDetections,
@@ -174,7 +175,9 @@ class App extends Component {
         this.editBoundingBox = this.editBoundingBox.bind(this);
         this.editPolygonMask = this.editPolygonMask.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.getAllLabels = this.getAllLabels.bind(this);
+        this.updateDetectionVisibility = this.updateDetectionVisibility.bind(
+            this
+        );
     }
 
     /**
@@ -1609,7 +1612,30 @@ class App extends Component {
                     );
                 }
             } else {
-                // arsitenarstien
+                // Updating existing Detection's bounding box
+                this.props.updateDetection({
+                    reference: {
+                        algorithm: data[0].algorithm,
+                        uuid: data[0].uuid,
+                        view: data[0].view,
+                    },
+                    update: {
+                        boundingBox: coords,
+                    },
+                });
+                this.setState(
+                    {
+                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                        isDetectionContextVisible: false,
+                        displaySelectedBoundingBox: false,
+                        isFABVisible: true,
+                    },
+                    () => {
+                        this.props.clearAllSelection();
+                        this.resetCornerstoneTool();
+                        this.appUpdateImage();
+                    }
+                );
             }
             if (
                 this.state.cornerstoneMode ===
@@ -1656,11 +1682,7 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION ||
             sideMenuUpdate === true
         ) {
-            for (const [key, detectionSet] of Object.entries(
-                this.state.detections
-            )) {
-                detectionSet.clearAll();
-            }
+            this.props.clearAllSelection();
             this.setState(
                 {
                     displaySelectedBoundingBox: false,
@@ -1729,6 +1751,7 @@ class App extends Component {
                         renderColor: getDetectionColor(detectionData),
                         confidence: detectionData.confidence,
                         updatingDetection: true,
+                        view: detectionData.view,
                     };
                     if (view === constants.viewport.TOP) {
                         cornerstoneTools.addToolState(
@@ -1812,7 +1835,7 @@ class App extends Component {
                 }
             );
         }
-        // Another Detection is selected and user is in Edition mode
+        // Another Detection is selected
         else {
             this.props.selectDetection({
                 algorithm: detection.algorithm,
@@ -2144,21 +2167,17 @@ class App extends Component {
         );
     }
 
-    /**
-     * Calls `DetectionSet` method `getClassNames` for each algorithm in detections state
-     * @returns {Array<string>} array of all unique class names
-     */
-    getAllLabels() {
-        let results = [];
-        const { detections } = this.state;
-        for (const algo in detections) {
-            const labels = detections[algo].getClassNames();
-            const uniqueLabels = labels.filter(
-                (label) => !results.find((existing) => existing === label)
-            );
-            results = [...results, ...uniqueLabels];
-        }
-        return results;
+    updateDetectionVisibility(detection, isVisible) {
+        this.props.updateDetection({
+            reference: {
+                algorithm: detection.algorithm,
+                uuid: detection.uuid,
+                view: detection.view,
+            },
+            update: {
+                visible: isVisible,
+            },
+        });
     }
 
     render() {
@@ -2200,7 +2219,9 @@ class App extends Component {
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
-                        setDetectionVisibility={this.props.updateDetection}
+                        updateDetectionVisibility={
+                            this.updateDetectionVisibility
+                        }
                         onDetectionSetSelected={this.props.selectDetectionSet}
                         onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
@@ -2275,6 +2296,7 @@ export default connect(mapStateToProps, {
     setCurrentProcessingFile,
     resetDetections,
     updateDetection,
+    updatedDetectionSet,
     addDetection,
     addDetectionSet,
     clearAllSelection,
