@@ -52,7 +52,8 @@ export const detectionContextStyle = {
 
 export const viewportStyle = {
     ZOOM: 1.2,
-    ORIGIN: 25,
+    ORIGIN: 0,
+    REF_VIEWPORT_WIDTH: 753,
 };
 
 export const RESOLUTION_UNIT = 'px';
@@ -79,5 +80,5 @@ export const commonDetections = {
 export const OPERATOR = 'OPERATOR';
 export const BOUNDING_BOX_AREA_THRESHOLD = 10;
 export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
-export const ENABLE_NEXT = process.env.REACT_APP_ENABLE_NEXT;
 export const ALGORTIHM = 'Algorithm';
+export const MAX_LABEL_LENGTH = 10;

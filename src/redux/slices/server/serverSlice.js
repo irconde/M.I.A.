@@ -1,14 +1,4 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import io from 'socket.io-client';
-import { COMMAND_SERVER, server } from '../../../Constants';
-
-// Socket.io clients for command & file server
-export const commandServer = io(COMMAND_SERVER, { autoConnect: false });
-export const fileServer = io(server.FILE_SERVER_ADDRESS, {
-    autoConnect: false,
-});
-
-// Redux Slice
 const serverSlice = createSlice({
     name: 'server',
     initialState: {
@@ -45,23 +35,23 @@ const serverSlice = createSlice({
         setCommandServerConnection: (state, action) => {
             const { payload } = action;
             // action payload is either connect or disconnect
-            if (payload.toLowerCase() === 'connect') {
-                commandServer.connect();
+            if (payload.action.toLowerCase() === 'connect') {
+                payload.socket.connect();
                 state.isConnected = true;
             } else {
-                commandServer.disconnect();
+                payload.socket.disconnect();
                 state.isConnected = false;
             }
         },
         setFileServerConnection: (state, action) => {
             const { payload } = action;
             // action payload is either connect or disconnect
-            if (payload.toLowerCase() === 'connect') {
+            if (payload.action.toLowerCase() === 'connect') {
                 //TODO: Do we want to keep track of file server connection status in the store?
                 // Currently, in `App.js` we are only updating `isConnected` for command server
-                fileServer.connect();
+                payload.socket.connect();
             } else {
-                fileServer.disconnect();
+                payload.socket.disconnect();
             }
         },
     },

@@ -55,7 +55,7 @@ export default class Utils {
      * @return {type}                 resulting string to be used as detection label
      */
     static formatDetectionLabel(objectClass, confidenceLevel) {
-        return objectClass + ' · ' + confidenceLevel + '%';
+        return objectClass.toUpperCase() + ' · ' + confidenceLevel + '%';
     }
 
     /**
@@ -336,5 +336,28 @@ export default class Utils {
      */
     static inRange(value, min, max) {
         return (value - min) * (value - max) <= 0;
+    }
+
+    /**
+     * calculateZoomLevel - Computes zoom level for CornerstoneJS viewport based on the viewport's width.
+     *
+     * @param {number} width - Viewport's width
+     */
+    static calculateZoomLevel(width) {
+        return (
+            (constants.viewportStyle.ZOOM * parseInt(width, 10)) /
+            constants.viewportStyle.REF_VIEWPORT_WIDTH
+        );
+    }
+
+    /**
+     * truncateString - Truncate a given string.
+     *
+     * @param {string} originalString - original string value
+     * @param {number} numberOfChars - target maximum number of chars in string
+     */
+    static truncateString(originalString, numberOfChars) {
+        if (originalString.length <= numberOfChars) return originalString;
+        return originalString.substring(0, numberOfChars) + '...';
     }
 }

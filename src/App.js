@@ -7,7 +7,7 @@ import dicomParser from 'dicom-parser';
 import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
-import socketIOClient from 'socket.io-client';
+import io from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
@@ -26,8 +26,6 @@ import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import {
-    commandServer,
-    fileServer,
     setCommandServerConnection,
     setFileServerConnection,
     setUpload,
@@ -82,6 +80,10 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
+
+// Socket IO
+let COMMAND_SERVER = null;
+let FILE_SERVER = null;
 
 class App extends Component {
     /**
@@ -159,6 +161,7 @@ class App extends Component {
         this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
             this
         );
+        this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
@@ -191,6 +194,16 @@ class App extends Component {
      * @return {type}  None
      */
     componentDidMount() {
+        // Connect socket servers
+        const hostname = window.location.hostname;
+        constants.server.FILE_SERVER_ADDRESS =
+            constants.server.PROTOCOL +
+            hostname +
+            constants.server.FILE_SERVER_PORT;
+        FILE_SERVER = io(constants.server.FILE_SERVER_ADDRESS);
+        COMMAND_SERVER = io(constants.COMMAND_SERVER);
+
+        this.props.setProcessingHost(hostname);
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -270,12 +283,6 @@ class App extends Component {
 
         this.calculateviewPortWidthAndHeight();
 
-        const hostname = window.location.hostname;
-        constants.server.FILE_SERVER_ADDRESS =
-            constants.server.PROTOCOL +
-            hostname +
-            constants.server.FILE_SERVER_PORT;
-        this.props.setProcessingHost(hostname);
         let reactObj = this;
         this.setState(
             {
@@ -291,14 +298,21 @@ class App extends Component {
                 );
             }
         );
-        this.props.setCommandServerConnection('connect');
-        this.props.setFileServerConnection('connect');
+        this.props.setCommandServerConnection({
+            action: 'connect',
+            socket: COMMAND_SERVER,
+        });
+        this.props.setFileServerConnection({
+            action: 'connect',
+            socket: FILE_SERVER,
+        });
         this.getFilesFromCommandServer();
         this.updateNumberOfFiles();
         this.setupCornerstoneJS(
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
+        this.recalculateZoomLevel();
     }
 
     /**
@@ -308,20 +322,49 @@ class App extends Component {
      * @returns {type} None
      */
     calculateviewPortWidthAndHeight() {
-        document.getElementsByClassName('twoViewportsSide')[0].style.left =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.sideMenuWidth +
-            constants.RESOLUTION_UNIT;
         document.getElementsByClassName('twoViewportsSide')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById('verticalDivider').style.left =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.sideMenuWidth +
-            constants.RESOLUTION_UNIT;
+        document.getElementById(
+            'verticalDivider'
+        ).style.left = document.getElementsByClassName(
+            'twoViewportsTop'
+        )[0].style.width;
+        document.getElementsByClassName('twoViewportsSide')[0].style.left =
+            document.getElementsByClassName('twoViewportsTop')[0].style.width +
+            document.getElementById('verticalDivider').style.width;
+    }
+
+    /**
+     * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
+     *
+     * @param  None
+     * @returns {type} None
+     */
+    recalculateZoomLevel() {
+        let canvasElements = document.getElementsByClassName(
+            'cornerstone-canvas'
+        );
+        let multipleViewports = canvasElements.length > 1;
+        const newZoomLevelTop = Utils.calculateZoomLevel(
+            canvasElements[0].style.width
+        );
+        const newZoomLevelSide = multipleViewports
+            ? Utils.calculateZoomLevel(canvasElements[1].style.width)
+            : 0;
+        const updateImageViewportTop = this.state.imageViewportTop;
+        const updateImageViewportSide = this.state.imageViewportSide;
+        updateImageViewportTop.scale = newZoomLevelTop;
+        updateImageViewportSide.scale = newZoomLevelSide;
+        this.setState({
+            zoomLevelTop: newZoomLevelTop,
+            zoomLevelSide: newZoomLevelSide,
+            imageViewportTop: updateImageViewportTop,
+            imageViewportSide: updateImageViewportSide,
+        });
     }
 
     componentWillUnmount() {
@@ -385,7 +428,6 @@ class App extends Component {
      */
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
-
         if (this.state.displaySelectedBoundingBox === true) {
             this.props.clearAllSelection();
             this.setState({ displaySelectedBoundingBox: false }, () => {
@@ -457,7 +499,7 @@ class App extends Component {
      * @return {type} - Promise
      */
     async getFilesFromCommandServer() {
-        commandServer.on('img', (data) => {
+        COMMAND_SERVER.on('img', (data) => {
             this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
@@ -475,7 +517,7 @@ class App extends Component {
      * @return {type} - Promise
      */
     async updateNumberOfFiles() {
-        fileServer.on('numberOfFiles', (data) => {
+        FILE_SERVER.on('numberOfFiles', (data) => {
             if (!this.props.isFileInQueue && data > 0) {
                 const updateImageViewportTop = this.state.imageViewportTop;
                 updateImageViewportTop.style.visibility = 'visible';
@@ -500,7 +542,7 @@ class App extends Component {
      */
     async sendImageToFileServer(file) {
         this.props.setDownload(true);
-        fileServer.emit('fileFromClient', file);
+        FILE_SERVER.emit('fileFromClient', file);
     }
 
     /**
@@ -510,7 +552,7 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        commandServer.emit('fileFromClient', file);
+        COMMAND_SERVER.emit('fileFromClient', file);
     }
 
     /**
@@ -704,6 +746,7 @@ class App extends Component {
                     let topCounter = 1;
                     let sideCounter = 1;
                     let stackCounter = 1;
+                    const listOfPromises = [];
                     // Loop through each stack, being either top or side currently
                     this.state.myOra.stackData.forEach((stack) => {
                         const stackElem = stackXML.createElement('stack');
@@ -725,28 +768,20 @@ class App extends Component {
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
-                            for (const [key, detectionSet] of Object.entries(
-                                this.props.detections
-                            )) {
-                                if (detectionSet.data.top !== undefined) {
-                                    for (
-                                        let j = 0;
-                                        j < detectionSet.data.top.length;
-                                        j++
-                                    ) {
+                            const topDetections = getDetectionsFromView(
+                                this.props.detections,
+                                constants.viewport.TOP
+                            );
+                            for (let j = 0; j < topDetections.length; j++) {
+                                let threatPromise = Dicos.dataToBlob(
+                                    topDetections[j],
+                                    stack.blobData[j + 1],
+                                    Date.now(),
+                                    !validationCompleted,
+                                    function (threatBlob) {
                                         newOra.file(
                                             `data/${stack.view}_threat_detection_${topCounter}.dcs`,
-                                            Dicos.dataToBlob(
-                                                detectionSet,
-                                                detectionSet.algorithm ===
-                                                    constants.OPERATOR
-                                                    ? stack.blobData[j]
-                                                    : stack.blobData[
-                                                          j + topCounter
-                                                      ],
-                                                Date.now(),
-                                                !validationCompleted
-                                            )
+                                            threatBlob
                                         );
                                         let newLayer = stackXML.createElement(
                                             'layer'
@@ -758,32 +793,25 @@ class App extends Component {
                                         stackElem.appendChild(newLayer);
                                         topCounter++;
                                     }
-                                }
+                                );
+                                listOfPromises.push(threatPromise);
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
-                            for (const [key, detectionSet] of Object.entries(
-                                this.props.detections
-                            )) {
-                                if (detectionSet.data.side !== undefined) {
-                                    for (
-                                        let j = 0;
-                                        j < detectionSet.data.side.length;
-                                        j++
-                                    ) {
+                            const sideDetections = getDetectionsFromView(
+                                this.props.detections,
+                                constants.viewport.SIDE
+                            );
+                            for (let j = 0; j < sideDetections.length; j++) {
+                                let threatPromise = Dicos.dataToBlob(
+                                    sideDetections[j],
+                                    sideDetections[j].blobData,
+                                    Date.now(),
+                                    !validationCompleted,
+                                    function (threatBlob) {
                                         newOra.file(
                                             `data/${stack.view}_threat_detection_${sideCounter}.dcs`,
-                                            Dicos.dataToBlob(
-                                                detectionSet,
-                                                detectionSet.algorithm ===
-                                                    constants.OPERATOR
-                                                    ? stack.blobData[j]
-                                                    : stack.blobData[
-                                                          j + sideCounter
-                                                      ],
-                                                Date.now(),
-                                                !validationCompleted
-                                            )
+                                            threatBlob
                                         );
                                         let newLayer = stackXML.createElement(
                                             'layer'
@@ -795,36 +823,43 @@ class App extends Component {
                                         stackElem.appendChild(newLayer);
                                         sideCounter++;
                                     }
-                                }
+                                );
+                                listOfPromises.push(threatPromise);
                             }
                         }
                         stackCounter++;
                         imageElem.appendChild(stackElem);
                     });
-                    stackXML.appendChild(imageElem);
-                    newOra.file(
-                        'stack.xml',
-                        new Blob(
-                            [
-                                prolog +
-                                    new XMLSerializer().serializeToString(
-                                        stackXML
-                                    ),
-                            ],
-                            { type: 'application/xml ' }
-                        )
-                    );
-                    newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
-                        this.sendImageToCommandServer(oraBlob).then((res) => {
-                            this.props.resetDetections();
-                            this.resetSelectedDetectionBoxes(e);
-                            this.setState({
-                                selectedFile: null,
-                                displayNext: false,
+                    const promiseOfList = Promise.all(listOfPromises);
+                    promiseOfList.then(() => {
+                        stackXML.appendChild(imageElem);
+                        newOra.file(
+                            'stack.xml',
+                            new Blob(
+                                [
+                                    prolog +
+                                        new XMLSerializer().serializeToString(
+                                            stackXML
+                                        ),
+                                ],
+                                { type: 'application/xml ' }
+                            )
+                        );
+                        newOra
+                            .generateAsync({ type: 'blob' })
+                            .then((oraBlob) => {
+                                this.sendImageToCommandServer(oraBlob).then(
+                                    (res) => {
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.setState({
+                                            selectedFile: null,
+                                            displayNext: false,
+                                        });
+                                        this.props.setUpload(false);
+                                        this.getNextImage();
+                                    }
+                                );
                             });
-                            this.props.setUpload(false);
-                            this.getNextImage();
-                        });
                     });
                 } else if (res.data.confirm === 'image-not-removed') {
                     console.log("File server couldn't remove the next image");
@@ -1064,6 +1099,7 @@ class App extends Component {
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
+                        blobData: new Blob([new Uint8Array(reader.result)]),
                     });
                 }
             });
@@ -1133,6 +1169,7 @@ class App extends Component {
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
+                            blobData: new Blob([new Uint8Array(read.result)]),
                         });
                     }
                 });
@@ -1378,6 +1415,12 @@ class App extends Component {
                 }
             }
 
+            if (
+                this.state.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION
+            )
+                return;
+
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
@@ -1503,6 +1546,31 @@ class App extends Component {
             let boundingBoxArea = Math.abs(
                 (coords[0] - coords[2]) * (coords[1] - coords[3])
             );
+            let newDetection = new Detection(
+                coords,
+                null,
+                data[0].class,
+                data[0].confidence,
+                true,
+                data[0].algorithm,
+                viewport === this.state.imageViewportTop
+                    ? constants.viewport.TOP
+                    : constants.viewport.SIDE,
+                data[0].uuid
+            );
+            const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
+                return newDetection.view === stack.view;
+            });
+            let state = this.state;
+            Dicos.detectionObjectToBlob(
+                newDetection,
+                this.state.myOra.stackData[stackIndex].blobData[0],
+                function (newBlob) {
+                    state.myOra.stackData[stackIndex].blobData.push(newBlob);
+                    newDetection.blobData = newBlob;
+                }
+            );
+
             if (data[0].updatingDetection === false) {
                 // Need to determine if updating operator or new
                 // Create new user-created detection
@@ -2059,28 +2127,50 @@ class App extends Component {
      * Invoked when user selects 'delete' option from DetectionContextMenu
      */
     deleteDetection() {
+        // Detection is selected
         if (this.props.selectedDetection) {
             this.props.deleteDetection({
                 algorithm: this.props.selectedDetection.algorithm,
                 uuid: this.props.selectedDetection.uuid,
                 view: this.props.selectedDetection.view,
             });
-        }
-        // Reset remaining DetectionSets to `un-selected` state
-        this.props.clearAllSelection();
-        this.setState(
-            {
-                isFABVisible: true,
-                isDetectionContextVisible: false,
-                isDrawingBoundingBox: false,
-                displaySelectedBoundingBox: false,
-                cornerstoneMode: constants.cornerstoneMode.SELECTION,
-            },
-            () => {
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
+            if (this.props.selectedDetection.view === constants.viewport.TOP) {
+                this.state.myOra.setStackBlobData(
+                    0,
+                    this.state.myOra.stackData[0].blobData.filter(
+                        (blob) =>
+                            blob.size !==
+                            this.props.selectedDetection.blobData.size
+                    )
+                );
+            } else if (
+                this.props.selectedDetection.view === constants.viewport.SIDE
+            ) {
+                this.state.myOra.setStackBlobData(
+                    1,
+                    this.state.myOra.stackData[1].blobData.filter(
+                        (blob) =>
+                            blob.size !==
+                            this.props.selectedDetection.blobData.size
+                    )
+                );
             }
-        );
+            // Reset remaining DetectionSets to `un-selected` state
+            this.props.clearAllSelection();
+            this.setState(
+                {
+                    isFABVisible: true,
+                    isDetectionContextVisible: false,
+                    isDrawingBoundingBox: false,
+                    displaySelectedBoundingBox: false,
+                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                },
+                () => {
+                    this.resetCornerstoneTool();
+                    this.appUpdateImage();
+                }
+            );
+        }
     }
 
     /**

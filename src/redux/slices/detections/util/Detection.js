@@ -38,6 +38,7 @@ export default class DetectionUtil {
         algorithm,
         view,
         updatingDetection = false,
+        blobData,
     }) {
         const defaultDetectionIndex = -1;
         const color = randomColor({
@@ -59,6 +60,7 @@ export default class DetectionUtil {
             uuid: uuidv4(),
             updatingDetection: updatingDetection,
             detectionIndex: defaultDetectionIndex,
+            blobData: blobData,
         };
     }
 

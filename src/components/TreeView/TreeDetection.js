@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { detectionStyle } from '../../Constants';
+import { detectionStyle, MAX_LABEL_LENGTH } from '../../Constants';
+import Utils from '../../Utils.js';
 
 class TreeDetection extends Component {
     constructor(props) {
@@ -144,7 +145,10 @@ class TreeDetection extends Component {
                         style={{
                             ...this.state.typeStyle,
                             color: textColor,
-                        }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
+                        }}>{`${Utils.truncateString(
+                        this.props.detection.class,
+                        MAX_LABEL_LENGTH
+                    )} - ${this.props.detection.confidence}%`}</span>
                     <Icons.EyeO
                         id="eye"
                         onClick={this.setVisible}
@@ -167,7 +171,10 @@ class TreeDetection extends Component {
                         style={{
                             ...this.state.typeStyle,
                             color: textColor,
-                        }}>{`${this.props.detection.class} - ${this.props.detection.confidence}%`}</span>
+                        }}>{`${Utils.truncateString(
+                        this.props.detection.class,
+                        MAX_LABEL_LENGTH
+                    )} - ${this.props.detection.confidence}%`}</span>
                     <Icons.EyeC
                         id="hidden-eye"
                         onClick={this.setVisible}

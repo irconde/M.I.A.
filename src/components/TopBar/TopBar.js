@@ -41,6 +41,7 @@ const TopBar = ({
             justifyContent: 'center',
             fontWeight: 500,
             fontSize: '10pt',
+            boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'
         },
         connectionStatusIconsContainer: {
             position: 'absolute',

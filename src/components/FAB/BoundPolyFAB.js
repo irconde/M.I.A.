@@ -17,15 +17,13 @@ const FABContainer = styled.div`
     position: absolute;
     left: ${(props) => props.leftPX};
     bottom: 5%;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    padding-top: 0.7rem;
-    padding-bottom: 0.7rem;
+    padding: 0.7rem 1.25rem;
     background-color: #313131;
     color: #fff;
     border: 1px solid #414141;
     border-radius: 60px;
     display: flex;
+    box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
     opacity: ${(props) => (props.fabOpacity ? '100%' : '38%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
 
@@ -41,16 +39,19 @@ const FABContainer = styled.div`
     &:hover {
         cursor: pointer;
     }
+
     .divider {
         height: 1.5rem;
         border-left: 1px solid #575757;
         margin-left: 1rem;
         margin-right: 1rem;
     }
+
     .fabOption {
         display: flex;
         align-items: center;
         justify-content: center;
+
         .icon {
             margin-right: 0.5rem;
         }
@@ -80,15 +81,15 @@ const BoundPolyFAB = ({
     const userScreenWidth = Utils.getScreenSize();
     let [width] = userScreenWidth;
     if (Utils.inRange(width, 0, 800)) {
-        leftPX = '36%';
+        leftPX = '5.00%';
     } else if (Utils.inRange(width, 801, 1200)) {
-        leftPX = '41.5%';
+        leftPX = '20.0%';
     } else if (Utils.inRange(width, 1201, 1500)) {
-        leftPX = '46%';
+        leftPX = '28.5%';
     } else if (Utils.inRange(width, 1501, 2000)) {
-        leftPX = '47%';
+        leftPX = '31.75%';
     } else if (Utils.inRange(width, 2001, 3000)) {
-        leftPX = '51.5%';
+        leftPX = '36.25%';
     }
 
     let fabOpacity;

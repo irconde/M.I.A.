@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../Constants';
+import Utils from '../../Utils.js';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -96,7 +97,9 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
      */
     const submitFromInput = (e) => {
         if (e.key === 'Enter') {
-            onLabelChange(newLabel);
+            onLabelChange(
+                Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
+            );
             setNewLabel('');
         }
     };
@@ -112,7 +115,9 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
                         className="newLabelInput"
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
+                        onChange={(e) =>
+                            setNewLabel(e.target.value.toUpperCase())
+                        }
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
                         ref={inputField}
@@ -123,8 +128,8 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
                         }}
                         direction={
                             isListOpen
-                                ? arrowOrientation.DOWN
-                                : arrowOrientation.UP
+                                ? arrowOrientation.UP
+                                : arrowOrientation.DOWN
                         }
                         color={constants.colors.WHITE}
                     />
