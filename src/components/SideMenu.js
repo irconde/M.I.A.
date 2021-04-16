@@ -82,6 +82,7 @@ class SideMenu extends Component {
      * @returns {type} none
      */
     updateSelectedDetection(detection, e) {
+        e.persist();
         if (detection.selected === false) {
             this.props.resetSelectedDetectionBoxes(e);
         }

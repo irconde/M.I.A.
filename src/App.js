@@ -55,6 +55,7 @@ import {
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
+    hasDetectionChanged,
 } from './redux/slices/detections/detectionsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -386,14 +387,7 @@ class App extends Component {
         this.calculateviewPortWidthAndHeight();
 
         if (this.state.displaySelectedBoundingBox === true) {
-            console.log('here');
-            //TODO redux
             this.props.clearAllSelection();
-            for (const [key, detectionSet] of Object.entries(
-                this.state.detections
-            )) {
-                detectionSet.clearAll();
-            }
             this.setState({ displaySelectedBoundingBox: false }, () => {
                 this.appUpdateImage();
             });
@@ -730,7 +724,6 @@ class App extends Component {
                         );
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
-                            // TODO redux
                             // Loop through each detection and only the top view of the detection
                             for (const [key, detectionSet] of Object.entries(
                                 this.props.detections
@@ -767,7 +760,6 @@ class App extends Component {
                                     }
                                 }
                             }
-                            //TODO redux
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
                             for (const [key, detectionSet] of Object.entries(
@@ -1166,7 +1158,6 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             this.setState({ zoomLevelTop: eventData.viewport.scale });
-            //TODO redux
             this.renderDetections(this.props.detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
@@ -1178,7 +1169,6 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             this.setState({ zoomLevelSide: eventData.viewport.scale });
-            //TODO redux
             this.renderDetections(this.props.detections, context);
         }
         // set the canvas context to the image coordinate system
@@ -1208,11 +1198,9 @@ class App extends Component {
      * @return {type}         None
      */
     renderDetections(data, context) {
-        console.log(context);
         if (!data) {
             return;
         }
-        console.log(data);
         const B_BOX_COORDS = 4;
         let detectionList;
         let selectedViewport;
@@ -1224,16 +1212,12 @@ class App extends Component {
             }
             selectedViewport = constants.viewport.TOP;
             detectionList = getDetectionsFromView(data, selectedViewport);
-            console.log('top');
-            console.log(detectionList);
             if (
                 context.canvas.offsetParent.id === 'dicomImageRight' &&
                 this.state.singleViewport === false
             ) {
-                console.log('side');
                 selectedViewport = constants.viewport.SIDE;
                 detectionList = getDetectionsFromView(data, selectedViewport);
-                console.log(detectionList);
             }
             if (detectionList === undefined) {
                 return;
@@ -1243,11 +1227,7 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
-                if (
-                    detectionList[j].visible !== true ||
-                    detectionList[j].updatingDetection === true
-                )
-                    continue;
+                if (detectionList[j].visible !== true) continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = getDetectionColor(detectionList[j]);
                 if (boundingBoxCoords.length < B_BOX_COORDS) {
@@ -1288,26 +1268,32 @@ class App extends Component {
                 this.renderDetectionMasks(detectionList[j].maskBitmap, context);
 
                 // Label rendering
-                context.fillRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.strokeRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-                context.fillText(
-                    detectionLabel,
-                    boundingBoxCoords[0] +
-                        constants.detectionStyle.LABEL_PADDING,
-                    boundingBoxCoords[1] -
-                        constants.detectionStyle.LABEL_PADDING
-                );
+                if (
+                    !detectionList[j].updatingDetection ||
+                    detectionSet.selected
+                ) {
+                    context.fillRect(
+                        boundingBoxCoords[0],
+                        boundingBoxCoords[1] - labelSize['height'],
+                        labelSize['width'],
+                        labelSize['height']
+                    );
+                    context.strokeRect(
+                        boundingBoxCoords[0],
+                        boundingBoxCoords[1] - labelSize['height'],
+                        labelSize['width'],
+                        labelSize['height']
+                    );
+                    context.fillStyle =
+                        constants.detectionStyle.LABEL_TEXT_COLOR;
+                    context.fillText(
+                        detectionLabel,
+                        boundingBoxCoords[0] +
+                            constants.detectionStyle.LABEL_PADDING,
+                        boundingBoxCoords[1] -
+                            constants.detectionStyle.LABEL_PADDING
+                    );
+                }
             }
         }
     }
@@ -1565,29 +1551,43 @@ class App extends Component {
                 }
             } else {
                 // Updating existing Detection's bounding box
-                this.props.updateDetection({
-                    reference: {
-                        algorithm: data[0].algorithm,
-                        uuid: data[0].uuid,
-                        view: data[0].view,
-                    },
-                    update: {
-                        boundingBox: coords,
-                    },
-                });
-                this.setState(
-                    {
-                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                        isDetectionContextVisible: false,
-                        displaySelectedBoundingBox: false,
-                        isFABVisible: true,
-                    },
-                    () => {
-                        this.props.clearAllSelection();
-                        this.resetCornerstoneTool();
-                        this.appUpdateImage();
-                    }
-                );
+                const { algorithm, uuid, view } = data[0];
+
+                // Only update the Detection if the boundingBox actually changes
+                if (
+                    hasDetectionChanged(
+                        this.props.detections,
+                        algorithm,
+                        view,
+                        uuid,
+                        { boundingBox: coords }
+                    )
+                ) {
+                    this.props.updateDetection({
+                        reference: {
+                            algorithm: data[0].algorithm,
+                            uuid: data[0].uuid,
+                            view: data[0].view,
+                        },
+                        update: {
+                            boundingBox: coords,
+                        },
+                    });
+                    this.setState(
+                        {
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                            isDetectionContextVisible: false,
+                            displaySelectedBoundingBox: false,
+                            isFABVisible: true,
+                        },
+                        () => {
+                            this.props.clearAllSelection();
+                            this.resetCornerstoneTool();
+                            this.appUpdateImage();
+                        }
+                    );
+                }
             }
             if (
                 this.state.cornerstoneMode ===
@@ -1767,7 +1767,6 @@ class App extends Component {
      * @param detection {Detection} - detection-related data used as reference for buttons' location
      */
     onMenuDetectionSelected(detection, e) {
-        console.log(e);
         // Selecting a Detection from Selection mode
         if (!this.props.selectedDetection) {
             this.props.selectDetection({
@@ -1789,14 +1788,26 @@ class App extends Component {
         }
         // Another Detection is selected
         else {
+            // Clear selection data in redux and tool state
+            this.props.clearAllSelection();
+            this.resetCornerstoneTool();
+
             this.props.selectDetection({
                 algorithm: detection.algorithm,
                 uuid: detection.uuid,
                 view: detection.view,
             });
-            this.onDetectionSelected(e);
-            this.resetCornerstoneTool();
-            this.renderDetectionContextMenu(e);
+            this.setState(
+                {
+                    displaySelectedBoundingBox: true,
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    isDetectionContextVisible: true,
+                },
+                () => {
+                    this.onDetectionSelected(e);
+                    this.renderDetectionContextMenu(e);
+                }
+            );
         }
     }
 
@@ -1846,50 +1857,58 @@ class App extends Component {
      * function is called. Use the param data to render the context menu.
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
-        const viewportInfo = Utils.eventToViewportInfo(event);
-        const detectionData = draggedData
-            ? draggedData
-            : this.props.selectedDetection;
-        if (viewportInfo.viewport !== null) {
-            if (detectionData !== undefined) {
-                let detectionContextGap = 0;
-                let viewport, originCoordX;
-                const boundingBoxCoords = detectionData.boundingBox;
-                const boundingWidth = Math.abs(
-                    boundingBoxCoords[2] - boundingBoxCoords[0]
-                );
-                const boundingHeight = Math.abs(
-                    boundingBoxCoords[3] - boundingBoxCoords[1]
-                );
-                if (viewportInfo.viewport === constants.viewport.TOP) {
-                    detectionContextGap =
-                        viewportInfo.offset / this.state.zoomLevelTop -
-                        boundingWidth;
-                    originCoordX = 2;
-                    viewport = this.state.imageViewportTop;
-                } else {
-                    originCoordX = 0;
-                    detectionContextGap =
-                        viewportInfo.offset / this.state.zoomLevelSide -
-                        boundingHeight / boundingWidth;
-                    viewport = this.state.imageViewportSide;
-                }
-                const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                    x: boundingBoxCoords[originCoordX] + detectionContextGap,
-                    y: boundingBoxCoords[1] + boundingHeight + 4,
-                });
+        if (
+            this.props.selectedAlgorithm &&
+            this.props.selectedDetection !== constants.selection.ALL_SELECTED
+        ) {
+            const viewportInfo = Utils.eventToViewportInfo(event);
+            const detectionData = draggedData
+                ? draggedData
+                : this.props.selectedDetection;
 
-                this.setState(
-                    {
-                        detectionContextPosition: {
-                            top: y,
-                            left: x,
-                        },
-                    },
-                    () => {
-                        this.appUpdateImage();
+            if (viewportInfo.viewport !== null) {
+                if (detectionData !== undefined) {
+                    let detectionContextGap = 0;
+                    let viewport, originCoordX;
+                    const boundingBoxCoords = detectionData.boundingBox;
+                    const boundingWidth = Math.abs(
+                        boundingBoxCoords[2] - boundingBoxCoords[0]
+                    );
+                    const boundingHeight = Math.abs(
+                        boundingBoxCoords[3] - boundingBoxCoords[1]
+                    );
+                    if (viewportInfo.viewport === constants.viewport.TOP) {
+                        detectionContextGap =
+                            viewportInfo.offset / this.state.zoomLevelTop -
+                            boundingWidth;
+                        originCoordX = 2;
+                        viewport = this.state.imageViewportTop;
+                    } else {
+                        originCoordX = 0;
+                        detectionContextGap =
+                            viewportInfo.offset / this.state.zoomLevelSide -
+                            boundingHeight / boundingWidth;
+                        viewport = this.state.imageViewportSide;
                     }
-                );
+                    const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                        x:
+                            boundingBoxCoords[originCoordX] +
+                            detectionContextGap,
+                        y: boundingBoxCoords[1] + boundingHeight + 4,
+                    });
+
+                    this.setState(
+                        {
+                            detectionContextPosition: {
+                                top: y,
+                                left: x,
+                            },
+                        },
+                        () => {
+                            this.appUpdateImage();
+                        }
+                    );
+                }
             }
         }
     }
