@@ -98,10 +98,8 @@ const detectionsSlice = createSlice({
             const { payload } = action;
 
             if (state.data[payload.algorithm]) {
-                // Since this property typically only holds one Detection,
-                // just setting it the same as the algorithm seems the most logical
-                state.selectedDetection = payload.algorithm;
                 state.selectedAlgorithm = payload.algorithm;
+                state.selectedDetection = constants.selection.ALL_SELECTED;
 
                 state.algorithmNames.forEach((algo) => {
                     if (algo === payload.algorithm) {
@@ -109,10 +107,10 @@ const detectionsSlice = createSlice({
                             state.data[algo]
                         );
                     }
-                    // Clear selection on other DetectionSets
+                    // Clear selection and set lowerOpacity on other DetectionSets
                     else {
                         state.data[algo] = DetectionSetUtil.setLowerOpacity(
-                            state.data[algo]
+                            DetectionSetUtil.clearAll(state.data[algo])
                         );
                     }
                 });
@@ -132,19 +130,20 @@ const detectionsSlice = createSlice({
             );
 
             if (updatedDetectionSet) {
-                // Clear selection on DetectionSets
                 state.algorithmNames.forEach((algo) => {
                     if (state.data[algo]) {
-                        const cleared = DetectionSetUtil.clearAll(
-                            state.data[algo]
-                        );
-                        state.data[algo] = DetectionSetUtil.setLowerOpacity(
-                            cleared
-                        );
+                        if (algo === updatedDetectionSet.algorithm) {
+                            // Select the DetectionSet
+                            state.data[algo] = DetectionSetUtil.setLowerOpacity(
+                                updatedDetectionSet
+                            );
+                        } else {
+                            state.data[algo] = DetectionSetUtil.setLowerOpacity(
+                                DetectionSetUtil.clearAll(state.data[algo])
+                            );
+                        }
                     }
                 });
-                // Select the DetectionSet
-                state.data[payload.algorithm] = updatedDetectionSet;
                 state.selectedAlgorithm = payload.algorithm;
                 state.selectedDetection = updatedDetectionSet.selectedDetection;
             } else {
@@ -365,6 +364,31 @@ export const getDetectionsFromView = (data, view) => {
  */
 export const getDetectionColor = (detection) => {
     return DetectionUtil.getRenderColor(detection);
+};
+
+/**
+ * Compare a Detection's properties with an object for equality.
+ * @param {Object.<string, DetectionSet>} detections
+ * @param {string} algorithm algorithm to reference Detection
+ * @param {string} view view where Detection resides
+ * @param {string} uuid Detection's uuid
+ * @param {object} properties properties to compare on the original Detection
+ * @returns {boolean} true if Detection's properties differ from the supplied properties
+ */
+export const hasDetectionChanged = (
+    detections,
+    algorithm,
+    view,
+    uuid,
+    properties
+) => {
+    const detection = detections[algorithm].data[view].find(
+        (detec) => detec.uuid === uuid
+    );
+
+    if (detection) {
+        return DetectionUtil.hasDetectionChanged(detection, properties);
+    }
 };
 
 export const {

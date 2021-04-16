@@ -147,4 +147,36 @@ export default class DetectionUtil {
         // Handle error by checking for null return
         return null;
     }
+
+    /**
+     * Check if a Detection's properties have changed.
+     * Useful for comparing properties before dispatching a Redux action
+     * @param {Detection} detection
+     * @param {object} props properties and values to check on the Detection
+     * @returns {boolean} true if a Detection's property values are different than the supplied properties
+     */
+    static hasDetectionChanged(detection, props) {
+        let hasChanged = false;
+
+        for (const key in props) {
+            // Only compare properties that actually exist on the Detection
+            if (Object.prototype.hasOwnProperty.call(detection, key)) {
+                // Special case for array compariso
+                // Since everything in JS is an object, regular equality check does not work here
+                if (Array.isArray(props[key])) {
+                    // First, check lengths of array
+                    if (props[key].length !== detection[key].length)
+                        hasChanged = true;
+                    // Lengths are the same, now check each value
+                    else if (
+                        !detection[key].every((val, i) => val === props[key][i])
+                    ) {
+                        hasChanged = true;
+                    }
+                } else if (detection[key] !== props[key]) hasChanged = true;
+            }
+        }
+
+        return hasChanged;
+    }
 }
