@@ -14,6 +14,7 @@ class TreeAlgorithm extends Component {
                 width: '1.5rem',
                 marginLeft: '0.5rem',
                 marginRight: '0.5rem',
+                transform: 'rotate(90deg)',
             },
             eyeStyle: {
                 height: '1.5rem',
@@ -137,7 +138,7 @@ class TreeAlgorithm extends Component {
                     this.props.algorithm.algorithm
                 );
             } else {
-                if (e.target.id == 'arrow') {
+                if (e.target.id == 'arrow' || e.target.id == 'Path') {
                     let rotationValue = this.state.arrowStyle.transform;
 
                     if (
