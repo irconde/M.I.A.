@@ -136,6 +136,30 @@ class TreeAlgorithm extends Component {
                     !this.props.algorithm.selected,
                     this.props.algorithm.algorithm
                 );
+            } else {
+                if (e.target.id == 'arrow') {
+                    let rotationValue = this.state.arrowStyle.transform;
+
+                    if (
+                        rotationValue ==
+                        constants.PERPENDICULAR_DEGREE_TRANSFORM
+                    ) {
+                        rotationValue = constants.ZERO_DEGREE_TRANSFORM;
+                    } else {
+                        rotationValue =
+                            constants.PERPENDICULAR_DEGREE_TRANSFORM;
+                    }
+
+                    this.setState({
+                        arrowStyle: {
+                            height: 1.5 + 'rem',
+                            width: 1.5 + 'rem',
+                            marginLeft: 0.5 + 'rem',
+                            marginRight: 0.5 + 'rem',
+                            transform: rotationValue,
+                        },
+                    });
+                }
             }
         }
     }
