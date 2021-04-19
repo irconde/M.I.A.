@@ -792,7 +792,7 @@ class App extends Component {
                                         );
                                         newLayer.setAttribute(
                                             'UUID',
-                                            `${topDetections[j].uuid}.dcs`
+                                            `${topDetections[j].uuid}`
                                         );
                                         stackElem.appendChild(newLayer);
                                         topCounter++;
@@ -826,7 +826,7 @@ class App extends Component {
                                         );
                                         newLayer.setAttribute(
                                             'UUID',
-                                            `${sideDetections[j].uuid}.dcs`
+                                            `${sideDetections[j].uuid}`
                                         );
                                         stackElem.appendChild(newLayer);
                                         sideCounter++;
