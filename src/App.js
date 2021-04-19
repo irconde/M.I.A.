@@ -1099,10 +1099,7 @@ class App extends Component {
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
-<<<<<<< HEAD
-=======
                         blobData: new Blob([new Uint8Array(reader.result)]),
->>>>>>> 50c8365f40d01be8a16f93fc30d090344701cb4b
                     });
                 }
             });
@@ -1172,10 +1169,7 @@ class App extends Component {
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
-<<<<<<< HEAD
-=======
                             blobData: new Blob([new Uint8Array(read.result)]),
->>>>>>> 50c8365f40d01be8a16f93fc30d090344701cb4b
                         });
                     }
                 });
