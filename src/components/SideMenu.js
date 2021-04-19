@@ -38,6 +38,9 @@ class SideMenu extends Component {
         onMenuDetectionSelected: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         onDetectionSelected: PropTypes.func.isRequired,
+        onDetectionSetSelected: PropTypes.func.isRequired,
+        updateDetectionVisibility: PropTypes.func.isRequired,
+        updateDetectionSetVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -48,24 +51,7 @@ class SideMenu extends Component {
      * @returns {type}   None
      */
     setVisibilityData(algorithm, bool) {
-        for (const [key, detectionSet] of Object.entries(
-            this.props.detections
-        )) {
-            if (key === algorithm) {
-                detectionSet.visibility = !bool;
-                if (detectionSet.visibility === false) {
-                    detectionSet.selected = false;
-                    detectionSet.lowerOpacity = false;
-                    detectionSet.selectAlgorithm(false);
-                }
-                detectionSet.setDetectionVisibility(detectionSet.visibility);
-            } else if (key !== algorithm && bool === true) {
-                detectionSet.lowerOpacity = false;
-            }
-        }
-        this.forceUpdate(() => {
-            this.props.appUpdateImage();
-        });
+        this.props.updateDetectionSetVisibility(algorithm, !bool);
     }
 
     updateImage() {
@@ -84,24 +70,7 @@ class SideMenu extends Component {
     updateSelected(bool, algorithm) {
         const prevState = this.state;
         this.setState({ ...prevState, algorithmSelected: bool });
-        for (const [key, detectionSet] of Object.entries(
-            this.props.detections
-        )) {
-            if (bool === true) {
-                if (key === algorithm) {
-                    detectionSet.selected = true;
-                    detectionSet.selectAlgorithm(true);
-                    detectionSet.lowerOpacity = false;
-                } else {
-                    detectionSet.clearAll();
-                }
-            } else {
-                detectionSet.clearAll();
-            }
-        }
-        this.forceUpdate(() => {
-            this.props.onAlgorithmSelected(bool, algorithm);
-        });
+        this.props.onDetectionSetSelected({ algorithm: algorithm });
     }
 
     /**
@@ -113,24 +82,7 @@ class SideMenu extends Component {
      * @returns {type} none
      */
     updateSelectedDetection(detection, e) {
-        if (this.state.algorithmSelected) {
-            detection.selected = true;
-        }
-        if (detection.selected === true) {
-            for (const [key, detectionSet] of Object.entries(
-                this.props.detections
-            )) {
-                detectionSet.selectAlgorithm(false);
-                detectionSet.lowerOpacity = true;
-                detectionSet.selected = false;
-            }
-            detection.selected = true;
-        }
-        if (this.state.algorithmSelected) {
-            const prevState = this.state;
-            this.setState({ ...prevState, algorithmSelected: false });
-        }
-
+        e.persist();
         if (detection.selected === false) {
             this.props.resetSelectedDetectionBoxes(e);
         }
@@ -155,7 +107,7 @@ class SideMenu extends Component {
                 algorithm: detectionSet.algorithm,
                 data: detectionSet.data,
                 selected: detectionSet.selected,
-                visibility: detectionSet.visibility,
+                visibility: detectionSet.visible,
             });
         }
         // Checking to see if there is any data in myDetections
@@ -191,6 +143,9 @@ class SideMenu extends Component {
                                         this.props.configurationInfo
                                     }
                                     setVisibilityData={this.setVisibilityData}
+                                    updateDetectionVisibility={
+                                        this.props.updateDetectionVisibility
+                                    }
                                     updateImage={this.updateImage}
                                     resetSelectedDetectionBoxes={
                                         this.props.resetSelectedDetectionBoxes

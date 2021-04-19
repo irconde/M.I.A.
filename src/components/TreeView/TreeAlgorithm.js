@@ -52,6 +52,7 @@ class TreeAlgorithm extends Component {
         myKey: PropTypes.number.isRequired,
         updateImage: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
+        updateDetectionVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -217,7 +218,7 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.top.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.validation === undefined) {
+                            if (value.validation === null) {
                                 detectionColor = 'black';
                             } else if (value.validation === false) {
                                 detectionColor =
@@ -247,6 +248,9 @@ class TreeAlgorithm extends Component {
                                     }
                                     algorithmVisible={
                                         this.props.algorithm.visibility
+                                    }
+                                    updateDetectionVisibility={
+                                        this.props.updateDetectionVisibility
                                     }
                                 />
                             );
@@ -261,7 +265,7 @@ class TreeAlgorithm extends Component {
                         this.props.algorithm.data.side.map((value, index) => {
                             // Deciding what color to display next to the detection
                             let detectionColor = null;
-                            if (value.validation === undefined) {
+                            if (value.validation === null) {
                                 detectionColor = 'black';
                             } else if (value.validation === false) {
                                 detectionColor =
@@ -291,6 +295,9 @@ class TreeAlgorithm extends Component {
                                     }
                                     algorithmVisible={
                                         this.props.algorithm.visibility
+                                    }
+                                    updateDetectionVisibility={
+                                        this.props.updateDetectionVisibility
                                     }
                                 />
                             );
