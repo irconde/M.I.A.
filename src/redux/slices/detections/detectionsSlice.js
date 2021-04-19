@@ -58,6 +58,7 @@ const detectionsSlice = createSlice({
                 className: payload.className,
                 confidence: payload.confidence,
                 view: payload.view,
+                blobData: payload.blobData,
             });
 
             const algo = detection.algorithm;

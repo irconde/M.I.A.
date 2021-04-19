@@ -768,7 +768,8 @@ class App extends Component {
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
-                            const topDetections = this.currentSelection.getDetectionsFromView(
+                            const topDetections = getDetectionsFromView(
+                                this.props.detections,
                                 constants.viewport.TOP
                             );
                             for (let j = 0; j < topDetections.length; j++) {
@@ -797,7 +798,8 @@ class App extends Component {
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
-                            const sideDetections = this.currentSelection.getDetectionsFromView(
+                            const sideDetections = getDetectionsFromView(
+                                this.props.detections,
                                 constants.viewport.SIDE
                             );
                             for (let j = 0; j < sideDetections.length; j++) {
@@ -1097,6 +1099,10 @@ class App extends Component {
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
+<<<<<<< HEAD
+=======
+                        blobData: new Blob([new Uint8Array(reader.result)]),
+>>>>>>> 50c8365f40d01be8a16f93fc30d090344701cb4b
                     });
                 }
             });
@@ -1166,6 +1172,10 @@ class App extends Component {
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
+<<<<<<< HEAD
+=======
+                            blobData: new Blob([new Uint8Array(read.result)]),
+>>>>>>> 50c8365f40d01be8a16f93fc30d090344701cb4b
                         });
                     }
                 });
@@ -1567,7 +1577,6 @@ class App extends Component {
                 }
             );
 
-            let updatedDetections = this.state.detections;
             if (data[0].updatingDetection === false) {
                 // Need to determine if updating operator or new
                 // Create new user-created detection
@@ -2137,70 +2146,50 @@ class App extends Component {
      * Invoked when user selects 'delete' option from DetectionContextMenu
      */
     deleteDetection() {
-        const updatedDetections = this.state.detections;
-        const selectedDetection = updatedDetections[
-            this.currentSelection.getAlgorithm()
-        ].getDataFromSelectedDetection();
-        let updatedStack;
         // Detection is selected
-        if (selectedDetection) {
-            updatedDetections[selectedDetection.algorithm].deleteDetection(
-                selectedDetection
-            );
-            if (selectedDetection.view === constants.viewport.TOP) {
+        if (this.props.selectedDetection) {
+            this.props.deleteDetection({
+                algorithm: this.props.selectedDetection.algorithm,
+                uuid: this.props.selectedDetection.uuid,
+                view: this.props.selectedDetection.view,
+            });
+            if (this.props.selectedDetection.view === constants.viewport.TOP) {
                 this.state.myOra.setStackBlobData(
                     0,
                     this.state.myOra.stackData[0].blobData.filter(
-                        (blob) => blob.size !== selectedDetection.blobData.size
+                        (blob) =>
+                            blob.size !==
+                            this.props.selectedDetection.blobData.size
                     )
                 );
-            } else if (selectedDetection.view === constants.viewport.SIDE) {
+            } else if (
+                this.props.selectedDetection.view === constants.viewport.SIDE
+            ) {
                 this.state.myOra.setStackBlobData(
                     1,
                     this.state.myOra.stackData[1].blobData.filter(
-                        (blob) => blob.size !== selectedDetection.blobData.size
+                        (blob) =>
+                            blob.size !==
+                            this.props.selectedDetection.blobData.size
                     )
                 );
             }
-
-            // Remove empty DetectionSet
-            if (updatedDetections[selectedDetection.algorithm].isEmpty()) {
-                delete updatedDetections[selectedDetection.algorithm];
-
-                this.currentSelection.availableAlgorithms = updatedDetections;
-                this.currentSelection.algorithmNames = Object.values(
-                    updatedDetections
-                ).map((detectionSet) => {
-                    return {
-                        algorithm: detectionSet.algorithm,
-                    };
-                });
-
-                this.currentSelection.resetAlgorithmPositionToEnd();
-            }
-
             // Reset remaining DetectionSets to `un-selected` state
-            for (const [key, detectionSet] of Object.entries(
-                updatedDetections
-            )) {
-                detectionSet.clearAll();
-            }
+            this.props.clearAllSelection();
+            this.setState(
+                {
+                    isFABVisible: true,
+                    isDetectionContextVisible: false,
+                    isDrawingBoundingBox: false,
+                    displaySelectedBoundingBox: false,
+                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                },
+                () => {
+                    this.resetCornerstoneTool();
+                    this.appUpdateImage();
+                }
+            );
         }
-        // Reset remaining DetectionSets to `un-selected` state
-        this.props.clearAllSelection();
-        this.setState(
-            {
-                isFABVisible: true,
-                isDetectionContextVisible: false,
-                isDrawingBoundingBox: false,
-                displaySelectedBoundingBox: false,
-                cornerstoneMode: constants.cornerstoneMode.SELECTION,
-            },
-            () => {
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
-            }
-        );
     }
 
     /**
