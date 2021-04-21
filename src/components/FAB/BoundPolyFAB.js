@@ -5,6 +5,7 @@ import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import Utils from '../../Utils';
 import * as constants from '../../Constants';
+import SideMenu from '../SideMenu';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -26,6 +27,10 @@ const FABContainer = styled.div`
     box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
     opacity: ${(props) => (props.fabOpacity ? '100%' : '38%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
+    right:0;
+    width:max-content;
+    margin-left:auto;
+    margin-right:auto;
 
     @keyframes fadein {
         from {
@@ -77,20 +82,7 @@ const BoundPolyFAB = ({
         }
     };
     // Calculating screen size and setting horizontal value accordingly.
-    let leftPX = '50%';
-    const userScreenWidth = Utils.getScreenSize();
-    let [width] = userScreenWidth;
-    if (Utils.inRange(width, 0, 800)) {
-        leftPX = '5.00%';
-    } else if (Utils.inRange(width, 801, 1200)) {
-        leftPX = '20.0%';
-    } else if (Utils.inRange(width, 1201, 1500)) {
-        leftPX = '28.5%';
-    } else if (Utils.inRange(width, 1501, 2000)) {
-        leftPX = '31.75%';
-    } else if (Utils.inRange(width, 2001, 3000)) {
-        leftPX = '36.25%';
-    }
+    let leftPX = "-"+constants.sideMenuWidth+"px";
 
     let fabOpacity;
     if (

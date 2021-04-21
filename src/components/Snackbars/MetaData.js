@@ -38,7 +38,7 @@ class MetaData extends Component {
                 textAlign: 'left',
                 color: '#ffffff',
                 width: 'max-content',
-                transform: 'translateX(-50%)',
+                transform: 'translateX(-100%)',
             },
         };
     }
