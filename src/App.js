@@ -2244,6 +2244,7 @@ class App extends Component {
     onMenuDetectionSetSelected(algorithm) {
         this.setState({ isDetectionContextVisible: false });
         this.props.selectDetectionSet(algorithm);
+        this.resetCornerstoneTool();
         this.appUpdateImage();
     }
 
