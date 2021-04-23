@@ -55,6 +55,7 @@ import {
     updateDetectionSetVisibility,
     hasDetectionChanged,
 } from './redux/slices/detections/detectionsSlice';
+import { updateDetectionVisibility } from './redux/slices/detections/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 cornerstoneTools.external.cornerstone = cornerstone;
@@ -2219,6 +2220,7 @@ class App extends Component {
      * @param {boolean} isVisible
      */
     updateDetectionVisibility(detection, isVisible) {
+        this.props.updateDetectionVisibility();
         this.props.updateDetection({
             reference: {
                 algorithm: detection.algorithm,
@@ -2341,7 +2343,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections } = state;
+    const { server, detections, uiDetections } = state;
     return {
         // Socket connection state
         isConnected: server.isConnected,
@@ -2382,4 +2384,5 @@ export default connect(mapStateToProps, {
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
+    updateDetectionVisibility,
 })(App);
