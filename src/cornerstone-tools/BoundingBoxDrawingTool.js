@@ -2,12 +2,12 @@ import csTools from 'cornerstone-tools';
 import * as constants from '../Constants';
 import Utils from '../Utils.js';
 import * as cornerstone from 'cornerstone-core';
+import drawHandles from './drawing/drawHandles';
 
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
-const drawHandles = csTools.importInternal('drawing/drawHandles');
 const drawRect = csTools.importInternal('drawing/drawRect');
 
 // We define the new annotation tool by extending BaseAnnotationTool class
@@ -18,10 +18,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
-                drawHandlesOnHover: true,
-                hideHandlesIfMoving: true,
                 renderDashed: false,
-                renderClassName: true,
             },
             // TODO irconde. Customize the cursor
             //svgCursor: rectangleRoiCursor,
@@ -39,20 +36,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         if (!validParameters) {
             console.log("invalid parameters supplied to tool's pointNearTool");
         }
-
         if (!validParameters || data.visible === false) {
             return false;
         }
-
         const distance = interactionType === 'mouse' ? 15 : 25;
-        const startCanvas = csTools.external.cornerstone.pixelToCanvas(
+        const startCanvas = cornerstone.pixelToCanvas(
             element,
             data.handles.start
         );
-        const endCanvas = csTools.external.cornerstone.pixelToCanvas(
-            element,
-            data.handles.end
-        );
+        const endCanvas = cornerstone.pixelToCanvas(element, data.handles.end);
 
         const rect = {
             left: Math.min(startCanvas.x, endCanvas.x),
@@ -103,7 +95,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 const color = constants.detectionStyle.NORMAL_COLOR;
                 const handleOptions = {
                     color,
-                    handleRadius,
+                    handleRadius: 8,
+                    handleLineWidth: 3,
+                    fill: 'white',
                     drawHandlesIfActive: drawHandlesOnHover,
                     hideHandlesIfMoving,
                 };
@@ -137,10 +131,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
 
                 // Label Rendering
-                if (
-                    this.configuration.renderClassName === true &&
-                    data.updatingDetection === true
-                ) {
+                if (data.updatingDetection === true) {
                     if (
                         !data.handles.start.moving &&
                         !data.handles.end.moving
