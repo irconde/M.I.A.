@@ -5,6 +5,8 @@ import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../Constants';
 import Utils from '../../Utils.js';
+import { useSelector } from 'react-redux';
+import { getEditionMode } from '../../redux/slices/ui/uiSlice';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -46,13 +48,14 @@ const EditLabelWrapper = styled.div`
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {boolean} isVisible Determines whether widget should be displayed on screen
  * @param {object} position Contains `top` and `left` properties to position widget
  * @param {number} width Width in pixels of selected detection
  * @param {Array<string>} labels list of existing labels for other detections
  * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
+const EditLabel = ({ position, width, labels, onLabelChange }) => {
+    const editionMode = useSelector(getEditionMode);
+    const isVisible = editionMode === constants.editionMode.LABEL;
     const [isListOpen, setIsListOpen] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);
@@ -147,7 +150,6 @@ const EditLabel = ({ isVisible, position, width, labels, onLabelChange }) => {
 };
 
 EditLabel.propTypes = {
-    isVisible: PropTypes.bool.isRequired,
     position: PropTypes.object.isRequired,
     width: PropTypes.number.isRequired,
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,

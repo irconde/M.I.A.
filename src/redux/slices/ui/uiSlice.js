@@ -42,6 +42,9 @@ const uiSlice = createSlice({
         updateDisplaySelectedBoundingBox: (state, action) => {
             state.displaySelectedBoundingBox = action.payload;
         },
+        updateEditionMode: (state, action) => {
+            state.editionMode = action.payload;
+        },
     },
 });
 
@@ -49,6 +52,7 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 export const getDisplaySelectedBoundingBox = (state) =>
     state.ui.displaySelectedBoundingBox;
+export const getEditionMode = (state) => state.ui.editionMode;
 
 export const {
     updateCornerstoneMode,
@@ -57,6 +61,7 @@ export const {
     updateIsDetectionContextVisible,
     updateDetectionLabels,
     updateDisplaySelectedBoundingBox,
+    updateEditionMode,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

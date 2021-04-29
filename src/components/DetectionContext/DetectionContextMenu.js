@@ -6,6 +6,8 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { editionMode, detectionContextStyle } from '../../Constants';
+import { useSelector } from 'react-redux';
+import { getEditionMode } from '../../redux/slices/ui/uiSlice';
 
 const Positioner = styled.div`
     position: absolute;
@@ -75,13 +77,13 @@ const DeleteWidget = styled.div`
 function DetectionContextMenu({
     position,
     isVisible,
-    selectedOption,
     setSelectedOption,
     onLabelClicked,
     onBoundingClicked,
     onPolygonClicked,
     onDeleteClicked,
 }) {
+    const selectedOption = useSelector(getEditionMode);
     const handleClick = (type) => {
         if (type === editionMode.BOUNDING) {
             onBoundingClicked();

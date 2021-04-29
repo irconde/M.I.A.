@@ -61,6 +61,7 @@ import {
     updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
+    updateEditionMode,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -134,7 +135,6 @@ class App extends Component {
                 top: 0,
                 left: 0,
             },
-            editionMode: null,
             detectionLabels: [],
             detectionLabelEditWidth: '0px',
             detectionLabelEditPosition: {
@@ -1439,9 +1439,9 @@ class App extends Component {
                     constants.cornerstoneMode.SELECTION
                 );
                 this.props.updateDisplaySelectedBoundingBox(false);
+                this.props.updateEditionMode(null);
                 this.setState(
                     {
-                        editionMode: null,
                         isDetectionContextVisible: false,
                         detectionContextPosition: {
                             top: 0,
@@ -1493,9 +1493,9 @@ class App extends Component {
                         constants.cornerstoneMode.SELECTION
                     );
                     this.props.updateDisplaySelectedBoundingBox(false);
+                    this.props.updateEditionMode(null);
                     this.setState(
                         {
-                            editionMode: null,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
                                 top: 0,
@@ -1734,9 +1734,9 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION
             );
             this.props.updateDisplaySelectedBoundingBox(false);
+            this.props.updateEditionMode(null);
             this.setState(
                 {
-                    editionMode: null,
                     isDetectionContextVisible: false,
                     detectionContextPosition: {
                         top: 0,
@@ -1750,9 +1750,9 @@ class App extends Component {
                 }
             );
         } else {
+            this.props.updateEditionMode(null);
             this.setState({
                 isDetectionContextVisible: false,
-                editionMode: null,
             });
         }
     }
@@ -2022,12 +2022,8 @@ class App extends Component {
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
-            this.setState(
-                {
-                    editionMode: newMode,
-                },
-                () => this.appUpdateImage()
-            );
+            this.props.updateEditionMode(newMode);
+            this.appUpdateImage();
         }
     }
 
@@ -2055,9 +2051,9 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION
             );
             this.props.updateDisplaySelectedBoundingBox(false);
+            this.props.updateEditionMode(null);
             this.setState(
                 {
-                    editionMode: null,
                     detectionLabelEditWidth: 0,
                     detectionLabelEditPosition: { top: 0, left: 0 },
                 },
@@ -2133,10 +2129,10 @@ class App extends Component {
                     top: y,
                     left: x,
                 };
+                this.props.updateEditionMode(constants.editionMode.LABEL);
                 this.setState(
                     {
                         isDetectionContextVisible: false,
-                        editionMode: constants.editionMode.LABEL,
                         detectionLabelEditWidth: boundingWidth,
                         detectionLabelEditPosition: widgetPosition,
                     },
@@ -2307,7 +2303,6 @@ class App extends Component {
                     <DetectionContextMenu
                         position={this.state.detectionContextPosition}
                         isVisible={this.state.isDetectionContextVisible}
-                        selectedOption={this.state.editionMode}
                         setSelectedOption={this.selectEditionMode}
                         onLabelClicked={this.selectEditDetectionLabel}
                         onBoundingClicked={this.editBoundingBox}
@@ -2315,10 +2310,6 @@ class App extends Component {
                         onDeleteClicked={this.deleteDetection}
                     />
                     <EditLabel
-                        isVisible={
-                            this.state.editionMode ===
-                            constants.editionMode.LABEL
-                        }
                         position={this.state.detectionLabelEditPosition}
                         width={this.state.detectionLabelEditWidth}
                         labels={this.props.detectionLabels}
@@ -2385,4 +2376,5 @@ export default connect(mapStateToProps, {
     updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
+    updateEditionMode,
 })(App);
