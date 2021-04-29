@@ -767,33 +767,37 @@ class App extends Component {
                             for (let j = 0; j < topDetections.length; j++) {
                                 fetch(topDetections[j].blobData).then(
                                     (response) => {
-                                        const blobData = response.blob();
-                                        let threatPromise = Dicos.dataToBlob(
-                                            topDetections[j],
-                                            blobData,
-                                            Date.now(),
-                                            !validationCompleted,
-                                            function (threatBlob) {
-                                                newOra.file(
-                                                    `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`,
-                                                    threatBlob
-                                                );
-                                                let newLayer = stackXML.createElement(
-                                                    'layer'
-                                                );
-                                                newLayer.setAttribute(
-                                                    'src',
-                                                    `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
-                                                );
-                                                newLayer.setAttribute(
-                                                    'UUID',
-                                                    `${topDetections[j].uuid}`
-                                                );
-                                                stackElem.appendChild(newLayer);
-                                                topCounter++;
-                                            }
-                                        );
-                                        listOfPromises.push(threatPromise);
+                                        response.blob().then((blobData) => {
+                                            console.log(blobData);
+                                            let threatPromise = Dicos.dataToBlob(
+                                                topDetections[j],
+                                                blobData,
+                                                Date.now(),
+                                                !validationCompleted,
+                                                function (threatBlob) {
+                                                    newOra.file(
+                                                        `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`,
+                                                        threatBlob
+                                                    );
+                                                    let newLayer = stackXML.createElement(
+                                                        'layer'
+                                                    );
+                                                    newLayer.setAttribute(
+                                                        'src',
+                                                        `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
+                                                    );
+                                                    newLayer.setAttribute(
+                                                        'UUID',
+                                                        `${topDetections[j].uuid}`
+                                                    );
+                                                    stackElem.appendChild(
+                                                        newLayer
+                                                    );
+                                                    topCounter++;
+                                                }
+                                            );
+                                            listOfPromises.push(threatPromise);
+                                        });
                                     }
                                 );
                             }
@@ -806,33 +810,37 @@ class App extends Component {
                             for (let j = 0; j < sideDetections.length; j++) {
                                 fetch(sideDetections[j].blobData).then(
                                     (response) => {
-                                        const blobData = response.blob();
-                                        let threatPromise = Dicos.dataToBlob(
-                                            sideDetections[j],
-                                            blobData,
-                                            Date.now(),
-                                            !validationCompleted,
-                                            function (threatBlob) {
-                                                newOra.file(
-                                                    `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`,
-                                                    threatBlob
-                                                );
-                                                let newLayer = stackXML.createElement(
-                                                    'layer'
-                                                );
-                                                newLayer.setAttribute(
-                                                    'src',
-                                                    `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
-                                                );
-                                                newLayer.setAttribute(
-                                                    'UUID',
-                                                    `${sideDetections[j].uuid}`
-                                                );
-                                                stackElem.appendChild(newLayer);
-                                                sideCounter++;
-                                            }
-                                        );
-                                        listOfPromises.push(threatPromise);
+                                        response.blob().then((blobData) => {
+                                            console.log(blobData);
+                                            let threatPromise = Dicos.dataToBlob(
+                                                sideDetections[j],
+                                                blobData,
+                                                Date.now(),
+                                                !validationCompleted,
+                                                function (threatBlob) {
+                                                    newOra.file(
+                                                        `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`,
+                                                        threatBlob
+                                                    );
+                                                    let newLayer = stackXML.createElement(
+                                                        'layer'
+                                                    );
+                                                    newLayer.setAttribute(
+                                                        'src',
+                                                        `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
+                                                    );
+                                                    newLayer.setAttribute(
+                                                        'UUID',
+                                                        `${sideDetections[j].uuid}`
+                                                    );
+                                                    stackElem.appendChild(
+                                                        newLayer
+                                                    );
+                                                    sideCounter++;
+                                                }
+                                            );
+                                            listOfPromises.push(threatPromise);
+                                        });
                                     }
                                 );
                             }
@@ -1102,15 +1110,14 @@ class App extends Component {
                         threatSequence.items[j],
                         image
                     );
+                    console.log(imagesLeft[i]);
                     self.props.addDetection({
                         algorithm: algorithmName,
                         boundingBox: boundingBoxCoords,
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
-                        blobData: URL.createObjectURL(
-                            new Blob([new Uint8Array(reader.result)])
-                        ),
+                        blobData: window.URL.createObjectURL(imagesLeft[i]),
                     });
                 }
             });
@@ -1120,6 +1127,7 @@ class App extends Component {
         if (this.state.singleViewport === false) {
             for (var k = 0; k < imagesRight.length; k++) {
                 const read = new FileReader();
+                const currentRightImage = imagesRight[k];
                 read.addEventListener('loadend', function () {
                     const view = new Uint8Array(read.result);
                     var image = dicomParser.parseDicom(view);
@@ -1170,6 +1178,7 @@ class App extends Component {
                             )
                         );
                         var pixelData = Dicos.retrieveMaskData(image);
+                        console.log(imagesRight[k]);
                         self.props.addDetection({
                             algorithm: algorithmName,
                             maskBitmap: pixelData,
@@ -1177,8 +1186,8 @@ class App extends Component {
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
-                            blobData: URL.createObjectURL(
-                                new Blob([new Uint8Array(read.result)])
+                            blobData: window.URL.createObjectURL(
+                                currentRightImage
                             ),
                         });
                     }
