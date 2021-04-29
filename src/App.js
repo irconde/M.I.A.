@@ -55,7 +55,14 @@ import {
     updateDetectionSetVisibility,
     hasDetectionChanged,
 } from './redux/slices/detections/detectionsSlice';
-import { updateDetectionVisibility } from './redux/slices/detections/uiSlice';
+import {
+    updateDisplayNext,
+    updateFABVisibility,
+    updateIsDrawingBoundingBox,
+    updateIsDetectionContextVisible,
+    updateDetectionLabels,
+    getDisplayNext,
+} from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 cornerstoneTools.external.cornerstone = cornerstone;
@@ -128,7 +135,6 @@ class App extends Component {
             viewport: cornerstone.getDefaultViewport(null, undefined),
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isDrawingBoundingBox: false,
-            isFABVisible: false,
             isDetectionContextVisible: false,
             detectionContextPosition: {
                 top: 0,
@@ -283,21 +289,16 @@ class App extends Component {
         window.addEventListener('resize', this.resizeListener);
 
         this.calculateviewPortWidthAndHeight();
-
+        this.props.updateFABVisibility(
+            this.state.numberOfFilesInQueue > 0 ? true : false
+        );
         let reactObj = this;
-        this.setState(
-            {
-                isFABVisible:
-                    this.state.numberOfFilesInQueue > 0 ? true : false,
-            },
-            () => {
-                reactObj.getFilesFromCommandServer();
-                reactObj.updateNumberOfFiles();
-                reactObj.setupCornerstoneJS(
-                    reactObj.state.imageViewportTop,
-                    reactObj.state.imageViewportSide
-                );
-            }
+
+        reactObj.getFilesFromCommandServer();
+        reactObj.updateNumberOfFiles();
+        reactObj.setupCornerstoneJS(
+            reactObj.state.imageViewportTop,
+            reactObj.state.imageViewportSide
         );
         this.props.setCommandServerConnection({
             action: 'connect',
@@ -527,10 +528,7 @@ class App extends Component {
                 });
                 this.getNextImage();
             }
-            this.setState({
-                isFABVisible: data > 0,
-            });
-
+            this.props.updateFABVisibility(data > 0);
             this.props.setNumFilesInQueue(data);
             this.props.setIsFileInQueue(data > 0);
         });
@@ -569,12 +567,12 @@ class App extends Component {
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
         this.currentSelection = new Selection();
+        this.props.updateFABVisibility(false);
         this.setState({
             selectedFile: null,
             displayNext: false,
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
-            isFABVisible: false,
         });
     }
 
@@ -1443,12 +1441,12 @@ class App extends Component {
                 ) {
                     this.props.clearAllSelection();
                 }
+                this.props.updateFABVisibility(true);
                 this.setState(
                     {
                         displaySelectedBoundingBox: false,
                         cornerstoneMode: constants.cornerstoneMode.SELECTION,
                         editionMode: null,
-                        isFABVisible: true,
                         isDetectionContextVisible: false,
                         detectionContextPosition: {
                             top: 0,
@@ -1473,12 +1471,12 @@ class App extends Component {
                         view: viewport,
                         uuid: combinedDetections[clickedPos].uuid,
                     });
+                    this.props.updateFABVisibility(false);
                     this.setState(
                         {
                             cornerstoneMode: constants.cornerstoneMode.EDITION,
                             displaySelectedBoundingBox: true,
                             isDetectionContextVisible: true,
-                            isFABVisible: false,
                         },
                         () => {
                             this.onDetectionSelected(e);
@@ -1493,13 +1491,13 @@ class App extends Component {
                 ) {
                     // We clicked a visible detection and are in edition mode
                     this.props.clearAllSelection();
+                    this.props.updateFABVisibility(true);
                     this.setState(
                         {
                             displaySelectedBoundingBox: false,
                             cornerstoneMode:
                                 constants.cornerstoneMode.SELECTION,
                             editionMode: null,
-                            isFABVisible: true,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
                                 top: 0,
@@ -1658,13 +1656,13 @@ class App extends Component {
                                     boundingBox: coords,
                                 },
                             });
+                            self.props.updateFABVisibility(true);
                             self.setState(
                                 {
                                     cornerstoneMode:
                                         constants.cornerstoneMode.SELECTION,
                                     isDetectionContextVisible: false,
                                     displaySelectedBoundingBox: false,
-                                    isFABVisible: true,
                                 },
                                 () => {
                                     self.props.clearAllSelection();
@@ -1842,11 +1840,11 @@ class App extends Component {
                 myDetectionSet.lowerOpacity = true;
             }
         }
+        this.props.updateFABVisibility(selected);
         this.setState(
             {
                 displaySelectedBoundingBox: false,
                 isDetectionContextVisible: false,
-                isFABVisible: selected,
                 cornerstoneMode: constants.cornerstoneMode.SELECTION,
             },
             () => {
@@ -2054,10 +2052,9 @@ class App extends Component {
             });
             // Clear selections, etc. of all detections
             this.props.clearAllSelection();
-
+            this.props.updateFABVisibility(true);
             this.setState(
                 {
-                    isFABVisible: true,
                     editionMode: null,
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     detectionLabelEditWidth: 0,
@@ -2198,9 +2195,9 @@ class App extends Component {
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
+            this.props.updateFABVisibility(true);
             this.setState(
                 {
-                    isFABVisible: true,
                     isDetectionContextVisible: false,
                     isDrawingBoundingBox: false,
                     displaySelectedBoundingBox: false,
@@ -2330,7 +2327,6 @@ class App extends Component {
                         onLabelChange={this.editDetectionLabel}
                     />
                     <BoundPolyFAB
-                        isVisible={this.state.isFABVisible}
                         cornerstoneMode={this.state.cornerstoneMode}
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
@@ -2343,7 +2339,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections, uiDetections } = state;
+    const { server, detections, ui } = state;
     return {
         // Socket connection state
         isConnected: server.isConnected,
@@ -2359,6 +2355,7 @@ const mapStateToProps = (state) => {
         selectedAlgorithm: detections.selectedAlgorithm,
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
+        displayNext: ui.displayNext,
     };
 };
 
@@ -2384,5 +2381,9 @@ export default connect(mapStateToProps, {
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
-    updateDetectionVisibility,
+    updateDisplayNext,
+    updateFABVisibility,
+    updateIsDrawingBoundingBox,
+    updateIsDetectionContextVisible,
+    updateDetectionLabels,
 })(App);

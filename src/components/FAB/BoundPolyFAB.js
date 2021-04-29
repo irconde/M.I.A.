@@ -5,7 +5,8 @@ import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import Utils from '../../Utils';
 import * as constants from '../../Constants';
-import SideMenu from '../SideMenu';
+import { useSelector } from 'react-redux';
+import { getIsFabVisible } from '../../redux/slices/ui/uiSlice';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -68,11 +69,11 @@ const FABContainer = styled.div`
  *
  */
 const BoundPolyFAB = ({
-    isVisible,
     cornerstoneMode,
     onBoundingSelect,
     onPolygonSelect,
 }) => {
+    const isVisible = useSelector(getIsFabVisible);
     const handleClick = (e, cb) => {
         if (
             isVisible &&
@@ -116,7 +117,6 @@ const BoundPolyFAB = ({
 };
 
 BoundPolyFAB.propTypes = {
-    isVisible: PropTypes.bool.isRequired,
     cornerstoneMode: PropTypes.string.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
     onPolygonSelect: PropTypes.func.isRequired,
