@@ -115,7 +115,11 @@ export default class Utils {
      * @param  {type} contentType The MIMI type, image/dcs
      * @return {type}               blob
      */
-    static b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+    static b64toBlob = (
+        b64Data,
+        contentType = 'image/dcs',
+        sliceSize = 512
+    ) => {
         const byteCharacters = atob(b64Data);
         const byteArrays = [];
         for (
@@ -149,6 +153,18 @@ export default class Utils {
             bytes[i] = binary_string.charCodeAt(i);
         }
         return bytes.buffer;
+    }
+
+    static async blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const dataUrl = reader.result;
+                const base64 = dataUrl.split(',')[1];
+                resolve(base64);
+            };
+            reader.readAsDataURL(blob);
+        });
     }
 
     /**
