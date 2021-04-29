@@ -1613,30 +1613,36 @@ class App extends Component {
                                 self.props.addDetectionSet({
                                     algorithm: operator,
                                 });
-                                self.props.addDetection({
-                                    algorithm: operator,
-                                    boundingBox: coords,
-                                    className: data[0].class,
-                                    confidence: data[0].confidence,
-                                    view:
-                                        viewport === self.state.imageViewportTop
-                                            ? constants.viewport.TOP
-                                            : constants.viewport.SIDE,
-                                    blobData: newBlob,
+                                Utils.blobToBase64(newBlob).then((base64) => {
+                                    self.props.addDetection({
+                                        algorithm: operator,
+                                        boundingBox: coords,
+                                        className: data[0].class,
+                                        confidence: data[0].confidence,
+                                        view:
+                                            viewport ===
+                                            self.state.imageViewportTop
+                                                ? constants.viewport.TOP
+                                                : constants.viewport.SIDE,
+                                        blobData: base64,
+                                    });
                                 });
                             }
                             // Operator DetectionSet exists, add new detection to set
                             else {
-                                self.props.addDetection({
-                                    algorithm: operator,
-                                    boundingBox: coords,
-                                    className: data[0].class,
-                                    confidence: data[0].confidence,
-                                    view:
-                                        viewport === self.state.imageViewportTop
-                                            ? constants.viewport.TOP
-                                            : constants.viewport.SIDE,
-                                    blobData: newBlob,
+                                Utils.blobToBase64(newBlob).then((base64) => {
+                                    self.props.addDetection({
+                                        algorithm: operator,
+                                        boundingBox: coords,
+                                        className: data[0].class,
+                                        confidence: data[0].confidence,
+                                        view:
+                                            viewport ===
+                                            self.state.imageViewportTop
+                                                ? constants.viewport.TOP
+                                                : constants.viewport.SIDE,
+                                        blobData: base64,
+                                    });
                                 });
                             }
                         } else {
