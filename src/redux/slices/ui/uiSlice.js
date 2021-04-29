@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 
 const initialState = {
-    displayNext: false,
+    cornerstoneMode: constants.cornerstoneMode.SELECTION,
     isFABVisible: false,
     isDrawingBoundingBox: false,
     isDetectionContextVisible: false,
@@ -23,8 +23,8 @@ const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
-        updateDisplayNext: (state, action) => {
-            state.displayNext = action.payload;
+        updateCornerstoneMode: (state, action) => {
+            state.cornerstoneMode = action.payload;
         },
         updateFABVisibility: (state, action) => {
             state.isFABVisible = action.payload;
@@ -41,11 +41,11 @@ const uiSlice = createSlice({
     },
 });
 
-export const getDisplayNext = (state) => state.ui.displayNext;
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
+export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 
 export const {
-    updateDisplayNext,
+    updateCornerstoneMode,
     updateFABVisibility,
     updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,

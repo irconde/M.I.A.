@@ -56,12 +56,11 @@ import {
     hasDetectionChanged,
 } from './redux/slices/detections/detectionsSlice';
 import {
-    updateDisplayNext,
     updateFABVisibility,
     updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDetectionLabels,
-    getDisplayNext,
+    updateCornerstoneMode,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -124,16 +123,12 @@ class App extends Component {
                 confirm: {},
                 reject: {},
             },
-            displayNext: false,
-            nextAlgBtnEnabled: false,
-            prevAlgBtnEnabled: false,
             zoomLevelTop: constants.viewportStyle.ZOOM,
             zoomLevelSide: constants.viewportStyle.ZOOM,
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            cornerstoneMode: constants.cornerstoneMode.SELECTION,
             isDrawingBoundingBox: false,
             isDetectionContextVisible: false,
             detectionContextPosition: {
@@ -459,7 +454,7 @@ class App extends Component {
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
         if (
-            this.state.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
+            this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
         ) {
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
@@ -570,7 +565,6 @@ class App extends Component {
         this.props.updateFABVisibility(false);
         this.setState({
             selectedFile: null,
-            displayNext: false,
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
         });
@@ -680,7 +674,6 @@ class App extends Component {
                                         {
                                             selectedFile: this.state.myOra.getFirstImage(),
                                             image: this.state.myOra.getFirstPixelData(),
-                                            displayNext: false,
                                             singleViewport:
                                                 listOfStacks.length < 2,
                                             receiveTime: Date.now(),
@@ -860,7 +853,6 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.setState({
                                             selectedFile: null,
-                                            displayNext: false,
                                         });
                                         this.props.setUpload(false);
                                         this.getNextImage();
@@ -1079,9 +1071,6 @@ class App extends Component {
                     ) === undefined
                 ) {
                     console.log('No Potential Threat Objects detected');
-                    this.setState({
-                        displayNext: true,
-                    });
                     return;
                 }
                 // for every threat found, create a new Detection object and store all Detection
@@ -1149,9 +1138,6 @@ class App extends Component {
                         ) === undefined
                     ) {
                         console.log('No Potential Threat Objects detected');
-                        this.setState({
-                            displayNext: true,
-                        });
                         return;
                     }
                     // for every threat found, create a new Detection object and store all Detection
@@ -1427,7 +1413,7 @@ class App extends Component {
             }
 
             if (
-                this.state.cornerstoneMode ===
+                this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION
             )
                 return;
@@ -1442,10 +1428,12 @@ class App extends Component {
                     this.props.clearAllSelection();
                 }
                 this.props.updateFABVisibility(true);
+                this.props.updateCornerstoneMode(
+                    constants.cornerstoneMode.SELECTION
+                );
                 this.setState(
                     {
                         displaySelectedBoundingBox: false,
-                        cornerstoneMode: constants.cornerstoneMode.SELECTION,
                         editionMode: null,
                         isDetectionContextVisible: false,
                         detectionContextPosition: {
@@ -1463,7 +1451,7 @@ class App extends Component {
                 // Clicked on detection
                 if (
                     combinedDetections[clickedPos].visible !== false &&
-                    this.state.cornerstoneMode ===
+                    this.props.cornerstoneMode ===
                         constants.cornerstoneMode.SELECTION
                 ) {
                     this.props.selectDetection({
@@ -1472,9 +1460,11 @@ class App extends Component {
                         uuid: combinedDetections[clickedPos].uuid,
                     });
                     this.props.updateFABVisibility(false);
+                    this.props.updateCornerstoneMode(
+                        constants.cornerstoneMode.EDITION
+                    );
                     this.setState(
                         {
-                            cornerstoneMode: constants.cornerstoneMode.EDITION,
                             displaySelectedBoundingBox: true,
                             isDetectionContextVisible: true,
                         },
@@ -1486,17 +1476,18 @@ class App extends Component {
                     );
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
-                    this.state.cornerstoneMode ===
+                    this.props.cornerstoneMode ===
                         constants.cornerstoneMode.EDITION
                 ) {
                     // We clicked a visible detection and are in edition mode
                     this.props.clearAllSelection();
                     this.props.updateFABVisibility(true);
+                    this.props.updateCornerstoneMode(
+                        constants.cornerstoneMode.SELECTION
+                    );
                     this.setState(
                         {
                             displaySelectedBoundingBox: false,
-                            cornerstoneMode:
-                                constants.cornerstoneMode.SELECTION,
                             editionMode: null,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
@@ -1523,9 +1514,9 @@ class App extends Component {
      */
     onDragEnd(event, viewport) {
         if (
-            this.state.cornerstoneMode ===
+            this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION ||
-            this.state.cornerstoneMode === constants.cornerstoneMode.EDITION
+            this.props.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
             const toolState = cornerstoneTools.getToolState(
                 viewport,
@@ -1621,10 +1612,11 @@ class App extends Component {
                                 });
                             }
                         } else {
+                            self.props.updateCornerstoneMode(
+                                constants.cornerstoneMode.SELECTION
+                            );
                             self.setState(
                                 {
-                                    cornerstoneMode:
-                                        constants.cornerstoneMode.SELECTION,
                                     displayButtons: false,
                                 },
                                 () => {
@@ -1657,10 +1649,11 @@ class App extends Component {
                                 },
                             });
                             self.props.updateFABVisibility(true);
+                            self.props.updateCornerstoneMode(
+                                constants.cornerstoneMode.SELECTION
+                            );
                             self.setState(
                                 {
-                                    cornerstoneMode:
-                                        constants.cornerstoneMode.SELECTION,
                                     isDetectionContextVisible: false,
                                     displaySelectedBoundingBox: false,
                                 },
@@ -1673,13 +1666,14 @@ class App extends Component {
                         }
                     }
                     if (
-                        self.state.cornerstoneMode ===
+                        self.props.cornerstoneMode ===
                         constants.cornerstoneMode.ANNOTATION
                     ) {
+                        self.props.updateCornerstoneMode(
+                            constants.cornerstoneMode.SELECTION
+                        );
                         self.setState(
                             {
-                                cornerstoneMode:
-                                    constants.cornerstoneMode.SELECTION,
                                 displaySelectedBoundingBox: false,
                                 isDetectionContextVisible: false,
                             },
@@ -1690,7 +1684,7 @@ class App extends Component {
                             }
                         );
                     } else if (
-                        self.state.cornerstoneMode ===
+                        self.props.cornerstoneMode ===
                         constants.cornerstoneMode.EDITION
                     ) {
                         self.setState(
@@ -1724,15 +1718,17 @@ class App extends Component {
      */
     resetSelectedDetectionBoxes(e, sideMenuUpdate = false) {
         if (
-            this.state.cornerstoneMode ===
+            this.props.cornerstoneMode ===
                 constants.cornerstoneMode.SELECTION ||
             sideMenuUpdate === true
         ) {
             this.props.clearAllSelection();
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.SELECTION
+            );
             this.setState(
                 {
                     displaySelectedBoundingBox: false,
-                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     editionMode: null,
                     isDetectionContextVisible: false,
                     detectionContextPosition: {
@@ -1841,11 +1837,11 @@ class App extends Component {
             }
         }
         this.props.updateFABVisibility(selected);
+        this.props.updateCornerstoneMode(constants.cornerstoneMode.SELECTION);
         this.setState(
             {
                 displaySelectedBoundingBox: false,
                 isDetectionContextVisible: false,
-                cornerstoneMode: constants.cornerstoneMode.SELECTION,
             },
             () => {
                 this.resetCornerstoneTool();
@@ -1868,10 +1864,10 @@ class App extends Component {
                 uuid: detection.uuid,
                 view: detection.view,
             });
+            this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
             this.setState(
                 {
                     displaySelectedBoundingBox: true,
-                    cornerstoneMode: constants.cornerstoneMode.EDITION,
                     isDetectionContextVisible: true,
                 },
                 () => {
@@ -1891,10 +1887,10 @@ class App extends Component {
                 uuid: detection.uuid,
                 view: detection.view,
             });
+            this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
             this.setState(
                 {
                     displaySelectedBoundingBox: true,
-                    cornerstoneMode: constants.cornerstoneMode.EDITION,
                     isDetectionContextVisible: true,
                 },
                 () => {
@@ -1912,11 +1908,13 @@ class App extends Component {
      */
     onBoundingBoxSelected() {
         if (
-            this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
+            this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.ANNOTATION
+            );
             this.setState(
                 {
-                    cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
                     displaySelectedBoundingBox: true,
                 },
                 () => {
@@ -2053,10 +2051,12 @@ class App extends Component {
             // Clear selections, etc. of all detections
             this.props.clearAllSelection();
             this.props.updateFABVisibility(true);
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.SELECTION
+            );
             this.setState(
                 {
                     editionMode: null,
-                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     detectionLabelEditWidth: 0,
                     detectionLabelEditPosition: { top: 0, left: 0 },
                     displaySelectedBoundingBox: false,
@@ -2196,12 +2196,14 @@ class App extends Component {
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
             this.props.updateFABVisibility(true);
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.SELECTION
+            );
             this.setState(
                 {
                     isDetectionContextVisible: false,
                     isDrawingBoundingBox: false,
                     displaySelectedBoundingBox: false,
-                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
                 },
                 () => {
                     this.resetCornerstoneTool();
@@ -2301,7 +2303,7 @@ class App extends Component {
                         nextImageClick={this.nextImageClick}
                         enableNextButton={
                             !this.state.displaySelectedBoundingBox &&
-                            this.state.cornerstoneMode ===
+                            this.props.cornerstoneMode ===
                                 constants.cornerstoneMode.SELECTION
                         }
                     />
@@ -2327,7 +2329,6 @@ class App extends Component {
                         onLabelChange={this.editDetectionLabel}
                     />
                     <BoundPolyFAB
-                        cornerstoneMode={this.state.cornerstoneMode}
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
@@ -2355,7 +2356,7 @@ const mapStateToProps = (state) => {
         selectedAlgorithm: detections.selectedAlgorithm,
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
-        displayNext: ui.displayNext,
+        cornerstoneMode: ui.cornerstoneMode,
     };
 };
 
@@ -2381,9 +2382,9 @@ export default connect(mapStateToProps, {
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
-    updateDisplayNext,
     updateFABVisibility,
     updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDetectionLabels,
+    updateCornerstoneMode,
 })(App);

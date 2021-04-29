@@ -6,7 +6,10 @@ import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import Utils from '../../Utils';
 import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
-import { getIsFabVisible } from '../../redux/slices/ui/uiSlice';
+import {
+    getIsFabVisible,
+    getCornerstoneMode,
+} from '../../redux/slices/ui/uiSlice';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -68,12 +71,9 @@ const FABContainer = styled.div`
  * GUI widget that allows user to create a new detection and its polygon mask.
  *
  */
-const BoundPolyFAB = ({
-    cornerstoneMode,
-    onBoundingSelect,
-    onPolygonSelect,
-}) => {
+const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     const isVisible = useSelector(getIsFabVisible);
+    const cornerstoneMode = useSelector(getCornerstoneMode);
     const handleClick = (e, cb) => {
         if (
             isVisible &&
