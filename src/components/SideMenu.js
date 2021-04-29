@@ -154,10 +154,7 @@ class SideMenu extends Component {
                             );
                         })}
                     </div>
-                    <NextButton
-                        enableNextButton={this.props.enableNextButton}
-                        nextImageClick={this.props.nextImageClick}
-                    />
+                    <NextButton nextImageClick={this.props.nextImageClick} />
                 </div>
             );
         } else {
@@ -167,7 +164,6 @@ class SideMenu extends Component {
 }
 
 SideMenu.propTypes = {
-    enableNextButton: PropTypes.bool.isRequired,
     nextImageClick: PropTypes.func.isRequired,
 };
 

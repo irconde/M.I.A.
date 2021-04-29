@@ -6,6 +6,7 @@ const initialState = {
     isFABVisible: false,
     isDrawingBoundingBox: false,
     isDetectionContextVisible: false,
+    displaySelectedBoundingBox: false,
     detectionContextPosition: {
         top: 0,
         left: 0,
@@ -38,11 +39,16 @@ const uiSlice = createSlice({
         updateDetectionLabels: (state, action) => {
             state.detectionLabels = action.payload;
         },
+        updateDisplaySelectedBoundingBox: (state, action) => {
+            state.displaySelectedBoundingBox = action.payload;
+        },
     },
 });
 
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
+export const getDisplaySelectedBoundingBox = (state) =>
+    state.ui.displaySelectedBoundingBox;
 
 export const {
     updateCornerstoneMode,
@@ -50,6 +56,7 @@ export const {
     updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDetectionLabels,
+    updateDisplaySelectedBoundingBox,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

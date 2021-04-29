@@ -61,6 +61,7 @@ import {
     updateIsDetectionContextVisible,
     updateDetectionLabels,
     updateCornerstoneMode,
+    updateDisplaySelectedBoundingBox,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -118,7 +119,6 @@ class App extends Component {
             image: null,
             detections: {},
             receiveTime: null,
-            displaySelectedBoundingBox: false,
             buttonStyles: {
                 confirm: {},
                 reject: {},
@@ -425,11 +425,10 @@ class App extends Component {
      */
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
-        if (this.state.displaySelectedBoundingBox === true) {
+        if (this.props.displaySelectedBoundingBox === true) {
             this.props.clearAllSelection();
-            this.setState({ displaySelectedBoundingBox: false }, () => {
-                this.appUpdateImage();
-            });
+            this.props.updateDisplaySelectedBoundingBox(false);
+            this.appUpdateImage();
         }
     }
 
@@ -1431,9 +1430,9 @@ class App extends Component {
                 this.props.updateCornerstoneMode(
                     constants.cornerstoneMode.SELECTION
                 );
+                this.props.updateDisplaySelectedBoundingBox(false);
                 this.setState(
                     {
-                        displaySelectedBoundingBox: false,
                         editionMode: null,
                         isDetectionContextVisible: false,
                         detectionContextPosition: {
@@ -1463,9 +1462,9 @@ class App extends Component {
                     this.props.updateCornerstoneMode(
                         constants.cornerstoneMode.EDITION
                     );
+                    this.props.updateDisplaySelectedBoundingBox(true);
                     this.setState(
                         {
-                            displaySelectedBoundingBox: true,
                             isDetectionContextVisible: true,
                         },
                         () => {
@@ -1485,9 +1484,9 @@ class App extends Component {
                     this.props.updateCornerstoneMode(
                         constants.cornerstoneMode.SELECTION
                     );
+                    this.props.updateDisplaySelectedBoundingBox(false);
                     this.setState(
                         {
-                            displaySelectedBoundingBox: false,
                             editionMode: null,
                             isDetectionContextVisible: false,
                             detectionContextPosition: {
@@ -1652,10 +1651,10 @@ class App extends Component {
                             self.props.updateCornerstoneMode(
                                 constants.cornerstoneMode.SELECTION
                             );
+                            self.props.updateDisplaySelectedBoundingBox(false);
                             self.setState(
                                 {
                                     isDetectionContextVisible: false,
-                                    displaySelectedBoundingBox: false,
                                 },
                                 () => {
                                     self.props.clearAllSelection();
@@ -1672,9 +1671,9 @@ class App extends Component {
                         self.props.updateCornerstoneMode(
                             constants.cornerstoneMode.SELECTION
                         );
+                        self.props.updateDisplaySelectedBoundingBox(false);
                         self.setState(
                             {
-                                displaySelectedBoundingBox: false,
                                 isDetectionContextVisible: false,
                             },
                             () => {
@@ -1726,9 +1725,9 @@ class App extends Component {
             this.props.updateCornerstoneMode(
                 constants.cornerstoneMode.SELECTION
             );
+            this.props.updateDisplaySelectedBoundingBox(false);
             this.setState(
                 {
-                    displaySelectedBoundingBox: false,
                     editionMode: null,
                     isDetectionContextVisible: false,
                     detectionContextPosition: {
@@ -1771,52 +1770,46 @@ class App extends Component {
         const detectionData = this.props.selectedDetection;
         if (detectionData) {
             const detectionBoxCoords = detectionData.boundingBox;
-            this.setState(
-                {
-                    displaySelectedBoundingBox: true,
+            this.props.updateDisplaySelectedBoundingBox(true);
+            const data = {
+                handles: {
+                    end: {
+                        x: detectionBoxCoords[2],
+                        y: detectionBoxCoords[3],
+                    },
+                    start: {
+                        x: detectionBoxCoords[0],
+                        y: detectionBoxCoords[1],
+                    },
                 },
-                () => {
-                    const data = {
-                        handles: {
-                            end: {
-                                x: detectionBoxCoords[2],
-                                y: detectionBoxCoords[3],
-                            },
-                            start: {
-                                x: detectionBoxCoords[0],
-                                y: detectionBoxCoords[1],
-                            },
-                        },
-                        uuid: detectionData.uuid,
-                        algorithm: detectionData.algorithm,
-                        class: detectionData.class,
-                        renderColor: getDetectionColor(detectionData),
-                        confidence: detectionData.confidence,
-                        updatingDetection: true,
-                        view: detectionData.view,
-                    };
-                    if (view === constants.viewport.TOP) {
-                        cornerstoneTools.addToolState(
-                            this.state.imageViewportTop,
-                            'BoundingBoxDrawing',
-                            data
-                        );
-                    } else if (view === constants.viewport.SIDE) {
-                        cornerstoneTools.addToolState(
-                            this.state.imageViewportSide,
-                            'BoundingBoxDrawing',
-                            data
-                        );
-                    }
-                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                        mouseButtonMask: 1,
-                    });
-                    cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                        cornerstoneMode: constants.cornerstoneMode.EDITION,
-                    });
-                    this.appUpdateImage();
-                }
-            );
+                uuid: detectionData.uuid,
+                algorithm: detectionData.algorithm,
+                class: detectionData.class,
+                renderColor: getDetectionColor(detectionData),
+                confidence: detectionData.confidence,
+                updatingDetection: true,
+                view: detectionData.view,
+            };
+            if (view === constants.viewport.TOP) {
+                cornerstoneTools.addToolState(
+                    this.state.imageViewportTop,
+                    'BoundingBoxDrawing',
+                    data
+                );
+            } else if (view === constants.viewport.SIDE) {
+                cornerstoneTools.addToolState(
+                    this.state.imageViewportSide,
+                    'BoundingBoxDrawing',
+                    data
+                );
+            }
+            cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                mouseButtonMask: 1,
+            });
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                cornerstoneMode: constants.cornerstoneMode.EDITION,
+            });
+            this.appUpdateImage();
         }
         this.appUpdateImage();
     }
@@ -1838,9 +1831,9 @@ class App extends Component {
         }
         this.props.updateFABVisibility(selected);
         this.props.updateCornerstoneMode(constants.cornerstoneMode.SELECTION);
+        this.props.updateDisplaySelectedBoundingBox(false);
         this.setState(
             {
-                displaySelectedBoundingBox: false,
                 isDetectionContextVisible: false,
             },
             () => {
@@ -1865,9 +1858,9 @@ class App extends Component {
                 view: detection.view,
             });
             this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
+            this.props.updateDisplaySelectedBoundingBox(true);
             this.setState(
                 {
-                    displaySelectedBoundingBox: true,
                     isDetectionContextVisible: true,
                 },
                 () => {
@@ -1888,9 +1881,9 @@ class App extends Component {
                 view: detection.view,
             });
             this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
+            this.props.updateDisplaySelectedBoundingBox(true);
             this.setState(
                 {
-                    displaySelectedBoundingBox: true,
                     isDetectionContextVisible: true,
                 },
                 () => {
@@ -1913,22 +1906,16 @@ class App extends Component {
             this.props.updateCornerstoneMode(
                 constants.cornerstoneMode.ANNOTATION
             );
-            this.setState(
-                {
-                    displaySelectedBoundingBox: true,
-                },
-                () => {
-                    for (const [key, myDetectionSet] of Object.entries(
-                        this.state.detections
-                    )) {
-                        myDetectionSet.selectAlgorithm(false);
-                    }
-                    this.appUpdateImage();
-                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                        mouseButtonMask: 1,
-                    });
-                }
-            );
+            this.props.updateDisplaySelectedBoundingBox(true);
+            for (const [key, myDetectionSet] of Object.entries(
+                this.state.detections
+            )) {
+                myDetectionSet.selectAlgorithm(false);
+            }
+            this.appUpdateImage();
+            cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                mouseButtonMask: 1,
+            });
         }
 
         this.clearDetectionset(this.state.detections);
@@ -2054,12 +2041,12 @@ class App extends Component {
             this.props.updateCornerstoneMode(
                 constants.cornerstoneMode.SELECTION
             );
+            this.props.updateDisplaySelectedBoundingBox(false);
             this.setState(
                 {
                     editionMode: null,
                     detectionLabelEditWidth: 0,
                     detectionLabelEditPosition: { top: 0, left: 0 },
-                    displaySelectedBoundingBox: false,
                 },
                 () => {
                     this.appUpdateImage();
@@ -2199,11 +2186,11 @@ class App extends Component {
             this.props.updateCornerstoneMode(
                 constants.cornerstoneMode.SELECTION
             );
+            this.props.updateDisplaySelectedBoundingBox(false);
             this.setState(
                 {
                     isDetectionContextVisible: false,
                     isDrawingBoundingBox: false,
-                    displaySelectedBoundingBox: false,
                 },
                 () => {
                     this.resetCornerstoneTool();
@@ -2301,11 +2288,6 @@ class App extends Component {
                         onDetectionSetSelected={this.onMenuDetectionSetSelected}
                         onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
-                        enableNextButton={
-                            !this.state.displaySelectedBoundingBox &&
-                            this.props.cornerstoneMode ===
-                                constants.cornerstoneMode.SELECTION
-                        }
                     />
                     <div id="algorithm-outputs"> </div>
                     <DetectionContextMenu
@@ -2357,6 +2339,7 @@ const mapStateToProps = (state) => {
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
         cornerstoneMode: ui.cornerstoneMode,
+        displaySelectedBoundingBox: ui.displaySelectedBoundingBox,
     };
 };
 
@@ -2387,4 +2370,5 @@ export default connect(mapStateToProps, {
     updateIsDetectionContextVisible,
     updateDetectionLabels,
     updateCornerstoneMode,
+    updateDisplaySelectedBoundingBox,
 })(App);
