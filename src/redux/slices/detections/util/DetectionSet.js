@@ -272,6 +272,7 @@ export default class DetectionSetUtil {
 
         for (const detectionList of Object.values(updatedDetectionSet.data)) {
             detectionList.forEach((detection) => {
+                // eslint-disable-next-line no-unused-vars
                 detection = DetectionUtil.selectDetection(detection);
             });
         }
@@ -356,6 +357,7 @@ export default class DetectionSetUtil {
         const updatedDetectionSet = cloneDeep(detectionSet);
         for (const detectionList of Object.values(updatedDetectionSet.data)) {
             detectionList.forEach((detection) => {
+                // eslint-disable-next-line no-unused-vars
                 detection = DetectionUtil.updateDetection(detection, {
                     validation: true,
                 });

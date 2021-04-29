@@ -100,6 +100,7 @@ class SideMenu extends Component {
         // We can't use map on the this.props.detection in the return
         // Therefore, we will populate the array myDetections with this data before returning
         let myDetections = [];
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(
             this.props.detections
         )) {

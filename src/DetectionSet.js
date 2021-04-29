@@ -1,5 +1,4 @@
 import * as constants from './Constants';
-import Detection from './Detection';
 
 /**
  * Class that represents a set of detections returned by an object detection algorithm
@@ -81,6 +80,7 @@ export default class DetectionSet {
         this.selectedDetection = undefined;
         this.lowerOpacity = false;
         this.selectedDetectionIndex = constants.selection.NO_SELECTION;
+        // eslint-disable-next-line no-unused-vars
         for (let [key, detectionList] of Object.entries(this.data)) {
             for (let detection of detectionList) {
                 detection.setSelected(false);
@@ -155,10 +155,6 @@ export default class DetectionSet {
         return result;
     }
 
-    setVisibility(visibility) {
-        // TODO. To be implemented
-    }
-
     setAlgorithmName(algorithm) {
         this.algorithm = algorithm;
     }
@@ -211,6 +207,7 @@ export default class DetectionSet {
      */
     isValidated() {
         let result = true;
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionList] of Object.entries(this.data)) {
             for (let i = 0; i < detectionList.length; i++) {
                 if (detectionList[i].isValidated() === false) {

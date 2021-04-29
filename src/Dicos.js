@@ -1,8 +1,7 @@
 import * as dcmjs from 'dcmjs';
-import { type } from 'dcmjs';
 
 /**
- * Class that emcompases any secondary method related to DICOS file management
+ * Class that encompasses any secondary method related to DICOS file management
  */
 export default class Dicos {
     static get dictionary() {
@@ -66,7 +65,7 @@ export default class Dicos {
      * retrieveBoundingBoxData - Method that parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
      *
      * @param  {type} image DICOS+TDR image data
-     * @return {type}       Float array with the coordenates of the several bounding boxes derived from the DICOS+TDR data.
+     * @return {type}       Float array with the coordinates of the several bounding boxes derived from the DICOS+TDR data.
      *                      Each bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
      */
     static retrieveBoundingBoxData(image) {

@@ -219,7 +219,7 @@ class TreeAlgorithm extends Component {
                             'OPERATOR'
                         ) == 0
                             ? this.props.algorithm.algorithm
-                            : constants.ALGORTIHM +
+                            : constants.ALGORITHM +
                               ' - ' +
                               this.props.algorithm.algorithm}
                     </div>

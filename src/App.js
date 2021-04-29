@@ -8,7 +8,6 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import io from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
@@ -18,7 +17,6 @@ import axios from 'axios';
 import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
-import DetectionSet from './DetectionSet';
 import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
@@ -39,6 +37,7 @@ import {
     resetDetections,
     addDetection,
     addDetectionSet,
+    // eslint-disable-next-line no-unused-vars
     areDetectionsValidated,
     clearAllSelection,
     clearSelectedDetection,
@@ -423,6 +422,7 @@ class App extends Component {
      * @param {Event} e
      * @returns {type} None
      */
+    // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
         if (this.props.displaySelectedBoundingBox === true) {
@@ -496,6 +496,7 @@ class App extends Component {
      */
     async getFilesFromCommandServer() {
         COMMAND_SERVER.on('img', (data) => {
+            // eslint-disable-next-line no-unused-vars
             this.sendImageToFileServer(Utils.b64toBlob(data)).then((res) => {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
@@ -848,6 +849,7 @@ class App extends Component {
                             .generateAsync({ type: 'blob' })
                             .then((oraBlob) => {
                                 this.sendImageToCommandServer(oraBlob).then(
+                                    // eslint-disable-next-line no-unused-vars
                                     (res) => {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.setState({
@@ -880,6 +882,7 @@ class App extends Component {
      */
     validationCompleted() {
         let result = true;
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(
             this.state.detections
         )) {
@@ -1084,6 +1087,7 @@ class App extends Component {
                     const confidenceLevel = Utils.decimalToPercentage(
                         Dicos.retrieveConfidenceLevel(threatSequence.items[j])
                     );
+                    // eslint-disable-next-line no-unused-vars
                     const maskData = Dicos.retrieveMaskData(
                         threatSequence.items[j],
                         image
@@ -1182,6 +1186,7 @@ class App extends Component {
 
         if (eventData.element.id === 'dicomImageLeft') {
             const context = eventData.canvasContext;
+            // eslint-disable-next-line no-unused-vars
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
@@ -1193,6 +1198,7 @@ class App extends Component {
             this.state.singleViewport === false
         ) {
             const context = eventData.canvasContext;
+            // eslint-disable-next-line no-unused-vars
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
                 'BoundingBoxDrawing'
@@ -1235,6 +1241,7 @@ class App extends Component {
         let selectedViewport;
         context.font = constants.detectionStyle.LABEL_FONT;
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(data)) {
             if (detectionSet.visible !== true) {
                 continue;
@@ -1370,6 +1377,7 @@ class App extends Component {
         if (e.detail.element.id === 'dicomImageLeft') {
             view = constants.viewport.TOP;
         } else if (e.detail.element.id === 'dicomImageRight') {
+            // eslint-disable-next-line no-unused-vars
             view = constants.viewport.SIDE;
         }
         if (!this.props.detections) {
@@ -1821,8 +1829,10 @@ class App extends Component {
      * @param selected {boolean} - Indicates whether the algorithm was selected or not
      * @param algorithm {string} - Algorithm's name
      */
+    // eslint-disable-next-line no-unused-vars
     onAlgorithmSelected(selected, algorithm) {
         if (selected === true) {
+            // eslint-disable-next-line no-unused-vars
             for (const [key, myDetectionSet] of Object.entries(
                 this.state.detections
             )) {
@@ -1907,6 +1917,7 @@ class App extends Component {
                 constants.cornerstoneMode.ANNOTATION
             );
             this.props.updateDisplaySelectedBoundingBox(true);
+            // eslint-disable-next-line no-unused-vars
             for (const [key, myDetectionSet] of Object.entries(
                 this.state.detections
             )) {
@@ -1927,6 +1938,7 @@ class App extends Component {
      *
      */
     clearDetectionset(listOfDetections) {
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(listOfDetections)) {
             detectionSet.clearAll();
         }
@@ -2025,6 +2037,7 @@ class App extends Component {
      */
     editDetectionLabel(newLabel) {
         // Destructure and gather useful data from selected detection
+        // eslint-disable-next-line no-unused-vars
         const algo = this.currentSelection.getAlgorithm();
         const { algorithm, uuid, view } = this.props.selectedDetection;
 
@@ -2071,6 +2084,7 @@ class App extends Component {
                 confidence,
             } = detectionData;
             if (boundingBox) {
+                // eslint-disable-next-line no-unused-vars
                 const boundingHeight = Math.abs(
                     boundingBox[3] - boundingBox[1]
                 );

@@ -78,6 +78,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         }
 
         const eventData = evt.detail;
+        // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
         const lineWidth = constants.detectionStyle.BORDER_WIDTH;
 
@@ -206,6 +207,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         });
     }
 
+    // eslint-disable-next-line no-unused-vars
     updateCachedStats(image, element, data) {}
 
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
@@ -283,6 +285,7 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
  * @returns {string[]}
  */
 
+// eslint-disable-next-line no-unused-vars
 function _createTextBoxContent(context, { className, score }, options = {}) {
     const textLines = [];
     const classInfoString = `${className} - ${score}%`;
@@ -298,6 +301,7 @@ function _createTextBoxContent(context, { className, score }, options = {}) {
  * @returns {Array.<{x: number, y: number}>}
  */
 
+// eslint-disable-next-line no-unused-vars
 function _findTextBoxAnchorPoints(startHandle, endHandle) {
     const { left, top, width, height } = _getRectangleImageCoordinates(
         startHandle,

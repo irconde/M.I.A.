@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
-import Utils from '../../Utils';
 import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import {
@@ -117,7 +116,6 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
 };
 
 BoundPolyFAB.propTypes = {
-    cornerstoneMode: PropTypes.string.isRequired,
     onBoundingSelect: PropTypes.func.isRequired,
     onPolygonSelect: PropTypes.func.isRequired,
 };
