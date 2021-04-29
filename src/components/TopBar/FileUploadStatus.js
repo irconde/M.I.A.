@@ -28,7 +28,7 @@ const FileUploadStatus = ({ isUpload, isDownload, styles }) => {
 FileUploadStatus.propTypes = {
     isUpload: PropTypes.bool.isRequired,
     isDownload: PropTypes.bool.isRequired,
-    styles: PropTypes.string,
+    styles: PropTypes.object,
 };
 
 export default FileUploadStatus;

@@ -13,7 +13,7 @@ const ConnectionStatus = ({ isConnected, style }) => {
 
 ConnectionStatus.propTypes = {
     isConnected: PropTypes.bool.isRequired,
-    style: PropTypes.string,
+    style: PropTypes.object,
 };
 
 export default ConnectionStatus;

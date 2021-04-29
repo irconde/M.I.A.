@@ -139,7 +139,6 @@ function DetectionContextMenu({
 DetectionContextMenu.propTypes = {
     position: PropTypes.object.isRequired,
     isVisible: PropTypes.bool.isRequired,
-    selectedOption: PropTypes.string.isRequired,
     setSelectedOption: PropTypes.func.isRequired,
     onLabelClicked: PropTypes.func.isRequired,
     onBoundingClicked: PropTypes.func.isRequired,

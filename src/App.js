@@ -765,32 +765,37 @@ class App extends Component {
                                 constants.viewport.TOP
                             );
                             for (let j = 0; j < topDetections.length; j++) {
-                                let threatPromise = Dicos.dataToBlob(
-                                    topDetections[j],
-                                    topDetections[j].blobData,
-                                    Date.now(),
-                                    !validationCompleted,
-                                    function (threatBlob) {
-                                        newOra.file(
-                                            `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`,
-                                            threatBlob
+                                fetch(topDetections[j].blobData).then(
+                                    (response) => {
+                                        const blobData = response.blob();
+                                        let threatPromise = Dicos.dataToBlob(
+                                            topDetections[j],
+                                            blobData,
+                                            Date.now(),
+                                            !validationCompleted,
+                                            function (threatBlob) {
+                                                newOra.file(
+                                                    `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`,
+                                                    threatBlob
+                                                );
+                                                let newLayer = stackXML.createElement(
+                                                    'layer'
+                                                );
+                                                newLayer.setAttribute(
+                                                    'src',
+                                                    `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
+                                                );
+                                                newLayer.setAttribute(
+                                                    'UUID',
+                                                    `${topDetections[j].uuid}`
+                                                );
+                                                stackElem.appendChild(newLayer);
+                                                topCounter++;
+                                            }
                                         );
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
-                                        );
-                                        newLayer.setAttribute(
-                                            'UUID',
-                                            `${topDetections[j].uuid}`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        topCounter++;
+                                        listOfPromises.push(threatPromise);
                                     }
                                 );
-                                listOfPromises.push(threatPromise);
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
@@ -799,32 +804,37 @@ class App extends Component {
                                 constants.viewport.SIDE
                             );
                             for (let j = 0; j < sideDetections.length; j++) {
-                                let threatPromise = Dicos.dataToBlob(
-                                    sideDetections[j],
-                                    sideDetections[j].blobData,
-                                    Date.now(),
-                                    !validationCompleted,
-                                    function (threatBlob) {
-                                        newOra.file(
-                                            `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`,
-                                            threatBlob
+                                fetch(sideDetections[j].blobData).then(
+                                    (response) => {
+                                        const blobData = response.blob();
+                                        let threatPromise = Dicos.dataToBlob(
+                                            sideDetections[j],
+                                            blobData,
+                                            Date.now(),
+                                            !validationCompleted,
+                                            function (threatBlob) {
+                                                newOra.file(
+                                                    `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`,
+                                                    threatBlob
+                                                );
+                                                let newLayer = stackXML.createElement(
+                                                    'layer'
+                                                );
+                                                newLayer.setAttribute(
+                                                    'src',
+                                                    `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
+                                                );
+                                                newLayer.setAttribute(
+                                                    'UUID',
+                                                    `${sideDetections[j].uuid}`
+                                                );
+                                                stackElem.appendChild(newLayer);
+                                                sideCounter++;
+                                            }
                                         );
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
-                                        );
-                                        newLayer.setAttribute(
-                                            'UUID',
-                                            `${sideDetections[j].uuid}`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        sideCounter++;
+                                        listOfPromises.push(threatPromise);
                                     }
                                 );
-                                listOfPromises.push(threatPromise);
                             }
                         }
                         stackCounter++;
@@ -1098,7 +1108,9 @@ class App extends Component {
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
-                        blobData: new Blob([new Uint8Array(reader.result)]),
+                        blobData: URL.createObjectURL(
+                            new Blob([new Uint8Array(reader.result)])
+                        ),
                     });
                 }
             });
@@ -1165,7 +1177,9 @@ class App extends Component {
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
-                            blobData: new Blob([new Uint8Array(read.result)]),
+                            blobData: URL.createObjectURL(
+                                new Blob([new Uint8Array(read.result)])
+                            ),
                         });
                     }
                 });
@@ -2311,7 +2325,7 @@ class App extends Component {
                     />
                     <EditLabel
                         position={this.state.detectionLabelEditPosition}
-                        width={this.state.detectionLabelEditWidth}
+                        width={parseInt(this.state.detectionLabelEditWidth)}
                         labels={this.props.detectionLabels}
                         onLabelChange={this.editDetectionLabel}
                     />
