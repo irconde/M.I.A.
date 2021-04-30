@@ -63,13 +63,13 @@ const detectionsSlice = createSlice({
                 blobData,
             } = action.payload;
             const detection = DetectionUtil.createDetection({
-                algorithm: algorithm,
-                maskBitmap: maskBitmap,
-                boundingBox: boundingBox,
-                className: className,
-                confidence: confidence,
-                view: view,
-                blobData: blobData,
+                algorithm,
+                maskBitmap,
+                boundingBox,
+                className,
+                confidence,
+                view,
+                blobData,
             });
 
             const algo = detection.algorithm;
