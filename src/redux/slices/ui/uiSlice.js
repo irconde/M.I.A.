@@ -20,8 +20,6 @@ const initialState = {
     },
     zoomLevelTop: constants.viewportStyle.ZOOM,
     zoomLevelSide: constants.viewportStyle.ZOOM,
-    imageViewportTop: document.getElementById('dicomImageLeft'),
-    imageViewportSide: document.getElementById('dicomImageRight'),
 };
 
 const uiSlice = createSlice({
@@ -113,17 +111,10 @@ const uiSlice = createSlice({
             state.editionMode = null;
             state.isDetectionContextVisible = false;
         },
-        updateZoomAndViewport: (state, action) => {
-            const {
-                zoomLevelTop,
-                zoomLevelSide,
-                imageViewportTop,
-                imageViewportSide,
-            } = action.payload;
+        updateZoomLevels: (state, action) => {
+            const { zoomLevelTop, zoomLevelSide } = action.payload;
             state.zoomLevelTop = zoomLevelTop;
             state.zoomLevelSide = zoomLevelSide;
-            state.imageViewportTop = imageViewportTop;
-            state.imageViewportSide = imageViewportSide;
         },
         updateZoomLevelTop: (state, action) => {
             state.zoomLevelTop = action.payload;
@@ -149,8 +140,6 @@ export const getDetectionLabelEditPosition = (state) =>
     state.ui.detectionLabelEditPosition;
 export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
 export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
-export const getImageViewportTop = (state) => state.ui.imageViewportTop;
-export const getImageViewportSide = (state) => state.ui.imageViewportSide;
 
 export const {
     updateCornerstoneMode,
@@ -170,7 +159,7 @@ export const {
     resetSelectedDetectionsUpdate,
     menuDetectionSelectedUpdate,
     updateDetectionContextPosition,
-    updateZoomAndViewport,
+    updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
 } = uiSlice.actions;

@@ -71,7 +71,7 @@ import {
     boundingBoxSelectedUpdate,
     resetSelectedDetectionsUpdate,
     updateDetectionContextPosition,
-    updateZoomAndViewport,
+    updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
 } from './redux/slices/ui/uiSlice';
@@ -354,11 +354,9 @@ class App extends Component {
         const updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewportTop.scale = newZoomLevelTop;
         updateImageViewportSide.scale = newZoomLevelSide;
-        this.props.updateZoomAndViewport({
+        this.props.updateZoomLevels({
             zoomLevelTop: newZoomLevelTop,
             zoomLevelSide: newZoomLevelSide,
-            imageViewportTop: updateImageViewportTop,
-            imageViewportSide: updateImageViewportSide,
         });
     }
 
@@ -2260,7 +2258,7 @@ export default connect(mapStateToProps, {
     boundingBoxSelectedUpdate,
     resetSelectedDetectionsUpdate,
     updateDetectionContextPosition,
-    updateZoomAndViewport,
+    updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
 })(App);
