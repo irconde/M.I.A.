@@ -199,10 +199,6 @@ export default class Dicos {
      * @param  {type} detection      Detection object we are using to make a DICOM blob
      * @param  {type} image          Original DICOS Blob data
      * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
-     * @param  {type} abort= false   Boolean value that represents the abort flag.
-     *                               True. When feedback has been left for at least one detection, we need to create a TDR to save feedback
-     *                               False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
-     * @return {type}                Blob with data for the creation of the amended DICOS file.
      */
     static async dataToBlob(detection, image, startTime) {
         var today = new Date();
