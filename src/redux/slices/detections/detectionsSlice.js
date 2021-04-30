@@ -4,21 +4,23 @@ import './util/typedef';
 import DetectionSetUtil from './util/DetectionSet';
 import DetectionUtil from './util/Detection';
 
+const initialState = {
+    // Selection data
+    /** @type string */
+    selectedAlgorithm: null,
+    /** @type Detection */
+    selectedDetection: null,
+    /** @type Array<string> */
+    algorithmNames: [],
+
+    // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
+    /** @type Object<string, DetectionSet> */
+    data: {},
+};
+
 const detectionsSlice = createSlice({
     name: 'detections',
-    initialState: {
-        // Selection data
-        /** @type string */
-        selectedAlgorithm: null,
-        /** @type Detection */
-        selectedDetection: null,
-        /** @type Array<string> */
-        algorithmNames: [],
-
-        // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
-        /** @type Object<string, DetectionSet> */
-        data: {},
-    },
+    initialState,
     reducers: {
         // Reset store to default values
         resetDetections: (state) => {

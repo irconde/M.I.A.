@@ -1459,7 +1459,6 @@ class App extends Component {
                         view: viewport,
                         uuid: combinedDetections[clickedPos].uuid,
                     });
-                    console.log(e);
 
                     this.onDetectionSelected(e).finally(() => {
                         this.props.detectionSelectedUpdate();
@@ -1755,7 +1754,6 @@ class App extends Component {
                     this.appUpdateImage();
                     resolve();
                 }
-
                 this.appUpdateImage();
                 resolve();
             }
@@ -1812,11 +1810,13 @@ class App extends Component {
                 view: detection.view,
             });
         }
-        this.onDetectionSelected(e).finally(() => {
-            this.props.detectionSelectedUpdate();
-            this.renderDetectionContextMenu(e);
-            this.appUpdateImage();
-        });
+        setTimeout(() => {
+            this.onDetectionSelected(e).finally(() => {
+                this.props.detectionSelectedUpdate();
+                this.renderDetectionContextMenu(e);
+                this.appUpdateImage();
+            });
+        }, 0);
     }
 
     /**

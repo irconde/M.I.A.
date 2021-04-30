@@ -50,7 +50,6 @@ class TreeDetection extends Component {
         algorithmVisible: PropTypes.bool.isRequired,
         updateAlgorithmVisibility: PropTypes.func.isRequired,
         updateDetectionVisibility: PropTypes.func.isRequired,
-        updateFABVisibility: PropTypes.func.isRequired,
     };
 
     /**
