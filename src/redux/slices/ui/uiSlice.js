@@ -21,6 +21,7 @@ const initialState = {
     zoomLevelSide: constants.viewportStyle.ZOOM,
     singleViewport: true,
     receiveTime: null,
+    selectedFile: false,
 };
 
 const uiSlice = createSlice({
@@ -124,6 +125,10 @@ const uiSlice = createSlice({
             const { singleViewport, receiveTime } = action.payload;
             state.singleViewport = singleViewport;
             state.receiveTime = receiveTime;
+            state.selectedFile = true;
+        },
+        updateSelectedFile: (state) => {
+            state.selectedFile = false;
         },
     },
 });
@@ -166,6 +171,7 @@ export const {
     updateZoomLevelTop,
     updateZoomLevelSide,
     updateSingleViewportAndTime,
+    updateSelectedFile,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

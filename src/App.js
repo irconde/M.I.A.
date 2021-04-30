@@ -73,6 +73,7 @@ import {
     updateZoomLevelTop,
     updateZoomLevelSide,
     updateSingleViewportAndTime,
+    updateSelectedFile,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -120,18 +121,8 @@ class App extends Component {
         super(props);
         this.currentSelection = new Selection();
         this.state = {
-            threatsCount: 0,
-            selectedFile: null,
-            date: null,
-            time: null,
             configurationInfo: {},
             myOra: new ORA(),
-            image: null,
-            detections: {},
-            buttonStyles: {
-                confirm: {},
-                reject: {},
-            },
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -151,7 +142,6 @@ class App extends Component {
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.onMenuDetectionSelected = this.onMenuDetectionSelected.bind(this);
-        this.onAlgorithmSelected = this.onAlgorithmSelected.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
         this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
             this
@@ -493,7 +483,7 @@ class App extends Component {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
                 this.props.setDownload(false);
-                if (this.state.selectedFile === null) {
+                if (this.props.selectedFile === false) {
                     this.getNextImage();
                 }
             });
@@ -555,8 +545,8 @@ class App extends Component {
         updateImageViewportSide.style.visibility = 'hidden';
         this.currentSelection = new Selection();
         this.props.updateFABVisibility(false);
+        this.props.updateSelectedFile();
         this.setState({
-            selectedFile: null,
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
         });
@@ -666,29 +656,21 @@ class App extends Component {
                                         singleViewport: listOfStacks.length < 2,
                                         receiveTime: Date.now(),
                                     });
-                                    this.setState(
-                                        {
-                                            selectedFile: this.state.myOra.getFirstImage(),
-                                            image: this.state.myOra.getFirstPixelData(),
-                                        },
-                                        () => {
-                                            Utils.changeViewport(
-                                                this.props.singleViewport
-                                            );
-                                            if (this.props.singleViewport) {
-                                                cornerstone.resize(
-                                                    this.state.imageViewportTop,
-                                                    true
-                                                );
-                                            } else {
-                                                cornerstone.resize(
-                                                    this.state.imageViewportTop
-                                                );
-                                            }
-                                            this.props.resetDetections();
-                                            this.loadAndViewImage();
-                                        }
+                                    Utils.changeViewport(
+                                        this.props.singleViewport
                                     );
+                                    if (this.props.singleViewport) {
+                                        cornerstone.resize(
+                                            this.state.imageViewportTop,
+                                            true
+                                        );
+                                    } else {
+                                        cornerstone.resize(
+                                            this.state.imageViewportTop
+                                        );
+                                    }
+                                    this.props.resetDetections();
+                                    this.loadAndViewImage();
                                 });
                             });
                     });
@@ -712,7 +694,6 @@ class App extends Component {
             .then((res) => {
                 if (res.data.confirm === 'image-removed') {
                     this.props.validateDetections();
-                    let validationCompleted = false;
                     const stackXML = document.implementation.createDocument(
                         '',
                         '',
@@ -759,7 +740,7 @@ class App extends Component {
                                     detection,
                                     Utils.b64toBlob(detection.blobData),
                                     Date.now(),
-                                    !validationCompleted
+                                    true
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`,
@@ -793,7 +774,7 @@ class App extends Component {
                                     detection,
                                     Utils.b64toBlob(detection.blobData),
                                     Date.now(),
-                                    !validationCompleted
+                                    true
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`,
@@ -841,9 +822,7 @@ class App extends Component {
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
                                         this.resetSelectedDetectionBoxes(e);
-                                        this.setState({
-                                            selectedFile: null,
-                                        });
+                                        this.props.updateSelectedFile();
                                         this.props.setUpload(false);
                                         this.getNextImage();
                                     }
@@ -854,39 +833,12 @@ class App extends Component {
                     console.log("File server couldn't remove the next image");
                 } else if (res.data.confirm === 'no-next-image') {
                     alert('No next image');
-                    this.setState({ selectedFile: null });
+                    this.props.updateSelectedFile(false);
                 }
             })
             .catch((err) => {
                 console.log(err);
             });
-    }
-
-    /**
-     * * validationCompleted - Method that indicates is the operator has finished validating detections
-     *
-     * @param  {type} validationList array sized with the number of detections. Every position
-     * in the array is an int value (0/1) that indicates whether the corresponding detection has been validated or not.
-     * @return {type}                boolean value. True in case al detections were validated. False, otherwise.
-     */
-    validationCompleted() {
-        let result = true;
-        // eslint-disable-next-line no-unused-vars
-        for (const [key, detectionSet] of Object.entries(
-            this.state.detections
-        )) {
-            if (detectionSet.data.top !== undefined) {
-                detectionSet.data.top.forEach((detection) => {
-                    detection.validation = true;
-                });
-            }
-            if (detectionSet.data.side !== undefined) {
-                detectionSet.data.side.forEach((detection) => {
-                    detection.validation = true;
-                });
-            }
-        }
-        return result;
     }
 
     /**
@@ -992,29 +944,12 @@ class App extends Component {
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
-        var today = new Date();
-        var dd = String(today.getDate()).padStart(2, '0');
-        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        var yyyy = today.getFullYear();
         const reader = new FileReader();
         reader.addEventListener('loadend', function () {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
             self.currentSelection = new Selection();
             self.setState({
-                threatsCount: image.uint16(
-                    Dicos.dictionary['NumberOfAlarmObjects'].tag
-                ),
-                algorithm: image.string(
-                    Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag
-                ),
-                time:
-                    today.getHours() +
-                    ':' +
-                    today.getMinutes() +
-                    ':' +
-                    today.getSeconds(),
-                date: mm + '/' + dd + '/' + yyyy,
                 configurationInfo: {
                     type: image.string(Dicos.dictionary['DetectorType'].tag),
                     configuration: image.string(
@@ -1749,28 +1684,6 @@ class App extends Component {
     }
 
     /**
-     * onAlgorithmSelected - It updates detection sets' visualization
-     *
-     * @return {none} None
-     * @param selected {boolean} - Indicates whether the algorithm was selected or not
-     * @param algorithm {string} - Algorithm's name
-     */
-    // eslint-disable-next-line no-unused-vars
-    onAlgorithmSelected(selected, algorithm) {
-        if (selected === true) {
-            // eslint-disable-next-line no-unused-vars
-            for (const [key, myDetectionSet] of Object.entries(
-                this.state.detections
-            )) {
-                myDetectionSet.lowerOpacity = true;
-            }
-        }
-        this.props.algorithmSelectedUpdate();
-        this.resetCornerstoneTool();
-        this.appUpdateImage();
-    }
-
-    /**
      * onMenuDetectionSelected - It updates validation button visualization.
      *
      * @return {none} None
@@ -1819,19 +1732,11 @@ class App extends Component {
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.props.boundingBoxSelectedUpdate();
-            // eslint-disable-next-line no-unused-vars
-            for (const [key, myDetectionSet] of Object.entries(
-                this.state.detections
-            )) {
-                myDetectionSet.selectAlgorithm(false);
-            }
             this.appUpdateImage();
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
             });
         }
-
-        this.clearDetectionset(this.state.detections);
     }
 
     /**
@@ -1852,7 +1757,7 @@ class App extends Component {
      * @param {none} None
      */
     onPolygonMaskSelected() {
-        this.clearDetectionset(this.state.detections);
+        // To be implemented
     }
 
     /**
@@ -2148,7 +2053,6 @@ class App extends Component {
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
                         appUpdateImage={this.appUpdateImage}
-                        onAlgorithmSelected={this.onAlgorithmSelected}
                         onMenuDetectionSelected={this.onMenuDetectionSelected}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
@@ -2207,6 +2111,7 @@ const mapStateToProps = (state) => {
         imageViewportTop: ui.imageViewportTop,
         imageViewportSide: ui.imageViewportSide,
         singleViewport: ui.singleViewport,
+        selectedFile: ui.selectedFile,
     };
 };
 
@@ -2251,4 +2156,5 @@ export default connect(mapStateToProps, {
     updateZoomLevelTop,
     updateZoomLevelSide,
     updateSingleViewportAndTime,
+    updateSelectedFile,
 })(App);

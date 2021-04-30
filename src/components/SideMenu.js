@@ -34,7 +34,6 @@ class SideMenu extends Component {
         configurationInfo: PropTypes.object.isRequired,
         enableMenu: PropTypes.bool.isRequired,
         appUpdateImage: PropTypes.func.isRequired,
-        onAlgorithmSelected: PropTypes.func.isRequired,
         onMenuDetectionSelected: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         onDetectionSelected: PropTypes.func.isRequired,
