@@ -56,12 +56,20 @@ import {
 } from './redux/slices/detections/detectionsSlice';
 import {
     updateFABVisibility,
-    updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,
+    emptyAreaClickUpdate,
+    detectionSelectedUpdate,
+    algorithmSelectedUpdate,
+    menuDetectionSelectedUpdate,
+    labelSelectedUpdate,
+    labelCompleteUpdate,
+    deleteDetectionUpdate,
+    boundingBoxSelectedUpdate,
+    resetSelectedDetectionsUpdate,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -129,8 +137,6 @@ class App extends Component {
             imageViewportSide: document.getElementById('dicomImageRight'),
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            isDrawingBoundingBox: false,
-            isDetectionContextVisible: false,
             detectionContextPosition: {
                 top: 0,
                 left: 0,
@@ -764,41 +770,33 @@ class App extends Component {
                                 this.props.detections,
                                 constants.viewport.TOP
                             );
-                            console.log(topDetections);
-                            for (let j = 0; j < topDetections.length; j++) {
-                                console.log(topDetections[j]);
+                            topDetections.forEach((detection) => {
                                 let threatPromise = Dicos.dataToBlob(
-                                    topDetections[j],
-                                    Utils.b64toBlob(topDetections[j].blobData),
+                                    detection,
+                                    Utils.b64toBlob(detection.blobData),
                                     Date.now(),
-                                    !validationCompleted,
-                                    function (threatBlob) {
-                                        console.log(threatBlob);
-                                        newOra.file(
-                                            `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`,
-                                            threatBlob
-                                        );
-                                        console.log(newOra.files);
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
-                                        );
-                                        console.log(
-                                            `data/${topDetections[j].algorithm}_threat_detection_${topCounter}.dcs`
-                                        );
-                                        newLayer.setAttribute(
-                                            'UUID',
-                                            `${topDetections[j].uuid}`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        topCounter++;
-                                    }
-                                );
+                                    !validationCompleted
+                                ).then((threatBlob) => {
+                                    newOra.file(
+                                        `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`,
+                                        threatBlob
+                                    );
+                                    let newLayer = stackXML.createElement(
+                                        'layer'
+                                    );
+                                    newLayer.setAttribute(
+                                        'src',
+                                        `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`
+                                    );
+                                    newLayer.setAttribute(
+                                        'UUID',
+                                        `${detection.uuid}`
+                                    );
+                                    stackElem.appendChild(newLayer);
+                                    topCounter++;
+                                });
                                 listOfPromises.push(threatPromise);
-                            }
+                            });
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
                             const sideDetections = getDetectionsFromView(
@@ -806,40 +804,33 @@ class App extends Component {
                                 constants.viewport.SIDE
                             );
                             console.log(sideDetections);
-                            for (let j = 0; j < sideDetections.length; j++) {
-                                console.log(sideDetections[j]);
+                            sideDetections.forEach((detection) => {
                                 let threatPromise = Dicos.dataToBlob(
-                                    sideDetections[j],
-                                    Utils.b64toBlob(sideDetections[j].blobData),
+                                    detection,
+                                    Utils.b64toBlob(detection.blobData),
                                     Date.now(),
-                                    !validationCompleted,
-                                    function (threatBlob) {
-                                        console.log(threatBlob);
-                                        newOra.file(
-                                            `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`,
-                                            threatBlob
-                                        );
-                                        console.log(newOra.files);
-                                        let newLayer = stackXML.createElement(
-                                            'layer'
-                                        );
-                                        newLayer.setAttribute(
-                                            'src',
-                                            `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
-                                        );
-                                        console.log(
-                                            `data/${sideDetections[j].algorithm}_threat_detection_${sideCounter}.dcs`
-                                        );
-                                        newLayer.setAttribute(
-                                            'UUID',
-                                            `${sideDetections[j].uuid}`
-                                        );
-                                        stackElem.appendChild(newLayer);
-                                        sideCounter++;
-                                    }
-                                );
+                                    !validationCompleted
+                                ).then((threatBlob) => {
+                                    newOra.file(
+                                        `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`,
+                                        threatBlob
+                                    );
+                                    let newLayer = stackXML.createElement(
+                                        'layer'
+                                    );
+                                    newLayer.setAttribute(
+                                        'src',
+                                        `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`
+                                    );
+                                    newLayer.setAttribute(
+                                        'UUID',
+                                        `${detection.uuid}`
+                                    );
+                                    stackElem.appendChild(newLayer);
+                                    sideCounter++;
+                                });
                                 listOfPromises.push(threatPromise);
-                            }
+                            });
                         }
                         stackCounter++;
                         imageElem.appendChild(stackElem);
@@ -1455,15 +1446,10 @@ class App extends Component {
                 ) {
                     this.props.clearAllSelection();
                 }
-                this.props.updateFABVisibility(true);
-                this.props.updateCornerstoneMode(
-                    constants.cornerstoneMode.SELECTION
-                );
-                this.props.updateDisplaySelectedBoundingBox(false);
-                this.props.updateEditionMode(null);
+                // Convert these calls into one call;
+                this.props.emptyAreaClickUpdate();
                 this.setState(
                     {
-                        isDetectionContextVisible: false,
                         detectionContextPosition: {
                             top: 0,
                             left: 0,
@@ -1487,21 +1473,11 @@ class App extends Component {
                         view: viewport,
                         uuid: combinedDetections[clickedPos].uuid,
                     });
-                    this.props.updateFABVisibility(false);
-                    this.props.updateCornerstoneMode(
-                        constants.cornerstoneMode.EDITION
-                    );
-                    this.props.updateDisplaySelectedBoundingBox(true);
-                    this.setState(
-                        {
-                            isDetectionContextVisible: true,
-                        },
-                        () => {
-                            this.onDetectionSelected(e);
-                            this.renderDetectionContextMenu(e);
-                            this.appUpdateImage();
-                        }
-                    );
+
+                    this.onDetectionSelected(e);
+                    this.renderDetectionContextMenu(e);
+                    this.appUpdateImage();
+                    this.props.detectionSelectedUpdate();
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
                     this.props.cornerstoneMode ===
@@ -1509,15 +1485,9 @@ class App extends Component {
                 ) {
                     // We clicked a visible detection and are in edition mode
                     this.props.clearAllSelection();
-                    this.props.updateFABVisibility(true);
-                    this.props.updateCornerstoneMode(
-                        constants.cornerstoneMode.SELECTION
-                    );
-                    this.props.updateDisplaySelectedBoundingBox(false);
-                    this.props.updateEditionMode(null);
+                    this.props.emptyAreaClickUpdate();
                     this.setState(
                         {
-                            isDetectionContextVisible: false,
                             detectionContextPosition: {
                                 top: 0,
                                 left: 0,
@@ -1682,62 +1652,35 @@ class App extends Component {
                                     boundingBox: coords,
                                 },
                             });
-                            self.props.updateFABVisibility(true);
-                            self.props.updateCornerstoneMode(
-                                constants.cornerstoneMode.SELECTION
-                            );
-                            self.props.updateDisplaySelectedBoundingBox(false);
-                            self.setState(
-                                {
-                                    isDetectionContextVisible: false,
-                                },
-                                () => {
-                                    self.props.clearAllSelection();
-                                    self.resetCornerstoneTool();
-                                    self.appUpdateImage();
-                                }
-                            );
+                            self.props.emptyAreaClickUpdate();
+                            self.props.clearAllSelection();
+                            self.resetCornerstoneTool();
+                            self.appUpdateImage();
                         }
                     }
                     if (
                         self.props.cornerstoneMode ===
                         constants.cornerstoneMode.ANNOTATION
                     ) {
-                        self.props.updateCornerstoneMode(
-                            constants.cornerstoneMode.SELECTION
-                        );
-                        self.props.updateDisplaySelectedBoundingBox(false);
-                        self.setState(
-                            {
-                                isDetectionContextVisible: false,
-                            },
-                            () => {
-                                self.resetCornerstoneTool();
-                                self.props.clearAllSelection();
-                                self.appUpdateImage();
-                            }
-                        );
+                        self.props.emptyAreaClickUpdate();
+                        self.resetCornerstoneTool();
+                        self.props.clearAllSelection();
+                        self.appUpdateImage();
                     } else if (
                         self.props.cornerstoneMode ===
                         constants.cornerstoneMode.EDITION
                     ) {
-                        self.setState(
-                            {
-                                isDetectionContextVisible: true,
+                        self.props.updateIsDetectionContextVisible(true);
+                        self.props.updateDetection({
+                            reference: {
+                                algorithm: data[0].algorithm,
+                                uuid: data[0].uuid,
+                                view: data[0].view,
                             },
-                            () => {
-                                self.props.updateDetection({
-                                    reference: {
-                                        algorithm: data[0].algorithm,
-                                        uuid: data[0].uuid,
-                                        view: data[0].view,
-                                    },
-                                    update: {
-                                        updatingDetection: true,
-                                    },
-                                });
-                            }
-                        );
+                            update: {
+                                updatingDetection: true,
+                            },
+                        });
                     }
                 }
             );
@@ -1757,14 +1700,9 @@ class App extends Component {
             sideMenuUpdate === true
         ) {
             this.props.clearAllSelection();
-            this.props.updateCornerstoneMode(
-                constants.cornerstoneMode.SELECTION
-            );
-            this.props.updateDisplaySelectedBoundingBox(false);
-            this.props.updateEditionMode(null);
+            this.props.emptyAreaClickUpdate();
             this.setState(
                 {
-                    isDetectionContextVisible: false,
                     detectionContextPosition: {
                         top: 0,
                         left: 0,
@@ -1777,10 +1715,7 @@ class App extends Component {
                 }
             );
         } else {
-            this.props.updateEditionMode(null);
-            this.setState({
-                isDetectionContextVisible: false,
-            });
+            this.props.resetSelectedDetectionsUpdate();
         }
     }
 
@@ -1804,49 +1739,51 @@ class App extends Component {
         }
         const detectionData = this.props.selectedDetection;
         if (detectionData) {
-            const detectionBoxCoords = detectionData.boundingBox;
-            this.props.updateDisplaySelectedBoundingBox(true);
-            const data = {
-                handles: {
-                    end: {
-                        x: detectionBoxCoords[2],
-                        y: detectionBoxCoords[3],
+            if (detectionData.boundingBox !== undefined) {
+                const detectionBoxCoords = detectionData.boundingBox;
+                this.props.updateDisplaySelectedBoundingBox(true);
+                const data = {
+                    handles: {
+                        end: {
+                            x: detectionBoxCoords[2],
+                            y: detectionBoxCoords[3],
+                        },
+                        start: {
+                            x: detectionBoxCoords[0],
+                            y: detectionBoxCoords[1],
+                        },
                     },
-                    start: {
-                        x: detectionBoxCoords[0],
-                        y: detectionBoxCoords[1],
-                    },
-                },
-                uuid: detectionData.uuid,
-                algorithm: detectionData.algorithm,
-                class: detectionData.class,
-                renderColor: getDetectionColor(detectionData),
-                confidence: detectionData.confidence,
-                updatingDetection: true,
-                view: detectionData.view,
-            };
-            if (view === constants.viewport.TOP) {
-                cornerstoneTools.addToolState(
-                    this.state.imageViewportTop,
-                    'BoundingBoxDrawing',
-                    data
-                );
-            } else if (view === constants.viewport.SIDE) {
-                cornerstoneTools.addToolState(
-                    this.state.imageViewportSide,
-                    'BoundingBoxDrawing',
-                    data
-                );
+                    uuid: detectionData.uuid,
+                    algorithm: detectionData.algorithm,
+                    class: detectionData.class,
+                    renderColor: getDetectionColor(detectionData),
+                    confidence: detectionData.confidence,
+                    updatingDetection: true,
+                    view: detectionData.view,
+                };
+                if (view === constants.viewport.TOP) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportTop,
+                        'BoundingBoxDrawing',
+                        data
+                    );
+                } else if (view === constants.viewport.SIDE) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportSide,
+                        'BoundingBoxDrawing',
+                        data
+                    );
+                }
+                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                });
+                this.appUpdateImage();
             }
-            cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                mouseButtonMask: 1,
-            });
-            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                cornerstoneMode: constants.cornerstoneMode.EDITION,
-            });
             this.appUpdateImage();
         }
-        this.appUpdateImage();
     }
 
     /**
@@ -1866,18 +1803,9 @@ class App extends Component {
                 myDetectionSet.lowerOpacity = true;
             }
         }
-        this.props.updateFABVisibility(selected);
-        this.props.updateCornerstoneMode(constants.cornerstoneMode.SELECTION);
-        this.props.updateDisplaySelectedBoundingBox(false);
-        this.setState(
-            {
-                isDetectionContextVisible: false,
-            },
-            () => {
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
-            }
-        );
+        this.props.algorithmSelectedUpdate();
+        this.resetCornerstoneTool();
+        this.appUpdateImage();
     }
 
     /**
@@ -1894,17 +1822,11 @@ class App extends Component {
                 uuid: detection.uuid,
                 view: detection.view,
             });
-            this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
-            this.props.updateDisplaySelectedBoundingBox(true);
-            this.setState(
-                {
-                    isDetectionContextVisible: true,
-                },
-                () => {
-                    this.onDetectionSelected(e);
-                    this.renderDetectionContextMenu(e);
-                }
-            );
+
+            this.onDetectionSelected(e);
+            this.renderDetectionContextMenu(e);
+            this.props.detectionSelectedUpdate();
+            this.appUpdateImage();
         }
         // Another Detection is selected
         else {
@@ -1917,17 +1839,10 @@ class App extends Component {
                 uuid: detection.uuid,
                 view: detection.view,
             });
-            this.props.updateCornerstoneMode(constants.cornerstoneMode.EDITION);
-            this.props.updateDisplaySelectedBoundingBox(true);
-            this.setState(
-                {
-                    isDetectionContextVisible: true,
-                },
-                () => {
-                    this.onDetectionSelected(e);
-                    this.renderDetectionContextMenu(e);
-                }
-            );
+            this.onDetectionSelected(e);
+            this.renderDetectionContextMenu(e);
+            this.props.detectionSelectedUpdate();
+            this.appUpdateImage();
         }
     }
 
@@ -1940,10 +1855,7 @@ class App extends Component {
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
-            this.props.updateCornerstoneMode(
-                constants.cornerstoneMode.ANNOTATION
-            );
-            this.props.updateDisplaySelectedBoundingBox(true);
+            this.props.boundingBoxSelectedUpdate();
             // eslint-disable-next-line no-unused-vars
             for (const [key, myDetectionSet] of Object.entries(
                 this.state.detections
@@ -2073,12 +1985,7 @@ class App extends Component {
             });
             // Clear selections, etc. of all detections
             this.props.clearAllSelection();
-            this.props.updateFABVisibility(true);
-            this.props.updateCornerstoneMode(
-                constants.cornerstoneMode.SELECTION
-            );
-            this.props.updateDisplaySelectedBoundingBox(false);
-            this.props.updateEditionMode(null);
+            this.props.labelCompleteUpdate();
             this.setState(
                 {
                     detectionLabelEditWidth: 0,
@@ -2156,10 +2063,9 @@ class App extends Component {
                     top: y,
                     left: x,
                 };
-                this.props.updateEditionMode(constants.editionMode.LABEL);
+                this.props.labelSelectedUpdate();
                 this.setState(
                     {
-                        isDetectionContextVisible: false,
                         detectionLabelEditWidth: boundingWidth,
                         detectionLabelEditPosition: widgetPosition,
                     },
@@ -2219,21 +2125,9 @@ class App extends Component {
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
-            this.props.updateFABVisibility(true);
-            this.props.updateCornerstoneMode(
-                constants.cornerstoneMode.SELECTION
-            );
-            this.props.updateDisplaySelectedBoundingBox(false);
-            this.setState(
-                {
-                    isDetectionContextVisible: false,
-                    isDrawingBoundingBox: false,
-                },
-                () => {
-                    this.resetCornerstoneTool();
-                    this.appUpdateImage();
-                }
-            );
+            this.props.deleteDetectionUpdate();
+            this.resetCornerstoneTool();
+            this.appUpdateImage();
         }
     }
 
@@ -2271,9 +2165,9 @@ class App extends Component {
     }
 
     onMenuDetectionSetSelected(algorithm) {
-        this.setState({ isDetectionContextVisible: false });
         this.props.selectDetectionSet(algorithm);
         this.resetCornerstoneTool();
+        this.props.algorithmSelectedUpdate();
         this.appUpdateImage();
     }
 
@@ -2329,7 +2223,6 @@ class App extends Component {
                     <div id="algorithm-outputs"> </div>
                     <DetectionContextMenu
                         position={this.state.detectionContextPosition}
-                        isVisible={this.state.isDetectionContextVisible}
                         setSelectedOption={this.selectEditionMode}
                         onLabelClicked={this.selectEditDetectionLabel}
                         onBoundingClicked={this.editBoundingBox}
@@ -2370,6 +2263,7 @@ const mapStateToProps = (state) => {
         selectedAlgorithm: detections.selectedAlgorithm,
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
+        // UI
         cornerstoneMode: ui.cornerstoneMode,
         displaySelectedBoundingBox: ui.displaySelectedBoundingBox,
     };
@@ -2398,10 +2292,18 @@ export default connect(mapStateToProps, {
     validateDetections,
     updateDetectionSetVisibility,
     updateFABVisibility,
-    updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,
+    emptyAreaClickUpdate,
+    detectionSelectedUpdate,
+    algorithmSelectedUpdate,
+    menuDetectionSelectedUpdate,
+    labelSelectedUpdate,
+    labelCompleteUpdate,
+    deleteDetectionUpdate,
+    boundingBoxSelectedUpdate,
+    resetSelectedDetectionsUpdate,
 })(App);

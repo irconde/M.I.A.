@@ -204,13 +204,7 @@ export default class Dicos {
      *                               False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
      * @return {type}                Blob with data for the creation of the amended DICOS file.
      */
-    static async dataToBlob(
-        detection,
-        image,
-        startTime,
-        abort = false,
-        callback
-    ) {
+    static async dataToBlob(detection, image, startTime, abort = false) {
         var today = new Date();
         var dd = String(today.getDate()).padStart(2, '0');
         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -331,7 +325,7 @@ export default class Dicos {
                 var file = new Blob([new_file_WriterBuffer], {
                     type: 'image/dcs',
                 });
-                resolve(callback(file));
+                resolve(file);
             };
             fileReader.readAsArrayBuffer(image);
         });
