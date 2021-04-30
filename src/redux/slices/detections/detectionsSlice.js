@@ -53,15 +53,23 @@ const detectionsSlice = createSlice({
         // {number} confidence - confidence in detection
         // {string} view - where detection is rendered
         addDetection: (state, action) => {
-            const { payload } = action;
+            const {
+                algorithm,
+                maskBitmap,
+                boundingBox,
+                className,
+                confidence,
+                view,
+                blobData,
+            } = action.payload;
             const detection = DetectionUtil.createDetection({
-                algorithm: payload.algorithm,
-                maskBitmap: payload.maskBitmap,
-                boundingBox: payload.boundingBox,
-                className: payload.className,
-                confidence: payload.confidence,
-                view: payload.view,
-                blobData: payload.blobData,
+                algorithm: algorithm,
+                maskBitmap: maskBitmap,
+                boundingBox: boundingBox,
+                className: className,
+                confidence: confidence,
+                view: view,
+                blobData: blobData,
             });
 
             const algo = detection.algorithm;
@@ -72,17 +80,9 @@ const detectionsSlice = createSlice({
                 );
                 state.data[algo] = updatedDetectionSet;
             }
-            let classNames = [];
-
-            for (const algo in state.data) {
-                const labels = DetectionSetUtil.getClassNames(state.data[algo]);
-                const uniqueLabels = labels.filter(
-                    (label) =>
-                        !classNames.find((existing) => existing === label)
-                );
-                classNames = [...classNames, ...uniqueLabels];
+            if (state.detectionLabels.indexOf(className) === -1) {
+                state.detectionLabels.push(className);
             }
-            state.detectionLabels = classNames;
         },
         // Clears selection data for specified algorithm
         // Action payload should contain:

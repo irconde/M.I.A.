@@ -199,6 +199,7 @@ export default class Dicos {
      * @param  {type} detection      Detection object we are using to make a DICOM blob
      * @param  {type} image          Original DICOS Blob data
      * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
+     * @returns {Promise}            Promise once the file reader is complete
      */
     static async dataToBlob(detection, image, startTime) {
         var today = new Date();
