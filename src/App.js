@@ -74,6 +74,7 @@ import {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    updateSingleViewportAndTime,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -123,21 +124,18 @@ class App extends Component {
         this.state = {
             threatsCount: 0,
             selectedFile: null,
-            algorithm: null,
             date: null,
             time: null,
             configurationInfo: {},
             myOra: new ORA(),
             image: null,
             detections: {},
-            receiveTime: null,
             buttonStyles: {
                 confirm: {},
                 reject: {},
             },
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
-            singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
             detectionLabels: [],
         };
@@ -470,7 +468,7 @@ class App extends Component {
             this.state.imageViewportTop,
             'BoundingBoxDrawing'
         );
-        if (this.state.singleViewport !== true) {
+        if (this.props.singleViewport !== true) {
             cornerstoneTools.clearToolState(
                 this.state.imageViewportSide,
                 'BoundingBoxDrawing'
@@ -667,19 +665,20 @@ class App extends Component {
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
+                                    this.props.updateSingleViewportAndTime({
+                                        singleViewport: listOfStacks.length < 2,
+                                        receiveTime: Date.now(),
+                                    });
                                     this.setState(
                                         {
                                             selectedFile: this.state.myOra.getFirstImage(),
                                             image: this.state.myOra.getFirstPixelData(),
-                                            singleViewport:
-                                                listOfStacks.length < 2,
-                                            receiveTime: Date.now(),
                                         },
                                         () => {
                                             Utils.changeViewport(
-                                                this.state.singleViewport
+                                                this.props.singleViewport
                                             );
-                                            if (this.state.singleViewport) {
+                                            if (this.props.singleViewport) {
                                                 cornerstone.resize(
                                                     this.state.imageViewportTop,
                                                     true
@@ -715,9 +714,6 @@ class App extends Component {
             .get(`${constants.server.FILE_SERVER_ADDRESS}/confirm`)
             .then((res) => {
                 if (res.data.confirm === 'image-removed') {
-                    this.setState({
-                        algorithm: null,
-                    });
                     this.props.validateDetections();
                     let validationCompleted = false;
                     const stackXML = document.implementation.createDocument(
@@ -924,7 +920,7 @@ class App extends Component {
                     self.state.myOra.stackData[0].blobData[i];
             }
         }
-        if (this.state.singleViewport === false) {
+        if (this.props.singleViewport === false) {
             if (self.state.myOra.stackData[1] !== undefined) {
                 for (
                     var j = 1;
@@ -966,7 +962,7 @@ class App extends Component {
                 viewport
             );
         });
-        if (this.state.singleViewport === false) {
+        if (this.props.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
@@ -1103,7 +1099,7 @@ class App extends Component {
             readFile.readAsArrayBuffer(imagesLeft[i]);
         }
 
-        if (this.state.singleViewport === false) {
+        if (this.props.singleViewport === false) {
             for (var k = 0; k < imagesRight.length; k++) {
                 const read = new FileReader();
                 const currentRightImage = imagesRight[k];
@@ -1198,7 +1194,7 @@ class App extends Component {
             this.renderDetections(this.props.detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
-            this.state.singleViewport === false
+            this.props.singleViewport === false
         ) {
             const context = eventData.canvasContext;
             // eslint-disable-next-line no-unused-vars
@@ -1223,7 +1219,7 @@ class App extends Component {
      */
     appUpdateImage() {
         cornerstone.updateImage(this.state.imageViewportTop, true);
-        if (this.state.singleViewport === false) {
+        if (this.props.singleViewport === false) {
             cornerstone.updateImage(this.state.imageViewportSide, true);
         }
     }
@@ -1253,7 +1249,7 @@ class App extends Component {
             detectionList = getDetectionsFromView(data, selectedViewport);
             if (
                 context.canvas.offsetParent.id === 'dicomImageRight' &&
-                this.state.singleViewport === false
+                this.props.singleViewport === false
             ) {
                 selectedViewport = constants.viewport.SIDE;
                 detectionList = getDetectionsFromView(data, selectedViewport);
@@ -2217,6 +2213,7 @@ const mapStateToProps = (state) => {
         zoomLevelSide: ui.zoomLevelSide,
         imageViewportTop: ui.imageViewportTop,
         imageViewportSide: ui.imageViewportSide,
+        singleViewport: ui.singleViewport,
     };
 };
 
@@ -2261,4 +2258,5 @@ export default connect(mapStateToProps, {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    updateSingleViewportAndTime,
 })(App);

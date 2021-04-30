@@ -20,6 +20,8 @@ const initialState = {
     },
     zoomLevelTop: constants.viewportStyle.ZOOM,
     zoomLevelSide: constants.viewportStyle.ZOOM,
+    singleViewport: true,
+    receiveTime: null,
 };
 
 const uiSlice = createSlice({
@@ -122,6 +124,11 @@ const uiSlice = createSlice({
         updateZoomLevelSide: (state, action) => {
             state.zoomLevelSide = action.payload;
         },
+        updateSingleViewportAndTime: (state, action) => {
+            const { singleViewport, receiveTime } = action.payload;
+            state.singleViewport = singleViewport;
+            state.receiveTime = receiveTime;
+        },
     },
 });
 
@@ -140,6 +147,7 @@ export const getDetectionLabelEditPosition = (state) =>
     state.ui.detectionLabelEditPosition;
 export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
 export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
+export const getSingleViewport = (state) => state.ui.singleViewport;
 
 export const {
     updateCornerstoneMode,
@@ -162,6 +170,7 @@ export const {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    updateSingleViewportAndTime,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
