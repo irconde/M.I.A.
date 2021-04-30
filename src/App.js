@@ -43,7 +43,6 @@ import {
     clearSelectedDetection,
     selectDetection,
     selectDetectionSet,
-    getDetectionLabels,
     getDetectionColor,
     getDetectionsFromView,
     updateDetection,
@@ -57,7 +56,6 @@ import {
 import {
     updateFABVisibility,
     updateIsDetectionContextVisible,
-    updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,
@@ -137,7 +135,6 @@ class App extends Component {
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            detectionLabels: [],
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -2174,10 +2171,7 @@ class App extends Component {
                         onPolygonClicked={this.editPolygonMask}
                         onDeleteClicked={this.deleteDetection}
                     />
-                    <EditLabel
-                        labels={this.props.detectionLabels}
-                        onLabelChange={this.editDetectionLabel}
-                    />
+                    <EditLabel onLabelChange={this.editDetectionLabel} />
                     <BoundPolyFAB
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
@@ -2202,7 +2196,6 @@ const mapStateToProps = (state) => {
         currentProcessingFile: server.currentProcessingFile,
         // Detections and Selection state
         detections: detections.data,
-        detectionLabels: getDetectionLabels(detections.data),
         selectedAlgorithm: detections.selectedAlgorithm,
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
@@ -2241,7 +2234,6 @@ export default connect(mapStateToProps, {
     updateDetectionSetVisibility,
     updateFABVisibility,
     updateIsDetectionContextVisible,
-    updateDetectionLabels,
     updateCornerstoneMode,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,

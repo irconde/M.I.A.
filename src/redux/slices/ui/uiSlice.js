@@ -12,7 +12,6 @@ const initialState = {
         left: 0,
     },
     editionMode: null,
-    detectionLabels: [],
     detectionLabelEditWidth: '0px',
     detectionLabelEditPosition: {
         top: 0,
@@ -39,9 +38,6 @@ const uiSlice = createSlice({
         },
         updateIsDetectionContextVisible: (state, action) => {
             state.isDetectionContextVisible = action.payload;
-        },
-        updateDetectionLabels: (state, action) => {
-            state.detectionLabels = action.payload;
         },
         updateDisplaySelectedBoundingBox: (state, action) => {
             state.displaySelectedBoundingBox = action.payload;
@@ -154,7 +150,6 @@ export const {
     updateFABVisibility,
     updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
-    updateDetectionLabels,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,

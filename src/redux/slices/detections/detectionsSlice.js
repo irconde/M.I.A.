@@ -16,6 +16,7 @@ const initialState = {
     // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
     /** @type Object<string, DetectionSet> */
     data: {},
+    detectionLabels: [],
 };
 
 const detectionsSlice = createSlice({
@@ -71,6 +72,17 @@ const detectionsSlice = createSlice({
                 );
                 state.data[algo] = updatedDetectionSet;
             }
+            let classNames = [];
+
+            for (const algo in state.data) {
+                const labels = DetectionSetUtil.getClassNames(state.data[algo]);
+                const uniqueLabels = labels.filter(
+                    (label) =>
+                        !classNames.find((existing) => existing === label)
+                );
+                classNames = [...classNames, ...uniqueLabels];
+            }
+            state.detectionLabels = classNames;
         },
         // Clears selection data for specified algorithm
         // Action payload should contain:
@@ -311,22 +323,10 @@ const detectionsSlice = createSlice({
 /**
  * Gets all unique class names from each Detection in each DetectionSet.
  * Used to populate the label list component for editing Detection labels
- * @param {Object.<string, DetectionSet>} data Redux Detections state
+ * @param {Object.<string, DetectionSet>} state Redux Detections state
  * @returns {Array<string>} array of all unique detection class names
  */
-export const getDetectionLabels = (data) => {
-    let classNames = [];
-
-    for (const algo in data) {
-        const labels = DetectionSetUtil.getClassNames(data[algo]);
-        const uniqueLabels = labels.filter(
-            (label) => !classNames.find((existing) => existing === label)
-        );
-        classNames = [...classNames, ...uniqueLabels];
-    }
-
-    return classNames;
-};
+export const getDetectionLabels = (state) => state.detections.detectionLabels;
 
 /**
  * Determines if all detections in all detectionSets have been validated
