@@ -45,6 +45,11 @@ const uiSlice = createSlice({
         updateEditionMode: (state, action) => {
             state.editionMode = action.payload;
         },
+        updateDetectionContextPosition: (state, action) => {
+            const { top, left } = action.payload;
+            state.detectionContextPosition.top = top;
+            state.detectionContextPosition.left = left;
+        },
         emptyAreaClickUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
@@ -59,6 +64,7 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.EDITION;
             state.displaySelectedBoundingBox = true;
             state.isDetectionContextVisible = true;
+            state.editionMode = null;
         },
         algorithmSelectedUpdate: (state) => {
             state.isFABVisible = false;
@@ -107,6 +113,8 @@ export const getDisplaySelectedBoundingBox = (state) =>
 export const getEditionMode = (state) => state.ui.editionMode;
 export const getIsDetectionContextVisible = (state) =>
     state.ui.isDetectionContextVisible;
+export const getDetectionContextPosition = (state) =>
+    state.ui.detectionContextPosition;
 
 export const {
     updateCornerstoneMode,
@@ -125,6 +133,7 @@ export const {
     boundingBoxSelectedUpdate,
     resetSelectedDetectionsUpdate,
     menuDetectionSelectedUpdate,
+    updateDetectionContextPosition,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

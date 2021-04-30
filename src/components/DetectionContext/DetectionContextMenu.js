@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import {
     getEditionMode,
     getIsDetectionContextVisible,
+    getDetectionContextPosition,
 } from '../../redux/slices/ui/uiSlice';
 
 const Positioner = styled.div`
@@ -78,7 +79,6 @@ const DeleteWidget = styled.div`
     }
 `;
 function DetectionContextMenu({
-    position,
     setSelectedOption,
     onLabelClicked,
     onBoundingClicked,
@@ -87,6 +87,7 @@ function DetectionContextMenu({
 }) {
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
+    const position = useSelector(getDetectionContextPosition);
     const handleClick = (type) => {
         if (type === editionMode.BOUNDING) {
             onBoundingClicked();
@@ -105,8 +106,8 @@ function DetectionContextMenu({
             );
         }
     };
-    return (
-        isVisible && (
+    if (isVisible === true) {
+        return (
             <Positioner position={position}>
                 <FlexContainer>
                     <MainWidget>
@@ -135,12 +136,13 @@ function DetectionContextMenu({
                     </DeleteWidget>
                 </FlexContainer>
             </Positioner>
-        )
-    );
+        );
+    } else {
+        return null;
+    }
 }
 
 DetectionContextMenu.propTypes = {
-    position: PropTypes.object.isRequired,
     setSelectedOption: PropTypes.func.isRequired,
     onLabelClicked: PropTypes.func.isRequired,
     onBoundingClicked: PropTypes.func.isRequired,

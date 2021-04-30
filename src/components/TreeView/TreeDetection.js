@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { detectionStyle, MAX_LABEL_LENGTH } from '../../Constants';
 import Utils from '../../Utils.js';
-import { connect } from 'react-redux';
-import { updateFABVisibility } from '../../redux/slices/ui/uiSlice';
 
 class TreeDetection extends Component {
     constructor(props) {
@@ -89,11 +87,6 @@ class TreeDetection extends Component {
      */
     setSelected(e) {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            if (this.props.detection.selected === false) {
-                this.props.updateFABVisibility(false);
-            } else {
-                this.props.updateFABVisibility(true);
-            }
             this.props.updateSelectedDetection(this.props.detection, e);
         }
     }
@@ -193,4 +186,4 @@ class TreeDetection extends Component {
     }
 }
 
-export default connect(null, { updateFABVisibility })(TreeDetection);
+export default TreeDetection;
