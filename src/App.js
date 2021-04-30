@@ -71,6 +71,9 @@ import {
     boundingBoxSelectedUpdate,
     resetSelectedDetectionsUpdate,
     updateDetectionContextPosition,
+    updateZoomAndViewport,
+    updateZoomLevelTop,
+    updateZoomLevelSide,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -132,18 +135,11 @@ class App extends Component {
                 confirm: {},
                 reject: {},
             },
-            zoomLevelTop: constants.viewportStyle.ZOOM,
-            zoomLevelSide: constants.viewportStyle.ZOOM,
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             singleViewport: true,
             viewport: cornerstone.getDefaultViewport(null, undefined),
             detectionLabels: [],
-            detectionLabelEditWidth: '0px',
-            detectionLabelEditPosition: {
-                top: 0,
-                left: 0,
-            },
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -358,7 +354,7 @@ class App extends Component {
         const updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewportTop.scale = newZoomLevelTop;
         updateImageViewportSide.scale = newZoomLevelSide;
-        this.setState({
+        this.props.updateZoomAndViewport({
             zoomLevelTop: newZoomLevelTop,
             zoomLevelSide: newZoomLevelSide,
             imageViewportTop: updateImageViewportTop,
@@ -964,7 +960,7 @@ class App extends Component {
                 image
             );
             viewport.translation.y = constants.viewportStyle.ORIGIN;
-            viewport.scale = self.state.zoomLevelTop;
+            viewport.scale = self.props.zoomLevelTop;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
@@ -986,7 +982,7 @@ class App extends Component {
                     image
                 );
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
-                viewport.scale = self.state.zoomLevelSide;
+                viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportSide,
@@ -1200,7 +1196,7 @@ class App extends Component {
                 e.currentTarget,
                 'BoundingBoxDrawing'
             );
-            this.setState({ zoomLevelTop: eventData.viewport.scale });
+            this.props.updateZoomLevelTop(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
@@ -1212,7 +1208,7 @@ class App extends Component {
                 e.currentTarget,
                 'BoundingBoxDrawing'
             );
-            this.setState({ zoomLevelSide: eventData.viewport.scale });
+            this.props.updateZoomLevelSide(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
         }
         // set the canvas context to the image coordinate system
@@ -1810,6 +1806,9 @@ class App extends Component {
                 view: detection.view,
             });
         }
+        // TODO: james b. - Remove the use of setTimeout when we can.
+        //                  Currently an issue on needing to wait for the detection be selected.
+        //                  For some reason, the calls do no occur synchronously.
         setTimeout(() => {
             this.onDetectionSelected(e).finally(() => {
                 this.props.detectionSelectedUpdate();
@@ -1895,14 +1894,14 @@ class App extends Component {
                     );
                     if (viewportInfo.viewport === constants.viewport.TOP) {
                         detectionContextGap =
-                            viewportInfo.offset / this.state.zoomLevelTop -
+                            viewportInfo.offset / this.props.zoomLevelTop -
                             boundingWidth;
                         originCoordX = 2;
                         viewport = this.state.imageViewportTop;
                     } else {
                         originCoordX = 0;
                         detectionContextGap =
-                            viewportInfo.offset / this.state.zoomLevelSide -
+                            viewportInfo.offset / this.props.zoomLevelSide -
                             boundingHeight / boundingWidth;
                         viewport = this.state.imageViewportSide;
                     }
@@ -1952,16 +1951,8 @@ class App extends Component {
             // Clear selections, etc. of all detections
             this.props.clearAllSelection();
             this.props.labelCompleteUpdate();
-            this.setState(
-                {
-                    detectionLabelEditWidth: 0,
-                    detectionLabelEditPosition: { top: 0, left: 0 },
-                },
-                () => {
-                    this.appUpdateImage();
-                    this.resetCornerstoneTool();
-                }
-            );
+            this.appUpdateImage();
+            this.resetCornerstoneTool();
         }
     }
     /**
@@ -2001,7 +1992,7 @@ class App extends Component {
                         constants.detectionStyle.LABEL_PADDING
                     );
                     const { offsetLeft } = this.state.imageViewportTop;
-                    gap = offsetLeft / this.state.zoomLevelTop;
+                    gap = offsetLeft / this.props.zoomLevelTop;
                     viewport = this.state.imageViewportTop;
                     labelHeight = labelSize.height;
                 } else {
@@ -2017,7 +2008,7 @@ class App extends Component {
                         constants.detectionStyle.LABEL_PADDING
                     );
                     const { offsetLeft } = this.state.imageViewportSide;
-                    gap = offsetLeft / this.state.zoomLevelSide;
+                    gap = offsetLeft / this.props.zoomLevelSide;
                     viewport = this.state.imageViewportSide;
                     labelHeight = labelSize.height;
                 }
@@ -2029,16 +2020,11 @@ class App extends Component {
                     top: y,
                     left: x,
                 };
-                this.props.labelSelectedUpdate();
-                this.setState(
-                    {
-                        detectionLabelEditWidth: boundingWidth,
-                        detectionLabelEditPosition: widgetPosition,
-                    },
-                    () => {
-                        this.appUpdateImage();
-                    }
-                );
+                this.props.labelSelectedUpdate({
+                    width: boundingWidth,
+                    position: widgetPosition,
+                });
+                this.appUpdateImage();
             }
         }
     }
@@ -2195,8 +2181,6 @@ class App extends Component {
                         onDeleteClicked={this.deleteDetection}
                     />
                     <EditLabel
-                        position={this.state.detectionLabelEditPosition}
-                        width={parseInt(this.state.detectionLabelEditWidth)}
                         labels={this.props.detectionLabels}
                         onLabelChange={this.editDetectionLabel}
                     />
@@ -2231,6 +2215,10 @@ const mapStateToProps = (state) => {
         // UI
         cornerstoneMode: ui.cornerstoneMode,
         displaySelectedBoundingBox: ui.displaySelectedBoundingBox,
+        zoomLevelTop: ui.zoomLevelTop,
+        zoomLevelSide: ui.zoomLevelSide,
+        imageViewportTop: ui.imageViewportTop,
+        imageViewportSide: ui.imageViewportSide,
     };
 };
 
@@ -2272,4 +2260,7 @@ export default connect(mapStateToProps, {
     boundingBoxSelectedUpdate,
     resetSelectedDetectionsUpdate,
     updateDetectionContextPosition,
+    updateZoomAndViewport,
+    updateZoomLevelTop,
+    updateZoomLevelSide,
 })(App);

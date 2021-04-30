@@ -18,6 +18,10 @@ const initialState = {
         top: 0,
         left: 0,
     },
+    zoomLevelTop: constants.viewportStyle.ZOOM,
+    zoomLevelSide: constants.viewportStyle.ZOOM,
+    imageViewportTop: document.getElementById('dicomImageLeft'),
+    imageViewportSide: document.getElementById('dicomImageRight'),
 };
 
 const uiSlice = createSlice({
@@ -77,16 +81,22 @@ const uiSlice = createSlice({
             state.displaySelectedBoundingBox = true;
             state.isDetectionContextVisible = true;
         },
-        labelSelectedUpdate: (state) => {
-            // TODO payload with the width/position
+        labelSelectedUpdate: (state, action) => {
+            const { width, position } = action.payload;
             state.editionMode = constants.editionMode.LABEL;
             state.isDetectionContextVisible = false;
+            state.detectionLabelEditWidth = width;
+            state.detectionLabelEditPosition.top = position.top;
+            state.detectionLabelEditPosition.left = position.left;
         },
         labelCompleteUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.displaySelectedBoundingBox = false;
             state.editionMode = null;
+            state.detectionLabelEditWidth = 0;
+            state.detectionLabelEditPosition.top = 0;
+            state.detectionLabelEditPosition.left = 0;
         },
         deleteDetectionUpdate: (state) => {
             state.isFABVisible = true;
@@ -103,6 +113,24 @@ const uiSlice = createSlice({
             state.editionMode = null;
             state.isDetectionContextVisible = false;
         },
+        updateZoomAndViewport: (state, action) => {
+            const {
+                zoomLevelTop,
+                zoomLevelSide,
+                imageViewportTop,
+                imageViewportSide,
+            } = action.payload;
+            state.zoomLevelTop = zoomLevelTop;
+            state.zoomLevelSide = zoomLevelSide;
+            state.imageViewportTop = imageViewportTop;
+            state.imageViewportSide = imageViewportSide;
+        },
+        updateZoomLevelTop: (state, action) => {
+            state.zoomLevelTop = action.payload;
+        },
+        updateZoomLevelSide: (state, action) => {
+            state.zoomLevelSide = action.payload;
+        },
     },
 });
 
@@ -115,6 +143,14 @@ export const getIsDetectionContextVisible = (state) =>
     state.ui.isDetectionContextVisible;
 export const getDetectionContextPosition = (state) =>
     state.ui.detectionContextPosition;
+export const getDetectionLabelEditWidth = (state) =>
+    state.ui.detectionLabelEditWidth;
+export const getDetectionLabelEditPosition = (state) =>
+    state.ui.detectionLabelEditPosition;
+export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
+export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
+export const getImageViewportTop = (state) => state.ui.imageViewportTop;
+export const getImageViewportSide = (state) => state.ui.imageViewportSide;
 
 export const {
     updateCornerstoneMode,
@@ -134,6 +170,9 @@ export const {
     resetSelectedDetectionsUpdate,
     menuDetectionSelectedUpdate,
     updateDetectionContextPosition,
+    updateZoomAndViewport,
+    updateZoomLevelTop,
+    updateZoomLevelSide,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

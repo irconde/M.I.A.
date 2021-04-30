@@ -6,7 +6,11 @@ import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../Constants';
 import Utils from '../../Utils.js';
 import { useSelector } from 'react-redux';
-import { getEditionMode } from '../../redux/slices/ui/uiSlice';
+import {
+    getEditionMode,
+    getDetectionLabelEditPosition,
+    getDetectionLabelEditWidth,
+} from '../../redux/slices/ui/uiSlice';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -53,7 +57,9 @@ const EditLabelWrapper = styled.div`
  * @param {Array<string>} labels list of existing labels for other detections
  * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabel = ({ position, width, labels, onLabelChange }) => {
+const EditLabel = ({ labels, onLabelChange }) => {
+    const position = useSelector(getDetectionLabelEditPosition);
+    const width = useSelector(getDetectionLabelEditWidth);
     const editionMode = useSelector(getEditionMode);
     const isVisible = editionMode === constants.editionMode.LABEL;
     const [isListOpen, setIsListOpen] = useState(false);
@@ -150,8 +156,6 @@ const EditLabel = ({ position, width, labels, onLabelChange }) => {
 };
 
 EditLabel.propTypes = {
-    position: PropTypes.object.isRequired,
-    width: PropTypes.number.isRequired,
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
     onLabelChange: PropTypes.func.isRequired,
 };
