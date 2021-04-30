@@ -204,7 +204,7 @@ export default class Dicos {
      *                               False. When feedback has not been left for any detection we need to create a TDR w/ ABORT flag
      * @return {type}                Blob with data for the creation of the amended DICOS file.
      */
-    static async dataToBlob(detection, image, startTime, abort = false) {
+    static async dataToBlob(detection, image, startTime) {
         var today = new Date();
         var dd = String(today.getDate()).padStart(2, '0');
         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -260,64 +260,58 @@ export default class Dicos {
                         vrMap: {},
                     },
                 };
-                if (abort === true) {
-                    copiedData.abortFlag = 'ABORT';
-                    copiedData.abortReason = 'NOT_REVIEWED';
-                    copiedData.AdditionalScreeningPerformed = 'NO';
-                } else {
-                    copiedData.abortFlag = 'SUCCESS';
-                    copiedData.AdditionalScreeningPerformed = 'YES';
-                    copiedData.AdditionalInspectionSelectionCriteria = 'RANDOM';
-                    if (copiedData.ThreatSequence) {
-                        copiedData.ThreatSequence['ReferencedPTOSequence'] = {
-                            vrMap: {},
-                            PotentialThreatObjectID:
-                                copiedData.ThreatSequence[
-                                    'PotentialThreatObjectID'
-                                ],
-                            ReferencedTDRInstanceSequence: {
-                                ReferencedSOPClassUID: copiedData.SOPClassUID,
-                                ReferencedSOPInstanceUID:
-                                    copiedData.SOPInstanceUID,
-                                vrMap: {},
-                            },
-                        };
-                    }
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ThreatCategoryDescription'
-                    ] = detection.feedback ? 'CONFIRM' : 'REJECT';
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ATDAssessmentProbability'
-                    ] = 1;
 
-                    if (detection.feedback === true) {
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ATDAssessmentFlag'
-                        ] = 'THREAT';
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ATDAbilityAssessment'
-                        ] = 'NO_INTERFERENCE';
-                    } else if (detection.feedback === false) {
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ATDAssessmentFlag'
-                        ] = 'NO_THREAT';
-                        copiedData.ThreatSequence['ATDAssessmentSequence'][
-                            'ATDAbilityAssessment'
-                        ] = 'NO_INTERFERENCE';
-                        numberAlarmObjs = numberAlarmObjs - 1;
-                        numberTotalObjs = numberTotalObjs - 1;
-                        copiedData.NumberOfAlarmObjects = numberAlarmObjs;
-                        copiedData.NumberOfTotalObjects = numberTotalObjs;
-                    }
-                    copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon = [
-                        detection.boundingBox[0],
-                        detection.boundingBox[1],
-                        0,
-                        detection.boundingBox[2],
-                        detection.boundingBox[3],
-                        0,
-                    ];
-                } //end else abort
+                copiedData.abortFlag = 'SUCCESS';
+                copiedData.AdditionalScreeningPerformed = 'YES';
+                copiedData.AdditionalInspectionSelectionCriteria = 'RANDOM';
+                if (copiedData.ThreatSequence) {
+                    copiedData.ThreatSequence['ReferencedPTOSequence'] = {
+                        vrMap: {},
+                        PotentialThreatObjectID:
+                            copiedData.ThreatSequence[
+                                'PotentialThreatObjectID'
+                            ],
+                        ReferencedTDRInstanceSequence: {
+                            ReferencedSOPClassUID: copiedData.SOPClassUID,
+                            ReferencedSOPInstanceUID: copiedData.SOPInstanceUID,
+                            vrMap: {},
+                        },
+                    };
+                }
+                copiedData.ThreatSequence['ATDAssessmentSequence'][
+                    'ThreatCategoryDescription'
+                ] = detection.feedback ? 'CONFIRM' : 'REJECT';
+                copiedData.ThreatSequence['ATDAssessmentSequence'][
+                    'ATDAssessmentProbability'
+                ] = 1;
+
+                if (detection.feedback === true) {
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ATDAssessmentFlag'
+                    ] = 'THREAT';
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ATDAbilityAssessment'
+                    ] = 'NO_INTERFERENCE';
+                } else if (detection.feedback === false) {
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ATDAssessmentFlag'
+                    ] = 'NO_THREAT';
+                    copiedData.ThreatSequence['ATDAssessmentSequence'][
+                        'ATDAbilityAssessment'
+                    ] = 'NO_INTERFERENCE';
+                    numberAlarmObjs = numberAlarmObjs - 1;
+                    numberTotalObjs = numberTotalObjs - 1;
+                    copiedData.NumberOfAlarmObjects = numberAlarmObjs;
+                    copiedData.NumberOfTotalObjects = numberTotalObjs;
+                }
+                copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon = [
+                    detection.boundingBox[0],
+                    detection.boundingBox[1],
+                    0,
+                    detection.boundingBox[2],
+                    detection.boundingBox[3],
+                    0,
+                ];
                 dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
                     copiedData
                 );

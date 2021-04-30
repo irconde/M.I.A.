@@ -739,8 +739,7 @@ class App extends Component {
                                 let threatPromise = Dicos.dataToBlob(
                                     detection,
                                     Utils.b64toBlob(detection.blobData),
-                                    Date.now(),
-                                    true
+                                    Date.now()
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`,
@@ -773,8 +772,7 @@ class App extends Component {
                                 let threatPromise = Dicos.dataToBlob(
                                     detection,
                                     Utils.b64toBlob(detection.blobData),
-                                    Date.now(),
-                                    true
+                                    Date.now()
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`,
