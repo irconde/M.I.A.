@@ -8,7 +8,6 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import io from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
@@ -18,7 +17,6 @@ import axios from 'axios';
 import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
-import DetectionSet from './DetectionSet';
 import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
@@ -39,7 +37,6 @@ import {
     resetDetections,
     addDetection,
     addDetectionSet,
-    areDetectionsValidated,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,
@@ -1847,6 +1844,7 @@ class App extends Component {
                     });
                     cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                         cornerstoneMode: constants.cornerstoneMode.EDITION,
+                        editionMode: constants.editionMode.NO_TOOL,
                     });
                     this.appUpdateImage();
                 }
@@ -2182,7 +2180,17 @@ class App extends Component {
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
-        console.log('edit bounding box selected');
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            editionMode: constants.editionMode.BOUNDING,
+        });
+        this.setState(
+            {
+                editionMode: constants.editionMode.BOUNDING,
+            },
+            () => {
+                this.appUpdateImage();
+            }
+        );
     }
 
     /**

@@ -69,6 +69,7 @@ export const editionMode = {
     BOUNDING: 'bounding',
     POLYGON: 'polygon',
     DELETE: 'delete',
+    NO_TOOL: 'none',
 };
 export const commonDetections = {
     APPLE: 'apple',

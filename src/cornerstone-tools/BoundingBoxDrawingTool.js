@@ -26,8 +26,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         super(props, defaultProps);
     }
 
-    // Abstract method. Automatically invoked on mouse move to know whether the mouse pointer is
-    //  over (or close to) the rectangle's border
+    // Method that overrides the original abstract method in the cornerstone-tools library
+    // Automatically invoked on mouse move to know whether the mouse pointer is
+    // over (or close to) the rectangle's border
     pointNearTool(element, data, coords, interactionType) {
         const hasStartAndEndHandles =
             data && data.handles && data.handles.start && data.handles.end;
@@ -48,7 +49,21 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         return Utils.pointInRect(coords, rect);
     }
 
-    // Abstract method. Automatically invoked to render all the widgets that comprise a detection
+    // Method that overrides the original abstract method in the cornerstone-tools library
+    // Automatically invoked when a handle is selected and it's being dragged
+    handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
+        if (this.options.editionMode === constants.editionMode.BOUNDING) {
+            super.handleSelectedCallback(
+                evt,
+                toolData,
+                handle,
+                interactionType
+            );
+        }
+    }
+
+    // Method that overrides the original abstract method in the cornerstone-tools library
+    // Automatically invoked to render all the widgets that comprise a detection
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {
@@ -122,9 +137,12 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         'pixel'
                     );
                 }
-
                 // Draw handles
-                if (this.configuration.drawHandles) {
+                if (
+                    this.options.editionMode ==
+                        constants.editionMode.BOUNDING &&
+                    this.configuration.drawHandles
+                ) {
                     drawHandles(
                         context,
                         eventData,
@@ -133,7 +151,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     );
                 }
                 // Label Rendering
-                if (data.updatingDetection === true) {
+                if (
+                    this.options.editionMode == constants.editionMode.NO_TOOL &&
+                    data.updatingDetection === true
+                ) {
                     if (
                         !data.handles.start.moving &&
                         !data.handles.end.moving
