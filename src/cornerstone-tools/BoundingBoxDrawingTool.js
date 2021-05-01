@@ -1,14 +1,13 @@
-import csTools from 'cornerstone-tools';
+import csTools from 'eac-cornerstone-tools';
 import * as constants from '../Constants';
 import Utils from '../Utils.js';
 import * as cornerstone from 'cornerstone-core';
-import drawHandles from './drawing/drawHandles';
-
+const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
-const drawRect = csTools.importInternal('drawing/drawRect');
+const draw4CornerRect = csTools.importInternal('drawing/draw4CornerRect');
 
 // We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -84,6 +83,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         } = this.configuration;
 
         const context = getNewContext(eventData.canvasContext.canvas);
+        const color = constants.detectionStyle.NORMAL_COLOR;
+        const handleOptions = {
+            color,
+            handleRadius: 8,
+            handleLineWidth: 3,
+            fill: 'white',
+            drawHandlesIfActive: drawHandlesOnHover,
+            hideHandlesIfMoving,
+        };
 
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
@@ -93,16 +101,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     continue;
                 }
                 // Configure
-                const color = constants.detectionStyle.NORMAL_COLOR;
-                const handleOptions = {
-                    color,
-                    handleRadius: 8,
-                    handleLineWidth: 3,
-                    fill: 'white',
-                    drawHandlesIfActive: drawHandlesOnHover,
-                    hideHandlesIfMoving,
-                };
-
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
 
@@ -111,14 +109,16 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
                 rectOptions.lineWidth = lineWidth;
                 // Draw bounding box
-                drawRect(
+                data.handles = Utils.recalculateRectangle(data.handles);
+                draw4CornerRect(
                     context,
                     element,
                     data.handles.start,
                     data.handles.end,
+                    data.handles.start_prima,
+                    data.handles.end_prima,
                     rectOptions,
-                    'pixel',
-                    data.handles.initialRotation
+                    'pixel'
                 );
 
                 // Draw handles
@@ -130,7 +130,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         handleOptions
                     );
                 }
-
                 // Label Rendering
                 if (data.updatingDetection === true) {
                     if (
