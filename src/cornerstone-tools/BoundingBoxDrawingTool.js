@@ -38,26 +38,13 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         if (!validParameters || data.visible === false) {
             return false;
         }
-        const distance = interactionType === 'mouse' ? 15 : 25;
         const startCanvas = cornerstone.pixelToCanvas(
             element,
             data.handles.start
         );
         const endCanvas = cornerstone.pixelToCanvas(element, data.handles.end);
-
-        const rect = {
-            left: Math.min(startCanvas.x, endCanvas.x),
-            top: Math.min(startCanvas.y, endCanvas.y),
-            width: Math.abs(startCanvas.x - endCanvas.x),
-            height: Math.abs(startCanvas.y - endCanvas.y),
-        };
-
-        const distanceToPoint = csTools.external.cornerstoneMath.rect.distanceToPoint(
-            rect,
-            coords
-        );
-
-        return distanceToPoint < distance;
+        const rect = [startCanvas.x, startCanvas.y, endCanvas.x, endCanvas.y];
+        return Utils.pointInRect(coords, rect);
     }
 
     // Abstract method. Automatically invoked to render all the widgets that comprise a detection
