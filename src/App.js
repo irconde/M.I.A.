@@ -1272,7 +1272,11 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
-                if (detectionList[j].visible !== true) continue;
+                if (
+                    detectionList[j].visible !== true ||
+                    detectionList[j].selected === true
+                )
+                    continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = getDetectionColor(detectionList[j]);
                 if (boundingBoxCoords.length < B_BOX_COORDS) {
