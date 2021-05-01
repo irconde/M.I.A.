@@ -360,4 +360,42 @@ export default class Utils {
         if (originalString.length <= numberOfChars) return originalString;
         return originalString.substring(0, numberOfChars) + '...';
     }
+
+    /**
+     * recalculateRectangle - Recalculates the four corners of a rectangle based on the coordinates of the corner being moved
+     *
+     * @param {dictionary} cornerList - rectangle corners' coordinates
+     */
+    static recalculateRectangle(cornerList) {
+        const cornerKeys = Object.keys(cornerList);
+        let movingCornerKey;
+        let movingCornerKeyIndex;
+        for (let i = 0; i < cornerKeys.length; i++) {
+            if (cornerList[cornerKeys[i]].hasMoved === true) {
+                movingCornerKeyIndex = i;
+                movingCornerKey = cornerKeys[i];
+                break;
+            }
+        }
+        if (movingCornerKey === undefined) {
+            return cornerList;
+        }
+        let newRectDiagonal = movingCornerKey.includes('start')
+            ? [movingCornerKey, cornerKeys[movingCornerKeyIndex + 1]]
+            : [cornerKeys[movingCornerKeyIndex - 1], movingCornerKey];
+
+        let secondDiagonalFirstIndex = movingCornerKey.includes('prima')
+            ? 0
+            : 2;
+        cornerList[cornerKeys[secondDiagonalFirstIndex]].x =
+            cornerList[newRectDiagonal[0]].x;
+        cornerList[cornerKeys[secondDiagonalFirstIndex]].y =
+            cornerList[newRectDiagonal[1]].y;
+        cornerList[cornerKeys[secondDiagonalFirstIndex + 1]].x =
+            cornerList[newRectDiagonal[1]].x;
+        cornerList[cornerKeys[secondDiagonalFirstIndex + 1]].y =
+            cornerList[newRectDiagonal[0]].y;
+
+        return cornerList;
+    }
 }

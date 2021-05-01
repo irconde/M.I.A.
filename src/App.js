@@ -2,7 +2,7 @@ import './App.css';
 import React from 'react';
 import { Component } from 'react';
 import * as cornerstone from 'cornerstone-core';
-import * as cornerstoneTools from 'cornerstone-tools';
+import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
 import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
@@ -1779,12 +1779,20 @@ class App extends Component {
                 () => {
                     const data = {
                         handles: {
+                            start: {
+                                x: detectionBoxCoords[0],
+                                y: detectionBoxCoords[1],
+                            },
                             end: {
                                 x: detectionBoxCoords[2],
                                 y: detectionBoxCoords[3],
                             },
-                            start: {
+                            start_prima: {
                                 x: detectionBoxCoords[0],
+                                y: detectionBoxCoords[3],
+                            },
+                            end_prima: {
+                                x: detectionBoxCoords[2],
                                 y: detectionBoxCoords[1],
                             },
                         },

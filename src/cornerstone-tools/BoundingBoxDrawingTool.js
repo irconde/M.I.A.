@@ -1,14 +1,13 @@
-import csTools from 'cornerstone-tools';
+import csTools from 'eac-cornerstone-tools';
 import * as constants from '../Constants';
 import Utils from '../Utils.js';
 import * as cornerstone from 'cornerstone-core';
-import drawHandles from './drawing/drawHandles';
-
+const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
-const drawRect = csTools.importInternal('drawing/drawRect');
+const draw4CornerRect = csTools.importInternal('drawing/draw4CornerRect');
 
 // We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -83,6 +82,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         } = this.configuration;
 
         const context = getNewContext(eventData.canvasContext.canvas);
+        const color = constants.detectionStyle.NORMAL_COLOR;
+        const handleOptions = {
+            color,
+            handleRadius: 8,
+            handleLineWidth: 3,
+            fill: 'white',
+            drawHandlesIfActive: drawHandlesOnHover,
+            hideHandlesIfMoving,
+        };
 
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
@@ -92,16 +100,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     continue;
                 }
                 // Configure
-                const color = constants.detectionStyle.NORMAL_COLOR;
-                const handleOptions = {
-                    color,
-                    handleRadius: 8,
-                    handleLineWidth: 3,
-                    fill: 'white',
-                    drawHandlesIfActive: drawHandlesOnHover,
-                    hideHandlesIfMoving,
-                };
-
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
 
@@ -110,14 +108,16 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
                 rectOptions.lineWidth = lineWidth;
                 // Draw bounding box
-                drawRect(
+                data.handles = Utils.recalculateRectangle(data.handles);
+                draw4CornerRect(
                     context,
                     element,
                     data.handles.start,
                     data.handles.end,
+                    data.handles.start_prima,
+                    data.handles.end_prima,
                     rectOptions,
-                    'pixel',
-                    data.handles.initialRotation
+                    'pixel'
                 );
 
                 // Draw handles
@@ -129,7 +129,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         handleOptions
                     );
                 }
-
                 // Label Rendering
                 if (data.updatingDetection === true) {
                     if (
@@ -248,73 +247,4 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             updatingDetection: false,
         };
     }
-}
-
-/**
- *
- * @param {*} startHandle
- * @param {*} endHandle
- * @returns {{ left: number, top: number, width: number, height: number}}
- */
-
-function _getRectangleImageCoordinates(startHandle, endHandle) {
-    return {
-        left: Math.min(startHandle.x, endHandle.x),
-        top: Math.min(startHandle.y, endHandle.y),
-        width: Math.abs(startHandle.x - endHandle.x),
-        height: Math.abs(startHandle.y - endHandle.y),
-    };
-}
-
-/**
- *
- * @param {*} context
- * @param {*} { className, score}
- * @param {*} [options={}]
- * @returns {string[]}
- */
-
-function _createTextBoxContent(context, { className, score }, options = {}) {
-    const textLines = [];
-    const classInfoString = `${className} - ${score}%`;
-    textLines.push(classInfoString);
-    return textLines;
-}
-
-/**
- *
- *
- * @param {*} startHandle
- * @param {*} endHandle
- * @returns {Array.<{x: number, y: number}>}
- */
-
-function _findTextBoxAnchorPoints(startHandle, endHandle) {
-    const { left, top, width, height } = _getRectangleImageCoordinates(
-        startHandle,
-        endHandle
-    );
-
-    return [
-        {
-            // Top middle point of rectangle
-            x: left + width / 2,
-            y: top,
-        },
-        {
-            // Left middle point of rectangle
-            x: left,
-            y: top + height / 2,
-        },
-        {
-            // Bottom middle point of rectangle
-            x: left + width / 2,
-            y: top + height,
-        },
-        {
-            // Right middle point of rectangle
-            x: left + width,
-            y: top + height / 2,
-        },
-    ];
 }
