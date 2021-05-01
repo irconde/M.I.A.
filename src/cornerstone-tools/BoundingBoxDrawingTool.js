@@ -8,6 +8,7 @@ const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
 const draw4CornerRect = csTools.importInternal('drawing/draw4CornerRect');
+const drawRect = csTools.importInternal('drawing/drawRect');
 
 // We define the new annotation tool by extending BaseAnnotationTool class
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
@@ -94,18 +95,33 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     rectOptions.lineDash = lineDash;
                 }
                 rectOptions.lineWidth = lineWidth;
+
                 // Draw bounding box
-                data.handles = Utils.recalculateRectangle(data.handles);
-                draw4CornerRect(
-                    context,
-                    element,
-                    data.handles.start,
-                    data.handles.end,
-                    data.handles.start_prima,
-                    data.handles.end_prima,
-                    rectOptions,
-                    'pixel'
-                );
+                if (
+                    this.options.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION
+                ) {
+                    data.handles = Utils.recalculateRectangle(data.handles);
+                    draw4CornerRect(
+                        context,
+                        element,
+                        data.handles.start,
+                        data.handles.end,
+                        data.handles.start_prima,
+                        data.handles.end_prima,
+                        rectOptions,
+                        'pixel'
+                    );
+                } else {
+                    drawRect(
+                        context,
+                        element,
+                        data.handles.start,
+                        data.handles.end,
+                        rectOptions,
+                        'pixel'
+                    );
+                }
 
                 // Draw handles
                 if (this.configuration.drawHandles) {
@@ -213,6 +229,18 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     active: false,
                 },
                 end: {
+                    x: eventData.currentPoints.image.x,
+                    y: eventData.currentPoints.image.y,
+                    highlight: true,
+                    active: true,
+                },
+                start_prima: {
+                    x: eventData.currentPoints.image.x,
+                    y: eventData.currentPoints.image.y,
+                    highlight: true,
+                    active: true,
+                },
+                end_prima: {
                     x: eventData.currentPoints.image.x,
                     y: eventData.currentPoints.image.y,
                     highlight: true,
