@@ -947,6 +947,7 @@ class App extends Component {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
             self.currentSelection = new Selection();
+            // TODO: James B. - Refactor this into uiSlice.
             self.setState({
                 configurationInfo: {
                     type: image.string(Dicos.dictionary['DetectorType'].tag),
@@ -1517,14 +1518,7 @@ class App extends Component {
                             self.props.updateCornerstoneMode(
                                 constants.cornerstoneMode.SELECTION
                             );
-                            self.setState(
-                                {
-                                    displayButtons: false,
-                                },
-                                () => {
-                                    self.resetCornerstoneTool();
-                                }
-                            );
+                            self.resetCornerstoneTool();
                         }
                     } else {
                         // Updating existing Detection's bounding box
@@ -1710,7 +1704,7 @@ class App extends Component {
         }
         // TODO: james b. - Remove the use of setTimeout when we can.
         //                  Currently an issue on needing to wait for the detection be selected.
-        //                  For some reason, the calls do no occur synchronously.
+        //                  For some reason, the calls do not occur synchronously.
         setTimeout(() => {
             this.onDetectionSelected(e).finally(() => {
                 this.props.detectionSelectedUpdate();
