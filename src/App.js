@@ -1538,6 +1538,9 @@ class App extends Component {
             } else if (data[0] === undefined) {
                 return;
             }
+            if (data.length == 0) {
+                return;
+            }
             const { handles } = data[0];
             const { start, end } = handles;
             let coords = [];
@@ -1577,6 +1580,28 @@ class App extends Component {
                     self.state.myOra.stackData[stackIndex].blobData.push(
                         newBlob
                     );
+                    if (data.length == 0) {
+                        self.setState(
+                            {
+                                displaySelectedBoundingBox: false,
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.SELECTION,
+                                editionMode: null,
+                                isFABVisible: true,
+                                isDetectionContextVisible: false,
+                                detectionContextPosition: {
+                                    top: 0,
+                                    left: 0,
+                                },
+                            },
+                            () => {
+                                self.props.clearAllSelection();
+                                self.resetCornerstoneTool();
+                                self.appUpdateImage();
+                            }
+                        );
+                        return;
+                    }
                     // call updateDetection
                     if (data[0].updatingDetection === false) {
                         // Need to determine if updating operator or new
