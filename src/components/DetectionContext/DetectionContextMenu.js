@@ -6,6 +6,7 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { editionMode, detectionContextStyle } from '../../Constants';
+import * as constants from '../../Constants';
 
 const Positioner = styled.div`
     position: absolute;
@@ -77,23 +78,10 @@ function DetectionContextMenu({
     isVisible,
     selectedOption,
     setSelectedOption,
-    onLabelClicked,
-    onBoundingClicked,
-    onPolygonClicked,
-    onDeleteClicked,
 }) {
     const handleClick = (type) => {
-        if (type === editionMode.BOUNDING) {
-            onBoundingClicked();
-            setSelectedOption(editionMode.BOUNDING);
-        } else if (type === editionMode.POLYGON) {
-            onPolygonClicked();
-            setSelectedOption(editionMode.POLYGON);
-        } else if (type === editionMode.DELETE) {
-            onDeleteClicked();
-        } else if (type === editionMode.LABEL) {
-            onLabelClicked();
-            setSelectedOption(editionMode.LABEL);
+        if ([...Object.values(constants.editionMode)].includes(type)) {
+            setSelectedOption(type);
         } else {
             throw new Error(
                 `${type} is not a valid option for DetectionContextMenu click`
@@ -139,10 +127,6 @@ DetectionContextMenu.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     selectedOption: PropTypes.string.isRequired,
     setSelectedOption: PropTypes.func.isRequired,
-    onLabelClicked: PropTypes.func.isRequired,
-    onBoundingClicked: PropTypes.func.isRequired,
-    onPolygonClicked: PropTypes.func.isRequired,
-    onDeleteClicked: PropTypes.func.isRequired,
 };
 
 export default DetectionContextMenu;

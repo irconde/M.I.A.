@@ -130,7 +130,7 @@ class App extends Component {
                 top: 0,
                 left: 0,
             },
-            editionMode: null,
+            editionMode: constants.editionMode.NO_TOOL,
             detectionLabels: [],
             detectionLabelEditWidth: '0px',
             detectionLabelEditPosition: {
@@ -167,6 +167,7 @@ class App extends Component {
             this
         );
         this.selectEditionMode = this.selectEditionMode.bind(this);
+        this.onContextMenuBtnClicked = this.onContextMenuBtnClicked.bind(this);
         this.selectEditDetectionLabel = this.selectEditDetectionLabel.bind(
             this
         );
@@ -2047,18 +2048,45 @@ class App extends Component {
             }
         }
     }
+
     /**
-     * Invoked when user selects an edition mode from DetectionContextMenu
+     * Invoked when user selects an edition mode from DetectionContextMenu.
      * @param {string} newMode Edition mode selected from menu
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
+            const mode =
+                newMode === this.state.editionMode
+                    ? constants.editionMode.NO_TOOL
+                    : newMode;
             this.setState(
                 {
-                    editionMode: newMode,
+                    editionMode: mode,
                 },
-                () => this.appUpdateImage()
+                () => {
+                    this.onContextMenuBtnClicked(newMode);
+                }
             );
+        }
+    }
+
+    /**
+     * Callback Invoked when user selects an edition mode from DetectionContextMenu
+     * @param {string} mode Edition mode selected from menu
+     */
+    onContextMenuBtnClicked(mode) {
+        switch (mode) {
+            case constants.editionMode.BOUNDING:
+                this.editBoundingBox();
+                break;
+            case constants.editionMode.LABEL:
+                this.selectEditDetectionLabel();
+                break;
+            case constants.editionMode.DELETE:
+                this.deleteDetection();
+                break;
+            case constants.editionMode.POLYGON:
+                this.editPolygonMask();
         }
     }
 
@@ -2180,17 +2208,11 @@ class App extends Component {
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
+        const newEditionMode = this.state.editionMode;
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: constants.editionMode.BOUNDING,
+            editionMode: newEditionMode,
         });
-        this.setState(
-            {
-                editionMode: constants.editionMode.BOUNDING,
-            },
-            () => {
-                this.appUpdateImage();
-            }
-        );
+        this.appUpdateImage();
     }
 
     /**
@@ -2348,10 +2370,6 @@ class App extends Component {
                         isVisible={this.state.isDetectionContextVisible}
                         selectedOption={this.state.editionMode}
                         setSelectedOption={this.selectEditionMode}
-                        onLabelClicked={this.selectEditDetectionLabel}
-                        onBoundingClicked={this.editBoundingBox}
-                        onPolygonClicked={this.editPolygonMask}
-                        onDeleteClicked={this.deleteDetection}
                     />
                     <EditLabel
                         isVisible={
