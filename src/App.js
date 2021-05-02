@@ -2185,6 +2185,9 @@ class App extends Component {
                         detectionLabelEditPosition: widgetPosition,
                     },
                     () => {
+                        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                            editionMode: this.state.editionMode,
+                        });
                         this.appUpdateImage();
                     }
                 );
@@ -2196,9 +2199,8 @@ class App extends Component {
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
-        const newEditionMode = this.state.editionMode;
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: newEditionMode,
+            editionMode: this.state.editionMode,
         });
         this.appUpdateImage();
     }
@@ -2207,7 +2209,10 @@ class App extends Component {
      * Invoked when user selects 'polygon mask' option from DetectionContextMenu
      */
     editPolygonMask() {
-        console.log('edit polygon mask selected');
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            editionMode: this.state.editionMode,
+        });
+        this.appUpdateImage();
     }
 
     /**
