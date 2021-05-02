@@ -2131,7 +2131,6 @@ class App extends Component {
      */
     selectEditDetectionLabel() {
         const detectionData = this.props.selectedDetection;
-
         if (detectionData) {
             // Destructure relevant info related to selected detection
             const {
@@ -2147,40 +2146,31 @@ class App extends Component {
                 const boundingWidth = Math.abs(boundingBox[2] - boundingBox[0]);
 
                 // Position component on top of existing detection label
-                let gap, viewport, labelHeight;
+                let gap, viewport, labelHeight, currentViewport, zoomLevel;
+
                 if (view === constants.viewport.TOP) {
-                    const canvas = this.state.imageViewportTop.children[0];
-                    const ctx = canvas.getContext('2d');
-                    const detectionLabel = Utils.formatDetectionLabel(
-                        label,
-                        confidence
-                    );
-                    const labelSize = Utils.getTextLabelSize(
-                        ctx,
-                        detectionLabel,
-                        constants.detectionStyle.LABEL_PADDING
-                    );
-                    const { offsetLeft } = this.state.imageViewportTop;
-                    gap = offsetLeft / this.state.zoomLevelTop;
-                    viewport = this.state.imageViewportTop;
-                    labelHeight = labelSize.height;
+                    currentViewport = this.state.imageViewportTop;
+                    zoomLevel = this.state.zoomLevelTop;
                 } else {
-                    const canvas = this.state.imageViewportSide.children[0];
-                    const ctx = canvas.getContext('2d');
-                    const detectionLabel = Utils.formatDetectionLabel(
-                        label,
-                        confidence
-                    );
-                    const labelSize = Utils.getTextLabelSize(
-                        ctx,
-                        detectionLabel,
-                        constants.detectionStyle.LABEL_PADDING
-                    );
-                    const { offsetLeft } = this.state.imageViewportSide;
-                    gap = offsetLeft / this.state.zoomLevelSide;
-                    viewport = this.state.imageViewportSide;
-                    labelHeight = labelSize.height;
+                    currentViewport = this.state.imageViewportSide;
+                    zoomLevel = this.state.zoomLevelSide;
                 }
+                const canvas = currentViewport.children[0];
+                const ctx = canvas.getContext('2d');
+                const detectionLabel = Utils.formatDetectionLabel(
+                    label,
+                    confidence
+                );
+                const labelSize = Utils.getTextLabelSize(
+                    ctx,
+                    detectionLabel,
+                    constants.detectionStyle.LABEL_PADDING
+                );
+                const { offsetLeft } = currentViewport;
+                gap = offsetLeft / zoomLevel;
+                viewport = this.state.imageViewportSide;
+                labelHeight = labelSize.height;
+
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: boundingBox[0] + gap,
                     y: boundingBox[1] - labelHeight,
@@ -2191,8 +2181,6 @@ class App extends Component {
                 };
                 this.setState(
                     {
-                        isDetectionContextVisible: false,
-                        editionMode: constants.editionMode.LABEL,
                         detectionLabelEditWidth: boundingWidth,
                         detectionLabelEditPosition: widgetPosition,
                     },
