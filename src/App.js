@@ -1496,6 +1496,7 @@ class App extends Component {
                                                 : constants.viewport.SIDE,
                                         blobData: base64,
                                     });
+                                    self.appUpdateImage();
                                 });
                             }
                             // Operator DetectionSet exists, add new detection to set
@@ -1513,6 +1514,7 @@ class App extends Component {
                                                 : constants.viewport.SIDE,
                                         blobData: base64,
                                     });
+                                    self.appUpdateImage();
                                 });
                             }
                         } else {
@@ -1574,6 +1576,7 @@ class App extends Component {
                                 updatingDetection: true,
                             },
                         });
+                        self.appUpdateImage();
                     }
                 }
             );
