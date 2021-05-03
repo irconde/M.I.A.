@@ -163,6 +163,9 @@ export default class Utils {
                 const base64 = dataUrl.split(',')[1];
                 resolve(base64);
             };
+            reader.onerror = (error) => {
+                reject(error);
+            };
             reader.readAsDataURL(blob);
         });
     }

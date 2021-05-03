@@ -67,13 +67,14 @@ import {
     labelCompleteUpdate,
     deleteDetectionUpdate,
     boundingBoxSelectedUpdate,
-    resetSelectedDetectionsUpdate,
+    exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
-    updateSingleViewportAndTime,
+    newFileReceivedUpdate,
     updateSelectedFile,
+    onNoImageUpdate,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -544,8 +545,7 @@ class App extends Component {
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
         this.currentSelection = new Selection();
-        this.props.updateFABVisibility(false);
-        this.props.updateSelectedFile();
+        this.props.onNoImageUpdate();
         this.setState({
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
@@ -652,7 +652,7 @@ class App extends Component {
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
-                                    this.props.updateSingleViewportAndTime({
+                                    this.props.newFileReceivedUpdate({
                                         singleViewport: listOfStacks.length < 2,
                                         receiveTime: Date.now(),
                                     });
@@ -820,7 +820,7 @@ class App extends Component {
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
                                         this.resetSelectedDetectionBoxes(e);
-                                        this.props.updateSelectedFile();
+                                        this.props.updateSelectedFile(false);
                                         this.props.setUpload(false);
                                         this.getNextImage();
                                     }
@@ -1580,7 +1580,7 @@ class App extends Component {
     }
 
     /**
-     * resetSelectedDetectionBoxes - Unselect the selected detection and hide the two "feedback" buttons.
+     * resetSelectedDetectionBoxes - Unselect the selected detection.
      *
      * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {type}  None
@@ -1599,7 +1599,7 @@ class App extends Component {
                 this.appUpdateImage();
             });
         } else {
-            this.props.resetSelectedDetectionsUpdate();
+            this.props.exitEditionModeUpdate();
         }
     }
 
@@ -2107,7 +2107,7 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, {
+const mapDispatchToProps = {
     setCommandServerConnection,
     setFileServerConnection,
     setDownload,
@@ -2142,11 +2142,14 @@ export default connect(mapStateToProps, {
     labelCompleteUpdate,
     deleteDetectionUpdate,
     boundingBoxSelectedUpdate,
-    resetSelectedDetectionsUpdate,
+    exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
-    updateSingleViewportAndTime,
+    newFileReceivedUpdate,
     updateSelectedFile,
-})(App);
+    onNoImageUpdate,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
