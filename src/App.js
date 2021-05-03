@@ -767,7 +767,6 @@ class App extends Component {
                                 this.props.detections,
                                 constants.viewport.SIDE
                             );
-                            console.log(sideDetections);
                             sideDetections.forEach((detection) => {
                                 let threatPromise = Dicos.dataToBlob(
                                     detection,
@@ -2042,6 +2041,7 @@ class App extends Component {
                     />
                     <SideMenu
                         detections={this.props.detections}
+                        // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
                         appUpdateImage={this.appUpdateImage}

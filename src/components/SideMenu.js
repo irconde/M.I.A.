@@ -31,6 +31,7 @@ class SideMenu extends Component {
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
+        // TODO: James B. - Remove this once refactored into uiSlice
         configurationInfo: PropTypes.object.isRequired,
         enableMenu: PropTypes.bool.isRequired,
         appUpdateImage: PropTypes.func.isRequired,
@@ -139,6 +140,7 @@ class SideMenu extends Component {
                                     updateSelectedDetection={
                                         this.updateSelectedDetection
                                     }
+                                    // TODO: James B. - Remove this once refactored into uiSlice
                                     configurationInfo={
                                         this.props.configurationInfo
                                     }
