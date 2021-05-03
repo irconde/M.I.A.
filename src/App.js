@@ -559,6 +559,7 @@ class App extends Component {
      * @return {type} - None
      */
     getNextImage() {
+        // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
         axios
             .get(`${constants.server.FILE_SERVER_ADDRESS}/next`, {
                 headers: {
@@ -689,6 +690,7 @@ class App extends Component {
      * @return {type} - None
      */
     nextImageClick(e) {
+        // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
         axios
             .get(`${constants.server.FILE_SERVER_ADDRESS}/confirm`)
             .then((res) => {
