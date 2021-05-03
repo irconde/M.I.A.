@@ -155,6 +155,11 @@ export default class Utils {
         return bytes.buffer;
     }
 
+    /**
+     * blobToBase64 - Converts a blob object to a base 64 string.
+     * @param {Blob} blob
+     * @returns {Promise} Promise that resolves once the blob has been converted to base64, or rejects on error.
+     */
     static async blobToBase64(blob) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
