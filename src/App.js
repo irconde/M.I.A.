@@ -126,6 +126,7 @@ class App extends Component {
             isDrawingBoundingBox: false,
             isFABVisible: false,
             isDetectionContextVisible: false,
+            isEditLabelWidgetVisible: false,
             detectionContextPosition: {
                 top: 0,
                 left: 0,
@@ -150,6 +151,7 @@ class App extends Component {
         this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
             this
         );
+        this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.onMenuDetectionSelected = this.onMenuDetectionSelected.bind(this);
@@ -166,6 +168,8 @@ class App extends Component {
         this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
             this
         );
+        this.getContextMenuPos = this.getContextMenuPos.bind(this);
+        this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.onContextMenuBtnClicked = this.onContextMenuBtnClicked.bind(this);
         this.selectEditDetectionLabel = this.selectEditDetectionLabel.bind(
@@ -222,7 +226,7 @@ class App extends Component {
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolsmousedrag',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         this.state.imageViewportTop.addEventListener('mouseup', (event) => {
             const newEvent = Utils.mockCornerstoneEvent(
@@ -1440,9 +1444,10 @@ class App extends Component {
                     {
                         displaySelectedBoundingBox: false,
                         cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                        editionMode: null,
+                        editionMode: constants.editionMode.NO_TOOL,
                         isFABVisible: true,
                         isDetectionContextVisible: false,
+                        isEditLabelWidgetVisible: false,
                         detectionContextPosition: {
                             top: 0,
                             left: 0,
@@ -1491,9 +1496,10 @@ class App extends Component {
                             displaySelectedBoundingBox: false,
                             cornerstoneMode:
                                 constants.cornerstoneMode.SELECTION,
-                            editionMode: null,
+                            editionMode: constants.editionMode.NO_TOOL,
                             isFABVisible: true,
                             isDetectionContextVisible: false,
+                            isEditLabelWidgetVisible: false,
                             detectionContextPosition: {
                                 top: 0,
                                 left: 0,
@@ -1507,10 +1513,9 @@ class App extends Component {
                     );
                 }
             }
-            clickedPos = constants.selection.NO_SELECTION;
-            // this.currentSelection.resetAlgorithmPositionToEnd();
         }
     }
+
     /**
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
      * @param {*}  Viewport The Cornerstone Viewport containing the event
@@ -1584,7 +1589,7 @@ class App extends Component {
                                 displaySelectedBoundingBox: false,
                                 cornerstoneMode:
                                     constants.cornerstoneMode.SELECTION,
-                                editionMode: null,
+                                editionMode: constants.editionMode.NO_TOOL,
                                 isFABVisible: true,
                                 isDetectionContextVisible: false,
                                 detectionContextPosition: {
@@ -1676,17 +1681,39 @@ class App extends Component {
                                     boundingBox: coords,
                                 },
                             });
+                            const viewportInfo = Utils.eventToViewportInfo(
+                                event
+                            );
+                            const contextMenuPos = self.getContextMenuPos(
+                                viewportInfo,
+                                coords
+                            );
+                            const labelEditionIsEnabled =
+                                self.state.editionMode ===
+                                constants.editionMode.LABEL;
+                            const detectionData = self.props.selectedDetection;
+                            const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
+                                detectionData,
+                                coords
+                            );
+                            const widgetPosition = {
+                                top: editLabelWidgetPosInfo.y,
+                                left: editLabelWidgetPosInfo.x,
+                            };
                             self.setState(
                                 {
-                                    cornerstoneMode:
-                                        constants.cornerstoneMode.SELECTION,
-                                    isDetectionContextVisible: false,
-                                    displaySelectedBoundingBox: false,
-                                    isFABVisible: true,
+                                    isDetectionContextVisible: true,
+                                    displaySelectedBoundingBox: true,
+                                    detectionLabelEditWidth:
+                                        editLabelWidgetPosInfo.boundingWidth,
+                                    detectionLabelEditPosition: widgetPosition,
+                                    isEditLabelWidgetVisible: labelEditionIsEnabled,
+                                    detectionContextPosition: {
+                                        top: contextMenuPos.y,
+                                        left: contextMenuPos.x,
+                                    },
                                 },
                                 () => {
-                                    self.props.clearAllSelection();
-                                    self.resetCornerstoneTool();
                                     self.appUpdateImage();
                                 }
                             );
@@ -1737,7 +1764,7 @@ class App extends Component {
     }
 
     /**
-     * resetSelectedDetectionBoxes - Unselect the selected detection and hide the two "feedback" buttons.
+     * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
      *
      * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {type}  None
@@ -1753,7 +1780,7 @@ class App extends Component {
                 {
                     displaySelectedBoundingBox: false,
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
-                    editionMode: null,
+                    editionMode: constants.editionMode.NO_TOOL,
                     isDetectionContextVisible: false,
                     detectionContextPosition: {
                         top: 0,
@@ -1769,7 +1796,32 @@ class App extends Component {
         } else {
             this.setState({
                 isDetectionContextVisible: false,
-                editionMode: null,
+                editionMode: constants.editionMode.NO_TOOL,
+            });
+        }
+    }
+
+    /**
+     * hideContextMenu - Hide context menu when mouse is moved.
+     */
+    hideContextMenu() {
+        if (
+            this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
+        ) {
+            this.setState(
+                {
+                    displaySelectedBoundingBox: false,
+                    cornerstoneMode: constants.cornerstoneMode.SELECTION,
+                    isDetectionContextVisible: false,
+                },
+                () => {
+                    this.appUpdateImage();
+                }
+            );
+        } else {
+            this.setState({
+                isDetectionContextVisible: false,
+                isEditLabelWidgetVisible: false,
             });
         }
     }
@@ -1986,6 +2038,51 @@ class App extends Component {
     }
 
     /**
+     * getContextMenuPos - Get position of context menu based on the associated bounding box.
+     *
+     * @param {object} viewportInfo - viewport info
+     * @param {array} coords - bounding box' corners' coordinates
+     * @param {array}
+     */
+    getContextMenuPos(viewportInfo, coords) {
+        if (viewportInfo.viewport !== null) {
+            if (coords !== undefined && coords.length > 0) {
+                let detectionContextGap = 0;
+                let viewport, originCoordX;
+                const boundingBoxCoords = coords;
+                const boundingWidth = Math.abs(
+                    boundingBoxCoords[2] - boundingBoxCoords[0]
+                );
+                const boundingHeight = Math.abs(
+                    boundingBoxCoords[3] - boundingBoxCoords[1]
+                );
+                if (viewportInfo.viewport === constants.viewport.TOP) {
+                    originCoordX = 2;
+                    detectionContextGap =
+                        viewportInfo.offset / this.state.zoomLevelTop -
+                        boundingWidth;
+                    viewport = this.state.imageViewportTop;
+                } else {
+                    originCoordX = 0;
+                    detectionContextGap =
+                        viewportInfo.offset / this.state.zoomLevelSide -
+                        boundingHeight / boundingWidth;
+                    viewport = this.state.imageViewportSide;
+                }
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                    x: boundingBoxCoords[originCoordX] + detectionContextGap,
+                    y: boundingBoxCoords[1] + boundingHeight + 4,
+                });
+
+                return {
+                    x: x,
+                    y: y,
+                };
+            }
+        }
+    }
+
+    /**
      * Invoked when user selects a detection (callback from onMouseClicked)
      * @param {Event} event Related mouse click event to position the widget relative to detection
      * @param {Detection} [draggedData] Optional detection data. In the case that
@@ -2002,50 +2099,21 @@ class App extends Component {
                 ? draggedData
                 : this.props.selectedDetection;
 
-            if (viewportInfo.viewport !== null) {
-                if (detectionData !== undefined) {
-                    let detectionContextGap = 0;
-                    let viewport, originCoordX;
-                    const boundingBoxCoords = detectionData.boundingBox;
-                    const boundingWidth = Math.abs(
-                        boundingBoxCoords[2] - boundingBoxCoords[0]
-                    );
-                    const boundingHeight = Math.abs(
-                        boundingBoxCoords[3] - boundingBoxCoords[1]
-                    );
-                    if (viewportInfo.viewport === constants.viewport.TOP) {
-                        detectionContextGap =
-                            viewportInfo.offset / this.state.zoomLevelTop -
-                            boundingWidth;
-                        originCoordX = 2;
-                        viewport = this.state.imageViewportTop;
-                    } else {
-                        originCoordX = 0;
-                        detectionContextGap =
-                            viewportInfo.offset / this.state.zoomLevelSide -
-                            boundingHeight / boundingWidth;
-                        viewport = this.state.imageViewportSide;
-                    }
-                    const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                        x:
-                            boundingBoxCoords[originCoordX] +
-                            detectionContextGap,
-                        y: boundingBoxCoords[1] + boundingHeight + 4,
-                    });
-
-                    this.setState(
-                        {
-                            detectionContextPosition: {
-                                top: y,
-                                left: x,
-                            },
-                        },
-                        () => {
-                            this.appUpdateImage();
-                        }
-                    );
+            const contextMenuPos = this.getContextMenuPos(
+                viewportInfo,
+                detectionData.boundingBox
+            );
+            this.setState(
+                {
+                    detectionContextPosition: {
+                        top: contextMenuPos.y,
+                        left: contextMenuPos.x,
+                    },
+                },
+                () => {
+                    this.appUpdateImage();
                 }
-            }
+            );
         }
     }
 
@@ -2112,7 +2180,7 @@ class App extends Component {
             this.setState(
                 {
                     isFABVisible: true,
-                    editionMode: null,
+                    editionMode: constants.editionMode.NO_TOOL,
                     cornerstoneMode: constants.cornerstoneMode.SELECTION,
                     detectionLabelEditWidth: 0,
                     detectionLabelEditPosition: { top: 0, left: 0 },
@@ -2125,12 +2193,13 @@ class App extends Component {
             );
         }
     }
+
     /**
-     * Invoked when user selects 'label' option from DetectionContextMenu
-     * Renders and positions EditLabel widget relative to detection
+     * Calculates position of the edit label widget
+     * @param {dictionary} detectionData detection data
+     * @param {array} coords bounding box coordinates
      */
-    selectEditDetectionLabel() {
-        const detectionData = this.props.selectedDetection;
+    getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {
             // Destructure relevant info related to selected detection
             const {
@@ -2139,15 +2208,11 @@ class App extends Component {
                 class: label,
                 confidence,
             } = detectionData;
-            if (boundingBox) {
-                const boundingHeight = Math.abs(
-                    boundingBox[3] - boundingBox[1]
-                );
-                const boundingWidth = Math.abs(boundingBox[2] - boundingBox[0]);
-
+            const bbox = coords === undefined ? boundingBox : coords;
+            if (bbox) {
+                const boundingWidth = Math.abs(bbox[2] - bbox[0]);
                 // Position component on top of existing detection label
                 let gap, viewport, labelHeight, currentViewport, zoomLevel;
-
                 if (view === constants.viewport.TOP) {
                     currentViewport = this.state.imageViewportTop;
                     zoomLevel = this.state.zoomLevelTop;
@@ -2172,47 +2237,95 @@ class App extends Component {
                 labelHeight = labelSize.height;
 
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                    x: boundingBox[0] + gap,
-                    y: boundingBox[1] - labelHeight,
+                    x: bbox[0] + gap,
+                    y: bbox[1] - labelHeight,
                 });
-                const widgetPosition = {
-                    top: y,
-                    left: x,
+                return {
+                    x: x,
+                    y: y,
+                    boundingWidth: boundingWidth,
                 };
-                this.setState(
-                    {
-                        detectionLabelEditWidth: boundingWidth,
-                        detectionLabelEditPosition: widgetPosition,
-                    },
-                    () => {
-                        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                            editionMode: this.state.editionMode,
-                        });
-                        this.appUpdateImage();
-                    }
-                );
             }
         }
+    }
+
+    /**
+     * Invoked when user selects 'label' option from DetectionContextMenu
+     * Renders and positions EditLabel widget relative to detection
+     */
+    selectEditDetectionLabel() {
+        const detectionData = this.props.selectedDetection;
+        let coords;
+        if (this.state.cornerstoneMode === constants.cornerstoneMode.EDITION) {
+            const currentViewport =
+                detectionData.view === constants.viewport.TOP
+                    ? this.state.imageViewportTop
+                    : this.state.imageViewportSide;
+            const toolState = cornerstoneTools.getToolState(
+                currentViewport,
+                'BoundingBoxDrawing'
+            );
+            const { data } = toolState;
+            const { handles } = data[0];
+            const { start, end } = handles;
+            // Fix flipped rectangle issues
+            if (start.x > end.x && start.y > end.y) {
+                coords = [end.x, end.y, start.x, start.y];
+            } else if (start.x > end.x) {
+                coords = [end.x, start.y, start.x, end.y];
+            } else if (start.y > end.y) {
+                coords = [start.x, end.y, end.x, start.y];
+            } else {
+                coords = [start.x, start.y, end.x, end.y];
+            }
+        }
+        const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
+            detectionData,
+            coords
+        );
+        const widgetPosition = {
+            top: editLabelWidgetPosInfo.y,
+            left: editLabelWidgetPosInfo.x,
+        };
+        const editLabelVisible =
+            this.state.editionMode == constants.editionMode.LABEL;
+        this.setState(
+            {
+                detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
+                detectionLabelEditPosition: widgetPosition,
+                isEditLabelWidgetVisible: editLabelVisible,
+            },
+            () => {
+                cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                    editionMode: this.state.editionMode,
+                });
+                this.appUpdateImage();
+            }
+        );
     }
 
     /**
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: this.state.editionMode,
+        this.setState({ isEditLabelWidgetVisible: false }, () => {
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                editionMode: this.state.editionMode,
+            });
+            this.appUpdateImage();
         });
-        this.appUpdateImage();
     }
 
     /**
      * Invoked when user selects 'polygon mask' option from DetectionContextMenu
      */
     editPolygonMask() {
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: this.state.editionMode,
+        this.setState({ isEditLabelWidgetVisible: false }, () => {
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                editionMode: this.state.editionMode,
+            });
+            this.appUpdateImage();
         });
-        this.appUpdateImage();
     }
 
     /**
@@ -2365,10 +2478,7 @@ class App extends Component {
                         setSelectedOption={this.selectEditionMode}
                     />
                     <EditLabel
-                        isVisible={
-                            this.state.editionMode ===
-                            constants.editionMode.LABEL
-                        }
+                        isVisible={this.state.isEditLabelWidgetVisible}
                         position={this.state.detectionLabelEditPosition}
                         width={this.state.detectionLabelEditWidth}
                         labels={this.props.detectionLabels}
