@@ -1124,6 +1124,7 @@ class App extends Component {
             );
             this.props.updateZoomLevelTop(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
+            this.appUpdateImage();
         } else if (
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
@@ -1136,6 +1137,7 @@ class App extends Component {
             );
             this.props.updateZoomLevelSide(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
+            this.appUpdateImage();
         }
         // set the canvas context to the image coordinate system
         //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
