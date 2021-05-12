@@ -6,7 +6,16 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { editionMode, detectionContextStyle } from '../../Constants';
+<<<<<<< HEAD
 import * as constants from '../../Constants';
+=======
+import { useSelector } from 'react-redux';
+import {
+    getEditionMode,
+    getIsDetectionContextVisible,
+    getDetectionContextPosition,
+} from '../../redux/slices/ui/uiSlice';
+>>>>>>> develop
 
 const Positioner = styled.div`
     position: absolute;
@@ -74,11 +83,11 @@ const DeleteWidget = styled.div`
     }
 `;
 function DetectionContextMenu({
-    position,
-    isVisible,
-    selectedOption,
     setSelectedOption,
 }) {
+    const selectedOption = useSelector(getEditionMode);
+    const isVisible = useSelector(getIsDetectionContextVisible);
+    const position = useSelector(getDetectionContextPosition);
     const handleClick = (type) => {
         if ([...Object.values(constants.editionMode)].includes(type)) {
             setSelectedOption(type);
@@ -88,8 +97,8 @@ function DetectionContextMenu({
             );
         }
     };
-    return (
-        isVisible && (
+    if (isVisible === true) {
+        return (
             <Positioner position={position}>
                 <FlexContainer>
                     <MainWidget>
@@ -118,14 +127,13 @@ function DetectionContextMenu({
                     </DeleteWidget>
                 </FlexContainer>
             </Positioner>
-        )
-    );
+        );
+    } else {
+        return null;
+    }
 }
 
 DetectionContextMenu.propTypes = {
-    position: PropTypes.object.isRequired,
-    isVisible: PropTypes.bool.isRequired,
-    selectedOption: PropTypes.string.isRequired,
     setSelectedOption: PropTypes.func.isRequired,
 };
 

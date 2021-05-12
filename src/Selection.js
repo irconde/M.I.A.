@@ -174,6 +174,7 @@ export default class Selection {
      */
     getDetectionsFromView(viewport) {
         const combinedDetections = [];
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(
             this.availableAlgorithms
         )) {

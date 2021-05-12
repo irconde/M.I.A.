@@ -2,6 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import nextIcon from '../icons/navigate_next.png';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
+import {
+    getCornerstoneMode,
+    getDisplaySelectedBoundingBox,
+} from '../redux/slices/ui/uiSlice';
+import * as constants from '../Constants';
 
 const NextButtonContainer = styled.div`
     width: 100%;
@@ -29,7 +35,14 @@ const NextButtonContainer = styled.div`
     }
 `;
 
-const NextButton = ({ enableNextButton, nextImageClick }) => {
+const NextButton = ({ nextImageClick }) => {
+    const cornerstoneMode = useSelector(getCornerstoneMode);
+    const displaySelectedBoundingBox = useSelector(
+        getDisplaySelectedBoundingBox
+    );
+    const enableNextButton =
+        !displaySelectedBoundingBox &&
+        cornerstoneMode === constants.cornerstoneMode.SELECTION;
     const handleClick = (e) => {
         if (enableNextButton) {
             nextImageClick(e);
@@ -47,7 +60,6 @@ const NextButton = ({ enableNextButton, nextImageClick }) => {
 };
 
 NextButton.propTypes = {
-    enableNextButton: PropTypes.bool.isRequired,
     nextImageClick: PropTypes.func.isRequired,
 };
 

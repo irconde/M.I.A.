@@ -86,7 +86,6 @@ class TreeDetection extends Component {
      */
     setSelected(e) {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            // this.props.detection.selected = !this.props.detection.selected;
             this.props.updateSelectedDetection(this.props.detection, e);
         }
     }

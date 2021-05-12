@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 const serverSlice = createSlice({
     name: 'server',

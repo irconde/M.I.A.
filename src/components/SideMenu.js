@@ -31,10 +31,10 @@ class SideMenu extends Component {
 
     static propTypes = {
         detections: PropTypes.object.isRequired,
+        // TODO: James B. - Remove this once refactored into uiSlice
         configurationInfo: PropTypes.object.isRequired,
         enableMenu: PropTypes.bool.isRequired,
         appUpdateImage: PropTypes.func.isRequired,
-        onAlgorithmSelected: PropTypes.func.isRequired,
         onMenuDetectionSelected: PropTypes.func.isRequired,
         resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         onDetectionSelected: PropTypes.func.isRequired,
@@ -100,6 +100,7 @@ class SideMenu extends Component {
         // We can't use map on the this.props.detection in the return
         // Therefore, we will populate the array myDetections with this data before returning
         let myDetections = [];
+        // eslint-disable-next-line no-unused-vars
         for (const [key, detectionSet] of Object.entries(
             this.props.detections
         )) {
@@ -139,6 +140,7 @@ class SideMenu extends Component {
                                     updateSelectedDetection={
                                         this.updateSelectedDetection
                                     }
+                                    // TODO: James B. - Remove this once refactored into uiSlice
                                     configurationInfo={
                                         this.props.configurationInfo
                                     }
@@ -154,10 +156,7 @@ class SideMenu extends Component {
                             );
                         })}
                     </div>
-                    <NextButton
-                        enableNextButton={this.props.enableNextButton}
-                        nextImageClick={this.props.nextImageClick}
-                    />
+                    <NextButton nextImageClick={this.props.nextImageClick} />
                 </div>
             );
         } else {
@@ -167,7 +166,6 @@ class SideMenu extends Component {
 }
 
 SideMenu.propTypes = {
-    enableNextButton: PropTypes.bool.isRequired,
     nextImageClick: PropTypes.func.isRequired,
 };
 

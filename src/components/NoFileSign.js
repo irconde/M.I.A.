@@ -45,7 +45,7 @@ class NoFileSign extends Component {
         return (
             <div style={this.state.divStyle}>
                 <NoFilesIcon
-                    title="NoFilesAvalable"
+                    title="NoFilesAvailable"
                     style={this.state.imgStyle}
                 />
                 <p style={this.state.paragraphStyle}> · No file available ·</p>

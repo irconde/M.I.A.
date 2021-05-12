@@ -46,6 +46,7 @@ class TreeAlgorithm extends Component {
     }
     static propTypes = {
         algorithm: PropTypes.object.isRequired,
+        // TODO: James B. - Remove this once refactored into uiSlice
         configurationInfo: PropTypes.object.isRequired,
         updateSelected: PropTypes.func.isRequired,
         setVisibilityData: PropTypes.func.isRequired,
@@ -174,6 +175,7 @@ class TreeAlgorithm extends Component {
                             ? this.props.algorithm.selected
                             : false
                     }
+                    // TODO: James B. - Remove this once refactored into uiSlice
                     detectorType={this.props.configurationInfo.type}
                     detectorConfigType={
                         this.props.configurationInfo.configuration
@@ -219,7 +221,7 @@ class TreeAlgorithm extends Component {
                             'OPERATOR'
                         ) == 0
                             ? this.props.algorithm.algorithm
-                            : constants.ALGORTIHM +
+                            : constants.ALGORITHM +
                               ' - ' +
                               this.props.algorithm.algorithm}
                     </div>

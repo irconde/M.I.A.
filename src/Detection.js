@@ -79,8 +79,4 @@ export default class Detection {
     getValidation() {
         return this.validation;
     }
-
-    setVisibility(visibility) {
-        // TODO. To be implemented
-    }
 }

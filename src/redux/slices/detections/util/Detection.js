@@ -34,6 +34,7 @@ export default class DetectionUtil {
         className,
         confidence,
         validation = null,
+        // eslint-disable-next-line no-unused-vars
         isValidated,
         algorithm,
         view,
@@ -163,7 +164,7 @@ export default class DetectionUtil {
         for (const key in props) {
             // Only compare properties that actually exist on the Detection
             if (Object.prototype.hasOwnProperty.call(detection, key)) {
-                // Special case for array compariso
+                // Special case for array comparison
                 // Since everything in JS is an object, regular equality check does not work here
                 if (Array.isArray(props[key])) {
                     // First, check lengths of array

@@ -72,6 +72,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         }
 
         const eventData = evt.detail;
+        // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
         const lineWidth = constants.detectionStyle.BORDER_WIDTH;
 
@@ -220,6 +221,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         });
     }
 
+    // eslint-disable-next-line no-unused-vars
     updateCachedStats(image, element, data) {}
 
     // Abstract method invoked when the mouse is clicked (on mouse down) to create and add a new annotation
@@ -283,4 +285,75 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             updatingDetection: false,
         };
     }
+}
+
+/**
+ *
+ * @param {*} startHandle
+ * @param {*} endHandle
+ * @returns {{ left: number, top: number, width: number, height: number}}
+ */
+
+function _getRectangleImageCoordinates(startHandle, endHandle) {
+    return {
+        left: Math.min(startHandle.x, endHandle.x),
+        top: Math.min(startHandle.y, endHandle.y),
+        width: Math.abs(startHandle.x - endHandle.x),
+        height: Math.abs(startHandle.y - endHandle.y),
+    };
+}
+
+/**
+ *
+ * @param {*} context
+ * @param {*} { className, score}
+ * @param {*} [options={}]
+ * @returns {string[]}
+ */
+
+// eslint-disable-next-line no-unused-vars
+function _createTextBoxContent(context, { className, score }, options = {}) {
+    const textLines = [];
+    const classInfoString = `${className} - ${score}%`;
+    textLines.push(classInfoString);
+    return textLines;
+}
+
+/**
+ *
+ *
+ * @param {*} startHandle
+ * @param {*} endHandle
+ * @returns {Array.<{x: number, y: number}>}
+ */
+
+// eslint-disable-next-line no-unused-vars
+function _findTextBoxAnchorPoints(startHandle, endHandle) {
+    const { left, top, width, height } = _getRectangleImageCoordinates(
+        startHandle,
+        endHandle
+    );
+
+    return [
+        {
+            // Top middle point of rectangle
+            x: left + width / 2,
+            y: top,
+        },
+        {
+            // Left middle point of rectangle
+            x: left,
+            y: top + height / 2,
+        },
+        {
+            // Bottom middle point of rectangle
+            x: left + width / 2,
+            y: top + height,
+        },
+        {
+            // Right middle point of rectangle
+            x: left + width,
+            y: top + height / 2,
+        },
+    ];
 }
