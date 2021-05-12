@@ -1478,6 +1478,7 @@ class App extends Component {
                         newBlob
                     );
                     if (data.length == 0) {
+                        // TODO: refactor this into uiSlice
                         self.setState(
                             {
                                 displaySelectedBoundingBox: false,
@@ -1596,6 +1597,7 @@ class App extends Component {
                                 top: editLabelWidgetPosInfo.y,
                                 left: editLabelWidgetPosInfo.x,
                             };
+                            // TODO: refactor this into uiSlice
                             self.setState(
                                 {
                                     isDetectionContextVisible: true,
@@ -1658,6 +1660,7 @@ class App extends Component {
             sideMenuUpdate === true
         ) {
             this.props.clearAllSelection();
+            // TODO: refactor this into uiSlice
             this.setState(
                 {
                     displaySelectedBoundingBox: false,
@@ -1676,6 +1679,7 @@ class App extends Component {
                 }
             );
         } else {
+            // TODO: refactor this into uiSlice
             this.setState({
                 isDetectionContextVisible: false,
                 editionMode: constants.editionMode.NO_TOOL,
@@ -1690,6 +1694,7 @@ class App extends Component {
         if (
             this.state.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            // TODO: refactor this into uiSlice
             this.setState(
                 {
                     displaySelectedBoundingBox: false,
@@ -1701,6 +1706,7 @@ class App extends Component {
                 }
             );
         } else {
+            // TODO: refactor this into uiSlice
             this.setState({
                 isDetectionContextVisible: false,
                 isEditLabelWidgetVisible: false,
@@ -1933,6 +1939,7 @@ class App extends Component {
                 viewportInfo,
                 detectionData.boundingBox
             );
+            // TODO: refactor this into uiSlice
             this.setState(
                 {
                     detectionContextPosition: {
@@ -2003,6 +2010,7 @@ class App extends Component {
                 newMode === this.state.editionMode
                     ? constants.editionMode.NO_TOOL
                     : newMode;
+            // TODO: refactor this into uiSlice
             this.setState(
                 {
                     editionMode: mode,
@@ -2053,7 +2061,7 @@ class App extends Component {
             });
             // Clear selections, etc. of all detections
             this.props.clearAllSelection();
-
+            // TODO: refactor this into uiSlice
             this.setState(
                 {
                     isFABVisible: true,
@@ -2171,6 +2179,7 @@ class App extends Component {
         };
         const editLabelVisible =
             this.state.editionMode == constants.editionMode.LABEL;
+        // TODO: refactor this into uiSlice
         this.setState(
             {
                 detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
@@ -2190,6 +2199,7 @@ class App extends Component {
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
+        // TODO: refactor this into uiSlice
         this.setState({ isEditLabelWidgetVisible: false }, () => {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 editionMode: this.state.editionMode,
@@ -2202,6 +2212,7 @@ class App extends Component {
      * Invoked when user selects 'polygon mask' option from DetectionContextMenu
      */
     editPolygonMask() {
+        // TODO: refactor this into uiSlice
         this.setState({ isEditLabelWidgetVisible: false }, () => {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 editionMode: this.state.editionMode,
