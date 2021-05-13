@@ -6,16 +6,13 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { editionMode, detectionContextStyle } from '../../Constants';
-<<<<<<< HEAD
 import * as constants from '../../Constants';
-=======
 import { useSelector } from 'react-redux';
 import {
     getEditionMode,
     getIsDetectionContextVisible,
     getDetectionContextPosition,
 } from '../../redux/slices/ui/uiSlice';
->>>>>>> develop
 
 const Positioner = styled.div`
     position: absolute;
@@ -82,9 +79,7 @@ const DeleteWidget = styled.div`
         background: ${detectionContextStyle.HOVER_COLOR};
     }
 `;
-function DetectionContextMenu({
-    setSelectedOption,
-}) {
+function DetectionContextMenu({ setSelectedOption }) {
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
     const position = useSelector(getDetectionContextPosition);

@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 
 const initialState = {
+    isEditLabelWidgetVisible: false,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     isFABVisible: false,
     isDrawingBoundingBox: false,
@@ -28,6 +29,108 @@ const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * resetSelectedDetectionBoxesUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        editDetectionLabelUpdate: (state) => {
+            state.isFABVisible = true;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionLabelEditWidth = 0;
+            state.detectionLabelEditPosition = { top: 0, left: 0 };
+            state.displaySelectedBoundingBox = false;
+        },
+        /**
+         * resetSelectedDetectionBoxesUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        resetSelectedDetectionBoxesUpdate: (state) => {
+            state.displaySelectedBoundingBox = false;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.isDetectionContextVisible = false;
+            state.detectionContextPosition = {
+                top: 0,
+                left: 0,
+            };
+        },
+        /**
+         * resetSelectedDetectionBoxesElseUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        resetSelectedDetectionBoxesElseUpdate: (state) => {
+            state.isDetectionContextVisible = false;
+            state.editionMode = constants.editionMode.NO_TOOL;
+        },
+        /**
+         * onDragEndUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        onDragEndUpdate: (state) => {
+            state.displaySelectedBoundingBox = false;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.isFABVisible = true;
+            state.isDetectionContextVisible = false;
+            state.detectionContextPosition = {
+                top: 0,
+                left: 0,
+            };
+        },
+        /**
+         * onDragEndUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        onDragEndWidgetUpdate: (state, action) => {
+            const {
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+                isEditLabelWidgetVisible,
+                contextMenuPos,
+            } = action.payload;
+            state.isDetectionContextVisible = true;
+            state.displaySelectedBoundingBox = true;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.detectionLabelEditPosition = detectionLabelEditPosition;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+            state.detectionContextPosition = {
+                top: contextMenuPos.y,
+                left: contextMenuPos.x,
+            };
+        },
+        /**
+         * selectEditDetectionLabelUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
+         */
+        selectEditDetectionLabelUpdate: (state, action) => {
+            const {
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+                isEditLabelWidgetVisible,
+            } = action.payload;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.detectionLabelEditPosition = detectionLabelEditPosition;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+        },
+        /**
+         * hideContextMenuUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        hideContextMenuUpdate: (state) => {
+            state.isDetectionContextVisible = false;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.displaySelectedBoundingBox = false;
+        },
+        /**
+         * updateIsEditLabelWidgetVisible
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value to determine if the UI should display the edit label widget.
+         */
+        updateIsEditLabelWidgetVisible: (state, action) => {
+            state.isEditLabelWidgetVisible = action.payload;
+        },
         /**
          * updateCornerstoneMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -200,6 +303,7 @@ const uiSlice = createSlice({
         exitEditionModeUpdate: (state) => {
             state.editionMode = null;
             state.isDetectionContextVisible = false;
+            state.isEditLabelWidgetVisible = false;
         },
         /**
          * updateZoomLevels - For when the UI recalculates the zoom level for the cornerstone viewports.
@@ -331,6 +435,13 @@ export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
  * @returns {Boolean} Returns wether the UI should display a single viewport or multiple viewports
  */
 export const getSingleViewport = (state) => state.ui.singleViewport;
+/**
+ * getIsEditLabelWidgetVisible
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Boolean} Returns wether the UI should display the edit label widget
+ */
+export const getIsEditLabelWidgetVisible = (state) =>
+    state.ui.isEditLabelWidgetVisible;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -356,6 +467,14 @@ export const {
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
+    updateIsEditLabelWidgetVisible,
+    hideContextMenuUpdate,
+    selectEditDetectionLabelUpdate,
+    onDragEndUpdate,
+    onDragEndWidgetUpdate,
+    resetSelectedDetectionBoxesUpdate,
+    resetSelectedDetectionBoxesElseUpdate,
+    editDetectionLabelUpdate,
 } = uiSlice.actions;
 
 // Export the reducer for the store
