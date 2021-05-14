@@ -1208,20 +1208,12 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
-                if (
-                    detectionList[j].visible !== true ||
-                    detectionList[j].selected === true
-                )
-                    continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = getDetectionColor(detectionList[j]);
                 if (boundingBoxCoords.length < B_BOX_COORDS) {
                     return;
                 }
-                if (
-                    detectionSet.lowerOpacity === true &&
-                    detectionList[j].selected === false
-                ) {
+                if (detectionSet.lowerOpacity === true) {
                     let rgbColor = Utils.hexToRgb(color);
                     color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
                 }
@@ -2200,9 +2192,9 @@ class App extends Component {
 
     onMenuDetectionSetSelected(algorithm) {
         this.props.selectDetectionSet(algorithm);
+        this.props.algorithmSelectedUpdate();
         this.resetCornerstoneTool();
         this.appUpdateImage();
-        this.props.algorithmSelectedUpdate();
     }
 
     render() {
