@@ -1165,13 +1165,21 @@ class App extends Component {
      */
     appUpdateImage() {
         if (this.state.imageViewportTop !== undefined) {
-            cornerstone.updateImage(this.state.imageViewportTop, true);
+            try {
+                cornerstone.updateImage(this.state.imageViewportTop, true);
+            } catch (e) {
+                console.error(e.stack);
+            }
         }
         if (
             this.props.singleViewport === false &&
             this.state.imageViewportSide !== undefined
         ) {
-            cornerstone.updateImage(this.state.imageViewportSide, true);
+            try {
+                cornerstone.updateImage(this.state.imageViewportSide, true);
+            } catch (e) {
+                console.error(e.stack);
+            }
         }
     }
 
