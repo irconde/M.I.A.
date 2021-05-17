@@ -12,7 +12,7 @@ const initialState = {
         top: 0,
         left: 0,
     },
-    editionMode: null,
+    editionMode: constants.editionMode.NO_TOOL,
     detectionLabelEditWidth: '0px',
     detectionLabelEditPosition: {
         top: 0,
@@ -200,7 +200,7 @@ const uiSlice = createSlice({
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.displaySelectedBoundingBox = false;
-            state.editionMode = null;
+            state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.detectionContextPosition.top = 0;
             state.detectionContextPosition.left = 0;
@@ -217,7 +217,7 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.EDITION;
             state.displaySelectedBoundingBox = true;
             state.isDetectionContextVisible = true;
-            state.editionMode = null;
+            state.editionMode = constants.editionMode.NO_TOOL;
         },
         /**
          * algorithmSelectedUpdate - For when a user selects an algorithm from the side menu. Will set the UI elements
@@ -268,7 +268,7 @@ const uiSlice = createSlice({
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.displaySelectedBoundingBox = false;
-            state.editionMode = null;
+            state.editionMode = constants.editionMode.NO_TOOL;
             state.detectionLabelEditWidth = 0;
             state.detectionLabelEditPosition.top = 0;
             state.detectionLabelEditPosition.left = 0;
@@ -301,7 +301,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         exitEditionModeUpdate: (state) => {
-            state.editionMode = null;
+            state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
         },

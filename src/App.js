@@ -1167,7 +1167,10 @@ class App extends Component {
         if (this.state.imageViewportTop !== undefined) {
             cornerstone.updateImage(this.state.imageViewportTop, true);
         }
-        if (this.props.singleViewport === false && this.state.imageViewportSide !== undefined) {
+        if (
+            this.props.singleViewport === false &&
+            this.state.imageViewportSide !== undefined
+        ) {
             cornerstone.updateImage(this.state.imageViewportSide, true);
         }
     }
@@ -1210,6 +1213,7 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
+                if (detectionList[j].visible !== true) continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = getDetectionColor(detectionList[j]);
                 if (boundingBoxCoords.length < B_BOX_COORDS) {
