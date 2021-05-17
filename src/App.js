@@ -1221,7 +1221,11 @@ class App extends Component {
                 }
             }
             for (let j = 0; j < detectionList.length; j++) {
-                if (detectionList[j].visible !== true || detectionList[j].selected) continue;
+                if (
+                    detectionList[j].visible !== true ||
+                    detectionList[j].selected
+                )
+                    continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
                 let color = getDetectionColor(detectionList[j]);
                 if (boundingBoxCoords.length < B_BOX_COORDS) {
@@ -1583,23 +1587,10 @@ class App extends Component {
                                 viewportInfo,
                                 coords
                             );
-                            const labelEditionIsEnabled =
-                                self.props.editionMode ===
-                                constants.editionMode.LABEL;
-                            const detectionData = self.props.selectedDetection;
-                            const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
-                                detectionData,
-                                coords
-                            );
-                            const widgetPosition = {
-                                top: editLabelWidgetPosInfo.y,
-                                left: editLabelWidgetPosInfo.x,
-                            };
                             self.props.onDragEndWidgetUpdate({
-                                detectionLabelEditWidth:
-                                    editLabelWidgetPosInfo.boundingWidth,
-                                detectionLabelEditPosition: widgetPosition,
-                                isEditLabelWidgetVisible: labelEditionIsEnabled,
+                                detectionLabelEditWidth: 0,
+                                detectionLabelEditPosition: { top: 0, left: 0 },
+                                isEditLabelWidgetVisible: false,
                                 contextMenuPos,
                             });
                             self.appUpdateImage();
