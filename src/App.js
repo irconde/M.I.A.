@@ -1228,7 +1228,8 @@ class App extends Component {
             for (let j = 0; j < detectionList.length; j++) {
                 if (
                     detectionList[j].visible !== true ||
-                    detectionList[j].selected
+                    (detectionList[j].selected &&
+                        detectionSet.selected === false)
                 )
                     continue;
                 const boundingBoxCoords = detectionList[j].boundingBox;
