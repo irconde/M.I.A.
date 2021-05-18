@@ -131,6 +131,14 @@ const uiSlice = createSlice({
         updateIsEditLabelWidgetVisible: (state, action) => {
             state.isEditLabelWidgetVisible = action.payload;
         },
+        onBoundingBoxEditUpdate: (state) => {
+            state.isEditLabelWidgetVisible = false;
+            state.editionMode = constants.editionMode.BOUNDING;
+        },
+        onPolygonMaskEditUpdate: (state) => {
+            state.isEditLabelWidgetVisible = false;
+            state.editionMode = constants.editionMode.POLYGON;
+        },
         /**
          * updateCornerstoneMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -475,6 +483,8 @@ export const {
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     editDetectionLabelUpdate,
+    onBoundingBoxEditUpdate,
+    onPolygonMaskEditUpdate,
 } = uiSlice.actions;
 
 // Export the reducer for the store

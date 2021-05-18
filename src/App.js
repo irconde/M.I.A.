@@ -83,6 +83,8 @@ import {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
+    onBoundingBoxEditUpdate,
+    onPolygonMaskEditUpdate,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -1164,6 +1166,9 @@ class App extends Component {
      * @return {none} None
      */
     appUpdateImage() {
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            editionMode: this.props.editionMode,
+        });
         if (this.state.imageViewportTop !== undefined) {
             try {
                 cornerstone.updateImage(this.state.imageViewportTop, true);
@@ -2095,9 +2100,6 @@ class App extends Component {
             detectionLabelEditPosition: widgetPosition,
             isEditLabelWidgetVisible: editLabelVisible,
         });
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: this.props.editionMode,
-        });
         this.appUpdateImage();
     }
 
@@ -2105,10 +2107,7 @@ class App extends Component {
      * Invoked when user selects 'bounding box' option from DetectionContextMenu
      */
     editBoundingBox() {
-        this.props.updateIsEditLabelWidgetVisible(false);
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: this.props.editionMode,
-        });
+        this.props.onBoundingBoxEditUpdate();
         this.appUpdateImage();
     }
 
@@ -2116,10 +2115,7 @@ class App extends Component {
      * Invoked when user selects 'polygon mask' option from DetectionContextMenu
      */
     editPolygonMask() {
-        this.props.updateIsEditLabelWidgetVisible(false);
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-            editionMode: this.props.editionMode,
-        });
+        this.props.onPolygonMaskEditUpdate();
         this.appUpdateImage();
     }
 
@@ -2348,6 +2344,8 @@ const mapDispatchToProps = {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
+    onBoundingBoxEditUpdate,
+    onPolygonMaskEditUpdate,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
