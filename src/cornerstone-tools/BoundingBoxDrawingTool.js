@@ -106,6 +106,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 if (data.visible === false) {
                     continue;
                 }
+                //console.log(zoom);
                 // Configure
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
