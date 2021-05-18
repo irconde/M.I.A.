@@ -350,6 +350,10 @@ class App extends Component {
             zoomLevelTop: newZoomLevelTop,
             zoomLevelSide: newZoomLevelSide,
         });
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            zoomLevelTop: newZoomLevelTop,
+            zoomLevelSide: newZoomLevelSide,
+        });
     }
 
     componentWillUnmount() {
@@ -1127,6 +1131,9 @@ class App extends Component {
                 e.currentTarget,
                 'BoundingBoxDrawing'
             );
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                zoomLevelTop: eventData.viewport.scale,
+            });
             this.props.updateZoomLevelTop(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
             this.appUpdateImage();
@@ -1140,6 +1147,9 @@ class App extends Component {
                 e.currentTarget,
                 'BoundingBoxDrawing'
             );
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                zoomLevelSide: eventData.viewport.scale,
+            });
             this.props.updateZoomLevelSide(eventData.viewport.scale);
             this.renderDetections(this.props.detections, context);
             this.appUpdateImage();
