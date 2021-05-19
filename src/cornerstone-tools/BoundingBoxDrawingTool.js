@@ -152,6 +152,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     );
                 }
                 // Label Rendering
+
                 if (
                     this.options.editionMode == constants.editionMode.NO_TOOL &&
                     data.updatingDetection === true

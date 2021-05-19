@@ -139,6 +139,10 @@ const uiSlice = createSlice({
             state.isEditLabelWidgetVisible = false;
             state.editionMode = constants.editionMode.POLYGON;
         },
+        onLabelEditUpdate: (state) => {
+            state.isEditLabelWidgetVisible = true;
+            state.editionMode = constants.editionMode.LABEL;
+        },
         /**
          * updateCornerstoneMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -185,6 +189,7 @@ const uiSlice = createSlice({
          * @param {constants.editionMode} action.payload - Constant value for the edition mode.
          */
         updateEditionMode: (state, action) => {
+            console.log("Updating edition mode: " + action.payload);
             state.editionMode = action.payload;
         },
         /**
@@ -308,7 +313,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         exitEditionModeUpdate: (state) => {
-            state.editionMode = constants.editionMode.NO_TOOL;
+            //state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
         },
@@ -484,6 +489,7 @@ export const {
     editDetectionLabelUpdate,
     onBoundingBoxEditUpdate,
     onPolygonMaskEditUpdate,
+    onLabelEditUpdate
 } = uiSlice.actions;
 
 // Export the reducer for the store

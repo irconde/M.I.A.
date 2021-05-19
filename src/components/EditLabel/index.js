@@ -7,7 +7,7 @@ import * as constants from '../../Constants';
 import Utils from '../../Utils.js';
 import { useSelector } from 'react-redux';
 import {
-    getEditionMode,
+    getIsEditLabelWidgetVisible,
     getDetectionLabelEditPosition,
     getDetectionLabelEditWidth,
 } from '../../redux/slices/ui/uiSlice';
@@ -61,9 +61,8 @@ const EditLabelWrapper = styled.div`
 const EditLabel = ({ onLabelChange }) => {
     const position = useSelector(getDetectionLabelEditPosition);
     const width = useSelector(getDetectionLabelEditWidth);
-    const editionMode = useSelector(getEditionMode);
     const labels = useSelector(getDetectionLabels);
-    const isVisible = editionMode === constants.editionMode.LABEL;
+    const isVisible = useSelector(getIsEditLabelWidgetVisible);
     const [isListOpen, setIsListOpen] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);

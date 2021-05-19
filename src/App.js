@@ -83,6 +83,7 @@ import {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
+    onLabelEditUpdate,
     onBoundingBoxEditUpdate,
     onPolygonMaskEditUpdate,
 } from './redux/slices/ui/uiSlice';
@@ -1440,6 +1441,7 @@ class App extends Component {
      * @return {type} None
      */
     onDragEnd(event, viewport) {
+        console.log(this.props.editionMode);
         if (
             this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION ||
@@ -1946,6 +1948,7 @@ class App extends Component {
                 newMode === this.props.editionMode
                     ? constants.editionMode.NO_TOOL
                     : newMode;
+            console.log(mode);
             this.props.updateEditionMode(mode);
             this.onContextMenuBtnClicked(mode);
         }
@@ -2094,8 +2097,13 @@ class App extends Component {
             top: editLabelWidgetPosInfo.y,
             left: editLabelWidgetPosInfo.x,
         };
+
+        // TODO. irconde
         const editLabelVisible =
             this.props.editionMode == constants.editionMode.LABEL;
+        console.log(this.props.editionMode);
+        console.log("editLabelVisible" + editLabelVisible);
+
         this.props.selectEditDetectionLabelUpdate({
             detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
             detectionLabelEditPosition: widgetPosition,
@@ -2347,6 +2355,7 @@ const mapDispatchToProps = {
     selectEditDetectionLabelUpdate,
     onBoundingBoxEditUpdate,
     onPolygonMaskEditUpdate,
+    onLabelEditUpdate
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
