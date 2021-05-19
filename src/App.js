@@ -1947,7 +1947,7 @@ class App extends Component {
                     ? constants.editionMode.NO_TOOL
                     : newMode;
             this.props.updateEditionMode(mode);
-            this.onContextMenuBtnClicked(newMode);
+            this.onContextMenuBtnClicked(mode);
         }
     }
 
