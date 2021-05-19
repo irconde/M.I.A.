@@ -259,7 +259,6 @@ const uiSlice = createSlice({
         labelSelectedUpdate: (state, action) => {
             const { width, position } = action.payload;
             state.editionMode = constants.editionMode.LABEL;
-            state.isDetectionContextVisible = false;
             state.detectionLabelEditWidth = width;
             state.detectionLabelEditPosition.top = position.top;
             state.detectionLabelEditPosition.left = position.left;
