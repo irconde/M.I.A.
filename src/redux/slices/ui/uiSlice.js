@@ -15,6 +15,7 @@ const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
     detectionLabelEditWidth: '0px',
     detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
+    detectionLabelEditViewport: constants.viewport.SIDE,
     detectionLabelEditPosition: {
         top: 0,
         left: 0,
@@ -40,6 +41,7 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.detectionLabelEditWidth = 0;
             state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
+            state.detectionLabelEditViewport = constants.viewport.SIDE;
             state.detectionLabelEditPosition = { top: 0, left: 0 };
             state.displaySelectedBoundingBox = false;
         },
@@ -123,11 +125,13 @@ const uiSlice = createSlice({
                 detectionLabelEditPosition,
                 isEditLabelWidgetVisible,
                 detectionLabelEditFont,
+                detectionLabelEditViewport,
             } = action.payload;
             state.detectionLabelEditWidth = detectionLabelEditWidth;
             state.detectionLabelEditPosition = detectionLabelEditPosition;
             state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
             state.detectionLabelEditFont = detectionLabelEditFont;
+            state.detectionLabelEditViewport = detectionLabelEditViewport;
         },
         /**
          * hideContextMenuUpdate
@@ -272,6 +276,7 @@ const uiSlice = createSlice({
             const { width, position } = action.payload;
             state.detectionLabelEditWidth = width;
             state.detectionLabelEditFont = font;
+            state.detectionLabelEditViewport = viewport;
             state.detectionLabelEditPosition.top = position.top;
             state.detectionLabelEditPosition.left = position.left;
         },
@@ -290,6 +295,7 @@ const uiSlice = createSlice({
             state.editionMode = constants.editionMode.NO_TOOL;
             state.detectionLabelEditWidth = 0;
             state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
+            state.detectionLabelEditViewport = constants.viewport.SIDE;
             state.detectionLabelEditPosition.top = 0;
             state.detectionLabelEditPosition.left = 0;
         },
@@ -436,6 +442,13 @@ export const getDetectionLabelEditWidth = (state) =>
  */
 export const getDetectionLabelEditFont = (state) =>
     state.ui.detectionLabelEditFont;
+/**
+ * getDetectionLabelEditViewport
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} Returns the viewport of the detection label edition
+ */
+export const getDetectionLabelEditViewport = (state) =>
+    state.ui.detectionLabelEditViewport;
 /**
  * getDetectionLabelEditPosition
  * @param {State} state Passed in via useSelector/mapStateToProps

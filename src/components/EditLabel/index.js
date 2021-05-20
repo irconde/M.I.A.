@@ -11,6 +11,7 @@ import {
     getDetectionLabelEditPosition,
     getDetectionLabelEditWidth,
     getDetectionLabelEditFont,
+    getDetectionLabelEditViewport,
     getZoomLevelSide,
     getZoomLevelTop,
 } from '../../redux/slices/ui/uiSlice';
@@ -25,7 +26,7 @@ const EditLabelWrapper = styled.div`
     width: ${(props) => `${props.width}px`};
     min-width: 120px;
     z-index: 500;
-    left: ${(props) => `${props.left}px`};
+    left: ${(props) => `${props.left-props.positionDiff}px`};
     top: ${(props) => `${props.top}px`};
     background: ${constants.colors.BLUE};
 
@@ -36,8 +37,9 @@ const EditLabelWrapper = styled.div`
         .newLabelInput {
             background-color: transparent;
             font-family:"Arial";
-            font-weight:${(props) => `${props.fun}px`};//"bold"
+            font-weight:"600px";
             font-size:${(props) => `${props.fontSize}px`};
+            height:${(props) => `${props.heightDiff}px`};
             color: ${constants.colors.WHITE};
             border: none;
             border-radius: 4px;
@@ -71,6 +73,7 @@ const EditLabelWrapper = styled.div`
 const EditLabel = ({ onLabelChange }) => {
     const zoomSide = useSelector(getZoomLevelSide);
     const zoomTop = useSelector(getZoomLevelTop);
+    const viewport = useSelector(getDetectionLabelEditViewport);
     const position = useSelector(getDetectionLabelEditPosition);
     const width = useSelector(getDetectionLabelEditWidth);
     const font = useSelector(getDetectionLabelEditFont);
@@ -81,7 +84,7 @@ const EditLabel = ({ onLabelChange }) => {
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);
 
-    const placeholder = 'Input text here';
+    const placeholder = 'Input text';
     const arrowOrientation = {
         UP: 'up',
         DOWN: 'down',
@@ -128,10 +131,18 @@ const EditLabel = ({ onLabelChange }) => {
         }
     };
 
+    
+    const getEditLabelDiff = (diff, viewport) => {
+        const zoom = viewport === "side" ? zoomSide : zoomTop;
+        return diff*zoom;
+    }
+
     if (isVisible) {
         return (
             <EditLabelWrapper
-                fun={labels}
+                viewport={viewport}
+                positionDiff={getEditLabelDiff(1,viewport)}
+                heightDiff={getEditLabelDiff(18,viewport) < 28 ? 28 : getEditLabelDiff(18,viewport)}
                 top={position.top}
                 left={position.left}
                 width={width}
@@ -179,6 +190,7 @@ function getFontSize(str) {
     let fontSize = parseInt(floatNum);
     return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
 }
+
 
 EditLabel.propTypes = {
     onLabelChange: PropTypes.func.isRequired,

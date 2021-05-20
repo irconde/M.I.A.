@@ -2088,8 +2088,7 @@ class App extends Component {
                 gap = offsetLeft / zoomLevel;
                 viewport = this.state.imageViewportSide;
                 labelHeight = labelSize.height;
-                    
-
+                const newViewport = currentViewport.id === "dicomImageRight" ? constants.viewport.SIDE : constants.viewport.TOP;
                     
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
@@ -2099,6 +2098,7 @@ class App extends Component {
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
+                    viewport: newViewport,
                 });
                 this.appUpdateImage();
                 return {
@@ -2106,6 +2106,7 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
+                    viewport: newViewport,
                 };
             }
         }
