@@ -2304,7 +2304,7 @@ const mapDispatchToProps = {
     selectEditDetectionLabelUpdate,
     onBoundingBoxEditUpdate,
     onPolygonMaskEditUpdate,
-    onLabelEditUpdate
+    onLabelEditUpdate,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
