@@ -10,8 +10,15 @@ import {
     getIsEditLabelWidgetVisible,
     getDetectionLabelEditPosition,
     getDetectionLabelEditWidth,
+    getDetectionLabelEditFont,
+    getZoomLevelSide,
+    getZoomLevelTop,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
+
+//const zoom = element.id === "dicomImageRight" ? this.options.zoomLevelSide : this.options.zoomLevelTop;
+//console.log(zoom);
+
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -28,6 +35,9 @@ const EditLabelWrapper = styled.div`
 
         .newLabelInput {
             background-color: transparent;
+            font-family:"Arial";
+            font-weight:${(props) => `${props.fun}px`};//"bold"
+            font-size:${(props) => `${props.fontSize}px`};
             color: ${constants.colors.WHITE};
             border: none;
             border-radius: 4px;
@@ -59,8 +69,12 @@ const EditLabelWrapper = styled.div`
  * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabel = ({ onLabelChange }) => {
+    const zoomSide = useSelector(getZoomLevelSide);
+    const zoomTop = useSelector(getZoomLevelTop);
     const position = useSelector(getDetectionLabelEditPosition);
     const width = useSelector(getDetectionLabelEditWidth);
+    const font = useSelector(getDetectionLabelEditFont);
+    const editionMode = useSelector(getEditionMode);
     const labels = useSelector(getDetectionLabels);
     const isVisible = useSelector(getIsEditLabelWidgetVisible);
     const [isListOpen, setIsListOpen] = useState(false);
@@ -117,9 +131,11 @@ const EditLabel = ({ onLabelChange }) => {
     if (isVisible) {
         return (
             <EditLabelWrapper
+                fun={labels}
                 top={position.top}
                 left={position.left}
-                width={width}>
+                width={width}
+                fontSize={getFontSize(font)}>
                 <div className="inputContainer">
                     <input
                         className="newLabelInput"
@@ -155,6 +171,14 @@ const EditLabel = ({ onLabelChange }) => {
         );
     } else return null;
 };
+
+function getFontSize(str) {
+    var fontArr = str.split(" ");
+    let floatNum = parseFloat(fontArr[1]);
+    Math.floor(floatNum);
+    let fontSize = parseInt(floatNum);
+    return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
+}
 
 EditLabel.propTypes = {
     onLabelChange: PropTypes.func.isRequired,

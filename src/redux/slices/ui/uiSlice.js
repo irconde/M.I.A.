@@ -14,6 +14,7 @@ const initialState = {
     },
     editionMode: constants.editionMode.NO_TOOL,
     detectionLabelEditWidth: '0px',
+    detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
     detectionLabelEditPosition: {
         top: 0,
         left: 0,
@@ -34,12 +35,13 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         editDetectionLabelUpdate: (state) => {
-            (state.isFABVisible = true),
-                (state.editionMode = constants.editionMode.NO_TOOL),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.detectionLabelEditWidth = 0),
-                (state.detectionLabelEditPosition = { top: 0, left: 0 }),
-                (state.displaySelectedBoundingBox = false);
+            state.isFABVisible = true;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionLabelEditWidth = 0;
+            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
+            state.detectionLabelEditPosition = { top: 0, left: 0 };
+            state.displaySelectedBoundingBox = false;
         },
         /**
          * resetSelectedDetectionBoxesUpdate
@@ -120,10 +122,12 @@ const uiSlice = createSlice({
                 detectionLabelEditWidth,
                 detectionLabelEditPosition,
                 isEditLabelWidgetVisible,
+                detectionLabelEditFont,
             } = action.payload;
             state.detectionLabelEditWidth = detectionLabelEditWidth;
             state.detectionLabelEditPosition = detectionLabelEditPosition;
             state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+            state.detectionLabelEditFont = detectionLabelEditFont;
         },
         /**
          * hideContextMenuUpdate
@@ -267,6 +271,7 @@ const uiSlice = createSlice({
         labelSelectedUpdate: (state, action) => {
             const { width, position } = action.payload;
             state.detectionLabelEditWidth = width;
+            state.detectionLabelEditFont = font;
             state.detectionLabelEditPosition.top = position.top;
             state.detectionLabelEditPosition.left = position.left;
         },
@@ -284,6 +289,7 @@ const uiSlice = createSlice({
             state.displaySelectedBoundingBox = false;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.detectionLabelEditWidth = 0;
+            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
             state.detectionLabelEditPosition.top = 0;
             state.detectionLabelEditPosition.left = 0;
         },
@@ -423,6 +429,13 @@ export const getDetectionContextPosition = (state) =>
  */
 export const getDetectionLabelEditWidth = (state) =>
     state.ui.detectionLabelEditWidth;
+/**
+ * getDetectionLabelEditFont
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} Returns the font string of the detection label edition
+ */
+export const getDetectionLabelEditFont = (state) =>
+    state.ui.detectionLabelEditFont;
 /**
  * getDetectionLabelEditPosition
  * @param {State} state Passed in via useSelector/mapStateToProps

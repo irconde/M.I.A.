@@ -2063,6 +2063,16 @@ class App extends Component {
                     currentViewport = this.state.imageViewportSide;
                     zoomLevel = this.props.zoomLevelSide;
                 }
+
+                var fontArr = constants.detectionStyle.LABEL_FONT.split(" ");
+                var fontSizeArr = fontArr[1].split("px");
+                var fontSize = fontSizeArr[0];
+                fontSize*=zoomLevel;
+                fontSizeArr[0] = fontSize;
+                var newFontSize = fontSizeArr.join("px");
+                var newFont = fontArr[0] + " " + newFontSize + " " + fontArr[2];
+                
+
                 const canvas = currentViewport.children[0];
                 const ctx = canvas.getContext('2d');
                 const detectionLabel = Utils.formatDetectionLabel(
@@ -2078,7 +2088,9 @@ class App extends Component {
                 gap = offsetLeft / zoomLevel;
                 viewport = this.state.imageViewportSide;
                 labelHeight = labelSize.height;
+                    
 
+                    
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
                     y: bbox[1] - labelHeight,
@@ -2086,12 +2098,14 @@ class App extends Component {
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
+                    font: newFont,
                 });
                 this.appUpdateImage();
                 return {
                     x: x,
                     y: y,
                     boundingWidth: boundingWidth,
+                    font: newFont,
                 };
             }
         }
