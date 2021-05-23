@@ -105,6 +105,7 @@ const detectionsSlice = createSlice({
             }
             state.selectedAlgorithm = null;
             state.selectedDetection = null;
+            state.isEditLabelWidgetVisible = false;
         },
         // Select a DetectionSet
         // Action payload should contain:

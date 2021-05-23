@@ -226,6 +226,7 @@ const uiSlice = createSlice({
             state.displaySelectedBoundingBox = false;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
+            state.isEditLabelWidgetVisible = false;
             state.detectionContextPosition.top = 0;
             state.detectionContextPosition.left = 0;
         },
@@ -324,7 +325,6 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         exitEditionModeUpdate: (state) => {
-            //state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
         },
