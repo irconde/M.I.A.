@@ -170,13 +170,7 @@ class App extends Component {
         this.getContextMenuPos = this.getContextMenuPos.bind(this);
         this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
-        this.onContextMenuBtnClicked = this.onContextMenuBtnClicked.bind(this);
-        this.selectEditDetectionLabel = this.selectEditDetectionLabel.bind(
-            this
-        );
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
-        this.editBoundingBox = this.editBoundingBox.bind(this);
-        this.editPolygonMask = this.editPolygonMask.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
         this.updateDetectionVisibility = this.updateDetectionVisibility.bind(
             this
@@ -1129,7 +1123,6 @@ class App extends Component {
      */
     onImageRendered(e) {
         const eventData = e.detail;
-
         if (eventData.element.id === 'dicomImageLeft') {
             const context = eventData.canvasContext;
             // eslint-disable-next-line no-unused-vars
@@ -1441,7 +1434,6 @@ class App extends Component {
      * @return {type} None
      */
     onDragEnd(event, viewport) {
-        console.log(this.props.editionMode);
         if (
             this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION ||
@@ -1948,29 +1940,55 @@ class App extends Component {
                 newMode === this.props.editionMode
                     ? constants.editionMode.NO_TOOL
                     : newMode;
-            console.log(mode);
-            this.props.updateEditionMode(mode);
-            this.onContextMenuBtnClicked(mode);
-        }
-    }
-
-    /**
-     * Callback Invoked when user selects an edition mode from DetectionContextMenu
-     * @param {string} mode Edition mode selected from menu
-     */
-    onContextMenuBtnClicked(mode) {
-        switch (mode) {
-            case constants.editionMode.BOUNDING:
-                this.editBoundingBox();
-                break;
-            case constants.editionMode.LABEL:
-                this.selectEditDetectionLabel();
-                break;
-            case constants.editionMode.DELETE:
+            if (mode === constants.editionMode.DELETE) {
                 this.deleteDetection();
-                break;
-            case constants.editionMode.POLYGON:
-                this.editPolygonMask();
+                return;
+            }
+            let payload = {
+                editionMode: mode,
+                isEditLabelWidgetVisible: mode === constants.editionMode.LABEL
+            }
+            if (mode === constants.editionMode.LABEL) {
+                const detectionData = this.props.selectedDetection;
+                let coords;
+                if (this.props.cornerstoneMode === constants.cornerstoneMode.EDITION) {
+                    const currentViewport =
+                        detectionData.view === constants.viewport.TOP
+                            ? this.state.imageViewportTop
+                            : this.state.imageViewportSide;
+                    const toolState = cornerstoneTools.getToolState(
+                        currentViewport,
+                        'BoundingBoxDrawing'
+                    );
+                    const { data } = toolState;
+                    const { handles } = data[0];
+                    const { start, end } = handles;
+                    // Fix flipped rectangle issues
+                    if (start.x > end.x && start.y > end.y) {
+                        coords = [end.x, end.y, start.x, start.y];
+                    } else if (start.x > end.x) {
+                        coords = [end.x, start.y, start.x, end.y];
+                    } else if (start.y > end.y) {
+                        coords = [start.x, end.y, end.x, start.y];
+                    } else {
+                        coords = [start.x, start.y, end.x, end.y];
+                    }
+                }
+                const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
+                    detectionData,
+                    coords
+                );
+                const widgetPosition = {
+                    top: editLabelWidgetPosInfo.y,
+                    left: editLabelWidgetPosInfo.x,
+                };
+                payload = {
+                    ...payload,
+                    detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
+                    detectionLabelEditPosition: widgetPosition,
+                }
+            }
+            this.props.updateEditionMode(payload);
         }
     }
 
@@ -2057,75 +2075,6 @@ class App extends Component {
                 };
             }
         }
-    }
-
-    /**
-     * Invoked when user selects 'label' option from DetectionContextMenu
-     * Renders and positions EditLabel widget relative to detection
-     */
-    selectEditDetectionLabel() {
-        const detectionData = this.props.selectedDetection;
-        let coords;
-        if (this.props.cornerstoneMode === constants.cornerstoneMode.EDITION) {
-            const currentViewport =
-                detectionData.view === constants.viewport.TOP
-                    ? this.state.imageViewportTop
-                    : this.state.imageViewportSide;
-            const toolState = cornerstoneTools.getToolState(
-                currentViewport,
-                'BoundingBoxDrawing'
-            );
-            const { data } = toolState;
-            const { handles } = data[0];
-            const { start, end } = handles;
-            // Fix flipped rectangle issues
-            if (start.x > end.x && start.y > end.y) {
-                coords = [end.x, end.y, start.x, start.y];
-            } else if (start.x > end.x) {
-                coords = [end.x, start.y, start.x, end.y];
-            } else if (start.y > end.y) {
-                coords = [start.x, end.y, end.x, start.y];
-            } else {
-                coords = [start.x, start.y, end.x, end.y];
-            }
-        }
-        const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
-            detectionData,
-            coords
-        );
-        const widgetPosition = {
-            top: editLabelWidgetPosInfo.y,
-            left: editLabelWidgetPosInfo.x,
-        };
-
-        // TODO. irconde
-        const editLabelVisible =
-            this.props.editionMode == constants.editionMode.LABEL;
-        console.log(this.props.editionMode);
-        console.log("editLabelVisible" + editLabelVisible);
-
-        this.props.selectEditDetectionLabelUpdate({
-            detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
-            detectionLabelEditPosition: widgetPosition,
-            isEditLabelWidgetVisible: editLabelVisible,
-        });
-        this.appUpdateImage();
-    }
-
-    /**
-     * Invoked when user selects 'bounding box' option from DetectionContextMenu
-     */
-    editBoundingBox() {
-        this.props.onBoundingBoxEditUpdate();
-        this.appUpdateImage();
-    }
-
-    /**
-     * Invoked when user selects 'polygon mask' option from DetectionContextMenu
-     */
-    editPolygonMask() {
-        this.props.onPolygonMaskEditUpdate();
-        this.appUpdateImage();
     }
 
     /**

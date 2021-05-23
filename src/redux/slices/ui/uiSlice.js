@@ -34,49 +34,49 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         editDetectionLabelUpdate: (state) => {
-            state.isFABVisible = true;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.detectionLabelEditWidth = 0;
-            state.detectionLabelEditPosition = { top: 0, left: 0 };
-            state.displaySelectedBoundingBox = false;
+            (state.isFABVisible = true),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.detectionLabelEditWidth = 0),
+                (state.detectionLabelEditPosition = { top: 0, left: 0 }),
+                (state.displaySelectedBoundingBox = false);
         },
         /**
          * resetSelectedDetectionBoxesUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         resetSelectedDetectionBoxesUpdate: (state) => {
-            state.displaySelectedBoundingBox = false;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.isDetectionContextVisible = false;
-            state.detectionContextPosition = {
-                top: 0,
-                left: 0,
-            };
+            (state.displaySelectedBoundingBox = false),
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.isDetectionContextVisible = false),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
         },
         /**
          * resetSelectedDetectionBoxesElseUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         resetSelectedDetectionBoxesElseUpdate: (state) => {
-            state.isDetectionContextVisible = false;
-            state.editionMode = constants.editionMode.NO_TOOL;
+            (state.isDetectionContextVisible = false),
+                (state.editionMode = constants.editionMode.NO_TOOL);
         },
         /**
          * onDragEndUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         onDragEndUpdate: (state) => {
-            state.displaySelectedBoundingBox = false;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.isFABVisible = true;
-            state.isDetectionContextVisible = false;
-            state.detectionContextPosition = {
-                top: 0,
-                left: 0,
-            };
+            (state.displaySelectedBoundingBox = false),
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.isFABVisible = true),
+                (state.isDetectionContextVisible = false),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
         },
         /**
          * onDragEndUpdate
@@ -89,15 +89,15 @@ const uiSlice = createSlice({
                 isEditLabelWidgetVisible,
                 contextMenuPos,
             } = action.payload;
-            state.isDetectionContextVisible = true;
-            state.displaySelectedBoundingBox = true;
-            state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.detectionLabelEditPosition = detectionLabelEditPosition;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-            state.detectionContextPosition = {
-                top: contextMenuPos.y,
-                left: contextMenuPos.x,
-            };
+            (state.isDetectionContextVisible = true),
+                (state.displaySelectedBoundingBox = true),
+                (state.detectionLabelEditWidth = detectionLabelEditWidth),
+                (state.detectionLabelEditPosition = detectionLabelEditPosition),
+                (state.isEditLabelWidgetVisible = isEditLabelWidgetVisible),
+                (state.detectionContextPosition = {
+                    top: contextMenuPos.y,
+                    left: contextMenuPos.x,
+                });
         },
         /**
          * selectEditDetectionLabelUpdate
@@ -119,9 +119,9 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         hideContextMenuUpdate: (state) => {
-            state.isDetectionContextVisible = false;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
+            (state.isDetectionContextVisible = false),
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.displaySelectedBoundingBox = false);
         },
         /**
          * updateIsEditLabelWidgetVisible
@@ -132,16 +132,16 @@ const uiSlice = createSlice({
             state.isEditLabelWidgetVisible = action.payload;
         },
         onBoundingBoxEditUpdate: (state) => {
-            state.isEditLabelWidgetVisible = false;
-            state.editionMode = constants.editionMode.BOUNDING;
+            (state.isEditLabelWidgetVisible = false),
+                (state.editionMode = constants.editionMode.BOUNDING);
         },
         onPolygonMaskEditUpdate: (state) => {
-            state.isEditLabelWidgetVisible = false;
-            state.editionMode = constants.editionMode.POLYGON;
+            (state.isEditLabelWidgetVisible = false),
+                (state.editionMode = constants.editionMode.POLYGON);
         },
         onLabelEditUpdate: (state) => {
-            state.isEditLabelWidgetVisible = true;
-            state.editionMode = constants.editionMode.LABEL;
+            (state.isEditLabelWidgetVisible = true),
+                (state.editionMode = constants.editionMode.LABEL);
         },
         /**
          * updateCornerstoneMode
@@ -189,8 +189,19 @@ const uiSlice = createSlice({
          * @param {constants.editionMode} action.payload - Constant value for the edition mode.
          */
         updateEditionMode: (state, action) => {
-            console.log("Updating edition mode: " + action.payload);
-            state.editionMode = action.payload;
+            const {
+                editionMode,
+                isEditLabelWidgetVisible,
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+            } = action.payload;
+            state.editionMode = editionMode;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+            switch (editionMode) {
+                case constants.editionMode.LABEL:
+                    state.detectionLabelEditWidth = detectionLabelEditWidth;
+                    state.detectionLabelEditPosition = detectionLabelEditPosition;
+            }
         },
         /**
          * updateDetectionContextPosition
@@ -489,7 +500,7 @@ export const {
     editDetectionLabelUpdate,
     onBoundingBoxEditUpdate,
     onPolygonMaskEditUpdate,
-    onLabelEditUpdate
+    onLabelEditUpdate,
 } = uiSlice.actions;
 
 // Export the reducer for the store
