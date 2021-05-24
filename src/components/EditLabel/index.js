@@ -17,16 +17,12 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
 
-//const zoom = element.id === "dicomImageRight" ? this.options.zoomLevelSide : this.options.zoomLevelTop;
-//console.log(zoom);
-
-
 const EditLabelWrapper = styled.div`
     position: absolute;
     width: ${(props) => `${props.width}px`};
     min-width: 120px;
     z-index: 500;
-    left: ${(props) => `${props.left-props.positionDiff}px`};
+    left: ${(props) => `${props.left - props.positionDiff}px`};
     top: ${(props) => `${props.top}px`};
     background: ${constants.colors.BLUE};
 
@@ -36,10 +32,10 @@ const EditLabelWrapper = styled.div`
 
         .newLabelInput {
             background-color: transparent;
-            font-family:"Arial";
-            font-weight:"600px";
-            font-size:${(props) => `${props.fontSize}px`};
-            height:${(props) => `${props.heightDiff}px`};
+            font-family: 'Arial';
+            font-weight: '600px';
+            font-size: ${(props) => `${props.fontSize}px`};
+            height: ${(props) => `${props.heightDiff}px`};
             color: ${constants.colors.WHITE};
             border: none;
             border-radius: 4px;
@@ -77,7 +73,6 @@ const EditLabel = ({ onLabelChange }) => {
     const position = useSelector(getDetectionLabelEditPosition);
     const width = useSelector(getDetectionLabelEditWidth);
     const font = useSelector(getDetectionLabelEditFont);
-    const editionMode = useSelector(getEditionMode);
     const labels = useSelector(getDetectionLabels);
     const isVisible = useSelector(getIsEditLabelWidgetVisible);
     const [isListOpen, setIsListOpen] = useState(false);
@@ -131,18 +126,21 @@ const EditLabel = ({ onLabelChange }) => {
         }
     };
 
-    
     const getEditLabelDiff = (diff, viewport) => {
-        const zoom = viewport === "side" ? zoomSide : zoomTop;
-        return diff*zoom;
-    }
+        const zoom = viewport === 'side' ? zoomSide : zoomTop;
+        return diff * zoom;
+    };
 
     if (isVisible) {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                positionDiff={getEditLabelDiff(1,viewport)}
-                heightDiff={getEditLabelDiff(18,viewport) < 28 ? 28 : getEditLabelDiff(18,viewport)}
+                positionDiff={getEditLabelDiff(1, viewport)}
+                heightDiff={
+                    getEditLabelDiff(18, viewport) < 28
+                        ? 28
+                        : getEditLabelDiff(18, viewport)
+                }
                 top={position.top}
                 left={position.left}
                 width={width}
@@ -184,13 +182,12 @@ const EditLabel = ({ onLabelChange }) => {
 };
 
 function getFontSize(str) {
-    var fontArr = str.split(" ");
+    var fontArr = str.split(' ');
     let floatNum = parseFloat(fontArr[1]);
     Math.floor(floatNum);
     let fontSize = parseInt(floatNum);
     return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
 }
-
 
 EditLabel.propTypes = {
     onLabelChange: PropTypes.func.isRequired,

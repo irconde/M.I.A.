@@ -273,7 +273,7 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing the width of the label, and an top & left values for the position.
          */
         labelSelectedUpdate: (state, action) => {
-            const { width, position } = action.payload;
+            const { width, position, font, viewport } = action.payload;
             state.detectionLabelEditWidth = width;
             state.detectionLabelEditFont = font;
             state.detectionLabelEditViewport = viewport;

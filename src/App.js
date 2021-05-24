@@ -82,7 +82,7 @@ import {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
-    onLabelEditionEnd
+    onLabelEditionEnd,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -1600,13 +1600,14 @@ class App extends Component {
                                 coords
                             );
                             let widgetPosition = {
-                                    top: editLabelWidgetPosInfo.y,
-                                    left: editLabelWidgetPosInfo.x,
-                                };
+                                top: editLabelWidgetPosInfo.y,
+                                left: editLabelWidgetPosInfo.x,
+                            };
                             self.props.onDragEndWidgetUpdate({
-                                detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
+                                detectionLabelEditWidth:
+                                    editLabelWidgetPosInfo.boundingWidth,
                                 detectionLabelEditPosition: widgetPosition,
-                                contextMenuPos
+                                contextMenuPos,
                             });
                         }
                     }
@@ -1960,12 +1961,15 @@ class App extends Component {
             }
             let payload = {
                 editionMode: mode,
-                isEditLabelWidgetVisible: mode === constants.editionMode.LABEL
-            }
+                isEditLabelWidgetVisible: mode === constants.editionMode.LABEL,
+            };
             if (mode === constants.editionMode.LABEL) {
                 const detectionData = this.props.selectedDetection;
                 let coords;
-                if (this.props.cornerstoneMode === constants.cornerstoneMode.EDITION) {
+                if (
+                    this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION
+                ) {
                     const currentViewport =
                         detectionData.view === constants.viewport.TOP
                             ? this.state.imageViewportTop
@@ -1998,9 +2002,10 @@ class App extends Component {
                 };
                 payload = {
                     ...payload,
-                    detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
+                    detectionLabelEditWidth:
+                        editLabelWidgetPosInfo.boundingWidth,
                     detectionLabelEditPosition: widgetPosition,
-                }
+                };
             }
             this.props.updateEditionMode(payload);
         }
@@ -2064,14 +2069,13 @@ class App extends Component {
                     zoomLevel = this.props.zoomLevelSide;
                 }
 
-                var fontArr = constants.detectionStyle.LABEL_FONT.split(" ");
-                var fontSizeArr = fontArr[1].split("px");
+                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                var fontSizeArr = fontArr[1].split('px');
                 var fontSize = fontSizeArr[0];
-                fontSize*=zoomLevel;
+                fontSize *= zoomLevel;
                 fontSizeArr[0] = fontSize;
-                var newFontSize = fontSizeArr.join("px");
-                var newFont = fontArr[0] + " " + newFontSize + " " + fontArr[2];
-                
+                var newFontSize = fontSizeArr.join('px');
+                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
                 const canvas = currentViewport.children[0];
                 const ctx = canvas.getContext('2d');
@@ -2086,9 +2090,15 @@ class App extends Component {
                 );
                 const { offsetLeft } = currentViewport;
                 gap = offsetLeft / zoomLevel;
-                viewport = currentViewport.id === "dicomImageRight" ? this.state.imageViewportSide : this.state.imageViewportTop;
+                viewport =
+                    currentViewport.id === 'dicomImageRight'
+                        ? this.state.imageViewportSide
+                        : this.state.imageViewportTop;
                 labelHeight = labelSize.height;
-                const newViewport = currentViewport.id === "dicomImageRight" ? constants.viewport.SIDE : constants.viewport.TOP;
+                const newViewport =
+                    currentViewport.id === 'dicomImageRight'
+                        ? constants.viewport.SIDE
+                        : constants.viewport.TOP;
 
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
@@ -2336,7 +2346,7 @@ const mapDispatchToProps = {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
-    onLabelEditionEnd
+    onLabelEditionEnd,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
