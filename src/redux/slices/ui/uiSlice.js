@@ -86,14 +86,13 @@ const uiSlice = createSlice({
             const {
                 detectionLabelEditWidth,
                 detectionLabelEditPosition,
-                isEditLabelWidgetVisible,
                 contextMenuPos,
             } = action.payload;
             (state.isDetectionContextVisible = true),
                 (state.displaySelectedBoundingBox = true),
                 (state.detectionLabelEditWidth = detectionLabelEditWidth),
                 (state.detectionLabelEditPosition = detectionLabelEditPosition),
-                (state.isEditLabelWidgetVisible = isEditLabelWidgetVisible),
+                (state.isEditLabelWidgetVisible = state.editionMode === constants.editionMode.LABEL),
                 (state.detectionContextPosition = {
                     top: contextMenuPos.y,
                     left: contextMenuPos.x,
@@ -267,7 +266,6 @@ const uiSlice = createSlice({
          */
         labelSelectedUpdate: (state, action) => {
             const { width, position } = action.payload;
-            state.editionMode = constants.editionMode.LABEL;
             state.detectionLabelEditWidth = width;
             state.detectionLabelEditPosition.top = position.top;
             state.detectionLabelEditPosition.left = position.left;

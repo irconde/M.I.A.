@@ -1584,13 +1584,20 @@ class App extends Component {
                                 viewportInfo,
                                 coords
                             );
+                            const detectionData = self.props.selectedDetection;
+                            const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
+                                detectionData,
+                                coords
+                            );
+                            let widgetPosition = {
+                                    top: editLabelWidgetPosInfo.y,
+                                    left: editLabelWidgetPosInfo.x,
+                                };
                             self.props.onDragEndWidgetUpdate({
-                                detectionLabelEditWidth: 0,
-                                detectionLabelEditPosition: { top: 0, left: 0 },
-                                isEditLabelWidgetVisible: false,
-                                contextMenuPos,
+                                detectionLabelEditWidth: editLabelWidgetPosInfo.boundingWidth,
+                                detectionLabelEditPosition: widgetPosition,
+                                contextMenuPos
                             });
-                            self.appUpdateImage();
                         }
                     }
                     if (
