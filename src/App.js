@@ -75,7 +75,6 @@ import {
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
-    updateIsEditLabelWidgetVisible,
     hideContextMenuUpdate,
     onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
@@ -83,9 +82,7 @@ import {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
-    onLabelEditUpdate,
-    onBoundingBoxEditUpdate,
-    onPolygonMaskEditUpdate,
+    onLabelEditionEnd
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -2009,11 +2006,17 @@ class App extends Component {
                 uuid: uuid,
                 view: view,
             });
-            // Clear selections, etc. of all detections
-            this.props.clearAllSelection();
-            this.props.editDetectionLabelUpdate();
-            this.appUpdateImage();
-            this.resetCornerstoneTool();
+            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                cornerstoneMode: constants.cornerstoneMode.EDITION,
+                editionMode: constants.editionMode.NO_TOOL,
+                temporaryLabel: newLabel,
+            });
+            this.props.onLabelEditionEnd({
+                editionMode: constants.editionMode.NO_TOOL,
+                detectionLabelEditWidth: 0,
+                displaySelectedBoundingBox: false,
+                isEditLabelWidgetVisible: false,
+            });
         }
     }
 
@@ -2294,7 +2297,6 @@ const mapDispatchToProps = {
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
-    updateIsEditLabelWidgetVisible,
     hideContextMenuUpdate,
     onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
@@ -2302,9 +2304,7 @@ const mapDispatchToProps = {
     editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
-    onBoundingBoxEditUpdate,
-    onPolygonMaskEditUpdate,
-    onLabelEditUpdate,
+    onLabelEditionEnd
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

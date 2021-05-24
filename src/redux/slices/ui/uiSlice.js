@@ -100,6 +100,18 @@ const uiSlice = createSlice({
                 });
         },
         /**
+         * onLabelEditionEnd
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
+         */
+        onLabelEditionEnd: (state, action) => {
+            const {editionMode, detectionLabelEditWidth, displaySelectedBoundingBox, isEditLabelWidgetVisible} = action.payload;
+            state.editionMode = editionMode;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.displaySelectedBoundingBox = displaySelectedBoundingBox;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+        },
+        /**
          * selectEditDetectionLabelUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Boolean} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
@@ -122,26 +134,6 @@ const uiSlice = createSlice({
             (state.isDetectionContextVisible = false),
                 (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
                 (state.displaySelectedBoundingBox = false);
-        },
-        /**
-         * updateIsEditLabelWidgetVisible
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value to determine if the UI should display the edit label widget.
-         */
-        updateIsEditLabelWidgetVisible: (state, action) => {
-            state.isEditLabelWidgetVisible = action.payload;
-        },
-        onBoundingBoxEditUpdate: (state) => {
-            (state.isEditLabelWidgetVisible = false),
-                (state.editionMode = constants.editionMode.BOUNDING);
-        },
-        onPolygonMaskEditUpdate: (state) => {
-            (state.isEditLabelWidgetVisible = false),
-                (state.editionMode = constants.editionMode.POLYGON);
-        },
-        onLabelEditUpdate: (state) => {
-            (state.isEditLabelWidgetVisible = true),
-                (state.editionMode = constants.editionMode.LABEL);
         },
         /**
          * updateCornerstoneMode
@@ -490,7 +482,6 @@ export const {
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
-    updateIsEditLabelWidgetVisible,
     hideContextMenuUpdate,
     selectEditDetectionLabelUpdate,
     onDragEndUpdate,
@@ -498,9 +489,7 @@ export const {
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     editDetectionLabelUpdate,
-    onBoundingBoxEditUpdate,
-    onPolygonMaskEditUpdate,
-    onLabelEditUpdate,
+    onLabelEditionEnd
 } = uiSlice.actions;
 
 // Export the reducer for the store

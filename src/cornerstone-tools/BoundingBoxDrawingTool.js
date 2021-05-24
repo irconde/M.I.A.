@@ -194,8 +194,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             constants.detectionStyle.BORDER_WIDTH;
                         context.strokeStyle = data.renderColor;
                         context.fillStyle = data.renderColor;
+                        const className = this.options.temporaryLabel !== undefined ? this.options.temporaryLabel : data.class;
                         const detectionLabel = Utils.formatDetectionLabel(
-                            data.class,
+                            className,
                             data.confidence
                         );
                         const labelSize = Utils.getTextLabelSize(
