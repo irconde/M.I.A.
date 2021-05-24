@@ -1375,6 +1375,7 @@ class App extends Component {
                         constants.cornerstoneMode.EDITION
                 ) {
                     // We clicked a visible detection and are in edition mode
+
                     this.props.clearAllSelection();
                     this.onDetectionSelected(e).finally(() => {
                         this.props.emptyAreaClickUpdate();
@@ -1570,6 +1571,7 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION ||
             sideMenuUpdate === true
         ) {
+
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
             this.onDetectionSelected(e);
@@ -2012,6 +2014,7 @@ class App extends Component {
                 );
             }
             // Reset remaining DetectionSets to `un-selected` state
+
             this.props.clearAllSelection();
             this.props.deleteDetectionUpdate();
             this.resetCornerstoneTool();
