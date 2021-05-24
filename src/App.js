@@ -718,8 +718,6 @@ class App extends Component {
                     });
                     const newOra = new JSZip();
                     newOra.file('mimetype', mimeType, { compression: null });
-                    let topCounter = 1;
-                    let sideCounter = 1;
                     let stackCounter = 1;
                     const listOfPromises = [];
                     // Loop through each stack, being either top or side currently
@@ -740,6 +738,16 @@ class App extends Component {
                             `data/${stack.view}_pixel_data.dcs`,
                             stack.blobData[0]
                         );
+                        const topStackIndex = this.state.myOra.stackData.findIndex(
+                            (stack) => {
+                                return constants.viewport.TOP === stack.view;
+                            }
+                        );
+                        const sideStackIndex = this.state.myOra.stackData.findIndex(
+                            (stack) => {
+                                return constants.viewport.SIDE === stack.view;
+                            }
+                        );
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
@@ -747,14 +755,16 @@ class App extends Component {
                                 this.props.detections,
                                 constants.viewport.TOP
                             );
-                            topDetections.forEach((detection) => {
-                                let threatPromise = Dicos.dataToBlob(
-                                    detection,
-                                    Utils.b64toBlob(detection.blobData),
-                                    Date.now()
+                            for (let j = 0; j < topDetections.length; j++) {
+                                let threatPromise = Dicos.detectionObjectToBlob(
+                                    topDetections[j],
+                                    this.state.myOra.stackData[topStackIndex]
+                                        .blobData[0]
                                 ).then((threatBlob) => {
                                     newOra.file(
-                                        `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`,
+                                        `data/top_threat_detection_${j + 1}_${
+                                            topDetections[j].algorithm
+                                        }.dcs`,
                                         threatBlob
                                     );
                                     let newLayer = stackXML.createElement(
@@ -762,31 +772,34 @@ class App extends Component {
                                     );
                                     newLayer.setAttribute(
                                         'src',
-                                        `data/${detection.algorithm}_threat_detection_${topCounter}.dcs`
+                                        `data/top_threat_detection_${j + 1}_${
+                                            topDetections[j].algorithm
+                                        }.dcs`
                                     );
                                     newLayer.setAttribute(
                                         'UUID',
-                                        `${detection.uuid}`
+                                        `${topDetections[j].uuid}`
                                     );
                                     stackElem.appendChild(newLayer);
-                                    topCounter++;
                                 });
                                 listOfPromises.push(threatPromise);
-                            });
+                            }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
                             const sideDetections = getDetectionsFromView(
                                 this.props.detections,
                                 constants.viewport.SIDE
                             );
-                            sideDetections.forEach((detection) => {
-                                let threatPromise = Dicos.dataToBlob(
-                                    detection,
-                                    Utils.b64toBlob(detection.blobData),
-                                    Date.now()
+                            for (let i = 0; i < sideDetections.length; i++) {
+                                let threatPromise = Dicos.detectionObjectToBlob(
+                                    sideDetections[i],
+                                    this.state.myOra.stackData[sideStackIndex]
+                                        .blobData[0]
                                 ).then((threatBlob) => {
                                     newOra.file(
-                                        `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`,
+                                        `data/side_threat_detection_${i + 1}_${
+                                            sideDetections[i].algorithm
+                                        }.dcs`,
                                         threatBlob
                                     );
                                     let newLayer = stackXML.createElement(
@@ -794,17 +807,18 @@ class App extends Component {
                                     );
                                     newLayer.setAttribute(
                                         'src',
-                                        `data/${detection.algorithm}_threat_detection_${sideCounter}.dcs`
+                                        `data/side_threat_detection_${i + 1}_${
+                                            sideDetections[i].algorithm
+                                        }.dcs`
                                     );
                                     newLayer.setAttribute(
                                         'UUID',
-                                        `${detection.uuid}`
+                                        `${sideDetections[i].uuid}`
                                     );
                                     stackElem.appendChild(newLayer);
-                                    sideCounter++;
                                 });
                                 listOfPromises.push(threatPromise);
-                            });
+                            }
                         }
                         stackCounter++;
                         imageElem.appendChild(stackElem);
@@ -812,6 +826,7 @@ class App extends Component {
                     const promiseOfList = Promise.all(listOfPromises);
                     promiseOfList.then(() => {
                         stackXML.appendChild(imageElem);
+
                         newOra.file(
                             'stack.xml',
                             new Blob(
@@ -1026,15 +1041,12 @@ class App extends Component {
                         threatSequence.items[j],
                         image
                     );
-                    Utils.blobToBase64(imagesLeft[i]).then((blobData) => {
-                        self.props.addDetection({
-                            algorithm: algorithmName,
-                            boundingBox: boundingBoxCoords,
-                            className: objectClass,
-                            confidence: confidenceLevel,
-                            view: constants.viewport.TOP,
-                            blobData,
-                        });
+                    self.props.addDetection({
+                        algorithm: algorithmName,
+                        boundingBox: boundingBoxCoords,
+                        className: objectClass,
+                        confidence: confidenceLevel,
+                        view: constants.viewport.TOP,
                     });
                 }
             });
@@ -1095,19 +1107,14 @@ class App extends Component {
                             )
                         );
                         var pixelData = Dicos.retrieveMaskData(image);
-                        Utils.blobToBase64(currentRightImage).then(
-                            (blobData) => {
-                                self.props.addDetection({
-                                    algorithm: algorithmName,
-                                    maskBitmap: pixelData,
-                                    boundingBox: boundingBoxCoords,
-                                    className: objectClass,
-                                    confidence: confidenceLevel,
-                                    view: constants.viewport.SIDE,
-                                    blobData,
-                                });
-                            }
-                        );
+                        self.props.addDetection({
+                            algorithm: algorithmName,
+                            maskBitmap: pixelData,
+                            boundingBox: boundingBoxCoords,
+                            className: objectClass,
+                            confidence: confidenceLevel,
+                            view: constants.viewport.SIDE,
+                        });
                     }
                 });
                 read.readAsArrayBuffer(imagesRight[k]);
@@ -1497,133 +1504,75 @@ class App extends Component {
             let self = this;
             Dicos.detectionObjectToBlob(
                 newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0],
-                function (newBlob) {
-                    self.state.myOra.stackData[stackIndex].blobData.push(
-                        newBlob
-                    );
-                    if (data.length == 0) {
-                        self.props.onDragEndUpdate();
-                        self.props.clearAllSelection();
-                        self.resetCornerstoneTool();
-                        self.appUpdateImage();
-                        return;
-                    }
-                    // call updateDetection
-                    if (data[0].updatingDetection === false) {
-                        // Need to determine if updating operator or new
-                        // Create new user-created detection
-                        const operator = constants.OPERATOR;
-                        // add new DetectionSet if it doesn't exist
-                        if (
-                            boundingBoxArea >
-                            constants.BOUNDING_BOX_AREA_THRESHOLD
-                        ) {
-                            if (!(operator in self.props.detections)) {
-                                self.props.addDetectionSet({
-                                    algorithm: operator,
-                                });
-                                Utils.blobToBase64(newBlob).then((base64) => {
-                                    self.props.addDetection({
-                                        algorithm: operator,
-                                        boundingBox: coords,
-                                        className: data[0].class,
-                                        confidence: data[0].confidence,
-                                        view:
-                                            viewport ===
-                                            self.state.imageViewportTop
-                                                ? constants.viewport.TOP
-                                                : constants.viewport.SIDE,
-                                        blobData: base64,
-                                    });
-                                    self.appUpdateImage();
-                                });
-                            }
-                            // Operator DetectionSet exists, add new detection to set
-                            else {
-                                Utils.blobToBase64(newBlob).then((base64) => {
-                                    self.props.addDetection({
-                                        algorithm: operator,
-                                        boundingBox: coords,
-                                        className: data[0].class,
-                                        confidence: data[0].confidence,
-                                        view:
-                                            viewport ===
-                                            self.state.imageViewportTop
-                                                ? constants.viewport.TOP
-                                                : constants.viewport.SIDE,
-                                        blobData: base64,
-                                    });
-                                    self.appUpdateImage();
-                                });
-                            }
-                        } else {
-                            self.props.updateCornerstoneMode(
-                                constants.cornerstoneMode.SELECTION
-                            );
-                            self.resetCornerstoneTool();
+                self.state.myOra.stackData[stackIndex].blobData[0]
+            ).then((newBlob) => {
+                self.state.myOra.stackData[stackIndex].blobData.push(newBlob);
+                if (data.length == 0) {
+                    self.props.onDragEndUpdate();
+                    self.props.clearAllSelection();
+                    self.resetCornerstoneTool();
+                    self.appUpdateImage();
+                    return;
+                }
+                // call updateDetection
+                if (data[0].updatingDetection === false) {
+                    // Need to determine if updating operator or new
+                    // Create new user-created detection
+                    const operator = constants.OPERATOR;
+                    // add new DetectionSet if it doesn't exist
+                    if (
+                        boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
+                    ) {
+                        if (!(operator in self.props.detections)) {
+                            self.props.addDetectionSet({
+                                algorithm: operator,
+                            });
+                            self.props.addDetection({
+                                algorithm: operator,
+                                boundingBox: coords,
+                                className: data[0].class,
+                                confidence: data[0].confidence,
+                                view:
+                                    viewport === self.state.imageViewportTop
+                                        ? constants.viewport.TOP
+                                        : constants.viewport.SIDE,
+                            });
+                            self.appUpdateImage();
+                        }
+                        // Operator DetectionSet exists, add new detection to set
+                        else {
+                            self.props.addDetection({
+                                algorithm: operator,
+                                boundingBox: coords,
+                                className: data[0].class,
+                                confidence: data[0].confidence,
+                                view:
+                                    viewport === self.state.imageViewportTop
+                                        ? constants.viewport.TOP
+                                        : constants.viewport.SIDE,
+                            });
+                            self.appUpdateImage();
                         }
                     } else {
-                        // Updating existing Detection's bounding box
-                        const { algorithm, uuid, view } = data[0];
-
-                        // Only update the Detection if the boundingBox actually changes
-                        if (
-                            hasDetectionChanged(
-                                self.props.detections,
-                                algorithm,
-                                view,
-                                uuid,
-                                { boundingBox: coords }
-                            )
-                        ) {
-                            self.props.updateDetection({
-                                reference: {
-                                    algorithm: data[0].algorithm,
-                                    uuid: data[0].uuid,
-                                    view: data[0].view,
-                                },
-                                update: {
-                                    boundingBox: coords,
-                                },
-                            });
-                            const viewportInfo = Utils.eventToViewportInfo(
-                                event
-                            );
-                            const contextMenuPos = self.getContextMenuPos(
-                                viewportInfo,
-                                coords
-                            );
-                            const detectionData = self.props.selectedDetection;
-                            const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
-                                detectionData,
-                                coords
-                            );
-                            let widgetPosition = {
-                                top: editLabelWidgetPosInfo.y,
-                                left: editLabelWidgetPosInfo.x,
-                            };
-                            self.props.onDragEndWidgetUpdate({
-                                detectionLabelEditWidth:
-                                    editLabelWidgetPosInfo.boundingWidth,
-                                detectionLabelEditPosition: widgetPosition,
-                                contextMenuPos,
-                            });
-                        }
-                    }
-                    if (
-                        self.props.cornerstoneMode ===
-                        constants.cornerstoneMode.ANNOTATION
-                    ) {
-                        self.props.emptyAreaClickUpdate();
+                        self.props.updateCornerstoneMode(
+                            constants.cornerstoneMode.SELECTION
+                        );
                         self.resetCornerstoneTool();
-                        self.props.clearAllSelection();
-                        self.appUpdateImage();
-                    } else if (
-                        self.props.cornerstoneMode ===
-                        constants.cornerstoneMode.EDITION
+                    }
+                } else {
+                    // Updating existing Detection's bounding box
+                    const { algorithm, uuid, view } = data[0];
+
+                    // Only update the Detection if the boundingBox actually changes
+                    if (
+                        hasDetectionChanged(
+                            self.props.detections,
+                            algorithm,
+                            view,
+                            uuid,
+                            { boundingBox: coords }
+                        )
                     ) {
-                        self.props.updateIsDetectionContextVisible(true);
                         self.props.updateDetection({
                             reference: {
                                 algorithm: data[0].algorithm,
@@ -1631,13 +1580,57 @@ class App extends Component {
                                 view: data[0].view,
                             },
                             update: {
-                                updatingDetection: true,
+                                boundingBox: coords,
                             },
                         });
-                        self.appUpdateImage();
+                        const viewportInfo = Utils.eventToViewportInfo(event);
+                        const contextMenuPos = self.getContextMenuPos(
+                            viewportInfo,
+                            coords
+                        );
+                        const detectionData = self.props.selectedDetection;
+                        const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
+                            detectionData,
+                            coords
+                        );
+                        let widgetPosition = {
+                            top: editLabelWidgetPosInfo.y,
+                            left: editLabelWidgetPosInfo.x,
+                        };
+                        self.props.onDragEndWidgetUpdate({
+                            detectionLabelEditWidth:
+                                editLabelWidgetPosInfo.boundingWidth,
+                            detectionLabelEditPosition: widgetPosition,
+                            contextMenuPos,
+                        });
                     }
                 }
-            );
+                if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION
+                ) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.appUpdateImage();
+                } else if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION
+                ) {
+                    self.props.updateIsDetectionContextVisible(true);
+                    self.props.updateDetection({
+                        reference: {
+                            algorithm: data[0].algorithm,
+                            uuid: data[0].uuid,
+                            view: data[0].view,
+                        },
+                        update: {
+                            updatingDetection: true,
+                        },
+                    });
+                    self.appUpdateImage();
+                }
+            });
         }
     }
 

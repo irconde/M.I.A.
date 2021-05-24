@@ -96,7 +96,8 @@ const uiSlice = createSlice({
                 (state.displaySelectedBoundingBox = true),
                 (state.detectionLabelEditWidth = detectionLabelEditWidth),
                 (state.detectionLabelEditPosition = detectionLabelEditPosition),
-                (state.isEditLabelWidgetVisible = state.editionMode === constants.editionMode.LABEL),
+                (state.isEditLabelWidgetVisible =
+                    state.editionMode === constants.editionMode.LABEL),
                 (state.detectionContextPosition = {
                     top: contextMenuPos.y,
                     left: contextMenuPos.x,
@@ -108,7 +109,12 @@ const uiSlice = createSlice({
          * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
          */
         onLabelEditionEnd: (state, action) => {
-            const {editionMode, detectionLabelEditWidth, displaySelectedBoundingBox, isEditLabelWidgetVisible} = action.payload;
+            const {
+                editionMode,
+                detectionLabelEditWidth,
+                displaySelectedBoundingBox,
+                isEditLabelWidgetVisible,
+            } = action.payload;
             state.editionMode = editionMode;
             state.detectionLabelEditWidth = detectionLabelEditWidth;
             state.displaySelectedBoundingBox = displaySelectedBoundingBox;
@@ -513,7 +519,7 @@ export const {
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     editDetectionLabelUpdate,
-    onLabelEditionEnd
+    onLabelEditionEnd,
 } = uiSlice.actions;
 
 // Export the reducer for the store
