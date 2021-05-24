@@ -326,7 +326,7 @@ export default class Dicos {
      * getInstanceNumber - Will return the unique instance identifier for a given DICOM Image in blob format.
      *
      * @param {Blob} image
-     * @returns
+     * @returns {String} Instance number for the passed in image
      */
     static async getInstanceNumber(image) {
         var fileReader = new FileReader();
@@ -354,7 +354,7 @@ export default class Dicos {
      *
      * @param {Detection} detection
      * @param {Blob} image
-     * @param {Function} callback
+     * @returns {Promise} Returns a promise containing the blob on resolve or error on reject
      */
     static detectionObjectToBlob(detection, image) {
         const today = new Date();
