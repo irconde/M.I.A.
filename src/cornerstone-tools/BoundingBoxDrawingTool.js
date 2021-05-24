@@ -74,8 +74,11 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
-        const zoom = element.id === "dicomImageRight" ? this.options.zoomLevelSide : this.options.zoomLevelTop;
-        const lineWidth = constants.detectionStyle.BORDER_WIDTH*zoom;
+        const zoom =
+            element.id === 'dicomImageRight'
+                ? this.options.zoomLevelSide
+                : this.options.zoomLevelTop;
+        const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -103,7 +106,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 if (data.visible === false) {
                     continue;
                 }
-                //console.log(zoom);
                 // Configure
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
@@ -190,21 +192,27 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 data.handles.start
                             );
                         }
-                        var fontArr = constants.detectionStyle.LABEL_FONT.split(" ");
-                        var fontSizeArr = fontArr[1].split("px");
+                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
+                            ' '
+                        );
+                        var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
-                        fontSize*=zoom;
+                        fontSize *= zoom;
                         fontSizeArr[0] = fontSize;
-                        var newFontSize = fontSizeArr.join("px");
-                        var newFont = fontArr[0] + " " + newFontSize + " " + fontArr[2];
-                        
+                        var newFontSize = fontSizeArr.join('px');
+                        var newFont =
+                            fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+
                         context.font = newFont;
 
                         context.lineWidth =
                             constants.detectionStyle.BORDER_WIDTH;
                         context.strokeStyle = data.renderColor;
                         context.fillStyle = data.renderColor;
-                        const className = this.options.temporaryLabel !== undefined ? this.options.temporaryLabel : data.class;
+                        const className =
+                            this.options.temporaryLabel !== undefined
+                                ? this.options.temporaryLabel
+                                : data.class;
                         const detectionLabel = Utils.formatDetectionLabel(
                             className,
                             data.confidence
@@ -212,10 +220,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         const labelSize = Utils.getTextLabelSize(
                             context,
                             detectionLabel,
-                            constants.detectionStyle.LABEL_PADDING*zoom
+                            constants.detectionStyle.LABEL_PADDING * zoom
                         );
                         context.fillRect(
-                            myCoords.x - 1*zoom,
+                            myCoords.x - 1 * zoom,
                             myCoords.y - labelSize['height'],
                             labelSize['width'],
                             labelSize['height']
@@ -224,8 +232,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             constants.detectionStyle.LABEL_TEXT_COLOR;
                         context.fillText(
                             detectionLabel,
-                            myCoords.x + constants.detectionStyle.LABEL_PADDING*zoom,
-                            myCoords.y - constants.detectionStyle.LABEL_PADDING*zoom
+                            myCoords.x +
+                                constants.detectionStyle.LABEL_PADDING * zoom,
+                            myCoords.y -
+                                constants.detectionStyle.LABEL_PADDING * zoom
                         );
                     }
                 }
