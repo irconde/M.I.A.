@@ -3,8 +3,29 @@ import * as constants from '../../../Constants';
 import './util/typedef';
 import DetectionSetUtil from './util/DetectionSet';
 import DetectionUtil from './util/Detection';
+import randomColor from 'randomcolor';
+import { v4 as uuidv4 } from 'uuid';
+
+// interface Detection {
+//     uuid: string;
+//     algorithm: string;
+//     className: string;
+//     confidence: string;
+//     selected: boolean;
+//     visible: boolean;
+//     color: string;
+//     view: string;
+//     maskBitmap: number[][];
+//     boundingBox: number[];
+//     lowerOpacity: boolean;
+//     validation: boolean;
+// }
 
 const initialState = {
+    // New State
+    detections: [],
+
+    // Old State
     // Selection data
     /** @type string */
     selectedAlgorithm: null,
@@ -25,61 +46,38 @@ const detectionsSlice = createSlice({
     reducers: {
         // Reset store to default values
         resetDetections: (state) => {
+            // TODO: Refactoring
             state.selectedAlgorithm = null;
             state.selectedDetection = null;
             state.algorithmNames = [];
             state.data = {};
         },
-        // Adds a DetectionSet to state object
-        // Action payload should contain:
-        // {string} algorithm - algorithm name
-        // {boolean} visible - whether detections in set are visible (optional)
-        addDetectionSet: (state, action) => {
-            const { payload } = action;
-            const detectionSet = DetectionSetUtil.createDetectionSet({
-                algorithm: payload.algorithm,
-                visible: payload.visibility,
-            });
-
-            state.data[detectionSet.algorithm] = detectionSet;
-            state.algorithmNames.push(detectionSet.algorithm);
-        },
-        // Adds detection to a DetectionSet
-        // Action payload should contain:
-        // {string} algorithm - algorithm name
-        // {Array<Array<number>>} maskBitmap - maskBitmap data, if any
-        // {Array<number>} boundingBox - boundingBox data [x0, y0, x1, y1]
-        // {string} className - name of detection classification
-        // {number} confidence - confidence in detection
-        // {string} view - where detection is rendered
+        // Adds detection
         addDetection: (state, action) => {
             const {
                 algorithm,
-                maskBitmap,
-                boundingBox,
                 className,
                 confidence,
                 view,
-                blobData,
+                maskBitmap,
+                boundingBox,
             } = action.payload;
-            const detection = DetectionUtil.createDetection({
+            state.detections.push({
                 algorithm,
-                maskBitmap,
-                boundingBox,
                 className,
                 confidence,
                 view,
-                blobData,
+                maskBitmap,
+                boundingBox,
+                selected: false,
+                visible: true,
+                uuid: uuidv4(),
+                color: randomColor({
+                    seed: className,
+                    hue: 'random',
+                    luminosity: 'bright',
+                }),
             });
-
-            const algo = detection.algorithm;
-            if (algo in state.data) {
-                const updatedDetectionSet = DetectionSetUtil.addDetectionToSet(
-                    state.data[algo],
-                    detection
-                );
-                state.data[algo] = updatedDetectionSet;
-            }
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
@@ -88,49 +86,32 @@ const detectionsSlice = createSlice({
         // Action payload should contain:
         // {string} algorithm - algorithm name
         clearSelectedDetection: (state, action) => {
-            const { payload } = action;
-            const updatedDetectionSet = DetectionSetUtil.clearSelection(
-                state.data[payload.algorithm]
+            const detection = state.detections.filter(
+                (det) => det.uuid === action.payload
             );
-
-            state.data[payload.algorithm] = updatedDetectionSet;
+            detection.selected = false;
         },
         // Clears selection data for all DetectionSets and their Detections
         // No action payload used
         clearAllSelection: (state) => {
-            for (const detectionSet in state.data) {
-                state.data[detectionSet] = DetectionSetUtil.clearAll(
-                    state.data[detectionSet]
-                );
-            }
-            state.selectedAlgorithm = null;
-            state.selectedDetection = null;
+            state.detections.forEach((det) => {
+                det.selected = false;
+                det.lowerOpacity = false;
+            });
             state.isEditLabelWidgetVisible = false;
         },
         // Select a DetectionSet
         // Action payload should contain:
         // {string} algorithm - algorithm name
         selectDetectionSet: (state, action) => {
-            const { payload } = action;
-
-            if (state.data[payload.algorithm]) {
-                state.selectedAlgorithm = payload.algorithm;
-                state.selectedDetection = constants.selection.ALL_SELECTED;
-
-                state.algorithmNames.forEach((algo) => {
-                    if (algo === payload.algorithm) {
-                        state.data[algo] = DetectionSetUtil.selectDetectionSet(
-                            state.data[algo]
-                        );
-                    }
-                    // Clear selection and set lowerOpacity on other DetectionSets
-                    else {
-                        state.data[algo] = DetectionSetUtil.setLowerOpacity(
-                            DetectionSetUtil.clearAll(state.data[algo])
-                        );
-                    }
-                });
-            }
+            state.detections.forEach((det) => {
+                if (det.algorithm === action.payload) {
+                    det.selected = true;
+                } else {
+                    det.selected = false;
+                    det.lowerOpacity = true;
+                }
+            });
         },
         // Selects a detection from a DetectionSet
         // Action payload should contain:
@@ -138,36 +119,14 @@ const detectionsSlice = createSlice({
         // {string} view - where detection is rendered
         // {string} uuid - unique identifier for detection
         selectDetection: (state, action) => {
-            const { payload } = action;
-            const updatedDetectionSet = DetectionSetUtil.selectDetectionInSet(
-                state.data[payload.algorithm],
-                payload.view,
-                payload.uuid
-            );
-
-            if (updatedDetectionSet) {
-                state.algorithmNames.forEach((algo) => {
-                    if (state.data[algo]) {
-                        if (algo === updatedDetectionSet.algorithm) {
-                            // Select the DetectionSet
-                            state.data[algo] = DetectionSetUtil.setLowerOpacity(
-                                updatedDetectionSet
-                            );
-                        } else {
-                            state.data[algo] = DetectionSetUtil.setLowerOpacity(
-                                DetectionSetUtil.clearAll(state.data[algo])
-                            );
-                        }
-                    }
-                });
-                state.selectedAlgorithm = payload.algorithm;
-                state.selectedDetection = updatedDetectionSet.selectedDetection;
-            } else {
-                //TODO: better error handling?
-                console.warn(
-                    `Detection with uuid ${payload.uuid} in view ${payload.view} and algorithm ${payload.algorithm} not selected.`
-                );
-            }
+            state.detections.forEach((det) => {
+                if (det.uuid === action.payload) {
+                    det.selected = true;
+                } else {
+                    det.selected = false;
+                }
+                det.lowerOpacity = !det.selected;
+            });
         },
         // Update properties on a detection
         // Used for any action that is not selecting or deleting a detection
@@ -175,6 +134,7 @@ const detectionsSlice = createSlice({
         // {object} reference: contains uuid, algorithm, and view of detection to update
         // {object} update: contains any properties to update on the Detection
         updateDetection: (state, action) => {
+            // TODO: Refactoring
             try {
                 const { payload } = action;
                 const { reference, update } = payload;
@@ -214,45 +174,13 @@ const detectionsSlice = createSlice({
             }
         },
 
-        // Update properties on a DetectionSet
-        // Use for any action not covered in other reducers
-        // Action payload should contain:
-        // {string} algorithm - algorithm name for DetectionSet to update
-        // {object} update - contains any properties to update on the DetectionSet
-        updateDetectionSet: (state, action) => {
-            const payload = { action };
-
-            const detectionSet = state[payload.algorithm];
-
-            if (detectionSet) {
-                const updatedDetectionSet = DetectionSetUtil.updateDetectionSet(
-                    detectionSet,
-                    payload.update
-                );
-
-                if (updatedDetectionSet) {
-                    state[payload.algorithm] = updatedDetectionSet;
-                } else {
-                    console.warn(
-                        `DetectionSet with algorithm ${
-                            payload.algorithm
-                        } not updated because the update payload was invalid: ${JSON.stringify(
-                            payload.update
-                        )}`
-                    );
-                }
-            } else {
-                console.warn(
-                    `DetectionSet with algorithm ${payload.algorithm} not found. Update not applied`
-                );
-            }
-        },
         // Updates a Detection's class label.
         // Action payload should contain:
         // {string} algorithm - algorithm name for detection being updated
         // {string} uuid - uuid for detection being updated
         // {string} className - new label className for detection being updated
         editDetectionLabel: (state, action) => {
+            // TODO: Refactoring
             const { payload } = action;
 
             const updatedDetectionSet = DetectionSetUtil.updateDetectionLabelInSet(
@@ -266,27 +194,13 @@ const detectionsSlice = createSlice({
         },
 
         deleteDetection: (state, action) => {
-            const { payload } = action;
-
-            const updatedDetectionSet = DetectionSetUtil.deleteDetectionFromSet(
-                state.data[payload.algorithm],
-                payload.view,
-                payload.uuid
-            );
-
-            if (DetectionSetUtil.isEmpty(updatedDetectionSet)) {
-                delete state.data[payload.algorithm];
-            } else {
-                state.data[payload.algorithm] = updatedDetectionSet;
-            }
+            state.detections = state.detections.filter((det) => {
+                return det.uuid !== action.payload;
+            });
         },
         // Marks all DetectionSets as validated by the user
         validateDetections: (state) => {
-            state.algorithmNames.forEach((algo) => {
-                state.data[algo] = DetectionSetUtil.validateAllDetections(
-                    state.data[algo]
-                );
-            });
+            state.detections.forEach((det) => (det.validation = true));
         },
 
         // Update visibility on a DetectionSet
@@ -294,26 +208,20 @@ const detectionsSlice = createSlice({
         // {string} algorithm - Name of algorithm for DetectionSet
         // {boolean} isVisible - whether the DetectionSet is visible or not
         updateDetectionSetVisibility: (state, action) => {
-            try {
-                const { payload } = action;
-
-                const detectionSet = state.data[payload.algorithm];
-
-                if (!detectionSet) {
-                    throw new Error(
-                        `DetectionSet visibility not updated. Check provided algorithm: ${payload.algorithm}`
-                    );
+            const { algorithm, isVisible } = action.payload;
+            state.detections.forEach((det) => {
+                if (det.algorithm === algorithm) {
+                    det.visible = isVisible;
                 }
-
-                const updatedDetectionSet = DetectionSetUtil.updateDetectionSetVisibility(
-                    detectionSet,
-                    payload.isVisible
-                );
-
-                state.data[payload.algorithm] = updatedDetectionSet;
-            } catch (error) {
-                console.error(error);
-            }
+            });
+        },
+        updateDetectionVisibility: (state, action) => {
+            const { uuid, isVisible } = action.payload;
+            state.detections.forEach((det) => {
+                if (det.uuid === uuid) {
+                    det.visible = isVisible;
+                }
+            });
         },
     },
 });
@@ -335,6 +243,7 @@ export const getDetectionLabels = (state) => state.detections.detectionLabels;
  * @returns {boolean} true if all are validated, false otherwise
  */
 export const areDetectionsValidated = (data) => {
+    // TODO: Refactoring
     let result = true;
 
     Object.values(data).forEach((detectionSet) => {
@@ -347,18 +256,29 @@ export const areDetectionsValidated = (data) => {
 };
 
 /**
- * Get all Detections for a view
+ * Get all Detections for the top view
  * @param {Object.<string, DetectionSet>} data Redux Detections state
  * @param {string} view view to query
  * @returns {Array<Detection>}
  */
-export const getDetectionsFromView = (data, view) => {
-    let detections = [];
-
-    Object.values(data).forEach((detectionSet) => {
-        detections = [...detectionSet.data[view], ...detections];
+export const getDetectionsTopDetections = (state) => {
+    const topDetections = [];
+    state.detections.detections.forEach((det) => {
+        if (det.view === constants.viewport.TOP) {
+            topDetections.push(det);
+        }
     });
-    return detections;
+    return topDetections;
+};
+
+export const getDetectionsSideDetections = (state) => {
+    const sideDetections = [];
+    state.detections.detections.forEach((det) => {
+        if (det.view === constants.viewport.SIDE) {
+            sideDetections.push(det);
+        }
+    });
+    return sideDetections;
 };
 
 /**
@@ -367,7 +287,16 @@ export const getDetectionsFromView = (data, view) => {
  * @returns {string} color in string form
  */
 export const getDetectionColor = (detection) => {
-    return DetectionUtil.getRenderColor(detection);
+    // TODO: Refactoring - can probably just have a key value pair on the detection
+    //                     for its color rather than making more calls to the store
+    if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
+    if (detection.validation !== null) {
+        if (detection.validation) {
+            return constants.detectionStyle.VALID_COLOR;
+        }
+        return constants.detectionStyle.INVALID_COLOR;
+    }
+    return detection.color;
 };
 
 /**
@@ -386,6 +315,7 @@ export const hasDetectionChanged = (
     uuid,
     properties
 ) => {
+    // TODO: Refactoring
     const detection = detections[algorithm].data[view].find(
         (detec) => detec.uuid === uuid
     );
@@ -409,6 +339,7 @@ export const {
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
+    updateDetectionVisibility,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;
