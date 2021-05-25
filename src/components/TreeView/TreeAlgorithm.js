@@ -1,77 +1,42 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import MetaData from '../Snackbars/MetaData';
 import TreeDetection from './TreeDetection';
 import * as Icons from './Icons';
 import * as constants from '../../Constants';
+import { useSelector } from 'react-redux';
+import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 
-class TreeAlgorithm extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            arrowStyle: {
-                height: '1.5rem',
-                width: '1.5rem',
-                marginLeft: '0.5rem',
-                marginRight: '0.5rem',
-                transform: 'rotate(90deg)',
-            },
-            eyeStyle: {
-                height: '1.5rem',
-                width: '1.5rem',
-                display: 'inline-block',
-                float: 'right',
-                marginRight: '1.0rem',
-            },
-            typeStyles: {
-                fontSize: 14,
-                verticalAlign: 'super',
-                fontFamily: 'Noto Sans JP',
-                display: 'inline-block',
-                margin: 'auto',
-                cursor: 'default',
-            },
-            containerStyle: {
-                paddingBottom: '0.75rem',
-                paddingTop: '0.75rem',
-            },
-            isExpanded: true,
-            isSelected: false,
-        };
-        this.setExpanded = this.setExpanded.bind(this);
-        this.setVisibility = this.setVisibility.bind(this);
-        this.setSelected = this.setSelected.bind(this);
-        this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
-        this.updateSelected = this.updateSelected.bind(this);
-    }
-    static propTypes = {
-        algorithm: PropTypes.object.isRequired,
-        // TODO: James B. - Remove this once refactored into uiSlice
-        configurationInfo: PropTypes.object.isRequired,
-        myKey: PropTypes.number.isRequired,
-        updateImage: PropTypes.func.isRequired,
+const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
+    const arrowStyle = {
+        height: '1.5rem',
+        width: '1.5rem',
+        marginLeft: '0.5rem',
+        marginRight: '0.5rem',
+        transform: 'rotate(90deg)',
     };
-
-    /**
-     * setExpanded - Function that controls if the current algorithm is
-     *               displaying as a list or collapsed down.
-     *
-     * @param {type} none
-     * @returns {type} none
-     */
-    setExpanded() {
-        this.setState({ isExpanded: !this.state.isExpanded }, () => {
-            if (
-                this.state.isExpanded === false &&
-                this.props.algorithm.selected
-            ) {
-                // this.props.updateSelected(
-                //     !this.props.algorithm.selected,
-                //     this.props.algorithm.algorithm
-                // );
-            }
-        });
-    }
+    const eyeStyle = {
+        height: '1.5rem',
+        width: '1.5rem',
+        display: 'inline-block',
+        float: 'right',
+        marginRight: '1.0rem',
+    };
+    const typeStyles = {
+        fontSize: 14,
+        verticalAlign: 'super',
+        fontFamily: 'Noto Sans JP',
+        display: 'inline-block',
+        margin: 'auto',
+        cursor: 'default',
+    };
+    const containerStyle = {
+        paddingBottom: '0.75rem',
+        paddingTop: '0.75rem',
+    };
+    const [isExpanded, setIsExpanded] = useState < Boolean > true;
+    const [isSelected, setIsSelected] = useState < Boolean > false;
+    const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
 
     /**
      * setVisibility - Is the function that controls the eye visibility.
@@ -79,12 +44,12 @@ class TreeAlgorithm extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    setVisibility() {
+    const setVisibility = () => {
         // this.props.setVisibilityData(
         //     this.props.algorithm.algorithm,
         //     this.props.algorithm.visibility
         // );
-    }
+    };
 
     /**
      * updateSelected() - Control how each algorithm is selected and deselected
@@ -92,12 +57,12 @@ class TreeAlgorithm extends Component {
      * @param {type} none
      * @returns {type} none
      */
-    updateSelected() {
+    const updateSelected = () => {
         // this.props.updateSelected(
         //     !this.props.algorithm.selected,
         //     this.props.algorithm.algorithm
         // );
-    }
+    };
 
     /**
      * updateSelectedDetection() - Is the controller between the TreeDetection Component and
@@ -107,9 +72,9 @@ class TreeAlgorithm extends Component {
      *
      * @param {Detection} detection
      */
-    updateSelectedDetection(detection, e) {
+    const updateSelectedDetection = (detection, e) => {
         // this.props.updateSelectedDetection(detection, e);
-    }
+    };
 
     /**
      * setSelected - Is the function that will set our algorithm to be selected or not,
@@ -120,206 +85,138 @@ class TreeAlgorithm extends Component {
      * @param {Event} e
      * @returns {type} none
      */
-    setSelected(e) {
-        if (this.props.algorithm.visibility === true) {
-            if (
-                e.target.id !== 'Path' &&
-                e.target.id !== 'eye' &&
-                e.target.id !== 'Shape' &&
-                e.target.id !== 'arrow' &&
-                this.state.isExpanded
-            ) {
-                // this.props.updateSelected(
-                //     !this.props.algorithm.selected,
-                //     this.props.algorithm.algorithm
-                // );
-            } else {
-                if (e.target.id == 'arrow' || e.target.id == 'Path') {
-                    let rotationValue = this.state.arrowStyle.transform;
+    const setSelected = (e) => {
+        // if (this.props.algorithm.visibility === true) {
+        //     if (
+        //         e.target.id !== 'Path' &&
+        //         e.target.id !== 'eye' &&
+        //         e.target.id !== 'Shape' &&
+        //         e.target.id !== 'arrow' &&
+        //         this.state.isExpanded
+        //     ) {
+        //         // this.props.updateSelected(
+        //         //     !this.props.algorithm.selected,
+        //         //     this.props.algorithm.algorithm
+        //         // );
+        //     } else {
+        //         if (e.target.id == 'arrow' || e.target.id == 'Path') {
+        //             let rotationValue = this.state.arrowStyle.transform;
+        //             if (
+        //                 rotationValue ==
+        //                 constants.PERPENDICULAR_DEGREE_TRANSFORM
+        //             ) {
+        //                 rotationValue = constants.ZERO_DEGREE_TRANSFORM;
+        //             } else {
+        //                 rotationValue =
+        //                     constants.PERPENDICULAR_DEGREE_TRANSFORM;
+        //             }
+        //             this.setState({
+        //                 arrowStyle: {
+        //                     height: 1.5 + 'rem',
+        //                     width: 1.5 + 'rem',
+        //                     marginLeft: 0.5 + 'rem',
+        //                     marginRight: 0.5 + 'rem',
+        //                     transform: rotationValue,
+        //                 },
+        //             });
+        //         }
+        //     }
+        // }
+    };
 
-                    if (
-                        rotationValue ==
-                        constants.PERPENDICULAR_DEGREE_TRANSFORM
-                    ) {
-                        rotationValue = constants.ZERO_DEGREE_TRANSFORM;
-                    } else {
-                        rotationValue =
-                            constants.PERPENDICULAR_DEGREE_TRANSFORM;
-                    }
-
-                    this.setState({
-                        arrowStyle: {
-                            height: 1.5 + 'rem',
-                            width: 1.5 + 'rem',
-                            marginLeft: 0.5 + 'rem',
-                            marginRight: 0.5 + 'rem',
-                            transform: rotationValue,
-                        },
-                    });
-                }
-            }
-        }
-    }
-
-    render() {
-        return (
-            <div>
-                <MetaData
-                    isVisible={
-                        this.props.algorithm.visibility
-                            ? this.props.algorithm.selected
-                            : false
-                    }
-                    // TODO: James B. - Remove this once refactored into uiSlice
-                    detectorType={this.props.configurationInfo.type}
-                    detectorConfigType={
-                        this.props.configurationInfo.configuration
-                    }
-                    seriesType={this.props.configurationInfo.series}
-                    studyType={this.props.configurationInfo.study}
-                />
+    return (
+        <div>
+            <MetaData
+                isVisible={isAlgorithmSelected !== null ? true : false}
+                // TODO: James B. - Remove this once refactored into uiSlice
+                detectorType={configurationInfo.type}
+                detectorConfigType={configurationInfo.configuration}
+                seriesType={configurationInfo.series}
+                studyType={configurationInfo.study}
+            />
+            <div
+                onClick={setSelected}
+                style={
+                    isAlgorithmSelected !== null &&
+                    this.props.algorithm.visibility
+                        ? {
+                              ...containerStyle,
+                              backgroundColor: '#367EFF',
+                          }
+                        : containerStyle
+                }>
+                {isExpanded ? (
+                    <Icons.ExpendedArrow
+                        id="arrow"
+                        style={arrowStyle}
+                        onClick={setIsExpanded(!isExpanded)}
+                    />
+                ) : (
+                    <Icons.CollapsedArrow
+                        id="arrow"
+                        style={arrowStyle}
+                        onClick={setIsExpanded(!isExpanded)}
+                    />
+                )}
                 <div
-                    onClick={this.setSelected}
+                    id="algorithm-name"
                     style={
-                        this.props.algorithm.selected &&
                         this.props.algorithm.visibility
-                            ? {
-                                  ...this.state.containerStyle,
-                                  backgroundColor: '#367EFF',
+                            ? typeStyles
+                            : {
+                                  ...typeStyles,
+                                  color: 'gray',
                               }
-                            : this.state.containerStyle
                     }>
-                    {this.state.isExpanded ? (
-                        <Icons.ExpendedArrow
-                            id="arrow"
-                            style={this.state.arrowStyle}
-                            onClick={this.setExpanded}
-                        />
-                    ) : (
-                        <Icons.CollapsedArrow
-                            id="arrow"
-                            style={this.state.arrowStyle}
-                            onClick={this.setExpanded}
-                        />
-                    )}
-                    <div
-                        id="algorithm-name"
-                        style={
-                            this.props.algorithm.visibility
-                                ? this.state.typeStyles
-                                : {
-                                      ...this.state.typeStyles,
-                                      color: 'gray',
-                                  }
-                        }>
-                        {this.props.algorithm.algorithm.localeCompare(
-                            'OPERATOR'
-                        ) == 0
-                            ? this.props.algorithm.algorithm
-                            : constants.ALGORITHM +
-                              ' - ' +
-                              this.props.algorithm.algorithm}
-                    </div>
-                    {this.props.algorithm.visibility ? (
-                        <Icons.EyeO
-                            id="eye"
-                            onClick={this.setVisibility}
-                            style={this.state.eyeStyle}
-                        />
-                    ) : (
-                        <Icons.EyeC
-                            id="eye"
-                            onClick={this.setVisibility}
-                            style={this.state.eyeStyle}
-                        />
-                    )}
+                    {this.props.algorithm.algorithm.localeCompare('OPERATOR') ==
+                    0
+                        ? this.props.algorithm.algorithm
+                        : constants.ALGORITHM +
+                          ' - ' +
+                          this.props.algorithm.algorithm}
                 </div>
-                <div id="detection-holder">
-                    {this.props.algorithm.data.top !== undefined &&
-                    this.state.isExpanded === true ? (
-                        this.props.algorithm.data.top.map((value, index) => {
-                            // Deciding what color to display next to the detection
-                            let detectionColor = null;
-                            if (value.validation === null) {
-                                detectionColor = 'black';
-                            } else if (value.validation === false) {
-                                detectionColor =
-                                    constants.detectionStyle.INVALID_COLOR;
-                            } else if (value.validation === true) {
-                                detectionColor =
-                                    constants.detectionStyle.VALID_COLOR;
-                            }
-                            return (
-                                <TreeDetection
-                                    detection={value}
-                                    visible={this.props.algorithm.visibility}
-                                    updateImage={this.props.updateImage}
-                                    detectionColor={detectionColor}
-                                    key={index}
-                                    updateSelectedDetection={
-                                        this.updateSelectedDetection
-                                    }
-                                    algorithmSelected={
-                                        this.props.algorithm.selected
-                                    }
-                                    updateAlgorithmVisibility={
-                                        this.setVisibility
-                                    }
-                                    algorithmVisible={
-                                        this.props.algorithm.visibility
-                                    }
-                                />
-                            );
-                        })
-                    ) : (
-                        // If no data
-                        <span></span>
-                    )}
-                    {/* Repeating the process for the side stack if it exists */}
-                    {this.props.algorithm.data.side !== undefined &&
-                    this.state.isExpanded === true ? (
-                        this.props.algorithm.data.side.map((value, index) => {
-                            // Deciding what color to display next to the detection
-                            let detectionColor = null;
-                            if (value.validation === null) {
-                                detectionColor = 'black';
-                            } else if (value.validation === false) {
-                                detectionColor =
-                                    constants.detectionStyle.INVALID_COLOR;
-                            } else if (value.validation === true) {
-                                detectionColor =
-                                    constants.detectionStyle.VALID_COLOR;
-                            }
-                            return (
-                                <TreeDetection
-                                    detection={value}
-                                    visible={this.props.algorithm.visibility}
-                                    updateImage={this.props.updateImage}
-                                    detectionColor={detectionColor}
-                                    key={index}
-                                    updateSelectedDetection={
-                                        this.updateSelectedDetection
-                                    }
-                                    algorithmSelected={
-                                        this.props.algorithm.selected
-                                    }
-                                    updateAlgorithmVisibility={
-                                        this.setVisibility
-                                    }
-                                    algorithmVisible={
-                                        this.props.algorithm.visibility
-                                    }
-                                />
-                            );
-                        })
-                    ) : (
-                        // No data
-                        <span></span>
-                    )}
-                </div>
+                {this.props.algorithm.visibility ? (
+                    <Icons.EyeO
+                        id="eye"
+                        onClick={setVisibility}
+                        style={eyeStyle}
+                    />
+                ) : (
+                    <Icons.EyeC
+                        id="eye"
+                        onClick={setVisibility}
+                        style={eyeStyle}
+                    />
+                )}
             </div>
-        );
-    }
-}
+            <div id="detection-holder">
+                {detections !== undefined && this.state.isExpanded === true ? (
+                    detections.map((value, index) => {
+                        return (
+                            <TreeDetection
+                                detection={value}
+                                updateImage={this.props.updateImage}
+                                key={index}
+                                algorithmVisible={
+                                    this.props.algorithm.visibility
+                                }
+                            />
+                        );
+                    })
+                ) : (
+                    // If no data
+                    <span></span>
+                )}
+            </div>
+        </div>
+    );
+};
+
+TreeAlgorithm.propTypes = {
+    detections: PropTypes.array.isRequired,
+    // TODO: James B. - Remove this once refactored into uiSlice
+    configurationInfo: PropTypes.object.isRequired,
+    updateImage: PropTypes.func.isRequired,
+};
 
 export default TreeAlgorithm;
