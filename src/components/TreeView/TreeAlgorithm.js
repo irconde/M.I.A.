@@ -48,13 +48,8 @@ class TreeAlgorithm extends Component {
         algorithm: PropTypes.object.isRequired,
         // TODO: James B. - Remove this once refactored into uiSlice
         configurationInfo: PropTypes.object.isRequired,
-        updateSelected: PropTypes.func.isRequired,
-        setVisibilityData: PropTypes.func.isRequired,
-        updateSelectedDetection: PropTypes.func.isRequired,
         myKey: PropTypes.number.isRequired,
         updateImage: PropTypes.func.isRequired,
-        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
-        updateDetectionVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -70,10 +65,10 @@ class TreeAlgorithm extends Component {
                 this.state.isExpanded === false &&
                 this.props.algorithm.selected
             ) {
-                this.props.updateSelected(
-                    !this.props.algorithm.selected,
-                    this.props.algorithm.algorithm
-                );
+                // this.props.updateSelected(
+                //     !this.props.algorithm.selected,
+                //     this.props.algorithm.algorithm
+                // );
             }
         });
     }
@@ -85,10 +80,10 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     setVisibility() {
-        this.props.setVisibilityData(
-            this.props.algorithm.algorithm,
-            this.props.algorithm.visibility
-        );
+        // this.props.setVisibilityData(
+        //     this.props.algorithm.algorithm,
+        //     this.props.algorithm.visibility
+        // );
     }
 
     /**
@@ -98,10 +93,10 @@ class TreeAlgorithm extends Component {
      * @returns {type} none
      */
     updateSelected() {
-        this.props.updateSelected(
-            !this.props.algorithm.selected,
-            this.props.algorithm.algorithm
-        );
+        // this.props.updateSelected(
+        //     !this.props.algorithm.selected,
+        //     this.props.algorithm.algorithm
+        // );
     }
 
     /**
@@ -113,7 +108,7 @@ class TreeAlgorithm extends Component {
      * @param {Detection} detection
      */
     updateSelectedDetection(detection, e) {
-        this.props.updateSelectedDetection(detection, e);
+        // this.props.updateSelectedDetection(detection, e);
     }
 
     /**
@@ -134,10 +129,10 @@ class TreeAlgorithm extends Component {
                 e.target.id !== 'arrow' &&
                 this.state.isExpanded
             ) {
-                this.props.updateSelected(
-                    !this.props.algorithm.selected,
-                    this.props.algorithm.algorithm
-                );
+                // this.props.updateSelected(
+                //     !this.props.algorithm.selected,
+                //     this.props.algorithm.algorithm
+                // );
             } else {
                 if (e.target.id == 'arrow' || e.target.id == 'Path') {
                     let rotationValue = this.state.arrowStyle.transform;
@@ -267,17 +262,11 @@ class TreeAlgorithm extends Component {
                                     algorithmSelected={
                                         this.props.algorithm.selected
                                     }
-                                    resetSelectedDetectionBoxes={
-                                        this.props.resetSelectedDetectionBoxes
-                                    }
                                     updateAlgorithmVisibility={
                                         this.setVisibility
                                     }
                                     algorithmVisible={
                                         this.props.algorithm.visibility
-                                    }
-                                    updateDetectionVisibility={
-                                        this.props.updateDetectionVisibility
                                     }
                                 />
                             );
@@ -314,17 +303,11 @@ class TreeAlgorithm extends Component {
                                     algorithmSelected={
                                         this.props.algorithm.selected
                                     }
-                                    resetSelectedDetectionBoxes={
-                                        this.props.resetSelectedDetectionBoxes
-                                    }
                                     updateAlgorithmVisibility={
                                         this.setVisibility
                                     }
                                     algorithmVisible={
                                         this.props.algorithm.visibility
-                                    }
-                                    updateDetectionVisibility={
-                                        this.props.updateDetectionVisibility
                                     }
                                 />
                             );

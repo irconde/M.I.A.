@@ -51,6 +51,7 @@ const detectionsSlice = createSlice({
             state.selectedDetection = null;
             state.algorithmNames = [];
             state.data = {};
+            state.detections = [];
         },
         // Adds detection
         addDetection: (state, action) => {
@@ -77,6 +78,8 @@ const detectionsSlice = createSlice({
                     hue: 'random',
                     luminosity: 'bright',
                 }),
+                lowerOpacity: false,
+                validation: false,
             });
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
@@ -99,11 +102,13 @@ const detectionsSlice = createSlice({
                 det.lowerOpacity = false;
             });
             state.isEditLabelWidgetVisible = false;
+            state.selectedDetection = null;
         },
         // Select a DetectionSet
         // Action payload should contain:
         // {string} algorithm - algorithm name
         selectDetectionSet: (state, action) => {
+            state.selectedDetection = null;
             state.detections.forEach((det) => {
                 if (det.algorithm === action.payload) {
                     det.selected = true;
@@ -122,6 +127,7 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.selected = true;
+                    state.selectedDetection = det;
                 } else {
                     det.selected = false;
                 }
@@ -261,7 +267,7 @@ export const areDetectionsValidated = (data) => {
  * @param {string} view view to query
  * @returns {Array<Detection>}
  */
-export const getDetectionsTopDetections = (state) => {
+export const getTopDetections = (state) => {
     const topDetections = [];
     state.detections.detections.forEach((det) => {
         if (det.view === constants.viewport.TOP) {
@@ -271,7 +277,7 @@ export const getDetectionsTopDetections = (state) => {
     return topDetections;
 };
 
-export const getDetectionsSideDetections = (state) => {
+export const getSideDetections = (state) => {
     const sideDetections = [];
     state.detections.detections.forEach((det) => {
         if (det.view === constants.viewport.SIDE) {
@@ -323,6 +329,32 @@ export const hasDetectionChanged = (
     if (detection) {
         return DetectionUtil.hasDetectionChanged(detection, properties);
     }
+};
+
+export const getDetectionsByAlgorithm = (state) => {
+    const sorted = state.detections.detections.sort((a, b) => {
+        if (a.algorithm === b.algorithm) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    const response = [];
+    let preparedAlgorithm = [];
+    let currentAlgorithm = '';
+    sorted.forEach((det) => {
+        let priorAlgorithm = currentAlgorithm;
+        currentAlgorithm = det.algorithm;
+        if (priorAlgorithm === currentAlgorithm) {
+            preparedAlgorithm.push(det);
+        } else {
+            response.push(preparedAlgorithm);
+            preparedAlgorithm = [];
+            preparedAlgorithm.push(det);
+        }
+    });
+    console.log(response);
+    return response;
 };
 
 export const {

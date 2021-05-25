@@ -45,11 +45,9 @@ class TreeDetection extends Component {
         visible: PropTypes.bool.isRequired,
         updateImage: PropTypes.func.isRequired,
         updateSelectedDetection: PropTypes.func.isRequired,
-        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
         algorithmSelected: PropTypes.bool.isRequired,
         algorithmVisible: PropTypes.bool.isRequired,
         updateAlgorithmVisibility: PropTypes.func.isRequired,
-        updateDetectionVisibility: PropTypes.func.isRequired,
     };
 
     /**
@@ -65,12 +63,12 @@ class TreeDetection extends Component {
             e.target.id === 'eye' ||
             e.target.id === 'hidden-eye'
         ) {
-            this.props.updateDetectionVisibility(
-                this.props.detection,
-                !this.props.detection.visible
-            );
+            // this.props.updateDetectionVisibility(
+            //     this.props.detection,
+            //     !this.props.detection.visible
+            // );
             if (this.props.detection.visible === false) {
-                this.props.resetSelectedDetectionBoxes(e, true);
+                // this.props.resetSelectedDetectionBoxes(e, true);
             } else if (this.props.algorithmVisible === false) {
                 this.props.updateAlgorithmVisibility();
             }

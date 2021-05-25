@@ -1,46 +1,27 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
 import NextButton from './NextButton';
 import * as constants from '../Constants';
 import Utils from '../Utils';
+import { connect, useSelector } from 'react-redux';
+import { getDetectionsByAlgorithm } from '../redux/slices/detections/detectionsSlice';
 
-class SideMenu extends Component {
-    numberOfAlgorithms = 0;
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            treeStyle: {
-                top: '0',
-                color: 'white',
-                fill: 'white',
-                width: '100%',
-                height: 'inherit',
-            },
-            algorithmSelected: false,
-            sideMenuWidth: constants.sideMenuWidth + constants.RESOLUTION_UNIT,
-        };
-
-        this.updateSelected = this.updateSelected.bind(this);
-        this.updateSelectedDetection = this.updateSelectedDetection.bind(this);
-        this.setVisibilityData = this.setVisibilityData.bind(this);
-        this.updateImage = this.updateImage.bind(this);
-    }
-
-    static propTypes = {
-        detections: PropTypes.object.isRequired,
-        // TODO: James B. - Remove this once refactored into uiSlice
-        configurationInfo: PropTypes.object.isRequired,
-        enableMenu: PropTypes.bool.isRequired,
-        appUpdateImage: PropTypes.func.isRequired,
-        onMenuDetectionSelected: PropTypes.func.isRequired,
-        resetSelectedDetectionBoxes: PropTypes.func.isRequired,
-        onDetectionSelected: PropTypes.func.isRequired,
-        onDetectionSetSelected: PropTypes.func.isRequired,
-        updateDetectionVisibility: PropTypes.func.isRequired,
-        updateDetectionSetVisibility: PropTypes.func.isRequired,
+const SideMenu = ({
+    nextImageClick,
+    configurationInfo,
+    enableMenu,
+    appUpdateImage,
+}) => {
+    const algorithms = useSelector(getDetectionsByAlgorithm);
+    const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
+    const treeStyle = {
+        top: '0',
+        color: 'white',
+        fill: 'white',
+        width: '100%',
+        height: 'inherit',
     };
 
     /**
@@ -50,13 +31,13 @@ class SideMenu extends Component {
      * @param {Boolean} bool
      * @returns {type}   None
      */
-    setVisibilityData(algorithm, bool) {
+    const setVisibilityData = (algorithm, bool) => {
         this.props.updateDetectionSetVisibility(algorithm, !bool);
-    }
+    };
 
-    updateImage() {
-        this.props.appUpdateImage();
-    }
+    const updateImage = () => {
+        appUpdateImage();
+    };
 
     /**
      * updateSelected - This function is how we control which algorithm is selected. We loop
@@ -67,11 +48,11 @@ class SideMenu extends Component {
      * @param {type} bool
      * @returns {type} none
      */
-    updateSelected(bool, algorithm) {
+    const updateSelected = (bool, algorithm) => {
         const prevState = this.state;
         this.setState({ ...prevState, algorithmSelected: bool });
         this.props.onDetectionSetSelected({ algorithm: algorithm });
-    }
+    };
 
     /**
      * updateSelectedDetection - This function ensures that only one detection is selected at a time.
@@ -81,7 +62,7 @@ class SideMenu extends Component {
      * @param {Detection} detection
      * @returns {type} none
      */
-    updateSelectedDetection(detection, e) {
+    const updateSelectedDetection = (detection, e) => {
         e.persist();
         if (detection.selected === false) {
             this.props.resetSelectedDetectionBoxes(e);
@@ -93,80 +74,55 @@ class SideMenu extends Component {
                 : document.getElementById('dicomImageRight')
         );
         this.props.onMenuDetectionSelected(detection, newEvent);
-    }
+    };
 
-    render() {
-        this.numberOfAlgorithms = 0;
-        // We can't use map on the this.props.detection in the return
-        // Therefore, we will populate the array myDetections with this data before returning
-        let myDetections = [];
-        // eslint-disable-next-line no-unused-vars
-        for (const [key, detectionSet] of Object.entries(
-            this.props.detections
-        )) {
-            myDetections.push({
-                algorithm: detectionSet.algorithm,
-                data: detectionSet.data,
-                selected: detectionSet.selected,
-                visibility: detectionSet.visible,
-            });
-        }
-        // Checking to see if there is any data in myDetections
-        if (myDetections.length !== 0 && this.props.enableMenu) {
-            return (
+    // Checking to see if there is any data in myDetections
+    if (algorithms !== undefined && enableMenu) {
+        return (
+            <div
+                className="treeview-main"
+                style={{
+                    width: sideMenuWidth,
+                    height: document.documentElement.clientHeight,
+                }}>
+                {/* How we create the trees and their nodes is using map */}
                 <div
-                    className="treeview-main"
                     style={{
-                        width: this.state.sideMenuWidth,
-                        height: document.documentElement.clientHeight,
-                    }}>
-                    {/* How we create the trees and their nodes is using map */}
-                    <div
-                        style={{
-                            height:
-                                constants.sideMenuPaddingTop +
-                                constants.RESOLUTION_UNIT,
-                        }}></div>
-                    <div style={this.state.treeStyle}>
-                        {myDetections.map((value, index) => {
-                            this.numberOfAlgorithms++;
-                            return (
-                                // Setting the Algorithm name, IE OTAP or Tiled
-                                <TreeAlgorithm
-                                    key={index}
-                                    myKey={index}
-                                    algorithm={value}
-                                    updateSelected={this.updateSelected}
-                                    updateSelectedDetection={
-                                        this.updateSelectedDetection
-                                    }
-                                    // TODO: James B. - Remove this once refactored into uiSlice
-                                    configurationInfo={
-                                        this.props.configurationInfo
-                                    }
-                                    setVisibilityData={this.setVisibilityData}
-                                    updateDetectionVisibility={
-                                        this.props.updateDetectionVisibility
-                                    }
-                                    updateImage={this.updateImage}
-                                    resetSelectedDetectionBoxes={
-                                        this.props.resetSelectedDetectionBoxes
-                                    }
-                                />
-                            );
-                        })}
-                    </div>
-                    <NextButton nextImageClick={this.props.nextImageClick} />
+                        height:
+                            constants.sideMenuPaddingTop +
+                            constants.RESOLUTION_UNIT,
+                    }}></div>
+                <div style={treeStyle}>
+                    {algorithms.length > 0
+                        ? algorithms.map((algorithm, index) => {
+                              return (
+                                  // Setting the Algorithm name, IE OTAP or Tiled
+                                  <TreeAlgorithm
+                                      key={index}
+                                      myKey={index}
+                                      algorithm={algorithm}
+                                      // TODO: James B. - Remove this once refactored into uiSlice
+                                      configurationInfo={configurationInfo}
+                                      updateImage={updateImage}
+                                  />
+                              );
+                          })
+                        : null}
                 </div>
-            );
-        } else {
-            return <div />;
-        }
+                <NextButton nextImageClick={nextImageClick} />
+            </div>
+        );
+    } else {
+        return <div />;
     }
-}
+};
 
 SideMenu.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
+    // TODO: James B. - Remove this once refactored into uiSlice
+    configurationInfo: PropTypes.object.isRequired,
+    enableMenu: PropTypes.bool.isRequired,
+    appUpdateImage: PropTypes.func.isRequired,
 };
 
-export default SideMenu;
+export default connect()(SideMenu);

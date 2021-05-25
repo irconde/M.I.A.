@@ -36,7 +36,6 @@ import {
 import {
     resetDetections,
     addDetection,
-    addDetectionSet,
     // eslint-disable-next-line no-unused-vars
     areDetectionsValidated,
     clearAllSelection,
@@ -44,13 +43,15 @@ import {
     selectDetection,
     selectDetectionSet,
     getDetectionColor,
-    getDetectionsFromView,
+    getTopDetections,
+    getSideDetections,
     updateDetection,
     updatedDetectionSet,
     editDetectionLabel,
     deleteDetection,
     validateDetections,
     updateDetectionSetVisibility,
+    updateDetectionVisibility,
     hasDetectionChanged,
 } from './redux/slices/detections/detectionsSlice';
 import {
@@ -751,10 +752,7 @@ class App extends Component {
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
-                            const topDetections = getDetectionsFromView(
-                                this.props.detections,
-                                constants.viewport.TOP
-                            );
+                            const topDetections = getTopDetections();
                             for (let j = 0; j < topDetections.length; j++) {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     topDetections[j],
@@ -786,10 +784,7 @@ class App extends Component {
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
-                            const sideDetections = getDetectionsFromView(
-                                this.props.detections,
-                                constants.viewport.SIDE
-                            );
+                            const sideDetections = getSideDetections();
                             for (let i = 0; i < sideDetections.length; i++) {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     sideDetections[i],
@@ -1003,10 +998,6 @@ class App extends Component {
                 let algorithmName = image.string(
                     Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag
                 );
-
-                if (!(algorithmName in self.props.detections)) {
-                    self.props.addDetectionSet({ algorithm: algorithmName });
-                }
                 // Threat Sequence information
                 const threatSequence = image.elements.x40101011;
                 if (threatSequence == null) {
@@ -1043,10 +1034,11 @@ class App extends Component {
                     );
                     self.props.addDetection({
                         algorithm: algorithmName,
-                        boundingBox: boundingBoxCoords,
                         className: objectClass,
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
+                        boundingBox: boundingBoxCoords,
+                        maskBitmap: [[]],
                     });
                 }
             });
@@ -1056,7 +1048,7 @@ class App extends Component {
         if (this.props.singleViewport === false) {
             for (var k = 0; k < imagesRight.length; k++) {
                 const read = new FileReader();
-                const currentRightImage = imagesRight[k];
+                // const currentRightImage = imagesRight[k];
                 read.addEventListener('loadend', function () {
                     const view = new Uint8Array(read.result);
                     var image = dicomParser.parseDicom(view);
@@ -1068,13 +1060,6 @@ class App extends Component {
                         Dicos.dictionary['ThreatDetectionAlgorithmandVersion']
                             .tag
                     );
-
-                    if (!(algorithmName in self.props.detections)) {
-                        self.props.addDetectionSet({
-                            algorithm: algorithmName,
-                        });
-                    }
-
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
                     if (threatSequence == null) {
@@ -1109,11 +1094,11 @@ class App extends Component {
                         var pixelData = Dicos.retrieveMaskData(image);
                         self.props.addDetection({
                             algorithm: algorithmName,
-                            maskBitmap: pixelData,
-                            boundingBox: boundingBoxCoords,
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
+                            boundingBox: boundingBoxCoords,
+                            maskBitmap: pixelData,
                         });
                     }
                 });
@@ -1209,100 +1194,73 @@ class App extends Component {
         }
         const B_BOX_COORDS = 4;
         let detectionList;
-        let selectedViewport;
         context.font = constants.detectionStyle.LABEL_FONT;
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
         // eslint-disable-next-line no-unused-vars
-        for (const [key, detectionSet] of Object.entries(data)) {
-            if (detectionSet.visible !== true) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].visible !== true) {
                 continue;
             }
-            selectedViewport = constants.viewport.TOP;
-            detectionList = getDetectionsFromView(data, selectedViewport);
-            if (
-                context.canvas.offsetParent.id === 'dicomImageRight' &&
-                this.props.singleViewport === false
-            ) {
-                selectedViewport = constants.viewport.SIDE;
-                detectionList = getDetectionsFromView(data, selectedViewport);
-            }
-            if (detectionList === undefined) {
+            if (detectionList[j].visible !== true || detectionList[j].selected)
+                continue;
+            const boundingBoxCoords = detectionList[j].boundingBox;
+            let color = getDetectionColor(detectionList[j]);
+            if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
-            } else {
-                if (detectionList === null || detectionList.length === 0) {
-                    continue;
-                }
             }
-            for (let j = 0; j < detectionList.length; j++) {
-                if (
-                    detectionList[j].visible !== true ||
-                    (detectionList[j].selected &&
-                        detectionSet.selected === false)
-                )
-                    continue;
-                const boundingBoxCoords = detectionList[j].boundingBox;
-                let color = getDetectionColor(detectionList[j]);
-                if (boundingBoxCoords.length < B_BOX_COORDS) {
-                    return;
-                }
-                if (detectionSet.lowerOpacity === true) {
-                    let rgbColor = Utils.hexToRgb(color);
-                    color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
-                }
-                context.strokeStyle = color;
-                context.fillStyle = color;
-                const boundingBoxWidth = Math.abs(
-                    boundingBoxCoords[2] - boundingBoxCoords[0]
-                );
-                const boundingBoxHeight = Math.abs(
-                    boundingBoxCoords[3] - boundingBoxCoords[1]
-                );
-                const detectionLabel = Utils.formatDetectionLabel(
-                    detectionList[j].class,
-                    detectionList[j].confidence
-                );
-                const labelSize = Utils.getTextLabelSize(
-                    context,
-                    detectionLabel,
-                    constants.detectionStyle.LABEL_PADDING
+            if (data[j].lowerOpacity === true) {
+                let rgbColor = Utils.hexToRgb(color);
+                color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
+            }
+            context.strokeStyle = color;
+            context.fillStyle = color;
+            const boundingBoxWidth = Math.abs(
+                boundingBoxCoords[2] - boundingBoxCoords[0]
+            );
+            const boundingBoxHeight = Math.abs(
+                boundingBoxCoords[3] - boundingBoxCoords[1]
+            );
+            const detectionLabel = Utils.formatDetectionLabel(
+                detectionList[j].class,
+                detectionList[j].confidence
+            );
+            const labelSize = Utils.getTextLabelSize(
+                context,
+                detectionLabel,
+                constants.detectionStyle.LABEL_PADDING
+            );
+            context.strokeRect(
+                boundingBoxCoords[0],
+                boundingBoxCoords[1],
+                boundingBoxWidth,
+                boundingBoxHeight
+            );
+
+            // Mask rendering
+            this.renderDetectionMasks(detectionList[j].maskBitmap, context);
+
+            // Label rendering
+            if (!detectionList[j].updatingDetection) {
+                context.fillRect(
+                    boundingBoxCoords[0],
+                    boundingBoxCoords[1] - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
                 );
                 context.strokeRect(
                     boundingBoxCoords[0],
-                    boundingBoxCoords[1],
-                    boundingBoxWidth,
-                    boundingBoxHeight
+                    boundingBoxCoords[1] - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
                 );
-
-                // Mask rendering
-                this.renderDetectionMasks(detectionList[j].maskBitmap, context);
-
-                // Label rendering
-                if (
-                    !detectionList[j].updatingDetection ||
-                    detectionSet.selected
-                ) {
-                    context.fillRect(
-                        boundingBoxCoords[0],
-                        boundingBoxCoords[1] - labelSize['height'],
-                        labelSize['width'],
-                        labelSize['height']
-                    );
-                    context.strokeRect(
-                        boundingBoxCoords[0],
-                        boundingBoxCoords[1] - labelSize['height'],
-                        labelSize['width'],
-                        labelSize['height']
-                    );
-                    context.fillStyle =
-                        constants.detectionStyle.LABEL_TEXT_COLOR;
-                    context.fillText(
-                        detectionLabel,
-                        boundingBoxCoords[0] +
-                            constants.detectionStyle.LABEL_PADDING,
-                        boundingBoxCoords[1] -
-                            constants.detectionStyle.LABEL_PADDING
-                    );
-                }
+                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillText(
+                    detectionLabel,
+                    boundingBoxCoords[0] +
+                        constants.detectionStyle.LABEL_PADDING,
+                    boundingBoxCoords[1] -
+                        constants.detectionStyle.LABEL_PADDING
+                );
             }
         }
     }
@@ -1356,17 +1314,11 @@ class App extends Component {
         let viewport;
         if (e.detail.element.id === 'dicomImageLeft') {
             // top
-            combinedDetections = getDetectionsFromView(
-                this.props.detections,
-                constants.viewport.TOP
-            );
+            combinedDetections = getTopDetections();
             viewport = constants.viewport.TOP;
         } else if (e.detail.element.id === 'dicomImageRight') {
             // side
-            combinedDetections = getDetectionsFromView(
-                this.props.detections,
-                constants.viewport.SIDE
-            );
+            combinedDetections = getSideDetections();
             viewport = constants.viewport.SIDE;
         }
         if (combinedDetections.length > 0) {
@@ -1397,10 +1349,7 @@ class App extends Component {
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
-                if (
-                    this.props.selectedDetection ||
-                    this.props.selectedAlgorithm
-                ) {
+                if (this.props.selectedDetection) {
                     this.props.clearAllSelection();
                 }
                 this.props.emptyAreaClickUpdate();
@@ -1536,6 +1485,7 @@ class App extends Component {
                                     viewport === self.state.imageViewportTop
                                         ? constants.viewport.TOP
                                         : constants.viewport.SIDE,
+                                maskBitmap: [[]],
                             });
                             self.appUpdateImage();
                         }
@@ -1550,6 +1500,7 @@ class App extends Component {
                                     viewport === self.state.imageViewportTop
                                         ? constants.viewport.TOP
                                         : constants.viewport.SIDE,
+                                maskBitmap: [[]],
                             });
                             self.appUpdateImage();
                         }
@@ -1761,21 +1712,18 @@ class App extends Component {
         // Selecting a Detection from Selection mode
         if (!this.props.selectedDetection) {
             this.props.selectDetection({
-                algorithm: detection.algorithm,
                 uuid: detection.uuid,
-                view: detection.view,
             });
         }
         // Another Detection is selected
         else {
             // Clear selection data in redux and tool state
+            // TODO: Do we need to clear all with new implementation? Too many calls
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
 
             this.props.selectDetection({
-                algorithm: detection.algorithm,
                 uuid: detection.uuid,
-                view: detection.view,
             });
         }
         // TODO: james b. - Remove the use of setTimeout when we can.
@@ -1804,18 +1752,6 @@ class App extends Component {
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
             });
-        }
-    }
-
-    /**
-     *
-     * Method invoked to clear detectionset
-     *
-     */
-    clearDetectionset(listOfDetections) {
-        // eslint-disable-next-line no-unused-vars
-        for (const [key, detectionSet] of Object.entries(listOfDetections)) {
-            detectionSet.clearAll();
         }
     }
 
@@ -1881,10 +1817,7 @@ class App extends Component {
      * function is called. Use the param data to render the context menu.
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
-        if (
-            this.props.selectedAlgorithm &&
-            this.props.selectedDetection !== constants.selection.ALL_SELECTED
-        ) {
+        if (this.props.selectedDetection !== null) {
             const viewportInfo = Utils.eventToViewportInfo(event);
             const detectionData = draggedData
                 ? draggedData
@@ -2122,9 +2055,7 @@ class App extends Component {
         // Detection is selected
         if (this.props.selectedDetection) {
             this.props.deleteDetection({
-                algorithm: this.props.selectedDetection.algorithm,
                 uuid: this.props.selectedDetection.uuid,
-                view: this.props.selectedDetection.view,
             });
             if (this.props.selectedDetection.view === constants.viewport.TOP) {
                 this.state.myOra.setStackBlobData(
@@ -2161,16 +2092,11 @@ class App extends Component {
      * @param {boolean} isVisible
      */
     updateDetectionVisibility(detection, isVisible) {
-        this.props.updateDetection({
-            reference: {
-                algorithm: detection.algorithm,
-                uuid: detection.uuid,
-                view: detection.view,
-            },
-            update: {
-                visible: isVisible,
-            },
+        this.props.updateDetectionVisibility({
+            uuid: detection.uuid,
+            isVisible,
         });
+        this.appUpdateImage();
     }
 
     /**
@@ -2183,7 +2109,6 @@ class App extends Component {
             algorithm: algorithm,
             isVisible: isVisible,
         });
-
         this.appUpdateImage();
     }
 
@@ -2224,7 +2149,6 @@ class App extends Component {
                         isConnected={this.props.isConnected}
                     />
                     <SideMenu
-                        detections={this.props.detections}
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
@@ -2271,8 +2195,7 @@ const mapStateToProps = (state) => {
         processingHost: server.processingHost,
         currentProcessingFile: server.currentProcessingFile,
         // Detections and Selection state
-        detections: detections.data,
-        selectedAlgorithm: detections.selectedAlgorithm,
+        detections: detections.detections,
         selectedDetection: detections.selectedDetection,
         algorithmNames: detections.algorithmNames,
         // UI
@@ -2302,7 +2225,6 @@ const mapDispatchToProps = {
     updateDetection,
     updatedDetectionSet,
     addDetection,
-    addDetectionSet,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,
@@ -2340,6 +2262,7 @@ const mapDispatchToProps = {
     onDragEndWidgetUpdate,
     selectEditDetectionLabelUpdate,
     onLabelEditionEnd,
+    updateDetectionVisibility,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
