@@ -5,7 +5,7 @@ import '../App.css';
 import NextButton from './NextButton';
 import * as constants from '../Constants';
 import Utils from '../Utils';
-import { connect, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../redux/slices/detections/detectionsSlice';
 
 const SideMenu = ({
@@ -13,6 +13,7 @@ const SideMenu = ({
     configurationInfo,
     enableMenu,
     appUpdateImage,
+    resetSelectedDetectionBoxes,
 }) => {
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
@@ -23,7 +24,6 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
-
     // Checking to see if there is any data in myDetections
     if (algorithms !== undefined && enableMenu) {
         return (
@@ -51,6 +51,9 @@ const SideMenu = ({
                                       // TODO: James B. - Remove this once refactored into uiSlice
                                       configurationInfo={configurationInfo}
                                       updateImage={appUpdateImage}
+                                      resetSelectedDetectionBoxes={
+                                          resetSelectedDetectionBoxes
+                                      }
                                   />
                               );
                           })
@@ -70,6 +73,7 @@ SideMenu.propTypes = {
     configurationInfo: PropTypes.object.isRequired,
     enableMenu: PropTypes.bool.isRequired,
     appUpdateImage: PropTypes.func.isRequired,
+    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
 };
 
-export default connect()(SideMenu);
+export default SideMenu;

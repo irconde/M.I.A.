@@ -55,6 +55,7 @@ const detectionsSlice = createSlice({
         },
         // Adds detection
         addDetection: (state, action) => {
+            console.log('adding');
             const {
                 algorithm,
                 className,
@@ -103,12 +104,14 @@ const detectionsSlice = createSlice({
             });
             state.isEditLabelWidgetVisible = false;
             state.selectedDetection = null;
+            state.selectedAlgorithm = null;
         },
         // Select a DetectionSet
         // Action payload should contain:
         // {string} algorithm - algorithm name
         selectDetectionSet: (state, action) => {
             state.selectedDetection = null;
+            state.selectedAlgorithm = action.payload;
             state.detections.forEach((det) => {
                 if (det.algorithm === action.payload) {
                     det.selected = true;
@@ -222,10 +225,9 @@ const detectionsSlice = createSlice({
             });
         },
         updateDetectionVisibility: (state, action) => {
-            const { uuid, isVisible } = action.payload;
             state.detections.forEach((det) => {
-                if (det.uuid === uuid) {
-                    det.visible = isVisible;
+                if (det.uuid === action.payload) {
+                    det.visible = !det.visible;
                 }
             });
         },
@@ -269,21 +271,25 @@ export const areDetectionsValidated = (data) => {
  */
 export const getTopDetections = (state) => {
     const topDetections = [];
-    state.detections.detections.forEach((det) => {
-        if (det.view === constants.viewport.TOP) {
-            topDetections.push(det);
-        }
-    });
+    if (state.detections !== undefined) {
+        state.detections.detections.forEach((det) => {
+            if (det.view === constants.viewport.TOP) {
+                topDetections.push(det);
+            }
+        });
+    }
     return topDetections;
 };
 
 export const getSideDetections = (state) => {
     const sideDetections = [];
-    state.detections.detections.forEach((det) => {
-        if (det.view === constants.viewport.SIDE) {
-            sideDetections.push(det);
-        }
-    });
+    if (state.detections !== undefined) {
+        state.detections.detections.forEach((det) => {
+            if (det.view === constants.viewport.SIDE) {
+                sideDetections.push(det);
+            }
+        });
+    }
     return sideDetections;
 };
 
@@ -332,30 +338,37 @@ export const hasDetectionChanged = (
 };
 
 export const getDetectionsByAlgorithm = (state) => {
-    const sorted = state.detections.detections.sort((a, b) => {
-        if (a.algorithm === b.algorithm) {
-            return true;
-        } else {
-            return false;
+    const sorted = state.detections.detections.slice().sort((a, b) => {
+        if (a.algorithm < b.algorithm) {
+            return -1;
         }
+        if (a.algorithm > b.algorithm) {
+            return 1;
+        }
+        return 0;
     });
     const response = [];
-    let preparedAlgorithm = [];
-    let currentAlgorithm = '';
+    let prepared = [];
+    let priorAlgorithm = sorted.length > 0 ? sorted[0].algorithm : '';
     sorted.forEach((det) => {
-        let priorAlgorithm = currentAlgorithm;
-        currentAlgorithm = det.algorithm;
+        const currentAlgorithm = det.algorithm;
         if (priorAlgorithm === currentAlgorithm) {
-            preparedAlgorithm.push(det);
+            prepared.push(det);
         } else {
-            response.push(preparedAlgorithm);
-            preparedAlgorithm = [];
-            preparedAlgorithm.push(det);
+            response.push(prepared);
+            prepared = [];
+            prepared.push(det);
         }
+        priorAlgorithm = currentAlgorithm;
     });
-    console.log(response);
+    if (prepared.length > 0) response.push(prepared);
     return response;
 };
+
+export const getSelectedDetection = (state) =>
+    state.detections.selectedDetection;
+export const getSelectedAlgorithm = (state) =>
+    state.detections.selectedAlgorithm;
 
 export const {
     resetDetections,

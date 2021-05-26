@@ -7,7 +7,12 @@ import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 
-const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
+const TreeAlgorithm = ({
+    configurationInfo,
+    detections,
+    updateImage,
+    resetSelectedDetectionBoxes,
+}) => {
     const arrowStyle = {
         height: '1.5rem',
         width: '1.5rem',
@@ -34,8 +39,8 @@ const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
         paddingBottom: '0.75rem',
         paddingTop: '0.75rem',
     };
-    const [isExpanded, setIsExpanded] = useState < Boolean > true;
-    const [isSelected, setIsSelected] = useState < Boolean > false;
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [isSelected, setIsSelected] = useState(false);
     const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
 
     /**
@@ -137,14 +142,23 @@ const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
             <div
                 onClick={setSelected}
                 style={
-                    isAlgorithmSelected !== null &&
-                    this.props.algorithm.visibility
+                    isAlgorithmSelected !== null
                         ? {
                               ...containerStyle,
                               backgroundColor: '#367EFF',
                           }
                         : containerStyle
-                }>
+                }
+                // style={
+                //     isAlgorithmSelected !== null &&
+                //     this.props.algorithm.visibility
+                //         ? {
+                //               ...containerStyle,
+                //               backgroundColor: '#367EFF',
+                //           }
+                //         : containerStyle
+                //
+            >
                 {isExpanded ? (
                     <Icons.ExpendedArrow
                         id="arrow"
@@ -160,22 +174,22 @@ const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
                 )}
                 <div
                     id="algorithm-name"
-                    style={
-                        this.props.algorithm.visibility
-                            ? typeStyles
-                            : {
-                                  ...typeStyles,
-                                  color: 'gray',
-                              }
-                    }>
-                    {this.props.algorithm.algorithm.localeCompare('OPERATOR') ==
-                    0
-                        ? this.props.algorithm.algorithm
-                        : constants.ALGORITHM +
-                          ' - ' +
-                          this.props.algorithm.algorithm}
+                    style={typeStyles}
+                    // style={
+                    //     this.props.algorithm.visibility
+                    //         ? typeStyles
+                    //         : {
+                    //               ...typeStyles,
+                    //               color: 'gray',
+                    //           }
+                    // }
+                >
+                    {constants.ALGORITHM + ' - ' + detections.length > 0
+                        ? detections[0].algorithm
+                        : null}
                 </div>
-                {this.props.algorithm.visibility ? (
+                <Icons.EyeO id="eye" onClick={setVisibility} style={eyeStyle} />
+                {/* {this.props.algorithm.visibility ? (
                     <Icons.EyeO
                         id="eye"
                         onClick={setVisibility}
@@ -187,18 +201,19 @@ const TreeAlgorithm = ({ configurationInfo, detections, updateImage }) => {
                         onClick={setVisibility}
                         style={eyeStyle}
                     />
-                )}
+                )} */}
             </div>
             <div id="detection-holder">
-                {detections !== undefined && this.state.isExpanded === true ? (
+                {detections !== undefined && isExpanded === true ? (
                     detections.map((value, index) => {
                         return (
                             <TreeDetection
                                 detection={value}
-                                updateImage={this.props.updateImage}
+                                updateImage={updateImage}
                                 key={index}
-                                algorithmVisible={
-                                    this.props.algorithm.visibility
+                                algorithmVisible={true}
+                                resetSelectedDetectionBoxes={
+                                    resetSelectedDetectionBoxes
                                 }
                             />
                         );
@@ -217,6 +232,7 @@ TreeAlgorithm.propTypes = {
     // TODO: James B. - Remove this once refactored into uiSlice
     configurationInfo: PropTypes.object.isRequired,
     updateImage: PropTypes.func.isRequired,
+    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
 };
 
 export default TreeAlgorithm;

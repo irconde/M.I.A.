@@ -752,7 +752,9 @@ class App extends Component {
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
-                            const topDetections = getTopDetections();
+                            const topDetections = getTopDetections(
+                                this.props.detections
+                            );
                             for (let j = 0; j < topDetections.length; j++) {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     topDetections[j],
@@ -784,7 +786,9 @@ class App extends Component {
                             }
                             // Loop through each detection and only the side view of the detection
                         } else if (stack.view === 'side') {
-                            const sideDetections = getSideDetections();
+                            const sideDetections = getSideDetections(
+                                this.props.detections
+                            );
                             for (let i = 0; i < sideDetections.length; i++) {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     sideDetections[i],
@@ -1032,14 +1036,14 @@ class App extends Component {
                         threatSequence.items[j],
                         image
                     );
-                    self.props.addDetection({
-                        algorithm: algorithmName,
-                        className: objectClass,
-                        confidence: confidenceLevel,
-                        view: constants.viewport.TOP,
-                        boundingBox: boundingBoxCoords,
-                        maskBitmap: [[]],
-                    });
+                    // self.props.addDetection({
+                    //     algorithm: algorithmName,
+                    //     className: objectClass,
+                    //     confidence: confidenceLevel,
+                    //     view: constants.viewport.TOP,
+                    //     boundingBox: boundingBoxCoords,
+                    //     maskBitmap: [[]],
+                    // });
                 }
             });
             readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -1092,14 +1096,14 @@ class App extends Component {
                             )
                         );
                         var pixelData = Dicos.retrieveMaskData(image);
-                        self.props.addDetection({
-                            algorithm: algorithmName,
-                            className: objectClass,
-                            confidence: confidenceLevel,
-                            view: constants.viewport.SIDE,
-                            boundingBox: boundingBoxCoords,
-                            maskBitmap: pixelData,
-                        });
+                        // self.props.addDetection({
+                        //     algorithm: algorithmName,
+                        //     className: objectClass,
+                        //     confidence: confidenceLevel,
+                        //     view: constants.viewport.SIDE,
+                        //     boundingBox: boundingBoxCoords,
+                        //     maskBitmap: pixelData,
+                        // });
                     }
                 });
                 read.readAsArrayBuffer(imagesRight[k]);
@@ -1314,11 +1318,11 @@ class App extends Component {
         let viewport;
         if (e.detail.element.id === 'dicomImageLeft') {
             // top
-            combinedDetections = getTopDetections();
+            combinedDetections = getTopDetections(this.props.detections);
             viewport = constants.viewport.TOP;
         } else if (e.detail.element.id === 'dicomImageRight') {
             // side
-            combinedDetections = getSideDetections();
+            combinedDetections = getSideDetections(this.props.detections);
             viewport = constants.viewport.SIDE;
         }
         if (combinedDetections.length > 0) {
@@ -1473,35 +1477,35 @@ class App extends Component {
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
                         if (!(operator in self.props.detections)) {
-                            self.props.addDetectionSet({
-                                algorithm: operator,
-                            });
-                            self.props.addDetection({
-                                algorithm: operator,
-                                boundingBox: coords,
-                                className: data[0].class,
-                                confidence: data[0].confidence,
-                                view:
-                                    viewport === self.state.imageViewportTop
-                                        ? constants.viewport.TOP
-                                        : constants.viewport.SIDE,
-                                maskBitmap: [[]],
-                            });
+                            // self.props.addDetectionSet({
+                            //     algorithm: operator,
+                            // });
+                            // self.props.addDetection({
+                            //     algorithm: operator,
+                            //     boundingBox: coords,
+                            //     className: data[0].class,
+                            //     confidence: data[0].confidence,
+                            //     view:
+                            //         viewport === self.state.imageViewportTop
+                            //             ? constants.viewport.TOP
+                            //             : constants.viewport.SIDE,
+                            //     maskBitmap: [[]],
+                            // });
                             self.appUpdateImage();
                         }
                         // Operator DetectionSet exists, add new detection to set
                         else {
-                            self.props.addDetection({
-                                algorithm: operator,
-                                boundingBox: coords,
-                                className: data[0].class,
-                                confidence: data[0].confidence,
-                                view:
-                                    viewport === self.state.imageViewportTop
-                                        ? constants.viewport.TOP
-                                        : constants.viewport.SIDE,
-                                maskBitmap: [[]],
-                            });
+                            // self.props.addDetection({
+                            //     algorithm: operator,
+                            //     boundingBox: coords,
+                            //     className: data[0].class,
+                            //     confidence: data[0].confidence,
+                            //     view:
+                            //         viewport === self.state.imageViewportTop
+                            //             ? constants.viewport.TOP
+                            //             : constants.viewport.SIDE,
+                            //     maskBitmap: [[]],
+                            // });
                             self.appUpdateImage();
                         }
                     } else {

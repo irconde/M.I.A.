@@ -3,8 +3,20 @@ import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { detectionStyle, MAX_LABEL_LENGTH } from '../../Constants';
 import Utils from '../../Utils.js';
+import { useDispatch } from 'react-redux';
+import {
+    getDetectionColor,
+    selectDetection,
+    updateDetectionVisibility,
+} from '../../redux/slices/detections/detectionsSlice';
 
-const TreeDetection = ({ detection, updateImage, algorithmVisible }) => {
+const TreeDetection = ({
+    detection,
+    updateImage,
+    algorithmVisible,
+    resetSelectedDetectionBoxes,
+}) => {
+    const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
         height: '0.75rem',
@@ -46,6 +58,9 @@ const TreeDetection = ({ detection, updateImage, algorithmVisible }) => {
             e.target.id === 'eye' ||
             e.target.id === 'hidden-eye'
         ) {
+            dispatch(updateDetectionVisibility(detection.uuid));
+            if (detection.visible === false)
+                resetSelectedDetectionBoxes(e, true);
             // // this.props.updateDetectionVisibility(
             // //     this.props.detection,
             // //     !this.props.detection.visible
@@ -67,31 +82,30 @@ const TreeDetection = ({ detection, updateImage, algorithmVisible }) => {
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
+            dispatch(selectDetection(detection.uuid));
             // this.props.updateSelectedDetection(this.props.detection, e);
         }
     };
 
     // Figuring out what text color we need to display on the detection
-    // let textColor = 'white';
-    // let selectionColor;
-    // let colorSelection = false;
-    // if (
-    //     detection.validation === true &&
-    //     detection.validation !== undefined
-    // ) {
-    //     textColor = detectionStyle.VALID_COLOR;
-    // } else if (
-    //     detection.validation === false &&
-    //     detection.validation !== undefined
-    // ) {
-    //     textColor = detectionStyle.INVALID_COLOR;
-    // } else if (!detection.visible) {
-    //     textColor = 'gray';
-    // }
-    // if (detection.selected) {
-    //     selectionColor = 'rgba(54, 126, 255, 1)';
-    //     colorSelection = true;
-    // }
+    let textColor = 'white';
+    let selectionColor;
+    let colorSelection = false;
+    if (detection.validation === true && detection.validation !== undefined) {
+        textColor = detectionStyle.VALID_COLOR;
+    } else if (
+        detection.validation === false &&
+        detection.validation !== undefined
+    ) {
+        textColor = detectionStyle.INVALID_COLOR;
+    } else if (!detection.visible) {
+        textColor = 'gray';
+    }
+    if (detection.selected) {
+        selectionColor = detectionStyle.SELECTED_COLOR;
+        colorSelection = true;
+    }
+    const detectionColor = getDetectionColor(detection);
     // if (algorithmSelected) {
     //     selectionColor = 'rgba(54, 126, 255, 0.2)';
     //     colorSelection = true;
@@ -101,7 +115,7 @@ const TreeDetection = ({ detection, updateImage, algorithmVisible }) => {
         return (
             <div
                 id={`${detection.view}-container`}
-                onClick={this.setSelected}
+                onClick={setSelected}
                 style={
                     colorSelection
                         ? {
@@ -164,6 +178,7 @@ TreeDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     updateImage: PropTypes.func.isRequired,
     algorithmVisible: PropTypes.bool.isRequired,
+    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
 };
 
 export default TreeDetection;
