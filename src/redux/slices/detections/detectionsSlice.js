@@ -79,7 +79,7 @@ const detectionsSlice = createSlice({
                     luminosity: 'bright',
                 }),
                 lowerOpacity: false,
-                validation: false,
+                validation: null,
             });
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
@@ -104,7 +104,7 @@ const detectionsSlice = createSlice({
                         luminosity: 'bright',
                     }),
                     lowerOpacity: false,
-                    validation: false,
+                    validation: null,
                 });
                 if (state.detectionLabels.indexOf(det.className) === -1) {
                     state.detectionLabels.push(det.className);

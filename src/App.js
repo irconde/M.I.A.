@@ -1373,11 +1373,9 @@ class App extends Component {
                     this.props.cornerstoneMode ===
                         constants.cornerstoneMode.SELECTION
                 ) {
-                    this.props.selectDetection({
-                        algorithm: combinedDetections[clickedPos].algorithm,
-                        view: viewport,
-                        uuid: combinedDetections[clickedPos].uuid,
-                    });
+                    this.props.selectDetection(
+                        combinedDetections[clickedPos].uuid
+                    );
 
                     this.onDetectionSelected(e).finally(() => {
                         this.props.detectionSelectedUpdate();
@@ -1676,7 +1674,7 @@ class App extends Component {
                         },
                         uuid: detectionData.uuid,
                         algorithm: detectionData.algorithm,
-                        class: detectionData.class,
+                        class: detectionData.className,
                         renderColor: getDetectionColor(detectionData),
                         confidence: detectionData.confidence,
                         updatingDetection: true,
@@ -1721,9 +1719,7 @@ class App extends Component {
     onMenuDetectionSelected(detection, e) {
         // Selecting a Detection from Selection mode
         if (!this.props.selectedDetection) {
-            this.props.selectDetection({
-                uuid: detection.uuid,
-            });
+            this.props.selectDetection(detection.uuid);
         }
         // Another Detection is selected
         else {
@@ -1732,9 +1728,7 @@ class App extends Component {
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
 
-            this.props.selectDetection({
-                uuid: detection.uuid,
-            });
+            this.props.selectDetection(detection.uuid);
         }
         // TODO: james b. - Remove the use of setTimeout when we can.
         //                  Currently an issue on needing to wait for the detection be selected.
@@ -1989,7 +1983,7 @@ class App extends Component {
             const {
                 boundingBox,
                 view,
-                class: label,
+                className: label,
                 confidence,
             } = detectionData;
             const bbox = coords === undefined ? boundingBox : coords;
