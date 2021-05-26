@@ -25,7 +25,7 @@ const SideMenu = ({
         height: 'inherit',
     };
     // Checking to see if there is any data in myDetections
-    if (algorithms !== undefined && enableMenu) {
+    if (algorithms.length > 0 && enableMenu) {
         return (
             <div
                 className="treeview-main"
@@ -43,6 +43,7 @@ const SideMenu = ({
                 <div style={treeStyle}>
                     {algorithms.length > 0
                         ? algorithms.map((detections, index) => {
+                              console.log(detections);
                               return (
                                   // Setting the Algorithm name, IE OTAP or Tiled
                                   <TreeAlgorithm

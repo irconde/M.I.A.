@@ -55,7 +55,6 @@ const detectionsSlice = createSlice({
         },
         // Adds detection
         addDetection: (state, action) => {
-            console.log('adding');
             const {
                 algorithm,
                 className,
@@ -85,6 +84,32 @@ const detectionsSlice = createSlice({
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
+        },
+        // Adds detection
+        addDetections: (state, action) => {
+            action.payload.forEach((det) => {
+                state.detections.push({
+                    algorithm: det.algorithm,
+                    className: det.className,
+                    confidence: det.confidence,
+                    view: det.view,
+                    maskBitmap: det.maskBitmap,
+                    boundingBox: det.boundingBox,
+                    selected: false,
+                    visible: true,
+                    uuid: uuidv4(),
+                    color: randomColor({
+                        seed: det.className,
+                        hue: 'random',
+                        luminosity: 'bright',
+                    }),
+                    lowerOpacity: false,
+                    validation: false,
+                });
+                if (state.detectionLabels.indexOf(det.className) === -1) {
+                    state.detectionLabels.push(det.className);
+                }
+            });
         },
         // Clears selection data for specified algorithm
         // Action payload should contain:
@@ -269,10 +294,10 @@ export const areDetectionsValidated = (data) => {
  * @param {string} view view to query
  * @returns {Array<Detection>}
  */
-export const getTopDetections = (state) => {
+export const getTopDetections = (detections) => {
     const topDetections = [];
-    if (state.detections !== undefined) {
-        state.detections.detections.forEach((det) => {
+    if (detections !== undefined) {
+        detections.forEach((det) => {
             if (det.view === constants.viewport.TOP) {
                 topDetections.push(det);
             }
@@ -281,10 +306,10 @@ export const getTopDetections = (state) => {
     return topDetections;
 };
 
-export const getSideDetections = (state) => {
+export const getSideDetections = (detections) => {
     const sideDetections = [];
-    if (state.detections !== undefined) {
-        state.detections.detections.forEach((det) => {
+    if (detections !== undefined) {
+        detections.forEach((det) => {
             if (det.view === constants.viewport.SIDE) {
                 sideDetections.push(det);
             }
@@ -374,6 +399,7 @@ export const {
     resetDetections,
     addDetectionSet,
     addDetection,
+    addDetections,
     clearSelectedDetection,
     clearAllSelection,
     selectDetection,

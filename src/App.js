@@ -36,6 +36,7 @@ import {
 import {
     resetDetections,
     addDetection,
+    addDetections,
     // eslint-disable-next-line no-unused-vars
     areDetectionsValidated,
     clearAllSelection,
@@ -1036,14 +1037,14 @@ class App extends Component {
                         threatSequence.items[j],
                         image
                     );
-                    // self.props.addDetection({
-                    //     algorithm: algorithmName,
-                    //     className: objectClass,
-                    //     confidence: confidenceLevel,
-                    //     view: constants.viewport.TOP,
-                    //     boundingBox: boundingBoxCoords,
-                    //     maskBitmap: [[]],
-                    // });
+                    self.props.addDetection({
+                        algorithm: algorithmName,
+                        className: objectClass,
+                        confidence: confidenceLevel,
+                        view: constants.viewport.TOP,
+                        boundingBox: boundingBoxCoords,
+                        maskBitmap: [[]],
+                    });
                 }
             });
             readFile.readAsArrayBuffer(imagesLeft[i]);
@@ -1052,7 +1053,6 @@ class App extends Component {
         if (this.props.singleViewport === false) {
             for (var k = 0; k < imagesRight.length; k++) {
                 const read = new FileReader();
-                // const currentRightImage = imagesRight[k];
                 read.addEventListener('loadend', function () {
                     const view = new Uint8Array(read.result);
                     var image = dicomParser.parseDicom(view);
@@ -1096,14 +1096,14 @@ class App extends Component {
                             )
                         );
                         var pixelData = Dicos.retrieveMaskData(image);
-                        // self.props.addDetection({
-                        //     algorithm: algorithmName,
-                        //     className: objectClass,
-                        //     confidence: confidenceLevel,
-                        //     view: constants.viewport.SIDE,
-                        //     boundingBox: boundingBoxCoords,
-                        //     maskBitmap: pixelData,
-                        // });
+                        self.props.addDetection({
+                            algorithm: algorithmName,
+                            className: objectClass,
+                            confidence: confidenceLevel,
+                            view: constants.viewport.SIDE,
+                            boundingBox: boundingBoxCoords,
+                            maskBitmap: pixelData,
+                        });
                     }
                 });
                 read.readAsArrayBuffer(imagesRight[k]);
@@ -1120,8 +1120,8 @@ class App extends Component {
      */
     onImageRendered(e) {
         const eventData = e.detail;
+        const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
-            const context = eventData.canvasContext;
             // eslint-disable-next-line no-unused-vars
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
@@ -1131,13 +1131,15 @@ class App extends Component {
                 zoomLevelTop: eventData.viewport.scale,
             });
             this.props.updateZoomLevelTop(eventData.viewport.scale);
-            this.renderDetections(this.props.detections, context);
-            this.appUpdateImage();
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.TOP) detections.push(det);
+            });
+            this.renderDetections(detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
-            const context = eventData.canvasContext;
             // eslint-disable-next-line no-unused-vars
             const toolData = cornerstoneTools.getToolState(
                 e.currentTarget,
@@ -1147,9 +1149,14 @@ class App extends Component {
                 zoomLevelSide: eventData.viewport.scale,
             });
             this.props.updateZoomLevelSide(eventData.viewport.scale);
-            this.renderDetections(this.props.detections, context);
-            this.appUpdateImage();
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.SIDE) detections.push(det);
+            });
+            this.renderDetections(detections, context);
         }
+
+        this.appUpdateImage();
         // set the canvas context to the image coordinate system
         //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
         // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
@@ -1197,7 +1204,6 @@ class App extends Component {
             return;
         }
         const B_BOX_COORDS = 4;
-        let detectionList;
         context.font = constants.detectionStyle.LABEL_FONT;
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
         // eslint-disable-next-line no-unused-vars
@@ -1205,10 +1211,9 @@ class App extends Component {
             if (data[j].visible !== true) {
                 continue;
             }
-            if (detectionList[j].visible !== true || detectionList[j].selected)
-                continue;
-            const boundingBoxCoords = detectionList[j].boundingBox;
-            let color = getDetectionColor(detectionList[j]);
+            if (data[j].visible !== true || data[j].selected) continue;
+            const boundingBoxCoords = data[j].boundingBox;
+            let color = getDetectionColor(data[j]);
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
@@ -1225,8 +1230,8 @@ class App extends Component {
                 boundingBoxCoords[3] - boundingBoxCoords[1]
             );
             const detectionLabel = Utils.formatDetectionLabel(
-                detectionList[j].class,
-                detectionList[j].confidence
+                data[j].className,
+                data[j].confidence
             );
             const labelSize = Utils.getTextLabelSize(
                 context,
@@ -1241,10 +1246,10 @@ class App extends Component {
             );
 
             // Mask rendering
-            this.renderDetectionMasks(detectionList[j].maskBitmap, context);
+            this.renderDetectionMasks(data[j].maskBitmap, context);
 
             // Label rendering
-            if (!detectionList[j].updatingDetection) {
+            if (!data[j].updatingDetection) {
                 context.fillRect(
                     boundingBoxCoords[0],
                     boundingBoxCoords[1] - labelSize['height'],
@@ -1280,6 +1285,7 @@ class App extends Component {
         if (data === undefined || data === null || data.length === 0) {
             return;
         }
+        if (data[0].length === 0) return;
         const baseX = data[1][0];
         const baseY = data[1][1];
         const maskWidth = data[2][0];
@@ -2152,7 +2158,7 @@ class App extends Component {
                         isDownload={this.props.isDownload}
                         isConnected={this.props.isConnected}
                     />
-                    <SideMenu
+                    {/* <SideMenu
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
@@ -2170,7 +2176,7 @@ class App extends Component {
                         onDetectionSetSelected={this.onMenuDetectionSetSelected}
                         onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
-                    />
+                    /> */}
                     <div id="algorithm-outputs"> </div>
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
@@ -2229,6 +2235,7 @@ const mapDispatchToProps = {
     updateDetection,
     updatedDetectionSet,
     addDetection,
+    addDetections,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,

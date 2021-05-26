@@ -41,7 +41,7 @@ const TreeAlgorithm = ({
     };
     const [isExpanded, setIsExpanded] = useState(true);
     const [isSelected, setIsSelected] = useState(false);
-    const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
+    const isAlgorithmSelected = '';
 
     /**
      * setVisibility - Is the function that controls the eye visibility.
