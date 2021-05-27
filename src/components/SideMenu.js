@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TreeAlgorithm from './TreeView/TreeAlgorithm';
 import '../App.css';
@@ -7,6 +7,7 @@ import * as constants from '../Constants';
 import Utils from '../Utils';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../redux/slices/detections/detectionsSlice';
+import TreeDetection from './TreeView/TreeDetection';
 
 const SideMenu = ({
     nextImageClick,
@@ -24,6 +25,7 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
+
     // Checking to see if there is any data in myDetections
     if (algorithms.length > 0 && enableMenu) {
         return (
@@ -42,20 +44,31 @@ const SideMenu = ({
                     }}></div>
                 <div style={treeStyle}>
                     {algorithms.length > 0
-                        ? algorithms.map((detections, index) => {
-                              console.log(detections);
+                        ? algorithms.map((det, i) => {
                               return (
-                                  // Setting the Algorithm name, IE OTAP or Tiled
-                                  <TreeAlgorithm
-                                      key={index}
-                                      detections={detections}
-                                      // TODO: James B. - Remove this once refactored into uiSlice
-                                      configurationInfo={configurationInfo}
-                                      updateImage={appUpdateImage}
-                                      resetSelectedDetectionBoxes={
-                                          resetSelectedDetectionBoxes
-                                      }
-                                  />
+                                  <div key={i}>
+                                      {/* <TreeAlgorithm
+                                          detections={det}
+                                          configurationInfo={configurationInfo}
+                                          updateImage={appUpdateImage}
+                                          resetSelectedDetectionBoxes={
+                                              resetSelectedDetectionBoxes
+                                          }
+                                      /> */}
+                                      {det.map((d, z) => {
+                                          return (
+                                              <TreeDetection
+                                                  key={z}
+                                                  detection={d}
+                                                  updateImage={appUpdateImage}
+                                                  algorithmVisible={true}
+                                                  resetSelectedDetectionBoxes={
+                                                      resetSelectedDetectionBoxes
+                                                  }
+                                              />
+                                          );
+                                      })}
+                                  </div>
                               );
                           })
                         : null}

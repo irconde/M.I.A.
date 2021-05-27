@@ -128,7 +128,7 @@ const TreeAlgorithm = ({
         //     }
         // }
     };
-
+    console.log(detections);
     return (
         <div>
             <MetaData
@@ -204,7 +204,7 @@ const TreeAlgorithm = ({
                 )} */}
             </div>
             <div id="detection-holder">
-                {detections !== undefined && isExpanded === true ? (
+                {/* {detections !== undefined && isExpanded === true ? (
                     detections.map((value, index) => {
                         return (
                             <TreeDetection
@@ -221,7 +221,7 @@ const TreeAlgorithm = ({
                 ) : (
                     // If no data
                     <span></span>
-                )}
+                )} */}
             </div>
         </div>
     );

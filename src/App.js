@@ -1210,9 +1210,10 @@ class App extends Component {
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
             if (data[j].visible !== true) {
+                console.log('continue');
                 continue;
             }
-            if (data[j].visible !== true || data[j].selected) continue;
+
             const boundingBoxCoords = data[j].boundingBox;
             let color = getDetectionColor(data[j]);
             if (boundingBoxCoords.length < B_BOX_COORDS) {
@@ -2132,7 +2133,7 @@ class App extends Component {
                         isDownload={this.props.isDownload}
                         isConnected={this.props.isConnected}
                     />
-                    {/* <SideMenu
+                    <SideMenu
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
@@ -2150,7 +2151,7 @@ class App extends Component {
                         onDetectionSetSelected={this.onMenuDetectionSetSelected}
                         onDetectionSelected={this.props.selectDetection}
                         nextImageClick={this.nextImageClick}
-                    /> */}
+                    />
                     <div id="algorithm-outputs"> </div>
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}

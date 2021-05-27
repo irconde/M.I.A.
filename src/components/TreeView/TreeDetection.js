@@ -127,7 +127,7 @@ const TreeDetection = ({
                 <div
                     id="detectionBG"
                     style={{
-                        ...this.state.detectionBGStyle,
+                        ...detectionBGStyle,
                         backgroundColor:
                             detectionColor === 'black'
                                 ? detection.color
@@ -139,7 +139,7 @@ const TreeDetection = ({
                         ...typeStyle,
                         color: textColor,
                     }}>{`${Utils.truncateString(
-                    detection.class,
+                    detection.className,
                     MAX_LABEL_LENGTH
                 )} - ${detection.confidence}%`}</span>
                 <Icons.EyeO id="eye" onClick={setVisible} style={eyeStyle} />
@@ -158,10 +158,10 @@ const TreeDetection = ({
                 <span
                     id={`${detection.view}-hidden-span`}
                     style={{
-                        ...this.state.typeStyle,
+                        ...typeStyle,
                         color: textColor,
                     }}>{`${Utils.truncateString(
-                    detection.class,
+                    detection.className,
                     MAX_LABEL_LENGTH
                 )} - ${detection.confidence}%`}</span>
                 <Icons.EyeC
