@@ -168,43 +168,10 @@ const detectionsSlice = createSlice({
         // {object} reference: contains uuid, algorithm, and view of detection to update
         // {object} update: contains any properties to update on the Detection
         updateDetection: (state, action) => {
-            // TODO: Refactoring
-            try {
-                const { payload } = action;
-                const { reference, update } = payload;
-
-                const detectionIndex = state.data[reference.algorithm].data[
-                    reference.view
-                ].findIndex((detection) => detection.uuid === reference.uuid);
-
-                if (detectionIndex === -1) {
-                    throw new Error(
-                        `Detection not found, check reference properties: ${JSON.stringify(
-                            reference
-                        )}`
-                    );
-                }
-                const updatedDetection = DetectionUtil.updateDetection(
-                    state.data[reference.algorithm].data[reference.view][
-                        detectionIndex
-                    ],
-                    update
-                );
-
-                if (!updatedDetection) {
-                    throw new Error(
-                        `Detection not updated: ${JSON.stringify(
-                            reference
-                        )} Check update payload: ${JSON.stringify(update)}`
-                    );
-                }
-
-                // Update Redux state
-                state.data[reference.algorithm].data[reference.view][
-                    detectionIndex
-                ] = updatedDetection;
-            } catch (error) {
-                console.error(error);
+            const { uuid, update } = action.payload;
+            let detection = state.detections.find((det) => det.uuid === uuid);
+            if (detection !== undefined) {
+                for (let key in update) detection[key] = update[key];
             }
         },
 
@@ -214,17 +181,16 @@ const detectionsSlice = createSlice({
         // {string} uuid - uuid for detection being updated
         // {string} className - new label className for detection being updated
         editDetectionLabel: (state, action) => {
-            // TODO: Refactoring
-            const { payload } = action;
-
-            const updatedDetectionSet = DetectionSetUtil.updateDetectionLabelInSet(
-                state.data[payload.algorithm],
-                payload.uuid,
-                payload.view,
-                payload.className
-            );
-
-            state.data[payload.algorithm] = updatedDetectionSet;
+            const { uuid, className } = action.payload;
+            let detection = state.detections.find((det) => det.uuid === uuid);
+            if (detection) {
+                detection.className = className;
+                detection.color = randomColor({
+                    seed: className,
+                    hue: 'random',
+                    luminosity: 'bright',
+                });
+            }
         },
 
         deleteDetection: (state, action) => {
@@ -359,6 +325,22 @@ export const hasDetectionChanged = (
 
     if (detection) {
         return DetectionUtil.hasDetectionChanged(detection, properties);
+    }
+};
+
+export const hasDetectionCoordinatesChanged = (
+    detections,
+    uuid,
+    boundingBox
+) => {
+    // TODO: Refactoring
+    const detection = detections.filter((det) => det.uuid === uuid);
+    if (detection) {
+        if (detection.boundingBox === boundingBox) {
+            return false;
+        } else {
+            return true;
+        }
     }
 };
 

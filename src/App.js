@@ -54,6 +54,7 @@ import {
     updateDetectionSetVisibility,
     updateDetectionVisibility,
     hasDetectionChanged,
+    hasDetectionCoordinatesChanged,
 } from './redux/slices/detections/detectionsSlice';
 import {
     updateFABVisibility,
@@ -1524,20 +1525,14 @@ class App extends Component {
 
                     // Only update the Detection if the boundingBox actually changes
                     if (
-                        hasDetectionChanged(
+                        hasDetectionCoordinatesChanged(
                             self.props.detections,
-                            algorithm,
-                            view,
                             uuid,
-                            { boundingBox: coords }
+                            coords
                         )
                     ) {
                         self.props.updateDetection({
-                            reference: {
-                                algorithm: data[0].algorithm,
-                                uuid: data[0].uuid,
-                                view: data[0].view,
-                            },
+                            uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
                             },
@@ -1547,7 +1542,9 @@ class App extends Component {
                             viewportInfo,
                             coords
                         );
-                        const detectionData = self.props.selectedDetection;
+                        const detectionData = self.props.detections.find(
+                            (det) => det.uuid === data[0].uuid
+                        );
                         const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
                             detectionData,
                             coords
@@ -1578,11 +1575,7 @@ class App extends Component {
                 ) {
                     self.props.updateIsDetectionContextVisible(true);
                     self.props.updateDetection({
-                        reference: {
-                            algorithm: data[0].algorithm,
-                            uuid: data[0].uuid,
-                            view: data[0].view,
-                        },
+                        uuid: data[0].uuid,
                         update: {
                             updatingDetection: true,
                         },
@@ -1895,6 +1888,7 @@ class App extends Component {
             };
             if (mode === constants.editionMode.LABEL) {
                 const detectionData = this.props.selectedDetection;
+                console.log(detectionData);
                 let coords;
                 if (
                     this.props.cornerstoneMode ===
@@ -1954,9 +1948,7 @@ class App extends Component {
         if (algorithm && uuid && view) {
             this.props.editDetectionLabel({
                 className: newLabel,
-                algorithm: algorithm,
                 uuid: uuid,
-                view: view,
             });
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 cornerstoneMode: constants.cornerstoneMode.EDITION,
