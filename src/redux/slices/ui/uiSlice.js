@@ -226,7 +226,6 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         emptyAreaClickUpdate: (state) => {
-            console.log('ui empty area update');
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.displaySelectedBoundingBox = false;

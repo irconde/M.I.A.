@@ -1363,6 +1363,9 @@ class App extends Component {
                 if (this.props.selectedDetection) {
                     this.props.clearAllSelection();
                 }
+                // For some reason, when clicking the same viewport
+                // To clear the selected detection, the above call to
+                // Clear all does not finish before the following calls
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
                 this.appUpdateImage();
@@ -1481,38 +1484,18 @@ class App extends Component {
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
-                        if (!(operator in self.props.detections)) {
-                            // self.props.addDetectionSet({
-                            //     algorithm: operator,
-                            // });
-                            // self.props.addDetection({
-                            //     algorithm: operator,
-                            //     boundingBox: coords,
-                            //     className: data[0].class,
-                            //     confidence: data[0].confidence,
-                            //     view:
-                            //         viewport === self.state.imageViewportTop
-                            //             ? constants.viewport.TOP
-                            //             : constants.viewport.SIDE,
-                            //     maskBitmap: [[]],
-                            // });
-                            self.appUpdateImage();
-                        }
-                        // Operator DetectionSet exists, add new detection to set
-                        else {
-                            // self.props.addDetection({
-                            //     algorithm: operator,
-                            //     boundingBox: coords,
-                            //     className: data[0].class,
-                            //     confidence: data[0].confidence,
-                            //     view:
-                            //         viewport === self.state.imageViewportTop
-                            //             ? constants.viewport.TOP
-                            //             : constants.viewport.SIDE,
-                            //     maskBitmap: [[]],
-                            // });
-                            self.appUpdateImage();
-                        }
+                        self.props.addDetection({
+                            algorithm: operator,
+                            boundingBox: coords,
+                            className: data[0].class,
+                            confidence: data[0].confidence,
+                            view:
+                                viewport === self.state.imageViewportTop
+                                    ? constants.viewport.TOP
+                                    : constants.viewport.SIDE,
+                            maskBitmap: [[]],
+                        });
+                        self.appUpdateImage();
                     } else {
                         self.props.updateCornerstoneMode(
                             constants.cornerstoneMode.SELECTION

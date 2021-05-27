@@ -115,7 +115,7 @@ const detectionsSlice = createSlice({
         // Action payload should contain:
         // {string} algorithm - algorithm name
         clearSelectedDetection: (state, action) => {
-            const detection = state.detections.filter(
+            const detection = state.detections.find(
                 (det) => det.uuid === action.payload
             );
             detection.selected = false;
@@ -333,8 +333,7 @@ export const hasDetectionCoordinatesChanged = (
     uuid,
     boundingBox
 ) => {
-    // TODO: Refactoring
-    const detection = detections.filter((det) => det.uuid === uuid);
+    const detection = detections.find((det) => det.uuid === uuid);
     if (detection) {
         if (detection.boundingBox === boundingBox) {
             return false;
