@@ -1518,6 +1518,7 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
+                                updatingDetection: false,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2037,25 +2038,29 @@ class App extends Component {
                 uuid: this.props.selectedDetection.uuid,
             });
             if (this.props.selectedDetection.view === constants.viewport.TOP) {
-                this.state.myOra.setStackBlobData(
-                    0,
-                    this.state.myOra.stackData[0].blobData.filter(
-                        (blob) =>
-                            blob.size !==
-                            this.props.selectedDetection.blobData.size
-                    )
-                );
+                console.log(this.state.myOra.stackData[0]);
+                // Need to refactor how we delete a blob from the stackData
+                // this.state.myOra.setStackBlobData(
+                //     0,
+                //     this.state.myOra.stackData[0].blobData.filter(
+                //         (blob) =>
+                //             blob.size !==
+                //             this.props.selectedDetection.blobData.size
+                //     )
+                // );
             } else if (
                 this.props.selectedDetection.view === constants.viewport.SIDE
             ) {
-                this.state.myOra.setStackBlobData(
-                    1,
-                    this.state.myOra.stackData[1].blobData.filter(
-                        (blob) =>
-                            blob.size !==
-                            this.props.selectedDetection.blobData.size
-                    )
-                );
+                console.log(this.state.myOra.stackData[1]);
+                // Need to refactor how we delete a blob from the stackData
+                // this.state.myOra.setStackBlobData(
+                //     1,
+                //     this.state.myOra.stackData[1].blobData.filter(
+                //         (blob) =>
+                //             blob.size !==
+                //             this.props.selectedDetection.blobData.size
+                //     )
+                // );
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
