@@ -1125,7 +1125,9 @@ class App extends Component {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelTop: eventData.viewport.scale,
             });
-            this.props.updateZoomLevelTop(eventData.viewport.scale);
+            if (this.props.zoomLevelTop !== eventData.viewport.scale) {
+                this.props.updateZoomLevelTop(eventData.viewport.scale);
+            }
             let detections = [];
             this.props.detections.forEach((det) => {
                 if (det.view === constants.viewport.TOP) detections.push(det);
@@ -1143,7 +1145,9 @@ class App extends Component {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelSide: eventData.viewport.scale,
             });
-            this.props.updateZoomLevelSide(eventData.viewport.scale);
+            if (this.props.zoomLevelSide !== eventData.viewport.scale) {
+                this.props.updateZoomLevelSide(eventData.viewport.scale);
+            }
             let detections = [];
             this.props.detections.forEach((det) => {
                 if (det.view === constants.viewport.SIDE) detections.push(det);
@@ -1502,7 +1506,7 @@ class App extends Component {
                             self.props.detections,
                             uuid,
                             coords
-                        )
+                        ) === false
                     ) {
                         self.props.updateDetection({
                             uuid: data[0].uuid,
