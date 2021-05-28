@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, current } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,6 +54,7 @@ const detectionsSlice = createSlice({
                 view,
                 maskBitmap,
                 boundingBox,
+                uuid,
             } = action.payload;
             state.detections.push({
                 algorithm,
@@ -64,7 +65,7 @@ const detectionsSlice = createSlice({
                 boundingBox,
                 selected: false,
                 visible: true,
-                uuid: uuidv4(),
+                uuid,
                 color: randomColor({
                     seed: className,
                     hue: 'random',
@@ -210,6 +211,7 @@ const detectionsSlice = createSlice({
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
             });
+            console.log(current(state));
         },
         // Marks all DetectionSets as validated by the user
         validateDetections: (state) => {

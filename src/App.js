@@ -23,6 +23,7 @@ import * as constants from './Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
 import {
     setCommandServerConnection,
     setFileServerConnection,
@@ -653,9 +654,12 @@ class App extends Component {
                                                     ].pixelData = Utils.base64ToArrayBuffer(
                                                         imageData
                                                     );
-                                                listOfStacks[j].blobData.push(
-                                                    Utils.b64toBlob(imageData)
-                                                );
+                                                listOfStacks[j].blobData.push({
+                                                    blob: Utils.b64toBlob(
+                                                        imageData
+                                                    ),
+                                                    uuid: uuidv4(),
+                                                });
                                             });
                                     }
                                 }
@@ -738,7 +742,7 @@ class App extends Component {
                         );
                         newOra.file(
                             `data/${stack.view}_pixel_data.dcs`,
-                            stack.blobData[0]
+                            stack.blobData[0].blob
                         );
                         const topStackIndex = this.state.myOra.stackData.findIndex(
                             (stack) => {
@@ -760,7 +764,7 @@ class App extends Component {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     topDetections[j],
                                     this.state.myOra.stackData[topStackIndex]
-                                        .blobData[0]
+                                        .blobData[0].blob
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/top_threat_detection_${j + 1}_${
@@ -794,7 +798,7 @@ class App extends Component {
                                 let threatPromise = Dicos.detectionObjectToBlob(
                                     sideDetections[i],
                                     this.state.myOra.stackData[sideStackIndex]
-                                        .blobData[0]
+                                        .blobData[0].blob
                                 ).then((threatBlob) => {
                                     newOra.file(
                                         `data/side_threat_detection_${i + 1}_${
@@ -918,7 +922,7 @@ class App extends Component {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
         const self = this;
         const pixelDataTop = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-            self.state.myOra.stackData[0].blobData[0]
+            self.state.myOra.stackData[0].blobData[0].blob
         );
 
         cornerstone.loadImage(pixelDataTop).then(function (image) {
@@ -941,7 +945,7 @@ class App extends Component {
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
             const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                self.state.myOra.stackData[1].blobData[0]
+                self.state.myOra.stackData[1].blobData[0].blob
             );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
@@ -990,7 +994,7 @@ class App extends Component {
                 },
             });
         });
-        reader.readAsArrayBuffer(imagesLeft[0]);
+        reader.readAsArrayBuffer(imagesLeft[0].blob);
         for (let i = 0; i < imagesLeft.length; i++) {
             const readFile = new FileReader();
             readFile.addEventListener('loadend', function () {
@@ -1044,15 +1048,17 @@ class App extends Component {
                         view: constants.viewport.TOP,
                         boundingBox: boundingBoxCoords,
                         maskBitmap: [[]],
+                        uuid: imagesLeft[i].uuid,
                     });
                 }
             });
-            readFile.readAsArrayBuffer(imagesLeft[i]);
+            readFile.readAsArrayBuffer(imagesLeft[i].blob);
         }
 
         if (this.props.singleViewport === false) {
             for (var k = 0; k < imagesRight.length; k++) {
                 const read = new FileReader();
+                let currentRightImage = imagesRight[k];
                 read.addEventListener('loadend', function () {
                     const view = new Uint8Array(read.result);
                     var image = dicomParser.parseDicom(view);
@@ -1103,10 +1109,11 @@ class App extends Component {
                             view: constants.viewport.SIDE,
                             boundingBox: boundingBoxCoords,
                             maskBitmap: pixelData,
+                            uuid: currentRightImage.uuid,
                         });
                     }
                 });
-                read.readAsArrayBuffer(imagesRight[k]);
+                read.readAsArrayBuffer(imagesRight[k].blob);
             }
         }
     }
@@ -1458,9 +1465,13 @@ class App extends Component {
             let self = this;
             Dicos.detectionObjectToBlob(
                 newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0]
+                self.state.myOra.stackData[stackIndex].blobData[0].blob
             ).then((newBlob) => {
-                self.state.myOra.stackData[stackIndex].blobData.push(newBlob);
+                const uuid = uuidv4();
+                self.state.myOra.stackData[stackIndex].blobData.push({
+                    blob: newBlob,
+                    uuid,
+                });
                 if (data.length == 0) {
                     self.props.onDragEndUpdate();
                     self.props.clearAllSelection();
@@ -1487,6 +1498,7 @@ class App extends Component {
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
                             maskBitmap: [[]],
+                            uuid,
                         });
                         self.appUpdateImage();
                     } else {
@@ -2027,34 +2039,27 @@ class App extends Component {
      */
     deleteDetection() {
         // Detection is selected
+        console.log(this.state.myOra);
         if (this.props.selectedDetection) {
-            this.props.deleteDetection({
-                uuid: this.props.selectedDetection.uuid,
-            });
+            this.props.deleteDetection(this.props.selectedDetection.uuid);
             if (this.props.selectedDetection.view === constants.viewport.TOP) {
-                console.log(this.state.myOra.stackData[0]);
-                // Need to refactor how we delete a blob from the stackData
-                // this.state.myOra.setStackBlobData(
-                //     0,
-                //     this.state.myOra.stackData[0].blobData.filter(
-                //         (blob) =>
-                //             blob.size !==
-                //             this.props.selectedDetection.blobData.size
-                //     )
-                // );
+                this.state.myOra.setStackBlobData(
+                    0,
+                    this.state.myOra.stackData[0].blobData.filter(
+                        (blob) =>
+                            blob.uuid !== this.props.selectedDetection.uuid
+                    )
+                );
             } else if (
                 this.props.selectedDetection.view === constants.viewport.SIDE
             ) {
-                console.log(this.state.myOra.stackData[1]);
-                // Need to refactor how we delete a blob from the stackData
-                // this.state.myOra.setStackBlobData(
-                //     1,
-                //     this.state.myOra.stackData[1].blobData.filter(
-                //         (blob) =>
-                //             blob.size !==
-                //             this.props.selectedDetection.blobData.size
-                //     )
-                // );
+                this.state.myOra.setStackBlobData(
+                    1,
+                    this.state.myOra.stackData[1].blobData.filter(
+                        (blob) =>
+                            blob.uuid !== this.props.selectedDetection.uuid
+                    )
+                );
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
