@@ -10,7 +10,7 @@ import {
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 
-const TreeDetection = ({
+const SideMenuDetection = ({
     detection,
     algorithmVisible,
     resetSelectedDetectionBoxes,
@@ -161,11 +161,11 @@ const TreeDetection = ({
     }
 };
 
-TreeDetection.propTypes = {
+SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     algorithmVisible: PropTypes.bool.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
 
-export default TreeDetection;
+export default SideMenuDetection;

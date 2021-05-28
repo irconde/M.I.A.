@@ -149,6 +149,9 @@ const detectionsSlice = createSlice({
                 det.updatingDetection = false;
             });
         },
+        clearSelectedAlgorithm: (state) => {
+            state.selectedAlgorithm = null;
+        },
         // Selects a detection from a DetectionSet
         // Action payload should contain:
         // {string} algorithm - algorithm name
@@ -411,6 +414,7 @@ export const {
     validateDetections,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
+    clearSelectedAlgorithm,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

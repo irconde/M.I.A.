@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import nextIcon from '../icons/navigate_next.png';
+import nextIcon from '../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
     getCornerstoneMode,
     getDisplaySelectedBoundingBox,
-} from '../redux/slices/ui/uiSlice';
-import * as constants from '../Constants';
+} from '../../redux/slices/ui/uiSlice';
+import * as constants from '../../Constants';
 
 const NextButtonContainer = styled.div`
     width: 100%;

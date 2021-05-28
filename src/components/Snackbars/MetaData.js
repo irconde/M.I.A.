@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Info } from '../TreeView/Icons';
+import { Info } from '../SideMenu/Icons';
 // TODO: James B. - This needs the configurationInfo from the uiSlice.
 //                  Refactor this into a Functional Component and useSelector to grab the config info.
 //                  Examples of pulling from the uiSlice are in the src/components/EditLabel/index.js

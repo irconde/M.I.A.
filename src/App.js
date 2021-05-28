@@ -14,7 +14,7 @@ import Utils from './Utils.js';
 import Dicos from './Dicos.js';
 import Detection from './Detection.js';
 import axios from 'axios';
-import SideMenu from './components/SideMenu';
+import SideMenu from './components/SideMenu/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
 import Selection from './Selection';
