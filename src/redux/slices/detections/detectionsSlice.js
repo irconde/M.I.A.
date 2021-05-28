@@ -1,8 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
-import './util/typedef';
-import DetectionSetUtil from './util/DetectionSet';
-import DetectionUtil from './util/Detection';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,10 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 // }
 
 const initialState = {
-    // New State
     detections: [],
-
-    // Old State
     // Selection data
     /** @type string */
     selectedAlgorithm: null,
@@ -36,7 +30,6 @@ const initialState = {
 
     // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
     /** @type Object<string, DetectionSet> */
-    data: {},
     detectionLabels: [],
 };
 
@@ -50,7 +43,6 @@ const detectionsSlice = createSlice({
             state.selectedAlgorithm = null;
             state.selectedDetection = null;
             state.algorithmNames = [];
-            state.data = {};
             state.detections = [];
         },
         // Adds detection
@@ -266,11 +258,11 @@ export const areDetectionsValidated = (data) => {
     // TODO: Refactoring
     let result = true;
 
-    Object.values(data).forEach((detectionSet) => {
-        if (!DetectionSetUtil.isValidated(detectionSet)) {
-            result = false;
-        }
-    });
+    // Object.values(data).forEach((detectionSet) => {
+    //     if (!DetectionSetUtil.isValidated(detectionSet)) {
+    //         result = false;
+    //     }
+    // });
 
     return result;
 };
@@ -321,32 +313,6 @@ export const getDetectionColor = (detection) => {
         return constants.detectionStyle.INVALID_COLOR;
     }
     return detection.color;
-};
-
-/**
- * Compare a Detection's properties with an object for equality.
- * @param {Object.<string, DetectionSet>} detections
- * @param {string} algorithm algorithm to reference Detection
- * @param {string} view view where Detection resides
- * @param {string} uuid Detection's uuid
- * @param {object} properties properties to compare on the original Detection
- * @returns {boolean} true if Detection's properties differ from the supplied properties
- */
-export const hasDetectionChanged = (
-    detections,
-    algorithm,
-    view,
-    uuid,
-    properties
-) => {
-    // TODO: Refactoring
-    const detection = detections[algorithm].data[view].find(
-        (detec) => detec.uuid === uuid
-    );
-
-    if (detection) {
-        return DetectionUtil.hasDetectionChanged(detection, properties);
-    }
 };
 
 export const hasDetectionCoordinatesChanged = (

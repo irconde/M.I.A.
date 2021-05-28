@@ -53,7 +53,6 @@ import {
     validateDetections,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
-    hasDetectionChanged,
     hasDetectionCoordinatesChanged,
 } from './redux/slices/detections/detectionsSlice';
 import {
