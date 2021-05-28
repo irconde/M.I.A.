@@ -152,7 +152,6 @@ class App extends Component {
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
-        this.onMenuDetectionSelected = this.onMenuDetectionSelected.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
         this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
             this
@@ -170,15 +169,6 @@ class App extends Component {
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.updateDetectionVisibility = this.updateDetectionVisibility.bind(
-            this
-        );
-        this.updateDetectionSetVisibility = this.updateDetectionSetVisibility.bind(
-            this
-        );
-        this.onMenuDetectionSetSelected = this.onMenuDetectionSetSelected.bind(
-            this
-        );
     }
 
     /**
@@ -1688,38 +1678,6 @@ class App extends Component {
     }
 
     /**
-     * onMenuDetectionSelected - It updates validation button visualization.
-     *
-     * @return {none} None
-     * @param detection {Detection} - detection-related data used as reference for buttons' location
-     */
-    onMenuDetectionSelected(detection, e) {
-        // Selecting a Detection from Selection mode
-        if (!this.props.selectedDetection) {
-            this.props.selectDetection(detection.uuid);
-        }
-        // Another Detection is selected
-        else {
-            // Clear selection data in redux and tool state
-            // TODO: Do we need to clear all with new implementation? Too many calls
-            this.props.clearAllSelection();
-            this.resetCornerstoneTool();
-
-            this.props.selectDetection(detection.uuid);
-        }
-        // TODO: james b. - Remove the use of setTimeout when we can.
-        //                  Currently an issue on needing to wait for the detection be selected.
-        //                  For some reason, the calls do not occur synchronously.
-        setTimeout(() => {
-            this.onDetectionSelected(e).finally(() => {
-                this.props.detectionSelectedUpdate();
-                this.renderDetectionContextMenu(e);
-                this.appUpdateImage();
-            });
-        }, 0);
-    }
-
-    /**
      * Invoked when user selects bounding box option from FAB
      * @return {none} None
      * @param {none} None
@@ -2061,39 +2019,6 @@ class App extends Component {
             this.resetCornerstoneTool();
             this.appUpdateImage();
         }
-    }
-
-    /**
-     * Update visibility of a single Detection
-     * @param {Detection} detection
-     * @param {boolean} isVisible
-     */
-    updateDetectionVisibility(detection, isVisible) {
-        this.props.updateDetectionVisibility({
-            uuid: detection.uuid,
-            isVisible,
-        });
-        this.appUpdateImage();
-    }
-
-    /**
-     * Update visibility of DetectionSets and their Detections
-     * @param {string} algorithm
-     * @param {boolean} isVisible
-     */
-    updateDetectionSetVisibility(algorithm, isVisible) {
-        this.props.updateDetectionSetVisibility({
-            algorithm: algorithm,
-            isVisible: isVisible,
-        });
-        this.appUpdateImage();
-    }
-
-    onMenuDetectionSetSelected(algorithm) {
-        this.props.selectDetectionSet(algorithm);
-        this.props.algorithmSelectedUpdate();
-        this.resetCornerstoneTool();
-        this.appUpdateImage();
     }
 
     render() {
