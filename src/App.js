@@ -1322,15 +1322,12 @@ class App extends Component {
             return;
         }
         let combinedDetections;
-        let viewport;
         if (e.detail.element.id === 'dicomImageLeft') {
             // top
             combinedDetections = getTopDetections(this.props.detections);
-            viewport = constants.viewport.TOP;
         } else if (e.detail.element.id === 'dicomImageRight') {
             // side
             combinedDetections = getSideDetections(this.props.detections);
-            viewport = constants.viewport.SIDE;
         }
         if (combinedDetections.length > 0) {
             const mousePos = cornerstone.canvasToPixel(e.target, {
@@ -1507,7 +1504,7 @@ class App extends Component {
                     }
                 } else {
                     // Updating existing Detection's bounding box
-                    const { algorithm, uuid, view } = data[0];
+                    const { uuid } = data[0];
 
                     // Only update the Detection if the boundingBox actually changes
                     if (

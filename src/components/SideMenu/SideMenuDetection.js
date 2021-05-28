@@ -12,7 +12,6 @@ import {
 
 const SideMenuDetection = ({
     detection,
-    algorithmVisible,
     algorithmSelected,
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
@@ -163,7 +162,6 @@ const SideMenuDetection = ({
 
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
-    algorithmVisible: PropTypes.bool.isRequired,
     algorithmSelected: PropTypes.string.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,

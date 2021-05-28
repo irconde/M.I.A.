@@ -178,7 +178,6 @@ const SideMenuAlgorithm = ({
                             <TreeDetection
                                 detection={detection}
                                 key={index}
-                                algorithmVisible={isVisible}
                                 algorithmSelected={isAlgorithmSelected}
                                 resetCornerstoneTools={resetCornerstoneTools}
                                 resetSelectedDetectionBoxes={
