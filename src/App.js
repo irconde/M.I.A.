@@ -1352,9 +1352,6 @@ class App extends Component {
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
                 this.props.clearAllSelection();
-                // For some reason, when clicking the same viewport
-                // To clear the selected detection, the above call to
-                // Clear all does not finish before the following calls
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
                 this.appUpdateImage();
