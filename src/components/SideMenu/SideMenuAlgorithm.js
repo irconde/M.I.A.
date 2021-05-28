@@ -7,9 +7,9 @@ import * as constants from '../../Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     clearAllSelection,
-    clearSelectedAlgorithm,
     getSelectedAlgorithm,
     selectDetectionSet,
+    updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 
 const SideMenuAlgorithm = ({
@@ -20,8 +20,18 @@ const SideMenuAlgorithm = ({
 }) => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(true);
-    const [isSelected, setIsSelected] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+    let anyVisible = true;
+    for (let i = 0; i < detections.length; i++) {
+        if (detections[i].visible) {
+            anyVisible = true;
+            break;
+        } else {
+            anyVisible = false;
+        }
+    }
     const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
+    const algorithm = detections.length > 0 ? detections[0].algorithm : '';
     let arrowStyle = {
         height: '1.5rem',
         width: '1.5rem',
@@ -58,10 +68,13 @@ const SideMenuAlgorithm = ({
      * @returns {type} none
      */
     const setVisibility = () => {
-        // this.props.setVisibilityData(
-        //     this.props.algorithm.algorithm,
-        //     this.props.algorithm.visibility
-        // );
+        dispatch(
+            updateDetectionSetVisibility({
+                algorithm: algorithm,
+                isVisible: !isVisible,
+            })
+        );
+        setIsVisible(!isVisible);
     };
 
     /**
@@ -79,9 +92,10 @@ const SideMenuAlgorithm = ({
             e.target.id !== 'eye' &&
             e.target.id !== 'Shape' &&
             e.target.id !== 'arrow' &&
-            isExpanded
+            isExpanded &&
+            isVisible
         ) {
-            dispatch(selectDetectionSet(detections[0].algorithm));
+            dispatch(selectDetectionSet(algorithm));
         } else {
             if (e.target.id == 'arrow' || e.target.id == 'Path') {
                 let rotationValue = arrowStyle.transform;
@@ -110,7 +124,7 @@ const SideMenuAlgorithm = ({
             />
             <div
                 style={
-                    isAlgorithmSelected === detections[0].algorithm
+                    isAlgorithmSelected === algorithm && isVisible
                         ? {
                               ...containerStyle,
                               backgroundColor:
@@ -132,10 +146,30 @@ const SideMenuAlgorithm = ({
                         onClick={() => setIsExpanded(!isExpanded)}
                     />
                 )}
-                <div style={typeStyles}>
-                    {constants.ALGORITHM + ' - ' + detections[0].algorithm}
+                <div
+                    id="algorithm-name"
+                    style={
+                        anyVisible
+                            ? typeStyles
+                            : { ...typeStyles, color: 'gray' }
+                    }>
+                    {algorithm === constants.OPERATOR
+                        ? algorithm
+                        : constants.ALGORITHM + ' - ' + algorithm}
                 </div>
-                <Icons.EyeO id="eye" onClick={setVisibility} style={eyeStyle} />
+                {anyVisible ? (
+                    <Icons.EyeO
+                        id="eye"
+                        onClick={setVisibility}
+                        style={eyeStyle}
+                    />
+                ) : (
+                    <Icons.EyeC
+                        id="eye"
+                        onClick={setVisibility}
+                        style={eyeStyle}
+                    />
+                )}
             </div>
             <div id="detection-holder">
                 {detections !== undefined && isExpanded === true ? (
@@ -144,7 +178,8 @@ const SideMenuAlgorithm = ({
                             <TreeDetection
                                 detection={detection}
                                 key={index}
-                                algorithmVisible={true}
+                                algorithmVisible={isVisible}
+                                algorithmSelected={isAlgorithmSelected}
                                 resetCornerstoneTools={resetCornerstoneTools}
                                 resetSelectedDetectionBoxes={
                                     resetSelectedDetectionBoxes

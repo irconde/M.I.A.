@@ -225,6 +225,22 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.algorithm === algorithm) {
                     det.visible = isVisible;
+                    if (isVisible === false) {
+                        det.selected = false;
+                        det.updatingDetection = false;
+                        det.lowerOpacity = false;
+                        if (state.selectedAlgorithm === algorithm) {
+                            state.selectedAlgorithm = null;
+                        }
+                    } else if (
+                        isVisible === true &&
+                        algorithm !== state.selectedAlgorithm &&
+                        state.selectedAlgorithm !== null
+                    ) {
+                        det.lowerOpacity = true;
+                    }
+                } else if (isVisible === false && det.algorithm !== algorithm) {
+                    det.lowerOpacity = false;
                 }
             });
         },
@@ -232,6 +248,11 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.visible = !det.visible;
+                    if (det.visible === false) {
+                        det.selected = false;
+                        det.updatingDetection = false;
+                        det.lowerOpacity = false;
+                    }
                 }
             });
         },

@@ -1721,6 +1721,8 @@ class App extends Component {
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            this.props.clearAllSelection();
+            this.resetCornerstoneTool();
             this.props.boundingBoxSelectedUpdate();
             this.appUpdateImage();
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {

@@ -13,6 +13,7 @@ import {
 const SideMenuDetection = ({
     detection,
     algorithmVisible,
+    algorithmSelected,
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
 }) => {
@@ -59,8 +60,7 @@ const SideMenuDetection = ({
             e.target.id === 'hidden-eye'
         ) {
             dispatch(updateDetectionVisibility(detection.uuid));
-            if (detection.visible === false)
-                resetSelectedDetectionBoxes(e, true);
+            resetSelectedDetectionBoxes(e, true);
         }
     };
 
@@ -96,10 +96,10 @@ const SideMenuDetection = ({
         colorSelection = true;
     }
     const detectionColor = getDetectionColor(detection);
-    // if (algorithmSelected) {
-    //     selectionColor = 'rgba(54, 126, 255, 0.2)';
-    //     colorSelection = true;
-    // }
+    if (algorithmSelected === detection.algorithm) {
+        selectionColor = 'rgba(54, 127, 255, 0.2)';
+        colorSelection = true;
+    }
     // We only display an open eye if both algorithm and detection are visible.
     if (detection.visible === true) {
         return (
@@ -164,6 +164,7 @@ const SideMenuDetection = ({
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     algorithmVisible: PropTypes.bool.isRequired,
+    algorithmSelected: PropTypes.bool.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
