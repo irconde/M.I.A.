@@ -119,6 +119,7 @@ const detectionsSlice = createSlice({
                 (det) => det.uuid === action.payload
             );
             detection.selected = false;
+            detection.updatingDetection = false;
         },
         // Clears selection data for all DetectionSets and their Detections
         // No action payload used
@@ -126,6 +127,7 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 det.selected = false;
                 det.lowerOpacity = false;
+                det.updatingDetection = false;
             });
             state.isEditLabelWidgetVisible = false;
             state.selectedDetection = null;
@@ -160,6 +162,19 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
+                det.updatingDetection = det.selected;
+            });
+        },
+        menuSelectDetection: (state, action) => {
+            state.detections.forEach((det) => {
+                if (det.uuid === action.payload) {
+                    det.selected = true;
+                    state.selectedDetection = det;
+                } else {
+                    det.selected = false;
+                }
+                det.lowerOpacity = !det.selected;
+                det.updatingDetection = false;
             });
         },
         // Update properties on a detection
@@ -384,6 +399,7 @@ export const {
     clearSelectedDetection,
     clearAllSelection,
     selectDetection,
+    menuSelectDetection,
     selectDetectionSet,
     updateDetection,
     updatedDetectionSet,

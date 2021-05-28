@@ -6,15 +6,15 @@ import Utils from '../../Utils.js';
 import { useDispatch } from 'react-redux';
 import {
     getDetectionColor,
-    selectDetection,
+    menuSelectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 
 const TreeDetection = ({
     detection,
-    updateImage,
     algorithmVisible,
     resetSelectedDetectionBoxes,
+    resetCornerstoneTools,
 }) => {
     const dispatch = useDispatch();
     const detectionBGStyle = {
@@ -61,16 +61,6 @@ const TreeDetection = ({
             dispatch(updateDetectionVisibility(detection.uuid));
             if (detection.visible === false)
                 resetSelectedDetectionBoxes(e, true);
-            // // this.props.updateDetectionVisibility(
-            // //     this.props.detection,
-            // //     !this.props.detection.visible
-            // // );
-            // if (this.props.detection.visible === false) {
-            //     // this.props.resetSelectedDetectionBoxes(e, true);
-            // } else if (this.props.algorithmVisible === false) {
-            //     this.props.updateAlgorithmVisibility();
-            // }
-            // this.props.updateImage();
         }
     };
 
@@ -82,8 +72,8 @@ const TreeDetection = ({
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            dispatch(selectDetection(detection.uuid));
-            // this.props.updateSelectedDetection(this.props.detection, e);
+            dispatch(menuSelectDetection(detection.uuid));
+            resetCornerstoneTools();
         }
     };
 
@@ -128,10 +118,7 @@ const TreeDetection = ({
                     id="detectionBG"
                     style={{
                         ...detectionBGStyle,
-                        backgroundColor:
-                            detectionColor === 'black'
-                                ? detection.color
-                                : detectionColor,
+                        backgroundColor: detection.color,
                     }}></div>
                 <span
                     id={`${detection.view}-span`}
@@ -176,9 +163,9 @@ const TreeDetection = ({
 
 TreeDetection.propTypes = {
     detection: PropTypes.object.isRequired,
-    updateImage: PropTypes.func.isRequired,
     algorithmVisible: PropTypes.bool.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
+    resetCornerstoneTools: PropTypes.func.isRequired,
 };
 
 export default TreeDetection;

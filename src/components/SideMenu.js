@@ -13,8 +13,8 @@ const SideMenu = ({
     nextImageClick,
     configurationInfo,
     enableMenu,
-    appUpdateImage,
     resetSelectedDetectionBoxes,
+    resetCornerstoneTools,
 }) => {
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
@@ -44,26 +44,20 @@ const SideMenu = ({
                     }}></div>
                 <div style={treeStyle}>
                     {algorithms.length > 0
-                        ? algorithms.map((det, i) => {
+                        ? algorithms.map((detections, i) => {
                               return (
                                   <div key={i}>
-                                      {/* <TreeAlgorithm
-                                          detections={det}
-                                          configurationInfo={configurationInfo}
-                                          updateImage={appUpdateImage}
-                                          resetSelectedDetectionBoxes={
-                                              resetSelectedDetectionBoxes
-                                          }
-                                      /> */}
-                                      {det.map((d, z) => {
+                                      {detections.map((detection, z) => {
                                           return (
                                               <TreeDetection
                                                   key={z}
-                                                  detection={d}
-                                                  updateImage={appUpdateImage}
+                                                  detection={detection}
                                                   algorithmVisible={true}
                                                   resetSelectedDetectionBoxes={
                                                       resetSelectedDetectionBoxes
+                                                  }
+                                                  resetCornerstoneTools={
+                                                      resetCornerstoneTools
                                                   }
                                               />
                                           );
@@ -86,8 +80,8 @@ SideMenu.propTypes = {
     // TODO: James B. - Remove this once refactored into uiSlice
     configurationInfo: PropTypes.object.isRequired,
     enableMenu: PropTypes.bool.isRequired,
-    appUpdateImage: PropTypes.func.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
+    resetCornerstoneTools: PropTypes.func.isRequired,
 };
 
 export default SideMenu;

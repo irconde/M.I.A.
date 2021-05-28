@@ -1209,8 +1209,7 @@ class App extends Component {
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
-            if (data[j].visible !== true) {
-                console.log('continue');
+            if (data[j].visible !== true || data[j].updatingDetection) {
                 continue;
             }
 
@@ -1251,28 +1250,24 @@ class App extends Component {
             this.renderDetectionMasks(data[j].maskBitmap, context);
 
             // Label rendering
-            if (!data[j].updatingDetection) {
-                context.fillRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.strokeRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-                context.fillText(
-                    detectionLabel,
-                    boundingBoxCoords[0] +
-                        constants.detectionStyle.LABEL_PADDING,
-                    boundingBoxCoords[1] -
-                        constants.detectionStyle.LABEL_PADDING
-                );
-            }
+            context.fillRect(
+                boundingBoxCoords[0],
+                boundingBoxCoords[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.strokeRect(
+                boundingBoxCoords[0],
+                boundingBoxCoords[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillText(
+                detectionLabel,
+                boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING,
+                boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
+            );
         }
     }
 
@@ -1873,7 +1868,6 @@ class App extends Component {
             };
             if (mode === constants.editionMode.LABEL) {
                 const detectionData = this.props.selectedDetection;
-                console.log(detectionData);
                 let coords;
                 if (
                     this.props.cornerstoneMode ===
@@ -2134,23 +2128,14 @@ class App extends Component {
                         isConnected={this.props.isConnected}
                     />
                     <SideMenu
+                        nextImageClick={this.nextImageClick}
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
                         enableMenu={this.props.isFileInQueue}
-                        appUpdateImage={this.appUpdateImage}
-                        onMenuDetectionSelected={this.onMenuDetectionSelected}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
-                        updateDetectionVisibility={
-                            this.updateDetectionVisibility
-                        }
-                        updateDetectionSetVisibility={
-                            this.updateDetectionSetVisibility
-                        }
-                        onDetectionSetSelected={this.onMenuDetectionSetSelected}
-                        onDetectionSelected={this.props.selectDetection}
-                        nextImageClick={this.nextImageClick}
+                        resetCornerstoneTools={this.resetCornerstoneTool}
                     />
                     <div id="algorithm-outputs"> </div>
                     <DetectionContextMenu
