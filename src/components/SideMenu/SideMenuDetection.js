@@ -65,7 +65,7 @@ const SideMenuDetection = ({
     };
 
     /**
-     * setSelected() - Simply tells our controller to update the selected detection
+     * setSelected() - Simply tells the redux store to update the selected detection
      *
      * @param {type} none
      * @returns {type} none
@@ -164,7 +164,7 @@ const SideMenuDetection = ({
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     algorithmVisible: PropTypes.bool.isRequired,
-    algorithmSelected: PropTypes.bool.isRequired,
+    algorithmSelected: PropTypes.string.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };

@@ -20,7 +20,7 @@ const SideMenuAlgorithm = ({
 }) => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(true);
-    const [isVisible, setIsVisible] = useState(true);
+    let [isVisible, setIsVisible] = useState(true);
     let anyVisible = true;
     for (let i = 0; i < detections.length; i++) {
         if (detections[i].visible) {
@@ -29,6 +29,9 @@ const SideMenuAlgorithm = ({
         } else {
             anyVisible = false;
         }
+    }
+    if (anyVisible !== isVisible) {
+        isVisible = anyVisible;
     }
     const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
     const algorithm = detections.length > 0 ? detections[0].algorithm : '';
@@ -78,10 +81,7 @@ const SideMenuAlgorithm = ({
     };
 
     /**
-     * setSelected - Is the function that will set our algorithm to be selected or not,
-     *               that is when you click the algorithm name and the color of it and
-     *               its detection are changed. We call the passed in function letting it
-     *               know which algorithm to change its value the current components algorithm object
+     * setSelected - Uses dispatch to select the algorithm and transforms the expand icon if clicked
      *
      * @param {Event} e
      * @returns {type} none
@@ -115,7 +115,7 @@ const SideMenuAlgorithm = ({
     return (
         <div>
             <MetaData
-                isVisible={isAlgorithmSelected !== null ? true : false}
+                isVisible={isAlgorithmSelected !== '' ? true : false}
                 // TODO: James B. - Remove this once refactored into uiSlice
                 detectorType={configurationInfo.type}
                 detectorConfigType={configurationInfo.configuration}

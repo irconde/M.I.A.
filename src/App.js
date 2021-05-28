@@ -38,8 +38,6 @@ import {
     resetDetections,
     addDetection,
     addDetections,
-    // eslint-disable-next-line no-unused-vars
-    areDetectionsValidated,
     clearAllSelection,
     clearSelectedDetection,
     selectDetection,
@@ -2039,7 +2037,6 @@ class App extends Component {
      */
     deleteDetection() {
         // Detection is selected
-        console.log(this.state.myOra);
         if (this.props.selectedDetection) {
             this.props.deleteDetection(this.props.selectedDetection.uuid);
             if (this.props.selectedDetection.view === constants.viewport.TOP) {

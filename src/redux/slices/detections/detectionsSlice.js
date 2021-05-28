@@ -1,4 +1,4 @@
-import { createSlice, current } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,7 @@ const initialState = {
     detections: [],
     // Selection data
     /** @type string */
-    selectedAlgorithm: null,
+    selectedAlgorithm: '',
     /** @type Detection */
     selectedDetection: null,
     /** @type Array<string> */
@@ -39,8 +39,7 @@ const detectionsSlice = createSlice({
     reducers: {
         // Reset store to default values
         resetDetections: (state) => {
-            // TODO: Refactoring
-            state.selectedAlgorithm = null;
+            state.selectedAlgorithm = '';
             state.selectedDetection = null;
             state.algorithmNames = [];
             state.detections = [];
@@ -78,7 +77,7 @@ const detectionsSlice = createSlice({
                 state.detectionLabels.push(className);
             }
         },
-        // Adds detection
+        // Adds detections
         addDetections: (state, action) => {
             action.payload.forEach((det) => {
                 state.detections.push({
@@ -114,7 +113,7 @@ const detectionsSlice = createSlice({
             detection.selected = false;
             detection.updatingDetection = false;
         },
-        // Clears selection data for all DetectionSets and their Detections
+        // Clears selection data for all detections
         // No action payload used
         clearAllSelection: (state) => {
             state.detections.forEach((det) => {
@@ -124,7 +123,7 @@ const detectionsSlice = createSlice({
             });
             state.isEditLabelWidgetVisible = false;
             state.selectedDetection = null;
-            state.selectedAlgorithm = null;
+            state.selectedAlgorithm = '';
         },
         // Select a DetectionSet
         // Action payload should contain:
@@ -142,16 +141,15 @@ const detectionsSlice = createSlice({
                 det.updatingDetection = false;
             });
         },
+        // Resets the selected algorithm
         clearSelectedAlgorithm: (state) => {
-            state.selectedAlgorithm = null;
+            state.selectedAlgorithm = '';
         },
-        // Selects a detection from a DetectionSet
+        // Selects a detection
         // Action payload should contain:
-        // {string} algorithm - algorithm name
-        // {string} view - where detection is rendered
         // {string} uuid - unique identifier for detection
         selectDetection: (state, action) => {
-            state.selectedAlgorithm = null;
+            state.selectedAlgorithm = '';
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.selected = true;
@@ -163,8 +161,11 @@ const detectionsSlice = createSlice({
                 det.updatingDetection = det.selected;
             });
         },
+        // Menu selection of detection
+        // Action payload should contain:
+        // {string} uuid - unique identifier for detection
         menuSelectDetection: (state, action) => {
-            state.selectedAlgorithm = null;
+            state.selectedAlgorithm = '';
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.selected = true;
@@ -179,7 +180,7 @@ const detectionsSlice = createSlice({
         // Update properties on a detection
         // Used for any action that is not selecting or deleting a detection
         // Action payload should contain:
-        // {object} reference: contains uuid, algorithm, and view of detection to update
+        // {object} uuid of detection to update
         // {object} update: contains any properties to update on the Detection
         updateDetection: (state, action) => {
             const { uuid, update } = action.payload;
@@ -191,7 +192,6 @@ const detectionsSlice = createSlice({
 
         // Updates a Detection's class label.
         // Action payload should contain:
-        // {string} algorithm - algorithm name for detection being updated
         // {string} uuid - uuid for detection being updated
         // {string} className - new label className for detection being updated
         editDetectionLabel: (state, action) => {
@@ -206,12 +206,13 @@ const detectionsSlice = createSlice({
                 });
             }
         },
-
+        // Deletes a detection.
+        // Action payload should contain:
+        // {string} uuid - uuid for detection being deleted
         deleteDetection: (state, action) => {
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
             });
-            console.log(current(state));
         },
         // Marks all DetectionSets as validated by the user
         validateDetections: (state) => {
@@ -232,12 +233,12 @@ const detectionsSlice = createSlice({
                         det.updatingDetection = false;
                         det.lowerOpacity = false;
                         if (state.selectedAlgorithm === algorithm) {
-                            state.selectedAlgorithm = null;
+                            state.selectedAlgorithm = '';
                         }
                     } else if (
                         isVisible === true &&
                         algorithm !== state.selectedAlgorithm &&
-                        state.selectedAlgorithm !== null
+                        state.selectedAlgorithm !== ''
                     ) {
                         det.lowerOpacity = true;
                     }
@@ -246,6 +247,10 @@ const detectionsSlice = createSlice({
                 }
             });
         },
+        // Update visibility on a Detection
+        // action payload should contain:
+        // {string} uuid - id of detection
+        // {boolean} isVisible - whether the DetectionSet is visible or not
         updateDetectionVisibility: (state, action) => {
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
@@ -273,27 +278,8 @@ const detectionsSlice = createSlice({
 export const getDetectionLabels = (state) => state.detections.detectionLabels;
 
 /**
- * Determines if all detections in all detectionSets have been validated
- * @param {Object.<string, DetectionSet>} data Redux Detections state
- * @returns {boolean} true if all are validated, false otherwise
- */
-export const areDetectionsValidated = (data) => {
-    // TODO: Refactoring
-    let result = true;
-
-    // Object.values(data).forEach((detectionSet) => {
-    //     if (!DetectionSetUtil.isValidated(detectionSet)) {
-    //         result = false;
-    //     }
-    // });
-
-    return result;
-};
-
-/**
  * Get all Detections for the top view
  * @param {Object.<string, DetectionSet>} data Redux Detections state
- * @param {string} view view to query
  * @returns {Array<Detection>}
  */
 export const getTopDetections = (detections) => {
@@ -308,6 +294,11 @@ export const getTopDetections = (detections) => {
     return topDetections;
 };
 
+/**
+ * Get all Detections for the side view
+ * @param {Object.<string, DetectionSet>} data Redux Detections state
+ * @returns {Array<Detection>}
+ */
 export const getSideDetections = (detections) => {
     const sideDetections = [];
     if (detections !== undefined) {
@@ -337,7 +328,13 @@ export const getDetectionColor = (detection) => {
     }
     return detection.color;
 };
-
+/**
+ * hasDetectionCoordinatesChanged - Determines if the bounding box coordinates have changed from the passed in values to the stored ones
+ * @param {Array<Detection>} detections
+ * @param {String} uuid
+ * @param {Array<Number>} boundingBox
+ * @returns
+ */
 export const hasDetectionCoordinatesChanged = (
     detections,
     uuid,
@@ -353,6 +350,12 @@ export const hasDetectionCoordinatesChanged = (
     }
 };
 
+/**
+ * getDetectionsByAlgorithm - Sorts and organizes the detections into arrays based on algorithm name
+ *                            Returns the array of detections by algorithm in an array.
+ * @param {Store} state Passed in via useSelector/mapDispatchToProps
+ * @returns {Array<Array<Detection>>} - Array containing arrays of each algorithm
+ */
 export const getDetectionsByAlgorithm = (state) => {
     const sorted = state.detections.detections.slice().sort((a, b) => {
         if (a.algorithm < b.algorithm) {
@@ -381,8 +384,19 @@ export const getDetectionsByAlgorithm = (state) => {
     return response;
 };
 
+/**
+ * getSelectedDetection
+ * @param {Store} state Passed in via useSelector/mapDispatchToProps
+ * @returns {Detection} The currently selected detection
+ */
 export const getSelectedDetection = (state) =>
     state.detections.selectedDetection;
+
+/**
+ * getSelectedAlgorithm
+ * @param {Store} state Passed in via useSelector/mapDispatchToProps
+ * @returns {String} The currently selected algorithm
+ */
 export const getSelectedAlgorithm = (state) =>
     state.detections.selectedAlgorithm;
 
