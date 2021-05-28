@@ -144,8 +144,9 @@ const detectionsSlice = createSlice({
                     det.selected = true;
                 } else {
                     det.selected = false;
-                    det.lowerOpacity = true;
                 }
+                det.lowerOpacity = !det.selected;
+                det.updatingDetection = false;
             });
         },
         // Selects a detection from a DetectionSet
@@ -154,6 +155,7 @@ const detectionsSlice = createSlice({
         // {string} view - where detection is rendered
         // {string} uuid - unique identifier for detection
         selectDetection: (state, action) => {
+            state.selectedAlgorithm = null;
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.selected = true;
@@ -166,6 +168,7 @@ const detectionsSlice = createSlice({
             });
         },
         menuSelectDetection: (state, action) => {
+            state.selectedAlgorithm = null;
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
                     det.selected = true;

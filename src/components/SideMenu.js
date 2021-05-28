@@ -5,8 +5,13 @@ import '../App.css';
 import NextButton from './NextButton';
 import * as constants from '../Constants';
 import Utils from '../Utils';
-import { useSelector } from 'react-redux';
-import { getDetectionsByAlgorithm } from '../redux/slices/detections/detectionsSlice';
+import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    getDetectionsByAlgorithm,
+    getSelectedAlgorithm,
+    selectDetectionSet,
+} from '../redux/slices/detections/detectionsSlice';
 import TreeDetection from './TreeView/TreeDetection';
 
 const SideMenu = ({
@@ -16,7 +21,9 @@ const SideMenu = ({
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
 }) => {
+    const dispatch = useDispatch();
     const algorithms = useSelector(getDetectionsByAlgorithm);
+    const selectedAlgorithm = useSelector(getSelectedAlgorithm);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
     const treeStyle = {
         top: '0',
@@ -24,6 +31,20 @@ const SideMenu = ({
         fill: 'white',
         width: '100%',
         height: 'inherit',
+    };
+
+    const containerStyle = {
+        paddingBottom: '0.35rem',
+        paddingTop: '0.35rem',
+        paddingLeft: '1rem',
+    };
+    const algorithmTypeStyles = {
+        fontSize: 14,
+        verticalAlign: 'super',
+        fontFamily: 'Noto Sans JP',
+        display: 'block',
+        margin: 'auto',
+        cursor: 'default',
     };
 
     // Checking to see if there is any data in myDetections
@@ -46,7 +67,30 @@ const SideMenu = ({
                     {algorithms.length > 0
                         ? algorithms.map((detections, i) => {
                               return (
-                                  <div key={i}>
+                                  <div
+                                      style={
+                                          selectedAlgorithm ===
+                                          detections[0].algorithm
+                                              ? {
+                                                    ...containerStyle,
+                                                    backgroundColor:
+                                                        constants.detectionStyle
+                                                            .SELECTED_COLOR,
+                                                }
+                                              : containerStyle
+                                      }
+                                      key={i}>
+                                      <div
+                                          onClick={() =>
+                                              dispatch(
+                                                  selectDetectionSet(
+                                                      detections[0].algorithm
+                                                  )
+                                              )
+                                          }
+                                          style={algorithmTypeStyles}>
+                                          {detections[0].algorithm}
+                                      </div>
                                       {detections.map((detection, z) => {
                                           return (
                                               <TreeDetection

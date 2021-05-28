@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { detectionStyle, MAX_LABEL_LENGTH } from '../../Constants';

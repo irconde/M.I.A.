@@ -1356,9 +1356,7 @@ class App extends Component {
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
-                if (this.props.selectedDetection) {
-                    this.props.clearAllSelection();
-                }
+                this.props.clearAllSelection();
                 // For some reason, when clicking the same viewport
                 // To clear the selected detection, the above call to
                 // Clear all does not finish before the following calls
