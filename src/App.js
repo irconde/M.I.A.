@@ -1119,44 +1119,30 @@ class App extends Component {
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
-            // eslint-disable-next-line no-unused-vars
-            const toolData = cornerstoneTools.getToolState(
-                e.currentTarget,
-                'BoundingBoxDrawing'
-            );
+            const context = eventData.canvasContext;
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelTop: eventData.viewport.scale,
             });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.TOP) detections.push(det);
-            });
-            this.renderDetections(detections, context);
+            this.props.updateZoomLevelTop(eventData.viewport.scale);
+            this.renderDetections(this.props.detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
-            // eslint-disable-next-line no-unused-vars
-            const toolData = cornerstoneTools.getToolState(
-                e.currentTarget,
-                'BoundingBoxDrawing'
-            );
+            const context = eventData.canvasContext;
+
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelSide: eventData.viewport.scale,
             });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.SIDE) detections.push(det);
-            });
-            this.renderDetections(detections, context);
+            this.props.updateZoomLevelSide(eventData.viewport.scale);
+            this.renderDetections(this.props.detections, context);
         }
-
         this.appUpdateImage();
         // set the canvas context to the image coordinate system
         //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
@@ -1166,15 +1152,12 @@ class App extends Component {
     }
 
     renderCrosshair(context, target) {
-        const mousePos = cornerstone.canvasToPixel(target, {
-            x: this.state.mousePosition.x,
-            y: this.state.mousePosition.y,
-        });
+        const pixelCoords = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
+        const mousePos = cornerstone.pixelToCanvas(target, pixelCoords);
         context.beginPath();
         context.moveTo(mousePos.x, 0);
         context.lineTo(mousePos.x, mousePos.y);
         context.stroke();
-        
     }
 
     /**
