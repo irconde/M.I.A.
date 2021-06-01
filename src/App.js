@@ -12,7 +12,6 @@ import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
 import Dicos from './Dicos.js';
-import Detection from './Detection.js';
 import axios from 'axios';
 import SideMenu from './components/SideMenu/SideMenu';
 import TopBar from './components/TopBar/TopBar';
@@ -1433,18 +1432,19 @@ class App extends Component {
             let boundingBoxArea = Math.abs(
                 (coords[0] - coords[2]) * (coords[1] - coords[3])
             );
-            let newDetection = new Detection(
-                coords,
-                null,
-                data[0].class,
-                data[0].confidence,
-                true,
-                data[0].algorithm,
-                viewport === this.state.imageViewportTop
-                    ? constants.viewport.TOP
-                    : constants.viewport.SIDE,
-                data[0].uuid
-            );
+            let newDetection = {
+                uuid: data[0].uuid,
+                boundingBox: coords,
+                algorithm: data[0].algorithm,
+                className: data[0].class,
+                confidence: data[0].confidence,
+                view:
+                    viewport === this.state.imageViewportTop
+                        ? constants.viewport.TOP
+                        : constants.viewport.SIDE,
+                validation: true,
+                maskBitmap: [[]],
+            };
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
                 return newDetection.view === stack.view;
             });
@@ -1470,7 +1470,6 @@ class App extends Component {
                     // Need to determine if updating operator or new
                     // Create new user-created detection
                     const operator = constants.OPERATOR;
-                    // add new DetectionSet if it doesn't exist
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
