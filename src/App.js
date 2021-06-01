@@ -134,6 +134,8 @@ class App extends Component {
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
+            mousePosition: {x: 0, y: 0},
+            activeViewport: "dicomImageLeft",
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -144,6 +146,7 @@ class App extends Component {
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
         this.loadDICOSdata = this.loadDICOSdata.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
+        this.onMouseMoved = this.onMouseMoved.bind(this);
         this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
             this
         );
@@ -289,6 +292,7 @@ class App extends Component {
             this.state.imageViewportSide
         );
         this.recalculateZoomLevel();
+        document.body.addEventListener("mousemove", this.onMouseMoved)
     }
 
     /**
@@ -395,6 +399,7 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         window.removeEventListener('resize', this.resizeListener);
+        document.body.removeEventListener('mousemove', this.onMouseMoved);
     }
 
     /**
@@ -1160,6 +1165,18 @@ class App extends Component {
         // right.
     }
 
+    renderCrosshair(context, target) {
+        const mousePos = cornerstone.canvasToPixel(target, {
+            x: this.state.mousePosition.x,
+            y: this.state.mousePosition.y,
+        });
+        context.beginPath();
+        context.moveTo(mousePos.x, 0);
+        context.lineTo(mousePos.x, mousePos.y);
+        context.stroke();
+        
+    }
+
     /**
      * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
      *
@@ -1325,6 +1342,7 @@ class App extends Component {
                 x: e.detail.currentPoints.canvas.x,
                 y: e.detail.currentPoints.canvas.y,
             });
+            console.log("Actual: " + mousePos.x + ", " + mousePos.y);
             let clickedPos = constants.selection.NO_SELECTION;
             for (var j = combinedDetections.length - 1; j > -1; j--) {
                 if (combinedDetections[j].visible === false) continue;
@@ -2020,6 +2038,13 @@ class App extends Component {
             this.resetCornerstoneTool();
             this.appUpdateImage();
         }
+    }
+
+    onMouseMoved(event) {
+        this.setState({
+            mousePosition: {x: event.x, y: event.y},
+            activeViewport: event.target.parentElement.id
+        });
     }
 
     render() {

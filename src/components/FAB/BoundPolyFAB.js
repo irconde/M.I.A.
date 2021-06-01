@@ -90,12 +90,14 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         isVisible === false
     ) {
         fabOpacity = false;
-        let canvasElements = document.getElementsByClassName(
-            'cornerstone-canvas'
-        );
-        let multipleViewports = canvasElements.length > 1;
-        if (canvasElements[0]!== undefined)canvasElements[0].id = 'selectedTop';
-        if (multipleViewports) canvasElements[1].id = 'selectedSide';
+        if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
+            let canvasElements = document.getElementsByClassName(
+                'cornerstone-canvas'
+            );
+            let multipleViewports = canvasElements.length > 1;
+            if (canvasElements[0]!== undefined)canvasElements[0].id = 'selectedTop';
+            if (multipleViewports) canvasElements[1].id = 'selectedSide';
+        }
     
     } else {
         fabOpacity = true;
