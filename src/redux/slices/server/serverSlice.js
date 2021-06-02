@@ -68,7 +68,7 @@ export const {
 } = serverSlice.actions;
 
 // Selectors
-export const selectConnectionInfo = (state) => {
+export const getConnectionInfo = (state) => {
     const { isConnected, isUpload, isDownload } = state.server;
 
     return { isConnected, isUpload, isDownload };
