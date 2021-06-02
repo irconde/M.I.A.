@@ -1504,7 +1504,7 @@ class App extends Component {
                             self.props.detections,
                             uuid,
                             coords
-                        ) === false
+                        )
                     ) {
                         self.props.updateDetection({
                             uuid: data[0].uuid,
