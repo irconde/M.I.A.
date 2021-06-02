@@ -6,7 +6,7 @@ import Utils from '../../Utils.js';
 import { useDispatch } from 'react-redux';
 import {
     getDetectionColor,
-    menuSelectDetection,
+    selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import { resetSelectedDetectionBoxesUpdate } from '../../redux/slices/ui/uiSlice';
@@ -72,7 +72,7 @@ const SideMenuDetection = ({
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            dispatch(menuSelectDetection(detection.uuid));
+            dispatch(selectDetection(detection.uuid));
             dispatch(resetSelectedDetectionBoxesUpdate());
             resetCornerstoneTools();
         }

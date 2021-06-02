@@ -159,21 +159,6 @@ const detectionsSlice = createSlice({
                 det.lowerOpacity = !det.selected;
             });
         },
-        // Menu selection of detection
-        // Action payload should contain:
-        // {string} uuid - unique identifier for detection
-        menuSelectDetection: (state, action) => {
-            state.selectedAlgorithm = '';
-            state.detections.forEach((det) => {
-                if (det.uuid === action.payload) {
-                    det.selected = true;
-                    state.selectedDetection = det;
-                } else {
-                    det.selected = false;
-                }
-                det.lowerOpacity = !det.selected;
-            });
-        },
         // Update properties on a detection
         // Used for any action that is not selecting or deleting a detection
         // Action payload should contain:
@@ -405,7 +390,6 @@ export const {
     addDetections,
     clearAllSelection,
     selectDetection,
-    menuSelectDetection,
     selectDetectionSet,
     updateDetection,
     updatedDetectionSet,
