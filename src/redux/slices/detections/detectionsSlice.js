@@ -123,7 +123,6 @@ const detectionsSlice = createSlice({
                 det.lowerOpacity = false;
                 det.updatingDetection = false;
             });
-            state.isEditLabelWidgetVisible = false;
             state.selectedDetection = null;
             state.selectedAlgorithm = '';
         },
