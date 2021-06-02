@@ -322,14 +322,14 @@ export const hasDetectionCoordinatesChanged = (
 ) => {
     const detection = detections.find((det) => det.uuid === uuid);
     if (detection) {
-        let equality = false;
+        let result = false;
         for (let i = 0; i < detection.boundingBox.length; i++) {
             if (detection.boundingBox[i] !== boundingBox[i]) {
-                equality = true;
+                result = true;
                 break;
             }
         }
-        return equality;
+        return result;
     }
 };
 
