@@ -6,8 +6,8 @@ import {
     getCurrentFile,
     getIsDownload,
     getIsUpload,
+    getNumFilesInQueue,
     getProcessingHost,
-    selectNumFilesInQueue,
 } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
@@ -15,7 +15,7 @@ import FileUploadStatus from './FileUploadStatus';
 const TopBar = () => {
     const processingFile = useSelector(getCurrentFile);
     const connectedServer = useSelector(getProcessingHost);
-    const numberOfFiles = useSelector(selectNumFilesInQueue);
+    const numberOfFiles = useSelector(getNumFilesInQueue);
     const isDownload = useSelector(getIsDownload);
     const isUpload = useSelector(getIsUpload);
     const isConnected = useSelector(getConnected);

@@ -73,7 +73,7 @@ export const selectConnectionInfo = (state) => {
 
     return { isConnected, isUpload, isDownload };
 };
-export const selectNumFilesInQueue = (state) => state.server.numFilesInQueue;
+export const getNumFilesInQueue = (state) => state.server.numFilesInQueue;
 export const getConnected = (state) => state.server.isConnected;
 export const getIsDownload = (state) => state.server.isDownload;
 export const getIsUpload = (state) => state.server.isUpload;

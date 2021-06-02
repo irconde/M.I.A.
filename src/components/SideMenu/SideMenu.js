@@ -6,7 +6,7 @@ import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';
-import { selectNumFilesInQueue } from '../../redux/slices/server/serverSlice';
+import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 
 const SideMenu = ({
     nextImageClick,
@@ -23,7 +23,7 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
-    const numOfFiles = useSelector(selectNumFilesInQueue);
+    const numOfFiles = useSelector(getNumFilesInQueue);
     const enableMenu = numOfFiles > 0;
     // Checking to see if there is any data in myDetections
     if (algorithms.length > 0 && enableMenu) {
