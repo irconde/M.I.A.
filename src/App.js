@@ -1203,7 +1203,12 @@ class App extends Component {
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
-            if (data[j].visible !== true || data[j].updatingDetection) {
+            if (
+                data[j].visible !== true ||
+                (data[j].selected &&
+                    this.props.cornerstoneMode !==
+                        constants.cornerstoneMode.SELECTION)
+            ) {
                 continue;
             }
 
@@ -1505,7 +1510,6 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                updatingDetection: false,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -1545,12 +1549,6 @@ class App extends Component {
                     constants.cornerstoneMode.EDITION
                 ) {
                     self.props.updateIsDetectionContextVisible(true);
-                    self.props.updateDetection({
-                        uuid: data[0].uuid,
-                        update: {
-                            updatingDetection: true,
-                        },
-                    });
                     self.appUpdateImage();
                 }
             });

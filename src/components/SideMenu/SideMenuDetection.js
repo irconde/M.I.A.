@@ -9,6 +9,7 @@ import {
     menuSelectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
+import { resetSelectedDetectionBoxesUpdate } from '../../redux/slices/ui/uiSlice';
 
 const SideMenuDetection = ({
     detection,
@@ -72,6 +73,7 @@ const SideMenuDetection = ({
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
             dispatch(menuSelectDetection(detection.uuid));
+            dispatch(resetSelectedDetectionBoxesUpdate());
             resetCornerstoneTools();
         }
     };

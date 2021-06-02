@@ -11,6 +11,7 @@ import {
     selectDetectionSet,
     updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
+import { resetSelectedDetectionBoxesUpdate } from '../../redux/slices/ui/uiSlice';
 
 const SideMenuAlgorithm = ({
     configurationInfo,
@@ -96,6 +97,8 @@ const SideMenuAlgorithm = ({
             isVisible
         ) {
             dispatch(selectDetectionSet(algorithm));
+            dispatch(resetSelectedDetectionBoxesUpdate());
+            resetCornerstoneTools();
         } else {
             if (e.target.id == 'arrow' || e.target.id == 'Path') {
                 let rotationValue = arrowStyle.transform;

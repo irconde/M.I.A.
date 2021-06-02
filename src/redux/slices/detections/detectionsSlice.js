@@ -121,7 +121,6 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 det.selected = false;
                 det.lowerOpacity = false;
-                det.updatingDetection = false;
             });
             state.selectedDetection = null;
             state.selectedAlgorithm = '';
@@ -139,7 +138,6 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
-                det.updatingDetection = false;
             });
         },
         // Resets the selected algorithm
@@ -159,7 +157,6 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
-                det.updatingDetection = det.selected;
             });
         },
         // Menu selection of detection
@@ -175,7 +172,6 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
-                det.updatingDetection = false;
             });
         },
         // Update properties on a detection
@@ -231,7 +227,6 @@ const detectionsSlice = createSlice({
                     det.visible = isVisible;
                     if (isVisible === false) {
                         det.selected = false;
-                        det.updatingDetection = false;
                         det.lowerOpacity = false;
                         if (state.selectedAlgorithm === algorithm) {
                             state.selectedAlgorithm = '';
@@ -258,7 +253,6 @@ const detectionsSlice = createSlice({
                     det.visible = !det.visible;
                     if (det.visible === false) {
                         det.selected = false;
-                        det.updatingDetection = false;
                         det.lowerOpacity = false;
                     }
                 }
