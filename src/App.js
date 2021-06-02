@@ -2074,7 +2074,6 @@ const mapStateToProps = (state) => {
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
-        algorithmNames: detections.algorithmNames,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
         displaySelectedBoundingBox: ui.displaySelectedBoundingBox,

@@ -4,17 +4,32 @@ import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
 
 // interface Detection {
+//     // Unique Identifier
 //     uuid: string;
+//     // Algorithm name - "Tiled 2.0", "OTAP" etc
 //     algorithm: string;
+//     // Apple, Orange, Banana, etc
 //     className: string;
-//     confidence: string;
+//     // A percentage value representing how confident that we have labeled the detection
+//     // class name appropriately, IE we labeled it an Apple and we believe it to be an Apple by 86%
+//     confidence: string;s
+//     // Wether the detection is selected and we can edit the detection
 //     selected: boolean;
+//     // If the detection is rendered in the Apps viewports
 //     visible: boolean;
+//     // What color to display the bounding box
 //     color: string;
+//     // Dictating what viewport the detection resides in, TOP or SIDE eg.
 //     view: string;
-//     maskBitmap: number[][];
+//     // An array inside an array representing the polygon mask if there is one
+//     maskBitmap: number[[]];
+//     // The coordinates of the detection which are generally [x-start, y-start, x-end, y-end]
 //     boundingBox: number[];
+//     // This is based on if another detection is selected and the App should not render the bounding box
+//     // at full opacity.
 //     lowerOpacity: boolean;
+//     // Wether the detection is considered to valid. If a detection is not deleted before sending
+//     // the file back to the image/command server, then is is considered to be validated.
 //     validation: boolean;
 // }
 
@@ -25,8 +40,6 @@ const initialState = {
     selectedAlgorithm: '',
     /** @type Detection */
     selectedDetection: null,
-    /** @type Array<string> */
-    algorithmNames: [],
 
     // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
     /** @type Object<string, DetectionSet> */
@@ -41,7 +54,6 @@ const detectionsSlice = createSlice({
         resetDetections: (state) => {
             state.selectedAlgorithm = '';
             state.selectedDetection = null;
-            state.algorithmNames = [];
             state.detections = [];
         },
         // Adds detection
