@@ -115,16 +115,6 @@ const detectionsSlice = createSlice({
                 }
             });
         },
-        // Clears selection data for specified algorithm
-        // Action payload should contain:
-        // {string} algorithm - algorithm name
-        clearSelectedDetection: (state, action) => {
-            const detection = state.detections.find(
-                (det) => det.uuid === action.payload
-            );
-            detection.selected = false;
-            detection.updatingDetection = false;
-        },
         // Clears selection data for all detections
         // No action payload used
         clearAllSelection: (state) => {
@@ -420,7 +410,6 @@ export const {
     addDetectionSet,
     addDetection,
     addDetections,
-    clearSelectedDetection,
     clearAllSelection,
     selectDetection,
     menuSelectDetection,
