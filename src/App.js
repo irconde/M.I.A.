@@ -1152,11 +1152,17 @@ class App extends Component {
     }
 
     renderCrosshair(context, target) {
-        const pixelCoords = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
-        const mousePos = cornerstone.pixelToCanvas(target, pixelCoords);
+        const mousePos = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
+        const imageSize = target.id === "dicomImageRight" ? cornerstone.getImage(this.state.imageViewportSide) : cornerstone.getImage(this.state.imageViewportTop);
         context.beginPath();
+        context.strokeStyle = "black";
         context.moveTo(mousePos.x, 0);
-        context.lineTo(mousePos.x, mousePos.y);
+        context.lineTo(mousePos.x, imageSize.height);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(0, mousePos.y);
+        context.lineTo(imageSize.width, mousePos.y);
         context.stroke();
     }
 
