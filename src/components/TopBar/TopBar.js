@@ -1,17 +1,24 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/FileQueueIcon';
+import {
+    getConnected,
+    getCurrentFile,
+    getIsDownload,
+    getIsUpload,
+    getProcessingHost,
+    selectNumFilesInQueue,
+} from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 
-const TopBar = ({
-    numberOfFiles,
-    isUpload,
-    isDownload,
-    isConnected,
-    connectedServer,
-    processingFile,
-}) => {
+const TopBar = () => {
+    const processingFile = useSelector(getCurrentFile);
+    const connectedServer = useSelector(getProcessingHost);
+    const numberOfFiles = useSelector(selectNumFilesInQueue);
+    const isDownload = useSelector(getIsDownload);
+    const isUpload = useSelector(getIsUpload);
+    const isConnected = useSelector(getConnected);
     const styles = {
         bar: {
             position: 'absolute',
@@ -41,7 +48,7 @@ const TopBar = ({
             justifyContent: 'center',
             fontWeight: 500,
             fontSize: '10pt',
-            boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'
+            boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
         },
         connectionStatusIconsContainer: {
             position: 'absolute',
@@ -124,15 +131,6 @@ const TopBar = ({
             </div>
         </div>
     );
-};
-
-TopBar.propTypes = {
-    numberOfFiles: PropTypes.number,
-    isUpload: PropTypes.bool,
-    isDownload: PropTypes.bool,
-    isConnected: PropTypes.bool,
-    connectedServer: PropTypes.string,
-    processingFile: PropTypes.string,
 };
 
 export default TopBar;

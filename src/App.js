@@ -2040,19 +2040,11 @@ class App extends Component {
                             });
                     }}
                     onMouseDown={(e) => e.preventDefault()}>
-                    <TopBar
-                        connectedServer={this.props.processingHost}
-                        processingFile={this.props.currentProcessingFile}
-                        numberOfFiles={this.props.numFilesInQueue}
-                        isUpload={this.props.isUpload}
-                        isDownload={this.props.isDownload}
-                        isConnected={this.props.isConnected}
-                    />
+                    <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
-                        enableMenu={this.props.numFilesInQueue > 0}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
@@ -2078,12 +2070,7 @@ const mapStateToProps = (state) => {
     const { server, detections, ui } = state;
     return {
         // Socket connection state
-        isConnected: server.isConnected,
-        isDownload: server.isDownload,
-        isUpload: server.isUpload,
         numFilesInQueue: server.numFilesInQueue,
-        processingHost: server.processingHost,
-        currentProcessingFile: server.currentProcessingFile,
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,

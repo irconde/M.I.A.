@@ -6,11 +6,11 @@ import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';
+import { selectNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 
 const SideMenu = ({
     nextImageClick,
     configurationInfo,
-    enableMenu,
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
 }) => {
@@ -23,7 +23,8 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
-
+    const numOfFiles = useSelector(selectNumFilesInQueue);
+    const enableMenu = numOfFiles > 0;
     // Checking to see if there is any data in myDetections
     if (algorithms.length > 0 && enableMenu) {
         return (
@@ -71,7 +72,6 @@ SideMenu.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
     // TODO: James B. - Remove this once refactored into uiSlice
     configurationInfo: PropTypes.object.isRequired,
-    enableMenu: PropTypes.bool.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
