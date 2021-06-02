@@ -28,7 +28,6 @@ import {
     setFileServerConnection,
     setUpload,
     setDownload,
-    setIsFileInQueue,
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,
@@ -498,7 +497,7 @@ class App extends Component {
      */
     async updateNumberOfFiles() {
         FILE_SERVER.on('numberOfFiles', (data) => {
-            if (!this.props.isFileInQueue && data > 0) {
+            if (!this.props.numFilesInQueue > 0 && data > 0) {
                 const updateImageViewportTop = this.state.imageViewportTop;
                 updateImageViewportTop.style.visibility = 'visible';
                 this.setState({
@@ -508,7 +507,6 @@ class App extends Component {
             }
             this.props.updateFABVisibility(data > 0);
             this.props.setNumFilesInQueue(data);
-            this.props.setIsFileInQueue(data > 0);
         });
     }
 
@@ -2054,7 +2052,7 @@ class App extends Component {
                         nextImageClick={this.nextImageClick}
                         // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
                         configurationInfo={this.state.configurationInfo}
-                        enableMenu={this.props.isFileInQueue}
+                        enableMenu={this.props.numFilesInQueue > 0}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
@@ -2069,7 +2067,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <NoFileSign isVisible={!this.props.isFileInQueue} />
+                    <NoFileSign isVisible={!this.props.numFilesInQueue > 0} />
                 </div>
             </div>
         );
@@ -2083,7 +2081,6 @@ const mapStateToProps = (state) => {
         isConnected: server.isConnected,
         isDownload: server.isDownload,
         isUpload: server.isUpload,
-        isFileInQueue: server.isFileInQueue,
         numFilesInQueue: server.numFilesInQueue,
         processingHost: server.processingHost,
         currentProcessingFile: server.currentProcessingFile,
@@ -2110,7 +2107,6 @@ const mapDispatchToProps = {
     setFileServerConnection,
     setDownload,
     setUpload,
-    setIsFileInQueue,
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,

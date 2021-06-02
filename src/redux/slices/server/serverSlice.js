@@ -4,7 +4,6 @@ const serverSlice = createSlice({
     name: 'server',
     initialState: {
         numFilesInQueue: 0,
-        isFileInQueue: false,
         isConnected: false,
         isUpload: false,
         isDownload: false,
@@ -20,9 +19,6 @@ const serverSlice = createSlice({
         },
         setDownload: (state, action) => {
             state.isDownload = action.payload;
-        },
-        setIsFileInQueue: (state, action) => {
-            state.isFileInQueue = action.payload;
         },
         setNumFilesInQueue: (state, action) => {
             state.numFilesInQueue = action.payload;
