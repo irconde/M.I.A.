@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
+import Utils from '../../../Utils';
 
 // interface Detection {
 //     // Unique Identifier
@@ -84,6 +85,7 @@ const detectionsSlice = createSlice({
                 }),
                 lowerOpacity: false,
                 validation: null,
+                textColor: 'white',
             });
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
@@ -138,6 +140,10 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
+                det.displayColor = getDetectionColor(
+                    det,
+                    state.selectedAlgorithm
+                );
             });
         },
         // Resets the selected algorithm
@@ -157,6 +163,7 @@ const detectionsSlice = createSlice({
                     det.selected = false;
                 }
                 det.lowerOpacity = !det.selected;
+                if (det.visible) det.displayColor = getDetectionColor(det);
             });
         },
         // Update properties on a detection
@@ -198,7 +205,10 @@ const detectionsSlice = createSlice({
         },
         // Marks all DetectionSets as validated by the user
         validateDetections: (state) => {
-            state.detections.forEach((det) => (det.validation = true));
+            state.detections.forEach((det) => {
+                det.validation = true;
+                det.textColor = constants.detectionStyle.VALID_COLOR;
+            });
         },
 
         // Update visibility on a DetectionSet
@@ -226,6 +236,12 @@ const detectionsSlice = createSlice({
                 } else if (isVisible === false && det.algorithm !== algorithm) {
                     det.lowerOpacity = false;
                 }
+                if (det.visible) {
+                    det.textColor = 'white';
+                } else {
+                    det.textColor = 'gray';
+                    det.displayColor = 'black';
+                }
             });
         },
         // Update visibility on a Detection
@@ -239,7 +255,9 @@ const detectionsSlice = createSlice({
                     if (det.visible === false) {
                         det.selected = false;
                         det.lowerOpacity = false;
-                    }
+                        det.textColor = 'gray';
+                        det.displayColor = 'black';
+                    } else det.textColor = 'white';
                 }
             });
         },
@@ -296,9 +314,17 @@ export const getSideDetections = (detections) => {
  * @param {Detection} detection
  * @returns {string} color in string form
  */
-export const getDetectionColor = (detection) => {
+export const getDetectionColor = (detection, selectedAlgorithm) => {
     // TODO: Refactoring - can probably just have a key value pair on the detection
     //                     for its color rather than making more calls to the store
+    //                     Lets call this function anytime a selection reducer is called
+    //                     and assign the result to detection.displayColor
+    if (selectedAlgorithm === detection.algorithm) {
+        const rgb = Utils.hexToRgb(constants.detectionStyle.SELECTED_COLOR);
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+    } else if (detection.visible === false && selectedAlgorithm !== null) {
+        return 'black';
+    }
     if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
     if (detection.validation !== null) {
         if (detection.validation) {

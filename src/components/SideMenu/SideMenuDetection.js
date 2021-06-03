@@ -78,29 +78,6 @@ const SideMenuDetection = ({
         }
     };
 
-    // Figuring out what text color we need to display on the detection
-    let textColor = 'white';
-    let selectionColor;
-    let colorSelection = false;
-    if (detection.validation === true && detection.validation !== undefined) {
-        textColor = detectionStyle.VALID_COLOR;
-    } else if (
-        detection.validation === false &&
-        detection.validation !== undefined
-    ) {
-        textColor = detectionStyle.INVALID_COLOR;
-    } else if (!detection.visible) {
-        textColor = 'gray';
-    }
-    if (detection.selected) {
-        selectionColor = detectionStyle.SELECTED_COLOR;
-        colorSelection = true;
-    }
-    const detectionColor = getDetectionColor(detection);
-    if (algorithmSelected === detection.algorithm) {
-        selectionColor = 'rgba(54, 127, 255, 0.2)';
-        colorSelection = true;
-    }
     // We only display an open eye if both algorithm and detection are visible.
     if (detection.visible === true) {
         return (
@@ -108,10 +85,10 @@ const SideMenuDetection = ({
                 id={`${detection.view}-container`}
                 onClick={setSelected}
                 style={
-                    colorSelection
+                    detection.selected
                         ? {
                               ...containerStyle,
-                              backgroundColor: selectionColor,
+                              backgroundColor: detection.displayColor,
                           }
                         : containerStyle
                 }>
@@ -125,7 +102,7 @@ const SideMenuDetection = ({
                     id={`${detection.view}-span`}
                     style={{
                         ...typeStyle,
-                        color: textColor,
+                        color: detection.textColor,
                     }}>{`${Utils.truncateString(
                     detection.className,
                     MAX_LABEL_LENGTH
@@ -141,13 +118,13 @@ const SideMenuDetection = ({
                 <div
                     style={{
                         ...detectionBGStyle,
-                        backgroundColor: detectionColor,
+                        backgroundColor: detection.displayColor,
                     }}></div>
                 <span
                     id={`${detection.view}-hidden-span`}
                     style={{
                         ...typeStyle,
-                        color: textColor,
+                        color: detection.textColor,
                     }}>{`${Utils.truncateString(
                     detection.className,
                     MAX_LABEL_LENGTH
