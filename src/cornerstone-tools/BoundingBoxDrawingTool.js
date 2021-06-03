@@ -62,16 +62,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         }
     }
 
-
-    // updateCursor(x, y, context) {
-    //     context.beginPath();
-    //     context.lineWidth = '5'; // width of the line
-    //     context.strokeStyle = 'red'; // color of the line
-    //     context.moveTo(50,50); // begins a new sub-path based on the given x and y values.
-    //     context.lineTo(50, 100); // used to create a pointer based on x and y  
-    //     context.stroke(); // this is where the actual drawing happens.
-    // }
-
     // Method that overrides the original abstract method in the cornerstone-tools library
     // Automatically invoked to render all the widgets that comprise a detection
     renderToolData(evt) {
@@ -80,9 +70,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             // No tool data
             return;
         }
-
-        const mousePos = {x: 0, y:0};
-
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
@@ -113,33 +100,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             hideHandlesIfMoving,
         };
 
-        // const updateMouse = (x, y) => {
-        //     mousePos.x = x;
-        //     mousePos.y = y;
-        // }
-
-        // document.body.addEventListener("mousemove", (event) => {
-        //     const currPos = cornerstone.canvasToPixel(evt.target, {
-        //         x: event.x,
-        //         y: event.y,
-        //     });
-        //     clearCanvas();
-        //     drawLine(currPos);
-        //     console.log("Calculated: " + currPos.x + ", " + currPos.y);
-        // });
-
-        // const clearCanvas = () => {
-        //     //context.clearRect(0, 0, canvasEle.width, canvasEle.height);
-        //     //console.log(element.id);
-        // }
-
-        // const drawLine = (currPos) => {
-        //     context.beginPath();
-        //     context.moveTo(currPos.x, 0);
-        //     context.lineTo(currPos.x, currPos.y);
-        //     context.stroke();
-        // }
-
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
             for (let i = 0; i < toolData.data.length; i++) {
@@ -147,7 +107,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 if (data.visible === false) {
                     continue;
                 }
-                //console.log(zoom);
                 // Configure
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
@@ -234,9 +193,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 data.handles.start
                             );
                         }
-                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
-                            ' '
-                        );
+                        var fontArr =
+                            constants.detectionStyle.LABEL_FONT.split(' ');
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;
@@ -283,7 +241,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
             }
         });
-
     }
 
     // eslint-disable-next-line no-unused-vars

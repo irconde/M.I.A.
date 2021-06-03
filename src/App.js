@@ -1354,9 +1354,8 @@ class App extends Component {
                 x: e.detail.currentPoints.canvas.x,
                 y: e.detail.currentPoints.canvas.y,
             });
-            console.log("Actual: " + mousePos.x + ", " + mousePos.y);
             let clickedPos = constants.selection.NO_SELECTION;
-            for (var j = combinedDetections.length - 1; j > -1; j--) {
+            for (let j = combinedDetections.length - 1; j > -1; j--) {
                 if (combinedDetections[j].visible === false) continue;
                 if (
                     Utils.pointInRect(
