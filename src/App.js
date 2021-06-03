@@ -38,7 +38,6 @@ import {
     clearAllSelection,
     selectDetection,
     selectDetectionSet,
-    getDetectionColor,
     getTopDetections,
     getSideDetections,
     updateDetection,
@@ -131,8 +130,8 @@ class App extends Component {
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            mousePosition: {x: 0, y: 0},
-            activeViewport: "dicomImageLeft",
+            mousePosition: { x: 0, y: 0 },
+            activeViewport: 'dicomImageLeft',
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -289,7 +288,7 @@ class App extends Component {
             this.state.imageViewportSide
         );
         this.recalculateZoomLevel();
-        document.body.addEventListener("mousemove", this.onMouseMoved)
+        document.body.addEventListener('mousemove', this.onMouseMoved);
     }
 
     /**
@@ -1124,7 +1123,11 @@ class App extends Component {
             this.props.detections.forEach((det) => {
                 if (det.view === constants.viewport.TOP) detections.push(det);
             });
-            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageLeft") {
+            if (
+                this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION &&
+                this.state.activeViewport === 'dicomImageLeft'
+            ) {
                 this.renderCrosshair(context, e.currentTarget);
             }
             this.renderDetections(detections, context);
@@ -1143,7 +1146,11 @@ class App extends Component {
                 if (det.view === constants.viewport.SIDE) detections.push(det);
             });
             this.renderDetections(detections, context);
-            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageRight") {
+            if (
+                this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION &&
+                this.state.activeViewport === 'dicomImageRight'
+            ) {
                 this.renderCrosshair(context, e.currentTarget);
             }
         }
@@ -1157,10 +1164,22 @@ class App extends Component {
 
     renderCrosshair(context, target) {
         const crosshairLength = 8;
-        const mousePos = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
-        const imageSize = target.id === "dicomImageRight" ? cornerstone.getImage(this.state.imageViewportSide) : cornerstone.getImage(this.state.imageViewportTop);
+        const mousePos = cornerstone.pageToPixel(
+            target,
+            this.state.mousePosition.x,
+            this.state.mousePosition.y
+        );
+        const imageSize =
+            target.id === 'dicomImageRight'
+                ? cornerstone.getImage(this.state.imageViewportSide)
+                : cornerstone.getImage(this.state.imageViewportTop);
         context.lineWidth = 2;
-        if (mousePos.x >= 0 && mousePos.x <= imageSize.width && mousePos.y >= 0 && mousePos.y <= imageSize.height) {
+        if (
+            mousePos.x >= 0 &&
+            mousePos.x <= imageSize.width &&
+            mousePos.y >= 0 &&
+            mousePos.y <= imageSize.height
+        ) {
             context.beginPath();
             context.setLineDash([2, 2]);
             context.strokeStyle = 'grey';
@@ -1238,16 +1257,15 @@ class App extends Component {
             }
 
             const boundingBoxCoords = data[j].boundingBox;
-            let color = getDetectionColor(data[j]);
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            if (data[j].lowerOpacity === true) {
-                let rgbColor = Utils.hexToRgb(color);
-                color = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)`;
-            }
-            context.strokeStyle = color;
-            context.fillStyle = color;
+            context.strokeStyle = data[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : data[j].displayColor;
+            context.fillStyle = data[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : data[j].displayColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -1593,7 +1611,6 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION ||
             sideMenuUpdate === true
         ) {
-
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
             this.onDetectionSelected(e);
@@ -1664,7 +1681,7 @@ class App extends Component {
                         uuid: detectionData.uuid,
                         algorithm: detectionData.algorithm,
                         class: detectionData.className,
-                        renderColor: getDetectionColor(detectionData),
+                        renderColor: constants.detectionStyle.SELECTED_COLOR,
                         confidence: detectionData.confidence,
                         updatingDetection: true,
                         view: detectionData.view,
@@ -2042,8 +2059,8 @@ class App extends Component {
 
     onMouseMoved(event) {
         this.setState({
-            mousePosition: {x: event.x, y: event.y},
-            activeViewport: event.target.parentElement.id
+            mousePosition: { x: event.x, y: event.y },
+            activeViewport: event.target.parentElement.id,
         });
     }
 

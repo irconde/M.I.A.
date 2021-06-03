@@ -26,9 +26,6 @@ import Utils from '../../../Utils';
 //     maskBitmap: number[[]];
 //     // The coordinates of the detection which are generally [x-start, y-start, x-end, y-end]
 //     boundingBox: number[];
-//     // This is based on if another detection is selected and the App should not render the bounding box
-//     // at full opacity.
-//     lowerOpacity: boolean;
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending
 //     // the file back to the image/command server, then is is considered to be validated.
 //     validation: boolean;
@@ -83,10 +80,14 @@ const detectionsSlice = createSlice({
                     hue: 'random',
                     luminosity: 'bright',
                 }),
-                lowerOpacity: false,
                 validation: null,
                 textColor: 'white',
             });
+            state.detections[
+                state.detections.length - 1
+            ].displayColor = getDetectionColor(
+                state.detections[state.detections.length - 1]
+            );
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
@@ -109,7 +110,6 @@ const detectionsSlice = createSlice({
                         hue: 'random',
                         luminosity: 'bright',
                     }),
-                    lowerOpacity: false,
                     validation: null,
                 });
                 if (state.detectionLabels.indexOf(det.className) === -1) {
@@ -122,7 +122,10 @@ const detectionsSlice = createSlice({
         clearAllSelection: (state) => {
             state.detections.forEach((det) => {
                 det.selected = false;
-                det.lowerOpacity = false;
+                if (det.visible) {
+                    det.displayColor = det.color;
+                    det.textColor = 'white';
+                }
             });
             state.selectedDetection = null;
             state.selectedAlgorithm = '';
@@ -136,14 +139,15 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.algorithm === action.payload) {
                     det.selected = true;
+                    const rgb = Utils.hexToRgb(
+                        constants.detectionStyle.SELECTED_COLOR
+                    );
+                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 } else {
                     det.selected = false;
+                    const rgb = Utils.hexToRgb(det.color);
+                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 }
-                det.lowerOpacity = !det.selected;
-                det.displayColor = getDetectionColor(
-                    det,
-                    state.selectedAlgorithm
-                );
             });
         },
         // Resets the selected algorithm
@@ -162,8 +166,8 @@ const detectionsSlice = createSlice({
                 } else {
                     det.selected = false;
                 }
-                det.lowerOpacity = !det.selected;
-                if (det.visible) det.displayColor = getDetectionColor(det);
+                if (det.visible)
+                    det.displayColor = getDetectionColor(det, action.payload);
             });
         },
         // Update properties on a detection
@@ -222,22 +226,14 @@ const detectionsSlice = createSlice({
                     det.visible = isVisible;
                     if (isVisible === false) {
                         det.selected = false;
-                        det.lowerOpacity = false;
                         if (state.selectedAlgorithm === algorithm) {
                             state.selectedAlgorithm = '';
                         }
-                    } else if (
-                        isVisible === true &&
-                        algorithm !== state.selectedAlgorithm &&
-                        state.selectedAlgorithm !== ''
-                    ) {
-                        det.lowerOpacity = true;
                     }
-                } else if (isVisible === false && det.algorithm !== algorithm) {
-                    det.lowerOpacity = false;
                 }
                 if (det.visible) {
                     det.textColor = 'white';
+                    det.displayColor = det.color;
                 } else {
                     det.textColor = 'gray';
                     det.displayColor = 'black';
@@ -254,7 +250,6 @@ const detectionsSlice = createSlice({
                     det.visible = !det.visible;
                     if (det.visible === false) {
                         det.selected = false;
-                        det.lowerOpacity = false;
                         det.textColor = 'gray';
                         det.displayColor = 'black';
                     } else det.textColor = 'white';
@@ -264,7 +259,7 @@ const detectionsSlice = createSlice({
     },
 });
 
-// Selectors & Helper Functions
+// Selectors Functions
 // These functions do not modify the Redux store in any way, just gets data
 
 /**
@@ -309,31 +304,6 @@ export const getSideDetections = (detections) => {
     return sideDetections;
 };
 
-/**
- * Get color of detection for bounding box rendering
- * @param {Detection} detection
- * @returns {string} color in string form
- */
-export const getDetectionColor = (detection, selectedAlgorithm) => {
-    // TODO: Refactoring - can probably just have a key value pair on the detection
-    //                     for its color rather than making more calls to the store
-    //                     Lets call this function anytime a selection reducer is called
-    //                     and assign the result to detection.displayColor
-    if (selectedAlgorithm === detection.algorithm) {
-        const rgb = Utils.hexToRgb(constants.detectionStyle.SELECTED_COLOR);
-        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
-    } else if (detection.visible === false && selectedAlgorithm !== null) {
-        return 'black';
-    }
-    if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
-    if (detection.validation !== null) {
-        if (detection.validation) {
-            return constants.detectionStyle.VALID_COLOR;
-        }
-        return constants.detectionStyle.INVALID_COLOR;
-    }
-    return detection.color;
-};
 /**
  * hasDetectionCoordinatesChanged - Determines if the bounding box coordinates have changed from the passed in values to the stored ones
  * @param {Array<Detection>} detections
@@ -408,6 +378,28 @@ export const getSelectedDetection = (state) =>
  */
 export const getSelectedAlgorithm = (state) =>
     state.detections.selectedAlgorithm;
+
+// Helper Functions
+
+/**
+ * Get color of detection for bounding box rendering
+ * @param {Detection} detection
+ * @returns {string} color in string form
+ */
+const getDetectionColor = (detection, uuid) => {
+    if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
+    if (detection.uuid !== uuid && uuid !== undefined) {
+        const rgb = Utils.hexToRgb(detection.color);
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+    }
+    if (detection.validation !== null) {
+        if (detection.validation) {
+            return constants.detectionStyle.VALID_COLOR;
+        }
+        return constants.detectionStyle.INVALID_COLOR;
+    }
+    return detection.color;
+};
 
 export const {
     resetDetections,
