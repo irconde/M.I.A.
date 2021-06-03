@@ -1155,20 +1155,21 @@ class App extends Component {
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
         const imageSize = target.id === "dicomImageRight" ? cornerstone.getImage(this.state.imageViewportSide) : cornerstone.getImage(this.state.imageViewportTop);
-        context.beginPath();
-        context.setLineDash([2, 2]);
         context.lineWidth = 2;
-        context.strokeStyle = 'grey';
-        context.moveTo(mousePos.x, 0);
-        context.lineTo(mousePos.x, imageSize.height);
-        context.stroke();
-        context.beginPath();
-        context.moveTo(0, mousePos.y);
-        context.lineTo(imageSize.width, mousePos.y);
-        context.stroke();
+        if (mousePos.x >= 0 && mousePos.x <= imageSize.width && mousePos.y >= 0 && mousePos.y <= imageSize.height) {
+            context.beginPath();
+            context.setLineDash([2, 2]);
+            context.strokeStyle = 'grey';
+            context.moveTo(mousePos.x, 0);
+            context.lineTo(mousePos.x, imageSize.height);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(0, mousePos.y);
+            context.lineTo(imageSize.width, mousePos.y);
+            context.stroke();
+        }
         context.setLineDash([]);
         context.strokeStyle = constants.colors.BLUE;
-        context.lineWidth = 2;
         context.beginPath();
         context.moveTo(mousePos.x - crosshairLength, mousePos.y);
         context.lineTo(mousePos.x + crosshairLength, mousePos.y);
