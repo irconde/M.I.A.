@@ -13,7 +13,7 @@ import Utils from '../../../Utils';
 //     className: string;
 //     // A percentage value representing how confident that we have labeled the detection
 //     // class name appropriately, IE we labeled it an Apple and we believe it to be an Apple by 86%
-//     confidence: string;s
+//     confidence: string;
 //     // Wether the detection is selected and we can edit the detection
 //     selected: boolean;
 //     // If the detection is rendered in the Apps viewports
@@ -29,6 +29,10 @@ import Utils from '../../../Utils';
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending
 //     // the file back to the image/command server, then is is considered to be validated.
 //     validation: boolean;
+//     // Decides what color should be displayed when rendering a detection
+//     displayColor: string;
+//     // Will be white if the detection is visible and gray if not visible
+//     textColor: string;
 // }
 
 const initialState = {
