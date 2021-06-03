@@ -16,7 +16,6 @@ import axios from 'axios';
 import SideMenu from './components/SideMenu/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
-import Selection from './Selection';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
@@ -126,7 +125,6 @@ class App extends Component {
      */
     constructor(props) {
         super(props);
-        this.currentSelection = new Selection();
         this.state = {
             configurationInfo: {},
             myOra: new ORA(),
@@ -546,7 +544,6 @@ class App extends Component {
         let updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
-        this.currentSelection = new Selection();
         this.props.onNoImageUpdate();
         this.setState({
             imageViewportTop: updateImageViewport,
@@ -965,7 +962,6 @@ class App extends Component {
         reader.addEventListener('loadend', function () {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
-            self.currentSelection = new Selection();
             // TODO: James B. - Refactor this into uiSlice.
             self.setState({
                 configurationInfo: {
@@ -1909,11 +1905,7 @@ class App extends Component {
      * @param {string} newLabel Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
-        // Destructure and gather useful data from selected detection
-        // eslint-disable-next-line no-unused-vars
-        const algo = this.currentSelection.getAlgorithm();
         const { algorithm, uuid, view } = this.props.selectedDetection;
-
         if (algorithm && uuid && view) {
             this.props.editDetectionLabel({
                 className: newLabel,
