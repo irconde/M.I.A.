@@ -1119,29 +1119,38 @@ class App extends Component {
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
-            const context = eventData.canvasContext;
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelTop: eventData.viewport.scale,
             });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
             }
-            this.props.updateZoomLevelTop(eventData.viewport.scale);
-            this.renderDetections(this.props.detections, context);
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.TOP) detections.push(det);
+            });
+            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageLeft") {
+                this.renderCrosshair(context, e.currentTarget);
+            }
+            this.renderDetections(detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
-            const context = eventData.canvasContext;
-
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelSide: eventData.viewport.scale,
             });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
             }
-            this.props.updateZoomLevelSide(eventData.viewport.scale);
-            this.renderDetections(this.props.detections, context);
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.SIDE) detections.push(det);
+            });
+            this.renderDetections(detections, context);
+            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageRight") {
+                this.renderCrosshair(context, e.currentTarget);
+            }
         }
         this.appUpdateImage();
         // set the canvas context to the image coordinate system
