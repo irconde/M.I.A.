@@ -133,6 +133,8 @@ class App extends Component {
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
+            mousePosition: {x: 0, y: 0},
+            activeViewport: "dicomImageLeft",
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
@@ -143,6 +145,7 @@ class App extends Component {
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
         this.loadDICOSdata = this.loadDICOSdata.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
+        this.onMouseMoved = this.onMouseMoved.bind(this);
         this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
             this
         );
@@ -288,6 +291,7 @@ class App extends Component {
             this.state.imageViewportSide
         );
         this.recalculateZoomLevel();
+        document.body.addEventListener("mousemove", this.onMouseMoved)
     }
 
     /**
@@ -394,6 +398,7 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         window.removeEventListener('resize', this.resizeListener);
+        document.body.removeEventListener('mousemove', this.onMouseMoved);
     }
 
     /**
@@ -1113,11 +1118,6 @@ class App extends Component {
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
-            // eslint-disable-next-line no-unused-vars
-            const toolData = cornerstoneTools.getToolState(
-                e.currentTarget,
-                'BoundingBoxDrawing'
-            );
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelTop: eventData.viewport.scale,
             });
@@ -1128,16 +1128,14 @@ class App extends Component {
             this.props.detections.forEach((det) => {
                 if (det.view === constants.viewport.TOP) detections.push(det);
             });
+            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageLeft") {
+                this.renderCrosshair(context, e.currentTarget);
+            }
             this.renderDetections(detections, context);
         } else if (
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
-            // eslint-disable-next-line no-unused-vars
-            const toolData = cornerstoneTools.getToolState(
-                e.currentTarget,
-                'BoundingBoxDrawing'
-            );
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelSide: eventData.viewport.scale,
             });
@@ -1149,14 +1147,45 @@ class App extends Component {
                 if (det.view === constants.viewport.SIDE) detections.push(det);
             });
             this.renderDetections(detections, context);
+            if (this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION && this.state.activeViewport === "dicomImageRight") {
+                this.renderCrosshair(context, e.currentTarget);
+            }
         }
-
         this.appUpdateImage();
         // set the canvas context to the image coordinate system
         //cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
         // NOTE: The coordinate system of the canvas is in image pixel space.  Drawing
         // to location 0,0 will be the top left of the image and rows,columns is the bottom
         // right.
+    }
+
+    renderCrosshair(context, target) {
+        const crosshairLength = 8;
+        const mousePos = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
+        const imageSize = target.id === "dicomImageRight" ? cornerstone.getImage(this.state.imageViewportSide) : cornerstone.getImage(this.state.imageViewportTop);
+        context.lineWidth = 2;
+        if (mousePos.x >= 0 && mousePos.x <= imageSize.width && mousePos.y >= 0 && mousePos.y <= imageSize.height) {
+            context.beginPath();
+            context.setLineDash([2, 2]);
+            context.strokeStyle = 'grey';
+            context.moveTo(mousePos.x, 0);
+            context.lineTo(mousePos.x, imageSize.height);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(0, mousePos.y);
+            context.lineTo(imageSize.width, mousePos.y);
+            context.stroke();
+        }
+        context.setLineDash([]);
+        context.strokeStyle = constants.colors.BLUE;
+        context.beginPath();
+        context.moveTo(mousePos.x - crosshairLength, mousePos.y);
+        context.lineTo(mousePos.x + crosshairLength, mousePos.y);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(mousePos.x, mousePos.y - crosshairLength);
+        context.lineTo(mousePos.x, mousePos.y + crosshairLength);
+        context.stroke();
     }
 
     /**
@@ -1330,7 +1359,7 @@ class App extends Component {
                 y: e.detail.currentPoints.canvas.y,
             });
             let clickedPos = constants.selection.NO_SELECTION;
-            for (var j = combinedDetections.length - 1; j > -1; j--) {
+            for (let j = combinedDetections.length - 1; j > -1; j--) {
                 if (combinedDetections[j].visible === false) continue;
                 if (
                     Utils.pointInRect(
@@ -1379,6 +1408,7 @@ class App extends Component {
                         constants.cornerstoneMode.EDITION
                 ) {
                     // We clicked a visible detection and are in edition mode
+
                     this.props.clearAllSelection();
                     this.onDetectionSelected(e).finally(() => {
                         this.props.emptyAreaClickUpdate();
@@ -1567,6 +1597,7 @@ class App extends Component {
                 constants.cornerstoneMode.SELECTION ||
             sideMenuUpdate === true
         ) {
+
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
             this.onDetectionSelected(e);
@@ -2009,11 +2040,19 @@ class App extends Component {
                 );
             }
             // Reset remaining DetectionSets to `un-selected` state
+
             this.props.clearAllSelection();
             this.props.deleteDetectionUpdate();
             this.resetCornerstoneTool();
             this.appUpdateImage();
         }
+    }
+
+    onMouseMoved(event) {
+        this.setState({
+            mousePosition: {x: event.x, y: event.y},
+            activeViewport: event.target.parentElement.id
+        });
     }
 
     render() {

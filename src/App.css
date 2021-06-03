@@ -98,3 +98,7 @@ body {
     color: #63b1de;
     fill: #63b1de;
 }
+
+#selectedTop, #selectedSide {
+    cursor: none;
+}

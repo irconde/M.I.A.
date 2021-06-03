@@ -70,7 +70,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             // No tool data
             return;
         }
-
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
@@ -90,6 +89,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         } = this.configuration;
 
         const context = getNewContext(eventData.canvasContext.canvas);
+
         const color = constants.detectionStyle.NORMAL_COLOR;
         const handleOptions = {
             color,
@@ -99,6 +99,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
             drawHandlesIfActive: drawHandlesOnHover,
             hideHandlesIfMoving,
         };
+
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
             for (let i = 0; i < toolData.data.length; i++) {
@@ -106,7 +107,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 if (data.visible === false) {
                     continue;
                 }
-                //console.log(zoom);
                 // Configure
                 setShadow(context, this.configuration);
                 const rectOptions = { color };
@@ -193,9 +193,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 data.handles.start
                             );
                         }
-                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
-                            ' '
-                        );
+                        var fontArr =
+                            constants.detectionStyle.LABEL_FONT.split(' ');
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;
