@@ -1152,17 +1152,30 @@ class App extends Component {
     }
 
     renderCrosshair(context, target) {
+        const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(target, this.state.mousePosition.x, this.state.mousePosition.y);
         const imageSize = target.id === "dicomImageRight" ? cornerstone.getImage(this.state.imageViewportSide) : cornerstone.getImage(this.state.imageViewportTop);
         context.beginPath();
-        context.strokeStyle = "black";
+        context.setLineDash([2, 2]);
+        context.lineWidth = 2;
+        context.strokeStyle = 'grey';
         context.moveTo(mousePos.x, 0);
         context.lineTo(mousePos.x, imageSize.height);
         context.stroke();
-
         context.beginPath();
         context.moveTo(0, mousePos.y);
         context.lineTo(imageSize.width, mousePos.y);
+        context.stroke();
+        context.setLineDash([]);
+        context.strokeStyle = constants.colors.BLUE;
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(mousePos.x - crosshairLength, mousePos.y);
+        context.lineTo(mousePos.x + crosshairLength, mousePos.y);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(mousePos.x, mousePos.y - crosshairLength);
+        context.lineTo(mousePos.x, mousePos.y + crosshairLength);
         context.stroke();
     }
 
