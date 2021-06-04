@@ -2,17 +2,17 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 
 const initialState = {
-    isEditLabelWidgetVisible: false,
+    editionMode: constants.editionMode.NO_TOOL,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
+    isEditLabelWidgetVisible: false,
     isFABVisible: false,
-    isDrawingBoundingBox: false,
-    isDetectionContextVisible: false,
     displaySelectedBoundingBox: false,
+    isDetectionContextVisible: false,
     detectionContextPosition: {
         top: 0,
         left: 0,
     },
-    editionMode: constants.editionMode.NO_TOOL,
+
     detectionLabelEditWidth: '0px',
     detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
     detectionLabelEditViewport: constants.viewport.SIDE,
@@ -32,6 +32,51 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         /**
+         * updateEditionMode
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.editionMode} action.payload - Constant value for the edition mode.
+         */
+        updateEditionMode: (state, action) => {
+            const {
+                editionMode,
+                isEditLabelWidgetVisible,
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+            } = action.payload;
+            state.editionMode = editionMode;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+            switch (editionMode) {
+                case constants.editionMode.LABEL:
+                    state.detectionLabelEditWidth = detectionLabelEditWidth;
+                    state.detectionLabelEditPosition = detectionLabelEditPosition;
+            }
+        },
+        /**
+         * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
+         *                         to not display the detection context widget.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        exitEditionModeUpdate: (state) => {
+            state.isDetectionContextVisible = false;
+            state.isEditLabelWidgetVisible = false;
+        },
+        /**
+         * updateCornerstoneMode
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
+         */
+        updateCornerstoneMode: (state, action) => {
+            state.cornerstoneMode = action.payload;
+        },
+        /**
+         * updateFABVisibility
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
+         */
+        updateFABVisibility: (state, action) => {
+            state.isFABVisible = action.payload;
+        },
+        /**
          * resetSelectedDetectionBoxesUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -44,6 +89,83 @@ const uiSlice = createSlice({
             state.detectionLabelEditViewport = constants.viewport.SIDE;
             state.detectionLabelEditPosition = { top: 0, left: 0 };
             state.displaySelectedBoundingBox = false;
+        },
+        /**
+         * selectEditDetectionLabelUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
+         */
+        selectEditDetectionLabelUpdate: (state, action) => {
+            const {
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+                isEditLabelWidgetVisible,
+                detectionLabelEditFont,
+                detectionLabelEditViewport,
+            } = action.payload;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.detectionLabelEditPosition = detectionLabelEditPosition;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+            state.detectionLabelEditFont = detectionLabelEditFont;
+            state.detectionLabelEditViewport = detectionLabelEditViewport;
+        },
+        /**
+         * onLabelEditionEnd
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
+         */
+        onLabelEditionEnd: (state, action) => {
+            const {
+                editionMode,
+                detectionLabelEditWidth,
+                displaySelectedBoundingBox,
+                isEditLabelWidgetVisible,
+            } = action.payload;
+            state.editionMode = editionMode;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.displaySelectedBoundingBox = displaySelectedBoundingBox;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
+        },
+        /**
+         * labelSelectedUpdate - For when a user selects an label from the detection context widget. Will set the UI elements
+         *                       edition mode to be Label, the detection context to not be visible, the edit label width, and its position.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing the width of the label, and an top & left values for the position.
+         */
+        labelSelectedUpdate: (state, action) => {
+            const { width, position, font, viewport } = action.payload;
+            state.detectionLabelEditWidth = width;
+            state.detectionLabelEditFont = font;
+            state.detectionLabelEditViewport = viewport;
+            state.detectionLabelEditPosition.top = position.top;
+            state.detectionLabelEditPosition.left = position.left;
+        },
+        /**
+         * TODO - James B. - Are we supposed to exit the edition of a detection when finishing labeling a detection?
+         * labelCompleteUpdate - For when a user finishes selecting a label for a detection. Will set the UI elements
+         *                       for FAB to be visible, the cornerstone mode to selection, displaying the selected
+         *                       bounding box to false, the edition mode to null, the detection label edit widget
+         *                       width and position to 0.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        labelCompleteUpdate: (state) => {
+            state.isFABVisible = true;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.displaySelectedBoundingBox = false;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.detectionLabelEditWidth = 0;
+            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
+            state.detectionLabelEditViewport = constants.viewport.SIDE;
+            state.detectionLabelEditPosition.top = 0;
+            state.detectionLabelEditPosition.left = 0;
+        },
+        /**
+         * updateDisplaySelectedBoundingBox
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value to determine if we need to display a selected bounding box, or a selected detection.
+         */
+        updateDisplaySelectedBoundingBox: (state, action) => {
+            state.displaySelectedBoundingBox = action.payload;
         },
         /**
          * resetSelectedDetectionBoxesUpdate
@@ -66,6 +188,59 @@ const uiSlice = createSlice({
         resetSelectedDetectionBoxesElseUpdate: (state) => {
             (state.isDetectionContextVisible = false),
                 (state.editionMode = constants.editionMode.NO_TOOL);
+        },
+        /**
+         * boundingBoxSelectedUpdate - For when a user enters annotation mode for a new detection. Sets the UI elements for
+         *                             cornerstone mode to annotation and to display the selected bounding box.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        boundingBoxSelectedUpdate: (state) => {
+            state.cornerstoneMode = constants.cornerstoneMode.ANNOTATION;
+            state.displaySelectedBoundingBox = true;
+        },
+        /**
+         * updateIsDetectionContextVisible
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
+         */
+        updateIsDetectionContextVisible: (state, action) => {
+            state.isDetectionContextVisible = action.payload;
+        },
+        /**
+         * updateDetectionContextPosition
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing values for top and left position for the detection context position.
+         */
+        updateDetectionContextPosition: (state, action) => {
+            const { top, left } = action.payload;
+            state.detectionContextPosition.top = top;
+            state.detectionContextPosition.left = left;
+        },
+        /**
+         * updateZoomLevels - For when the UI recalculates the zoom level for the cornerstone viewports.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing the zoom levels for both top and side.
+         */
+        updateZoomLevels: (state, action) => {
+            const { zoomLevelTop, zoomLevelSide } = action.payload;
+            state.zoomLevelTop = zoomLevelTop;
+            state.zoomLevelSide = zoomLevelSide;
+        },
+        /**
+         * updateZoomLevelTop - Updates the top level zoom to the passed in number
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Number} action - Number containing the zoom level
+         */
+        updateZoomLevelTop: (state, action) => {
+            state.zoomLevelTop = action.payload;
+        },
+        /**
+         * updateZoomLevelSide - Updates the side level zoom to the passed in number
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Number} action - Number containing the zoom level
+         */
+        updateZoomLevelSide: (state, action) => {
+            state.zoomLevelSide = action.payload;
         },
         /**
          * onDragEndUpdate
@@ -104,42 +279,6 @@ const uiSlice = createSlice({
                 });
         },
         /**
-         * onLabelEditionEnd
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
-         */
-        onLabelEditionEnd: (state, action) => {
-            const {
-                editionMode,
-                detectionLabelEditWidth,
-                displaySelectedBoundingBox,
-                isEditLabelWidgetVisible,
-            } = action.payload;
-            state.editionMode = editionMode;
-            state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.displaySelectedBoundingBox = displaySelectedBoundingBox;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-        },
-        /**
-         * selectEditDetectionLabelUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
-         */
-        selectEditDetectionLabelUpdate: (state, action) => {
-            const {
-                detectionLabelEditWidth,
-                detectionLabelEditPosition,
-                isEditLabelWidgetVisible,
-                detectionLabelEditFont,
-                detectionLabelEditViewport,
-            } = action.payload;
-            state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.detectionLabelEditPosition = detectionLabelEditPosition;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-            state.detectionLabelEditFont = detectionLabelEditFont;
-            state.detectionLabelEditViewport = detectionLabelEditViewport;
-        },
-        /**
          * hideContextMenuUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -149,74 +288,25 @@ const uiSlice = createSlice({
                 (state.displaySelectedBoundingBox = false);
         },
         /**
-         * updateCornerstoneMode
+         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
+         *                         for single viewport, the received time, and that we have received a file flag.
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
+         * @param {Object} action.payload - Object containing a boolean value for single viewport and the Date for the received time.
          */
-        updateCornerstoneMode: (state, action) => {
-            state.cornerstoneMode = action.payload;
+        newFileReceivedUpdate: (state, action) => {
+            const { singleViewport, receiveTime } = action.payload;
+            state.singleViewport = singleViewport;
+            state.receiveTime = receiveTime;
+            state.selectedFile = true;
         },
         /**
-         * updateFABVisibility
+         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
+         *                         for single viewport, the received time, and that we have received a file flag.
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
+         * @param {Boolean} action.payload - Boolean value for if we have received a file.
          */
-        updateFABVisibility: (state, action) => {
-            state.isFABVisible = action.payload;
-        },
-        /**
-         * updateIsDrawingBoundingBox
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we are currently drawing a bounding box
-         */
-        updateIsDrawingBoundingBox: (state, action) => {
-            state.isDrawingBoundingBox = action.payload;
-        },
-        /**
-         * updateIsDetectionContextVisible
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
-         */
-        updateIsDetectionContextVisible: (state, action) => {
-            state.isDetectionContextVisible = action.payload;
-        },
-        /**
-         * updateDisplaySelectedBoundingBox
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value to determine if we need to display a selected bounding box, or a selected detection.
-         */
-        updateDisplaySelectedBoundingBox: (state, action) => {
-            state.displaySelectedBoundingBox = action.payload;
-        },
-        /**
-         * updateEditionMode
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {constants.editionMode} action.payload - Constant value for the edition mode.
-         */
-        updateEditionMode: (state, action) => {
-            const {
-                editionMode,
-                isEditLabelWidgetVisible,
-                detectionLabelEditWidth,
-                detectionLabelEditPosition,
-            } = action.payload;
-            state.editionMode = editionMode;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-            switch (editionMode) {
-                case constants.editionMode.LABEL:
-                    state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition = detectionLabelEditPosition;
-            }
-        },
-        /**
-         * updateDetectionContextPosition
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing values for top and left position for the detection context position.
-         */
-        updateDetectionContextPosition: (state, action) => {
-            const { top, left } = action.payload;
-            state.detectionContextPosition.top = top;
-            state.detectionContextPosition.left = left;
+        updateSelectedFile: (state, action) => {
+            state.selectedFile = action.payload;
         },
         /**
          * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
@@ -273,39 +363,6 @@ const uiSlice = createSlice({
             state.isDetectionContextVisible = true;
         },
         /**
-         * labelSelectedUpdate - For when a user selects an label from the detection context widget. Will set the UI elements
-         *                       edition mode to be Label, the detection context to not be visible, the edit label width, and its position.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing the width of the label, and an top & left values for the position.
-         */
-        labelSelectedUpdate: (state, action) => {
-            const { width, position, font, viewport } = action.payload;
-            state.detectionLabelEditWidth = width;
-            state.detectionLabelEditFont = font;
-            state.detectionLabelEditViewport = viewport;
-            state.detectionLabelEditPosition.top = position.top;
-            state.detectionLabelEditPosition.left = position.left;
-        },
-        /**
-         * TODO - James B. - Are we supposed to exit the edition of a detection when finishing labeling a detection?
-         * labelCompleteUpdate - For when a user finishes selecting a label for a detection. Will set the UI elements
-         *                       for FAB to be visible, the cornerstone mode to selection, displaying the selected
-         *                       bounding box to false, the edition mode to null, the detection label edit widget
-         *                       width and position to 0.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        labelCompleteUpdate: (state) => {
-            state.isFABVisible = true;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.detectionLabelEditWidth = 0;
-            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
-            state.detectionLabelEditViewport = constants.viewport.SIDE;
-            state.detectionLabelEditPosition.top = 0;
-            state.detectionLabelEditPosition.left = 0;
-        },
-        /**
          * deleteDetectionUpdate - For when a user deletes a detection. Will set the UI elements for FAB to be visible,
          *                         the cornerstone mode to selection, to not display the selected bounding box, the
          *                         detection context to not be visible and drawing bounding box to false.
@@ -316,72 +373,6 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.displaySelectedBoundingBox = false;
             state.isDetectionContextVisible = false;
-            state.isDrawingBoundingBox = false;
-        },
-        /**
-         * boundingBoxSelectedUpdate - For when a user enters annotation mode for a new detection. Sets the UI elements for
-         *                             cornerstone mode to annotation and to display the selected bounding box.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        boundingBoxSelectedUpdate: (state) => {
-            state.cornerstoneMode = constants.cornerstoneMode.ANNOTATION;
-            state.displaySelectedBoundingBox = true;
-        },
-        /**
-         * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
-         *                         to not display the detection context widget.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        exitEditionModeUpdate: (state) => {
-            state.isDetectionContextVisible = false;
-            state.isEditLabelWidgetVisible = false;
-        },
-        /**
-         * updateZoomLevels - For when the UI recalculates the zoom level for the cornerstone viewports.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing the zoom levels for both top and side.
-         */
-        updateZoomLevels: (state, action) => {
-            const { zoomLevelTop, zoomLevelSide } = action.payload;
-            state.zoomLevelTop = zoomLevelTop;
-            state.zoomLevelSide = zoomLevelSide;
-        },
-        /**
-         * updateZoomLevelTop - Updates the top level zoom to the passed in number
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action - Number containing the zoom level
-         */
-        updateZoomLevelTop: (state, action) => {
-            state.zoomLevelTop = action.payload;
-        },
-        /**
-         * updateZoomLevelSide - Updates the side level zoom to the passed in number
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action - Number containing the zoom level
-         */
-        updateZoomLevelSide: (state, action) => {
-            state.zoomLevelSide = action.payload;
-        },
-        /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing a boolean value for single viewport and the Date for the received time.
-         */
-        newFileReceivedUpdate: (state, action) => {
-            const { singleViewport, receiveTime } = action.payload;
-            state.singleViewport = singleViewport;
-            state.receiveTime = receiveTime;
-            state.selectedFile = true;
-        },
-        /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we have received a file.
-         */
-        updateSelectedFile: (state, action) => {
-            state.selectedFile = action.payload;
         },
         /**
          * onNoImageUpdate - Occurs when the UI does not have another file to process from the file server. Will set the UI
@@ -408,18 +399,18 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
+ * getEditionMode
+ * @param {State} state Passed in via useSelector
+ * @returns {constants.editionMode} The constant for the current edition mode.
+ */
+export const getEditionMode = (state) => state.ui.editionMode;
+/**
  * getDisplaySelectedBoundingBox
  * @param {State} state Passed in via useSelector
  * @returns {Boolean} Wether we are displaying a selected bounding box
  */
 export const getDisplaySelectedBoundingBox = (state) =>
     state.ui.displaySelectedBoundingBox;
-/**
- * getEditionMode
- * @param {State} state Passed in via useSelector
- * @returns {constants.editionMode} The constant for the current edition mode.
- */
-export const getEditionMode = (state) => state.ui.editionMode;
 /**
  * getIsDetectionContextVisible
  * @param {State} state Passed in via useSelector
@@ -492,7 +483,6 @@ export const getIsEditLabelWidgetVisible = (state) =>
 export const {
     updateCornerstoneMode,
     updateFABVisibility,
-    updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
     updateDisplaySelectedBoundingBox,
     updateEditionMode,
