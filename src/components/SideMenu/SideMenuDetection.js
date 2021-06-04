@@ -9,7 +9,10 @@ import {
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
-import { resetSelectedDetectionBoxesUpdate } from '../../redux/slices/ui/uiSlice';
+import {
+    menuDetectionSelectedUpdate,
+    resetSelectedDetectionBoxesUpdate,
+} from '../../redux/slices/ui/uiSlice';
 
 const SideMenuDetection = ({
     detection,
@@ -73,7 +76,7 @@ const SideMenuDetection = ({
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
             dispatch(selectDetection(detection.uuid));
-            dispatch(resetSelectedDetectionBoxesUpdate());
+            dispatch(menuDetectionSelectedUpdate());
             resetCornerstoneTools();
         }
     };
