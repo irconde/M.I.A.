@@ -11,10 +11,7 @@ import {
     selectDetectionSet,
     updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
-import {
-    menuDetectionSelectedUpdate,
-    resetSelectedDetectionBoxesUpdate,
-} from '../../redux/slices/ui/uiSlice';
+import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
 const SideMenuAlgorithm = ({
     configurationInfo,
@@ -184,7 +181,6 @@ const SideMenuAlgorithm = ({
                             <TreeDetection
                                 detection={detection}
                                 key={index}
-                                algorithmSelected={isAlgorithmSelected}
                                 resetCornerstoneTools={resetCornerstoneTools}
                                 resetSelectedDetectionBoxes={
                                     resetSelectedDetectionBoxes
