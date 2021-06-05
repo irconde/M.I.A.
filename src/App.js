@@ -19,6 +19,7 @@ import JSZip from 'jszip';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
+import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
@@ -428,12 +429,20 @@ class App extends Component {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
+        cornerstoneTools.addTool(PolygonDrawingTool);
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
         ) {
-            cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                mouseButtonMask: 1,
-            });
+            if (this.props.editionMode === constants.editionMode.BOUNDING) {
+                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                    mouseButtonMask: 1,
+                });
+            }
+            else if (this.props.editionMode === constants.editionMode.POLYGON) {
+                cornerstoneTools.setToolActive('PolygonDrawingTool', {
+                    mouseButtonMask: 1,
+                });
+            }
         }
     }
 
@@ -449,16 +458,28 @@ class App extends Component {
             this.state.imageViewportTop,
             'BoundingBoxDrawing'
         );
+        cornerstoneTools.clearToolState(
+            this.state.imageViewportTop,
+            'PolygonDrawingTool'
+        );
         if (this.props.singleViewport !== true) {
             cornerstoneTools.clearToolState(
                 this.state.imageViewportSide,
                 'BoundingBoxDrawing'
             );
+            cornerstoneTools.clearToolState(
+                this.state.imageViewportSide,
+                'PolygonDrawingTool'
+            );
         }
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
             cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
         });
+        cornerstoneTools.setToolOptions('PolygonDrawingTool', {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+        });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
+        cornerstoneTools.setToolDisabled('PolygonDrawingTool');
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
@@ -1748,7 +1769,17 @@ class App extends Component {
      * @param {none} None
      */
     onPolygonMaskSelected() {
-        // To be implemented
+        if (
+            this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
+        ) {
+            this.props.clearAllSelection();
+            this.resetCornerstoneTool();
+            this.props.boundingBoxSelectedUpdate();
+            this.appUpdateImage();
+            cornerstoneTools.setToolActive('PolygonDrawingTool', {
+                mouseButtonMask: 1,
+            });
+        }
     }
 
     /**

@@ -10,7 +10,12 @@ const setShadow = csTools.importInternal('drawing/setShadow');
 const draw4CornerRect = csTools.importInternal('drawing/draw4CornerRect');
 const drawRect = csTools.importInternal('drawing/drawRect');
 
-// We define the new annotation tool by extending BaseAnnotationTool class
+/**
+ * @public
+ * @class BoundingBoxDrawingTool
+ * @classdesc Tool for drawing rectangular regions of interest
+ * @extends Tools.Base.BaseAnnotationTool
+ */
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
@@ -20,8 +25,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 drawHandles: true,
                 renderDashed: false,
             },
-            // TODO irconde. Customize the cursor
-            //svgCursor: rectangleRoiCursor,
         };
         super(props, defaultProps);
     }
