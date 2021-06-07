@@ -14,7 +14,6 @@ const moveHandleNearImagePoint = csTools.importInternal(
 );
 const state = csTools.importInternal('store/state');
 const clipToBox = csTools.importInternal('util/clipToBox');
-const throttle = csTools.importInternal('util/throttle');
 const EVENTS = csTools.importInternal('constants/events');
 
 const { freehandArea, freehandIntersect, FreehandHandleData } = freehandUtils;
@@ -152,15 +151,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {void}  void
      */
     updateCachedStats(image, element, data) {
-        // Define variables for the area and mean/standard deviation
-        let meanStdDev, meanStdDevSUV;
-
-        const seriesModule = cornerstone.metaData.get(
-            'generalSeriesModule',
-            image.imageId
-        );
-        const modality = seriesModule ? seriesModule.modality : null;
-
         const points = data.handles.points;
         // If the data has been invalidated, and the tool is not currently active,
         // We need to calculate it again.
@@ -223,16 +213,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         }
         const { image, element } = eventData;
         const config = this.configuration;
-        const seriesModule = cornerstone.metaData.get(
-            'generalSeriesModule',
-            image.imageId
-        );
-        const modality = seriesModule ? seriesModule.modality : null;
 
         // We have tool data for this element - iterate over each one and draw it
         const context = getNewContext(eventData.canvasContext.canvas);
-        // TODO. irconde
-        const lineWidth = 3; //toolStyle.getToolWidth();
         const { renderDashed } = config;
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
