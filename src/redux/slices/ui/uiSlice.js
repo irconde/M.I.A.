@@ -122,7 +122,11 @@ const uiSlice = createSlice({
          */
         resetSelectedDetectionBoxesElseUpdate: (state) => {
             (state.isDetectionContextVisible = false),
-                (state.editionMode = constants.editionMode.NO_TOOL);
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
         },
         /**
          * updateIsDetectionContextVisible
@@ -167,20 +171,6 @@ const uiSlice = createSlice({
          */
         updateZoomLevelSide: (state, action) => {
             state.zoomLevelSide = action.payload;
-        },
-        /**
-         * onDragEndUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        onDragEndUpdate: (state) => {
-            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.editionMode = constants.editionMode.NO_TOOL),
-                (state.isFABVisible = true),
-                (state.isDetectionContextVisible = false),
-                (state.detectionContextPosition = {
-                    top: 0,
-                    left: 0,
-                });
         },
         /**
          * onDragEndUpdate
@@ -382,7 +372,6 @@ export const {
     updateZoomLevelSide,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
-    onDragEndUpdate,
     onDragEndWidgetUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,

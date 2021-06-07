@@ -65,7 +65,6 @@ import {
     updateZoomLevelSide,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
-    onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     onDragEndWidgetUpdate,
@@ -1492,13 +1491,6 @@ class App extends Component {
                     blob: newBlob,
                     uuid,
                 });
-                if (data.length == 0) {
-                    self.props.onDragEndUpdate();
-                    self.props.clearAllSelection();
-                    self.resetCornerstoneTool();
-                    self.appUpdateImage();
-                    return;
-                }
                 // call updateDetection
                 if (data[0].updatingDetection === false) {
                     // Need to determine if updating operator or new
@@ -1617,10 +1609,10 @@ class App extends Component {
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.props.hideContextMenuUpdate();
-            this.appUpdateImage();
         } else {
             this.props.exitEditionModeUpdate();
         }
+        this.appUpdateImage();
     }
 
     /**
@@ -1911,8 +1903,8 @@ class App extends Component {
      * @param {string} newLabel Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
-        const { algorithm, uuid, view } = this.props.selectedDetection;
-        if (algorithm && uuid && view) {
+        const { uuid } = this.props.selectedDetection;
+        if (uuid) {
             this.props.editDetectionLabel({
                 className: newLabel,
                 uuid: uuid,
@@ -2155,7 +2147,6 @@ const mapDispatchToProps = {
     updateZoomLevelSide,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
-    onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     onDragEndWidgetUpdate,
