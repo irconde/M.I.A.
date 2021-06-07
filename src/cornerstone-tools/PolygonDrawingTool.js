@@ -12,9 +12,12 @@ const triggerEvent = csTools.importInternal('util/triggerEvent');
 const moveHandleNearImagePoint = csTools.importInternal(
     'manipulators/moveHandleNearImagePoint'
 );
+const state = csTools.importInternal('store/state');
 const clipToBox = csTools.importInternal('util/clipToBox');
+const throttle = csTools.importInternal('util/throttle');
+const EVENTS = csTools.importInternal('constants/events');
 
-const { insertOrDelete, freehandIntersect, FreehandHandleData } = freehandUtils;
+const { freehandArea, freehandIntersect, FreehandHandleData } = freehandUtils;
 
 /**
  * @public
@@ -38,25 +41,53 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         this._modifying = false;
 
         // Create bound callback functions for private event loops
-
         this._drawingMouseDownCallback =
             this._drawingMouseDownCallback.bind(this);
         this._drawingMouseMoveCallback =
             this._drawingMouseMoveCallback.bind(this);
-        this._drawingMouseDragCallback =
-            this._drawingMouseDragCallback.bind(this);
         this._drawingMouseUpCallback = this._drawingMouseUpCallback.bind(this);
         this._drawingMouseDoubleClickCallback =
             this._drawingMouseDoubleClickCallback.bind(this);
         this._editMouseUpCallback = this._editMouseUpCallback.bind(this);
         this._editMouseDragCallback = this._editMouseDragCallback.bind(this);
+
         this._drawingTouchStartCallback =
             this._drawingTouchStartCallback.bind(this);
-        this._drawingTouchDragCallback =
-            this._drawingTouchDragCallback.bind(this);
         this._drawingDoubleTapClickCallback =
             this._drawingDoubleTapClickCallback.bind(this);
         this._editTouchDragCallback = this._editTouchDragCallback.bind(this);
+    }
+
+    createNewMeasurement(eventData) {
+        const goodEventData =
+            eventData &&
+            eventData.currentPoints &&
+            eventData.currentPoints.image;
+
+        if (!goodEventData) {
+            console.log(
+                `required eventData not supplied to tool ${this.name}'s createNewMeasurement`
+            );
+            return;
+        }
+        const measurementData = {
+            visible: true,
+            active: true,
+            invalidated: true,
+            color: undefined,
+            handles: {
+                points: [],
+            },
+        };
+        measurementData.handles.textBox = {
+            active: false,
+            hasMoved: false,
+            movesIndependently: false,
+            drawnIndependently: true,
+            allowedOutsideImage: true,
+            hasBoundingBox: true,
+        };
+        return measurementData;
     }
 
     /**
@@ -75,17 +106,13 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 `invalid parameters supplied to tool ${this.name}'s pointNearTool`
             );
         }
-
         if (!validParameters || data.visible === false) {
             return false;
         }
-
         const isPointNearTool = this._pointNearHandle(element, data, coords);
-
         if (isPointNearTool !== undefined) {
             return true;
         }
-
         return false;
     }
 
@@ -115,34 +142,69 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * @param {*} element
-     * @param {*} data
-     * @param {*} coords
-     * @returns {number} the distance in canvas units from the provided coordinates to the
-     * closest rendered portion of the annotation. -1 if the distance cannot be
-     * calculated.
+     *
+     *
+     *
+     * @param {Object} image image
+     * @param {Object} element element
+     * @param {Object} data data
+     *
+     * @returns {void}  void
      */
-    distanceFromPointCanvas(element, data, coords) {
-        let distance = Infinity;
+    updateCachedStats(image, element, data) {
+        // Define variables for the area and mean/standard deviation
+        let meanStdDev, meanStdDevSUV;
 
-        if (!data) {
-            return -1;
-        }
-        const canvasCoords = cornerstone.pixelToCanvas(element, coords);
+        const seriesModule = cornerstone.metaData.get(
+            'generalSeriesModule',
+            image.imageId
+        );
+        const modality = seriesModule ? seriesModule.modality : null;
+
         const points = data.handles.points;
+        // If the data has been invalidated, and the tool is not currently active,
+        // We need to calculate it again.
+
+        // Retrieve the bounds of the ROI in image coordinates
+        const bounds = {
+            left: points[0].x,
+            right: points[0].x,
+            bottom: points[0].y,
+            top: points[0].x,
+        };
+
         for (let i = 0; i < points.length; i++) {
-            const handleCanvas = cornerstone.pixelToCanvas(element, points[i]);
-            const distanceI = cornerstoneMath.point.distance(
-                handleCanvas,
-                canvasCoords
-            );
-            distance = Math.min(distance, distanceI);
+            bounds.left = Math.min(bounds.left, points[i].x);
+            bounds.right = Math.max(bounds.right, points[i].x);
+            bounds.bottom = Math.min(bounds.bottom, points[i].y);
+            bounds.top = Math.max(bounds.top, points[i].y);
         }
-        // If an error caused distance not to be calculated, return -1.
-        if (distance === Infinity) {
-            return -1;
+
+        const polyBoundingBox = {
+            left: bounds.left,
+            top: bounds.bottom,
+            width: Math.abs(bounds.right - bounds.left),
+            height: Math.abs(bounds.top - bounds.bottom),
+        };
+
+        // Store the bounding box information for the text box
+        data.polyBoundingBox = polyBoundingBox;
+
+        // Retrieve the pixel spacing values, and if they are not
+        // Real non-zero values, set them to 1
+        const columnPixelSpacing = image.columnPixelSpacing || 1;
+        const rowPixelSpacing = image.rowPixelSpacing || 1;
+        const scaling = columnPixelSpacing * rowPixelSpacing;
+
+        const area = freehandArea(data.handles.points, scaling);
+
+        // If the area value is sane, store it for later retrieval
+        if (!isNaN(area)) {
+            data.area = area;
         }
-        return distance;
+
+        // Set the invalidated flag to false so that this data won't automatically be recalculated
+        data.invalidated = false;
     }
 
     /**
@@ -284,32 +346,19 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                         drawHandles(context, eventData, [firstHandle], options);
                     }
                 }
+                // Invoked when a closed polygon is created
+                if (data.invalidated === true && !data.active) {
+                    this.updateCachedStats(image, element, data);
+                }
             });
         }
     }
 
     addNewMeasurement(evt) {
         const eventData = evt.detail;
-
         this._startDrawing(evt);
         this._addPoint(eventData);
-
         preventPropagation(evt);
-    }
-
-    preMouseDownCallback(evt) {
-        const eventData = evt.detail;
-        const nearby = this._pointNearHandleAllTools(eventData);
-        if (eventData.event.ctrlKey) {
-            if (nearby !== undefined && nearby.handleNearby.hasBoundingBox) {
-                // Ctrl + clicked textBox, do nothing but still consume event.
-            } else {
-                insertOrDelete.call(this, evt, nearby);
-            }
-            preventPropagation(evt);
-            return true;
-        }
-        return false;
     }
 
     handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
@@ -367,7 +416,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         }
 
         const coords = currentPoints.canvas;
-
         const config = this.configuration;
         const currentTool = config.currentTool;
         const toolState = csTools.getToolState(element, this.name);
@@ -375,10 +423,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
 
         const handleNearby = this._pointNearHandle(element, data, coords);
 
-        if (
-            !csTools.freehandIntersect.end(data.handles.points) &&
-            data.canComplete
-        ) {
+        if (!freehandIntersect.end(data.handles.points) && data.canComplete) {
             const lastHandlePlaced = config.currentHandle;
             this._endDrawing(element, lastHandlePlaced);
         } else if (handleNearby === undefined) {
@@ -460,50 +505,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 return i;
             }
         }
-
-        // Check to see if mouse in bounding box of textbox
-        // TODO. irconde
-        /*
-        if (data.handles.textBox) {
-            if (pointInsideBoundingBox(data.handles.textBox, coords)) {
-                return data.handles.textBox;
-            }
-        }
-         */
-    }
-
-    /**
-     * Returns a handle if it is close to the mouse cursor (all tools)
-     *
-     * @private
-     * @param {Object} eventData - data object associated with an event.
-     * @returns {Object}
-     */
-    _pointNearHandleAllTools(eventData) {
-        const { currentPoints, element } = eventData;
-        const coords = currentPoints.canvas;
-        const toolState = csTools.getToolState(element, this.name);
-        if (!toolState) {
-            return;
-        }
-        let handleNearby;
-        for (
-            let toolIndex = 0;
-            toolIndex < toolState.data.length;
-            toolIndex++
-        ) {
-            handleNearby = this._pointNearHandle(
-                element,
-                toolState.data[toolIndex],
-                coords
-            );
-            if (handleNearby !== undefined) {
-                return {
-                    handleNearby,
-                    toolIndex,
-                };
-            }
-        }
     }
 
     /**
@@ -513,7 +514,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {void}
      */
     fireModifiedEvent(element, measurementData) {
-        const eventType = cornerstone.EVENTS.MEASUREMENT_MODIFIED;
+        const eventType = EVENTS.MEASUREMENT_MODIFIED;
         const eventData = {
             toolName: this.name,
             toolType: this.name, // Deprecation notice: toolType will be replaced by toolName
@@ -524,7 +525,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     fireCompletedEvent(element, measurementData) {
-        const eventType = cornerstone.EVENTS.MEASUREMENT_COMPLETED;
+        const eventType = EVENTS.MEASUREMENT_COMPLETED;
         const eventData = {
             toolName: this.name,
             toolType: this.name, // Deprecation notice: toolType will be replaced by toolName
@@ -545,49 +546,40 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     _deactivateDraw(element) {
         this._drawing = false;
         // TODO. irconde
-        //state.isMultiPartToolActive = false;
-        this._activeDrawingToolReference = null;
+        state.isMultiPartToolActive = false;
         this._drawingInteractionType = null;
 
-        // TODO. irconde
-        //setToolCursor(this.element, this.svgCursor);
-
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_DOWN,
+            EVENTS.MOUSE_DOWN,
             this._drawingMouseDownCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_MOVE,
+            EVENTS.MOUSE_MOVE,
             this._drawingMouseMoveCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_DOUBLE_CLICK,
+            EVENTS.MOUSE_DOUBLE_CLICK,
             this._drawingMouseDoubleClickCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_DRAG,
-            this._drawingMouseDragCallback
-        );
-        element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_UP,
+            EVENTS.MOUSE_UP,
             this._drawingMouseUpCallback
         );
-
         // Touch
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_START,
+            EVENTS.TOUCH_START,
             this._drawingTouchStartCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_DRAG,
+            EVENTS.TOUCH_DRAG,
             this._drawingTouchDragCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_START,
+            EVENTS.TOUCH_START,
             this._drawingMouseMoveCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_END,
+            EVENTS.TOUCH_END,
             this._drawingMouseUpCallback
         );
         cornerstone.updateImage(element);
@@ -603,25 +595,16 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      */
     _activateModify(element) {
         // TODO. irconde
-        //state.isToolLocked = true;
+        state.isToolLocked = true;
+        element.addEventListener(EVENTS.MOUSE_UP, this._editMouseUpCallback);
         element.addEventListener(
-            cornerstone.EVENTS.MOUSE_UP,
-            this._editMouseUpCallback
-        );
-        element.addEventListener(
-            cornerstone.EVENTS.MOUSE_DRAG,
+            EVENTS.MOUSE_DRAG,
             this._editMouseDragCallback
         );
+        element.addEventListener(EVENTS.MOUSE_CLICK, this._editMouseUpCallback);
+        element.addEventListener(EVENTS.TOUCH_END, this._editMouseUpCallback);
         element.addEventListener(
-            cornerstone.EVENTS.MOUSE_CLICK,
-            this._editMouseUpCallback
-        );
-        element.addEventListener(
-            cornerstone.EVENTS.TOUCH_END,
-            this._editMouseUpCallback
-        );
-        element.addEventListener(
-            cornerstone.EVENTS.TOUCH_DRAG,
+            EVENTS.TOUCH_DRAG,
             this._editTouchDragCallback
         );
         cornerstone.updateImage(element);
@@ -637,25 +620,22 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      */
     _deactivateModify(element) {
         //TODO. irconde
-        //state.isToolLocked = false;
+        state.isToolLocked = false;
+        element.removeEventListener(EVENTS.MOUSE_UP, this._editMouseUpCallback);
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_UP,
-            this._editMouseUpCallback
-        );
-        element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_DRAG,
+            EVENTS.MOUSE_DRAG,
             this._editMouseDragCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.MOUSE_CLICK,
+            EVENTS.MOUSE_CLICK,
             this._editMouseUpCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_END,
+            EVENTS.TOUCH_END,
             this._editMouseUpCallback
         );
         element.removeEventListener(
-            cornerstone.EVENTS.TOUCH_DRAG,
+            EVENTS.TOUCH_DRAG,
             this._editTouchDragCallback
         );
         cornerstone.updateImage(element);
@@ -680,7 +660,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
             const lastHandlePlaced = config.currentHandle;
 
             this._endDrawing(element, lastHandlePlaced);
-            external.cornerstone.updateImage(element);
+            cornerstone.updateImage(element);
         }
     }
 
@@ -731,13 +711,10 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      */
     _drawingMouseMoveCallback(evt) {
         const eventData = evt.detail;
-        console.log(eventData);
         const { currentPoints, element } = eventData;
         const toolState = csTools.getToolState(element, this.name);
-
         const config = this.configuration;
         const currentTool = config.currentTool;
-
         const data = toolState.data[currentTool];
         const coords = currentPoints.canvas;
 
@@ -758,7 +735,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
             config.mouseLocation.handles.start.x = points[handleNearby].x;
             config.mouseLocation.handles.start.y = points[handleNearby].y;
         }
-
         // Force onImageRendered
         cornerstone.updateImage(element);
     }
@@ -777,20 +753,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         config.mouseLocation.handles.start.x = currentPoints.image.x;
         config.mouseLocation.handles.start.y = currentPoints.image.y;
         clipToBox(config.mouseLocation.handles.start, image);
-    }
-
-    /**
-     * Event handler for MOUSE_DRAG during drawing event loop.
-     *
-     * @event
-     * @param {Object} evt - The event.
-     * @returns {undefined}
-     */
-    _drawingMouseDragCallback(evt) {
-        if (!this.options.mouseButtonMask.includes(evt.detail.buttons)) {
-            return;
-        }
-        this._drawingDrag(evt);
     }
 
     /**
@@ -934,9 +896,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const config = this.configuration;
         let interactionType;
 
-        if (evt.type === cornerstone.EVENTS.MOUSE_DOWN_ACTIVATE) {
+        if (evt.type === EVENTS.MOUSE_DOWN_ACTIVATE) {
             interactionType = 'Mouse';
-        } else if (evt.type === cornerstone.EVENTS.TOUCH_START_ACTIVE) {
+        } else if (evt.type === EVENTS.TOUCH_START_ACTIVE) {
             interactionType = 'Touch';
         }
         this._activateDraw(element, interactionType);
@@ -947,8 +909,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const toolState = csTools.getToolState(element, this.name);
 
         config.currentTool = toolState.data.length - 1;
-
-        this._activeDrawingToolReference = toolState.data[config.currentTool];
     }
 
     /**
@@ -1032,38 +992,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * Event handler for TOUCH_DRAG during drawing event loop.
-     *
-     * @event
-     * @param {Object} evt - The event.
-     * @returns {undefined}
-     */
-    _drawingTouchDragCallback(evt) {
-        this._drawingDrag(evt);
-    }
-
-    _drawingDrag(evt) {
-        const eventData = evt.detail;
-        const { element } = eventData;
-
-        const toolState = csTools.getToolState(element, this.name);
-
-        const config = this.configuration;
-        const currentTool = config.currentTool;
-
-        const data = toolState.data[currentTool];
-
-        // Set the mouseLocation handle
-        this._getMouseLocation(eventData);
-        this._checkInvalidHandleLocation(data, eventData);
-        this._addPointPencilMode(eventData, data.handles.points);
-        this._dragging = true;
-
-        // Force onImageRendered
-        cornerstone.updateImage(element);
-    }
-
-    /**
      * Event handler for DOUBLE_TAP during drawing event loop.
      *
      * @event
@@ -1074,42 +1002,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const { element } = evt.detail;
         this.completeDrawing(element);
         preventPropagation(evt);
-    }
-
-    /**
-     * If in pencilMode, check the mouse position is farther than the minimum
-     * distance between points, then add a point.
-     *
-     * @private
-     * @param {Object} eventData - Data object associated with an event.
-     * @param {Object} points - Data object associated with the tool.
-     * @returns {undefined}
-     */
-    _addPointPencilMode(eventData, points) {
-        const config = this.configuration;
-        const { element } = eventData;
-        const mousePoint = config.mouseLocation.handles.start;
-
-        const handleFurtherThanMinimumSpacing = (handle) =>
-            this._isDistanceLargerThanSpacing(element, handle, mousePoint);
-
-        if (points.every(handleFurtherThanMinimumSpacing)) {
-            this._addPoint(eventData);
-        }
-    }
-
-    /**
-     * Returns true if two points are farther than this.configuration.spacing.
-     *
-     * @private
-     * @param  {Object} element     The element on which the roi is being drawn.
-     * @param  {Object} p1          The first point, in pixel space.
-     * @param  {Object} p2          The second point, in pixel space.
-     * @returns {boolean}            True if the distance is smaller than the
-     *                              allowed canvas spacing.
-     */
-    _isDistanceLargerThanSpacing(element, p1, p2) {
-        return this._compareDistanceToSpacing(element, p1, p2, '>');
     }
 
     /**
@@ -1149,54 +1041,44 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     _activateDraw(element, interactionType = 'Mouse') {
         this._drawing = true;
         this._drawingInteractionType = interactionType;
-        // TODO. irconde
-        //state.isMultiPartToolActive = true;
-        //hideToolCursor(this.element);
+        state.isMultiPartToolActive = true;
 
         // Polygonal Mode
         element.addEventListener(
-            cornerstone.EVENTS.MOUSE_DOWN,
+            EVENTS.MOUSE_DOWN,
             this._drawingMouseDownCallback
         );
         element.addEventListener(
-            cornerstone.EVENTS.MOUSE_MOVE,
+            EVENTS.MOUSE_MOVE,
             this._drawingMouseMoveCallback
         );
         element.addEventListener(
-            cornerstone.EVENTS.MOUSE_DOUBLE_CLICK,
+            EVENTS.MOUSE_DOUBLE_CLICK,
             this._drawingMouseDoubleClickCallback
         );
 
-        // Drag/Pencil Mode
-        element.addEventListener(
-            cornerstone.EVENTS.MOUSE_DRAG,
-            this._drawingMouseDragCallback
-        );
-        element.addEventListener(
-            cornerstone.EVENTS.MOUSE_UP,
-            this._drawingMouseUpCallback
-        );
+        element.addEventListener(EVENTS.MOUSE_UP, this._drawingMouseUpCallback);
 
         // Touch
         element.addEventListener(
-            cornerstone.EVENTS.TOUCH_START,
+            EVENTS.TOUCH_START,
             this._drawingMouseMoveCallback
         );
         element.addEventListener(
-            cornerstone.EVENTS.TOUCH_START,
+            EVENTS.TOUCH_START,
             this._drawingTouchStartCallback
         );
 
         element.addEventListener(
-            cornerstone.EVENTS.TOUCH_DRAG,
+            EVENTS.TOUCH_DRAG,
             this._drawingTouchDragCallback
         );
         element.addEventListener(
-            cornerstone.EVENTS.TOUCH_END,
+            EVENTS.TOUCH_END,
             this._drawingMouseUpCallback
         );
         element.addEventListener(
-            cornerstone.EVENTS.DOUBLE_TAP,
+            EVENTS.DOUBLE_TAP,
             this._drawingDoubleTapClickCallback
         );
 
@@ -1215,84 +1097,11 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         if (data.handles.points.length < 2) {
             return true;
         }
-        let invalidHandlePlacement;
-        if (this._dragging) {
-            invalidHandlePlacement = this._checkHandlesPencilMode(
-                data,
-                eventData
-            );
-        } else {
-            invalidHandlePlacement = this._checkHandlesPolygonMode(
-                data,
-                eventData
-            );
-        }
-        data.handles.invalidHandlePlacement = invalidHandlePlacement;
-    }
-
-    /**
-     * Returns true if the proposed location of a new handle is invalid (in pencilMode).
-     *
-     * @private
-     * @param {Object} data - data object associated with the tool.
-     * @param {Object} eventData The data associated with the event.
-     * @returns {Boolean}
-     */
-    _checkHandlesPencilMode(data, eventData) {
-        const config = this.configuration;
-        const mousePoint = config.mouseLocation.handles.start;
-        const points = data.handles.points;
-        let invalidHandlePlacement = freehandIntersect.newHandle(
-            mousePoint,
-            points
+        let invalidHandlePlacement = this._checkHandlesPolygonMode(
+            data,
+            eventData
         );
-        if (invalidHandlePlacement === false) {
-            invalidHandlePlacement = this._invalidHandlePencilMode(
-                data,
-                eventData
-            );
-        }
-        return invalidHandlePlacement;
-    }
-
-    /**
-     * Returns true if the mouse position is far enough from previous points (in pencilMode).
-     *
-     * @private
-     * @param {Object} data - data object associated with the tool.
-     * @param {Object} eventData The data associated with the event.
-     * @returns {Boolean}
-     */
-    _invalidHandlePencilMode(data, eventData) {
-        const config = this.configuration;
-        const { element } = eventData;
-        const mousePoint = config.mouseLocation.handles.start;
-        const points = data.handles.points;
-        const mouseAtOriginHandle =
-            this._isDistanceSmallerThanCompleteSpacingCanvas(
-                element,
-                points[0],
-                mousePoint
-            );
-        if (mouseAtOriginHandle) {
-            data.canComplete = true;
-
-            return false;
-        }
-        data.canComplete = false;
-        // Compare with all other handles appart from the last one
-        for (let i = 1; i < points.length - 1; i++) {
-            if (
-                this._isDistanceSmallerThanSpacing(
-                    element,
-                    points[i],
-                    mousePoint
-                )
-            ) {
-                return true;
-            }
-        }
-        return false;
+        data.handles.invalidHandlePlacement = invalidHandlePlacement;
     }
 
     /**
@@ -1321,20 +1130,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
             '<',
             completeHandleRadius
         );
-    }
-
-    /**
-     * Returns true if two points are closer than this.configuration.spacing.
-     *
-     * @private
-     * @param  {Object} element     The element on which the roi is being drawn.
-     * @param  {Object} p1          The first point, in pixel space.
-     * @param  {Object} p2          The second point, in pixel space.
-     * @returns {boolean}            True if the distance is smaller than the
-     *                              allowed canvas spacing.
-     */
-    _isDistanceSmallerThanSpacing(element, p1, p2) {
-        return this._compareDistanceToSpacing(element, p1, p2, '<');
     }
 
     /**
@@ -1431,183 +1226,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
             return points.length - 1;
         }
         return currentHandle - 1;
-    }
-
-    createNewMeasurement(eventData) {
-        const goodEventData =
-            eventData &&
-            eventData.currentPoints &&
-            eventData.currentPoints.image;
-
-        if (!goodEventData) {
-            console.log(
-                `required eventData not supplied to tool ${this.name}'s createNewMeasurement`
-            );
-            return;
-        }
-
-        const measurementData = {
-            visible: true,
-            active: true,
-            invalidated: true,
-            color: undefined,
-            handles: {
-                points: [],
-            },
-        };
-
-        measurementData.handles.textBox = {
-            active: false,
-            hasMoved: false,
-            movesIndependently: false,
-            drawnIndependently: true,
-            allowedOutsideImage: true,
-            hasBoundingBox: true,
-        };
-
-        return measurementData;
-    }
-
-    // ===================================================================
-    // Public Configuration API. .
-    // ===================================================================
-
-    get spacing() {
-        return this.configuration.spacing;
-    }
-
-    set spacing(value) {
-        if (typeof value !== 'number') {
-            throw new Error(
-                'Attempting to set freehand spacing to a value other than a number.'
-            );
-        }
-        this.configuration.spacing = value;
-        cornerstone.updateImage(this.element);
-    }
-
-    get activeHandleRadius() {
-        return this.configuration.activeHandleRadius;
-    }
-
-    set activeHandleRadius(value) {
-        if (typeof value !== 'number') {
-            throw new Error(
-                'Attempting to set freehand activeHandleRadius to a value other than a number.'
-            );
-        }
-        this.configuration.activeHandleRadius = value;
-        cornerstone.updateImage(this.element);
-    }
-
-    get completeHandleRadius() {
-        return this.configuration.completeHandleRadius;
-    }
-
-    set completeHandleRadius(value) {
-        if (typeof value !== 'number') {
-            throw new Error(
-                'Attempting to set freehand completeHandleRadius to a value other than a number.'
-            );
-        }
-        this.configuration.completeHandleRadius = value;
-        cornerstone.updateImage(this.element);
-    }
-
-    get alwaysShowHandles() {
-        return this.configuration.alwaysShowHandles;
-    }
-
-    set alwaysShowHandles(value) {
-        if (typeof value !== 'boolean') {
-            throw new Error(
-                'Attempting to set freehand alwaysShowHandles to a value other than a boolean.'
-            );
-        }
-        this.configuration.alwaysShowHandles = value;
-        cornerstone.updateImage(this.element);
-    }
-
-    get invalidColor() {
-        return this.configuration.invalidColor;
-    }
-
-    set invalidColor(value) {
-        /*
-          It'd be easy to check if the color was e.g. a valid rgba color. However
-          it'd be difficult to check if the color was a named CSS color without
-          bloating the library, so we don't. If the canvas can't intepret the color
-          it'll show up grey.
-        */
-        this.configuration.invalidColor = value;
-        cornerstone.updateImage(this.element);
-    }
-
-    /**
-     * Ends the active drawing loop and removes the polygon.
-     *
-     * @public
-     * @param {Object} element - The element on which the roi is being drawn.
-     * @returns {null}
-     */
-    cancelDrawing(element) {
-        if (!this._drawing) {
-            return;
-        }
-        const toolState = csTools.getToolState(element, this.name);
-        const config = this.configuration;
-        const data = toolState.data[config.currentTool];
-
-        data.active = false;
-        data.highlight = false;
-        data.handles.invalidHandlePlacement = false;
-
-        // Reset the current handle
-        config.currentHandle = 0;
-        config.currentTool = -1;
-        data.canComplete = false;
-
-        csTools.removeToolState(element, this.name, data);
-        this._deactivateDraw(element);
-        cornerstone.updateImage(element);
-    }
-
-    /**
-     * New image event handler.
-     *
-     * @public
-     * @param  {Object} evt The event.
-     * @returns {null}
-     */
-    newImageCallback(evt) {
-        const config = this.configuration;
-
-        if (!(this._drawing && this._activeDrawingToolReference)) {
-            return;
-        }
-
-        // Actively drawing but scrolled to different image.
-
-        const element = evt.detail.element;
-        const data = this._activeDrawingToolReference;
-
-        data.active = false;
-        data.highlight = false;
-        data.handles.invalidHandlePlacement = false;
-
-        // Connect the end handle to the origin handle
-        const points = data.handles.points;
-
-        points[config.currentHandle - 1].lines.push(points[0]);
-
-        // Reset the current handle
-        config.currentHandle = 0;
-        config.currentTool = -1;
-        data.canComplete = false;
-
-        this._deactivateDraw(element);
-
-        cornerstone.updateImage(element);
     }
 }
 
