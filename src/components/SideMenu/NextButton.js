@@ -35,9 +35,9 @@ const NextButtonContainer = styled.div`
 
 const NextButton = ({ nextImageClick }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
-    const displaySelectedBoundingBox = useSelector(getSelectedDetection);
+    const selectedDetection = useSelector(getSelectedDetection);
     const enableNextButton =
-        !displaySelectedBoundingBox &&
+        !selectedDetection &&
         cornerstoneMode === constants.cornerstoneMode.SELECTION;
     const handleClick = (e) => {
         if (enableNextButton) {
