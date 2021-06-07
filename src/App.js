@@ -53,13 +53,11 @@ import {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,
@@ -403,9 +401,8 @@ class App extends Component {
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
-        if (this.props.displaySelectedBoundingBox === true) {
+        if (this.props.selectDetection) {
             this.props.clearAllSelection();
-            this.props.updateDisplaySelectedBoundingBox(false);
             this.appUpdateImage();
         }
     }
@@ -1653,7 +1650,6 @@ class App extends Component {
             if (detectionData) {
                 if (detectionData.boundingBox !== undefined) {
                     const detectionBoxCoords = detectionData.boundingBox;
-                    this.props.updateDisplaySelectedBoundingBox(true);
                     const data = {
                         handles: {
                             start: {
@@ -1722,7 +1718,9 @@ class App extends Component {
         ) {
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
-            this.props.boundingBoxSelectedUpdate();
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.ANNOTATION
+            );
             this.appUpdateImage();
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
@@ -1931,7 +1929,6 @@ class App extends Component {
             this.props.onLabelEditionEnd({
                 editionMode: constants.editionMode.NO_TOOL,
                 detectionLabelEditWidth: 0,
-                displaySelectedBoundingBox: false,
                 isEditLabelWidgetVisible: false,
             });
         }
@@ -2116,7 +2113,6 @@ const mapStateToProps = (state) => {
         selectedDetection: detections.selectedDetection,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
-        displaySelectedBoundingBox: ui.displaySelectedBoundingBox,
         zoomLevelTop: ui.zoomLevelTop,
         zoomLevelSide: ui.zoomLevelSide,
         imageViewportTop: ui.imageViewportTop,
@@ -2151,13 +2147,11 @@ const mapDispatchToProps = {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,

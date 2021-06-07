@@ -6,7 +6,6 @@ const initialState = {
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     isEditLabelWidgetVisible: false,
     isFABVisible: false,
-    displaySelectedBoundingBox: false,
     isDetectionContextVisible: false,
     detectionContextPosition: {
         top: 0,
@@ -85,12 +84,10 @@ const uiSlice = createSlice({
             const {
                 editionMode,
                 detectionLabelEditWidth,
-                displaySelectedBoundingBox,
                 isEditLabelWidgetVisible,
             } = action.payload;
             state.editionMode = editionMode;
             state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.displaySelectedBoundingBox = displaySelectedBoundingBox;
             state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
         },
         /**
@@ -108,20 +105,11 @@ const uiSlice = createSlice({
             state.detectionLabelEditPosition.left = position.left;
         },
         /**
-         * updateDisplaySelectedBoundingBox
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value to determine if we need to display a selected bounding box, or a selected detection.
-         */
-        updateDisplaySelectedBoundingBox: (state, action) => {
-            state.displaySelectedBoundingBox = action.payload;
-        },
-        /**
          * resetSelectedDetectionBoxesUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         resetSelectedDetectionBoxesUpdate: (state) => {
-            (state.displaySelectedBoundingBox = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.isDetectionContextVisible = false),
                 (state.detectionContextPosition = {
@@ -136,15 +124,6 @@ const uiSlice = createSlice({
         resetSelectedDetectionBoxesElseUpdate: (state) => {
             (state.isDetectionContextVisible = false),
                 (state.editionMode = constants.editionMode.NO_TOOL);
-        },
-        /**
-         * boundingBoxSelectedUpdate - For when a user enters annotation mode for a new detection. Sets the UI elements for
-         *                             cornerstone mode to annotation and to display the selected bounding box.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        boundingBoxSelectedUpdate: (state) => {
-            state.cornerstoneMode = constants.cornerstoneMode.ANNOTATION;
-            state.displaySelectedBoundingBox = true;
         },
         /**
          * updateIsDetectionContextVisible
@@ -195,8 +174,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         onDragEndUpdate: (state) => {
-            (state.displaySelectedBoundingBox = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.isFABVisible = true),
                 (state.isDetectionContextVisible = false),
@@ -216,7 +194,6 @@ const uiSlice = createSlice({
                 contextMenuPos,
             } = action.payload;
             (state.isDetectionContextVisible = true),
-                (state.displaySelectedBoundingBox = true),
                 (state.detectionLabelEditWidth = detectionLabelEditWidth),
                 (state.detectionLabelEditPosition = detectionLabelEditPosition),
                 (state.isEditLabelWidgetVisible =
@@ -232,8 +209,7 @@ const uiSlice = createSlice({
          */
         hideContextMenuUpdate: (state) => {
             (state.isDetectionContextVisible = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.displaySelectedBoundingBox = false);
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION);
         },
         /**
          * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
@@ -266,7 +242,6 @@ const uiSlice = createSlice({
         emptyAreaClickUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
@@ -283,7 +258,6 @@ const uiSlice = createSlice({
         detectionSelectedUpdate: (state) => {
             state.isFABVisible = false;
             state.cornerstoneMode = constants.cornerstoneMode.EDITION;
-            state.displaySelectedBoundingBox = true;
             state.isDetectionContextVisible = true;
             state.editionMode = constants.editionMode.NO_TOOL;
         },
@@ -292,8 +266,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         menuDetectionSelectedUpdate: (state) => {
-            (state.displaySelectedBoundingBox = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.isDetectionContextVisible = false),
                 (state.detectionContextPosition = {
@@ -311,7 +284,6 @@ const uiSlice = createSlice({
         deleteDetectionUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
             state.isDetectionContextVisible = false;
         },
         /**
@@ -344,13 +316,6 @@ export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
  * @returns {constants.editionMode} The constant for the current edition mode.
  */
 export const getEditionMode = (state) => state.ui.editionMode;
-/**
- * getDisplaySelectedBoundingBox
- * @param {State} state Passed in via useSelector
- * @returns {Boolean} Wether we are displaying a selected bounding box
- */
-export const getDisplaySelectedBoundingBox = (state) =>
-    state.ui.displaySelectedBoundingBox;
 /**
  * getIsDetectionContextVisible
  * @param {State} state Passed in via useSelector
@@ -424,13 +389,11 @@ export const {
     updateCornerstoneMode,
     updateFABVisibility,
     updateIsDetectionContextVisible,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     menuDetectionSelectedUpdate,
     updateDetectionContextPosition,
