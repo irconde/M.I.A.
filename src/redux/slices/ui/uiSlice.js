@@ -23,7 +23,6 @@ const initialState = {
     zoomLevelSide: constants.viewportStyle.ZOOM,
     singleViewport: true,
     receiveTime: null,
-    selectedFile: false,
 };
 
 const uiSlice = createSlice({
@@ -221,16 +220,6 @@ const uiSlice = createSlice({
             const { singleViewport, receiveTime } = action.payload;
             state.singleViewport = singleViewport;
             state.receiveTime = receiveTime;
-            state.selectedFile = true;
-        },
-        /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we have received a file.
-         */
-        updateSelectedFile: (state, action) => {
-            state.selectedFile = action.payload;
         },
         /**
          * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
@@ -285,15 +274,6 @@ const uiSlice = createSlice({
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.isDetectionContextVisible = false;
-        },
-        /**
-         * onNoImageUpdate - Occurs when the UI does not have another file to process from the file server. Will set the UI
-         *                   elements for the FAB to not be visible and the selected file to false.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        onNoImageUpdate: (state) => {
-            state.isFABVisible = false;
-            state.selectedFile = false;
         },
     },
 });
@@ -401,8 +381,6 @@ export const {
     updateZoomLevelTop,
     updateZoomLevelSide,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
     onDragEndUpdate,
     onDragEndWidgetUpdate,

@@ -64,8 +64,6 @@ import {
     updateZoomLevelTop,
     updateZoomLevelSide,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
     onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
@@ -476,7 +474,7 @@ class App extends Component {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
                 this.props.setDownload(false);
-                if (this.props.selectedFile === false) {
+                if (this.props.currentProcessingFile === null) {
                     this.getNextImage();
                 }
             });
@@ -535,7 +533,7 @@ class App extends Component {
         let updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
-        this.props.onNoImageUpdate();
+        this.props.updateFABVisibility(false);
         this.setState({
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
@@ -827,7 +825,6 @@ class App extends Component {
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
                                         this.resetSelectedDetectionBoxes(e);
-                                        this.props.updateSelectedFile(false);
                                         this.props.setUpload(false);
                                         this.getNextImage();
                                     }
@@ -838,7 +835,6 @@ class App extends Component {
                     console.log("File server couldn't remove the next image");
                 } else if (res.data.confirm === 'no-next-image') {
                     alert('No next image');
-                    this.props.updateSelectedFile(false);
                 }
             })
             .catch((err) => {
@@ -2108,6 +2104,7 @@ const mapStateToProps = (state) => {
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
+        currentProcessingFile: server.currentProcessingFile,
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
@@ -2118,7 +2115,6 @@ const mapStateToProps = (state) => {
         imageViewportTop: ui.imageViewportTop,
         imageViewportSide: ui.imageViewportSide,
         singleViewport: ui.singleViewport,
-        selectedFile: ui.selectedFile,
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
     };
@@ -2158,8 +2154,6 @@ const mapDispatchToProps = {
     updateZoomLevelTop,
     updateZoomLevelSide,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
     onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
