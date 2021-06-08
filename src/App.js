@@ -133,6 +133,7 @@ class App extends Component {
         this.loadDICOSdata = this.loadDICOSdata.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
         this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
             this
         );
@@ -279,6 +280,7 @@ class App extends Component {
         );
         this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
+        document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
 
     /**
@@ -386,6 +388,7 @@ class App extends Component {
         );
         window.removeEventListener('resize', this.resizeListener);
         document.body.removeEventListener('mousemove', this.onMouseMoved);
+        document.body.removeEventListener('mouseleave', this.onMouseLeave);
     }
 
     /**
@@ -1437,13 +1440,32 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             if (toolState === undefined) {
+                this.props.emptyAreaClickUpdate();
+                this.props.clearAllSelection();
+                this.resetSelectedDetectionBoxes(event);
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
+                return;
+            }
+            if (toolState.data.length === 0) {
+                this.props.emptyAreaClickUpdate();
+                this.props.clearAllSelection();
+                this.resetSelectedDetectionBoxes(event);
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
                 return;
             }
             const { data } = toolState;
             // Destructure data needed from event
-            if (data === undefined) return;
-            if (data[0] === undefined) return;
-            if (data.length === 0) return;
+            if (data === undefined) {
+                return;
+            }
+            if (data[0] === undefined) {
+                return;
+            }
+            if (data.length === 0) {
+                return;
+            }
             const { handles } = data[0];
             const { start, end } = handles;
             let coords = [];
@@ -1486,7 +1508,14 @@ class App extends Component {
                     blob: newBlob,
                     uuid,
                 });
-                if (data[0] === undefined) return;
+                if (data[0] === undefined) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.resetSelectedDetectionBoxes(event);
+                    self.appUpdateImage();
+                    return;
+                }
                 if (data[0].updatingDetection === false) {
                     // Need to determine if updating operator or new
                     // Create new user-created detection
@@ -2037,6 +2066,14 @@ class App extends Component {
             mousePosition: { x: event.x, y: event.y },
             activeViewport: event.target.parentElement.id,
         });
+    }
+
+    onMouseLeave(event) {
+        this.props.emptyAreaClickUpdate();
+        this.props.clearAllSelection();
+        this.resetSelectedDetectionBoxes(event);
+        this.resetCornerstoneTool();
+        this.appUpdateImage();
     }
 
     render() {
