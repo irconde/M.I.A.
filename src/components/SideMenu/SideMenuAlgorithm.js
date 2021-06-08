@@ -119,11 +119,6 @@ const SideMenuAlgorithm = ({
         <div>
             <MetaData
                 isVisible={isAlgorithmSelected !== '' ? true : false}
-                // TODO: James B. - Remove this once refactored into uiSlice
-                detectorType={configurationInfo.type}
-                detectorConfigType={configurationInfo.configuration}
-                seriesType={configurationInfo.series}
-                studyType={configurationInfo.study}
             />
             <div
                 style={

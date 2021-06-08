@@ -68,6 +68,7 @@ import {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    selectConfigInfoUpdate,
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
@@ -962,21 +963,33 @@ class App extends Component {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
             // TODO: James B. - Refactor this into uiSlice.
-            self.setState({
-                configurationInfo: {
-                    type: image.string(Dicos.dictionary['DetectorType'].tag),
-                    configuration: image.string(
-                        Dicos.dictionary['DetectorConfiguration'].tag
-                    ),
-                    station: image.string(Dicos.dictionary['StationName'].tag),
-                    series: image.string(
-                        Dicos.dictionary['SeriesDescription'].tag
-                    ),
-                    study: image.string(
-                        Dicos.dictionary['StudyDescription'].tag
-                    ),
-                },
+            self.props.selectConfigInfoUpdate({
+                detectorType: image.string(Dicos.dictionary['DetectorType'].tag),
+                detectorConfigType: image.string(
+                    Dicos.dictionary['DetectorConfiguration'].tag
+                ),
+                seriesType: image.string(
+                    Dicos.dictionary['SeriesDescription'].tag
+                ),
+                studyType: image.string(
+                    Dicos.dictionary['StudyDescription'].tag
+                ),
             });
+            // self.setState({
+            //     configurationInfo: {
+            //         type: image.string(Dicos.dictionary['DetectorType'].tag),
+            //         configuration: image.string(
+            //             Dicos.dictionary['DetectorConfiguration'].tag
+            //         ),
+            //         station: image.string(Dicos.dictionary['StationName'].tag),
+            //         series: image.string(
+            //             Dicos.dictionary['SeriesDescription'].tag
+            //         ),
+            //         study: image.string(
+            //             Dicos.dictionary['StudyDescription'].tag
+            //         ),
+            //     },
+            // });
         });
         reader.readAsArrayBuffer(imagesLeft[0].blob);
         for (let i = 0; i < imagesLeft.length; i++) {
@@ -2171,6 +2184,7 @@ const mapDispatchToProps = {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    selectConfigInfoUpdate,
     newFileReceivedUpdate,
     updateSelectedFile,
     onNoImageUpdate,
