@@ -1441,14 +1441,9 @@ class App extends Component {
             }
             const { data } = toolState;
             // Destructure data needed from event
-            if (data === undefined) {
-                return;
-            } else if (data[0] === undefined) {
-                return;
-            }
-            if (data.length == 0) {
-                return;
-            }
+            if (data === undefined) return;
+            if (data[0] === undefined) return;
+            if (data.length === 0) return;
             const { handles } = data[0];
             const { start, end } = handles;
             let coords = [];
@@ -1491,7 +1486,7 @@ class App extends Component {
                     blob: newBlob,
                     uuid,
                 });
-                // call updateDetection
+                if (data[0] === undefined) return;
                 if (data[0].updatingDetection === false) {
                     // Need to determine if updating operator or new
                     // Create new user-created detection
