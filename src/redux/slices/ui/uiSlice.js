@@ -520,6 +520,20 @@ export const getSeriesType = (state) => state.ui.seriesType;
  */
 export const getStudyType = (state) => state.ui.studyType;
 /**
+ * getConfigInfo
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Object} The study type string.
+ */
+export const getConfigInfo = (state) => {
+    const configInfo = {
+        detectorType: state.ui.detectorType,
+        detectorConfigType: state.ui.detectorConfigType,
+        seriesType: state.ui.seriesType,
+        studyType: state.ui.studyType,
+    };
+    return configInfo;
+}
+/**
  * getSingleViewport
  * @param {State} state Passed in via useSelector/mapStateToProps
  * @returns {Boolean} Returns wether the UI should display a single viewport or multiple viewports

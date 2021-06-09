@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Info } from '../SideMenu/Icons';
 import { useSelector } from 'react-redux';
-import { getDetectorConfigType, getDetectorType, getSeriesType, getStudyType } from '../../redux/slices/ui/uiSlice';
+import { getConfigInfo, getDetectorConfigType, getDetectorType, getSeriesType, getStudyType } from '../../redux/slices/ui/uiSlice';
 // TODO: James B. - This needs the configurationInfo from the uiSlice.
 //                  Refactor this into a Functional Component and useSelector to grab the config info.
 //                  Examples of pulling from the uiSlice are in the src/components/EditLabel/index.js
@@ -11,12 +11,7 @@ import { getDetectorConfigType, getDetectorType, getSeriesType, getStudyType } f
  * object detection algorithm
  */
 const MetaData = ({ isVisible }) => {
-
-    const detectorType = useSelector(getDetectorType);
-    const detectorConfigType = useSelector(getDetectorConfigType);
-    const seriesType = useSelector(getSeriesType);
-    const studyType = useSelector(getStudyType);
-    console.log(isVisible);
+    const configInfo = useSelector(getConfigInfo);
 
     const slashLineStyle = {
         fontFamily: 'Noto Sans JP Black',
@@ -60,7 +55,7 @@ const MetaData = ({ isVisible }) => {
                     <span style={spanHeadStyle}>Detector Type:</span>
                     <span style={spanBodyStyle}>
                         {' '}
-                        {detectorType}
+                        {configInfo.detectorType}
                     </span>
                 </p>
                 <p style={slashLineStyle}>/</p>
@@ -70,7 +65,7 @@ const MetaData = ({ isVisible }) => {
                     </span>
                     <span style={spanBodyStyle}>
                         {' '}
-                        {detectorConfigType}
+                        {configInfo.detectorConfigType}
                     </span>
                 </p>
                 <p style={slashLineStyle}>/</p>
@@ -78,7 +73,7 @@ const MetaData = ({ isVisible }) => {
                     <span style={spanHeadStyle}>Series:</span>
                     <span style={spanBodyStyle}>
                         {' '}
-                        {seriesType}
+                        {configInfo.seriesType}
                     </span>
                 </p>
                 <p style={slashLineStyle}>/</p>
@@ -86,7 +81,7 @@ const MetaData = ({ isVisible }) => {
                     <span style={spanHeadStyle}>Study:</span>
                     <span style={spanBodyStyle}>
                         {' '}
-                        {studyType}
+                        {configInfo.studyType}
                     </span>
                 </p>
             </div>

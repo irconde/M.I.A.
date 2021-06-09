@@ -975,21 +975,6 @@ class App extends Component {
                     Dicos.dictionary['StudyDescription'].tag
                 ),
             });
-            // self.setState({
-            //     configurationInfo: {
-            //         type: image.string(Dicos.dictionary['DetectorType'].tag),
-            //         configuration: image.string(
-            //             Dicos.dictionary['DetectorConfiguration'].tag
-            //         ),
-            //         station: image.string(Dicos.dictionary['StationName'].tag),
-            //         series: image.string(
-            //             Dicos.dictionary['SeriesDescription'].tag
-            //         ),
-            //         study: image.string(
-            //             Dicos.dictionary['StudyDescription'].tag
-            //         ),
-            //     },
-            // });
         });
         reader.readAsArrayBuffer(imagesLeft[0].blob);
         for (let i = 0; i < imagesLeft.length; i++) {
