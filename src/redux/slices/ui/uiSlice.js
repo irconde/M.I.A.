@@ -371,7 +371,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
-         selectConfigInfoUpdate: (state, action) => {
+        selectConfigInfoUpdate: (state, action) => {
             const {
                 detectorType,
                 detectorConfigType,
@@ -522,7 +522,7 @@ export const getStudyType = (state) => state.ui.studyType;
 /**
  * getConfigInfo
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Object} The study type string.
+ * @returns {Object} An object containing the configuration info.
  */
 export const getConfigInfo = (state) => {
     const configInfo = {
@@ -532,7 +532,7 @@ export const getConfigInfo = (state) => {
         studyType: state.ui.studyType,
     };
     return configInfo;
-}
+};
 /**
  * getSingleViewport
  * @param {State} state Passed in via useSelector/mapStateToProps
