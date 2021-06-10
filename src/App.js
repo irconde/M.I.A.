@@ -962,9 +962,10 @@ class App extends Component {
         reader.addEventListener('loadend', function () {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
-            // TODO: James B. - Refactor this into uiSlice.
             self.props.selectConfigInfoUpdate({
-                detectorType: image.string(Dicos.dictionary['DetectorType'].tag),
+                detectorType: image.string(
+                    Dicos.dictionary['DetectorType'].tag
+                ),
                 detectorConfigType: image.string(
                     Dicos.dictionary['DetectorConfiguration'].tag
                 ),
@@ -2086,8 +2087,6 @@ class App extends Component {
                     <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
-                        // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
-                        configurationInfo={this.state.configurationInfo}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }

@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { detectionStyle, MAX_LABEL_LENGTH } from '../../Constants';
+import { MAX_LABEL_LENGTH } from '../../Constants';
 import Utils from '../../Utils.js';
 import { useDispatch } from 'react-redux';
 import {
-    getDetectionColor,
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
@@ -13,7 +12,6 @@ import { resetSelectedDetectionBoxesUpdate } from '../../redux/slices/ui/uiSlice
 
 const SideMenuDetection = ({
     detection,
-    algorithmSelected,
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
 }) => {
@@ -141,7 +139,6 @@ const SideMenuDetection = ({
 
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
-    algorithmSelected: PropTypes.string.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };

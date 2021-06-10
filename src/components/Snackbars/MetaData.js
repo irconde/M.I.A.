@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Info } from '../SideMenu/Icons';
 import { useSelector } from 'react-redux';
-import { getConfigInfo, getDetectorConfigType, getDetectorType, getSeriesType, getStudyType } from '../../redux/slices/ui/uiSlice';
-// TODO: James B. - This needs the configurationInfo from the uiSlice.
-//                  Refactor this into a Functional Component and useSelector to grab the config info.
-//                  Examples of pulling from the uiSlice are in the src/components/EditLabel/index.js
+import { getConfigInfo } from '../../redux/slices/ui/uiSlice';
+
 /**
  * GUI widget that provides the user with information regarding a particular
  * object detection algorithm
@@ -46,8 +44,7 @@ const MetaData = ({ isVisible }) => {
 
     if (!isVisible) {
         return <div></div>;
-    }
-    else {
+    } else {
         return (
             <div style={divStyle}>
                 <Info style={{ verticalAlign: 'text-top' }} />
@@ -60,9 +57,7 @@ const MetaData = ({ isVisible }) => {
                 </p>
                 <p style={slashLineStyle}>/</p>
                 <p style={paragraphStyle}>
-                    <span style={spanHeadStyle}>
-                        Detector Configuration:
-                    </span>
+                    <span style={spanHeadStyle}>Detector Configuration:</span>
                     <span style={spanBodyStyle}>
                         {' '}
                         {configInfo.detectorConfigType}
@@ -71,27 +66,20 @@ const MetaData = ({ isVisible }) => {
                 <p style={slashLineStyle}>/</p>
                 <p style={paragraphStyle}>
                     <span style={spanHeadStyle}>Series:</span>
-                    <span style={spanBodyStyle}>
-                        {' '}
-                        {configInfo.seriesType}
-                    </span>
+                    <span style={spanBodyStyle}> {configInfo.seriesType}</span>
                 </p>
                 <p style={slashLineStyle}>/</p>
                 <p style={paragraphStyle}>
                     <span style={spanHeadStyle}>Study:</span>
-                    <span style={spanBodyStyle}>
-                        {' '}
-                        {configInfo.studyType}
-                    </span>
+                    <span style={spanBodyStyle}> {configInfo.studyType}</span>
                 </p>
             </div>
         );
     }
-}
+};
 
-
-MetaData.PropTypes = {
+MetaData.propTypes = {
     isVisible: PropTypes.bool,
-}
+};
 
 export default MetaData;
