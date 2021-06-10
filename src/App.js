@@ -1704,6 +1704,7 @@ class App extends Component {
                     cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                         mouseButtonMask: 1,
                     });
+                    cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
                     cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                         cornerstoneMode: constants.cornerstoneMode.EDITION,
                         editionMode: constants.editionMode.NO_TOOL,
