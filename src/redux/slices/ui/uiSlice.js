@@ -23,7 +23,6 @@ const initialState = {
     zoomLevelSide: constants.viewportStyle.ZOOM,
     singleViewport: true,
     receiveTime: null,
-    selectedFile: false,
     detectorType: '',
     detectorConfigType: '',
     seriesType: '',
