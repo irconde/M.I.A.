@@ -2,17 +2,16 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../Constants';
 
 const initialState = {
-    isEditLabelWidgetVisible: false,
+    editionMode: constants.editionMode.NO_TOOL,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
+    isEditLabelWidgetVisible: false,
     isFABVisible: false,
-    isDrawingBoundingBox: false,
     isDetectionContextVisible: false,
-    displaySelectedBoundingBox: false,
     detectionContextPosition: {
         top: 0,
         left: 0,
     },
-    editionMode: constants.editionMode.NO_TOOL,
+
     detectionLabelEditWidth: '0px',
     detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
     detectionLabelEditViewport: constants.viewport.SIDE,
@@ -36,163 +35,6 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * resetSelectedDetectionBoxesUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        editDetectionLabelUpdate: (state) => {
-            state.isFABVisible = true;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.detectionLabelEditWidth = 0;
-            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
-            state.detectionLabelEditViewport = constants.viewport.SIDE;
-            state.detectionLabelEditPosition = { top: 0, left: 0 };
-            state.displaySelectedBoundingBox = false;
-        },
-        /**
-         * resetSelectedDetectionBoxesUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        resetSelectedDetectionBoxesUpdate: (state) => {
-            (state.displaySelectedBoundingBox = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.editionMode = constants.editionMode.NO_TOOL),
-                (state.isDetectionContextVisible = false),
-                (state.detectionContextPosition = {
-                    top: 0,
-                    left: 0,
-                });
-        },
-        /**
-         * resetSelectedDetectionBoxesElseUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        resetSelectedDetectionBoxesElseUpdate: (state) => {
-            (state.isDetectionContextVisible = false),
-                (state.editionMode = constants.editionMode.NO_TOOL);
-        },
-        /**
-         * onDragEndUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        onDragEndUpdate: (state) => {
-            (state.displaySelectedBoundingBox = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.editionMode = constants.editionMode.NO_TOOL),
-                (state.isFABVisible = true),
-                (state.isDetectionContextVisible = false),
-                (state.detectionContextPosition = {
-                    top: 0,
-                    left: 0,
-                });
-        },
-        /**
-         * onDragEndUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        onDragEndWidgetUpdate: (state, action) => {
-            const {
-                detectionLabelEditWidth,
-                detectionLabelEditPosition,
-                contextMenuPos,
-            } = action.payload;
-            (state.isDetectionContextVisible = true),
-                (state.displaySelectedBoundingBox = true),
-                (state.detectionLabelEditWidth = detectionLabelEditWidth),
-                (state.detectionLabelEditPosition = detectionLabelEditPosition),
-                (state.isEditLabelWidgetVisible =
-                    state.editionMode === constants.editionMode.LABEL),
-                (state.detectionContextPosition = {
-                    top: contextMenuPos.y,
-                    left: contextMenuPos.x,
-                });
-        },
-        /**
-         * onLabelEditionEnd
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
-         */
-        onLabelEditionEnd: (state, action) => {
-            const {
-                editionMode,
-                detectionLabelEditWidth,
-                displaySelectedBoundingBox,
-                isEditLabelWidgetVisible,
-            } = action.payload;
-            state.editionMode = editionMode;
-            state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.displaySelectedBoundingBox = displaySelectedBoundingBox;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-        },
-        /**
-         * selectEditDetectionLabelUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
-         */
-        selectEditDetectionLabelUpdate: (state, action) => {
-            const {
-                detectionLabelEditWidth,
-                detectionLabelEditPosition,
-                isEditLabelWidgetVisible,
-                detectionLabelEditFont,
-                detectionLabelEditViewport,
-            } = action.payload;
-            state.detectionLabelEditWidth = detectionLabelEditWidth;
-            state.detectionLabelEditPosition = detectionLabelEditPosition;
-            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
-            state.detectionLabelEditFont = detectionLabelEditFont;
-            state.detectionLabelEditViewport = detectionLabelEditViewport;
-        },
-        /**
-         * hideContextMenuUpdate
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        hideContextMenuUpdate: (state) => {
-            (state.isDetectionContextVisible = false),
-                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
-                (state.displaySelectedBoundingBox = false);
-        },
-        /**
-         * updateCornerstoneMode
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
-         */
-        updateCornerstoneMode: (state, action) => {
-            state.cornerstoneMode = action.payload;
-        },
-        /**
-         * updateFABVisibility
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
-         */
-        updateFABVisibility: (state, action) => {
-            state.isFABVisible = action.payload;
-        },
-        /**
-         * updateIsDrawingBoundingBox
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we are currently drawing a bounding box
-         */
-        updateIsDrawingBoundingBox: (state, action) => {
-            state.isDrawingBoundingBox = action.payload;
-        },
-        /**
-         * updateIsDetectionContextVisible
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
-         */
-        updateIsDetectionContextVisible: (state, action) => {
-            state.isDetectionContextVisible = action.payload;
-        },
-        /**
-         * updateDisplaySelectedBoundingBox
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value to determine if we need to display a selected bounding box, or a selected detection.
-         */
-        updateDisplaySelectedBoundingBox: (state, action) => {
-            state.displaySelectedBoundingBox = action.payload;
-        },
-        /**
          * updateEditionMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {constants.editionMode} action.payload - Constant value for the edition mode.
@@ -213,68 +55,44 @@ const uiSlice = createSlice({
             }
         },
         /**
-         * updateDetectionContextPosition
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing values for top and left position for the detection context position.
-         */
-        updateDetectionContextPosition: (state, action) => {
-            const { top, left } = action.payload;
-            state.detectionContextPosition.top = top;
-            state.detectionContextPosition.left = left;
-        },
-        /**
-         * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
-         *                        It will set the FAB to be visible, reset the cornerstone mode to selection,
-         *                        set display selected bounding box to false, the edition mode to null, the
-         *                        detection context to not be visible and reset its position.
+         * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
+         *                         to not display the detection context widget.
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
-        emptyAreaClickUpdate: (state) => {
-            state.isFABVisible = true;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
-            state.editionMode = constants.editionMode.NO_TOOL;
+        exitEditionModeUpdate: (state) => {
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
-            state.detectionContextPosition.top = 0;
-            state.detectionContextPosition.left = 0;
         },
         /**
-         * detectionSelectedUpdate - This sets UI elements related to selecting a detection. It will set the
-         *                           FAB to not be visible, the cornerstone mode to edition, display the selected
-         *                           bounding box to true, the edition mode to null and the detection context widget
-         *                           to display.
+         * updateCornerstoneMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
          */
-        detectionSelectedUpdate: (state) => {
-            state.isFABVisible = false;
-            state.cornerstoneMode = constants.cornerstoneMode.EDITION;
-            state.displaySelectedBoundingBox = true;
-            state.isDetectionContextVisible = true;
-            state.editionMode = constants.editionMode.NO_TOOL;
+        updateCornerstoneMode: (state, action) => {
+            state.cornerstoneMode = action.payload;
         },
         /**
-         * algorithmSelectedUpdate - For when a user selects an algorithm from the side menu. Will set the UI elements
-         *                           for FAB to not be visible, cornerstone mode to selection, displaying the selected bounding
-         *                           box to false, and the detection context visibility.
+         * updateFABVisibility
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
          */
-        algorithmSelectedUpdate: (state) => {
-            state.isFABVisible = false;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
-            state.isDetectionContextVisible = false;
+        updateFABVisibility: (state, action) => {
+            state.isFABVisible = action.payload;
         },
         /**
-         * menuDetectionSelectedUpdate - For when a user selects a detection from the side menu. Will set the UI elements
-         *                               for cornerstone mode to edition, display the selected bounding box and the detection
-         *                               context widget to be visible.
+         * onLabelEditionEnd
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
          */
-        menuDetectionSelectedUpdate: (state) => {
-            state.cornerstoneMode = constants.cornerstoneMode.EDITION;
-            state.displaySelectedBoundingBox = true;
-            state.isDetectionContextVisible = true;
+        onLabelEditionEnd: (state, action) => {
+            const {
+                editionMode,
+                detectionLabelEditWidth,
+                isEditLabelWidgetVisible,
+            } = action.payload;
+            state.editionMode = editionMode;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
         },
         /**
          * labelSelectedUpdate - For when a user selects an label from the detection context widget. Will set the UI elements
@@ -291,54 +109,47 @@ const uiSlice = createSlice({
             state.detectionLabelEditPosition.left = position.left;
         },
         /**
-         * TODO - James B. - Are we supposed to exit the edition of a detection when finishing labeling a detection?
-         * labelCompleteUpdate - For when a user finishes selecting a label for a detection. Will set the UI elements
-         *                       for FAB to be visible, the cornerstone mode to selection, displaying the selected
-         *                       bounding box to false, the edition mode to null, the detection label edit widget
-         *                       width and position to 0.
+         * resetSelectedDetectionBoxesUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
-        labelCompleteUpdate: (state) => {
-            state.isFABVisible = true;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
-            state.editionMode = constants.editionMode.NO_TOOL;
-            state.detectionLabelEditWidth = 0;
-            state.detectionLabelEditFont = constants.detectionStyle.LABEL_FONT;
-            state.detectionLabelEditViewport = constants.viewport.SIDE;
-            state.detectionLabelEditPosition.top = 0;
-            state.detectionLabelEditPosition.left = 0;
+        resetSelectedDetectionBoxesUpdate: (state) => {
+            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.isDetectionContextVisible = false),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
         },
         /**
-         * deleteDetectionUpdate - For when a user deletes a detection. Will set the UI elements for FAB to be visible,
-         *                         the cornerstone mode to selection, to not display the selected bounding box, the
-         *                         detection context to not be visible and drawing bounding box to false.
+         * resetSelectedDetectionBoxesElseUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
-        deleteDetectionUpdate: (state) => {
-            state.isFABVisible = true;
-            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
-            state.displaySelectedBoundingBox = false;
-            state.isDetectionContextVisible = false;
-            state.isDrawingBoundingBox = false;
+        resetSelectedDetectionBoxesElseUpdate: (state) => {
+            (state.isDetectionContextVisible = false),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
         },
         /**
-         * boundingBoxSelectedUpdate - For when a user enters annotation mode for a new detection. Sets the UI elements for
-         *                             cornerstone mode to annotation and to display the selected bounding box.
+         * updateIsDetectionContextVisible
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
          */
-        boundingBoxSelectedUpdate: (state) => {
-            state.cornerstoneMode = constants.cornerstoneMode.ANNOTATION;
-            state.displaySelectedBoundingBox = true;
+        updateIsDetectionContextVisible: (state, action) => {
+            state.isDetectionContextVisible = action.payload;
         },
         /**
-         * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
-         *                         to not display the detection context widget.
+         * updateDetectionContextPosition
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing values for top and left position for the detection context position.
          */
-        exitEditionModeUpdate: (state) => {
-            state.isDetectionContextVisible = false;
-            state.isEditLabelWidgetVisible = false;
+        updateDetectionContextPosition: (state, action) => {
+            const { top, left } = action.payload;
+            state.detectionContextPosition.top = top;
+            state.detectionContextPosition.left = left;
         },
         /**
          * updateZoomLevels - For when the UI recalculates the zoom level for the cornerstone viewports.
@@ -367,6 +178,99 @@ const uiSlice = createSlice({
             state.zoomLevelSide = action.payload;
         },
         /**
+         * onDragEndUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        onDragEndWidgetUpdate: (state, action) => {
+            const {
+                detectionLabelEditWidth,
+                detectionLabelEditPosition,
+                contextMenuPos,
+            } = action.payload;
+            (state.isDetectionContextVisible = true),
+                (state.detectionLabelEditWidth = detectionLabelEditWidth),
+                (state.detectionLabelEditPosition = detectionLabelEditPosition),
+                (state.isEditLabelWidgetVisible =
+                    state.editionMode === constants.editionMode.LABEL),
+                (state.detectionContextPosition = {
+                    top: contextMenuPos.y,
+                    left: contextMenuPos.x,
+                });
+        },
+        /**
+         * hideContextMenuUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        hideContextMenuUpdate: (state) => {
+            (state.isDetectionContextVisible = false),
+                (state.cornerstoneMode = constants.cornerstoneMode.SELECTION);
+        },
+        /**
+         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
+         *                         for single viewport, the received time, and that we have received a file flag.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing a boolean value for single viewport and the Date for the received time.
+         */
+        newFileReceivedUpdate: (state, action) => {
+            const { singleViewport, receiveTime } = action.payload;
+            state.singleViewport = singleViewport;
+            state.receiveTime = receiveTime;
+        },
+        /**
+         * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
+         *                        It will set the FAB to be visible, reset the cornerstone mode to selection,
+         *                        set display selected bounding box to false, the edition mode to null, the
+         *                        detection context to not be visible and reset its position.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        emptyAreaClickUpdate: (state) => {
+            state.isFABVisible = true;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.isDetectionContextVisible = false;
+            state.isEditLabelWidgetVisible = false;
+            state.detectionContextPosition.top = 0;
+            state.detectionContextPosition.left = 0;
+        },
+        /**
+         * detectionSelectedUpdate - This sets UI elements related to selecting a detection. It will set the
+         *                           FAB to not be visible, the cornerstone mode to edition, display the selected
+         *                           bounding box to true, the edition mode to null and the detection context widget
+         *                           to display.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        detectionSelectedUpdate: (state) => {
+            state.isFABVisible = false;
+            state.cornerstoneMode = constants.cornerstoneMode.EDITION;
+            state.isDetectionContextVisible = true;
+            state.editionMode = constants.editionMode.NO_TOOL;
+        },
+        /**
+         * resetSelectedDetectionBoxesUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        menuDetectionSelectedUpdate: (state) => {
+            (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.editionMode = constants.editionMode.NO_TOOL),
+                (state.isDetectionContextVisible = false),
+                (state.detectionContextPosition = {
+                    top: 0,
+                    left: 0,
+                });
+            state.isFABVisible = true;
+        },
+        /**
+         * deleteDetectionUpdate - For when a user deletes a detection. Will set the UI elements for FAB to be visible,
+         *                         the cornerstone mode to selection, to not display the selected bounding box, the
+         *                         detection context to not be visible and drawing bounding box to false.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        deleteDetectionUpdate: (state) => {
+            state.isFABVisible = true;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.isDetectionContextVisible = false;
+        },
+        /**
          * selectConfigInfoUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
@@ -383,36 +287,6 @@ const uiSlice = createSlice({
             state.seriesType = seriesType;
             state.studyType = studyType;
         },
-        /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing a boolean value for single viewport and the Date for the received time.
-         */
-        newFileReceivedUpdate: (state, action) => {
-            const { singleViewport, receiveTime } = action.payload;
-            state.singleViewport = singleViewport;
-            state.receiveTime = receiveTime;
-            state.selectedFile = true;
-        },
-        /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we have received a file.
-         */
-        updateSelectedFile: (state, action) => {
-            state.selectedFile = action.payload;
-        },
-        /**
-         * onNoImageUpdate - Occurs when the UI does not have another file to process from the file server. Will set the UI
-         *                   elements for the FAB to not be visible and the selected file to false.
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        onNoImageUpdate: (state) => {
-            state.isFABVisible = false;
-            state.selectedFile = false;
-        },
     },
 });
 
@@ -428,13 +302,6 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  * @returns {constants.cornerstoneMode} Returns the current cornerstone mode
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
-/**
- * getDisplaySelectedBoundingBox
- * @param {State} state Passed in via useSelector
- * @returns {Boolean} Wether we are displaying a selected bounding box
- */
-export const getDisplaySelectedBoundingBox = (state) =>
-    state.ui.displaySelectedBoundingBox;
 /**
  * getEditionMode
  * @param {State} state Passed in via useSelector
@@ -551,17 +418,12 @@ export const getIsEditLabelWidgetVisible = (state) =>
 export const {
     updateCornerstoneMode,
     updateFABVisibility,
-    updateIsDrawingBoundingBox,
     updateIsDetectionContextVisible,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
-    algorithmSelectedUpdate,
     labelSelectedUpdate,
-    labelCompleteUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     menuDetectionSelectedUpdate,
     updateDetectionContextPosition,
@@ -570,15 +432,10 @@ export const {
     updateZoomLevelSide,
     selectConfigInfoUpdate,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
-    selectEditDetectionLabelUpdate,
-    onDragEndUpdate,
     onDragEndWidgetUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
-    editDetectionLabelUpdate,
     onLabelEditionEnd,
 } = uiSlice.actions;
 

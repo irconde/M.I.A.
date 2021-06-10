@@ -53,16 +53,11 @@ import {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
-    algorithmSelectedUpdate,
-    menuDetectionSelectedUpdate,
     labelSelectedUpdate,
-    labelCompleteUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,
@@ -70,15 +65,10 @@ import {
     updateZoomLevelSide,
     selectConfigInfoUpdate,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
-    onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
-    editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
-    selectEditDetectionLabelUpdate,
     onLabelEditionEnd,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
@@ -144,6 +134,7 @@ class App extends Component {
         this.loadDICOSdata = this.loadDICOSdata.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
         this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
             this
         );
@@ -290,6 +281,7 @@ class App extends Component {
         );
         this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
+        document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
 
     /**
@@ -397,6 +389,7 @@ class App extends Component {
         );
         window.removeEventListener('resize', this.resizeListener);
         document.body.removeEventListener('mousemove', this.onMouseMoved);
+        document.body.removeEventListener('mouseleave', this.onMouseLeave);
     }
 
     /**
@@ -409,9 +402,8 @@ class App extends Component {
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
         this.calculateviewPortWidthAndHeight();
-        if (this.props.displaySelectedBoundingBox === true) {
+        if (this.props.selectDetection) {
             this.props.clearAllSelection();
-            this.props.updateDisplaySelectedBoundingBox(false);
             this.appUpdateImage();
         }
     }
@@ -485,7 +477,7 @@ class App extends Component {
                 // If we got an image and we are null, we know we can now fetch one
                 // This is how it triggers to display a new file if none existed and a new one was added
                 this.props.setDownload(false);
-                if (this.props.selectedFile === false) {
+                if (this.props.currentProcessingFile === null) {
                     this.getNextImage();
                 }
             });
@@ -544,7 +536,7 @@ class App extends Component {
         let updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
-        this.props.onNoImageUpdate();
+        this.props.updateFABVisibility(false);
         this.setState({
             imageViewportTop: updateImageViewport,
             imageViewportSide: updateImageViewportSide,
@@ -836,7 +828,6 @@ class App extends Component {
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
                                         this.resetSelectedDetectionBoxes(e);
-                                        this.props.updateSelectedFile(false);
                                         this.props.setUpload(false);
                                         this.getNextImage();
                                     }
@@ -847,7 +838,6 @@ class App extends Component {
                     console.log("File server couldn't remove the next image");
                 } else if (res.data.confirm === 'no-next-image') {
                     alert('No next image');
-                    this.props.updateSelectedFile(false);
                 }
             })
             .catch((err) => {
@@ -1449,16 +1439,30 @@ class App extends Component {
                 'BoundingBoxDrawing'
             );
             if (toolState === undefined) {
+                this.props.emptyAreaClickUpdate();
+                this.props.clearAllSelection();
+                this.resetSelectedDetectionBoxes(event);
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
+                return;
+            }
+            if (toolState.data.length === 0) {
+                this.props.emptyAreaClickUpdate();
+                this.props.clearAllSelection();
+                this.resetSelectedDetectionBoxes(event);
+                this.resetCornerstoneTool();
+                this.appUpdateImage();
                 return;
             }
             const { data } = toolState;
             // Destructure data needed from event
             if (data === undefined) {
                 return;
-            } else if (data[0] === undefined) {
+            }
+            if (data[0] === undefined) {
                 return;
             }
-            if (data.length == 0) {
+            if (data.length === 0) {
                 return;
             }
             const { handles } = data[0];
@@ -1503,14 +1507,14 @@ class App extends Component {
                     blob: newBlob,
                     uuid,
                 });
-                if (data.length == 0) {
-                    self.props.onDragEndUpdate();
-                    self.props.clearAllSelection();
+                if (data[0] === undefined) {
+                    self.props.emptyAreaClickUpdate();
                     self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.resetSelectedDetectionBoxes(event);
                     self.appUpdateImage();
                     return;
                 }
-                // call updateDetection
                 if (data[0].updatingDetection === false) {
                     // Need to determine if updating operator or new
                     // Create new user-created detection
@@ -1628,10 +1632,10 @@ class App extends Component {
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.props.hideContextMenuUpdate();
-            this.appUpdateImage();
         } else {
             this.props.exitEditionModeUpdate();
         }
+        this.appUpdateImage();
     }
 
     /**
@@ -1657,7 +1661,6 @@ class App extends Component {
             if (detectionData) {
                 if (detectionData.boundingBox !== undefined) {
                     const detectionBoxCoords = detectionData.boundingBox;
-                    this.props.updateDisplaySelectedBoundingBox(true);
                     const data = {
                         handles: {
                             start: {
@@ -1726,7 +1729,9 @@ class App extends Component {
         ) {
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
-            this.props.boundingBoxSelectedUpdate();
+            this.props.updateCornerstoneMode(
+                constants.cornerstoneMode.ANNOTATION
+            );
             this.appUpdateImage();
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
@@ -1921,8 +1926,8 @@ class App extends Component {
      * @param {string} newLabel Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
-        const { algorithm, uuid, view } = this.props.selectedDetection;
-        if (algorithm && uuid && view) {
+        const { uuid } = this.props.selectedDetection;
+        if (uuid) {
             this.props.editDetectionLabel({
                 className: newLabel,
                 uuid: uuid,
@@ -1935,7 +1940,6 @@ class App extends Component {
             this.props.onLabelEditionEnd({
                 editionMode: constants.editionMode.NO_TOOL,
                 detectionLabelEditWidth: 0,
-                displaySelectedBoundingBox: false,
                 isEditLabelWidgetVisible: false,
             });
         }
@@ -2063,6 +2067,14 @@ class App extends Component {
         });
     }
 
+    onMouseLeave(event) {
+        this.props.emptyAreaClickUpdate();
+        this.props.clearAllSelection();
+        this.resetSelectedDetectionBoxes(event);
+        this.resetCornerstoneTool();
+        this.appUpdateImage();
+    }
+
     render() {
         return (
             <div>
@@ -2113,18 +2125,17 @@ const mapStateToProps = (state) => {
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
+        currentProcessingFile: server.currentProcessingFile,
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
-        displaySelectedBoundingBox: ui.displaySelectedBoundingBox,
         zoomLevelTop: ui.zoomLevelTop,
         zoomLevelSide: ui.zoomLevelSide,
         imageViewportTop: ui.imageViewportTop,
         imageViewportSide: ui.imageViewportSide,
         singleViewport: ui.singleViewport,
-        selectedFile: ui.selectedFile,
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
     };
@@ -2153,16 +2164,11 @@ const mapDispatchToProps = {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDisplaySelectedBoundingBox,
     updateEditionMode,
     emptyAreaClickUpdate,
     detectionSelectedUpdate,
-    algorithmSelectedUpdate,
-    menuDetectionSelectedUpdate,
     labelSelectedUpdate,
-    labelCompleteUpdate,
     deleteDetectionUpdate,
-    boundingBoxSelectedUpdate,
     exitEditionModeUpdate,
     updateDetectionContextPosition,
     updateZoomLevels,
@@ -2170,15 +2176,10 @@ const mapDispatchToProps = {
     updateZoomLevelSide,
     selectConfigInfoUpdate,
     newFileReceivedUpdate,
-    updateSelectedFile,
-    onNoImageUpdate,
     hideContextMenuUpdate,
-    onDragEndUpdate,
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
-    editDetectionLabelUpdate,
     onDragEndWidgetUpdate,
-    selectEditDetectionLabelUpdate,
     onLabelEditionEnd,
     updateDetectionVisibility,
 };
