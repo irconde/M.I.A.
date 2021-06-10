@@ -23,6 +23,10 @@ const initialState = {
     zoomLevelSide: constants.viewportStyle.ZOOM,
     singleViewport: true,
     receiveTime: null,
+    detectorType: '',
+    detectorConfigType: '',
+    seriesType: '',
+    studyType: '',
 };
 
 const uiSlice = createSlice({
@@ -265,6 +269,23 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.isDetectionContextVisible = false;
         },
+        /**
+         * selectConfigInfoUpdate
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
+         */
+        selectConfigInfoUpdate: (state, action) => {
+            const {
+                detectorType,
+                detectorConfigType,
+                seriesType,
+                studyType,
+            } = action.payload;
+            state.detectorType = detectorType;
+            state.detectorConfigType = detectorConfigType;
+            state.seriesType = seriesType;
+            state.studyType = studyType;
+        },
     },
 });
 
@@ -341,6 +362,44 @@ export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
  */
 export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
 /**
+ * getDetectorType
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} The detector type string.
+ */
+export const getDetectorType = (state) => state.ui.detectorType;
+/**
+ * getDetectorConfigType
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} The detector config type string.
+ */
+export const getDetectorConfigType = (state) => state.ui.detectorConfigType;
+/**
+ * getSeriesType
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} The series type string.
+ */
+export const getSeriesType = (state) => state.ui.seriesType;
+/**
+ * getStudyType
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} The study type string.
+ */
+export const getStudyType = (state) => state.ui.studyType;
+/**
+ * getConfigInfo
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Object} An object containing the configuration info.
+ */
+export const getConfigInfo = (state) => {
+    const configInfo = {
+        detectorType: state.ui.detectorType,
+        detectorConfigType: state.ui.detectorConfigType,
+        seriesType: state.ui.seriesType,
+        studyType: state.ui.studyType,
+    };
+    return configInfo;
+};
+/**
  * getSingleViewport
  * @param {State} state Passed in via useSelector/mapStateToProps
  * @returns {Boolean} Returns wether the UI should display a single viewport or multiple viewports
@@ -370,6 +429,7 @@ export const {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    selectConfigInfoUpdate,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
     onDragEndWidgetUpdate,

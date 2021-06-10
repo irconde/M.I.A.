@@ -10,7 +10,6 @@ import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 
 const SideMenu = ({
     nextImageClick,
-    configurationInfo,
     resetSelectedDetectionBoxes,
     resetCornerstoneTools,
 }) => {
@@ -47,7 +46,6 @@ const SideMenu = ({
                               return (
                                   <SideMenuAlgorithm
                                       key={i}
-                                      configurationInfo={configurationInfo}
                                       detections={detections}
                                       resetSelectedDetectionBoxes={
                                           resetSelectedDetectionBoxes
@@ -70,8 +68,6 @@ const SideMenu = ({
 
 SideMenu.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
-    // TODO: James B. - Remove this once refactored into uiSlice
-    configurationInfo: PropTypes.object.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };

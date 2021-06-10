@@ -63,6 +63,7 @@ import {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    selectConfigInfoUpdate,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
     resetSelectedDetectionBoxesUpdate,
@@ -951,21 +952,19 @@ class App extends Component {
         reader.addEventListener('loadend', function () {
             const view = new Uint8Array(reader.result);
             var image = dicomParser.parseDicom(view);
-            // TODO: James B. - Refactor this into uiSlice.
-            self.setState({
-                configurationInfo: {
-                    type: image.string(Dicos.dictionary['DetectorType'].tag),
-                    configuration: image.string(
-                        Dicos.dictionary['DetectorConfiguration'].tag
-                    ),
-                    station: image.string(Dicos.dictionary['StationName'].tag),
-                    series: image.string(
-                        Dicos.dictionary['SeriesDescription'].tag
-                    ),
-                    study: image.string(
-                        Dicos.dictionary['StudyDescription'].tag
-                    ),
-                },
+            self.props.selectConfigInfoUpdate({
+                detectorType: image.string(
+                    Dicos.dictionary['DetectorType'].tag
+                ),
+                detectorConfigType: image.string(
+                    Dicos.dictionary['DetectorConfiguration'].tag
+                ),
+                seriesType: image.string(
+                    Dicos.dictionary['SeriesDescription'].tag
+                ),
+                studyType: image.string(
+                    Dicos.dictionary['StudyDescription'].tag
+                ),
             });
         });
         reader.readAsArrayBuffer(imagesLeft[0].blob);
@@ -2100,8 +2099,6 @@ class App extends Component {
                     <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
-                        // TODO: James B. - Remove this prop once the config info has been refactored into the uiSlice
-                        configurationInfo={this.state.configurationInfo}
                         resetSelectedDetectionBoxes={
                             this.resetSelectedDetectionBoxes
                         }
@@ -2177,6 +2174,7 @@ const mapDispatchToProps = {
     updateZoomLevels,
     updateZoomLevelTop,
     updateZoomLevelSide,
+    selectConfigInfoUpdate,
     newFileReceivedUpdate,
     hideContextMenuUpdate,
     resetSelectedDetectionBoxesUpdate,

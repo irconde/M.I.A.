@@ -14,7 +14,6 @@ import {
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
 const SideMenuAlgorithm = ({
-    configurationInfo,
     detections,
     resetCornerstoneTools,
     resetSelectedDetectionBoxes,
@@ -117,14 +116,7 @@ const SideMenuAlgorithm = ({
     };
     return (
         <div>
-            <MetaData
-                isVisible={isAlgorithmSelected !== '' ? true : false}
-                // TODO: James B. - Remove this once refactored into uiSlice
-                detectorType={configurationInfo.type}
-                detectorConfigType={configurationInfo.configuration}
-                seriesType={configurationInfo.series}
-                studyType={configurationInfo.study}
-            />
+            <MetaData isVisible={isAlgorithmSelected !== '' ? true : false} />
             <div
                 style={
                     isAlgorithmSelected === algorithm && isVisible
@@ -198,8 +190,6 @@ const SideMenuAlgorithm = ({
 };
 
 SideMenuAlgorithm.propTypes = {
-    // TODO: James B. - Remove this once refactored into uiSlice
-    configurationInfo: PropTypes.object.isRequired,
     detections: PropTypes.array.isRequired,
     resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
