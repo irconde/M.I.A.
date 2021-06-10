@@ -7,7 +7,7 @@ import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
-    getCornerstoneMode,
+    getCornerstoneMode
 } from '../../redux/slices/ui/uiSlice';
 
 /**
@@ -26,9 +26,9 @@ const FABContainer = styled.div`
     color: #fff;
     border: 1px solid #414141;
     border-radius: 60px;
-    display: flex;
+    display: ${(props) => (props.fabOpacity ? 'flex' : 'none')};
     box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
-    opacity: ${(props) => (props.fabOpacity ? '100%' : '38%')};
+    opacity: ${(props) => (props.fabOpacity ? '100%' : '0%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
     right:0;
     width:max-content;
@@ -87,6 +87,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     let fabOpacity;
     if (
         cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
+        cornerstoneMode === constants.cornerstoneMode.EDITION ||
         isVisible === false
     ) {
         fabOpacity = false;

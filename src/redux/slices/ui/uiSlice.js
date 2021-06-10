@@ -291,7 +291,7 @@ const uiSlice = createSlice({
 /**
  * getIsFabVisible
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns wether the FAB is Visible
+ * @returns {Boolean} Returns whether the FAB is Visible
  */
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
 /**
@@ -407,13 +407,13 @@ export const getConfigInfo = (state) => {
 /**
  * getSingleViewport
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns wether the UI should display a single viewport or multiple viewports
+ * @returns {Boolean} Returns whether the UI should display a single viewport or multiple viewports
  */
 export const getSingleViewport = (state) => state.ui.singleViewport;
 /**
  * getIsEditLabelWidgetVisible
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns wether the UI should display the edit label widget
+ * @returns {Boolean} Returns whether the UI should display the edit label widget
  */
 export const getIsEditLabelWidgetVisible = (state) =>
     state.ui.isEditLabelWidgetVisible;

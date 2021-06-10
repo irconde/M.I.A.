@@ -257,7 +257,7 @@ class App extends Component {
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
         this.props.updateFABVisibility(
-            this.props.numberOfFilesInQueue > 0 ? true : false
+            this.props.numFilesInQueue > 0
         );
         let reactObj = this;
         reactObj.getFilesFromCommandServer();
