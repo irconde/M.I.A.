@@ -235,6 +235,22 @@ const uiSlice = createSlice({
             state.detectionContextPosition.left = 0;
         },
         /**
+         * emptyAreaClickUpdate - This resets UI elements related to when the user mouse leaves the window and there are now files in the queue
+         *                        It will set the FAB to NOT be visible, reset the cornerstone mode to selection,
+         *                        set display selected bounding box to false, the edition mode to null, the
+         *                        detection context to not be visible and reset its position.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        onMouseLeaveNoFilesUpdate: (state) => {
+            state.isFABVisible = false;
+            state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.editionMode = constants.editionMode.NO_TOOL;
+            state.isDetectionContextVisible = false;
+            state.isEditLabelWidgetVisible = false;
+            state.detectionContextPosition.top = 0;
+            state.detectionContextPosition.left = 0;
+        },
+        /**
          * detectionSelectedUpdate - This sets UI elements related to selecting a detection. It will set the
          *                           FAB to not be visible, the cornerstone mode to edition, display the selected
          *                           bounding box to true, the edition mode to null and the detection context widget
@@ -425,6 +441,7 @@ export const {
     updateIsDetectionContextVisible,
     updateEditionMode,
     emptyAreaClickUpdate,
+    onMouseLeaveNoFilesUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,

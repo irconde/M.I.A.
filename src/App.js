@@ -56,6 +56,7 @@ import {
     updateCornerstoneMode,
     updateEditionMode,
     emptyAreaClickUpdate,
+    onMouseLeaveNoFilesUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,
@@ -256,9 +257,7 @@ class App extends Component {
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
-        this.props.updateFABVisibility(
-            this.props.numFilesInQueue > 0
-        );
+        this.props.updateFABVisibility(this.props.numFilesInQueue > 0);
         let reactObj = this;
         reactObj.getFilesFromCommandServer();
         reactObj.updateNumberOfFiles();
@@ -2231,7 +2230,8 @@ class App extends Component {
     }
 
     onMouseLeave(event) {
-        this.props.emptyAreaClickUpdate();
+        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        else this.props.onMouseLeaveNoFilesUpdate();
         this.props.clearAllSelection();
         this.resetSelectedDetectionBoxes(event);
         this.resetCornerstoneTool();
@@ -2330,6 +2330,7 @@ const mapDispatchToProps = {
     updateCornerstoneMode,
     updateEditionMode,
     emptyAreaClickUpdate,
+    onMouseLeaveNoFilesUpdate,
     detectionSelectedUpdate,
     labelSelectedUpdate,
     deleteDetectionUpdate,
