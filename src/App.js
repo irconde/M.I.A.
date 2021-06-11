@@ -1792,6 +1792,7 @@ class App extends Component {
      * C
      */
     async onDetectionSelected(e) {
+        console.log("@onDetectionSelected");
         return new Promise((resolve, reject) => {
             const viewportInfo = Utils.eventToViewportInfo(e);
             const view =
@@ -1803,6 +1804,7 @@ class App extends Component {
             }
             const detectionData = this.props.selectedDetection;
             if (detectionData) {
+                console.log("Label: ", detectionData.className);
                 if (detectionData.boundingBox !== undefined) {
                     const detectionBoxCoords = detectionData.boundingBox;
                     const data = {
@@ -1963,6 +1965,7 @@ class App extends Component {
      * function is called. Use the param data to render the context menu.
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
+        console.log("@renderDetectionContextMenu");
         if (this.props.selectedDetection !== null) {
             const viewportInfo = Utils.eventToViewportInfo(event);
             const detectionData = draggedData
@@ -1979,6 +1982,7 @@ class App extends Component {
             });
             if (viewportInfo.viewport !== null) {
                 if (detectionData !== undefined) {
+                    console.log("Label: ", detectionData.className);
                     let detectionContextGap = 0;
                     let viewport, originCoordX;
                     const boundingBoxCoords = detectionData.boundingBox;
@@ -2088,6 +2092,8 @@ class App extends Component {
      * @param {string} newLabel Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
+        console.log("@App.editDetectionLabel");
+        console.log("Label: ", newLabel);
         const { uuid } = this.props.selectedDetection;
         if (uuid) {
             this.props.editDetectionLabel({
@@ -2097,7 +2103,7 @@ class App extends Component {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 cornerstoneMode: constants.cornerstoneMode.EDITION,
                 editionMode: constants.editionMode.NO_TOOL,
-                temporaryLabel: newLabel,
+                //temporaryLabel: newLabel,
             });
             this.props.onLabelEditionEnd({
                 editionMode: constants.editionMode.NO_TOOL,
