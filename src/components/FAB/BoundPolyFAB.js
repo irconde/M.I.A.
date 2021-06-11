@@ -7,7 +7,7 @@ import * as constants from '../../Constants';
 import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
-    getCornerstoneMode
+    getCornerstoneMode,
 } from '../../redux/slices/ui/uiSlice';
 
 /**
@@ -30,10 +30,10 @@ const FABContainer = styled.div`
     box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
     opacity: ${(props) => (props.fabOpacity ? '100%' : '0%')};
     animation: fadein 2s; /* fade component in so cornerstone can load */
-    right:0;
-    width:max-content;
-    margin-left:auto;
-    margin-right:auto;
+    right: 0;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
 
     @keyframes fadein {
         from {
@@ -82,7 +82,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         }
     };
     // Calculating screen size and setting horizontal value accordingly.
-    let leftPX = "-"+constants.sideMenuWidth+"px";
+    let leftPX = '-' + constants.sideMenuWidth + 'px';
 
     let fabOpacity;
     if (
@@ -96,10 +96,10 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
                 'cornerstone-canvas'
             );
             let multipleViewports = canvasElements.length > 1;
-            if (canvasElements[0]!== undefined)canvasElements[0].id = 'selectedTop';
+            if (canvasElements[0] !== undefined)
+                canvasElements[0].id = 'selectedTop';
             if (multipleViewports) canvasElements[1].id = 'selectedSide';
         }
-    
     } else {
         fabOpacity = true;
         let canvasElements = document.getElementsByClassName(
