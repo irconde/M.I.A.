@@ -126,9 +126,8 @@ class App extends Component {
             activeViewport: 'dicomImageLeft',
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
-        this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
-            this
-        );
+        this.sendImageToCommandServer =
+            this.sendImageToCommandServer.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -136,25 +135,22 @@ class App extends Component {
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
-        this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
-            this
-        );
+        this.resetSelectedDetectionBoxes =
+            this.resetSelectedDetectionBoxes.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
-            this
-        );
+        this.calculateviewPortWidthAndHeight =
+            this.calculateviewPortWidthAndHeight.bind(this);
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
         this.onNewPolygonMaskCreated = this.onNewPolygonMaskCreated.bind(this);
-        this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
-            this
-        );
+        this.renderDetectionContextMenu =
+            this.renderDetectionContextMenu.bind(this);
         this.getContextMenuPos = this.getContextMenuPos.bind(this);
         this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
@@ -218,7 +214,9 @@ class App extends Component {
         );
         this.state.imageViewportTop.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
-            this.onNewPolygonMaskCreated
+            (event) => {
+                this.onNewPolygonMaskCreated(event, this.state.imageViewportTop);
+            }
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstoneimagerendered',
@@ -259,7 +257,9 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
-            this.onNewPolygonMaskCreated
+            (event) => {
+                this.onNewPolygonMaskCreated(event, this.state.imageViewportSide);
+            }
         );
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
@@ -305,11 +305,8 @@ class App extends Component {
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById(
-            'verticalDivider'
-        ).style.left = document.getElementsByClassName(
-            'twoViewportsTop'
-        )[0].style.width;
+        document.getElementById('verticalDivider').style.left =
+            document.getElementsByClassName('twoViewportsTop')[0].style.width;
         document.getElementsByClassName('twoViewportsSide')[0].style.left =
             document.getElementsByClassName('twoViewportsTop')[0].style.width +
             document.getElementById('verticalDivider').style.width;
@@ -322,9 +319,8 @@ class App extends Component {
      * @returns {type} None
      */
     recalculateZoomLevel() {
-        let canvasElements = document.getElementsByClassName(
-            'cornerstone-canvas'
-        );
+        let canvasElements =
+            document.getElementsByClassName('cornerstone-canvas');
         let multipleViewports = canvasElements.length > 1;
         const newZoomLevelTop = Utils.calculateZoomLevel(
             canvasElements[0].style.width
@@ -444,8 +440,9 @@ class App extends Component {
                 cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                     mouseButtonMask: 1,
                 });
-            }
-            else if (this.props.editionMode === constants.editionMode.POLYGON) {
+            } else if (
+                this.props.editionMode === constants.editionMode.POLYGON
+            ) {
                 cornerstoneTools.setToolActive('PolygonDrawingTool', {
                     mouseButtonMask: 1,
                 });
@@ -618,9 +615,8 @@ class App extends Component {
                                     stackFile,
                                     'text/xml'
                                 );
-                                const xmlStack = xmlDoc.getElementsByTagName(
-                                    'stack'
-                                );
+                                const xmlStack =
+                                    xmlDoc.getElementsByTagName('stack');
                                 // We loop through each stack. Creating a new stack object to store our info
                                 // for now, we are just grabbing the location of the dicos file in the ora file
                                 for (let stackData of xmlStack) {
@@ -628,9 +624,8 @@ class App extends Component {
                                         stackData.getAttribute('name'),
                                         stackData.getAttribute('view')
                                     );
-                                    let layerData = stackData.getElementsByTagName(
-                                        'layer'
-                                    );
+                                    let layerData =
+                                        stackData.getElementsByTagName('layer');
                                     for (let imageSrc of layerData) {
                                         currentStack.rawData.push(
                                             imageSrc.getAttribute('src')
@@ -655,11 +650,10 @@ class App extends Component {
                                             .async('base64')
                                             .then((imageData) => {
                                                 if (i === 0)
-                                                    listOfStacks[
-                                                        j
-                                                    ].pixelData = Utils.base64ToArrayBuffer(
-                                                        imageData
-                                                    );
+                                                    listOfStacks[j].pixelData =
+                                                        Utils.base64ToArrayBuffer(
+                                                            imageData
+                                                        );
                                                 listOfStacks[j].blobData.push({
                                                     blob: Utils.b64toBlob(
                                                         imageData
@@ -669,9 +663,8 @@ class App extends Component {
                                             });
                                     }
                                 }
-                                const promiseOfList = Promise.all(
-                                    listOfPromises
-                                );
+                                const promiseOfList =
+                                    Promise.all(listOfPromises);
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
@@ -750,16 +743,14 @@ class App extends Component {
                             `data/${stack.view}_pixel_data.dcs`,
                             stack.blobData[0].blob
                         );
-                        const topStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                        const topStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.TOP === stack.view;
-                            }
-                        );
-                        const sideStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                            });
+                        const sideStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.SIDE === stack.view;
-                            }
-                        );
+                            });
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
@@ -778,9 +769,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/top_threat_detection_${j + 1}_${
@@ -812,9 +802,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/side_threat_detection_${i + 1}_${
@@ -948,9 +937,10 @@ class App extends Component {
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
-            const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                self.state.myOra.stackData[1].blobData[0].blob
-            );
+            const pixelDataSide =
+                cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                    self.state.myOra.stackData[1].blobData[0].blob
+                );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportSide,
@@ -1453,7 +1443,9 @@ class App extends Component {
 
     /**
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
-     * @param {*}  Viewport The Cornerstone Viewport containing the event
+     *
+     * @param {Event} event Mouse drag end event
+     * @param {container}  viewport The Cornerstone Viewport containing the event
      * @return {type} None
      */
     onDragEnd(event, viewport) {
@@ -1468,15 +1460,7 @@ class App extends Component {
                 viewport,
                 'BoundingBoxDrawing'
             );
-            if (toolState === undefined) {
-                this.props.emptyAreaClickUpdate();
-                this.props.clearAllSelection();
-                this.resetSelectedDetectionBoxes(event);
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
-                return;
-            }
-            if (toolState.data.length === 0) {
+            if (toolState === undefined || toolState.data.length === 0) {
                 this.props.emptyAreaClickUpdate();
                 this.props.clearAllSelection();
                 this.resetSelectedDetectionBoxes(event);
@@ -1486,13 +1470,11 @@ class App extends Component {
             }
             const { data } = toolState;
             // Destructure data needed from event
-            if (data === undefined) {
-                return;
-            }
-            if (data[0] === undefined) {
-                return;
-            }
-            if (data.length === 0) {
+            if (
+                data === undefined ||
+                data.length === 0 ||
+                data[0] === undefined
+            ) {
                 return;
             }
             const { handles } = data[0];
@@ -1634,11 +1616,21 @@ class App extends Component {
     /**
      * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
      *
-     * @param  {type} event Event data.
+     * @param {Event} event Event triggered when a new polygon is created
+     * @param {container}  viewport The Cornerstone Viewport receiving the event
      * @return {type}  None
      */
-    onNewPolygonMaskCreated(event) {
-        console.log("New polygon has been created");
+    onNewPolygonMaskCreated(event, viewport) {
+        if (
+            this.props.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION &&
+            this.props.annotationMode === constants.annotationMode.POLYGON
+        ) {
+            this.props.emptyAreaClickUpdate();
+            this.resetCornerstoneTool();
+            this.props.clearAllSelection();
+            this.appUpdateImage();
+        }
     }
 
     /**
