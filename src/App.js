@@ -74,7 +74,6 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
-import { annotationMode } from './Constants';
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -152,6 +151,7 @@ class App extends Component {
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
+        this.onNewPolygonMaskCreated = this.onNewPolygonMaskCreated.bind(this);
         this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
             this
         );
@@ -216,6 +216,10 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
+        this.state.imageViewportTop.addEventListener(
+            constants.events.POLYGON_MASK_CREATED,
+            this.onNewPolygonMaskCreated
+        );
         this.state.imageViewportSide.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -253,14 +257,16 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
+        this.state.imageViewportSide.addEventListener(
+            constants.events.POLYGON_MASK_CREATED,
+            this.onNewPolygonMaskCreated
+        );
         window.addEventListener('resize', this.resizeListener);
-
         this.calculateviewPortWidthAndHeight();
         this.props.updateFABVisibility(
             this.props.numberOfFilesInQueue > 0 ? true : false
         );
         let reactObj = this;
-
         reactObj.getFilesFromCommandServer();
         reactObj.updateNumberOfFiles();
         reactObj.setupCornerstoneJS(
@@ -1626,6 +1632,16 @@ class App extends Component {
     }
 
     /**
+     * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
+     *
+     * @param  {type} event Event data.
+     * @return {type}  None
+     */
+    onNewPolygonMaskCreated(event) {
+        console.log("New polygon has been created");
+    }
+
+    /**
      * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
      *
      * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
@@ -2171,6 +2187,7 @@ const mapStateToProps = (state) => {
         selectedDetection: detections.selectedDetection,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
+        annotationMode: ui.annotationMode,
         zoomLevelTop: ui.zoomLevelTop,
         zoomLevelSide: ui.zoomLevelSide,
         imageViewportTop: ui.imageViewportTop,

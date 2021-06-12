@@ -301,6 +301,12 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
+ * getAnnotationMode
+ * @param {State} state Passed in via useSelector
+ * @returns {constants.editionMode} The constant for the current edition mode.
+ */
+export const getAnnotationMode = (state) => state.ui.annotationMode;
+/**
  * getEditionMode
  * @param {State} state Passed in via useSelector
  * @returns {constants.editionMode} The constant for the current edition mode.

@@ -16,6 +16,7 @@ const state = csTools.importInternal('store/state');
 const clipToBox = csTools.importInternal('util/clipToBox');
 const EVENTS = csTools.importInternal('constants/events');
 
+
 const { freehandArea, freehandIntersect, FreehandHandleData } = freehandUtils;
 
 /**
@@ -205,7 +206,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      */
     renderToolData(evt) {
         const eventData = evt.detail;
-
         // If we have no toolState for this element, return immediately as there is nothing to do
         const toolState = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolState) {
@@ -277,12 +277,10 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 }
 
                 // Draw handles
-
                 options = {
                     color,
                     fill: fillColor,
                 };
-
                 if (
                     config.alwaysShowHandles ||
                     (data.active && data.polyBoundingBox)
@@ -299,21 +297,17 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                         );
                     }
                 }
-
                 if (data.canComplete) {
                     // Draw large handle at the origin if can complete drawing
                     options.handleRadius = config.completeHandleRadius;
                     const handle = data.handles.points[0];
-
                     if (this.configuration.drawHandles) {
                         drawHandles(context, eventData, [handle], options);
                     }
                 }
-
                 if (data.active && !data.polyBoundingBox) {
                     // Draw handle at origin and at mouse if actively drawing
                     options.handleRadius = config.activeHandleRadius;
-
                     if (this.configuration.drawHandles) {
                         drawHandles(
                             context,
@@ -497,7 +491,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {void}
      */
     fireModifiedEvent(element, measurementData) {
-        const eventType = EVENTS.MEASUREMENT_MODIFIED;
+        const eventType = constants.events.POLYGON_MASK_MODIFIED;
         const eventData = {
             toolName: this.name,
             toolType: this.name, // Deprecation notice: toolType will be replaced by toolName
@@ -508,7 +502,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     fireCompletedEvent(element, measurementData) {
-        const eventType = EVENTS.MEASUREMENT_COMPLETED;
+        const eventType = constants.events.POLYGON_MASK_CREATED;
         const eventData = {
             toolName: this.name,
             toolType: this.name, // Deprecation notice: toolType will be replaced by toolName
@@ -1163,15 +1157,12 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     _editTouchDragCallback(evt) {
         const eventData = evt.detail;
         const { element } = eventData;
-
         const toolState = csTools.getToolState(element, this.name);
-
         const config = this.configuration;
         const data = toolState.data[config.currentTool];
         const currentHandle = config.currentHandle;
         const points = data.handles.points;
         let handleIndex = -1;
-
         // Set the mouseLocation handle
         this._getMouseLocation(eventData);
 
