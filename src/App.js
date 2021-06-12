@@ -74,6 +74,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
+import { annotationMode } from './Constants';
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -1451,8 +1452,10 @@ class App extends Component {
      */
     onDragEnd(event, viewport) {
         if (
-            this.props.cornerstoneMode ===
-                constants.cornerstoneMode.ANNOTATION ||
+            (this.props.cornerstoneMode ===
+                constants.cornerstoneMode.ANNOTATION &&
+                this.props.annotationMode ===
+                    constants.annotationMode.BOUNDING) ||
             this.props.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
             const toolState = cornerstoneTools.getToolState(
@@ -1557,9 +1560,10 @@ class App extends Component {
                         });
                         self.appUpdateImage();
                     } else {
-                        self.props.updateCornerstoneMode(
-                            constants.cornerstoneMode.SELECTION
-                        );
+                        self.props.updateCornerstoneMode({
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                        });
                         self.resetCornerstoneTool();
                     }
                 } else {
@@ -1588,10 +1592,8 @@ class App extends Component {
                         const detectionData = self.props.detections.find(
                             (det) => det.uuid === data[0].uuid
                         );
-                        const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
-                            detectionData,
-                            coords
-                        );
+                        const editLabelWidgetPosInfo =
+                            self.getEditLabelWidgetPos(detectionData, coords);
                         let widgetPosition = {
                             top: editLabelWidgetPosInfo.y,
                             left: editLabelWidgetPosInfo.x,
@@ -1753,9 +1755,10 @@ class App extends Component {
         ) {
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
-            this.props.updateCornerstoneMode(
-                constants.cornerstoneMode.ANNOTATION
-            );
+            this.props.updateCornerstoneMode({
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                annotationMode: constants.annotationMode.BOUNDING,
+            });
             this.appUpdateImage();
             cornerstoneTools.setToolActive('BoundingBoxDrawing', {
                 mouseButtonMask: 1,
@@ -1774,7 +1777,10 @@ class App extends Component {
         ) {
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
-            this.props.boundingBoxSelectedUpdate();
+            this.props.updateCornerstoneMode({
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                annotationMode: constants.annotationMode.POLYGON,
+            });
             this.appUpdateImage();
             cornerstoneTools.setToolActive('PolygonDrawingTool', {
                 mouseButtonMask: 1,

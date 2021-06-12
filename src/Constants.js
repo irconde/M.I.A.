@@ -64,6 +64,11 @@ export const cornerstoneMode = {
     ANNOTATION: 'annotation',
     EDITION: 'edition',
 };
+export const annotationMode = {
+    BOUNDING: 'bounding',
+    POLYGON: 'polygon',
+    NO_TOOL: 'none',
+};
 export const editionMode = {
     LABEL: 'label',
     BOUNDING: 'bounding',

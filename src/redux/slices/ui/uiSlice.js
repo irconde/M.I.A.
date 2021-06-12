@@ -4,6 +4,7 @@ import * as constants from '../../../Constants';
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
+    annotationMode: constants.annotationMode.NO_TOOL,
     isEditLabelWidgetVisible: false,
     isFABVisible: false,
     isDetectionContextVisible: false,
@@ -11,7 +12,6 @@ const initialState = {
         top: 0,
         left: 0,
     },
-
     detectionLabelEditWidth: '0px',
     detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
     detectionLabelEditViewport: constants.viewport.SIDE,
@@ -50,7 +50,8 @@ const uiSlice = createSlice({
             switch (editionMode) {
                 case constants.editionMode.LABEL:
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition = detectionLabelEditPosition;
+                    state.detectionLabelEditPosition =
+                        detectionLabelEditPosition;
             }
         },
         /**
@@ -68,7 +69,9 @@ const uiSlice = createSlice({
          * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
          */
         updateCornerstoneMode: (state, action) => {
-            state.cornerstoneMode = action.payload;
+            const { cornerstoneMode, annotationMode } = action.payload;
+            state.cornerstoneMode = cornerstoneMode;
+            state.annotationMode = annotationMode;
         },
         /**
          * updateFABVisibility
@@ -275,12 +278,8 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
         selectConfigInfoUpdate: (state, action) => {
-            const {
-                detectorType,
-                detectorConfigType,
-                seriesType,
-                studyType,
-            } = action.payload;
+            const { detectorType, detectorConfigType, seriesType, studyType } =
+                action.payload;
             state.detectorType = detectorType;
             state.detectorConfigType = detectorConfigType;
             state.seriesType = seriesType;
