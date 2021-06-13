@@ -234,12 +234,10 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                         fillColor = config.invalidColor;
                     } else {
                         color = constants.detectionStyle.NORMAL_COLOR;
-                        // TODO.irconde
-                        fillColor = constants.detectionStyle.NORMAL_COLOR; //toolColors.getFillColor();
+                        fillColor = constants.detectionStyle.NORMAL_COLOR;
                     }
                 } else {
-                    // TODO.irconde
-                    fillColor = constants.detectionStyle.NORMAL_COLOR; //toolColors.getToolColor();
+                    fillColor = constants.detectionStyle.NORMAL_COLOR;
                 }
 
                 let options = { color };
@@ -524,7 +522,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      */
     _deactivateDraw(element) {
         this._drawing = false;
-        // TODO. irconde
         state.isMultiPartToolActive = false;
         this._drawingInteractionType = null;
 
@@ -573,7 +570,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {undefined}
      */
     _activateModify(element) {
-        // TODO. irconde
         state.isToolLocked = true;
         element.addEventListener(EVENTS.MOUSE_UP, this._editMouseUpCallback);
         element.addEventListener(
@@ -598,7 +594,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {undefined}
      */
     _deactivateModify(element) {
-        //TODO. irconde
         state.isToolLocked = false;
         element.removeEventListener(EVENTS.MOUSE_UP, this._editMouseUpCallback);
         element.removeEventListener(
