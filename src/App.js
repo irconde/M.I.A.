@@ -156,6 +156,8 @@ class App extends Component {
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
+        this.startListeningClickEvents = this.startListeningClickEvents.bind(this);
+        this.stopListeningClickEvents = this.stopListeningClickEvents.bind(this);
     }
 
     /**
@@ -177,14 +179,6 @@ class App extends Component {
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
-        );
-        this.state.imageViewportTop.addEventListener(
-            'cornerstonetoolsmouseclick',
-            this.onMouseClicked
-        );
-        this.state.imageViewportTop.addEventListener(
-            'cornerstonetoolstouchstart',
-            this.onMouseClicked
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolstouchdragend',
@@ -226,14 +220,6 @@ class App extends Component {
             this.onImageRendered
         );
         this.state.imageViewportSide.addEventListener(
-            'cornerstonetoolsmouseclick',
-            this.onMouseClicked
-        );
-        this.state.imageViewportSide.addEventListener(
-            'cornerstonetoolstouchstart',
-            this.onMouseClicked
-        );
-        this.state.imageViewportSide.addEventListener(
             'cornerstonetoolstouchdragend',
             (event) => {
                 this.onDragEnd(event, this.state.imageViewportSide);
@@ -267,6 +253,7 @@ class App extends Component {
                 );
             }
         );
+        this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
         this.props.updateFABVisibility(
@@ -296,6 +283,52 @@ class App extends Component {
         this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
+    }
+
+    /**
+     * startListeningClickEvents - Method that binds a click event listener to the two cornerstonejs viewports
+     *
+     */
+    startListeningClickEvents() {
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+    }
+
+    /**
+     * startListeningClickEvents - Method that unbinds a click event listener to the two cornerstonejs viewports
+     *
+     */
+    stopListeningClickEvents() {
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmouseclick',
+            this.onMouseClicked
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolstouchstart',
+            this.onMouseClicked
+        );
     }
 
     /**
@@ -354,14 +387,6 @@ class App extends Component {
             this.onImageRendered
         );
         this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolsmouseclick',
-            this.onMouseClicked
-        );
-        this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolstouchstart',
-            this.onMouseClicked
-        );
-        this.state.imageViewportTop.removeEventListener(
             'cornerstonetoolsmousedrag',
             this.resetSelectedDetectionBoxes
         );
@@ -378,14 +403,6 @@ class App extends Component {
             this.onImageRendered
         );
         this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolsmouseclick',
-            this.onMouseClicked
-        );
-        this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolstouchstart',
-            this.onMouseClicked
-        );
-        this.state.imageViewportSide.removeEventListener(
             'cornerstonetoolsmousedrag',
             this.resetSelectedDetectionBoxes
         );
@@ -397,6 +414,7 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
+        this.stopListeningClickEvents();
         window.removeEventListener('resize', this.resizeListener);
         document.body.removeEventListener('mousemove', this.onMouseMoved);
         document.body.removeEventListener('mouseleave', this.onMouseLeave);
@@ -1717,10 +1735,13 @@ class App extends Component {
                     uuid,
                 });
 
-                this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
                 this.props.clearAllSelection();
                 this.appUpdateImage();
+                this.props.emptyAreaClickUpdate();
+                setTimeout(() => {
+                    this.startListeningClickEvents();
+                }, 500)
             });
         }
     }
@@ -1875,6 +1896,7 @@ class App extends Component {
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            this.stopListeningClickEvents();
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
             this.props.updateCornerstoneMode({
