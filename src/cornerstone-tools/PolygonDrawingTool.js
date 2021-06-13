@@ -430,7 +430,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         // Connect the end handle to the origin handle
         if (handleNearby !== undefined) {
             const points = data.handles.points;
-
             points[config.currentHandle - 1].lines.push(points[0]);
         }
 
@@ -448,7 +447,10 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
             this._deactivateDraw(element);
         }
 
-        cornerstone.updateImage(element);
+        data.algorithm = constants.OPERATOR;
+        data.class = constants.commonDetections.UNKNOWN;
+        data.confidence = 100;
+        data.updatingDetection = false;
 
         this.fireModifiedEvent(element, data);
         this.fireCompletedEvent(element, data);

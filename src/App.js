@@ -215,7 +215,10 @@ class App extends Component {
         this.state.imageViewportTop.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
-                this.onNewPolygonMaskCreated(event, this.state.imageViewportTop);
+                this.onNewPolygonMaskCreated(
+                    event,
+                    this.state.imageViewportTop
+                );
             }
         );
         this.state.imageViewportSide.addEventListener(
@@ -258,7 +261,10 @@ class App extends Component {
         this.state.imageViewportSide.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
-                this.onNewPolygonMaskCreated(event, this.state.imageViewportSide);
+                this.onNewPolygonMaskCreated(
+                    event,
+                    this.state.imageViewportSide
+                );
             }
         );
         window.addEventListener('resize', this.resizeListener);
@@ -1038,7 +1044,8 @@ class App extends Component {
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
                         boundingBox: boundingBoxCoords,
-                        maskBitmap: [[]],
+                        binaryMask: [[]],
+                        polygonMask: [],
                         uuid: imagesLeft[i].uuid,
                     });
                 }
@@ -1099,7 +1106,8 @@ class App extends Component {
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
                             boundingBox: boundingBoxCoords,
-                            maskBitmap: pixelData,
+                            binaryMask: pixelData,
+                            polygonMask: [],
                             uuid: currentRightImage.uuid,
                         });
                     }
@@ -1295,8 +1303,13 @@ class App extends Component {
                 boundingBoxHeight
             );
 
-            // Mask rendering
-            this.renderDetectionMasks(data[j].maskBitmap, context);
+            context.globalAlpha = 0.5;
+            // Binary mask rendering
+            this.renderBinaryMasks(data[j].binaryMask, context);
+
+            // Polygon mask rendering
+            this.renderPolygonMasks(data[j].polygonMask, context);
+            context.globalAlpha = 1.0;
 
             // Label rendering
             context.fillRect(
@@ -1321,13 +1334,13 @@ class App extends Component {
     }
 
     /**
-     * renderDetectionMasks - Method that renders the several annotations in a given DICOS+TDR file
+     * renderBinaryMasks - Method that renders the binary mask associated with a detection
      *
      * @param  {type} data    DICOS+TDR data
      * @param  {type} context Rendering context
      * @return {type}         None
      */
-    renderDetectionMasks(data, context) {
+    renderBinaryMasks(data, context) {
         if (data === undefined || data === null || data.length === 0) {
             return;
         }
@@ -1337,7 +1350,6 @@ class App extends Component {
         const maskWidth = data[2][0];
         const maskHeight = data[2][1];
         const pixelData = data[0];
-        context.globalAlpha = 0.5;
         context.imageSmoothingEnabled = true;
         for (var y = 0; y < maskHeight; y++)
             for (var x = 0; x < maskWidth; x++) {
@@ -1345,8 +1357,28 @@ class App extends Component {
                     context.fillRect(baseX + x, baseY + y, 1, 1);
                 }
             }
-        context.globalAlpha = 1.0;
         context.imageSmoothingEnabled = false;
+    }
+
+    /**
+     * renderPolygonMasks - Method that renders the polygon mask associated with a detection
+     *
+     * @param  {array} coords    polygon mask coordinates
+     * @param  {Context} context Rendering context
+     */
+    renderPolygonMasks(coords, context) {
+        if (coords === undefined || coords === null || coords.length === 0) {
+            return;
+        }
+        let index = 0;
+        context.beginPath();
+        context.moveTo(coords[index], coords[index + 1]);
+        index += 2;
+        for (let i = index; i < coords.length; i += 2) {
+            context.lineTo(coords[i], coords[i + 1]);
+        }
+        context.closePath();
+        context.fill();
     }
 
     /**
@@ -1504,7 +1536,8 @@ class App extends Component {
                         ? constants.viewport.TOP
                         : constants.viewport.SIDE,
                 validation: true,
-                maskBitmap: [[]],
+                binaryMask: [[]],
+                polygonMask: [],
             };
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
                 return newDetection.view === stack.view;
@@ -1543,7 +1576,8 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
-                            maskBitmap: [[]],
+                            binaryMask: [[]],
+                            polygonMask: [],
                             uuid,
                         });
                         self.appUpdateImage();
@@ -1626,10 +1660,68 @@ class App extends Component {
                 constants.cornerstoneMode.ANNOTATION &&
             this.props.annotationMode === constants.annotationMode.POLYGON
         ) {
-            this.props.emptyAreaClickUpdate();
-            this.resetCornerstoneTool();
-            this.props.clearAllSelection();
-            this.appUpdateImage();
+            const polygonData = event.detail.measurementData;
+            const polygonCoords = Utils.polygonDataToCoordArray(
+                polygonData.handles.points
+            );
+            const boundingBoxCoords = Utils.calculateBoundingBox(
+                polygonData.handles.points
+            );
+
+            let newDetection = {
+                uuid: polygonData.uuid,
+                boundingBox: boundingBoxCoords,
+                algorithm: polygonData.algorithm,
+                className: polygonData.class,
+                confidence: polygonData.confidence,
+                view:
+                    viewport === this.state.imageViewportTop
+                        ? constants.viewport.TOP
+                        : constants.viewport.SIDE,
+                validation: true,
+                binaryMask: [[]],
+                polygonMask: polygonCoords,
+            };
+            const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
+                return newDetection.view === stack.view;
+            });
+            let self = this;
+            Dicos.detectionObjectToBlob(
+                newDetection,
+                self.state.myOra.stackData[stackIndex].blobData[0].blob
+            ).then((newBlob) => {
+                const uuid = uuidv4();
+                self.state.myOra.stackData[stackIndex].blobData.push({
+                    blob: newBlob,
+                    uuid,
+                });
+                if (polygonData === undefined) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.resetSelectedDetectionBoxes(event);
+                    self.appUpdateImage();
+                    return;
+                }
+                self.props.addDetection({
+                    algorithm: constants.OPERATOR,
+                    boundingBox: boundingBoxCoords,
+                    className: polygonData.class,
+                    confidence: polygonData.confidence,
+                    view:
+                        viewport === self.state.imageViewportTop
+                            ? constants.viewport.TOP
+                            : constants.viewport.SIDE,
+                    binaryMask: [[]],
+                    polygonMask: polygonCoords,
+                    uuid,
+                });
+
+                this.props.emptyAreaClickUpdate();
+                this.resetCornerstoneTool();
+                this.props.clearAllSelection();
+                this.appUpdateImage();
+            });
         }
     }
 

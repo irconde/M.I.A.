@@ -422,4 +422,37 @@ export default class Utils {
 
         return cornerList;
     }
+
+    /**
+     * handleDataToArray - Convert list of handles into an array of float values
+     *
+     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     */
+    static polygonDataToCoordArray(polygonData) {
+        let points = [];
+        for (let index in polygonData) {
+            points.push(polygonData[index].x);
+            points.push(polygonData[index].y);
+        }
+        return points;
+    }
+
+    /**
+     * calculateBoundingBox - Calculate the coordinates of the bounding box for a given polygon
+     *
+     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     */
+    static calculateBoundingBox(polygonData) {
+        let x_values = [];
+        let y_values = [];
+        for (let index in polygonData) {
+            x_values.push(polygonData[index].x);
+            y_values.push(polygonData[index].y);
+        }
+        const x_min = Math.min(...x_values);
+        const y_max = Math.max(...y_values);
+        const x_max = Math.max(...x_values);
+        const y_min = Math.min(...y_values);
+        return [x_min, y_min, x_max, y_max];
+    }
 }
