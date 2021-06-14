@@ -26,10 +26,11 @@ const FABContainer = styled.div`
     color: #fff;
     border: 1px solid #414141;
     border-radius: 60px;
-    display: ${(props) => (props.fabOpacity ? 'flex' : 'none')};
+    display: flex;
     box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
-    opacity: ${(props) => (props.fabOpacity ? '100%' : '0%')};
-    animation: fadein 2s; /* fade component in so cornerstone can load */
+    opacity: ${(props) => (props.fabOpacity ? '100%' : '28%')};
+    animation: fadein ${(props) => (props.fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
+    pointer-events: ${(props) => (props.fabOpacity ? 'auto' : 'none')};
     right: 0;
     width: max-content;
     margin-left: auto;
@@ -40,7 +41,7 @@ const FABContainer = styled.div`
             opacity: 0;
         }
         to {
-            opacity: 1;
+            opacity: ${(props) => (props.fabOpacity ? '1' : '0.28')};
         }
     }
 
