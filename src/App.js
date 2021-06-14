@@ -9,7 +9,6 @@ import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import io from 'socket.io-client';
 import ORA from './utils/Ora.js';
-import Stack from './Stack.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
 import axios from 'axios';
@@ -657,10 +656,13 @@ class App extends Component {
                                 // We loop through each stack. Creating a new stack object to store our info
                                 // for now, we are just grabbing the location of the dicos file in the ora file
                                 for (let stackData of xmlStack) {
-                                    let currentStack = new Stack(
-                                        stackData.getAttribute('name'),
-                                        stackData.getAttribute('view')
-                                    );
+                                    let currentStack = {
+                                        name: stackData.getAttribute('name'),
+                                        view: stackData.getAttribute('view'),
+                                        rawData: [],
+                                        blobData: [],
+                                        pixelData: null
+                                    };
                                     let layerData = stackData.getElementsByTagName(
                                         'layer'
                                     );
