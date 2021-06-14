@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import '../../App.css';
 import NextButton from './NextButton';
-import * as constants from '../../Constants';
+import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';

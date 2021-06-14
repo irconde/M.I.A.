@@ -5,8 +5,8 @@ import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
 import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
-import { editionMode, detectionContextStyle } from '../../Constants';
-import * as constants from '../../Constants';
+import { editionMode, detectionContextStyle } from '../../utils/Constants';
+import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
     getEditionMode,

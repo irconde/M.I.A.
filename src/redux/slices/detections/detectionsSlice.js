@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../Constants';
+import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
-import Utils from '../../../Utils';
+import Utils from '../../../utils/Utils';
 
 // interface Detection {
 //     // Unique Identifier

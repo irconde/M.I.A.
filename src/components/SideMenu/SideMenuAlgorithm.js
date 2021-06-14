@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MetaData from '../Snackbars/MetaData';
 import TreeDetection from './SideMenuDetection';
 import * as Icons from './Icons';
-import * as constants from '../../Constants';
+import * as constants from '../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     clearAllSelection,

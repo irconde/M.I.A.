@@ -1,5 +1,5 @@
 import csTools from 'eac-cornerstone-tools';
-import * as constants from '../Constants';
+import * as constants from '../utils/Constants';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneMath from 'cornerstone-math';
 const drawHandles = csTools.importInternal('drawing/drawHandles');
@@ -15,7 +15,6 @@ const moveHandleNearImagePoint = csTools.importInternal(
 const state = csTools.importInternal('store/state');
 const clipToBox = csTools.importInternal('util/clipToBox');
 const EVENTS = csTools.importInternal('constants/events');
-
 
 const { freehandArea, freehandIntersect, FreehandHandleData } = freehandUtils;
 
@@ -41,20 +40,25 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         this._modifying = false;
 
         // Create bound callback functions for private event loops
-        this._drawingMouseDownCallback =
-            this._drawingMouseDownCallback.bind(this);
-        this._drawingMouseMoveCallback =
-            this._drawingMouseMoveCallback.bind(this);
+        this._drawingMouseDownCallback = this._drawingMouseDownCallback.bind(
+            this
+        );
+        this._drawingMouseMoveCallback = this._drawingMouseMoveCallback.bind(
+            this
+        );
         this._drawingMouseUpCallback = this._drawingMouseUpCallback.bind(this);
-        this._drawingMouseDoubleClickCallback =
-            this._drawingMouseDoubleClickCallback.bind(this);
+        this._drawingMouseDoubleClickCallback = this._drawingMouseDoubleClickCallback.bind(
+            this
+        );
         this._editMouseUpCallback = this._editMouseUpCallback.bind(this);
         this._editMouseDragCallback = this._editMouseDragCallback.bind(this);
 
-        this._drawingTouchStartCallback =
-            this._drawingTouchStartCallback.bind(this);
-        this._drawingDoubleTapClickCallback =
-            this._drawingDoubleTapClickCallback.bind(this);
+        this._drawingTouchStartCallback = this._drawingTouchStartCallback.bind(
+            this
+        );
+        this._drawingDoubleTapClickCallback = this._drawingDoubleTapClickCallback.bind(
+            this
+        );
         this._editTouchDragCallback = this._editTouchDragCallback.bind(this);
     }
 
@@ -1122,12 +1126,11 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const points = data.handles.points;
         let invalidHandlePlacement = false;
         data.canComplete = false;
-        const mouseAtOriginHandle =
-            this._isDistanceSmallerThanCompleteSpacingCanvas(
-                element,
-                points[0],
-                mousePoint
-            );
+        const mouseAtOriginHandle = this._isDistanceSmallerThanCompleteSpacingCanvas(
+            element,
+            points[0],
+            mousePoint
+        );
         if (
             mouseAtOriginHandle &&
             !freehandIntersect.end(points) &&

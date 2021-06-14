@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
-import * as constants from '../../Constants';
-import Utils from '../../Utils.js';
+import * as constants from '../../utils/Constants';
+import Utils from '../../utils/Utils.js';
 import { useSelector } from 'react-redux';
 import {
     getIsEditLabelWidgetVisible,

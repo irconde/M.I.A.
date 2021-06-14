@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../Constants';
+import * as constants from '../../../utils/Constants';
 
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
@@ -50,8 +50,7 @@ const uiSlice = createSlice({
             switch (editionMode) {
                 case constants.editionMode.LABEL:
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition =
-                        detectionLabelEditPosition;
+                    state.detectionLabelEditPosition = detectionLabelEditPosition;
             }
         },
         /**
@@ -294,8 +293,12 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
         selectConfigInfoUpdate: (state, action) => {
-            const { detectorType, detectorConfigType, seriesType, studyType } =
-                action.payload;
+            const {
+                detectorType,
+                detectorConfigType,
+                seriesType,
+                studyType,
+            } = action.payload;
             state.detectorType = detectorType;
             state.detectorConfigType = detectorConfigType;
             state.seriesType = seriesType;

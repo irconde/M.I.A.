@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { MAX_LABEL_LENGTH } from '../../Constants';
-import Utils from '../../Utils.js';
+import { MAX_LABEL_LENGTH } from '../../utils/Constants';
+import Utils from '../../utils/Utils.js';
 import { useDispatch } from 'react-redux';
 import {
     selectDetection,
