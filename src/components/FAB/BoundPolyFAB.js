@@ -95,9 +95,8 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         fabOpacity = false;
         show = true;
         if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
-            let canvasElements = document.getElementsByClassName(
-                'cornerstone-canvas'
-            );
+            let canvasElements =
+                document.getElementsByClassName('cornerstone-canvas');
             let multipleViewports = canvasElements.length > 1;
             if (canvasElements[0] !== undefined)
                 canvasElements[0].id = 'selectedTop';
@@ -107,10 +106,9 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         show = false;
     } else {
         fabOpacity = true;
-        show  = true;
-        let canvasElements = document.getElementsByClassName(
-            'cornerstone-canvas'
-        );
+        show = true;
+        let canvasElements =
+            document.getElementsByClassName('cornerstone-canvas');
         let multipleViewports = canvasElements.length > 1;
         canvasElements[0].id = '';
         if (multipleViewports) canvasElements[1].id = '';

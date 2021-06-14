@@ -157,8 +157,10 @@ class App extends Component {
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.startListeningClickEvents = this.startListeningClickEvents.bind(this);
-        this.stopListeningClickEvents = this.stopListeningClickEvents.bind(this);
+        this.startListeningClickEvents =
+            this.startListeningClickEvents.bind(this);
+        this.stopListeningClickEvents =
+            this.stopListeningClickEvents.bind(this);
     }
 
     /**
@@ -1741,7 +1743,7 @@ class App extends Component {
                 this.props.emptyAreaClickUpdate();
                 setTimeout(() => {
                     this.startListeningClickEvents();
-                }, 500)
+                }, 500);
             });
         }
     }
