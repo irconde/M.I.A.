@@ -195,9 +195,7 @@ const detectionsSlice = createSlice({
         // {string} uuid - uuid for detection being updated
         // {string} className - new label className for detection being updated
         editDetectionLabel: (state, action) => {
-            console.log("@editDetectionLabel");
             const { uuid, className } = action.payload;
-            console.log("Label: ", className);
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection) {
                 detection.className = className;
