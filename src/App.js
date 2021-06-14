@@ -264,13 +264,14 @@ class App extends Component {
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
-        this.props.updateFABVisibility(this.props.numFilesInQueue > 0);
-        let reactObj = this;
-        reactObj.getFilesFromCommandServer();
-        reactObj.updateNumberOfFiles();
-        reactObj.setupCornerstoneJS(
-            reactObj.state.imageViewportTop,
-            reactObj.state.imageViewportSide
+        this.props.updateFABVisibility(
+            this.props.numberOfFilesInQueue > 0 ? true : false
+        );
+        this.getFilesFromCommandServer();
+        this.updateNumberOfFiles();
+        this.setupCornerstoneJS(
+            this.state.imageViewportTop,
+            this.state.imageViewportSide
         );
         this.props.setCommandServerConnection({
             action: 'connect',
