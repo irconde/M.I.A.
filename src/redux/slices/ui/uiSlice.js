@@ -87,7 +87,6 @@ const uiSlice = createSlice({
          * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
          */
         onLabelEditionEnd: (state, action) => {
-            console.log("@onLabelEditionEnd: ", action);
             const {
                 editionMode,
                 detectionLabelEditWidth,
@@ -104,7 +103,6 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing the width of the label, and an top & left values for the position.
          */
         labelSelectedUpdate: (state, action) => {
-            console.log("@labelSelectedUpdate");
             const { width, position, font, viewport } = action.payload;
             state.detectionLabelEditWidth = width;
             state.detectionLabelEditFont = font;
