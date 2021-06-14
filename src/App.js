@@ -917,8 +917,8 @@ class App extends Component {
      * @return {None} None
      */
     loadAndViewImage() {
-        const dataImagesLeft = [];
-        const dataImagesRight = [];
+        let dataImagesLeft = [];
+        let dataImagesRight = [];
         this.displayDICOSimage();
         // all other images do not have pixel data -- cornerstoneJS will fail and send an error
         // if pixel data is missing in the dicom/dicos file. To parse out only the data,
@@ -927,27 +927,11 @@ class App extends Component {
         if (this.state.myOra.stackData[0].blobData.length === 1) {
             dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
         } else {
-            for (
-                var i = 1;
-                i < this.state.myOra.stackData[0].blobData.length;
-                i++
-            ) {
-                dataImagesLeft[i - 1] = this.state.myOra.stackData[0].blobData[
-                    i
-                ];
-            }
+            dataImagesLeft = this.state.myOra.stackData[0].blobData;
         }
         if (this.props.singleViewport === false) {
             if (this.state.myOra.stackData[1] !== undefined) {
-                for (
-                    var j = 1;
-                    j < this.state.myOra.stackData[1].blobData.length;
-                    j++
-                ) {
-                    dataImagesRight[
-                        j - 1
-                    ] = this.state.myOra.stackData[1].blobData[j];
-                }
+                dataImagesRight = this.state.myOra.stackData[1].blobData;
             }
         }
         this.loadDICOSdata(dataImagesLeft, dataImagesRight);
