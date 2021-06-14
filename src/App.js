@@ -2300,7 +2300,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <NoFileSign isVisible={this.props.numFilesInQueue > 0} />
+                    <NoFileSign />
                 </div>
             </div>
         );
