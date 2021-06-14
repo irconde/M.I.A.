@@ -8,7 +8,7 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import io from 'socket.io-client';
-import ORA from './utils/ORA.js';
+import ORA from './utils/Ora.js';
 import Stack from './Stack.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
