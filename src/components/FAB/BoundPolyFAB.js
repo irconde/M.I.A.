@@ -16,6 +16,7 @@ import {
  *
  * @property {leftPX} - Prop to control the horizontal alignment dynamically
  * @property {fabOpacity} - Prop to control opacity based on the current cornerstoneMode
+ * @property {show} - Prop to control whether the component should be displayed
  */
 const FABContainer = styled.div`
     position: absolute;
@@ -26,7 +27,7 @@ const FABContainer = styled.div`
     color: #fff;
     border: 1px solid #414141;
     border-radius: 60px;
-    display: flex;
+    display: ${(props) => (props.show ? 'flex' : 'none')};
     box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
     opacity: ${(props) => (props.fabOpacity ? '100%' : '28%')};
     animation: fadein ${(props) => (props.fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
@@ -86,12 +87,13 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     let leftPX = '-' + constants.sideMenuWidth + 'px';
 
     let fabOpacity;
+    let show;
     if (
         cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
-        cornerstoneMode === constants.cornerstoneMode.EDITION ||
-        isVisible === false
+        cornerstoneMode === constants.cornerstoneMode.EDITION
     ) {
         fabOpacity = false;
+        show = true;
         if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
             let canvasElements = document.getElementsByClassName(
                 'cornerstone-canvas'
@@ -101,8 +103,11 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
                 canvasElements[0].id = 'selectedTop';
             if (multipleViewports) canvasElements[1].id = 'selectedSide';
         }
+    } else if (isVisible === false) {
+        show = false;
     } else {
         fabOpacity = true;
+        show  = true;
         let canvasElements = document.getElementsByClassName(
             'cornerstone-canvas'
         );
@@ -112,7 +117,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     }
 
     return (
-        <FABContainer leftPX={leftPX} fabOpacity={fabOpacity}>
+        <FABContainer leftPX={leftPX} fabOpacity={fabOpacity} show={show}>
             <div
                 className="fabOption"
                 onClick={(e) => handleClick(e, onBoundingSelect)}>
