@@ -662,7 +662,7 @@ class App extends Component {
                                         view: stackData.getAttribute('view'),
                                         rawData: [],
                                         blobData: [],
-                                        pixelData: null
+                                        pixelData: null,
                                     };
                                     let layerData = stackData.getElementsByTagName(
                                         'layer'
@@ -913,43 +913,44 @@ class App extends Component {
      * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
      * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
      *
-     * @param  {type} imageId id that references the DICOS+TDR file to be loaded
-     * @return {type}         None
+     * @param  {None} None
+     * @return {None} None
      */
     loadAndViewImage() {
-        const self = this;
         const dataImagesLeft = [];
         const dataImagesRight = [];
-        self.displayDICOSimage();
+        this.displayDICOSimage();
         // all other images do not have pixel data -- cornerstoneJS will fail and send an error
         // if pixel data is missing in the dicom/dicos file. To parse out only the data,
         // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
         // the file data and call loadDICOSdata() to store the data in a DetectionSet
-        if (self.state.myOra.stackData[0].blobData.length === 1) {
-            dataImagesLeft[0] = self.state.myOra.stackData[0].blobData[0];
+        if (this.state.myOra.stackData[0].blobData.length === 1) {
+            dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
         } else {
             for (
                 var i = 1;
-                i < self.state.myOra.stackData[0].blobData.length;
+                i < this.state.myOra.stackData[0].blobData.length;
                 i++
             ) {
-                dataImagesLeft[i - 1] =
-                    self.state.myOra.stackData[0].blobData[i];
+                dataImagesLeft[i - 1] = this.state.myOra.stackData[0].blobData[
+                    i
+                ];
             }
         }
         if (this.props.singleViewport === false) {
-            if (self.state.myOra.stackData[1] !== undefined) {
+            if (this.state.myOra.stackData[1] !== undefined) {
                 for (
                     var j = 1;
-                    j < self.state.myOra.stackData[1].blobData.length;
+                    j < this.state.myOra.stackData[1].blobData.length;
                     j++
                 ) {
-                    dataImagesRight[j - 1] =
-                        self.state.myOra.stackData[1].blobData[j];
+                    dataImagesRight[
+                        j - 1
+                    ] = this.state.myOra.stackData[1].blobData[j];
                 }
             }
         }
-        self.loadDICOSdata(dataImagesLeft, dataImagesRight);
+        this.loadDICOSdata(dataImagesLeft, dataImagesRight);
     }
 
     /**
