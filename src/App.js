@@ -1754,11 +1754,9 @@ class App extends Component {
      * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {None}  None
      */
-    resetSelectedDetectionBoxes(e, sideMenuUpdate = false) {
+    resetSelectedDetectionBoxes(e) {
         if (
-            this.props.cornerstoneMode ===
-                constants.cornerstoneMode.SELECTION ||
-            sideMenuUpdate === true
+            this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
