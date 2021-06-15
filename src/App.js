@@ -1867,8 +1867,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects bounding box option from FAB
+     *
      * @return {none} None
-     * @param {none} None
      */
     onBoundingBoxSelected() {
         if (
@@ -1889,8 +1889,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects polygon mask option from FAB
+     *
      * @return {none} None
-     * @param {none} None
      */
     onPolygonMaskSelected() {
         if (
@@ -1913,9 +1913,9 @@ class App extends Component {
     /**
      * getContextMenuPos - Get position of context menu based on the associated bounding box.
      *
-     * @param {object} viewportInfo - viewport info
-     * @param {array} coords - bounding box' corners' coordinates
-     * @param {array}
+     * @param {DOMElement} viewportInfo viewport info
+     * @param {Array<Number>} coords bounding box' corners' coordinates
+     * @returns {Object{Number: x; Number: y}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
@@ -1961,6 +1961,8 @@ class App extends Component {
      * @param {Detection} [draggedData] Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
+     *
+     * @returns {None} None
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
         if (this.props.selectedDetection !== null) {
@@ -2019,7 +2021,9 @@ class App extends Component {
 
     /**
      * Invoked when user selects an edition mode from DetectionContextMenu.
+     *
      * @param {string} newMode Edition mode selected from menu
+     * @returns {None} None
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
@@ -2085,7 +2089,9 @@ class App extends Component {
 
     /**
      * Invoked when user completes editing a detection's label
+     *
      * @param {string} newLabel Updated label name from user interaction
+     * @returns {None} None
      */
     editDetectionLabel(newLabel) {
         const { uuid } = this.props.selectedDetection;
@@ -2109,8 +2115,10 @@ class App extends Component {
 
     /**
      * Calculates position of the edit label widget
-     * @param {dictionary} detectionData detection data
-     * @param {array} coords bounding box coordinates
+     *
+     * @param {Dictionary} detectionData detection data
+     * @param {Array<Number>} coords bounding box coordinates
+     * @returns {None} None
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {
@@ -2189,6 +2197,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects 'delete' option from DetectionContextMenu
+     *
+     * @returns {None} None
      */
     deleteDetection() {
         // Detection is selected
@@ -2222,6 +2232,12 @@ class App extends Component {
         }
     }
 
+    /**
+     * onMouseMoved - Captures and saves the {x , y} coordinates of the mouse to the App State
+     *
+     * @param {Event} event
+     * @returns {None} None
+     */
     onMouseMoved(event) {
         this.setState({
             mousePosition: { x: event.x, y: event.y },
@@ -2229,6 +2245,14 @@ class App extends Component {
         });
     }
 
+    /**
+     * onMouseLeave - Event handler for if the mouse leaves the window. It mainly serves
+     *                as a way to make sure a user does not try to drag a detection out of
+     *                the window.
+     *
+     * @param {Event} event
+     * @returns {None} None
+     */
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
         else this.props.onMouseLeaveNoFilesUpdate();
