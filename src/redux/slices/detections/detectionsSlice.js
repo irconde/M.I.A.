@@ -23,7 +23,9 @@ import Utils from '../../../utils/Utils';
 //     // Dictating what viewport the detection resides in, TOP or SIDE eg.
 //     view: string;
 //     // An array inside an array representing the polygon mask if there is one
-//     maskBitmap: number[[]];
+//     polygonMask: number[[]];
+//     // An array inside an array representing the binary mask if there is one
+//     binaryMask: number[[]];
 //     // The coordinates of the detection which are generally [x-start, y-start, x-end, y-end]
 //     boundingBox: number[];
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending

@@ -1202,6 +1202,13 @@ class App extends Component {
         // right.
     }
 
+    /**
+     * renderCrosshair - Renders a cross hair element on the target passed in. Which are
+     *                   the imageViewportTop or imageViewportSide
+     *
+     * @param {eventData.canvasContext} context
+     * @param {DOMElement} target
+     */
     renderCrosshair(context, target) {
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
@@ -1274,9 +1281,9 @@ class App extends Component {
     /**
      * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
      *
-     * @param  {type} data    DICOS+TDR data
-     * @param  {type} context Rendering context
-     * @return {type}         None
+     * @param  {Array<Detection>} data    DICOS+TDR data
+     * @param  {eventData.canvasContext} context Rendering context
+     * @return {None}         None
      */
     renderDetections(data, context) {
         if (!data) {
@@ -1361,9 +1368,9 @@ class App extends Component {
     /**
      * renderBinaryMasks - Method that renders the binary mask associated with a detection
      *
-     * @param  {type} data    DICOS+TDR data
-     * @param  {type} context Rendering context
-     * @return {type}         None
+     * @param  {Array<Array<Number>>} data DICOS+TDR data
+     * @param  {eventData.canvasContext} context Rendering context
+     * @return {None} None
      */
     renderBinaryMasks(data, context) {
         if (data === undefined || data === null || data.length === 0) {
@@ -1388,7 +1395,7 @@ class App extends Component {
     /**
      * renderPolygonMasks - Method that renders the polygon mask associated with a detection
      *
-     * @param  {array} coords    polygon mask coordinates
+     * @param  {Array<Number>} coords    polygon mask coordinates
      * @param  {Context} context Rendering context
      */
     renderPolygonMasks(coords, context) {
@@ -1409,8 +1416,8 @@ class App extends Component {
     /**
      * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {type}   None
+     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @return {None} None
      */
     onMouseClicked(e) {
         let view;
@@ -1502,8 +1509,8 @@ class App extends Component {
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
      *
      * @param {Event} event Mouse drag end event
-     * @param {container}  viewport The Cornerstone Viewport containing the event
-     * @return {type} None
+     * @param {DOMElement}  viewport The Cornerstone Viewport containing the event
+     * @return {None} None
      */
     onDragEnd(event, viewport) {
         if (
@@ -1519,10 +1526,7 @@ class App extends Component {
             );
             if (toolState === undefined || toolState.data.length === 0) {
                 this.props.emptyAreaClickUpdate();
-                this.props.clearAllSelection();
                 this.resetSelectedDetectionBoxes(event);
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
                 return;
             }
             const { data } = toolState;
@@ -1579,10 +1583,7 @@ class App extends Component {
                 });
                 if (data[0] === undefined) {
                     self.props.emptyAreaClickUpdate();
-                    self.resetCornerstoneTool();
-                    self.props.clearAllSelection();
                     self.resetSelectedDetectionBoxes(event);
-                    self.appUpdateImage();
                     return;
                 }
                 if (data[0].updatingDetection === false) {
@@ -1678,8 +1679,8 @@ class App extends Component {
      * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
      *
      * @param {Event} event Event triggered when a new polygon is created
-     * @param {container}  viewport The Cornerstone Viewport receiving the event
-     * @return {type}  None
+     * @param {DOMElement} viewport The Cornerstone Viewport receiving the event
+     * @return {None} None
      */
     onNewPolygonMaskCreated(event, viewport) {
         if (
@@ -1724,10 +1725,7 @@ class App extends Component {
                 });
                 if (polygonData === undefined) {
                     self.props.emptyAreaClickUpdate();
-                    self.resetCornerstoneTool();
-                    self.props.clearAllSelection();
                     self.resetSelectedDetectionBoxes(event);
-                    self.appUpdateImage();
                     return;
                 }
                 self.props.addDetection({
@@ -2241,10 +2239,7 @@ class App extends Component {
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
         else this.props.onMouseLeaveNoFilesUpdate();
-        this.props.clearAllSelection();
         this.resetSelectedDetectionBoxes(event);
-        this.resetCornerstoneTool();
-        this.appUpdateImage();
     }
 
     render() {
