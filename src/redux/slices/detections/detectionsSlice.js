@@ -261,7 +261,10 @@ const detectionsSlice = createSlice({
                         det.selected = false;
                         det.textColor = 'gray';
                         det.displayColor = 'black';
-                    } else det.textColor = 'white';
+                    } else {
+                        det.textColor = 'white';
+                        det.displayColor = det.color;
+                    }
                 }
             });
         },

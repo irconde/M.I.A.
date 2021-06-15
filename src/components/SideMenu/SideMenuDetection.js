@@ -10,11 +10,7 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
-const SideMenuDetection = ({
-    detection,
-    resetSelectedDetectionBoxes,
-    resetCornerstoneTools,
-}) => {
+const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -58,7 +54,6 @@ const SideMenuDetection = ({
             e.target.id === 'hidden-eye'
         ) {
             dispatch(updateDetectionVisibility(detection.uuid));
-            resetSelectedDetectionBoxes(e, true);
         }
     };
 
@@ -139,7 +134,6 @@ const SideMenuDetection = ({
 
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
-    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
 

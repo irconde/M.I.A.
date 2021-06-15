@@ -171,7 +171,7 @@ class App extends Component {
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
-     * @return {type}  None
+     * @return {None} None
      */
     componentDidMount() {
         // Connect socket servers
@@ -341,8 +341,7 @@ class App extends Component {
     /**
      * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
      *
-     * @param  None
-     * @returns {type} None
+     * @returns {None} None
      */
     calculateviewPortWidthAndHeight() {
         document.getElementsByClassName('twoViewportsSide')[0].style.width =
@@ -364,7 +363,6 @@ class App extends Component {
     /**
      * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
      *
-     * @param  None
      * @returns {type} None
      */
     recalculateZoomLevel() {
@@ -436,7 +434,7 @@ class App extends Component {
      *                  we clear the detections and hide the buttons.
      *
      * @param {Event} e
-     * @returns {type} None
+     * @returns {None} None
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
@@ -450,9 +448,9 @@ class App extends Component {
     /**
      * setupCornerstoneJS - CornerstoneJS Tools are initialized
      *
-     * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
-     * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
-     * @return {type}               None
+     * @param  {DOMElement} imageViewportTop DOM element where the top-view x-ray image is rendered
+     * @param  {DOMElement} imageViewportSide DOM element where the side-view x-ray image is rendered
+     * @return {None} None
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -488,8 +486,7 @@ class App extends Component {
     /**
      * resetCornerstoneTool - Reset Cornerstone Tools to their default state.
      *                        Invoked when user leaves annotation or edition mode
-     * @param   {type} None
-     * @return   {type} None
+     * @return {None} None
      */
 
     resetCornerstoneTool() {
@@ -528,8 +525,8 @@ class App extends Component {
     /**
      * getFilesFromCommandServer - Socket Listener to get files from command server then send them
      *                           - to the file server directly after
-     * @param {type} - None
-     * @return {type} - Promise
+     *
+     * @return {Promise} Promise
      */
     async getFilesFromCommandServer() {
         COMMAND_SERVER.on('img', (data) => {
@@ -547,8 +544,8 @@ class App extends Component {
 
     /**
      * updateNumberOfFiles - Opens a socket to constantly monitor the number of files with the file server
-     * @param {type} - None
-     * @return {type} - Promise
+     *
+     * @return {Promise} Promise
      */
     async updateNumberOfFiles() {
         FILE_SERVER.on('numberOfFiles', (data) => {
@@ -567,8 +564,8 @@ class App extends Component {
 
     /**
      * sendImageToFileServer - Socket IO to send an image to the file server
-     * @param {type} - file - which file we are sending
-     * @return {type} - None
+     * @param {Blob} Blob - which file we are sending
+     * @return {type} None
      */
     async sendImageToFileServer(file) {
         this.props.setDownload(true);
@@ -577,8 +574,8 @@ class App extends Component {
 
     /**
      * sendImageToCommandServer - Socket IO to send a file to the server
-     * @param {type} - file - which file we are sending
-     * @return {type} - None
+     * @param {Blob} Blob - which file we are sending
+     * @return {type} None
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -589,8 +586,7 @@ class App extends Component {
      * onNoImageLeft - Method invoked when there isn't any file in the file queue.
      * A 'No file' image is displayed instead of the cornerstoneJs canvas
      *
-     * @param {type}  - None
-     * @return {type} -  None
+     * @return {None} None
      */
     onNoImageLeft() {
         let updateImageViewport = this.state.imageViewportTop;
@@ -607,8 +603,7 @@ class App extends Component {
     /**
      * getNextImage() - Attempts to retrieve the next image from the file server via get request
      *                - Then sets the state to the blob and calls the loadAndViewImage() function
-     * @param {type} - None
-     * @return {type} - None
+     * @return {type} None
      */
     getNextImage() {
         // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
@@ -744,8 +739,8 @@ class App extends Component {
      * nextImageClick() - When the operator taps next, we send to the file server to remove the
      *                  - current image, then when that is complete, we send the image to the command
      *                  - server. Finally, calling getNextImage to display another image if there is one
-     * @param {type} - Event
-     * @return {type} - None
+     * @param {Event} Event
+     * @return {None} None
      */
     nextImageClick(e) {
         // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
@@ -913,7 +908,6 @@ class App extends Component {
      * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
      * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
      *
-     * @param  {None} None
      * @return {None} None
      */
     loadAndViewImage() {
@@ -940,8 +934,7 @@ class App extends Component {
     /**
      * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
      *
-     * @param  {type} image DICOS+TDR data
-     * @return {type}       None
+     * @return {None} None
      */
     displayDICOSimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
@@ -992,8 +985,9 @@ class App extends Component {
     /**
      * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {type} images list of DICOS+TDR data from  algorithm
-     * @return {type}       None
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
+     * @return {None} None
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1144,10 +1138,10 @@ class App extends Component {
 
     /**
      * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
-     * It triggers the rendering of the several annotations associated to the image
+     *                   It triggers the rendering of the several annotations associated to the image
      *
-     * @param  {type} e Event
-     * @return {type}   None
+     * @param  {Event} e Event
+     * @return {None} None
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1208,6 +1202,7 @@ class App extends Component {
      *
      * @param {eventData.canvasContext} context
      * @param {DOMElement} target
+     * @return {None} None
      */
     renderCrosshair(context, target) {
         const crosshairLength = 8;
@@ -1283,7 +1278,7 @@ class App extends Component {
      *
      * @param  {Array<Detection>} data    DICOS+TDR data
      * @param  {eventData.canvasContext} context Rendering context
-     * @return {None}         None
+     * @return {None} None
      */
     renderDetections(data, context) {
         if (!data) {
@@ -1756,8 +1751,8 @@ class App extends Component {
     /**
      * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
      *
-     * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {type}  None
+     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @return {None}  None
      */
     resetSelectedDetectionBoxes(e, sideMenuUpdate = false) {
         if (
@@ -2266,9 +2261,6 @@ class App extends Component {
                     <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
-                        resetSelectedDetectionBoxes={
-                            this.resetSelectedDetectionBoxes
-                        }
                         resetCornerstoneTools={this.resetCornerstoneTool}
                     />
                     <div id="algorithm-outputs"> </div>

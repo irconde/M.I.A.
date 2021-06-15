@@ -8,11 +8,7 @@ import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectio
 import SideMenuAlgorithm from './SideMenuAlgorithm';
 import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 
-const SideMenu = ({
-    nextImageClick,
-    resetSelectedDetectionBoxes,
-    resetCornerstoneTools,
-}) => {
+const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
     const treeStyle = {
@@ -47,9 +43,6 @@ const SideMenu = ({
                                   <SideMenuAlgorithm
                                       key={i}
                                       detections={detections}
-                                      resetSelectedDetectionBoxes={
-                                          resetSelectedDetectionBoxes
-                                      }
                                       resetCornerstoneTools={
                                           resetCornerstoneTools
                                       }
@@ -68,7 +61,6 @@ const SideMenu = ({
 
 SideMenu.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
-    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
 
