@@ -437,6 +437,23 @@ export const getSingleViewport = (state) => state.ui.singleViewport;
 export const getIsEditLabelWidgetVisible = (state) =>
     state.ui.isEditLabelWidgetVisible;
 
+/**
+ * getIsEditLabelWidgetVisible
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Boolean} Returns whether the UI should display the edit label widget
+ */
+export const getDetectionContextInfo = (state) => {
+    return {
+        zoomSide: state.ui.zoomLevelSide,
+        zoomTop: state.ui.zoomLevelTop,
+        viewport: state.ui.detectionLabelEditViewport,
+        position: state.ui.detectionLabelEditPosition,
+        width: state.ui.detectionLabelEditWidth,
+        font: state.ui.detectionLabelEditFont,
+        isVisible: state.ui.isEditLabelWidgetVisible,
+    };
+};
+
 // Exporting the Actions for the Reducers
 export const {
     updateCornerstoneMode,

@@ -6,15 +6,7 @@ import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useSelector } from 'react-redux';
-import {
-    getIsEditLabelWidgetVisible,
-    getDetectionLabelEditPosition,
-    getDetectionLabelEditWidth,
-    getDetectionLabelEditFont,
-    getDetectionLabelEditViewport,
-    getZoomLevelSide,
-    getZoomLevelTop,
-} from '../../redux/slices/ui/uiSlice';
+import { getDetectionContextInfo } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
 
 const EditLabelWrapper = styled.div`
@@ -67,14 +59,17 @@ const EditLabelWrapper = styled.div`
  * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabel = ({ onLabelChange }) => {
-    const zoomSide = useSelector(getZoomLevelSide);
-    const zoomTop = useSelector(getZoomLevelTop);
-    const viewport = useSelector(getDetectionLabelEditViewport);
-    const position = useSelector(getDetectionLabelEditPosition);
-    const width = useSelector(getDetectionLabelEditWidth);
-    const font = useSelector(getDetectionLabelEditFont);
+    const reduxInfo = useSelector(getDetectionContextInfo);
+    const {
+        zoomSide,
+        zoomTop,
+        viewport,
+        position,
+        width,
+        font,
+        isVisible,
+    } = reduxInfo;
     const labels = useSelector(getDetectionLabels);
-    const isVisible = useSelector(getIsEditLabelWidgetVisible);
     const [isListOpen, setIsListOpen] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);
