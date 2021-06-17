@@ -438,9 +438,11 @@ export const getIsEditLabelWidgetVisible = (state) =>
     state.ui.isEditLabelWidgetVisible;
 
 /**
- * getIsEditLabelWidgetVisible
+ * getDetectionContextInfo
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the UI should display the edit label widget
+ * @returns {Object} Returns several items from the uiSlice in an object that are
+ *                   zoomSide, zoomTop, detectionLabelEditViewport, detectionLabelEditPosition
+ *                   detectionLabelEditWidth, detectionLabelEditFont, and isEditLabelWidgetVisible
  */
 export const getDetectionContextInfo = (state) => {
     return {
