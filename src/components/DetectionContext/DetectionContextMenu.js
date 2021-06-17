@@ -79,7 +79,7 @@ const DeleteWidget = styled.div`
         background: ${detectionContextStyle.HOVER_COLOR};
     }
 `;
-function DetectionContextMenu({ setSelectedOption }) {
+const DetectionContextMenu = ({ setSelectedOption }) => {
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
     const position = useSelector(getDetectionContextPosition);
@@ -126,7 +126,7 @@ function DetectionContextMenu({ setSelectedOption }) {
     } else {
         return null;
     }
-}
+};
 
 DetectionContextMenu.propTypes = {
     setSelectedOption: PropTypes.func.isRequired,

@@ -53,9 +53,6 @@ const EditLabelWrapper = styled.div`
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {object} position Contains `top` and `left` properties to position widget
- * @param {number} width Width in pixels of selected detection
- * @param {Array<string>} labels list of existing labels for other detections
  * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabel = ({ onLabelChange }) => {
