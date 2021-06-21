@@ -296,7 +296,7 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportTop.addEventListener(
-            'cornerstonetoolstouchstart',
+            'cornerstonetoolstap',
             this.onMouseClicked
         );
         this.state.imageViewportSide.addEventListener(
@@ -304,7 +304,7 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportSide.addEventListener(
-            'cornerstonetoolstouchstart',
+            'cornerstonetoolstap',
             this.onMouseClicked
         );
     }
@@ -319,7 +319,7 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolstouchstart',
+            'cornerstonetoolstap',
             this.onMouseClicked
         );
         this.state.imageViewportSide.removeEventListener(
@@ -327,7 +327,7 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolstouchstart',
+            'cornerstonetoolstap',
             this.onMouseClicked
         );
     }
@@ -1408,6 +1408,7 @@ class App extends Component {
      * @return {type}   None
      */
     onMouseClicked(e) {
+        console.log("@1411: onMouseClicked: ", e);
         let view;
         if (e.detail.element.id === 'dicomImageLeft') {
             view = constants.viewport.TOP;
