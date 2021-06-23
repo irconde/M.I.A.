@@ -1961,6 +1961,7 @@ class App extends Component {
                         editLabelWidgetPosInfo.boundingWidth,
                     detectionLabelEditPosition: widgetPosition,
                 };
+                this.resetCornerstoneTool();
             } else if (
                 mode === constants.editionMode.BOUNDING &&
                 this.props.selectedDetection
@@ -2022,6 +2023,12 @@ class App extends Component {
                     editionMode: constants.editionMode.NO_TOOL,
                 });
                 this.appUpdateImage();
+            } else if (
+                this.props.editionMode === constants.editionMode.BOUNDING &&
+                mode === constants.editionMode.NO_TOOL
+            ) {
+                // This is for if the user was already editing a bounding box, and clicked the button again to finish editing it.
+                this.resetCornerstoneTool();
             }
             // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
             this.props.updateEditionMode(payload);
