@@ -1481,7 +1481,8 @@ class App extends Component {
                     this.props.cornerstoneMode ===
                         constants.cornerstoneMode.EDITION
                 ) {
-                    // We clicked a visible detection and are in edition mode
+                    // We are in edition mode and clicked the same detection that is in edition mode
+                    // In other words, clicking the same detection again after having selected it
                     this.props.updateEditionMode({
                         editionMode: constants.editionMode.NO_TOOL,
                     });
