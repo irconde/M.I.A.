@@ -2022,6 +2022,7 @@ class App extends Component {
                 });
                 this.appUpdateImage();
             }
+            // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
             this.props.updateEditionMode(payload);
         }
     }
