@@ -1291,7 +1291,7 @@ class App extends Component {
         for (let j = 0; j < data.length; j++) {
             if (
                 data[j].visible !== true ||
-                (this.props.editionMode !== constants.editionMode.NO_TOOL &&
+                (this.props.editionMode === constants.editionMode.BOUNDING &&
                     data[j].selected)
             ) {
                 continue;
@@ -1338,24 +1338,31 @@ class App extends Component {
             context.globalAlpha = 1.0;
 
             // Label rendering
-            context.fillRect(
-                boundingBoxCoords[0],
-                boundingBoxCoords[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
-            );
-            context.strokeRect(
-                boundingBoxCoords[0],
-                boundingBoxCoords[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
-            );
-            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-            context.fillText(
-                detectionLabel,
-                boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING,
-                boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
-            );
+            if (
+                this.props.editionMode !== constants.editionMode.LABEL ||
+                data[j].selected
+            ) {
+                context.fillRect(
+                    boundingBoxCoords[0],
+                    boundingBoxCoords[1] - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
+                );
+                context.strokeRect(
+                    boundingBoxCoords[0],
+                    boundingBoxCoords[1] - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
+                );
+                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillText(
+                    detectionLabel,
+                    boundingBoxCoords[0] +
+                        constants.detectionStyle.LABEL_PADDING,
+                    boundingBoxCoords[1] -
+                        constants.detectionStyle.LABEL_PADDING
+                );
+            }
         }
     }
 
@@ -1457,7 +1464,6 @@ class App extends Component {
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
                 this.appUpdateImage();
-                this.onDetectionSelected(e);
             } else {
                 // Clicked on detection
                 if (
@@ -1569,9 +1575,8 @@ class App extends Component {
                     self.resetSelectedDetectionBoxes(event);
                     return;
                 }
+                // When the updating detection is false, this means we are creating a new detection
                 if (data[0].updatingDetection === false) {
-                    // Need to determine if updating operator or new
-                    // Create new user-created detection
                     const operator = constants.OPERATOR;
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
@@ -1748,7 +1753,6 @@ class App extends Component {
         ) {
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
-            this.onDetectionSelected(e);
             this.resetCornerstoneTool();
             this.appUpdateImage();
         }
@@ -1766,89 +1770,6 @@ class App extends Component {
             this.props.exitEditionModeUpdate();
         }
         this.appUpdateImage();
-    }
-
-    /**
-     * renderButtons - Function that handles the logic behind whether or not to display
-     * the feedback buttons and where to display those buttons depending on the current
-     * zoom level in the window
-     *
-     * @param  {Event} e Event data passed from the onMouseClick function,
-     * such as the mouse cursor position, mouse button clicked, etc.
-     * C
-     */
-    async onDetectionSelected(e) {
-        return new Promise((resolve, reject) => {
-            const viewportInfo = Utils.eventToViewportInfo(e);
-            const view =
-                viewportInfo.viewport === constants.viewport.TOP
-                    ? constants.viewport.TOP
-                    : constants.viewport.SIDE;
-            if (!this.props.detections) {
-                reject();
-            }
-            const detectionData = this.props.selectedDetection;
-            if (detectionData) {
-                if (detectionData.boundingBox !== undefined) {
-                    const detectionBoxCoords = detectionData.boundingBox;
-                    const data = {
-                        handles: {
-                            start: {
-                                x: detectionBoxCoords[0],
-                                y: detectionBoxCoords[1],
-                            },
-                            end: {
-                                x: detectionBoxCoords[2],
-                                y: detectionBoxCoords[3],
-                            },
-                            start_prima: {
-                                x: detectionBoxCoords[0],
-                                y: detectionBoxCoords[3],
-                            },
-                            end_prima: {
-                                x: detectionBoxCoords[2],
-                                y: detectionBoxCoords[1],
-                            },
-                        },
-                        uuid: detectionData.uuid,
-                        algorithm: detectionData.algorithm,
-                        class: detectionData.className,
-                        renderColor: constants.detectionStyle.SELECTED_COLOR,
-                        confidence: detectionData.confidence,
-                        updatingDetection: true,
-                        view: detectionData.view,
-                    };
-                    if (view === constants.viewport.TOP) {
-                        cornerstoneTools.addToolState(
-                            this.state.imageViewportTop,
-                            'BoundingBoxDrawing',
-                            data
-                        );
-                    } else if (view === constants.viewport.SIDE) {
-                        cornerstoneTools.addToolState(
-                            this.state.imageViewportSide,
-                            'BoundingBoxDrawing',
-                            data
-                        );
-                    }
-                    cornerstoneTools.setToolActive('BoundingBoxDrawing', {
-                        mouseButtonMask: 1,
-                    });
-                    cornerstoneTools.setToolActive('Pan', {
-                        mouseButtonMask: 1,
-                    });
-                    cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                        cornerstoneMode: constants.cornerstoneMode.EDITION,
-                        editionMode: constants.editionMode.NO_TOOL,
-                    });
-                    this.appUpdateImage();
-                    resolve();
-                }
-                this.appUpdateImage();
-                resolve();
-            }
-            resolve();
-        });
     }
 
     /**
