@@ -337,16 +337,24 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolstap',
-            this.onMouseClicked
+            'cornerstonetoolstouchstart',
+            this.onTouchStart
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolstouchend',
+            this.onTouchEnd
         );
         this.state.imageViewportSide.removeEventListener(
             'cornerstonetoolsmouseclick',
             this.onMouseClicked
         );
         this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolstap',
-            this.onMouseClicked
+            'cornerstonetoolstouchstart',
+            this.onTouchStart
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolstouchend',
+            this.onTouchEnd
         );
     }
 
