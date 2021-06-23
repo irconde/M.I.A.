@@ -292,6 +292,45 @@ class App extends Component {
         document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
 
+    componentWillUnmount() {
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstoneimagerendered',
+            this.onImageRendered
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmousedrag',
+            this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolstouchpinch',
+            this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstoneimagerendered',
+            this.onImageRendered
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmousedrag',
+            this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolstouchpinch',
+            this.resetSelectedDetectionBoxes
+        );
+        this.stopListeningClickEvents();
+        window.removeEventListener('resize', this.resizeListener);
+        document.body.removeEventListener('mousemove', this.onMouseMoved);
+        document.body.removeEventListener('mouseleave', this.onMouseLeave);
+    }
+
     /**
      * startListeningClickEvents - Method that binds a click event listener to the two cornerstonejs viewports
      *
@@ -388,45 +427,6 @@ class App extends Component {
             zoomLevelTop: newZoomLevelTop,
             zoomLevelSide: newZoomLevelSide,
         });
-    }
-
-    componentWillUnmount() {
-        this.state.imageViewportTop.removeEventListener(
-            'cornerstoneimagerendered',
-            this.onImageRendered
-        );
-        this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolsmousedrag',
-            this.resetSelectedDetectionBoxes
-        );
-        this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolsmousewheel',
-            this.resetSelectedDetectionBoxes
-        );
-        this.state.imageViewportTop.removeEventListener(
-            'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
-        );
-        this.state.imageViewportSide.removeEventListener(
-            'cornerstoneimagerendered',
-            this.onImageRendered
-        );
-        this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolsmousedrag',
-            this.resetSelectedDetectionBoxes
-        );
-        this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolsmousewheel',
-            this.resetSelectedDetectionBoxes
-        );
-        this.state.imageViewportSide.removeEventListener(
-            'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
-        );
-        this.stopListeningClickEvents();
-        window.removeEventListener('resize', this.resizeListener);
-        document.body.removeEventListener('mousemove', this.onMouseMoved);
-        document.body.removeEventListener('mouseleave', this.onMouseLeave);
     }
 
     /**
@@ -1290,7 +1290,9 @@ class App extends Component {
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
             if (
-                data[j].visible !== true                
+                data[j].visible !== true ||
+                (this.props.editionMode !== constants.editionMode.NO_TOOL &&
+                    data[j].selected)
             ) {
                 continue;
             }
@@ -1412,13 +1414,6 @@ class App extends Component {
      * @return {None} None
      */
     onMouseClicked(e) {
-        let view;
-        if (e.detail.element.id === 'dicomImageLeft') {
-            view = constants.viewport.TOP;
-        } else if (e.detail.element.id === 'dicomImageRight') {
-            // eslint-disable-next-line no-unused-vars
-            view = constants.viewport.SIDE;
-        }
         if (!this.props.detections) {
             return;
         }
@@ -1452,9 +1447,9 @@ class App extends Component {
             if (
                 this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION
-            )
+            ) {
                 return;
-
+            }
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
                 // Only clear if a detection is selected
@@ -1474,24 +1469,20 @@ class App extends Component {
                         combinedDetections[clickedPos].uuid
                     );
 
-                    // this.onDetectionSelected(e).finally(() => {
-                        this.props.detectionSelectedUpdate();
-                        this.renderDetectionContextMenu(e);
-                        this.appUpdateImage();
-                    // });
+                    this.props.detectionSelectedUpdate();
+                    this.renderDetectionContextMenu(e);
+                    this.appUpdateImage();
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
                     this.props.cornerstoneMode ===
                         constants.cornerstoneMode.EDITION
                 ) {
                     // We clicked a visible detection and are in edition mode
-
-                    this.props.clearAllSelection();
-                    this.onDetectionSelected(e).finally(() => {
-                        this.props.emptyAreaClickUpdate();
-                        this.resetCornerstoneTool();
-                        this.appUpdateImage();
+                    this.props.updateEditionMode({
+                        editionMode: constants.editionMode.NO_TOOL,
                     });
+                    this.resetCornerstoneTool();
+                    this.appUpdateImage();
                 }
             }
         }
@@ -1760,8 +1751,6 @@ class App extends Component {
             this.onDetectionSelected(e);
             this.resetCornerstoneTool();
             this.appUpdateImage();
-        } else {
-            this.props.resetSelectedDetectionBoxesElseUpdate();
         }
     }
 
@@ -2032,13 +2021,12 @@ class App extends Component {
                 this.deleteDetection();
                 return;
             }
-            console.log(mode)
             let payload = {
                 editionMode: mode,
                 isEditLabelWidgetVisible: mode === constants.editionMode.LABEL,
             };
             if (mode === constants.editionMode.LABEL) {
-                const detectionData = this.props.selectedDetection;           
+                const detectionData = this.props.selectedDetection;
                 const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                     detectionData,
                     detectionData.boundingBox
@@ -2053,6 +2041,67 @@ class App extends Component {
                         editLabelWidgetPosInfo.boundingWidth,
                     detectionLabelEditPosition: widgetPosition,
                 };
+            } else if (
+                mode === constants.editionMode.BOUNDING &&
+                this.props.selectedDetection
+            ) {
+                // Detection selected and activating the bounding box mode
+                const data = {
+                    handles: {
+                        start: {
+                            x: this.props.selectedDetection.boundingBox[0],
+                            y: this.props.selectedDetection.boundingBox[1],
+                        },
+                        end: {
+                            x: this.props.selectedDetection.boundingBox[2],
+                            y: this.props.selectedDetection.boundingBox[3],
+                        },
+                        start_prima: {
+                            x: this.props.selectedDetection.boundingBox[0],
+                            y: this.props.selectedDetection.boundingBox[3],
+                        },
+                        end_prima: {
+                            x: this.props.selectedDetection.boundingBox[2],
+                            y: this.props.selectedDetection.boundingBox[1],
+                        },
+                    },
+                    uuid: this.props.selectedDetection.uuid,
+                    algorithm: this.props.selectedDetection.algorithm,
+                    class: this.props.selectedDetection.className,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    confidence: this.props.selectedDetection.confidence,
+                    updatingDetection: true,
+                    view: this.props.selectedDetection.view,
+                };
+                if (
+                    this.props.selectedDetection.view === constants.viewport.TOP
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportTop,
+                        'BoundingBoxDrawing',
+                        data
+                    );
+                } else if (
+                    this.props.selectedDetection.view ===
+                    constants.viewport.SIDE
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportSide,
+                        'BoundingBoxDrawing',
+                        data
+                    );
+                }
+                cornerstoneTools.setToolActive('BoundingBoxDrawing', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolActive('Pan', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.NO_TOOL,
+                });
+                this.appUpdateImage();
             }
             this.props.updateEditionMode(payload);
         }

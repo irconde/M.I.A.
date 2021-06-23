@@ -189,6 +189,8 @@ const detectionsSlice = createSlice({
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection !== undefined) {
                 for (let key in update) detection[key] = update[key];
+                if (state.selectedDetection)
+                    state.selectedDetection = detection;
             }
         },
 
