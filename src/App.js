@@ -11,6 +11,7 @@ import io from 'socket.io-client';
 import ORA from './ORA.js';
 import Stack from './Stack.js';
 import Utils from './Utils.js';
+import TapDetector from './TapDetector';
 import Dicos from './Dicos.js';
 import axios from 'axios';
 import SideMenu from './components/SideMenu/SideMenu';
@@ -125,6 +126,7 @@ class App extends Component {
             viewport: cornerstone.getDefaultViewport(null, undefined),
             mousePosition: { x: 0, y: 0 },
             activeViewport: 'dicomImageLeft',
+            tapDetector: new TapDetector(),
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
         this.sendImageToCommandServer =
@@ -133,6 +135,8 @@ class App extends Component {
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
         this.loadDICOSdata = this.loadDICOSdata.bind(this);
+        this.onTouchStart = this.onTouchStart.bind(this);
+        this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -296,21 +300,29 @@ class App extends Component {
             this.onMouseClicked
         );
         this.state.imageViewportTop.addEventListener(
-            'cornerstonetoolstap',
-            this.onMouseClicked
+            'cornerstonetoolstouchstart',
+            this.onTouchStart
+        );
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolstouchend',
+            this.onTouchEnd
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmouseclick',
             this.onMouseClicked
         );
         this.state.imageViewportSide.addEventListener(
-            'cornerstonetoolstap',
-            this.onMouseClicked
+            'cornerstonetoolstouchstart',
+            this.onTouchStart
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolstouchend',
+            this.onTouchEnd
         );
     }
 
     /**
-     * startListeningClickEvents - Method that unbinds a click event listener to the two cornerstonejs viewports
+     * stopListeningClickEvents - Method that unbinds a click event listener to the two cornerstonejs viewports
      *
      */
     stopListeningClickEvents() {
@@ -1402,13 +1414,39 @@ class App extends Component {
     }
 
     /**
+     * onTouchStart - Callback function invoked when a touch event is initiated.
+     *
+     * @param {type} e Event data such as touch position and event time stamp.
+     */
+    onTouchStart(e) {
+        let startPosition = e.detail.currentPoints.page;
+        let startTime = e.detail.event.timeStamp;
+
+        this.state.tapDetector.touchStart(startPosition, startTime);
+    }
+
+    /**
+     * onTouchEnd - Callback function invoked when a touch ends.
+     *
+     * @param {type} e Event data such as touch position and event time stamp.
+     */
+    onTouchEnd(e) {
+        let endPosition = e.detail.currentPoints.page;
+        let endTime = e.detail.event.timeStamp;
+        let isTap = this.state.tapDetector.checkTouchEnd(endPosition, endTime);
+
+        if (isTap) {
+            this.onMouseClicked(e);
+        }
+    }
+
+    /**
      * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
      * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {type}   None
      */
     onMouseClicked(e) {
-        console.log("@1411: onMouseClicked: ", e);
         let view;
         if (e.detail.element.id === 'dicomImageLeft') {
             view = constants.viewport.TOP;
