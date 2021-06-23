@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../Constants';
+import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
-import Utils from '../../../Utils';
+import Utils from '../../../utils/Utils';
 
 // interface Detection {
 //     // Unique Identifier
@@ -23,7 +23,9 @@ import Utils from '../../../Utils';
 //     // Dictating what viewport the detection resides in, TOP or SIDE eg.
 //     view: string;
 //     // An array inside an array representing the polygon mask if there is one
-//     maskBitmap: number[[]];
+//     polygonMask: number[[]];
+//     // An array inside an array representing the binary mask if there is one
+//     binaryMask: number[[]];
 //     // The coordinates of the detection which are generally [x-start, y-start, x-end, y-end]
 //     boundingBox: number[];
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending
@@ -259,7 +261,10 @@ const detectionsSlice = createSlice({
                         det.selected = false;
                         det.textColor = 'gray';
                         det.displayColor = 'black';
-                    } else det.textColor = 'white';
+                    } else {
+                        det.textColor = 'white';
+                        det.displayColor = det.color;
+                    }
                 }
             });
         },

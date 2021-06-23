@@ -8,17 +8,16 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import io from 'socket.io-client';
-import ORA from './ORA.js';
-import Stack from './Stack.js';
-import Utils from './Utils.js';
-import TapDetector from './TapDetector';
-import Dicos from './Dicos.js';
+import ORA from './utils/ORA.js';
+import Utils from './utils/Utils.js';
+import Dicos from './utils/Dicos.js';
+import TapDetector from './utils/TapDetector';
 import axios from 'axios';
 import SideMenu from './components/SideMenu/SideMenu';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
 import NoFileSign from './components/NoFileSign';
-import * as constants from './Constants';
+import * as constants from './utils/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
@@ -129,8 +128,9 @@ class App extends Component {
             tapDetector: new TapDetector(),
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
-        this.sendImageToCommandServer =
-            this.sendImageToCommandServer.bind(this);
+        this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
+            this
+        );
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -140,37 +140,42 @@ class App extends Component {
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
-        this.resetSelectedDetectionBoxes =
-            this.resetSelectedDetectionBoxes.bind(this);
+        this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
+            this
+        );
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight =
-            this.calculateviewPortWidthAndHeight.bind(this);
+        this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
+            this
+        );
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
         this.onNewPolygonMaskCreated = this.onNewPolygonMaskCreated.bind(this);
-        this.renderDetectionContextMenu =
-            this.renderDetectionContextMenu.bind(this);
+        this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
+            this
+        );
         this.getContextMenuPos = this.getContextMenuPos.bind(this);
         this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.startListeningClickEvents =
-            this.startListeningClickEvents.bind(this);
-        this.stopListeningClickEvents =
-            this.stopListeningClickEvents.bind(this);
+        this.startListeningClickEvents = this.startListeningClickEvents.bind(
+            this
+        );
+        this.stopListeningClickEvents = this.stopListeningClickEvents.bind(
+            this
+        );
     }
 
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
-     * @return {type}  None
+     * @return {None} None
      */
     componentDidMount() {
         // Connect socket servers
@@ -263,13 +268,14 @@ class App extends Component {
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
         this.calculateviewPortWidthAndHeight();
-        this.props.updateFABVisibility(this.props.numFilesInQueue > 0);
-        let reactObj = this;
-        reactObj.getFilesFromCommandServer();
-        reactObj.updateNumberOfFiles();
-        reactObj.setupCornerstoneJS(
-            reactObj.state.imageViewportTop,
-            reactObj.state.imageViewportSide
+        this.props.updateFABVisibility(
+            this.props.numberOfFilesInQueue > 0 ? true : false
+        );
+        this.getFilesFromCommandServer();
+        this.updateNumberOfFiles();
+        this.setupCornerstoneJS(
+            this.state.imageViewportTop,
+            this.state.imageViewportSide
         );
         this.props.setCommandServerConnection({
             action: 'connect',
@@ -347,8 +353,7 @@ class App extends Component {
     /**
      * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
      *
-     * @param  None
-     * @returns {type} None
+     * @returns {None} None
      */
     calculateviewPortWidthAndHeight() {
         document.getElementsByClassName('twoViewportsSide')[0].style.width =
@@ -357,8 +362,11 @@ class App extends Component {
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById('verticalDivider').style.left =
-            document.getElementsByClassName('twoViewportsTop')[0].style.width;
+        document.getElementById(
+            'verticalDivider'
+        ).style.left = document.getElementsByClassName(
+            'twoViewportsTop'
+        )[0].style.width;
         document.getElementsByClassName('twoViewportsSide')[0].style.left =
             document.getElementsByClassName('twoViewportsTop')[0].style.width +
             document.getElementById('verticalDivider').style.width;
@@ -367,12 +375,12 @@ class App extends Component {
     /**
      * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
      *
-     * @param  None
      * @returns {type} None
      */
     recalculateZoomLevel() {
-        let canvasElements =
-            document.getElementsByClassName('cornerstone-canvas');
+        let canvasElements = document.getElementsByClassName(
+            'cornerstone-canvas'
+        );
         let multipleViewports = canvasElements.length > 1;
         const newZoomLevelTop = Utils.calculateZoomLevel(
             canvasElements[0].style.width
@@ -438,7 +446,7 @@ class App extends Component {
      *                  we clear the detections and hide the buttons.
      *
      * @param {Event} e
-     * @returns {type} None
+     * @returns {None} None
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
@@ -452,9 +460,9 @@ class App extends Component {
     /**
      * setupCornerstoneJS - CornerstoneJS Tools are initialized
      *
-     * @param  {type} imageViewportTop DOM element where the top-view x-ray image is rendered
-     * @param  {type} imageViewportSide DOM element where the side-view x-ray image is rendered
-     * @return {type}               None
+     * @param  {DOMElement} imageViewportTop DOM element where the top-view x-ray image is rendered
+     * @param  {DOMElement} imageViewportSide DOM element where the side-view x-ray image is rendered
+     * @return {None} None
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -490,8 +498,7 @@ class App extends Component {
     /**
      * resetCornerstoneTool - Reset Cornerstone Tools to their default state.
      *                        Invoked when user leaves annotation or edition mode
-     * @param   {type} None
-     * @return   {type} None
+     * @return {None} None
      */
 
     resetCornerstoneTool() {
@@ -530,8 +537,8 @@ class App extends Component {
     /**
      * getFilesFromCommandServer - Socket Listener to get files from command server then send them
      *                           - to the file server directly after
-     * @param {type} - None
-     * @return {type} - Promise
+     *
+     * @return {Promise} Promise
      */
     async getFilesFromCommandServer() {
         COMMAND_SERVER.on('img', (data) => {
@@ -549,8 +556,8 @@ class App extends Component {
 
     /**
      * updateNumberOfFiles - Opens a socket to constantly monitor the number of files with the file server
-     * @param {type} - None
-     * @return {type} - Promise
+     *
+     * @return {Promise} Promise
      */
     async updateNumberOfFiles() {
         FILE_SERVER.on('numberOfFiles', (data) => {
@@ -569,8 +576,8 @@ class App extends Component {
 
     /**
      * sendImageToFileServer - Socket IO to send an image to the file server
-     * @param {type} - file - which file we are sending
-     * @return {type} - None
+     * @param {Blob} Blob - which file we are sending
+     * @return {type} None
      */
     async sendImageToFileServer(file) {
         this.props.setDownload(true);
@@ -579,8 +586,8 @@ class App extends Component {
 
     /**
      * sendImageToCommandServer - Socket IO to send a file to the server
-     * @param {type} - file - which file we are sending
-     * @return {type} - None
+     * @param {Blob} Blob - which file we are sending
+     * @return {type} None
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -591,8 +598,7 @@ class App extends Component {
      * onNoImageLeft - Method invoked when there isn't any file in the file queue.
      * A 'No file' image is displayed instead of the cornerstoneJs canvas
      *
-     * @param {type}  - None
-     * @return {type} -  None
+     * @return {None} None
      */
     onNoImageLeft() {
         let updateImageViewport = this.state.imageViewportTop;
@@ -609,8 +615,7 @@ class App extends Component {
     /**
      * getNextImage() - Attempts to retrieve the next image from the file server via get request
      *                - Then sets the state to the blob and calls the loadAndViewImage() function
-     * @param {type} - None
-     * @return {type} - None
+     * @return {type} None
      */
     getNextImage() {
         // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
@@ -653,17 +658,22 @@ class App extends Component {
                                     stackFile,
                                     'text/xml'
                                 );
-                                const xmlStack =
-                                    xmlDoc.getElementsByTagName('stack');
+                                const xmlStack = xmlDoc.getElementsByTagName(
+                                    'stack'
+                                );
                                 // We loop through each stack. Creating a new stack object to store our info
                                 // for now, we are just grabbing the location of the dicos file in the ora file
                                 for (let stackData of xmlStack) {
-                                    let currentStack = new Stack(
-                                        stackData.getAttribute('name'),
-                                        stackData.getAttribute('view')
+                                    let currentStack = {
+                                        name: stackData.getAttribute('name'),
+                                        view: stackData.getAttribute('view'),
+                                        rawData: [],
+                                        blobData: [],
+                                        pixelData: null,
+                                    };
+                                    let layerData = stackData.getElementsByTagName(
+                                        'layer'
                                     );
-                                    let layerData =
-                                        stackData.getElementsByTagName('layer');
                                     for (let imageSrc of layerData) {
                                         currentStack.rawData.push(
                                             imageSrc.getAttribute('src')
@@ -688,10 +698,11 @@ class App extends Component {
                                             .async('base64')
                                             .then((imageData) => {
                                                 if (i === 0)
-                                                    listOfStacks[j].pixelData =
-                                                        Utils.base64ToArrayBuffer(
-                                                            imageData
-                                                        );
+                                                    listOfStacks[
+                                                        j
+                                                    ].pixelData = Utils.base64ToArrayBuffer(
+                                                        imageData
+                                                    );
                                                 listOfStacks[j].blobData.push({
                                                     blob: Utils.b64toBlob(
                                                         imageData
@@ -701,8 +712,9 @@ class App extends Component {
                                             });
                                     }
                                 }
-                                const promiseOfList =
-                                    Promise.all(listOfPromises);
+                                const promiseOfList = Promise.all(
+                                    listOfPromises
+                                );
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
@@ -739,8 +751,8 @@ class App extends Component {
      * nextImageClick() - When the operator taps next, we send to the file server to remove the
      *                  - current image, then when that is complete, we send the image to the command
      *                  - server. Finally, calling getNextImage to display another image if there is one
-     * @param {type} - Event
-     * @return {type} - None
+     * @param {Event} Event
+     * @return {None} None
      */
     nextImageClick(e) {
         // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
@@ -781,14 +793,16 @@ class App extends Component {
                             `data/${stack.view}_pixel_data.dcs`,
                             stack.blobData[0].blob
                         );
-                        const topStackIndex =
-                            this.state.myOra.stackData.findIndex((stack) => {
+                        const topStackIndex = this.state.myOra.stackData.findIndex(
+                            (stack) => {
                                 return constants.viewport.TOP === stack.view;
-                            });
-                        const sideStackIndex =
-                            this.state.myOra.stackData.findIndex((stack) => {
+                            }
+                        );
+                        const sideStackIndex = this.state.myOra.stackData.findIndex(
+                            (stack) => {
                                 return constants.viewport.SIDE === stack.view;
-                            });
+                            }
+                        );
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
@@ -807,8 +821,9 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer =
-                                        stackXML.createElement('layer');
+                                    let newLayer = stackXML.createElement(
+                                        'layer'
+                                    );
                                     newLayer.setAttribute(
                                         'src',
                                         `data/top_threat_detection_${j + 1}_${
@@ -840,8 +855,9 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer =
-                                        stackXML.createElement('layer');
+                                    let newLayer = stackXML.createElement(
+                                        'layer'
+                                    );
                                     newLayer.setAttribute(
                                         'src',
                                         `data/side_threat_detection_${i + 1}_${
@@ -904,50 +920,33 @@ class App extends Component {
      * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
      * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
      *
-     * @param  {type} imageId id that references the DICOS+TDR file to be loaded
-     * @return {type}         None
+     * @return {None} None
      */
     loadAndViewImage() {
-        const self = this;
-        const dataImagesLeft = [];
-        const dataImagesRight = [];
-        self.displayDICOSimage();
+        let dataImagesLeft = [];
+        let dataImagesRight = [];
+        this.displayDICOSimage();
         // all other images do not have pixel data -- cornerstoneJS will fail and send an error
         // if pixel data is missing in the dicom/dicos file. To parse out only the data,
         // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
         // the file data and call loadDICOSdata() to store the data in a DetectionSet
-        if (self.state.myOra.stackData[0].blobData.length === 1) {
-            dataImagesLeft[0] = self.state.myOra.stackData[0].blobData[0];
+        if (this.state.myOra.stackData[0].blobData.length === 1) {
+            dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
         } else {
-            for (
-                var i = 1;
-                i < self.state.myOra.stackData[0].blobData.length;
-                i++
-            ) {
-                dataImagesLeft[i - 1] =
-                    self.state.myOra.stackData[0].blobData[i];
-            }
+            dataImagesLeft = this.state.myOra.stackData[0].blobData;
         }
         if (this.props.singleViewport === false) {
-            if (self.state.myOra.stackData[1] !== undefined) {
-                for (
-                    var j = 1;
-                    j < self.state.myOra.stackData[1].blobData.length;
-                    j++
-                ) {
-                    dataImagesRight[j - 1] =
-                        self.state.myOra.stackData[1].blobData[j];
-                }
+            if (this.state.myOra.stackData[1] !== undefined) {
+                dataImagesRight = this.state.myOra.stackData[1].blobData;
             }
         }
-        self.loadDICOSdata(dataImagesLeft, dataImagesRight);
+        this.loadDICOSdata(dataImagesLeft, dataImagesRight);
     }
 
     /**
      * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
      *
-     * @param  {type} image DICOS+TDR data
-     * @return {type}       None
+     * @return {None} None
      */
     displayDICOSimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
@@ -975,10 +974,9 @@ class App extends Component {
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
-            const pixelDataSide =
-                cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                    self.state.myOra.stackData[1].blobData[0].blob
-                );
+            const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                self.state.myOra.stackData[1].blobData[0].blob
+            );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportSide,
@@ -999,8 +997,9 @@ class App extends Component {
     /**
      * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {type} images list of DICOS+TDR data from  algorithm
-     * @return {type}       None
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
+     * @return {None} None
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1151,10 +1150,10 @@ class App extends Component {
 
     /**
      * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
-     * It triggers the rendering of the several annotations associated to the image
+     *                   It triggers the rendering of the several annotations associated to the image
      *
-     * @param  {type} e Event
-     * @return {type}   None
+     * @param  {Event} e Event
+     * @return {None} None
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1209,6 +1208,14 @@ class App extends Component {
         // right.
     }
 
+    /**
+     * renderCrosshair - Renders a cross hair element on the target passed in. Which are
+     *                   the imageViewportTop or imageViewportSide
+     *
+     * @param {eventData.canvasContext} context
+     * @param {DOMElement} target
+     * @return {None} None
+     */
     renderCrosshair(context, target) {
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
@@ -1281,9 +1288,9 @@ class App extends Component {
     /**
      * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
      *
-     * @param  {type} data    DICOS+TDR data
-     * @param  {type} context Rendering context
-     * @return {type}         None
+     * @param  {Array<Detection>} data    DICOS+TDR data
+     * @param  {eventData.canvasContext} context Rendering context
+     * @return {None} None
      */
     renderDetections(data, context) {
         if (!data) {
@@ -1368,9 +1375,9 @@ class App extends Component {
     /**
      * renderBinaryMasks - Method that renders the binary mask associated with a detection
      *
-     * @param  {type} data    DICOS+TDR data
-     * @param  {type} context Rendering context
-     * @return {type}         None
+     * @param  {Array<Array<Number>>} data DICOS+TDR data
+     * @param  {eventData.canvasContext} context Rendering context
+     * @return {None} None
      */
     renderBinaryMasks(data, context) {
         if (data === undefined || data === null || data.length === 0) {
@@ -1395,7 +1402,7 @@ class App extends Component {
     /**
      * renderPolygonMasks - Method that renders the polygon mask associated with a detection
      *
-     * @param  {array} coords    polygon mask coordinates
+     * @param  {Array<Number>} coords    polygon mask coordinates
      * @param  {Context} context Rendering context
      */
     renderPolygonMasks(coords, context) {
@@ -1443,8 +1450,8 @@ class App extends Component {
     /**
      * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {type}   None
+     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @return {None} None
      */
     onMouseClicked(e) {
         let view;
@@ -1536,8 +1543,8 @@ class App extends Component {
      * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
      *
      * @param {Event} event Mouse drag end event
-     * @param {container}  viewport The Cornerstone Viewport containing the event
-     * @return {type} None
+     * @param {DOMElement}  viewport The Cornerstone Viewport containing the event
+     * @return {None} None
      */
     onDragEnd(event, viewport) {
         if (
@@ -1553,10 +1560,7 @@ class App extends Component {
             );
             if (toolState === undefined || toolState.data.length === 0) {
                 this.props.emptyAreaClickUpdate();
-                this.props.clearAllSelection();
                 this.resetSelectedDetectionBoxes(event);
-                this.resetCornerstoneTool();
-                this.appUpdateImage();
                 return;
             }
             const { data } = toolState;
@@ -1613,10 +1617,7 @@ class App extends Component {
                 });
                 if (data[0] === undefined) {
                     self.props.emptyAreaClickUpdate();
-                    self.resetCornerstoneTool();
-                    self.props.clearAllSelection();
                     self.resetSelectedDetectionBoxes(event);
-                    self.appUpdateImage();
                     return;
                 }
                 if (data[0].updatingDetection === false) {
@@ -1673,8 +1674,10 @@ class App extends Component {
                         const detectionData = self.props.detections.find(
                             (det) => det.uuid === data[0].uuid
                         );
-                        const editLabelWidgetPosInfo =
-                            self.getEditLabelWidgetPos(detectionData, coords);
+                        const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
+                            detectionData,
+                            coords
+                        );
                         let widgetPosition = {
                             top: editLabelWidgetPosInfo.y,
                             left: editLabelWidgetPosInfo.x,
@@ -1710,8 +1713,8 @@ class App extends Component {
      * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
      *
      * @param {Event} event Event triggered when a new polygon is created
-     * @param {container}  viewport The Cornerstone Viewport receiving the event
-     * @return {type}  None
+     * @param {DOMElement} viewport The Cornerstone Viewport receiving the event
+     * @return {None} None
      */
     onNewPolygonMaskCreated(event, viewport) {
         if (
@@ -1756,10 +1759,7 @@ class App extends Component {
                 });
                 if (polygonData === undefined) {
                     self.props.emptyAreaClickUpdate();
-                    self.resetCornerstoneTool();
-                    self.props.clearAllSelection();
                     self.resetSelectedDetectionBoxes(event);
-                    self.appUpdateImage();
                     return;
                 }
                 self.props.addDetection({
@@ -1790,14 +1790,12 @@ class App extends Component {
     /**
      * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
      *
-     * @param  {type} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {type}  None
+     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @return {None}  None
      */
-    resetSelectedDetectionBoxes(e, sideMenuUpdate = false) {
+    resetSelectedDetectionBoxes(e) {
         if (
-            this.props.cornerstoneMode ===
-                constants.cornerstoneMode.SELECTION ||
-            sideMenuUpdate === true
+            this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
@@ -1908,8 +1906,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects bounding box option from FAB
+     *
      * @return {none} None
-     * @param {none} None
      */
     onBoundingBoxSelected() {
         if (
@@ -1930,8 +1928,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects polygon mask option from FAB
+     *
      * @return {none} None
-     * @param {none} None
      */
     onPolygonMaskSelected() {
         if (
@@ -1954,9 +1952,9 @@ class App extends Component {
     /**
      * getContextMenuPos - Get position of context menu based on the associated bounding box.
      *
-     * @param {object} viewportInfo - viewport info
-     * @param {array} coords - bounding box' corners' coordinates
-     * @param {array}
+     * @param {DOMElement} viewportInfo viewport info
+     * @param {Array<Number>} coords bounding box' corners' coordinates
+     * @returns {Object{Number: x; Number: y}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
@@ -2002,6 +2000,8 @@ class App extends Component {
      * @param {Detection} [draggedData] Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
+     *
+     * @returns {None} None
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
         if (this.props.selectedDetection !== null) {
@@ -2060,7 +2060,9 @@ class App extends Component {
 
     /**
      * Invoked when user selects an edition mode from DetectionContextMenu.
+     *
      * @param {string} newMode Edition mode selected from menu
+     * @returns {None} None
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
@@ -2126,7 +2128,9 @@ class App extends Component {
 
     /**
      * Invoked when user completes editing a detection's label
+     *
      * @param {string} newLabel Updated label name from user interaction
+     * @returns {None} None
      */
     editDetectionLabel(newLabel) {
         const { uuid } = this.props.selectedDetection;
@@ -2150,8 +2154,10 @@ class App extends Component {
 
     /**
      * Calculates position of the edit label widget
-     * @param {dictionary} detectionData detection data
-     * @param {array} coords bounding box coordinates
+     *
+     * @param {Dictionary} detectionData detection data
+     * @param {Array<Number>} coords bounding box coordinates
+     * @returns {None} None
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {
@@ -2230,6 +2236,8 @@ class App extends Component {
 
     /**
      * Invoked when user selects 'delete' option from DetectionContextMenu
+     *
+     * @returns {None} None
      */
     deleteDetection() {
         // Detection is selected
@@ -2263,6 +2271,12 @@ class App extends Component {
         }
     }
 
+    /**
+     * onMouseMoved - Captures and saves the {x , y} coordinates of the mouse to the App State
+     *
+     * @param {Event} event
+     * @returns {None} None
+     */
     onMouseMoved(event) {
         this.setState({
             mousePosition: { x: event.x, y: event.y },
@@ -2270,13 +2284,18 @@ class App extends Component {
         });
     }
 
+    /**
+     * onMouseLeave - Event handler for if the mouse leaves the window. It mainly serves
+     *                as a way to make sure a user does not try to drag a detection out of
+     *                the window.
+     *
+     * @param {Event} event
+     * @returns {None} None
+     */
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
         else this.props.onMouseLeaveNoFilesUpdate();
-        this.props.clearAllSelection();
         this.resetSelectedDetectionBoxes(event);
-        this.resetCornerstoneTool();
-        this.appUpdateImage();
     }
 
     render() {
@@ -2303,9 +2322,6 @@ class App extends Component {
                     <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
-                        resetSelectedDetectionBoxes={
-                            this.resetSelectedDetectionBoxes
-                        }
                         resetCornerstoneTools={this.resetCornerstoneTool}
                     />
                     <div id="algorithm-outputs"> </div>
@@ -2317,7 +2333,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <NoFileSign isVisible={this.props.numFilesInQueue > 0} />
+                    <NoFileSign />
                 </div>
             </div>
         );

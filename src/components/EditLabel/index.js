@@ -3,18 +3,10 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
-import * as constants from '../../Constants';
-import Utils from '../../Utils.js';
+import * as constants from '../../utils/Constants';
+import Utils from '../../utils/Utils.js';
 import { useSelector } from 'react-redux';
-import {
-    getIsEditLabelWidgetVisible,
-    getDetectionLabelEditPosition,
-    getDetectionLabelEditWidth,
-    getDetectionLabelEditFont,
-    getDetectionLabelEditViewport,
-    getZoomLevelSide,
-    getZoomLevelTop,
-} from '../../redux/slices/ui/uiSlice';
+import { getDetectionContextInfo } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
 
 const EditLabelWrapper = styled.div`
@@ -61,20 +53,20 @@ const EditLabelWrapper = styled.div`
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {object} position Contains `top` and `left` properties to position widget
- * @param {number} width Width in pixels of selected detection
- * @param {Array<string>} labels list of existing labels for other detections
  * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabel = ({ onLabelChange }) => {
-    const zoomSide = useSelector(getZoomLevelSide);
-    const zoomTop = useSelector(getZoomLevelTop);
-    const viewport = useSelector(getDetectionLabelEditViewport);
-    const position = useSelector(getDetectionLabelEditPosition);
-    const width = useSelector(getDetectionLabelEditWidth);
-    const font = useSelector(getDetectionLabelEditFont);
+    const reduxInfo = useSelector(getDetectionContextInfo);
+    const {
+        zoomSide,
+        zoomTop,
+        viewport,
+        position,
+        width,
+        font,
+        isVisible,
+    } = reduxInfo;
     const labels = useSelector(getDetectionLabels);
-    const isVisible = useSelector(getIsEditLabelWidgetVisible);
     const [isListOpen, setIsListOpen] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const inputField = useRef(null);

@@ -4,7 +4,7 @@ import nextIcon from '../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getCornerstoneMode } from '../../redux/slices/ui/uiSlice';
-import * as constants from '../../Constants';
+import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 
 const NextButtonContainer = styled.div`

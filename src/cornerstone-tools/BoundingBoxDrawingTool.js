@@ -1,6 +1,6 @@
 import csTools from 'eac-cornerstone-tools';
-import * as constants from '../Constants';
-import Utils from '../Utils.js';
+import * as constants from '../utils/Constants';
+import Utils from '../utils/Utils.js';
 import * as cornerstone from 'cornerstone-core';
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
@@ -196,8 +196,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 data.handles.start
                             );
                         }
-                        var fontArr =
-                            constants.detectionStyle.LABEL_FONT.split(' ');
+                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
+                            ' '
+                        );
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;

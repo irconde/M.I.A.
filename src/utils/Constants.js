@@ -84,8 +84,8 @@ export const commonDetections = {
 };
 export const events = {
     POLYGON_MASK_CREATED: 'polygon_mask_created',
-    POLYGON_MASK_MODIFIED: 'polygon_mask_modified'
-}
+    POLYGON_MASK_MODIFIED: 'polygon_mask_modified',
+};
 
 export const OPERATOR = 'OPERATOR';
 export const BOUNDING_BOX_AREA_THRESHOLD = 10;

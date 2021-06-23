@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { MAX_LABEL_LENGTH } from '../../Constants';
-import Utils from '../../Utils.js';
+import { MAX_LABEL_LENGTH } from '../../utils/Constants';
+import Utils from '../../utils/Utils.js';
 import { useDispatch } from 'react-redux';
 import {
     selectDetection,
@@ -10,11 +10,7 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
-const SideMenuDetection = ({
-    detection,
-    resetSelectedDetectionBoxes,
-    resetCornerstoneTools,
-}) => {
+const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -58,7 +54,6 @@ const SideMenuDetection = ({
             e.target.id === 'hidden-eye'
         ) {
             dispatch(updateDetectionVisibility(detection.uuid));
-            resetSelectedDetectionBoxes(e, true);
         }
     };
 
@@ -139,7 +134,6 @@ const SideMenuDetection = ({
 
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
-    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MetaData from '../Snackbars/MetaData';
 import TreeDetection from './SideMenuDetection';
 import * as Icons from './Icons';
-import * as constants from '../../Constants';
+import * as constants from '../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     clearAllSelection,
@@ -13,11 +13,7 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
-const SideMenuAlgorithm = ({
-    detections,
-    resetCornerstoneTools,
-    resetSelectedDetectionBoxes,
-}) => {
+const SideMenuAlgorithm = ({ detections, resetCornerstoneTools }) => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(true);
     let [isVisible, setIsVisible] = useState(true);
@@ -174,9 +170,6 @@ const SideMenuAlgorithm = ({
                                 detection={detection}
                                 key={index}
                                 resetCornerstoneTools={resetCornerstoneTools}
-                                resetSelectedDetectionBoxes={
-                                    resetSelectedDetectionBoxes
-                                }
                             />
                         );
                     })
@@ -191,7 +184,6 @@ const SideMenuAlgorithm = ({
 
 SideMenuAlgorithm.propTypes = {
     detections: PropTypes.array.isRequired,
-    resetSelectedDetectionBoxes: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
 };
 

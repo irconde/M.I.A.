@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../Constants';
+import * as constants from '../../../utils/Constants';
 
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
@@ -50,8 +50,7 @@ const uiSlice = createSlice({
             switch (editionMode) {
                 case constants.editionMode.LABEL:
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition =
-                        detectionLabelEditPosition;
+                    state.detectionLabelEditPosition = detectionLabelEditPosition;
             }
         },
         /**
@@ -294,8 +293,12 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
         selectConfigInfoUpdate: (state, action) => {
-            const { detectorType, detectorConfigType, seriesType, studyType } =
-                action.payload;
+            const {
+                detectorType,
+                detectorConfigType,
+                seriesType,
+                studyType,
+            } = action.payload;
             state.detectorType = detectorType;
             state.detectorConfigType = detectorConfigType;
             state.seriesType = seriesType;
@@ -433,6 +436,25 @@ export const getSingleViewport = (state) => state.ui.singleViewport;
  */
 export const getIsEditLabelWidgetVisible = (state) =>
     state.ui.isEditLabelWidgetVisible;
+
+/**
+ * getDetectionContextInfo
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Object} Returns several items from the uiSlice in an object that are
+ *                   zoomSide, zoomTop, detectionLabelEditViewport, detectionLabelEditPosition
+ *                   detectionLabelEditWidth, detectionLabelEditFont, and isEditLabelWidgetVisible
+ */
+export const getDetectionContextInfo = (state) => {
+    return {
+        zoomSide: state.ui.zoomLevelSide,
+        zoomTop: state.ui.zoomLevelTop,
+        viewport: state.ui.detectionLabelEditViewport,
+        position: state.ui.detectionLabelEditPosition,
+        width: state.ui.detectionLabelEditWidth,
+        font: state.ui.detectionLabelEditFont,
+        isVisible: state.ui.isEditLabelWidgetVisible,
+    };
+};
 
 // Exporting the Actions for the Reducers
 export const {

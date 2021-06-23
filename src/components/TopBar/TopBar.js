@@ -1,24 +1,20 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/FileQueueIcon';
-import {
-    getConnected,
-    getCurrentFile,
-    getIsDownload,
-    getIsUpload,
-    getNumFilesInQueue,
-    getProcessingHost,
-} from '../../redux/slices/server/serverSlice';
+import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 
 const TopBar = () => {
-    const processingFile = useSelector(getCurrentFile);
-    const connectedServer = useSelector(getProcessingHost);
-    const numberOfFiles = useSelector(getNumFilesInQueue);
-    const isDownload = useSelector(getIsDownload);
-    const isUpload = useSelector(getIsUpload);
-    const isConnected = useSelector(getConnected);
+    const reduxInfo = useSelector(getTopBarInfo);
+    const {
+        processingFile,
+        connectedServer,
+        numberOfFiles,
+        isDownload,
+        isUpload,
+        isConnected,
+    } = reduxInfo;
     const styles = {
         bar: {
             position: 'absolute',

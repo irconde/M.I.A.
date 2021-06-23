@@ -1,11 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { getNumFilesInQueue } from '../redux/slices/server/serverSlice';
 import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
  * provide user with feedback when there are no pending files on the file queue
  */
-const NoFileSign = ({ isVisible }) => {
+const NoFileSign = () => {
+    const isVisible = useSelector(getNumFilesInQueue);
     const paragraphStyle = {
         fontWeight: '500',
         marginTop: '0.0rem',

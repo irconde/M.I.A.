@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
-import * as constants from '../../Constants';
+import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
