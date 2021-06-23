@@ -1290,10 +1290,7 @@ class App extends Component {
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
             if (
-                data[j].visible !== true ||
-                (data[j].selected &&
-                    this.props.cornerstoneMode !==
-                        constants.cornerstoneMode.SELECTION)
+                data[j].visible !== true                
             ) {
                 continue;
             }
@@ -1477,11 +1474,11 @@ class App extends Component {
                         combinedDetections[clickedPos].uuid
                     );
 
-                    this.onDetectionSelected(e).finally(() => {
+                    // this.onDetectionSelected(e).finally(() => {
                         this.props.detectionSelectedUpdate();
                         this.renderDetectionContextMenu(e);
                         this.appUpdateImage();
-                    });
+                    // });
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
                     this.props.cornerstoneMode ===
@@ -2035,42 +2032,16 @@ class App extends Component {
                 this.deleteDetection();
                 return;
             }
+            console.log(mode)
             let payload = {
                 editionMode: mode,
                 isEditLabelWidgetVisible: mode === constants.editionMode.LABEL,
             };
             if (mode === constants.editionMode.LABEL) {
-                const detectionData = this.props.selectedDetection;
-                let coords;
-                if (
-                    this.props.cornerstoneMode ===
-                    constants.cornerstoneMode.EDITION
-                ) {
-                    const currentViewport =
-                        detectionData.view === constants.viewport.TOP
-                            ? this.state.imageViewportTop
-                            : this.state.imageViewportSide;
-                    const toolState = cornerstoneTools.getToolState(
-                        currentViewport,
-                        'BoundingBoxDrawing'
-                    );
-                    const { data } = toolState;
-                    const { handles } = data[0];
-                    const { start, end } = handles;
-                    // Fix flipped rectangle issues
-                    if (start.x > end.x && start.y > end.y) {
-                        coords = [end.x, end.y, start.x, start.y];
-                    } else if (start.x > end.x) {
-                        coords = [end.x, start.y, start.x, end.y];
-                    } else if (start.y > end.y) {
-                        coords = [start.x, end.y, end.x, start.y];
-                    } else {
-                        coords = [start.x, start.y, end.x, end.y];
-                    }
-                }
+                const detectionData = this.props.selectedDetection;           
                 const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                     detectionData,
-                    coords
+                    detectionData.boundingBox
                 );
                 const widgetPosition = {
                     top: editLabelWidgetPosInfo.y,
