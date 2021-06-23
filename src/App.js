@@ -1339,30 +1339,28 @@ class App extends Component {
 
             // Label rendering
             if (
-                this.props.editionMode !== constants.editionMode.LABEL ||
-                data[j].selected
-            ) {
-                context.fillRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.strokeRect(
-                    boundingBoxCoords[0],
-                    boundingBoxCoords[1] - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
-                );
-                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
-                context.fillText(
-                    detectionLabel,
-                    boundingBoxCoords[0] +
-                        constants.detectionStyle.LABEL_PADDING,
-                    boundingBoxCoords[1] -
-                        constants.detectionStyle.LABEL_PADDING
-                );
-            }
+                data[j].selected &&
+                this.props.editionMode === constants.editionMode.LABEL
+            )
+                continue;
+            context.fillRect(
+                boundingBoxCoords[0],
+                boundingBoxCoords[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.strokeRect(
+                boundingBoxCoords[0],
+                boundingBoxCoords[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillText(
+                detectionLabel,
+                boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING,
+                boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
+            );
         }
     }
 
