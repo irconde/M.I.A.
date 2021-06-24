@@ -455,4 +455,18 @@ export default class Utils {
         const y_min = Math.min(...y_values);
         return [x_min, y_min, x_max, y_max];
     }
+
+    /**
+     * getDistanceBetween - calculates the Euclidean distance between two 2D points.
+     *
+     * @param {dictionary} position1 - a dictionary of the form {x:value, y:value}
+     * @param {dictionary} position2 - a dictionary of the form {x:value, y:value}
+     * @return {number} - the Euclidean distance between position1 and position2
+     */
+    static getDistanceBetween(position1, position2) {
+        return Math.sqrt(
+            Math.pow(position1.x - position2.x, 2) +
+                Math.pow(position1.y - position2.y, 2)
+        );
+    }
 }
