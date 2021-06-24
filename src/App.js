@@ -128,9 +128,8 @@ class App extends Component {
             tapDetector: new TapDetector(),
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
-        this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
-            this
-        );
+        this.sendImageToCommandServer =
+            this.sendImageToCommandServer.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -140,36 +139,31 @@ class App extends Component {
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
-        this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
-            this
-        );
+        this.resetSelectedDetectionBoxes =
+            this.resetSelectedDetectionBoxes.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
-            this
-        );
+        this.calculateviewPortWidthAndHeight =
+            this.calculateviewPortWidthAndHeight.bind(this);
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
         this.onNewPolygonMaskCreated = this.onNewPolygonMaskCreated.bind(this);
-        this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
-            this
-        );
+        this.renderDetectionContextMenu =
+            this.renderDetectionContextMenu.bind(this);
         this.getContextMenuPos = this.getContextMenuPos.bind(this);
         this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.startListeningClickEvents = this.startListeningClickEvents.bind(
-            this
-        );
-        this.stopListeningClickEvents = this.stopListeningClickEvents.bind(
-            this
-        );
+        this.startListeningClickEvents =
+            this.startListeningClickEvents.bind(this);
+        this.stopListeningClickEvents =
+            this.stopListeningClickEvents.bind(this);
     }
 
     /**
@@ -370,11 +364,8 @@ class App extends Component {
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById(
-            'verticalDivider'
-        ).style.left = document.getElementsByClassName(
-            'twoViewportsTop'
-        )[0].style.width;
+        document.getElementById('verticalDivider').style.left =
+            document.getElementsByClassName('twoViewportsTop')[0].style.width;
         document.getElementsByClassName('twoViewportsSide')[0].style.left =
             document.getElementsByClassName('twoViewportsTop')[0].style.width +
             document.getElementById('verticalDivider').style.width;
@@ -386,9 +377,8 @@ class App extends Component {
      * @returns {type} None
      */
     recalculateZoomLevel() {
-        let canvasElements = document.getElementsByClassName(
-            'cornerstone-canvas'
-        );
+        let canvasElements =
+            document.getElementsByClassName('cornerstone-canvas');
         let multipleViewports = canvasElements.length > 1;
         const newZoomLevelTop = Utils.calculateZoomLevel(
             canvasElements[0].style.width
@@ -666,9 +656,8 @@ class App extends Component {
                                     stackFile,
                                     'text/xml'
                                 );
-                                const xmlStack = xmlDoc.getElementsByTagName(
-                                    'stack'
-                                );
+                                const xmlStack =
+                                    xmlDoc.getElementsByTagName('stack');
                                 // We loop through each stack. Creating a new stack object to store our info
                                 // for now, we are just grabbing the location of the dicos file in the ora file
                                 for (let stackData of xmlStack) {
@@ -679,9 +668,8 @@ class App extends Component {
                                         blobData: [],
                                         pixelData: null,
                                     };
-                                    let layerData = stackData.getElementsByTagName(
-                                        'layer'
-                                    );
+                                    let layerData =
+                                        stackData.getElementsByTagName('layer');
                                     for (let imageSrc of layerData) {
                                         currentStack.rawData.push(
                                             imageSrc.getAttribute('src')
@@ -706,11 +694,10 @@ class App extends Component {
                                             .async('base64')
                                             .then((imageData) => {
                                                 if (i === 0)
-                                                    listOfStacks[
-                                                        j
-                                                    ].pixelData = Utils.base64ToArrayBuffer(
-                                                        imageData
-                                                    );
+                                                    listOfStacks[j].pixelData =
+                                                        Utils.base64ToArrayBuffer(
+                                                            imageData
+                                                        );
                                                 listOfStacks[j].blobData.push({
                                                     blob: Utils.b64toBlob(
                                                         imageData
@@ -720,9 +707,8 @@ class App extends Component {
                                             });
                                     }
                                 }
-                                const promiseOfList = Promise.all(
-                                    listOfPromises
-                                );
+                                const promiseOfList =
+                                    Promise.all(listOfPromises);
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
@@ -801,16 +787,14 @@ class App extends Component {
                             `data/${stack.view}_pixel_data.dcs`,
                             stack.blobData[0].blob
                         );
-                        const topStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                        const topStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.TOP === stack.view;
-                            }
-                        );
-                        const sideStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                            });
+                        const sideStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.SIDE === stack.view;
-                            }
-                        );
+                            });
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
@@ -829,9 +813,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/top_threat_detection_${j + 1}_${
@@ -863,9 +846,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/side_threat_detection_${i + 1}_${
@@ -982,9 +964,10 @@ class App extends Component {
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
-            const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                self.state.myOra.stackData[1].blobData[0].blob
-            );
+            const pixelDataSide =
+                cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                    self.state.myOra.stackData[1].blobData[0].blob
+                );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportSide,
@@ -1682,10 +1665,8 @@ class App extends Component {
                         const detectionData = self.props.detections.find(
                             (det) => det.uuid === data[0].uuid
                         );
-                        const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
-                            detectionData,
-                            coords
-                        );
+                        const editLabelWidgetPosInfo =
+                            self.getEditLabelWidgetPos(detectionData, coords);
                         let widgetPosition = {
                             top: editLabelWidgetPosInfo.y,
                             left: editLabelWidgetPosInfo.x,

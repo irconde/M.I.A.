@@ -4,10 +4,9 @@
 import Utils from './Utils';
 
 const maximumTapDistance = 2.0; // Distance in pixels
-const maximumTapTime = 250;     // Time in milliseconds
+const maximumTapTime = 250; // Time in milliseconds
 
 export default class TapDetector {
-
     constructor() {
         this.startPosition = { x: 0, y: 0 };
         this.startTime = 0;
@@ -32,9 +31,12 @@ export default class TapDetector {
      * @returns {boolean}               - true if the touch event corresponds to a tap; false otherwise.
      */
     checkTouchEnd(endPosition, endTime) {
-        let distance = Utils.getDistanceBetween(this.startPosition, endPosition);
+        let distance = Utils.getDistanceBetween(
+            this.startPosition,
+            endPosition
+        );
         let deltaTime = endTime - this.startTime;
 
-        return (distance <= maximumTapDistance && deltaTime <= maximumTapTime);
+        return distance <= maximumTapDistance && deltaTime <= maximumTapTime;
     }
 }
