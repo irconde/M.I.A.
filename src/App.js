@@ -1946,6 +1946,7 @@ class App extends Component {
                 isEditLabelWidgetVisible: mode === constants.editionMode.LABEL,
             };
             if (mode === constants.editionMode.LABEL) {
+                this.resetCornerstoneTool();
                 const detectionData = this.props.selectedDetection;
                 const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                     detectionData,
@@ -1961,12 +1962,12 @@ class App extends Component {
                         editLabelWidgetPosInfo.boundingWidth,
                     detectionLabelEditPosition: widgetPosition,
                 };
-                this.resetCornerstoneTool();
             } else if (
                 mode === constants.editionMode.BOUNDING &&
                 this.props.selectedDetection
             ) {
                 // Detection selected and activating the bounding box mode
+                this.resetCornerstoneTool();
                 const data = {
                     handles: {
                         start: {
