@@ -4,6 +4,7 @@
 import * as constants from './Constants';
 import { useLayoutEffect, useState } from 'react';
 import randomColor from 'randomcolor';
+const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
     /**
@@ -438,6 +439,20 @@ export default class Utils {
     }
 
     /**
+     * polygonDataToXYArray - Convert list of handles into an array of objects with x, y float values
+     *
+     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {Array<Object{ x, y}>}
+     */
+    static polygonDataToXYArray(polygonData) {
+        let points = [];
+        for (let index in polygonData) {
+            points.push({ x: polygonData[index].x, y: polygonData[index].y });
+        }
+        return points;
+    }
+
+    /**
      * calculateBoundingBox - Calculate the coordinates of the bounding box for a given polygon
      *
      * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
@@ -454,6 +469,38 @@ export default class Utils {
         const x_max = Math.max(...x_values);
         const y_min = Math.min(...y_values);
         return [x_min, y_min, x_max, y_max];
+    }
+
+    /**
+     * calculatePolygonMask - Calculate the coordinates of the bounding box for a given polygon
+     *
+     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     */
+    static calculatePolygonMask(boundingData, polygonData) {
+        let x_values = [];
+        let y_values = [];
+        let newPolygonData = cloneDeep(polygonData);
+        newPolygonData.forEach((point) => {
+            x_values.push(point.x);
+            y_values.push(point.y);
+        });
+        const poly_x_max = x_values.reduce((p, c) => (p > c ? p : c));
+        const poly_x_min = x_values.reduce((p, c) => (p < c ? p : c));
+        const poly_y_max = y_values.reduce((p, c) => (p > c ? p : c));
+        const poly_y_min = y_values.reduce((p, c) => (p < c ? p : c));
+        newPolygonData[
+            newPolygonData.findIndex((point) => point.x === poly_x_max)
+        ].x = boundingData[2];
+        newPolygonData[
+            newPolygonData.findIndex((point) => point.x === poly_x_min)
+        ].x = boundingData[0];
+        newPolygonData[
+            newPolygonData.findIndex((point) => point.y === poly_y_max)
+        ].y = boundingData[3];
+        newPolygonData[
+            newPolygonData.findIndex((point) => point.y === poly_y_min)
+        ].y = boundingData[1];
+        return newPolygonData;
     }
 
     /**
