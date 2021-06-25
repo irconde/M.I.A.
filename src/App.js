@@ -1960,6 +1960,7 @@ class App extends Component {
      * @returns {None} None
      */
     selectEditionMode(newMode) {
+        console.log('Edition Mode Selected: ', newMode);
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
             const mode =
                 newMode === this.props.editionMode
@@ -2053,10 +2054,64 @@ class App extends Component {
                 });
                 this.appUpdateImage();
             } else if (
-                this.props.editionMode === constants.editionMode.BOUNDING &&
+                mode === constants.editionMode.POLYGON &&
+                this.props.selectedDetection
+            ) {
+                console.log('Starting Polygon Edition');
+                console.log(this.props.selectedDetection);
+
+                this.resetCornerstoneTool();
+                const data = {
+                    handles: {
+                        points: this.props.selectedDetection.polygonMask
+                    },
+                    uuid: this.props.selectedDetection.uuid,
+                    algorithm: this.props.selectedDetection.algorithm,
+                    class: this.props.selectedDetection.className,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    confidence: this.props.selectedDetection.confidence,
+                    updatingDetection: true,
+                    view: this.props.selectedDetection.view,
+                };
+
+                if (
+                    this.props.selectedDetection.view === constants.viewport.TOP
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportTop,
+                        'PolygonDrawingTool',
+                        data
+                    );
+                } else if (
+                    this.props.selectedDetection.view ===
+                    constants.viewport.SIDE
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportSide,
+                        'PolygonDrawingTool',
+                        data
+                    );
+                }
+                cornerstoneTools.setToolActive('PolygonDrawingTool', {
+                    mouseButtonMask: 1,
+                });
+                /*cornerstoneTools.setToolActive('Pan', {
+                    mouseButtonMask: 1,
+                });*/
+                cornerstoneTools.setToolOptions('PolygonDrawingTool', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.NO_TOOL,
+                });
+                this.appUpdateImage();
+            } else if (
+                (
+                    this.props.editionMode === constants.editionMode.BOUNDING ||
+                    this.props.editionMode === constants.editionMode.POLYGON
+                ) &&
                 mode === constants.editionMode.NO_TOOL
             ) {
                 // This is for if the user was already editing a bounding box, and clicked the button again to finish editing it.
+                console.log('Ending Edition');
                 this.resetCornerstoneTool();
             }
             // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
