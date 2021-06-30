@@ -1587,10 +1587,10 @@ class App extends Component {
             } else {
                 coords = [start.x, start.y, end.x, end.y];
             }
-            let boundingBoxArea = Math.abs(
+            const boundingBoxArea = Math.abs(
                 (coords[0] - coords[2]) * (coords[1] - coords[3])
             );
-            let newDetection = {
+            const newDetection = {
                 uuid: data[0].uuid,
                 boundingBox: coords,
                 algorithm: data[0].algorithm,
@@ -1607,7 +1607,7 @@ class App extends Component {
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
                 return newDetection.view === stack.view;
             });
-            let self = this;
+            const self = this;
             Dicos.detectionObjectToBlob(
                 newDetection,
                 self.state.myOra.stackData[stackIndex].blobData[0].blob
@@ -1733,11 +1733,12 @@ class App extends Component {
             this.props.annotationMode === constants.annotationMode.POLYGON
         ) {
             const polygonData = event.detail.measurementData;
-            const polygonCoords = Utils.polygonDataToXYArray(
-                polygonData.handles.points
-            );
             const boundingBoxCoords = Utils.calculateBoundingBox(
                 polygonData.handles.points
+            );
+            const polygonCoords = Utils.polygonDataToXYArray(
+                polygonData.handles.points,
+                boundingBoxCoords
             );
             let newDetection = {
                 uuid: polygonData.uuid,

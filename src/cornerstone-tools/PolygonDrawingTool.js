@@ -491,7 +491,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     /**
      * Fire MEASUREMENT_MODIFIED event on provided element
      * @param {any} element which freehand data has been modified
-     * @param {any} measurementData the measurment data
+     * @param {any} measurementData the measurement data
      * @returns {void}
      */
     fireModifiedEvent(element, measurementData) {
@@ -721,7 +721,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Gets the current mouse location and stores it in the configuration object.
      *
      * @private
-     * @param {Object} eventData The data assoicated with the event.
+     * @param {Object} eventData The data associated with the event.
      * @returns {undefined}
      */
     _getMouseLocation(eventData) {
@@ -860,7 +860,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * Begining of drawing loop when tool is active and a click event happens far
+     * Beginning of drawing loop when tool is active and a click event happens far
      * from existing handles.
      *
      * @private
@@ -1068,7 +1068,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      *
      * @private
      * @param {Object} data      Data object associated with the tool.
-     * @param {Object} eventData The data assoicated with the event.
+     * @param {Object} eventData The data associated with the event.
      * @returns {Boolean}
      */
     _checkInvalidHandleLocation(data, eventData) {
@@ -1116,7 +1116,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @private
      *
      * @param {Object} data - data object associated with the tool.
-     * @param {Object} eventData The data assoicated with the event.
+     * @param {Object} eventData The data associated with the event.
      * @returns {Boolean}
      */
     _checkHandlesPolygonMode(data, eventData) {
@@ -1193,7 +1193,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Returns the previous handle to the current one.
      * @param {Number} currentHandle - the current handle index
      * @param {Array} points - the handles Array of the freehand data
-     * @returns {Number} - The index of the previos handle
+     * @returns {Number} - The index of the previous handle
      */
     _getPrevHandleIndex(currentHandle, points) {
         if (currentHandle === 0) {
