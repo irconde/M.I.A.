@@ -110,12 +110,8 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             <RectangleIcon />
                         </IconContainer>
                         <IconContainer
-                            onClick={() =>
-                                handleClick(editionMode.BOUNDING_MOVE)
-                            }
-                            selected={
-                                selectedOption === editionMode.BOUNDING_MOVE
-                            }>
+                            onClick={() => handleClick(editionMode.MOVE)}
+                            selected={selectedOption === editionMode.MOVE}>
                             <MovementIcon />
                         </IconContainer>
                         <IconContainer

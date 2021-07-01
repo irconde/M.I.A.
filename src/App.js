@@ -19,6 +19,7 @@ import JSZip from 'jszip';
 import NoFileSign from './components/NoFileSign';
 import * as constants from './utils/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
+import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
@@ -447,6 +448,10 @@ class App extends Component {
             zoomLevelTop: newZoomLevelTop,
             zoomLevelSide: newZoomLevelSide,
         });
+        cornerstoneTools.setToolOptions('DetectionMovementTool', {
+            zoomLevelTop: newZoomLevelTop,
+            zoomLevelSide: newZoomLevelSide,
+        });
     }
 
     /**
@@ -485,6 +490,7 @@ class App extends Component {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
+        cornerstoneTools.addTool(DetectionMovementTool);
         cornerstoneTools.addTool(PolygonDrawingTool);
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
@@ -497,6 +503,10 @@ class App extends Component {
                 this.props.editionMode === constants.editionMode.POLYGON
             ) {
                 cornerstoneTools.setToolActive('PolygonDrawingTool', {
+                    mouseButtonMask: 1,
+                });
+            } else if (this.props.editionMode === constants.editionMode.MOVE) {
+                cornerstoneTools.setToolActive('DetectionMovementTool', {
                     mouseButtonMask: 1,
                 });
             }
@@ -516,12 +526,20 @@ class App extends Component {
         );
         cornerstoneTools.clearToolState(
             this.state.imageViewportTop,
+            'DetectionMovementTool'
+        );
+        cornerstoneTools.clearToolState(
+            this.state.imageViewportTop,
             'PolygonDrawingTool'
         );
         if (this.props.singleViewport !== true) {
             cornerstoneTools.clearToolState(
                 this.state.imageViewportSide,
                 'BoundingBoxDrawing'
+            );
+            cornerstoneTools.clearToolState(
+                this.state.imageViewportSide,
+                'DetectionMovementTool'
             );
             cornerstoneTools.clearToolState(
                 this.state.imageViewportSide,
@@ -532,10 +550,15 @@ class App extends Component {
             cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
             temporaryLabel: undefined,
         });
+        cornerstoneTools.setToolOptions('DetectionMovementTool', {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            temporaryLabel: undefined,
+        });
         cornerstoneTools.setToolOptions('PolygonDrawingTool', {
             cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
         });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
+        cornerstoneTools.setToolDisabled('DetectionMovementTool');
         cornerstoneTools.setToolDisabled('PolygonDrawingTool');
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
@@ -1170,6 +1193,9 @@ class App extends Component {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                 zoomLevelTop: eventData.viewport.scale,
             });
+            cornerstoneTools.setToolOptions('DetectionMovementTool', {
+                zoomLevelTop: eventData.viewport.scale,
+            });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
             }
@@ -1190,6 +1216,9 @@ class App extends Component {
             this.props.singleViewport === false
         ) {
             cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                zoomLevelSide: eventData.viewport.scale,
+            });
+            cornerstoneTools.setToolOptions('DetectionMovementTool', {
                 zoomLevelSide: eventData.viewport.scale,
             });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
@@ -1312,6 +1341,8 @@ class App extends Component {
             if (
                 data[j].visible !== true ||
                 (this.props.editionMode === constants.editionMode.BOUNDING &&
+                    data[j].selected) ||
+                (this.props.editionMode === constants.editionMode.MOVE &&
                     data[j].selected)
             ) {
                 continue;
@@ -1556,10 +1587,18 @@ class App extends Component {
                     constants.annotationMode.BOUNDING) ||
             this.props.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
-            const toolState = cornerstoneTools.getToolState(
-                viewport,
-                'BoundingBoxDrawing'
-            );
+            let toolState;
+            if (this.props.editionMode === constants.editionMode.BOUNDING) {
+                toolState = cornerstoneTools.getToolState(
+                    viewport,
+                    'BoundingBoxDrawing'
+                );
+            } else if (this.props.editionMode === constants.editionMode.MOVE) {
+                toolState = cornerstoneTools.getToolState(
+                    viewport,
+                    'DetectionMovementTool'
+                );
+            }
             if (toolState === undefined || toolState.data.length === 0) {
                 this.props.emptyAreaClickUpdate();
                 this.resetSelectedDetectionBoxes(event);
@@ -1661,19 +1700,24 @@ class App extends Component {
                             coords
                         )
                     ) {
+                        let mask = [];
+                        if (this.props.selectedDetection) {
+                            if (
+                                this.props.selectedDetection.polygonMask !==
+                                null
+                            ) {
+                                mask = Utils.calculatePolygonMask(
+                                    coords,
+                                    this.props.selectedDetection.polygonMask
+                                );
+                            }
+                        }
+
                         self.props.updateDetection({
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                polygonMask:
-                                    this.props.selectedDetection.polygonMask
-                                        .length > 0
-                                        ? Utils.calculatePolygonMask(
-                                              coords,
-                                              this.props.selectedDetection
-                                                  .polygonMask
-                                          )
-                                        : [],
+                                polygonMask: mask,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2078,6 +2122,63 @@ class App extends Component {
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
                     editionMode: constants.editionMode.NO_TOOL,
+                });
+                this.appUpdateImage();
+            } else if (
+                mode === constants.editionMode.MOVE &&
+                this.props.selectedDetection
+            ) {
+                this.resetCornerstoneTool();
+                const data = {
+                    handles: {
+                        start: {
+                            x: this.props.selectedDetection.boundingBox[0],
+                            y: this.props.selectedDetection.boundingBox[1],
+                        },
+                        end: {
+                            x: this.props.selectedDetection.boundingBox[2],
+                            y: this.props.selectedDetection.boundingBox[3],
+                        },
+                    },
+                    uuid: this.props.selectedDetection.uuid,
+                    algorithm: this.props.selectedDetection.algorithm,
+                    class: this.props.selectedDetection.className,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    confidence: this.props.selectedDetection.confidence,
+                    updatingDetection: true,
+                    view: this.props.selectedDetection.view,
+                    polygonCoords:
+                        this.props.selectedDetection.polygonMask !== null
+                            ? this.props.selectedDetection.polygonMask
+                            : undefined,
+                };
+                if (
+                    this.props.selectedDetection.view === constants.viewport.TOP
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportTop,
+                        'DetectionMovementTool',
+                        data
+                    );
+                } else if (
+                    this.props.selectedDetection.view ===
+                    constants.viewport.SIDE
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportSide,
+                        'DetectionMovementTool',
+                        data
+                    );
+                }
+                cornerstoneTools.setToolActive('DetectionMovementTool', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolActive('Pan', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolOptions('DetectionMovementTool', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.MOVE,
                 });
                 this.appUpdateImage();
             } else if (
