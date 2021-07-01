@@ -2094,6 +2094,10 @@ class App extends Component {
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
+                    polygonCoords:
+                        this.props.selectedDetection.polygonMask !== null
+                            ? this.props.selectedDetection.polygonMask
+                            : undefined,
                 };
                 if (
                     this.props.selectedDetection.view === constants.viewport.TOP

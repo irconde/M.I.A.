@@ -114,81 +114,91 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     'pixel'
                 );
                 // Label Rendering
-                if (!data.handles.start.moving && !data.handles.end.moving) {
-                    let myCoords;
-                    if (
-                        data.handles.end.y < data.handles.start.y &&
-                        data.handles.end.x < data.handles.start.x
-                    ) {
-                        myCoords = cornerstone.pixelToCanvas(element, {
-                            x: data.handles.end.x,
-                            y: data.handles.end.y,
-                        });
-                    } else if (
-                        data.handles.end.y > data.handles.start.y &&
-                        data.handles.end.x < data.handles.start.x
-                    ) {
-                        myCoords = cornerstone.pixelToCanvas(element, {
-                            x: data.handles.end.x,
-                            y: data.handles.start.y,
-                        });
-                    } else if (data.handles.end.y < data.handles.start.y) {
-                        myCoords = cornerstone.pixelToCanvas(element, {
-                            x: data.handles.start.x,
-                            y: data.handles.end.y,
-                        });
-                    } else {
-                        myCoords = cornerstone.pixelToCanvas(
-                            element,
-                            data.handles.start
-                        );
-                    }
-                    var fontArr = constants.detectionStyle.LABEL_FONT.split(
-                        ' '
-                    );
-                    var fontSizeArr = fontArr[1].split('px');
-                    var fontSize = fontSizeArr[0];
-                    fontSize *= zoom;
-                    fontSizeArr[0] = fontSize;
-                    var newFontSize = fontSizeArr.join('px');
-                    var newFont =
-                        fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
-
-                    context.font = newFont;
-
-                    context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
-                    context.strokeStyle = data.renderColor;
-                    context.fillStyle = data.renderColor;
-                    const className =
-                        this.options.temporaryLabel !== undefined
-                            ? this.options.temporaryLabel
-                            : data.class;
-                    const detectionLabel = Utils.formatDetectionLabel(
-                        className,
-                        data.confidence
-                    );
-                    const labelSize = Utils.getTextLabelSize(
-                        context,
-                        detectionLabel,
-                        constants.detectionStyle.LABEL_PADDING * zoom
-                    );
-                    context.fillRect(
-                        myCoords.x - 1 * zoom,
-                        myCoords.y - labelSize['height'],
-                        labelSize['width'],
-                        labelSize['height']
-                    );
-                    context.fillStyle =
-                        constants.detectionStyle.LABEL_TEXT_COLOR;
-                    context.fillText(
-                        detectionLabel,
-                        myCoords.x +
-                            constants.detectionStyle.LABEL_PADDING * zoom,
-                        myCoords.y -
-                            constants.detectionStyle.LABEL_PADDING * zoom
+                let myCoords;
+                if (
+                    data.handles.end.y < data.handles.start.y &&
+                    data.handles.end.x < data.handles.start.x
+                ) {
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.end.y,
+                    });
+                } else if (
+                    data.handles.end.y > data.handles.start.y &&
+                    data.handles.end.x < data.handles.start.x
+                ) {
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.start.y,
+                    });
+                } else if (data.handles.end.y < data.handles.start.y) {
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.start.x,
+                        y: data.handles.end.y,
+                    });
+                } else {
+                    myCoords = cornerstone.pixelToCanvas(
+                        element,
+                        data.handles.start
                     );
                 }
+                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                var fontSizeArr = fontArr[1].split('px');
+                var fontSize = fontSizeArr[0];
+                fontSize *= zoom;
+                fontSizeArr[0] = fontSize;
+                var newFontSize = fontSizeArr.join('px');
+                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+
+                context.font = newFont;
+
+                context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+                context.strokeStyle = data.renderColor;
+                context.fillStyle = data.renderColor;
+                const className =
+                    this.options.temporaryLabel !== undefined
+                        ? this.options.temporaryLabel
+                        : data.class;
+                const detectionLabel = Utils.formatDetectionLabel(
+                    className,
+                    data.confidence
+                );
+                const labelSize = Utils.getTextLabelSize(
+                    context,
+                    detectionLabel,
+                    constants.detectionStyle.LABEL_PADDING * zoom
+                );
+                context.fillRect(
+                    myCoords.x - 1 * zoom,
+                    myCoords.y - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
+                );
+                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillText(
+                    detectionLabel,
+                    myCoords.x + constants.detectionStyle.LABEL_PADDING * zoom,
+                    myCoords.y - constants.detectionStyle.LABEL_PADDING * zoom
+                );
+                // Polygon Mask Rendering
                 if (data.polygonCoords.length > 0) {
+                    const pixelStart = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.start.x,
+                        y: data.handles.start.y,
+                    });
+                    const pixelEnd = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.end.y,
+                    });
+                    data.polygonCoords = Utils.calculatePolygonMask(
+                        [
+                            Math.abs(pixelStart.x),
+                            Math.abs(pixelStart.y),
+                            Math.abs(pixelEnd.x),
+                            Math.abs(pixelEnd.y),
+                        ],
+                        data.polygonCoords
+                    );
                     context.strokeStyle =
                         constants.detectionStyle.SELECTED_COLOR;
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;

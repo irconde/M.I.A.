@@ -243,6 +243,43 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         );
                     }
                 }
+                // Polygon Mask Rendering
+                if (data.polygonCoords.length > 0) {
+                    const pixelStart = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.start.x,
+                        y: data.handles.start.y,
+                    });
+                    const pixelEnd = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.end.y,
+                    });
+                    data.polygonCoords = Utils.calculatePolygonMask(
+                        [
+                            Math.abs(pixelStart.x),
+                            Math.abs(pixelStart.y),
+                            Math.abs(pixelEnd.x),
+                            Math.abs(pixelEnd.y),
+                        ],
+                        data.polygonCoords
+                    );
+                    context.strokeStyle =
+                        constants.detectionStyle.SELECTED_COLOR;
+                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
+                    context.globalAlpha = 0.5;
+                    const coords = Utils.polygonDataToCoordArray(
+                        data.polygonCoords
+                    );
+                    let index = 0;
+                    context.beginPath();
+                    context.moveTo(coords[index], coords[index + 1]);
+                    index += 2;
+                    for (let i = index; i < coords.length; i += 2) {
+                        context.lineTo(coords[i], coords[i + 1]);
+                    }
+                    context.closePath();
+                    context.fill();
+                    context.globalAlpha = 1.0;
+                }
             }
         });
     }
