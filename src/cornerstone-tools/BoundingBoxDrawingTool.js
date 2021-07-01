@@ -253,28 +253,59 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         x: data.handles.end.x,
                         y: data.handles.end.y,
                     });
+                    let flippedCoords = [];
+                    // Fix flipped rectangle issues
+                    if (
+                        pixelStart.x > pixelEnd.x &&
+                        pixelStart.y > pixelEnd.y
+                    ) {
+                        flippedCoords = [
+                            pixelEnd.x,
+                            pixelEnd.y,
+                            pixelStart.x,
+                            pixelStart.y,
+                        ];
+                    } else if (pixelStart.x > pixelEnd.x) {
+                        flippedCoords = [
+                            pixelEnd.x,
+                            pixelStart.y,
+                            pixelStart.x,
+                            pixelEnd.y,
+                        ];
+                    } else if (pixelStart.y > pixelEnd.y) {
+                        flippedCoords = [
+                            pixelStart.x,
+                            pixelEnd.y,
+                            pixelEnd.x,
+                            pixelStart.y,
+                        ];
+                    } else {
+                        flippedCoords = [
+                            pixelStart.x,
+                            pixelStart.y,
+                            pixelEnd.x,
+                            pixelEnd.y,
+                        ];
+                    }
                     data.polygonCoords = Utils.calculatePolygonMask(
-                        [
-                            Math.abs(pixelStart.x),
-                            Math.abs(pixelStart.y),
-                            Math.abs(pixelEnd.x),
-                            Math.abs(pixelEnd.y),
-                        ],
+                        flippedCoords,
                         data.polygonCoords
                     );
                     context.strokeStyle =
                         constants.detectionStyle.SELECTED_COLOR;
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
-                    const coords = Utils.polygonDataToCoordArray(
-                        data.polygonCoords
-                    );
                     let index = 0;
                     context.beginPath();
-                    context.moveTo(coords[index], coords[index + 1]);
-                    index += 2;
-                    for (let i = index; i < coords.length; i += 2) {
-                        context.lineTo(coords[i], coords[i + 1]);
+                    context.moveTo(
+                        data.polygonCoords[index].x,
+                        data.polygonCoords[index].y
+                    );
+                    for (let i = index; i < data.polygonCoords.length; i++) {
+                        context.lineTo(
+                            data.polygonCoords[i].x,
+                            data.polygonCoords[i].y
+                        );
                     }
                     context.closePath();
                     context.fill();

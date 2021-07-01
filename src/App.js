@@ -1452,13 +1452,11 @@ class App extends Component {
         if (coords === undefined || coords === null || coords.length === 0) {
             return;
         }
-        coords = Utils.polygonDataToCoordArray(coords);
         let index = 0;
         context.beginPath();
-        context.moveTo(coords[index], coords[index + 1]);
-        index += 2;
-        for (let i = index; i < coords.length; i += 2) {
-            context.lineTo(coords[i], coords[i + 1]);
+        context.moveTo(coords[index].x, coords[index].y);
+        for (let i = index; i < coords.length; i++) {
+            context.lineTo(coords[i].x, coords[i].y);
         }
         context.closePath();
         context.fill();

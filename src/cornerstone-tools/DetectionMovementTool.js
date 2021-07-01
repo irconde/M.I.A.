@@ -203,15 +203,17 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                         constants.detectionStyle.SELECTED_COLOR;
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
-                    const coords = Utils.polygonDataToCoordArray(
-                        data.polygonCoords
-                    );
                     let index = 0;
                     context.beginPath();
-                    context.moveTo(coords[index], coords[index + 1]);
-                    index += 2;
-                    for (let i = index; i < coords.length; i += 2) {
-                        context.lineTo(coords[i], coords[i + 1]);
+                    context.moveTo(
+                        data.polygonCoords[index].x,
+                        data.polygonCoords[index].y
+                    );
+                    for (let i = index; i < data.polygonCoords.length; i++) {
+                        context.lineTo(
+                            data.polygonCoords[i].x,
+                            data.polygonCoords[i].y
+                        );
                     }
                     context.closePath();
                     context.fill();
