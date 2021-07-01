@@ -1909,7 +1909,6 @@ class App extends Component {
                     x: boundingBoxCoords[originCoordX] + detectionContextGap,
                     y: boundingBoxCoords[1] + boundingHeight + 4,
                 });
-
                 return {
                     x: x,
                     y: y,
