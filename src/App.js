@@ -1452,14 +1452,7 @@ class App extends Component {
         if (coords === undefined || coords === null || coords.length === 0) {
             return;
         }
-        let index = 0;
-        context.beginPath();
-        context.moveTo(coords[index].x, coords[index].y);
-        for (let i = index; i < coords.length; i++) {
-            context.lineTo(coords[i].x, coords[i].y);
-        }
-        context.closePath();
-        context.fill();
+        Utils.renderPolygonMasks(context, coords);
     }
 
     /**

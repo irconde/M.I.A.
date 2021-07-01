@@ -295,20 +295,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         constants.detectionStyle.SELECTED_COLOR;
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
-                    let index = 0;
-                    context.beginPath();
-                    context.moveTo(
-                        data.polygonCoords[index].x,
-                        data.polygonCoords[index].y
-                    );
-                    for (let i = index; i < data.polygonCoords.length; i++) {
-                        context.lineTo(
-                            data.polygonCoords[i].x,
-                            data.polygonCoords[i].y
-                        );
-                    }
-                    context.closePath();
-                    context.fill();
+                    Utils.renderPolygonMasks(context, data.polygonCoords);
                     context.globalAlpha = 1.0;
                 }
             }

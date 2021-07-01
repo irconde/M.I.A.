@@ -539,6 +539,23 @@ export default class Utils {
     }
 
     /**
+     * renderPolygonMasks - Will render the polygon mask coordinates for the passed in context
+     *
+     * @param {eventData.context} context
+     * @param {Array<{x, y}>} polygonCoords
+     */
+    static renderPolygonMasks(context, polygonCoords) {
+        let index = 0;
+        context.beginPath();
+        context.moveTo(polygonCoords[index].x, polygonCoords[index].y);
+        for (let i = index; i < polygonCoords.length; i++) {
+            context.lineTo(polygonCoords[i].x, polygonCoords[i].y);
+        }
+        context.closePath();
+        context.fill();
+    }
+
+    /**
      * getDistanceBetween - calculates the Euclidean distance between two 2D points.
      *
      * @param {dictionary} position1 - a dictionary of the form {x:value, y:value}
