@@ -2176,11 +2176,7 @@ class App extends Component {
                     editionMode: constants.editionMode.MOVE,
                 });
                 this.appUpdateImage();
-            } else if (
-                this.props.editionMode === constants.editionMode.BOUNDING &&
-                mode === constants.editionMode.NO_TOOL
-            ) {
-                // This is for if the user was already editing a bounding box, and clicked the button again to finish editing it.
+            } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
             }
             // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
