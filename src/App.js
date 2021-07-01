@@ -240,7 +240,7 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousedrag',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         this.state.imageViewportSide.addEventListener('mouseup', (event) => {
             const newEvent = Utils.mockCornerstoneEvent(
