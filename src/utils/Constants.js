@@ -72,6 +72,7 @@ export const annotationMode = {
 export const editionMode = {
     LABEL: 'label',
     BOUNDING: 'bounding',
+    MOVE: 'movement',
     POLYGON: 'polygon',
     DELETE: 'delete',
     NO_TOOL: 'none',

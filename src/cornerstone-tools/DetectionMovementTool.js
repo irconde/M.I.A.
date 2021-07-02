@@ -2,24 +2,22 @@ import csTools from 'eac-cornerstone-tools';
 import * as constants from '../utils/Constants';
 import Utils from '../utils/Utils.js';
 import * as cornerstone from 'cornerstone-core';
-const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
-const draw4CornerRect = csTools.importInternal('drawing/draw4CornerRect');
 const drawRect = csTools.importInternal('drawing/drawRect');
 
 /**
  * @public
- * @class BoundingBoxDrawingTool
+ * @class DetectionMovementTool
  * @classdesc Tool for drawing rectangular regions of interest
  * @extends Tools.Base.BaseAnnotationTool
  */
-export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
+export default class DetectionMovementTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'BoundingBoxDrawing',
+            name: 'DetectionMovementTool',
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
@@ -55,7 +53,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     // Method that overrides the original abstract method in the cornerstone-tools library
     // Automatically invoked when a handle is selected and it's being dragged
     handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
-        if (this.options.editionMode === constants.editionMode.BOUNDING) {
+        if (this.options.editionMode === constants.editionMode.MOVE) {
             super.handleSelectedCallback(
                 evt,
                 toolData,
@@ -84,24 +82,11 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
-        const {
-            handleRadius,
-            drawHandlesOnHover,
-            hideHandlesIfMoving,
-            renderDashed,
-        } = this.configuration;
+        const { renderDashed } = this.configuration;
 
         const context = getNewContext(eventData.canvasContext.canvas);
 
         const color = constants.detectionStyle.NORMAL_COLOR;
-        const handleOptions = {
-            color,
-            handleRadius: 8,
-            handleLineWidth: 3,
-            fill: 'white',
-            drawHandlesIfActive: drawHandlesOnHover,
-            hideHandlesIfMoving,
-        };
 
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
@@ -120,129 +105,81 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 rectOptions.lineWidth = lineWidth;
 
                 // Draw bounding box
-                if (
-                    this.options.cornerstoneMode ===
-                    constants.cornerstoneMode.EDITION
-                ) {
-                    data.handles = Utils.recalculateRectangle(data.handles);
-                    draw4CornerRect(
-                        context,
-                        element,
-                        data.handles.start,
-                        data.handles.end,
-                        data.handles.start_prima,
-                        data.handles.end_prima,
-                        rectOptions,
-                        'pixel'
-                    );
-                } else {
-                    drawRect(
-                        context,
-                        element,
-                        data.handles.start,
-                        data.handles.end,
-                        rectOptions,
-                        'pixel'
-                    );
-                }
-                // Draw handles
-                if (
-                    this.options.editionMode ==
-                        constants.editionMode.BOUNDING &&
-                    this.configuration.drawHandles
-                ) {
-                    drawHandles(
-                        context,
-                        eventData,
-                        data.handles,
-                        handleOptions
-                    );
-                }
+                drawRect(
+                    context,
+                    element,
+                    data.handles.start,
+                    data.handles.end,
+                    rectOptions,
+                    'pixel'
+                );
                 // Label Rendering
-
+                let myCoords;
                 if (
-                    this.options.editionMode == constants.editionMode.NO_TOOL &&
-                    data.updatingDetection === true
+                    data.handles.end.y < data.handles.start.y &&
+                    data.handles.end.x < data.handles.start.x
                 ) {
-                    if (
-                        !data.handles.start.moving &&
-                        !data.handles.end.moving
-                    ) {
-                        let myCoords;
-                        if (
-                            data.handles.end.y < data.handles.start.y &&
-                            data.handles.end.x < data.handles.start.x
-                        ) {
-                            myCoords = cornerstone.pixelToCanvas(element, {
-                                x: data.handles.end.x,
-                                y: data.handles.end.y,
-                            });
-                        } else if (
-                            data.handles.end.y > data.handles.start.y &&
-                            data.handles.end.x < data.handles.start.x
-                        ) {
-                            myCoords = cornerstone.pixelToCanvas(element, {
-                                x: data.handles.end.x,
-                                y: data.handles.start.y,
-                            });
-                        } else if (data.handles.end.y < data.handles.start.y) {
-                            myCoords = cornerstone.pixelToCanvas(element, {
-                                x: data.handles.start.x,
-                                y: data.handles.end.y,
-                            });
-                        } else {
-                            myCoords = cornerstone.pixelToCanvas(
-                                element,
-                                data.handles.start
-                            );
-                        }
-                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
-                            ' '
-                        );
-                        var fontSizeArr = fontArr[1].split('px');
-                        var fontSize = fontSizeArr[0];
-                        fontSize *= zoom;
-                        fontSizeArr[0] = fontSize;
-                        var newFontSize = fontSizeArr.join('px');
-                        var newFont =
-                            fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
-
-                        context.font = newFont;
-
-                        context.lineWidth =
-                            constants.detectionStyle.BORDER_WIDTH;
-                        context.strokeStyle = data.renderColor;
-                        context.fillStyle = data.renderColor;
-                        const className =
-                            this.options.temporaryLabel !== undefined
-                                ? this.options.temporaryLabel
-                                : data.class;
-                        const detectionLabel = Utils.formatDetectionLabel(
-                            className,
-                            data.confidence
-                        );
-                        const labelSize = Utils.getTextLabelSize(
-                            context,
-                            detectionLabel,
-                            constants.detectionStyle.LABEL_PADDING * zoom
-                        );
-                        context.fillRect(
-                            myCoords.x - 1 * zoom,
-                            myCoords.y - labelSize['height'],
-                            labelSize['width'],
-                            labelSize['height']
-                        );
-                        context.fillStyle =
-                            constants.detectionStyle.LABEL_TEXT_COLOR;
-                        context.fillText(
-                            detectionLabel,
-                            myCoords.x +
-                                constants.detectionStyle.LABEL_PADDING * zoom,
-                            myCoords.y -
-                                constants.detectionStyle.LABEL_PADDING * zoom
-                        );
-                    }
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.end.y,
+                    });
+                } else if (
+                    data.handles.end.y > data.handles.start.y &&
+                    data.handles.end.x < data.handles.start.x
+                ) {
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.end.x,
+                        y: data.handles.start.y,
+                    });
+                } else if (data.handles.end.y < data.handles.start.y) {
+                    myCoords = cornerstone.pixelToCanvas(element, {
+                        x: data.handles.start.x,
+                        y: data.handles.end.y,
+                    });
+                } else {
+                    myCoords = cornerstone.pixelToCanvas(
+                        element,
+                        data.handles.start
+                    );
                 }
+                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                var fontSizeArr = fontArr[1].split('px');
+                var fontSize = fontSizeArr[0];
+                fontSize *= zoom;
+                fontSizeArr[0] = fontSize;
+                var newFontSize = fontSizeArr.join('px');
+                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+
+                context.font = newFont;
+
+                context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+                context.strokeStyle = data.renderColor;
+                context.fillStyle = data.renderColor;
+                const className =
+                    this.options.temporaryLabel !== undefined
+                        ? this.options.temporaryLabel
+                        : data.class;
+                const detectionLabel = Utils.formatDetectionLabel(
+                    className,
+                    data.confidence
+                );
+                const labelSize = Utils.getTextLabelSize(
+                    context,
+                    detectionLabel,
+                    constants.detectionStyle.LABEL_PADDING * zoom
+                );
+                context.fillRect(
+                    myCoords.x - 1 * zoom,
+                    myCoords.y - labelSize['height'],
+                    labelSize['width'],
+                    labelSize['height']
+                );
+                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillText(
+                    detectionLabel,
+                    myCoords.x + constants.detectionStyle.LABEL_PADDING * zoom,
+                    myCoords.y - constants.detectionStyle.LABEL_PADDING * zoom
+                );
                 // Polygon Mask Rendering
                 if (data.polygonCoords.length > 0) {
                     const pixelStart = cornerstone.pixelToCanvas(element, {
@@ -253,42 +190,13 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         x: data.handles.end.x,
                         y: data.handles.end.y,
                     });
-                    let flippedCoords = [];
-                    // Fix flipped rectangle issues
-                    if (
-                        pixelStart.x > pixelEnd.x &&
-                        pixelStart.y > pixelEnd.y
-                    ) {
-                        flippedCoords = [
-                            pixelEnd.x,
-                            pixelEnd.y,
-                            pixelStart.x,
-                            pixelStart.y,
-                        ];
-                    } else if (pixelStart.x > pixelEnd.x) {
-                        flippedCoords = [
-                            pixelEnd.x,
-                            pixelStart.y,
-                            pixelStart.x,
-                            pixelEnd.y,
-                        ];
-                    } else if (pixelStart.y > pixelEnd.y) {
-                        flippedCoords = [
-                            pixelStart.x,
-                            pixelEnd.y,
-                            pixelEnd.x,
-                            pixelStart.y,
-                        ];
-                    } else {
-                        flippedCoords = [
-                            pixelStart.x,
-                            pixelStart.y,
-                            pixelEnd.x,
-                            pixelEnd.y,
-                        ];
-                    }
                     data.polygonCoords = Utils.calculatePolygonMask(
-                        flippedCoords,
+                        [
+                            Math.abs(pixelStart.x),
+                            Math.abs(pixelStart.y),
+                            Math.abs(pixelEnd.x),
+                            Math.abs(pixelEnd.y),
+                        ],
                         data.polygonCoords
                     );
                     context.strokeStyle =
@@ -333,18 +241,6 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     active: false,
                 },
                 end: {
-                    x: eventData.currentPoints.image.x,
-                    y: eventData.currentPoints.image.y,
-                    highlight: true,
-                    active: true,
-                },
-                start_prima: {
-                    x: eventData.currentPoints.image.x,
-                    y: eventData.currentPoints.image.y,
-                    highlight: true,
-                    active: true,
-                },
-                end_prima: {
                     x: eventData.currentPoints.image.x,
                     y: eventData.currentPoints.image.y,
                     highlight: true,

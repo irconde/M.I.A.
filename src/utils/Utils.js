@@ -4,6 +4,7 @@
 import * as constants from './Constants';
 import { useLayoutEffect, useState } from 'react';
 import randomColor from 'randomcolor';
+const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
     /**
@@ -438,6 +439,38 @@ export default class Utils {
     }
 
     /**
+     * polygonDataToXYArray - Convert list of handles into an array of objects with x, y float values
+     *                        It will as well, calculate anchor points in percentage values of each point
+     *                        corresponding to each wall of the bounding box(top/bottom/left/right). Which
+     *                        represents its position as a percentage value inside the bounding box.
+     *
+     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>}
+     */
+    static polygonDataToXYArray(polygonData, boundingBox) {
+        const xDist = boundingBox[2] - boundingBox[0];
+        const yDist = boundingBox[3] - boundingBox[1];
+        let points = [];
+        for (let index in polygonData) {
+            points.push({
+                x: polygonData[index].x,
+                y: polygonData[index].y,
+                anchor: {
+                    top:
+                        ((boundingBox[3] - polygonData[index].y) / yDist) * 100,
+                    bottom:
+                        ((polygonData[index].y - boundingBox[1]) / yDist) * 100,
+                    left:
+                        ((polygonData[index].x - boundingBox[0]) / xDist) * 100,
+                    right:
+                        ((boundingBox[2] - polygonData[index].x) / xDist) * 100,
+                },
+            });
+        }
+        return points;
+    }
+
+    /**
      * calculateBoundingBox - Calculate the coordinates of the bounding box for a given polygon
      *
      * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
@@ -454,6 +487,72 @@ export default class Utils {
         const x_max = Math.max(...x_values);
         const y_min = Math.min(...y_values);
         return [x_min, y_min, x_max, y_max];
+    }
+
+    /**
+     * calculateMaskAnchorPoints - Will recalculate the anchor points of a polygon mask
+     *
+     * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
+     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns
+     */
+    static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
+        const xDist = boundingBox[2] - boundingBox[0];
+        const yDist = boundingBox[3] - boundingBox[1];
+        polygonCoords.forEach((point) => {
+            point.anchor.top = ((boundingBox[3] - point.y) / yDist) * 100;
+            point.anchor.bottom = ((point.y - boundingBox[1]) / yDist) * 100;
+            point.anchor.left = ((point.x - boundingBox[0]) / xDist) * 100;
+            point.anchor.right = ((boundingBox[2] - point.x) / xDist) * 100;
+        });
+        return polygonCoords;
+    }
+
+    /**
+     * calculatePolygonMask - Calculate the coordinates of the bounding box for a given polygon
+     *
+     * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
+     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>} - newPolygonData with updated points based on anchor points
+     */
+    static calculatePolygonMask(boundingBox, polygonData) {
+        let newPolygonData = cloneDeep(polygonData);
+        const xDist = boundingBox[2] - boundingBox[0];
+        const yDist = boundingBox[3] - boundingBox[1];
+        newPolygonData.forEach((point) => {
+            if (point.anchor.left !== 0 && point.anchor.right !== 0) {
+                point.x = boundingBox[0] + (xDist * point.anchor.left) / 100;
+            } else if (point.anchor.right === 0) {
+                point.x = boundingBox[2];
+            } else if (point.anchor.left === 0) {
+                point.x = boundingBox[0];
+            }
+            if (point.anchor.top !== 0 && point.anchor.bottom !== 0) {
+                point.y = boundingBox[1] + (yDist * point.anchor.bottom) / 100;
+            } else if (point.anchor.bottom === 0) {
+                point.y = boundingBox[1];
+            } else if (point.anchor.top === 0) {
+                point.y = boundingBox[3];
+            }
+        });
+        return newPolygonData;
+    }
+
+    /**
+     * renderPolygonMasks - Will render the polygon mask coordinates for the passed in context
+     *
+     * @param {eventData.context} context
+     * @param {Array<{x, y}>} polygonCoords
+     */
+    static renderPolygonMasks(context, polygonCoords) {
+        let index = 0;
+        context.beginPath();
+        context.moveTo(polygonCoords[index].x, polygonCoords[index].y);
+        for (let i = index; i < polygonCoords.length; i++) {
+            context.lineTo(polygonCoords[i].x, polygonCoords[i].y);
+        }
+        context.closePath();
+        context.fill();
     }
 
     /**
