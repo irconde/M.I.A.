@@ -2023,7 +2023,6 @@ class App extends Component {
      * @returns {None} None
      */
     selectEditionMode(newMode) {
-        console.log('Edition Mode Selected: ', newMode);
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
             const mode =
                 newMode === this.props.editionMode
@@ -2124,13 +2123,10 @@ class App extends Component {
                 mode === constants.editionMode.POLYGON &&
                 this.props.selectedDetection
             ) {
-                console.log('Starting Polygon Edition');
-                console.log(this.props.selectedDetection);
-
                 this.resetCornerstoneTool();
                 const data = {
                     handles: {
-                        points: this.props.selectedDetection.polygonMask
+                        points: [...this.props.selectedDetection.polygonMask],
                     },
                     uuid: this.props.selectedDetection.uuid,
                     algorithm: this.props.selectedDetection.algorithm,
@@ -2162,23 +2158,11 @@ class App extends Component {
                 cornerstoneTools.setToolActive('PolygonDrawingTool', {
                     mouseButtonMask: 1,
                 });
-                /*cornerstoneTools.setToolActive('Pan', {
-                    mouseButtonMask: 1,
-                });*/
                 cornerstoneTools.setToolOptions('PolygonDrawingTool', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
                     editionMode: constants.editionMode.NO_TOOL,
                 });
                 this.appUpdateImage();
-            } else if (
-                (
-                    this.props.editionMode === constants.editionMode.BOUNDING ||
-                    this.props.editionMode === constants.editionMode.POLYGON
-                ) &&
-                mode === constants.editionMode.NO_TOOL
-            ) {
-                // This is for if the user was already editing a bounding box, and clicked the button again to finish editing it.
-                console.log('Ending Edition');
             } else if (
                 mode === constants.editionMode.MOVE &&
                 this.props.selectedDetection
@@ -2239,7 +2223,7 @@ class App extends Component {
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
             }
-            // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
+
             this.props.updateEditionMode(payload);
         }
     }
