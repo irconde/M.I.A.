@@ -424,7 +424,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const toolState = csTools.getToolState(element, this.name);
         const config = this.configuration;
         const data = toolState.data[config.currentTool];
-
+        if(data === undefined)
+            return;
         data.active = false;
         data.highlight = false;
         data.handles.invalidHandlePlacement = false;
@@ -694,6 +695,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const config = this.configuration;
         const currentTool = config.currentTool;
         const data = toolState.data[currentTool];
+        if(data === undefined)
+            return;
         const coords = currentPoints.canvas;
 
         // Set the mouseLocation handle
@@ -815,6 +818,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const { element } = eventData;
         const toolState = csTools.getToolState(element, this.name);
         this._deactivateModify(element);
+        if(toolState.data.length === 0)
+            return;
         this._dropHandle(eventData, toolState);
         this._endDrawing(element);
         cornerstone.updateImage(element);
@@ -921,18 +926,21 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         );
         data.active = true;
         data.highlight = true;
-        points[currentHandle].x = config.mouseLocation.handles.start.x;
-        points[currentHandle].y = config.mouseLocation.handles.start.y;
+        let newPoint = {
+            x: config.mouseLocation.handles.start.x,
+            y: config.mouseLocation.handles.start.y,
+        };
+        points[currentHandle] = newPoint;
 
         handleIndex = this._getPrevHandleIndex(currentHandle, points);
 
-        if (currentHandle >= 0) {
+        /*if (currentHandle >= 0) {
             const lastLineIndex = points[handleIndex].lines.length - 1;
             const lastLine = points[handleIndex].lines[lastLineIndex];
 
             lastLine.x = config.mouseLocation.handles.start.x;
             lastLine.y = config.mouseLocation.handles.start.y;
-        }
+        }*/
 
         // Update the image
         cornerstone.updateImage(element);
