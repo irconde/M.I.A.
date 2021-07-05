@@ -1588,19 +1588,16 @@ class App extends Component {
                     constants.cornerstoneMode.EDITION &&
                     this.props.editionMode === constants.editionMode.BOUNDING)
             ) {
-                console.log('get bounding');
                 toolState = cornerstoneTools.getToolState(
                     viewport,
                     'BoundingBoxDrawing'
                 );
             } else if (this.props.editionMode === constants.editionMode.MOVE) {
-                console.log('get det move');
                 toolState = cornerstoneTools.getToolState(
                     viewport,
                     'DetectionMovementTool'
                 );
-            } else console.log('get nothing');
-            console.log(toolState);
+            }
             if (toolState === undefined || toolState.data.length === 0) {
                 this.props.emptyAreaClickUpdate();
                 this.resetSelectedDetectionBoxes(event);

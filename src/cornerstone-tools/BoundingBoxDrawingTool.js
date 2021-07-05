@@ -243,8 +243,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         );
                     }
                 }
-                // Polygon Mask Rendering.length > 0
+                // Polygon Mask Rendering
+                // First check if it exists, new detections may not have this field built yet
                 if (data.polygonCoords) {
+                    // Make sure it is non-empty, not all detections will have a mask
                     if (data.polygonCoords.length > 0) {
                         const pixelStart = cornerstone.pixelToCanvas(element, {
                             x: data.handles.start.x,
