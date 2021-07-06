@@ -1603,7 +1603,21 @@ class App extends Component {
                     this.resetSelectedDetectionBoxes(event);
                 } else {
                     this.props.updateIsDetectionContextVisible(true);
-                    this.renderDetectionContextMenu(event);
+                    // Only show the detection if we are still in the same viewport (from event data) as the detection
+                    if (
+                        (this.props.selectedDetection.view ===
+                            constants.viewport.TOP &&
+                            event.target === this.state.imageViewportTop) ||
+                        (this.props.selectedDetection.view ===
+                            constants.viewport.SIDE &&
+                            event.target === this.state.imageViewportSide)
+                    ) {
+                        this.renderDetectionContextMenu(event);
+                    } else {
+                        // Otherwise hide the menu
+                        // It will re-appear when they drag to correct the image
+                        this.props.updateIsDetectionContextVisible(false);
+                    }
                 }
                 return;
             }
@@ -1859,7 +1873,7 @@ class App extends Component {
             this.resetCornerstoneTool();
             this.appUpdateImage();
         } else if (this.props.selectedDetection) {
-            this.renderDetectionContextMenu(e);
+            setTimeout(() => this.renderDetectionContextMenu(e), 0);
         }
     }
 
