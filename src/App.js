@@ -1095,7 +1095,6 @@ class App extends Component {
                     const confidenceLevel = Utils.decimalToPercentage(
                         Dicos.retrieveConfidenceLevel(threatSequence.items[j])
                     );
-                    // eslint-disable-next-line no-unused-vars
                     const maskData = Dicos.retrieveMaskData(
                         threatSequence.items[j],
                         image
@@ -1106,7 +1105,7 @@ class App extends Component {
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
                         boundingBox: boundingBoxCoords,
-                        binaryMask: [[]],
+                        binaryMask: maskData,
                         polygonMask: [],
                         uuid: imagesLeft[i].uuid,
                     });
