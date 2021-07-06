@@ -1598,8 +1598,13 @@ class App extends Component {
                 );
             }
             if (toolState === undefined || toolState.data.length === 0) {
-                this.props.emptyAreaClickUpdate();
-                this.resetSelectedDetectionBoxes(event);
+                if (!this.props.selectedDetection) {
+                    this.props.emptyAreaClickUpdate();
+                    this.resetSelectedDetectionBoxes(event);
+                } else {
+                    this.props.updateIsDetectionContextVisible(true);
+                    this.renderDetectionContextMenu(event);
+                }
                 return;
             }
             const { data } = toolState;
@@ -1853,6 +1858,8 @@ class App extends Component {
             this.props.resetSelectedDetectionBoxesUpdate();
             this.resetCornerstoneTool();
             this.appUpdateImage();
+        } else if (this.props.selectedDetection) {
+            this.renderDetectionContextMenu(e);
         }
     }
 
