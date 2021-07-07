@@ -1541,7 +1541,6 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
-
                     this.props.detectionSelectedUpdate();
                     this.renderDetectionContextMenu(e);
                     this.appUpdateImage();
