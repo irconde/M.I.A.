@@ -1759,6 +1759,10 @@ class App extends Component {
                             detectionLabelEditPosition: widgetPosition,
                             contextMenuPos,
                         });
+                        // Detection coordinates changed and we need to re-render the detection context widget
+                        if (this.props.selectedDetection) {
+                            this.renderDetectionContextMenu(event);
+                        }
                     }
                 }
                 if (

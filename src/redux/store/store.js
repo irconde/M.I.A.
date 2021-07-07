@@ -14,6 +14,11 @@ export default configureStore({
             ignoredActions: [
                 'server/setCommandServerConnection',
                 'server/setFileServerConnection',
+                'detections/addDetection',
+            ],
+            ignoredPaths: [
+                'detections.detections',
+                'detections.selectedDetection',
             ],
         },
     }),
