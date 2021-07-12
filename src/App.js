@@ -1582,21 +1582,7 @@ class App extends Component {
                 bitmap[i-min.y][j-min.x] = this.isInside(coords, n, p);
             }
         }
-        // try{
-        //     for(var i = 0; i < bitmap[0].length; i++) {
-        //         for(var z = 0; z < bitmap.length; z++) {
-        //             console.log(bitmap[z][i] + ", ");
-        //         }
-        //         console.log("\n");
-        //     }
-        // } catch (err) {
-        //     console.log(err + " | " + i);
-        // }
-        // console.log("Rows: " + bitmap.length);
-        // console.log("Columns: " + bitmap[0].length);
-
-        // console.log(y_diff);
-        // console.log(x_diff);
+        
         let data = [];
         data[0] = bitmap;
         data[1] = [min.x, min.y];
@@ -1622,20 +1608,15 @@ class App extends Component {
         const maskWidth = data[2][0];
         const maskHeight = data[2][1];
         const pixelData = data[0];
-        console.log(
-            "baseX: " + baseX + "\n" 
-            + "baseY: " + baseY + "\n" 
-            + "maskWidth: " + maskWidth + "\n" 
-            + "maskHeight: " + maskHeight + "\n" 
-            + "pixelData: " + pixelData + "\n"
-        );
         context.imageSmoothingEnabled = true;
+        context.beginPath();
         for (var y = 0; y < maskHeight; y++)
             for (var x = 0; x < maskWidth; x++) {
-                if (pixelData[x + y * maskWidth] === 1) {
+                if (pixelData[y][x] === true) {
                     context.fillRect(baseX + x, baseY + y, 1, 1);
                 }
             }
+        context.closePath();
         context.imageSmoothingEnabled = false;
     }
 
@@ -2002,6 +1983,7 @@ class App extends Component {
                 polygonData.handles.points,
                 boundingBoxCoords
             );
+            const binaryData = this.polygonToBinaryMask(polygonCoords);
             let newDetection = {
                 uuid: polygonData.uuid,
                 boundingBox: boundingBoxCoords,
@@ -2013,7 +1995,7 @@ class App extends Component {
                         ? constants.viewport.TOP
                         : constants.viewport.SIDE,
                 validation: true,
-                binaryMask: [[]],
+                binaryMask: binaryData,
                 polygonMask: polygonCoords,
             };
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
@@ -2043,14 +2025,10 @@ class App extends Component {
                         viewport === self.state.imageViewportTop
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
-                    binaryMask: [[]],
+                    binaryMask: binaryData,
                     polygonMask: polygonCoords,
                     uuid,
                 });
-
-                const new_data = this.polygonToBinaryMask(polygonCoords);
-
-                console.log(new_data);
 
                 this.resetCornerstoneTool();
                 this.props.clearAllSelection();
