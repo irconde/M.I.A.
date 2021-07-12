@@ -76,6 +76,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
+import { create, data } from 'dcmjs';
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -1382,7 +1383,6 @@ class App extends Component {
             context.globalAlpha = 0.5;
             // Binary mask rendering
             this.renderBinaryMasks(data[j].binaryMask, context);
-
             // Polygon mask rendering
             this.renderPolygonMasks(data[j].polygonMask, context);
             context.globalAlpha = 1.0;
@@ -1414,6 +1414,197 @@ class App extends Component {
         }
     }
 
+        // Given three colinear points p, q, r,
+        // the function checks if point q lies
+        // on line segment 'pr'
+    onSegment(p,q,r) {
+        if (q.x <= Math.max(p.x, r.x) &&
+                q.x >= Math.min(p.x, r.x) &&
+                q.y <= Math.max(p.y, r.y) &&
+                q.y >= Math.min(p.y, r.y))
+            {
+                return true;
+            }
+            return false;
+    }
+    
+    // To find orientation of ordered triplet (p, q, r).
+        // The function returns following values
+        // 0 --> p, q and r are colinear
+        // 1 --> Clockwise
+        // 2 --> Counterclockwise
+    orientation(p,q,r) {
+        let val = (q.y - p.y) * (r.x - q.x)
+                    - (q.x - p.x) * (r.y - q.y);
+    
+            if (val == 0)
+            {
+                return 0; // colinear
+            }
+            return (val > 0) ? 1 : 2; // clock or counterclock wise
+    }
+    
+    // The function that returns true if line segment 'p1q1' and 'p2q2' intersect.
+
+    doIntersect(p1,q1,p2,q2) {
+        // Find the four orientations needed for general and special cases
+
+        let o1 = this.orientation(p1, q1, p2);
+        let o2 = this.orientation(p1, q1, q2);
+        let o3 = this.orientation(p2, q2, p1);
+        let o4 = this.orientation(p2, q2, q1);
+
+        // General case
+        if (o1 != o2 && o3 != o4) {
+            return true;
+        }
+
+        // Special Cases
+        // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+        if (o1 == 0 && this.onSegment(p1, p2, q1)) {
+            return true;
+        }
+
+        // p1, q1 and p2 are colinear and q2 lies on segment p1q1
+        if (o2 == 0 && this.onSegment(p1, q2, q1)) {
+            return true;
+        }
+
+        // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+        if (o3 == 0 && this.onSegment(p2, p1, q2)) {
+            return true;
+        }
+
+        // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+        if (o4 == 0 && this.onSegment(p2, q1, q2)) {
+            return true;
+        }
+
+        // Doesn't fall in any of the above cases
+        return false;
+    }
+    
+    // Returns true if the point p lies inside the polygon[] with n vertices
+    isInside(polygon,n,p) {
+    // There must be at least 3 vertices in polygon[]
+        if (n < 3)
+        {
+            return false;
+        }
+
+        // Create a point for line segment from p to infinite
+        let extreme = {
+            x: 99999, 
+            y: p.y
+        }
+
+        // Count intersections of the above line
+        // with sides of polygon
+        let count = 0, i = 0;
+        do
+        {
+            let next = (i + 1) % n;
+            // Check if the line segment from 'p' to 'extreme' intersects with the line segment from 'polygon[i]' to 'polygon[next]'
+            if (this.doIntersect(polygon[i], polygon[next], p, extreme))
+            {
+                // If the point 'p' is colinear with line segment 'i-next', then check if it lies on segment. If it lies, return true, otherwise false
+                if (this.orientation(polygon[i], p, polygon[next]) == 0)
+                {
+                    return this.onSegment(polygon[i], p,
+                                    polygon[next]);
+                }
+                count++;
+            }
+            i = next;
+        } while (i != 0);
+
+        // Return true if count is odd, false otherwise
+        return (count % 2 == 1); // Same as (count%2 == 1)
+    }
+
+    createArray(length) {
+        var arr = new Array(length || 0),
+            i = length;
+    
+        if (arguments.length > 1) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            while(i--) arr[length-1 - i] = this.createArray.apply(this, args);
+        }
+    
+        return arr;
+    }
+
+    /**
+     * polygonToBinaryMask - Method that converts the polygon mask associated with a detection to its binary mask counterpart
+     *
+     * @param  {Array<Number>} coords    polygon mask coordinates
+     * 
+     */
+     polygonToBinaryMask(coords) {
+        if (coords === undefined || coords === null || coords.length === 0) {
+            return;
+        }
+
+        let n = coords.length;
+
+        let min = {
+            x: 99999,
+            y: 99999
+        };
+        let max = {
+            x: 0,
+            y: 0
+        };
+
+        for (let i = 0; i < coords.length; i++) {
+            //MIN
+            if (coords[i].x < min.x) min.x = Math.floor(coords[i].x);
+            if (coords[i].y < min.y) min.y = Math.floor(coords[i].y);
+
+            //MAX
+            if (coords[i].x > max.x) max.x = Math.floor(coords[i].x);
+            if (coords[i].y > max.y) max.y = Math.floor(coords[i].y);
+        }
+
+        const x_diff = max.x-min.x;
+        const y_diff = max.y-min.y;
+
+        let bitmap = this.createArray(y_diff,x_diff);
+
+        for (let i = min.y; i < max.y; i++) {
+            for (let j = min.x; j < max.x; j++) {
+
+                let p = { //Create new point to determine if within polygon.
+                    x: j,
+                    y: i
+                };
+
+                bitmap[i-min.y][j-min.x] = this.isInside(coords, n, p);
+            }
+        }
+        // try{
+        //     for(var i = 0; i < bitmap[0].length; i++) {
+        //         for(var z = 0; z < bitmap.length; z++) {
+        //             console.log(bitmap[z][i] + ", ");
+        //         }
+        //         console.log("\n");
+        //     }
+        // } catch (err) {
+        //     console.log(err + " | " + i);
+        // }
+        // console.log("Rows: " + bitmap.length);
+        // console.log("Columns: " + bitmap[0].length);
+
+        // console.log(y_diff);
+        // console.log(x_diff);
+        let data = [];
+        data[0] = bitmap;
+        data[1] = [min.x, min.y];
+        data[2] = [x_diff, y_diff];
+
+        return data;
+    }
+
     /**
      * renderBinaryMasks - Method that renders the binary mask associated with a detection
      *
@@ -1427,10 +1618,17 @@ class App extends Component {
         }
         if (data[0].length === 0) return;
         const baseX = data[1][0];
-        const baseY = data[1][1];
+        const baseY = data[1][1];  
         const maskWidth = data[2][0];
         const maskHeight = data[2][1];
         const pixelData = data[0];
+        console.log(
+            "baseX: " + baseX + "\n" 
+            + "baseY: " + baseY + "\n" 
+            + "maskWidth: " + maskWidth + "\n" 
+            + "maskHeight: " + maskHeight + "\n" 
+            + "pixelData: " + pixelData + "\n"
+        );
         context.imageSmoothingEnabled = true;
         for (var y = 0; y < maskHeight; y++)
             for (var x = 0; x < maskWidth; x++) {
@@ -1849,6 +2047,10 @@ class App extends Component {
                     polygonMask: polygonCoords,
                     uuid,
                 });
+
+                const new_data = this.polygonToBinaryMask(polygonCoords);
+
+                console.log(new_data);
 
                 this.resetCornerstoneTool();
                 this.props.clearAllSelection();
