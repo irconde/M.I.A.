@@ -1646,7 +1646,9 @@ class App extends Component {
                         constants.annotationMode.BOUNDING) ||
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.EDITION &&
-                    this.props.editionMode === constants.editionMode.BOUNDING)
+                    this.props.editionMode ===
+                        constants.editionMode.BOUNDING) ||
+                this.props.editionMode === constants.editionMode.MOVE
             ) {
                 const { handles } = data[0];
                 const { start, end } = handles;
@@ -1663,6 +1665,10 @@ class App extends Component {
                 boundingBoxArea = Math.abs(
                     (coords[0] - coords[2]) * (coords[1] - coords[3])
                 );
+                polygonMask = Utils.calculatePolygonMask(
+                    coords,
+                    data[0].polygonCoords
+                );
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
@@ -1674,7 +1680,7 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    binaryMask: [[]],
+                    binaryMask: polygonMask,
                     polygonMask: [],
                 };
             } else if (
@@ -1759,7 +1765,6 @@ class App extends Component {
                             polygonMask
                         )
                     ) {
-                        console.log('has changed');
                         if (
                             this.props.selectedDetection &&
                             this.props.editionMode !==
