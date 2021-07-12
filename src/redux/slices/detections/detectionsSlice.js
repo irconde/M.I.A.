@@ -210,6 +210,9 @@ const detectionsSlice = createSlice({
                     hue: 'random',
                     luminosity: 'bright',
                 });
+                if (state.detectionLabels.indexOf(className) === -1) {
+                    state.detectionLabels.push(className);
+                }
             }
         },
         // Deletes a detection.

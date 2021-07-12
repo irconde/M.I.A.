@@ -164,8 +164,8 @@ export default class Dicos {
             pixelDataElement.dataOffset,
             pixelDataElement.length
         );
-
-        return [pixelData, baseCoords, extentsCoords];
+        const arrayPixelData = Array.from(pixelData);
+        return [arrayPixelData, baseCoords, extentsCoords];
     }
 
     /**

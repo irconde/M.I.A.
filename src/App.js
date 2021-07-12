@@ -1095,7 +1095,6 @@ class App extends Component {
                     const confidenceLevel = Utils.decimalToPercentage(
                         Dicos.retrieveConfidenceLevel(threatSequence.items[j])
                     );
-                    // eslint-disable-next-line no-unused-vars
                     const maskData = Dicos.retrieveMaskData(
                         threatSequence.items[j],
                         image
@@ -1106,7 +1105,7 @@ class App extends Component {
                         confidence: confidenceLevel,
                         view: constants.viewport.TOP,
                         boundingBox: boundingBoxCoords,
-                        binaryMask: [[]],
+                        binaryMask: maskData,
                         polygonMask: [],
                         uuid: imagesLeft[i].uuid,
                     });
@@ -1542,7 +1541,6 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
-
                     this.props.detectionSelectedUpdate();
                     this.renderDetectionContextMenu(e);
                     this.appUpdateImage();
@@ -1579,7 +1577,15 @@ class App extends Component {
             this.props.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
             let toolState;
-            if (this.props.editionMode === constants.editionMode.BOUNDING) {
+            if (
+                (this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION &&
+                    this.props.annotationMode ===
+                        constants.annotationMode.BOUNDING) ||
+                (this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION &&
+                    this.props.editionMode === constants.editionMode.BOUNDING)
+            ) {
                 toolState = cornerstoneTools.getToolState(
                     viewport,
                     'BoundingBoxDrawing'
@@ -1591,8 +1597,27 @@ class App extends Component {
                 );
             }
             if (toolState === undefined || toolState.data.length === 0) {
-                this.props.emptyAreaClickUpdate();
-                this.resetSelectedDetectionBoxes(event);
+                if (!this.props.selectedDetection) {
+                    this.props.emptyAreaClickUpdate();
+                    this.resetSelectedDetectionBoxes(event);
+                } else {
+                    this.props.updateIsDetectionContextVisible(true);
+                    // Only show the detection if we are still in the same viewport (from event data) as the detection
+                    if (
+                        (this.props.selectedDetection.view ===
+                            constants.viewport.TOP &&
+                            event.target === this.state.imageViewportTop) ||
+                        (this.props.selectedDetection.view ===
+                            constants.viewport.SIDE &&
+                            event.target === this.state.imageViewportSide)
+                    ) {
+                        this.renderDetectionContextMenu(event);
+                    } else {
+                        // Otherwise hide the menu
+                        // It will re-appear when they drag to correct the image
+                        this.props.updateIsDetectionContextVisible(false);
+                    }
+                }
                 return;
             }
             const { data } = toolState;
@@ -1733,6 +1758,10 @@ class App extends Component {
                             detectionLabelEditPosition: widgetPosition,
                             contextMenuPos,
                         });
+                        // Detection coordinates changed and we need to re-render the detection context widget
+                        if (this.props.selectedDetection) {
+                            this.renderDetectionContextMenu(event);
+                        }
                     }
                 }
                 if (
@@ -1846,6 +1875,8 @@ class App extends Component {
             this.props.resetSelectedDetectionBoxesUpdate();
             this.resetCornerstoneTool();
             this.appUpdateImage();
+        } else if (this.props.selectedDetection) {
+            setTimeout(() => this.renderDetectionContextMenu(e), 0);
         }
     }
 
