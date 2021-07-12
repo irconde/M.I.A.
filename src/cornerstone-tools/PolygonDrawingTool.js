@@ -2,6 +2,7 @@ import csTools from 'eac-cornerstone-tools';
 import * as constants from '../utils/Constants';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneMath from 'cornerstone-math';
+import Utils from '../utils/Utils';
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');
@@ -329,6 +330,24 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 if (data.invalidated === true && !data.active) {
                     this.updateCachedStats(image, element, data);
                 }
+
+                if (data.updatingDetection) {
+                    let polygonCoords = [];
+                    for (let i = 0; i < data.handles.points.length; i++) {
+                        const point = cornerstone.pixelToCanvas(element, {
+                            x: data.handles.points[i].x,
+                            y: data.handles.points[i].y,
+                        });
+                        polygonCoords.push(point);
+                    }
+                    context.strokeStyle =
+                        constants.detectionStyle.SELECTED_COLOR;
+                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
+                    context.globalAlpha = 0.5;
+                    if (polygonCoords !== undefined)
+                        Utils.renderPolygonMasks(context, polygonCoords);
+                    context.globalAlpha = 1.0;
+                }
             });
         }
     }
@@ -424,8 +443,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const toolState = csTools.getToolState(element, this.name);
         const config = this.configuration;
         const data = toolState.data[config.currentTool];
-        if(data === undefined)
-            return;
+        if (data === undefined) return;
         data.active = false;
         data.highlight = false;
         data.handles.invalidHandlePlacement = false;
@@ -453,7 +471,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         data.algorithm = constants.OPERATOR;
         data.class = constants.commonDetections.UNKNOWN;
         data.confidence = 100;
-        data.updatingDetection = false;
 
         this.fireModifiedEvent(element, data);
         this.fireCompletedEvent(element, data);
@@ -695,8 +712,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const config = this.configuration;
         const currentTool = config.currentTool;
         const data = toolState.data[currentTool];
-        if(data === undefined)
-            return;
+        if (data === undefined) return;
         const coords = currentPoints.canvas;
 
         // Set the mouseLocation handle
@@ -818,8 +834,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const { element } = eventData;
         const toolState = csTools.getToolState(element, this.name);
         this._deactivateModify(element);
-        if(toolState.data.length === 0)
-            return;
+        if (toolState.data.length === 0) return;
         this._dropHandle(eventData, toolState);
         this._endDrawing(element);
         cornerstone.updateImage(element);

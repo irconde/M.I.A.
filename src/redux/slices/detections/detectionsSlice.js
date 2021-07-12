@@ -333,13 +333,23 @@ export const getSideDetections = (detections) => {
 export const hasDetectionCoordinatesChanged = (
     detections,
     uuid,
-    boundingBox
+    boundingBox,
+    polygonMask
 ) => {
     const detection = detections.find((det) => det.uuid === uuid);
     if (detection) {
         let result = false;
         for (let i = 0; i < detection.boundingBox.length; i++) {
             if (detection.boundingBox[i] !== boundingBox[i]) {
+                result = true;
+                break;
+            }
+        }
+        for (let j = 0; j < detection.polygonMask.length; j++) {
+            if (
+                detection.polygonMask[j].x !== polygonMask[j].x &&
+                detection.polygonMask[j].y !== polygonMask[j].y
+            ) {
                 result = true;
                 break;
             }
