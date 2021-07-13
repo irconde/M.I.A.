@@ -354,9 +354,13 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
 
     addNewMeasurement(evt) {
         const eventData = evt.detail;
-        this._startDrawing(evt);
-        this._addPoint(eventData);
-        preventPropagation(evt);
+        if (this._options.updatingDetection === false) {
+            this._startDrawing(evt);
+            this._addPoint(eventData);
+            preventPropagation(evt);
+        } else {
+            return;
+        }
     }
 
     handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
@@ -538,7 +542,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Removes drawing loop event listeners.
      *
      * @private
-     * @param {Object} element - The viewport element to add event listeners to.
+     * @param {Object} element - The viewport element to remove event listeners from.
      * @modifies {element}
      * @returns {undefined}
      */
@@ -611,7 +615,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Removes modify loop event listeners.
      *
      * @private
-     * @param {Object} element - The viewport element to add event listeners to.
+     * @param {Object} element - The viewport element to remove event listeners from.
      * @modifies {element}
      * @returns {undefined}
      */

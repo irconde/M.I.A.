@@ -556,6 +556,7 @@ class App extends Component {
         });
         cornerstoneTools.setToolOptions('PolygonDrawingTool', {
             cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            updatingDetection: false,
         });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolDisabled('DetectionMovementTool');
@@ -2238,12 +2239,14 @@ class App extends Component {
                         data
                     );
                 }
+                // cornerstoneTools.setToolConfiguration()
                 cornerstoneTools.setToolActive('PolygonDrawingTool', {
                     mouseButtonMask: 1,
                 });
                 cornerstoneTools.setToolOptions('PolygonDrawingTool', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
                     editionMode: constants.editionMode.NO_TOOL,
+                    updatingDetection: true,
                 });
                 this.appUpdateImage();
             } else if (
