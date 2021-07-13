@@ -269,13 +269,23 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                             options
                         );
                     } else {
-                        drawJoinedLines(
-                            context,
-                            element,
-                            points[points.length - 1],
-                            [config.mouseLocation.handles.start],
-                            options
-                        );
+                        if (data.updatingDetection) {
+                            drawJoinedLines(
+                                context,
+                                element,
+                                points[points.length - 1],
+                                points,
+                                options
+                            );
+                        } else {
+                            drawJoinedLines(
+                                context,
+                                element,
+                                points[points.length - 1],
+                                [config.mouseLocation.handles.start],
+                                options
+                            );
+                        }
                     }
                 }
 
@@ -286,7 +296,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 };
                 if (
                     config.alwaysShowHandles ||
-                    (data.active && data.polyBoundingBox)
+                    (data.active && data.polyBoundingBox) ||
+                    data.updatingDetection
                 ) {
                     // Render all handles
                     options.handleRadius = config.activeHandleRadius;
@@ -953,13 +964,14 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
 
         handleIndex = this._getPrevHandleIndex(currentHandle, points);
 
-        /*if (currentHandle >= 0) {
+        if (currentHandle >= 0) {
+            if (points[handleIndex].lines === undefined) return;
             const lastLineIndex = points[handleIndex].lines.length - 1;
             const lastLine = points[handleIndex].lines[lastLineIndex];
 
             lastLine.x = config.mouseLocation.handles.start.x;
             lastLine.y = config.mouseLocation.handles.start.y;
-        }*/
+        }
 
         // Update the image
         cornerstone.updateImage(element);
@@ -1205,6 +1217,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         handleIndex = this._getPrevHandleIndex(currentHandle, points);
 
         if (currentHandle >= 0) {
+            if (points[handleIndex].lines === undefined) return;
             const lastLineIndex = points[handleIndex].lines.length - 1;
             const lastLine = points[handleIndex].lines[lastLineIndex];
 

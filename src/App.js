@@ -2239,7 +2239,6 @@ class App extends Component {
                         data
                     );
                 }
-                // cornerstoneTools.setToolConfiguration()
                 cornerstoneTools.setToolActive('PolygonDrawingTool', {
                     mouseButtonMask: 1,
                 });
