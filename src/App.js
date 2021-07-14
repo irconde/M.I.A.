@@ -1414,9 +1414,7 @@ class App extends Component {
         }
     }
 
-        // Given three colinear points p, q, r,
-        // the function checks if point q lies
-        // on line segment 'pr'
+    // Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr'
     onSegment(p,q,r) {
         if (q.x <= Math.max(p.x, r.x) &&
                 q.x >= Math.min(p.x, r.x) &&
@@ -1569,17 +1567,17 @@ class App extends Component {
         const x_diff = max.x-min.x;
         const y_diff = max.y-min.y;
 
-        let bitmap = this.createArray(y_diff,x_diff);
+        let bitmap = [];
 
-        for (let i = min.y; i < max.y; i++) {
-            for (let j = min.x; j < max.x; j++) {
+        for (let i = 0; i < y_diff; i++) {
+            for (let j = 0; j < x_diff; j++) {
 
                 let p = { //Create new point to determine if within polygon.
-                    x: j,
-                    y: i
+                    x: j + min.x,
+                    y: i + min.y
                 };
 
-                bitmap[i-min.y][j-min.x] = this.isInside(coords, n, p);
+                bitmap[j + i * x_diff] = this.isInside(coords, n, p) ? 1 : 0;
             }
         }
         
@@ -1598,25 +1596,23 @@ class App extends Component {
      * @param  {eventData.canvasContext} context Rendering context
      * @return {None} None
      */
-    renderBinaryMasks(data, context) {
+     renderBinaryMasks(data, context) {
         if (data === undefined || data === null || data.length === 0) {
             return;
         }
         if (data[0].length === 0) return;
         const baseX = data[1][0];
-        const baseY = data[1][1];  
+        const baseY = data[1][1];
         const maskWidth = data[2][0];
         const maskHeight = data[2][1];
         const pixelData = data[0];
         context.imageSmoothingEnabled = true;
-        context.beginPath();
         for (var y = 0; y < maskHeight; y++)
             for (var x = 0; x < maskWidth; x++) {
-                if (pixelData[y][x] === true) {
+                if (pixelData[x + y * maskWidth] === 1) {
                     context.fillRect(baseX + x, baseY + y, 1, 1);
                 }
             }
-        context.closePath();
         context.imageSmoothingEnabled = false;
     }
 
