@@ -1384,10 +1384,14 @@ class App extends Component {
             );
 
             context.globalAlpha = 0.5;
-            // Binary mask rendering
-            this.renderBinaryMasks(data[j].binaryMask, context);
-            // Polygon mask rendering
-            //this.renderPolygonMasks(data[j].polygonMask, context);
+            if (data[j].polygonMask.length > 0) {
+                // Polygon mask rendering
+                this.renderPolygonMasks(data[j].polygonMask, context);
+            } else {
+                // Binary mask rendering
+                this.renderBinaryMasks(data[j].binaryMask, context);
+            }
+
             context.globalAlpha = 1.0;
 
             // Label rendering
