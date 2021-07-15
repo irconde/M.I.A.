@@ -1382,9 +1382,9 @@ class App extends Component {
 
             context.globalAlpha = 0.5;
             // Binary mask rendering
-            this.renderBinaryMasks(data[j].binaryMask, context);
+            //this.renderBinaryMasks(data[j].binaryMask, context);
             // Polygon mask rendering
-            //this.renderPolygonMasks(data[j].polygonMask, context);
+            this.renderPolygonMasks(data[j].polygonMask, context);
             context.globalAlpha = 1.0;
 
             // Label rendering
