@@ -698,4 +698,60 @@ export default class Utils {
         // Return true if count is odd, false otherwise
         return (count % 2 == 1); // Same as (count%2 == 1)
     }
+
+    
+    /**
+     * polygonToBinaryMask - Method that converts the polygon mask associated with a detection to its binary mask counterpart
+     *
+     * @param  {Array<Number>} coords    polygon mask coordinates
+     * 
+     */
+     static polygonToBinaryMask(coords) {
+        if (coords === undefined || coords === null || coords.length === 0) {
+            return;
+        }
+
+        let n = coords.length;
+
+        let min = {
+            x: 99999,
+            y: 99999
+        };
+        let max = {
+            x: 0,
+            y: 0
+        };
+
+        for (let i = 0; i < coords.length; i++) {
+            //MIN
+            if (coords[i].x < min.x) min.x = Math.floor(coords[i].x);
+            if (coords[i].y < min.y) min.y = Math.floor(coords[i].y);
+
+            //MAX
+            if (coords[i].x > max.x) max.x = Math.floor(coords[i].x);
+            if (coords[i].y > max.y) max.y = Math.floor(coords[i].y);
+        }
+
+        const x_diff = max.x-min.x;
+        const y_diff = max.y-min.y;
+
+        let bitmap = [];
+
+        for (let i = 0; i < y_diff; i++) {
+            for (let j = 0; j < x_diff; j++) {
+                let p = { //Create new point to determine if within polygon.
+                    x: j + min.x,
+                    y: i + min.y
+                };
+                bitmap[j + i * x_diff] = this.isInside(coords, n, p) ? 1 : 0;
+            }
+        }
+        
+        let data = [];
+        data[0] = bitmap;
+        data[1] = [min.x, min.y];
+        data[2] = [x_diff, y_diff];
+
+        return data;
+    }
 }

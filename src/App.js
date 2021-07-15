@@ -1382,9 +1382,9 @@ class App extends Component {
 
             context.globalAlpha = 0.5;
             // Binary mask rendering
-            //this.renderBinaryMasks(data[j].binaryMask, context);
+            this.renderBinaryMasks(data[j].binaryMask, context);
             // Polygon mask rendering
-            this.renderPolygonMasks(data[j].polygonMask, context);
+            //this.renderPolygonMasks(data[j].polygonMask, context);
             context.globalAlpha = 1.0;
 
             // Label rendering
@@ -1412,61 +1412,6 @@ class App extends Component {
                 boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
             );
         }
-    }
-
-    /**
-     * polygonToBinaryMask - Method that converts the polygon mask associated with a detection to its binary mask counterpart
-     *
-     * @param  {Array<Number>} coords    polygon mask coordinates
-     * 
-     */
-     polygonToBinaryMask(coords) {
-        if (coords === undefined || coords === null || coords.length === 0) {
-            return;
-        }
-
-        let n = coords.length;
-
-        let min = {
-            x: 99999,
-            y: 99999
-        };
-        let max = {
-            x: 0,
-            y: 0
-        };
-
-        for (let i = 0; i < coords.length; i++) {
-            //MIN
-            if (coords[i].x < min.x) min.x = Math.floor(coords[i].x);
-            if (coords[i].y < min.y) min.y = Math.floor(coords[i].y);
-
-            //MAX
-            if (coords[i].x > max.x) max.x = Math.floor(coords[i].x);
-            if (coords[i].y > max.y) max.y = Math.floor(coords[i].y);
-        }
-
-        const x_diff = max.x-min.x;
-        const y_diff = max.y-min.y;
-
-        let bitmap = [];
-
-        for (let i = 0; i < y_diff; i++) {
-            for (let j = 0; j < x_diff; j++) {
-                let p = { //Create new point to determine if within polygon.
-                    x: j + min.x,
-                    y: i + min.y
-                };
-                bitmap[j + i * x_diff] = Utils.isInside(coords, n, p) ? 1 : 0;
-            }
-        }
-        
-        let data = [];
-        data[0] = bitmap;
-        data[1] = [min.x, min.y];
-        data[2] = [x_diff, y_diff];
-
-        return data;
     }
 
     /**
@@ -1772,6 +1717,7 @@ class App extends Component {
                         )
                     ) {
                         let mask = [];
+                        let mask_b = [];
                         if (this.props.selectedDetection) {
                             if (
                                 this.props.selectedDetection.polygonMask !==
@@ -1781,6 +1727,7 @@ class App extends Component {
                                     coords,
                                     this.props.selectedDetection.polygonMask
                                 );
+                                mask_b = Utils.polygonToBinaryMask(mask);
                             }
                         }
 
@@ -1789,6 +1736,7 @@ class App extends Component {
                             update: {
                                 boundingBox: coords,
                                 polygonMask: mask,
+                                binaryMask: mask_b
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -1859,7 +1807,7 @@ class App extends Component {
                 polygonData.handles.points,
                 boundingBoxCoords
             );
-            const binaryData = this.polygonToBinaryMask(polygonCoords);
+            const binaryData = Utils.polygonToBinaryMask(polygonCoords);
             let newDetection = {
                 uuid: polygonData.uuid,
                 boundingBox: boundingBoxCoords,
