@@ -557,6 +557,7 @@ class App extends Component {
         });
         cornerstoneTools.setToolOptions('PolygonDrawingTool', {
             cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            updatingDetection: false,
         });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolDisabled('DetectionMovementTool');
@@ -1342,6 +1343,8 @@ class App extends Component {
                 data[j].visible !== true ||
                 (this.props.editionMode === constants.editionMode.BOUNDING &&
                     data[j].selected) ||
+                (this.props.editionMode === constants.editionMode.POLYGON &&
+                    data[j].selected) ||
                 (this.props.editionMode === constants.editionMode.MOVE &&
                     data[j].selected)
             ) {
@@ -1421,7 +1424,7 @@ class App extends Component {
      * @param  {eventData.canvasContext} context Rendering context
      * @return {None} None
      */
-     renderBinaryMasks(data, context) {
+    renderBinaryMasks(data, context) {
         if (data === undefined || data === null || data.length === 0) {
             return;
         }
@@ -1595,6 +1598,13 @@ class App extends Component {
                     viewport,
                     'DetectionMovementTool'
                 );
+            } else if (
+                this.props.editionMode === constants.editionMode.POLYGON
+            ) {
+                toolState = cornerstoneTools.getToolState(
+                    viewport,
+                    'PolygonDrawingTool'
+                );
             }
             if (toolState === undefined || toolState.data.length === 0) {
                 if (!this.props.selectedDetection) {
@@ -1629,36 +1639,75 @@ class App extends Component {
             ) {
                 return;
             }
-            const { handles } = data[0];
-            const { start, end } = handles;
-            let coords = [];
-            // Fix flipped rectangle issues
-            if (start.x > end.x && start.y > end.y) {
-                coords = [end.x, end.y, start.x, start.y];
-            } else if (start.x > end.x) {
-                coords = [end.x, start.y, start.x, end.y];
-            } else if (start.y > end.y) {
-                coords = [start.x, end.y, end.x, start.y];
-            } else {
-                coords = [start.x, start.y, end.x, end.y];
+            let newDetection, coords, boundingBoxArea, polygonMask;
+            if (
+                (this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION &&
+                    this.props.annotationMode ===
+                        constants.annotationMode.BOUNDING) ||
+                (this.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION &&
+                    this.props.editionMode ===
+                        constants.editionMode.BOUNDING) ||
+                this.props.editionMode === constants.editionMode.MOVE
+            ) {
+                const { handles } = data[0];
+                const { start, end } = handles;
+                // Fix flipped rectangle issues
+                if (start.x > end.x && start.y > end.y) {
+                    coords = [end.x, end.y, start.x, start.y];
+                } else if (start.x > end.x) {
+                    coords = [end.x, start.y, start.x, end.y];
+                } else if (start.y > end.y) {
+                    coords = [start.x, end.y, end.x, start.y];
+                } else {
+                    coords = [start.x, start.y, end.x, end.y];
+                }
+                boundingBoxArea = Math.abs(
+                    (coords[0] - coords[2]) * (coords[1] - coords[3])
+                );
+                polygonMask = Utils.calculatePolygonMask(
+                    coords,
+                    data[0].polygonCoords
+                );
+                newDetection = {
+                    uuid: data[0].uuid,
+                    boundingBox: coords,
+                    algorithm: data[0].algorithm,
+                    className: data[0].class,
+                    confidence: data[0].confidence,
+                    view:
+                        viewport === this.state.imageViewportTop
+                            ? constants.viewport.TOP
+                            : constants.viewport.SIDE,
+                    validation: true,
+                    binaryMask: polygonMask,
+                    polygonMask: [],
+                };
+            } else if (
+                this.props.editionMode === constants.editionMode.POLYGON
+            ) {
+                // Poly
+                coords = Utils.calculateBoundingBox(data[0].handles.points);
+                polygonMask = Utils.polygonDataToXYArray(
+                    data[0].handles.points,
+                    coords
+                );
+                newDetection = {
+                    uuid: data[0].uuid,
+                    boundingBox: coords,
+                    algorithm: data[0].algorithm,
+                    className: data[0].class,
+                    confidence: data[0].confidence,
+                    view:
+                        viewport === this.state.imageViewportTop
+                            ? constants.viewport.TOP
+                            : constants.viewport.SIDE,
+                    validation: true,
+                    binaryMask: [[]],
+                    polygonMask,
+                };
             }
-            const boundingBoxArea = Math.abs(
-                (coords[0] - coords[2]) * (coords[1] - coords[3])
-            );
-            const newDetection = {
-                uuid: data[0].uuid,
-                boundingBox: coords,
-                algorithm: data[0].algorithm,
-                className: data[0].class,
-                confidence: data[0].confidence,
-                view:
-                    viewport === this.state.imageViewportTop
-                        ? constants.viewport.TOP
-                        : constants.viewport.SIDE,
-                validation: true,
-                binaryMask: [[]],
-                polygonMask: [],
-            };
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
                 return newDetection.view === stack.view;
             });
@@ -1713,21 +1762,25 @@ class App extends Component {
                         hasDetectionCoordinatesChanged(
                             self.props.detections,
                             uuid,
-                            coords
+                            coords,
+                            polygonMask
                         )
                     ) {
-                        let mask = [];
                         let mask_b = [];
-                        if (this.props.selectedDetection) {
+                        if (
+                            this.props.selectedDetection &&
+                            this.props.editionMode !==
+                                constants.editionMode.POLYGON
+                        ) {
                             if (
                                 this.props.selectedDetection.polygonMask !==
                                 null
                             ) {
-                                mask = Utils.calculatePolygonMask(
+                                polygonMask = Utils.calculatePolygonMask(
                                     coords,
                                     this.props.selectedDetection.polygonMask
                                 );
-                                mask_b = Utils.polygonToBinaryMask(mask);
+                                mask_b = Utils.polygonToBinaryMask(polygonMask);
                             }
                         }
 
@@ -1735,8 +1788,8 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                polygonMask: mask,
-                                binaryMask: mask_b
+                                polygonMask: polygonMask,
+                                binaryMask: mask_b,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2155,6 +2208,51 @@ class App extends Component {
                 });
                 this.appUpdateImage();
             } else if (
+                mode === constants.editionMode.POLYGON &&
+                this.props.selectedDetection
+            ) {
+                this.resetCornerstoneTool();
+                const data = {
+                    handles: {
+                        points: [...this.props.selectedDetection.polygonMask],
+                    },
+                    uuid: this.props.selectedDetection.uuid,
+                    algorithm: this.props.selectedDetection.algorithm,
+                    class: this.props.selectedDetection.className,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    confidence: this.props.selectedDetection.confidence,
+                    updatingDetection: true,
+                    view: this.props.selectedDetection.view,
+                };
+
+                if (
+                    this.props.selectedDetection.view === constants.viewport.TOP
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportTop,
+                        'PolygonDrawingTool',
+                        data
+                    );
+                } else if (
+                    this.props.selectedDetection.view ===
+                    constants.viewport.SIDE
+                ) {
+                    cornerstoneTools.addToolState(
+                        this.state.imageViewportSide,
+                        'PolygonDrawingTool',
+                        data
+                    );
+                }
+                cornerstoneTools.setToolActive('PolygonDrawingTool', {
+                    mouseButtonMask: 1,
+                });
+                cornerstoneTools.setToolOptions('PolygonDrawingTool', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.NO_TOOL,
+                    updatingDetection: true,
+                });
+                this.appUpdateImage();
+            } else if (
                 mode === constants.editionMode.MOVE &&
                 this.props.selectedDetection
             ) {
@@ -2214,7 +2312,7 @@ class App extends Component {
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
             }
-            // TODO: Implement another else if for editing a polygon mask where the mode === POLYGON and a detection is selected
+
             this.props.updateEditionMode(payload);
         }
     }

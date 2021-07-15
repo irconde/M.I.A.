@@ -535,6 +535,10 @@ export default class Utils {
                 point.y = boundingBox[3];
             }
         });
+        newPolygonData = this.calculateMaskAnchorPoints(
+            boundingBox,
+            newPolygonData
+        );
         return newPolygonData;
     }
 
