@@ -207,11 +207,14 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     Utils.renderPolygonMasks(context, data.polygonCoords);
                     context.globalAlpha = 1.0;
                 } else if (data.binaryMask.length > 0) {
-                    let binaryMask = cloneDeep(data.binaryMask);
                     context.globalAlpha = 0.5;
+                    context.strokeStyle =
+                        constants.detectionStyle.SELECTED_COLOR;
+                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
+                    let binaryMask = cloneDeep(data.binaryMask);
                     const base = cornerstone.pixelToCanvas(element, {
-                        x: data.binaryMask[1][0],
-                        y: data.binaryMask[1][1],
+                        x: data.handles.start.x,
+                        y: data.handles.start.y,
                     });
                     binaryMask[1][0] = base.x;
                     binaryMask[1][1] = base.y;
