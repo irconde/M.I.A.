@@ -76,7 +76,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
-import { create, data } from 'dcmjs';
+const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -130,9 +130,8 @@ class App extends Component {
             tapDetector: new TapDetector(),
         };
         this.sendImageToFileServer = this.sendImageToFileServer.bind(this);
-        this.sendImageToCommandServer = this.sendImageToCommandServer.bind(
-            this
-        );
+        this.sendImageToCommandServer =
+            this.sendImageToCommandServer.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -142,36 +141,31 @@ class App extends Component {
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
-        this.resetSelectedDetectionBoxes = this.resetSelectedDetectionBoxes.bind(
-            this
-        );
+        this.resetSelectedDetectionBoxes =
+            this.resetSelectedDetectionBoxes.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight = this.calculateviewPortWidthAndHeight.bind(
-            this
-        );
+        this.calculateviewPortWidthAndHeight =
+            this.calculateviewPortWidthAndHeight.bind(this);
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
         this.resetCornerstoneTool = this.resetCornerstoneTool.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
         this.onNewPolygonMaskCreated = this.onNewPolygonMaskCreated.bind(this);
-        this.renderDetectionContextMenu = this.renderDetectionContextMenu.bind(
-            this
-        );
+        this.renderDetectionContextMenu =
+            this.renderDetectionContextMenu.bind(this);
         this.getContextMenuPos = this.getContextMenuPos.bind(this);
         this.getEditLabelWidgetPos = this.getEditLabelWidgetPos.bind(this);
         this.selectEditionMode = this.selectEditionMode.bind(this);
         this.editDetectionLabel = this.editDetectionLabel.bind(this);
         this.deleteDetection = this.deleteDetection.bind(this);
-        this.startListeningClickEvents = this.startListeningClickEvents.bind(
-            this
-        );
-        this.stopListeningClickEvents = this.stopListeningClickEvents.bind(
-            this
-        );
+        this.startListeningClickEvents =
+            this.startListeningClickEvents.bind(this);
+        this.stopListeningClickEvents =
+            this.stopListeningClickEvents.bind(this);
     }
 
     /**
@@ -411,11 +405,8 @@ class App extends Component {
         document.getElementsByClassName('twoViewportsTop')[0].style.width =
             (window.innerWidth - constants.sideMenuWidth) / 2 +
             constants.RESOLUTION_UNIT;
-        document.getElementById(
-            'verticalDivider'
-        ).style.left = document.getElementsByClassName(
-            'twoViewportsTop'
-        )[0].style.width;
+        document.getElementById('verticalDivider').style.left =
+            document.getElementsByClassName('twoViewportsTop')[0].style.width;
         document.getElementsByClassName('twoViewportsSide')[0].style.left =
             document.getElementsByClassName('twoViewportsTop')[0].style.width +
             document.getElementById('verticalDivider').style.width;
@@ -427,9 +418,8 @@ class App extends Component {
      * @returns {type} None
      */
     recalculateZoomLevel() {
-        let canvasElements = document.getElementsByClassName(
-            'cornerstone-canvas'
-        );
+        let canvasElements =
+            document.getElementsByClassName('cornerstone-canvas');
         let multipleViewports = canvasElements.length > 1;
         const newZoomLevelTop = Utils.calculateZoomLevel(
             canvasElements[0].style.width
@@ -691,9 +681,8 @@ class App extends Component {
                                     stackFile,
                                     'text/xml'
                                 );
-                                const xmlStack = xmlDoc.getElementsByTagName(
-                                    'stack'
-                                );
+                                const xmlStack =
+                                    xmlDoc.getElementsByTagName('stack');
                                 // We loop through each stack. Creating a new stack object to store our info
                                 // for now, we are just grabbing the location of the dicos file in the ora file
                                 for (let stackData of xmlStack) {
@@ -704,9 +693,8 @@ class App extends Component {
                                         blobData: [],
                                         pixelData: null,
                                     };
-                                    let layerData = stackData.getElementsByTagName(
-                                        'layer'
-                                    );
+                                    let layerData =
+                                        stackData.getElementsByTagName('layer');
                                     for (let imageSrc of layerData) {
                                         currentStack.rawData.push(
                                             imageSrc.getAttribute('src')
@@ -731,11 +719,10 @@ class App extends Component {
                                             .async('base64')
                                             .then((imageData) => {
                                                 if (i === 0)
-                                                    listOfStacks[
-                                                        j
-                                                    ].pixelData = Utils.base64ToArrayBuffer(
-                                                        imageData
-                                                    );
+                                                    listOfStacks[j].pixelData =
+                                                        Utils.base64ToArrayBuffer(
+                                                            imageData
+                                                        );
                                                 listOfStacks[j].blobData.push({
                                                     blob: Utils.b64toBlob(
                                                         imageData
@@ -745,9 +732,8 @@ class App extends Component {
                                             });
                                     }
                                 }
-                                const promiseOfList = Promise.all(
-                                    listOfPromises
-                                );
+                                const promiseOfList =
+                                    Promise.all(listOfPromises);
                                 // Once we have all the layers...
                                 promiseOfList.then(() => {
                                     this.state.myOra.stackData = listOfStacks;
@@ -826,16 +812,14 @@ class App extends Component {
                             `data/${stack.view}_pixel_data.dcs`,
                             stack.blobData[0].blob
                         );
-                        const topStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                        const topStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.TOP === stack.view;
-                            }
-                        );
-                        const sideStackIndex = this.state.myOra.stackData.findIndex(
-                            (stack) => {
+                            });
+                        const sideStackIndex =
+                            this.state.myOra.stackData.findIndex((stack) => {
                                 return constants.viewport.SIDE === stack.view;
-                            }
-                        );
+                            });
                         stackElem.appendChild(pixelLayer);
                         if (stack.view === 'top') {
                             // Loop through each detection and only the top view of the detection
@@ -854,9 +838,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/top_threat_detection_${j + 1}_${
@@ -888,9 +871,8 @@ class App extends Component {
                                         }.dcs`,
                                         threatBlob
                                     );
-                                    let newLayer = stackXML.createElement(
-                                        'layer'
-                                    );
+                                    let newLayer =
+                                        stackXML.createElement('layer');
                                     newLayer.setAttribute(
                                         'src',
                                         `data/side_threat_detection_${i + 1}_${
@@ -1007,9 +989,10 @@ class App extends Component {
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
-            const pixelDataSide = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                self.state.myOra.stackData[1].blobData[0].blob
-            );
+            const pixelDataSide =
+                cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                    self.state.myOra.stackData[1].blobData[0].blob
+                );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportSide,
@@ -1389,7 +1372,7 @@ class App extends Component {
                 this.renderPolygonMasks(data[j].polygonMask, context);
             } else {
                 // Binary mask rendering
-                this.renderBinaryMasks(data[j].binaryMask, context);
+                Utils.renderBinaryMasks(data[j].binaryMask, context);
             }
 
             context.globalAlpha = 1.0;
@@ -1419,33 +1402,6 @@ class App extends Component {
                 boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
             );
         }
-    }
-
-    /**
-     * renderBinaryMasks - Method that renders the binary mask associated with a detection
-     *
-     * @param  {Array<Array<Number>>} data DICOS+TDR data
-     * @param  {eventData.canvasContext} context Rendering context
-     * @return {None} None
-     */
-    renderBinaryMasks(data, context) {
-        if (data === undefined || data === null || data.length === 0) {
-            return;
-        }
-        if (data[0].length === 0) return;
-        const baseX = data[1][0];
-        const baseY = data[1][1];
-        const maskWidth = data[2][0];
-        const maskHeight = data[2][1];
-        const pixelData = data[0];
-        context.imageSmoothingEnabled = true;
-        for (var y = 0; y < maskHeight; y++)
-            for (var x = 0; x < maskWidth; x++) {
-                if (pixelData[x + y * maskWidth] === 1) {
-                    context.fillRect(baseX + x, baseY + y, 1, 1);
-                }
-            }
-        context.imageSmoothingEnabled = false;
     }
 
     /**
@@ -1670,10 +1626,12 @@ class App extends Component {
                 boundingBoxArea = Math.abs(
                     (coords[0] - coords[2]) * (coords[1] - coords[3])
                 );
-                polygonMask = Utils.calculatePolygonMask(
-                    coords,
-                    data[0].polygonCoords
-                );
+                if (data[0].updatingDetection) {
+                    polygonMask = Utils.calculatePolygonMask(
+                        coords,
+                        data[0].polygonCoords
+                    );
+                }
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
@@ -1685,8 +1643,8 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    binaryMask: polygonMask,
-                    polygonMask: [],
+                    binaryMask: [],
+                    polygonMask: polygonMask,
                 };
             } else if (
                 this.props.editionMode === constants.editionMode.POLYGON
@@ -1777,17 +1735,24 @@ class App extends Component {
                                 constants.editionMode.POLYGON
                         ) {
                             if (
-                                this.props.selectedDetection.polygonMask !==
-                                null
+                                this.props.selectedDetection.polygonMask
+                                    .length > 0
                             ) {
                                 polygonMask = Utils.calculatePolygonMask(
                                     coords,
                                     this.props.selectedDetection.polygonMask
                                 );
                                 mask_b = Utils.polygonToBinaryMask(polygonMask);
+                            } else if (
+                                this.props.selectedDetection.binaryMask
+                            ) {
+                                mask_b = cloneDeep(
+                                    this.props.selectedDetection.binaryMask
+                                );
+                                mask_b[1][0] = coords[0];
+                                mask_b[1][1] = coords[1];
                             }
                         }
-
                         self.props.updateDetection({
                             uuid: data[0].uuid,
                             update: {
@@ -1804,10 +1769,8 @@ class App extends Component {
                         const detectionData = self.props.detections.find(
                             (det) => det.uuid === data[0].uuid
                         );
-                        const editLabelWidgetPosInfo = self.getEditLabelWidgetPos(
-                            detectionData,
-                            coords
-                        );
+                        const editLabelWidgetPosInfo =
+                            self.getEditLabelWidgetPos(detectionData, coords);
                         let widgetPosition = {
                             top: editLabelWidgetPosInfo.y,
                             left: editLabelWidgetPosInfo.x,
@@ -2279,10 +2242,12 @@ class App extends Component {
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
-                    polygonCoords:
-                        this.props.selectedDetection.polygonMask !== null
-                            ? this.props.selectedDetection.polygonMask
-                            : undefined,
+                    polygonCoords: this.props.selectedDetection.polygonMask
+                        ? this.props.selectedDetection.polygonMask
+                        : undefined,
+                    binaryMask: this.props.selectedDetection.binaryMask
+                        ? this.props.selectedDetection.binaryMask
+                        : undefined,
                 };
                 if (
                     this.props.selectedDetection.view === constants.viewport.TOP

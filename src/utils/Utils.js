@@ -560,6 +560,33 @@ export default class Utils {
     }
 
     /**
+     * renderBinaryMasks - Method that renders the binary mask associated with a detection
+     *
+     * @param  {Array<Array<Number>>} data DICOS+TDR data
+     * @param  {eventData.canvasContext} context Rendering context
+     * @return {None} None
+     */
+    static renderBinaryMasks(data, context) {
+        if (data === undefined || data === null || data.length === 0) {
+            return;
+        }
+        if (data[0].length === 0) return;
+        const baseX = data[1][0];
+        const baseY = data[1][1];
+        const maskWidth = data[2][0];
+        const maskHeight = data[2][1];
+        const pixelData = data[0];
+        context.imageSmoothingEnabled = true;
+        for (var y = 0; y < maskHeight; y++)
+            for (var x = 0; x < maskWidth; x++) {
+                if (pixelData[x + y * maskWidth] === 1) {
+                    context.fillRect(baseX + x, baseY + y, 1, 1);
+                }
+            }
+        context.imageSmoothingEnabled = false;
+    }
+
+    /**
      * getDistanceBetween - calculates the Euclidean distance between two 2D points.
      *
      * @param {dictionary} position1 - a dictionary of the form {x:value, y:value}
@@ -581,17 +608,18 @@ export default class Utils {
      * @param {dictionary} r - a dictionary of the form {x:value, y:value}
      * @return {boolean} - is point q on line segment 'pr'
      */
-    static onSegment(p,q,r) {
-        if (q.x <= Math.max(p.x, r.x) &&
-                q.x >= Math.min(p.x, r.x) &&
-                q.y <= Math.max(p.y, r.y) &&
-                q.y >= Math.min(p.y, r.y))
-            {
-                return true;
-            }
-            return false;
+    static onSegment(p, q, r) {
+        if (
+            q.x <= Math.max(p.x, r.x) &&
+            q.x >= Math.min(p.x, r.x) &&
+            q.y <= Math.max(p.y, r.y) &&
+            q.y >= Math.min(p.y, r.y)
+        ) {
+            return true;
+        }
+        return false;
     }
-    
+
     /**
      * orientation - To find orientation of ordered triplet (p, q, r).
      *
@@ -600,15 +628,13 @@ export default class Utils {
      * @param {dictionary} r - a dictionary of the form {x:value, y:value}
      * @return {number} -  The function returns following values: 0 --> p, q and r are colinear, 1 --> Clockwise, 2 --> Counterclockwise
      */
-    static orientation(p,q,r) {
-        let val = (q.y - p.y) * (r.x - q.x)
-                    - (q.x - p.x) * (r.y - q.y);
-    
-            if (val == 0)
-            {
-                return 0; // colinear
-            }
-            return (val > 0) ? 1 : 2; // clock or counterclock wise
+    static orientation(p, q, r) {
+        let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+        if (val == 0) {
+            return 0; // colinear
+        }
+        return val > 0 ? 1 : 2; // clock or counterclock wise
     }
 
     /**
@@ -620,7 +646,7 @@ export default class Utils {
      * @param {dictionary} q2 - a dictionary of the form {x:value, y:value}
      * @return {boolean} -  returns true if line segment 'p1q1' and 'p2q2' intersect
      */
-    static doIntersect(p1,q1,p2,q2) {
+    static doIntersect(p1, q1, p2, q2) {
         // Find the four orientations needed for general and special cases
 
         let o1 = this.orientation(p1, q1, p2);
@@ -657,7 +683,7 @@ export default class Utils {
         // Doesn't fall in any of the above cases
         return false;
     }
-    
+
     /**
      * isInside - The function that returns true if line segment 'p1q1' and 'p2q2' intersect.
      *
@@ -666,33 +692,29 @@ export default class Utils {
      * @param {dictionary} p - a dictionary of the form {x:value, y:value}
      * @return {boolean} -  Returns true if the point p lies inside the polygon[] with n vertices
      */
-    static isInside(polygon,n,p) {
-    // There must be at least 3 vertices in polygon[]
-        if (n < 3)
-        {
+    static isInside(polygon, n, p) {
+        // There must be at least 3 vertices in polygon[]
+        if (n < 3) {
             return false;
         }
 
         // Create a point for line segment from p to infinite
         let extreme = {
-            x: 99999, 
-            y: p.y
-        }
+            x: 99999,
+            y: p.y,
+        };
 
         // Count intersections of the above line
         // with sides of polygon
-        let count = 0, i = 0;
-        do
-        {
+        let count = 0,
+            i = 0;
+        do {
             let next = (i + 1) % n;
             // Check if the line segment from 'p' to 'extreme' intersects with the line segment from 'polygon[i]' to 'polygon[next]'
-            if (this.doIntersect(polygon[i], polygon[next], p, extreme))
-            {
+            if (this.doIntersect(polygon[i], polygon[next], p, extreme)) {
                 // If the point 'p' is colinear with line segment 'i-next', then check if it lies on segment. If it lies, return true, otherwise false
-                if (this.orientation(polygon[i], p, polygon[next]) == 0)
-                {
-                    return this.onSegment(polygon[i], p,
-                                    polygon[next]);
+                if (this.orientation(polygon[i], p, polygon[next]) == 0) {
+                    return this.onSegment(polygon[i], p, polygon[next]);
                 }
                 count++;
             }
@@ -700,17 +722,16 @@ export default class Utils {
         } while (i != 0);
 
         // Return true if count is odd, false otherwise
-        return (count % 2 == 1); // Same as (count%2 == 1)
+        return count % 2 == 1; // Same as (count%2 == 1)
     }
 
-    
     /**
      * polygonToBinaryMask - Method that converts the polygon mask associated with a detection to its binary mask counterpart
      *
      * @param  {Array<Number>} coords    polygon mask coordinates
-     * 
+     *
      */
-     static polygonToBinaryMask(coords) {
+    static polygonToBinaryMask(coords) {
         if (coords === undefined || coords === null || coords.length === 0) {
             return;
         }
@@ -719,11 +740,11 @@ export default class Utils {
 
         let min = {
             x: 99999,
-            y: 99999
+            y: 99999,
         };
         let max = {
             x: 0,
-            y: 0
+            y: 0,
         };
 
         for (let i = 0; i < coords.length; i++) {
@@ -736,21 +757,22 @@ export default class Utils {
             if (coords[i].y > max.y) max.y = Math.floor(coords[i].y);
         }
 
-        const x_diff = max.x-min.x;
-        const y_diff = max.y-min.y;
+        const x_diff = max.x - min.x;
+        const y_diff = max.y - min.y;
 
         let bitmap = [];
 
         for (let i = 0; i < y_diff; i++) {
             for (let j = 0; j < x_diff; j++) {
-                let p = { //Create new point to determine if within polygon.
+                let p = {
+                    //Create new point to determine if within polygon.
                     x: j + min.x,
-                    y: i + min.y
+                    y: i + min.y,
                 };
                 bitmap[j + i * x_diff] = this.isInside(coords, n, p) ? 1 : 0;
             }
         }
-        
+
         let data = [];
         data[0] = bitmap;
         data[1] = [min.x, min.y];
