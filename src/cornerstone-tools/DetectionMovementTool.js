@@ -7,7 +7,6 @@ const getNewContext = csTools.importInternal('drawing/getNewContext');
 const draw = csTools.importInternal('drawing/draw');
 const setShadow = csTools.importInternal('drawing/setShadow');
 const drawRect = csTools.importInternal('drawing/drawRect');
-const cloneDeep = require('lodash.clonedeep');
 
 /**
  * @public
@@ -206,19 +205,21 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     context.globalAlpha = 0.5;
                     Utils.renderPolygonMasks(context, data.polygonCoords);
                     context.globalAlpha = 1.0;
-                } else if (data.binaryMask.length > 0) {
+                } else if (
+                    data.binaryMask.length > 0 &&
+                    data.binaryMask[0].length > 0
+                ) {
                     context.globalAlpha = 0.5;
                     context.strokeStyle =
                         constants.detectionStyle.SELECTED_COLOR;
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
-                    let binaryMask = cloneDeep(data.binaryMask);
                     const base = cornerstone.pixelToCanvas(element, {
                         x: data.handles.start.x,
                         y: data.handles.start.y,
                     });
-                    binaryMask[1][0] = base.x;
-                    binaryMask[1][1] = base.y;
-                    Utils.renderBinaryMasks(binaryMask, context);
+                    data.binaryMask[1][0] = base.x;
+                    data.binaryMask[1][1] = base.y;
+                    Utils.renderBinaryMasks(data.binaryMask, context);
                     context.globalAlpha = 1.0;
                 }
             }

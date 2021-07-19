@@ -1174,14 +1174,14 @@ class App extends Component {
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
-            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                zoomLevelTop: eventData.viewport.scale,
-            });
-            cornerstoneTools.setToolOptions('DetectionMovementTool', {
-                zoomLevelTop: eventData.viewport.scale,
-            });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
+                cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                    zoomLevelTop: eventData.viewport.scale,
+                });
+                cornerstoneTools.setToolOptions('DetectionMovementTool', {
+                    zoomLevelTop: eventData.viewport.scale,
+                });
             }
             let detections = [];
             this.props.detections.forEach((det) => {
@@ -1199,14 +1199,14 @@ class App extends Component {
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
-            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                zoomLevelSide: eventData.viewport.scale,
-            });
-            cornerstoneTools.setToolOptions('DetectionMovementTool', {
-                zoomLevelSide: eventData.viewport.scale,
-            });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
+                cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+                    zoomLevelSide: eventData.viewport.scale,
+                });
+                cornerstoneTools.setToolOptions('DetectionMovementTool', {
+                    zoomLevelSide: eventData.viewport.scale,
+                });
             }
             let detections = [];
             this.props.detections.forEach((det) => {
@@ -1744,7 +1744,10 @@ class App extends Component {
                                 );
                                 mask_b = Utils.polygonToBinaryMask(polygonMask);
                             } else if (
-                                this.props.selectedDetection.binaryMask
+                                this.props.selectedDetection.binaryMask.length >
+                                    0 &&
+                                this.props.selectedDetection.binaryMask[0]
+                                    .length > 0
                             ) {
                                 mask_b = cloneDeep(
                                     this.props.selectedDetection.binaryMask
@@ -2176,7 +2179,7 @@ class App extends Component {
                 this.appUpdateImage();
             } else if (
                 mode === constants.editionMode.POLYGON &&
-                this.props.selectedDetection
+                this.props.selectedDetection.polygonMask.length > 0
             ) {
                 this.resetCornerstoneTool();
                 const data = {
@@ -2246,7 +2249,7 @@ class App extends Component {
                         ? this.props.selectedDetection.polygonMask
                         : undefined,
                     binaryMask: this.props.selectedDetection.binaryMask
-                        ? this.props.selectedDetection.binaryMask
+                        ? cloneDeep(this.props.selectedDetection.binaryMask)
                         : undefined,
                 };
                 if (
