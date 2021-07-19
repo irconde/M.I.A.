@@ -219,7 +219,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     });
                     data.binaryMask[1][0] = base.x;
                     data.binaryMask[1][1] = base.y;
-                    Utils.renderBinaryMasks(data.binaryMask, context);
+                    Utils.renderBinaryMasks(data.binaryMask, context, zoom);
                     context.globalAlpha = 1.0;
                 }
             }

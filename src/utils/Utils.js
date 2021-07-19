@@ -566,7 +566,7 @@ export default class Utils {
      * @param  {eventData.canvasContext} context Rendering context
      * @return {None} None
      */
-    static renderBinaryMasks(data, context) {
+    static renderBinaryMasks(data, context, zoom = 1) {
         if (data === undefined || data === null || data.length === 0) {
             return;
         }
@@ -577,10 +577,10 @@ export default class Utils {
         const maskHeight = data[2][1];
         const pixelData = data[0];
         context.imageSmoothingEnabled = true;
-        for (var y = 0; y < maskHeight; y++)
-            for (var x = 0; x < maskWidth; x++) {
+        for (let y = 0; y < maskHeight; y++)
+            for (let x = 0; x < maskWidth; x++) {
                 if (pixelData[x + y * maskWidth] === 1) {
-                    context.fillRect(baseX + x, baseY + y, 1, 1);
+                    context.fillRect(baseX + x * zoom, baseY + y * zoom, 1, 1);
                 }
             }
         context.imageSmoothingEnabled = false;
