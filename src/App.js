@@ -76,6 +76,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
+import Settings from './components/Settings/Settings';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -2497,6 +2498,7 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
+                    <Settings />
                 </div>
             </div>
         );

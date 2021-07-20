@@ -27,6 +27,7 @@ const initialState = {
     detectorConfigType: '',
     seriesType: '',
     studyType: '',
+    displaySettings: false,
 };
 
 const uiSlice = createSlice({
@@ -50,7 +51,8 @@ const uiSlice = createSlice({
             switch (editionMode) {
                 case constants.editionMode.LABEL:
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition = detectionLabelEditPosition;
+                    state.detectionLabelEditPosition =
+                        detectionLabelEditPosition;
             }
         },
         /**
@@ -293,16 +295,20 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
         selectConfigInfoUpdate: (state, action) => {
-            const {
-                detectorType,
-                detectorConfigType,
-                seriesType,
-                studyType,
-            } = action.payload;
+            const { detectorType, detectorConfigType, seriesType, studyType } =
+                action.payload;
             state.detectorType = detectorType;
             state.detectorConfigType = detectorConfigType;
             state.seriesType = seriesType;
             state.studyType = studyType;
+        },
+        /**
+         * setDisplaySettings
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value determining wether or not to display the settings component.
+         */
+        setDisplaySettings: (state, action) => {
+            state.displaySettings = action.payload;
         },
     },
 });
@@ -310,9 +316,15 @@ const uiSlice = createSlice({
 /**
  * getIsFabVisible
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the FAB is Visible
+ * @returns {Boolean} Returns whether the FAB is visible
  */
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
+/**
+ * getDisplaySettings
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Boolean} Returns whether the display settings component is visible
+ */
+export const getDisplaySettings = (state) => state.ui.displaySettings;
 /**
  * getCornerstoneMode
  * @param {State} state Passed in via useSelector/mapStateToProps
