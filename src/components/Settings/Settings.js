@@ -4,10 +4,12 @@ import { getDisplaySettings } from '../../redux/slices/ui/uiSlice';
 import {
     setCookieData,
     removeCookieData,
+    getSettings,
 } from '../../redux/slices/settings/settingsSlice';
 
 const Settings = () => {
     const display = useSelector(getDisplaySettings);
+    const storeSettings = useSelector(getSettings);
     const dispatch = useDispatch();
 
     if (display === true) {
