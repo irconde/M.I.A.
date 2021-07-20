@@ -334,7 +334,7 @@ export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
  * getAnnotationMode
  * @param {State} state Passed in via useSelector
- * @returns {constants.editionMode} The constant for the current edition mode.
+ * @returns {constants.annotationMode} The constant for the current annotation mode.
  */
 export const getAnnotationMode = (state) => state.ui.annotationMode;
 /**
