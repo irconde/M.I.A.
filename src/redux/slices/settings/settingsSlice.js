@@ -51,6 +51,6 @@ const settingsSlice = createSlice({
 export const { setCookieData, removeCookieData } = settingsSlice.actions;
 
 // Selectors
-export const getSettings = (state) => state.settings;
+export const getSettings = (state) => state.settings.settings;
 
 export default settingsSlice.reducer;
