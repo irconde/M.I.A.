@@ -32,7 +32,7 @@ const settingsSlice = createSlice({
             state.settings = action.payload;
             myCookie.set('settings', action.payload, {
                 path: '/',
-                maxAge: 10800,
+                maxAge: 10800, // Current time is 3 hours
             });
         },
         /**
@@ -47,6 +47,10 @@ const settingsSlice = createSlice({
     },
 });
 
+// Actions
 export const { setCookieData, removeCookieData } = settingsSlice.actions;
+
+// Selectors
+export const getSettings = (state) => state.settings;
 
 export default settingsSlice.reducer;
