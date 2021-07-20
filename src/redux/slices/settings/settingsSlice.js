@@ -13,6 +13,10 @@ if (cookieData !== undefined) {
     settings = cookieData;
 } else {
     settings = defaultSettings;
+    myCookie.set('settings', defaultSettings, {
+        path: '/',
+        maxAge: COOKIE.TIME, // Current time is 3 hours
+    });
 }
 
 const initialState = {
