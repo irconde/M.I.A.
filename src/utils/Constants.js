@@ -95,3 +95,8 @@ export const ALGORITHM = 'Algorithm';
 export const MAX_LABEL_LENGTH = 10;
 export const ZERO_DEGREE_TRANSFORM = 'rotate(0deg)';
 export const PERPENDICULAR_DEGREE_TRANSFORM = 'rotate(90deg)';
+
+export const COOKIE = {
+    // In seconds, 10800 = 3 hours
+    TIME: 10800,
+};

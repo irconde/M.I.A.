@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { Cookies } from 'react-cookie';
+import { COOKIE } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');
@@ -32,7 +33,7 @@ const settingsSlice = createSlice({
             state.settings = action.payload;
             myCookie.set('settings', action.payload, {
                 path: '/',
-                maxAge: 10800, // Current time is 3 hours
+                maxAge: COOKIE.TIME, // Current time is 3 hours
             });
         },
         /**
