@@ -2029,7 +2029,10 @@ class App extends Component {
      * @returns {None} None
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
-        const type = (this.props.selectedDetection.polygonMask.length === 0) ? constants.detectionType.BOUNDING : constants.detectionType.POLYGON;
+        const type =
+            this.props.selectedDetection.polygonMask.length === 0
+                ? constants.detectionType.BOUNDING
+                : constants.detectionType.POLYGON;
         this.props.updateDetectionType({
             detectionType: type,
         });
