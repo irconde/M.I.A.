@@ -5,6 +5,7 @@ const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     annotationMode: constants.annotationMode.NO_TOOL,
+    detectionType: constants.detectionType.NO_TOOL,
     isEditLabelWidgetVisible: false,
     isFABVisible: false,
     isDetectionContextVisible: false,
@@ -34,6 +35,10 @@ const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        updateDetectionType: (state, action) => {
+            const {detectionType} = action.payload;
+            state.detectionType = detectionType;
+        },
         /**
          * updateEditionMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -338,6 +343,12 @@ export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
  */
 export const getAnnotationMode = (state) => state.ui.annotationMode;
 /**
+ * getDetectionType
+ * @param {State} state Passed in via useSelector
+ * @returns {constants.detectionType} The constant for the current detectionType.
+ */
+export const getDetectionType = (state) => state.ui.detectionType;
+/**
  * getEditionMode
  * @param {State} state Passed in via useSelector
  * @returns {constants.editionMode} The constant for the current edition mode.
@@ -470,6 +481,7 @@ export const getDetectionContextInfo = (state) => {
 
 // Exporting the Actions for the Reducers
 export const {
+    updateDetectionType,
     updateCornerstoneMode,
     updateFABVisibility,
     updateIsDetectionContextVisible,

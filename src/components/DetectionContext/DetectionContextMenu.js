@@ -13,7 +13,7 @@ import {
     getEditionMode,
     getIsDetectionContextVisible,
     getDetectionContextPosition,
-    getAnnotationMode,
+    getDetectionType,
 } from '../../redux/slices/ui/uiSlice';
 
 const Positioner = styled.div`
@@ -94,11 +94,9 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             );
         }
     };
-    const annotationType = useSelector(getAnnotationMode);
-    //console.log(selectedOption);
-    //const editionType = (annotationType === annotationMode.BOUNDING) ? editionMode.BOUNDING : editionMode.POLYGON;
-    const editionType = selectedOption;
-    const icon = (selectedOption === editionMode.BOUNDING) ? <RectangleIcon /> : <PolygonIcon />;
+    const detectionType = useSelector(getDetectionType);
+    const editionType = (detectionType === constants.detectionType.BOUNDING) ? editionMode.BOUNDING : editionMode.POLYGON;
+    const icon = (detectionType === constants.detectionType.BOUNDING) ? <RectangleIcon /> : <PolygonIcon />;
     if (isVisible === true) {
         return (
             <Positioner position={position}>

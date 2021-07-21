@@ -69,6 +69,7 @@ export const annotationMode = {
     POLYGON: 'polygon',
     NO_TOOL: 'none',
 };
+export const detectionType = annotationMode;
 export const editionMode = {
     LABEL: 'label',
     BOUNDING: 'bounding',
