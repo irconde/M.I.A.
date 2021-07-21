@@ -2022,7 +2022,10 @@ class App extends Component {
      * @returns {None} None
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
-        const type = (this.props.selectedDetection.polygonMask.length === 0) ? constants.detectionType.BOUNDING : constants.detectionType.POLYGON;
+        const type =
+            this.props.selectedDetection.polygonMask.length === 0
+                ? constants.detectionType.BOUNDING
+                : constants.detectionType.POLYGON;
         this.props.updateDetectionType({
             detectionType: type,
         });
@@ -2493,7 +2496,7 @@ class App extends Component {
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
                     />
-                    <div id="algorithm-outputs"> </div>
+                    <div id="algorithm-outputs"></div>
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
                     />
