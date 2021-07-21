@@ -1506,6 +1506,13 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
+                    const detectionType =
+                        this.props.selectedDetection.polygonMask.length === 0
+                            ? constants.detectionType.BOUNDING
+                            : constants.detectionType.POLYGON;
+                    this.props.updateDetectionType({
+                        detectionType: detectionType,
+                    });
                     this.props.detectionSelectedUpdate();
                     this.renderDetectionContextMenu(e);
                     this.appUpdateImage();
@@ -2022,13 +2029,6 @@ class App extends Component {
      * @returns {None} None
      */
     renderDetectionContextMenu(event, draggedData = undefined) {
-        const type =
-            this.props.selectedDetection.polygonMask.length === 0
-                ? constants.detectionType.BOUNDING
-                : constants.detectionType.POLYGON;
-        this.props.updateDetectionType({
-            detectionType: type,
-        });
         if (this.props.selectedDetection !== null) {
             const viewportInfo = Utils.eventToViewportInfo(event);
             const detectionData = draggedData

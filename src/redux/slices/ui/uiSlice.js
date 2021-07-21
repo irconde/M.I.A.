@@ -36,7 +36,7 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         updateDetectionType: (state, action) => {
-            const {detectionType} = action.payload;
+            const { detectionType } = action.payload;
             state.detectionType = detectionType;
         },
         /**
@@ -122,6 +122,7 @@ const uiSlice = createSlice({
          */
         resetSelectedDetectionBoxesUpdate: (state) => {
             (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.detectionType = constants.detectionType.NO_TOOL),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.isDetectionContextVisible = false),
                 (state.detectionContextPosition = {
@@ -135,6 +136,7 @@ const uiSlice = createSlice({
          */
         resetSelectedDetectionBoxesElseUpdate: (state) => {
             (state.isDetectionContextVisible = false),
+                (state.detectionType = constants.detectionType.NO_TOOL),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.detectionContextPosition = {
                     top: 0,
@@ -234,6 +236,7 @@ const uiSlice = createSlice({
         emptyAreaClickUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
@@ -250,6 +253,7 @@ const uiSlice = createSlice({
         onMouseLeaveNoFilesUpdate: (state) => {
             state.isFABVisible = false;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
@@ -270,7 +274,7 @@ const uiSlice = createSlice({
             state.editionMode = constants.editionMode.NO_TOOL;
         },
         /**
-         * resetSelectedDetectionBoxesUpdate
+         * menuDetectionSelectedUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         menuDetectionSelectedUpdate: (state) => {
@@ -292,6 +296,7 @@ const uiSlice = createSlice({
         deleteDetectionUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.isDetectionContextVisible = false;
         },
         /**
