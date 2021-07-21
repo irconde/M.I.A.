@@ -342,12 +342,6 @@ export const getDisplaySettings = (state) => state.ui.displaySettings;
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
- * getAnnotationMode
- * @param {State} state Passed in via useSelector
- * @returns {constants.annotationMode} The constant for the current annotation mode.
- */
-export const getAnnotationMode = (state) => state.ui.annotationMode;
-/**
  * getDetectionType
  * @param {State} state Passed in via useSelector
  * @returns {constants.detectionType} The constant for the current detectionType.
