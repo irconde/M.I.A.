@@ -7,7 +7,7 @@ const cookieData = myCookie.get('settings');
 
 let settings;
 const defaultSettings = {
-    view: top,
+    view: 'top',
 };
 if (cookieData !== undefined) {
     settings = cookieData;
