@@ -64,12 +64,17 @@ export const cornerstoneMode = {
     ANNOTATION: 'annotation',
     EDITION: 'edition',
 };
+export const detectionType = {
+    BOUNDING: 'bounding',
+    BINARY: 'binary',
+    POLYGON: 'polygon',
+    NO_TOOL: 'none',
+};
 export const annotationMode = {
     BOUNDING: 'bounding',
     POLYGON: 'polygon',
     NO_TOOL: 'none',
 };
-export const detectionType = annotationMode;
 export const editionMode = {
     LABEL: 'label',
     BOUNDING: 'bounding',

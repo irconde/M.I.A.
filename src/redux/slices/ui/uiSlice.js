@@ -35,6 +35,11 @@ const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * updateDetectionType
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.detectionType} action.payload - Constant value for the detection type.
+         */
         updateDetectionType: (state, action) => {
             const { detectionType } = action.payload;
             state.detectionType = detectionType;

@@ -110,11 +110,17 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             selected={selectedOption === editionMode.LABEL}>
                             <TextIcon />
                         </IconContainer>
-                        <IconContainer
-                            onClick={() => handleClick(editionMode.BOUNDING)}
-                            selected={selectedOption === editionMode.BOUNDING}>
-                            <RectangleIcon />
-                        </IconContainer>
+                        {detectionType !== constants.detectionType.BINARY && (
+                            <IconContainer
+                                onClick={() =>
+                                    handleClick(editionMode.BOUNDING)
+                                }
+                                selected={
+                                    selectedOption === editionMode.BOUNDING
+                                }>
+                                <RectangleIcon />
+                            </IconContainer>
+                        )}
                         {detectionType === constants.detectionType.POLYGON && (
                             <IconContainer
                                 onClick={() => handleClick(editionMode.POLYGON)}

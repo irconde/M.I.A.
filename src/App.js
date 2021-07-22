@@ -141,6 +141,7 @@ class App extends Component {
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
+        this.getDetectionType = this.getDetectionType.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
         this.resetSelectedDetectionBoxes =
@@ -1506,10 +1507,13 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
-                    const detectionType =
-                        this.props.selectedDetection.polygonMask.length === 0
-                            ? constants.detectionType.BOUNDING
-                            : constants.detectionType.POLYGON;
+                    console.log(
+                        'props.selectedDetection:',
+                        this.props.selectedDetection
+                    );
+                    const detectionType = this.getDetectionType(
+                        this.props.selectedDetection
+                    );
                     this.props.updateDetectionType({
                         detectionType: detectionType,
                     });
@@ -1531,6 +1535,27 @@ class App extends Component {
                 }
             }
         }
+    }
+
+    /**
+     * getDetectionType - Utility method that determines a detection's type according to constants.detectionType.
+     *
+     * @param {Object} detection
+     * @return {constants.detectionType} type
+     */
+    getDetectionType(detection) {
+        let type;
+        if (
+            !this.props.selectedDetection.binaryMask ||
+            this.props.selectedDetection.binaryMask.length === 1
+        ) {
+            type = constants.detectionType.BOUNDING;
+        } else if (this.props.selectedDetection.polygonMask.length !== 0) {
+            type = constants.detectionType.POLYGON;
+        } else {
+            type = constants.detectionType.BINARY;
+        }
+        return type;
     }
 
     /**
