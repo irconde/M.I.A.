@@ -22,6 +22,7 @@ import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
 import BoundPolyFAB from './components/FAB/BoundPolyFAB';
+import { Modal } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import {

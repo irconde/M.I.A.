@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/FileQueueIcon';
+import SettingsIcon from '../../icons/SettingsIcon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
@@ -15,6 +16,7 @@ const TopBar = () => {
         isUpload,
         isConnected,
     } = reduxInfo;
+
     const styles = {
         bar: {
             position: 'absolute',
@@ -100,6 +102,7 @@ const TopBar = () => {
                     isConnected={isConnected}
                     style={styles.lastIcon}
                 />
+                <SettingsIcon title="Settings" />
             </div>
         </div>
     ) : (
