@@ -6,7 +6,11 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
-import { editionMode, annotationMode, detectionContextStyle } from '../../utils/Constants';
+import {
+    editionMode,
+    annotationMode,
+    detectionContextStyle,
+} from '../../utils/Constants';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
@@ -95,8 +99,6 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
         }
     };
     const detectionType = useSelector(getDetectionType);
-    const editionType = (detectionType === constants.detectionType.BOUNDING) ? editionMode.BOUNDING : editionMode.POLYGON;
-    const icon = (detectionType === constants.detectionType.BOUNDING) ? <RectangleIcon /> : <PolygonIcon />;
     if (isVisible === true) {
         return (
             <Positioner position={position}>
@@ -109,10 +111,19 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             <TextIcon />
                         </IconContainer>
                         <IconContainer
-                            onClick={() => handleClick(editionType)}
-                            selected={selectedOption === editionType}>
-                            {icon}
+                            onClick={() => handleClick(editionMode.BOUNDING)}
+                            selected={selectedOption === editionMode.BOUNDING}>
+                            <RectangleIcon />
                         </IconContainer>
+                        {detectionType === constants.detectionType.POLYGON && (
+                            <IconContainer
+                                onClick={() => handleClick(editionMode.POLYGON)}
+                                selected={
+                                    selectedOption === editionMode.POLYGON
+                                }>
+                                <PolygonIcon />
+                            </IconContainer>
+                        )}
                         <IconContainer
                             onClick={() => handleClick(editionMode.MOVE)}
                             id="lastIcon"
