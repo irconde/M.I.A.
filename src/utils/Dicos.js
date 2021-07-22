@@ -165,12 +165,7 @@ export default class Dicos {
             pixelDataElement.length
         );
         const arrayPixelData = Array.from(pixelData);
-        return [
-            arrayPixelData,
-            baseCoords,
-            extentsCoords,
-            [pixelDataElement.dataOffset, pixelDataElement.length],
-        ];
+        return [arrayPixelData, baseCoords, extentsCoords];
     }
 
     /**
@@ -451,15 +446,12 @@ export default class Dicos {
                     dataset.RescaleSlope = '1';
                     dataset.RescaleType = 'HU';
                     dataset.LossyImageCompression = '00';
-
                     if (
                         detection.binaryMask.length > 0 &&
                         detection.binaryMask[0].length > 0
                     ) {
                         let maskPixelData = new Uint8Array(
-                            detection.binaryMask[0],
-                            detection.binaryMask[3][0],
-                            detection.binaryMask[3][1]
+                            detection.binaryMask[0]
                         ).buffer;
                         dataset.ThreatSequence = {
                             PotentialThreatObjectID: 0,
