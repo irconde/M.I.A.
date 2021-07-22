@@ -1507,10 +1507,6 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
-                    console.log(
-                        'props.selectedDetection:',
-                        this.props.selectedDetection
-                    );
                     const detectionType = this.getDetectionType(
                         this.props.selectedDetection
                     );
