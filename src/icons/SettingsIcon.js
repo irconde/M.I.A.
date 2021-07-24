@@ -34,9 +34,7 @@ const SettingsIcon = ({ title }) => {
     };
 
     const handleClose = () => {
-        console.log('Old: ' + open);
         setOpen(false);
-        console.log('New: ' + open);
     };
 
     const body = (
@@ -48,9 +46,9 @@ const SettingsIcon = ({ title }) => {
     );
 
     return (
-        <div>
-            <div onClick={handleOpen}>
-                <svg
+        <>
+            <div style={{margin: "1rem 2.5rem 0.5rem 0rem"}} onClick={handleOpen} >
+                <svg 
                     width="24px"
                     height="24px"
                     viewBox="0 0 24 24"
@@ -81,6 +79,7 @@ const SettingsIcon = ({ title }) => {
                         </g>
                     </g>
                 </svg>
+                </div>
 
                 <Modal
                     open={open}
@@ -89,13 +88,13 @@ const SettingsIcon = ({ title }) => {
                     aria-describedby="simple-modal-description">
                     {body}
                 </Modal>
-            </div>
-        </div>
+        </>
     );
 };
 
 SettingsIcon.propTypes = {
     title: PropTypes.string,
+    styles: PropTypes.object
 };
 
 export default SettingsIcon;
