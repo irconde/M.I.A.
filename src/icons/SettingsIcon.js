@@ -1,5 +1,6 @@
 import { React, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 
@@ -45,10 +46,14 @@ const SettingsIcon = ({ title }) => {
         </div>
     );
 
+    const IconStyle = styled.div`
+        margin: 1rem 2.5rem 0.5rem 0rem;
+    `;
+
     return (
         <>
-            <div style={{margin: "1rem 2.5rem 0.5rem 0rem"}} onClick={handleOpen} >
-                <svg 
+            <IconStyle onClick={handleOpen}>
+                <svg
                     width="24px"
                     height="24px"
                     viewBox="0 0 24 24"
@@ -79,22 +84,21 @@ const SettingsIcon = ({ title }) => {
                         </g>
                     </g>
                 </svg>
-                </div>
+            </IconStyle>
 
-                <Modal
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="simple-modal-title"
-                    aria-describedby="simple-modal-description">
-                    {body}
-                </Modal>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description">
+                {body}
+            </Modal>
         </>
     );
 };
 
 SettingsIcon.propTypes = {
     title: PropTypes.string,
-    styles: PropTypes.object
 };
 
 export default SettingsIcon;

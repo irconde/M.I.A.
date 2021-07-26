@@ -102,9 +102,7 @@ const TopBar = () => {
                     isConnected={isConnected}
                     style={styles.icon}
                 />
-                <SettingsIcon
-                    title="Settings"               
-                />
+                <SettingsIcon title="Settings" />
             </div>
         </div>
     ) : (
@@ -129,6 +127,7 @@ const TopBar = () => {
                     isConnected={isConnected}
                     style={styles.lastIcon}
                 />
+                <SettingsIcon title="Settings" />
             </div>
         </div>
     );
