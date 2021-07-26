@@ -447,6 +447,7 @@ export default class Dicos {
                     dataset.RescaleType = 'HU';
                     dataset.LossyImageCompression = '00';
                     if (
+                        detection.binaryMask !== undefined &&
                         detection.binaryMask.length > 0 &&
                         detection.binaryMask[0].length > 0
                     ) {
@@ -491,10 +492,11 @@ export default class Dicos {
                             },
                             ATDAssessmentSequence: {
                                 ThreatCategory: 'ANOMALY',
-                                ThreatCategoryDescription: detection.class,
+                                ThreatCategoryDescription: detection.className,
                                 ATDAbilityAssessment: 'SHIELD',
                                 ATDAssessmentFlag: 'THREAT',
-                                ATDAssessmentProbability: detection.confidence,
+                                ATDAssessmentProbability:
+                                    detection.confidence / 100,
                             },
                         };
                     } else {
@@ -521,10 +523,11 @@ export default class Dicos {
                             },
                             ATDAssessmentSequence: {
                                 ThreatCategory: 'ANOMALY',
-                                ThreatCategoryDescription: detection.class,
+                                ThreatCategoryDescription: detection.className,
                                 ATDAbilityAssessment: 'SHIELD',
                                 ATDAssessmentFlag: 'THREAT',
-                                ATDAssessmentProbability: detection.confidence,
+                                ATDAssessmentProbability:
+                                    detection.confidence / 100,
                             },
                         };
                     }
