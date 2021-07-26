@@ -6,13 +6,18 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
-import { editionMode, detectionContextStyle } from '../../utils/Constants';
+import {
+    editionMode,
+    annotationMode,
+    detectionContextStyle,
+} from '../../utils/Constants';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
     getEditionMode,
     getIsDetectionContextVisible,
     getDetectionContextPosition,
+    getDetectionType,
 } from '../../redux/slices/ui/uiSlice';
 
 const Positioner = styled.div`
@@ -93,6 +98,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             );
         }
     };
+    const detectionType = useSelector(getDetectionType);
     if (isVisible === true) {
         return (
             <Positioner position={position}>
@@ -104,21 +110,31 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             selected={selectedOption === editionMode.LABEL}>
                             <TextIcon />
                         </IconContainer>
-                        <IconContainer
-                            onClick={() => handleClick(editionMode.BOUNDING)}
-                            selected={selectedOption === editionMode.BOUNDING}>
-                            <RectangleIcon />
-                        </IconContainer>
+                        {detectionType !== constants.detectionType.BINARY && (
+                            <IconContainer
+                                onClick={() =>
+                                    handleClick(editionMode.BOUNDING)
+                                }
+                                selected={
+                                    selectedOption === editionMode.BOUNDING
+                                }>
+                                <RectangleIcon />
+                            </IconContainer>
+                        )}
+                        {detectionType === constants.detectionType.POLYGON && (
+                            <IconContainer
+                                onClick={() => handleClick(editionMode.POLYGON)}
+                                selected={
+                                    selectedOption === editionMode.POLYGON
+                                }>
+                                <PolygonIcon />
+                            </IconContainer>
+                        )}
                         <IconContainer
                             onClick={() => handleClick(editionMode.MOVE)}
+                            id="lastIcon"
                             selected={selectedOption === editionMode.MOVE}>
                             <MovementIcon />
-                        </IconContainer>
-                        <IconContainer
-                            onClick={() => handleClick(editionMode.POLYGON)}
-                            id="lastIcon"
-                            selected={selectedOption === editionMode.POLYGON}>
-                            <PolygonIcon />
                         </IconContainer>
                     </MainWidget>
                     <DeleteWidget>

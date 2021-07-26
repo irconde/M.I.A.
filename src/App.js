@@ -55,6 +55,7 @@ import {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
+    updateDetectionType,
     updateEditionMode,
     emptyAreaClickUpdate,
     onMouseLeaveNoFilesUpdate,
@@ -140,6 +141,7 @@ class App extends Component {
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
+        this.getDetectionType = this.getDetectionType.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
         this.resetSelectedDetectionBoxes =
@@ -1505,6 +1507,12 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
+                    const detectionType = this.getDetectionType(
+                        this.props.selectedDetection
+                    );
+                    this.props.updateDetectionType({
+                        detectionType: detectionType,
+                    });
                     this.props.detectionSelectedUpdate();
                     this.renderDetectionContextMenu(e);
                     this.appUpdateImage();
@@ -1523,6 +1531,27 @@ class App extends Component {
                 }
             }
         }
+    }
+
+    /**
+     * getDetectionType - Utility method that determines a detection's type according to constants.detectionType.
+     *
+     * @param {Object} detection
+     * @return {constants.detectionType} type
+     */
+    getDetectionType(detection) {
+        let type;
+        if (
+            !this.props.selectedDetection.binaryMask ||
+            this.props.selectedDetection.binaryMask.length === 1
+        ) {
+            type = constants.detectionType.BOUNDING;
+        } else if (this.props.selectedDetection.polygonMask.length !== 0) {
+            type = constants.detectionType.POLYGON;
+        } else {
+            type = constants.detectionType.BINARY;
+        }
+        return type;
     }
 
     /**
@@ -2488,7 +2517,7 @@ class App extends Component {
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
                     />
-                    <div id="algorithm-outputs"> </div>
+                    <div id="algorithm-outputs"></div>
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
                     />
@@ -2550,6 +2579,7 @@ const mapDispatchToProps = {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
+    updateDetectionType,
     updateEditionMode,
     emptyAreaClickUpdate,
     onMouseLeaveNoFilesUpdate,
