@@ -301,17 +301,19 @@ export default class Dicos {
                     copiedData.NumberOfAlarmObjects = numberAlarmObjs;
                     copiedData.NumberOfTotalObjects = numberTotalObjs;
                 }
-                copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon = [
-                    detection.boundingBox[0],
-                    detection.boundingBox[1],
-                    0,
-                    detection.boundingBox[2],
-                    detection.boundingBox[3],
-                    0,
-                ];
-                dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
-                    copiedData
-                );
+                copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon =
+                    [
+                        detection.boundingBox[0],
+                        detection.boundingBox[1],
+                        0,
+                        detection.boundingBox[2],
+                        detection.boundingBox[3],
+                        0,
+                    ];
+                dicomDict.dict =
+                    dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
+                        copiedData
+                    );
                 let new_file_WriterBuffer = dicomDict.write();
                 var file = new Blob([new_file_WriterBuffer], {
                     type: 'image/dcs',
@@ -353,10 +355,10 @@ export default class Dicos {
      *                         based on the naturalized dataset we pass into the DICOM Dictionary.
      *
      * @param {Detection} detection
-     * @param {Blob} image
+     * @param {Blob} data
      * @returns {Promise} Returns a promise containing the blob on resolve or error on reject
      */
-    static detectionObjectToBlob(detection, image) {
+    static detectionObjectToBlob(detection, data) {
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -365,7 +367,7 @@ export default class Dicos {
         let dataset = {};
         return new Promise((resolve, reject) => {
             try {
-                this.getInstanceNumber(image).then((instanceNumber) => {
+                this.getInstanceNumber(data).then((instanceNumber) => {
                     dataset.ImageType = [
                         'ORIGINAL',
                         'PRIMARY',
@@ -444,35 +446,91 @@ export default class Dicos {
                     dataset.RescaleSlope = '1';
                     dataset.RescaleType = 'HU';
                     dataset.LossyImageCompression = '00';
-                    dataset.ThreatSequence = {
-                        PotentialThreatObjectID: 0,
-                        PTORepresentationSequence: {
-                            ReferencedInstanceSequence: [
-                                {
-                                    ReferencedSOPClassUID:
-                                        '1.2.840.10008.5.1.4.1.1.501.2.1',
-                                    ReferencedSOPInstanceUID:
-                                        '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
-                                },
-                            ],
-                            // [x0, y0, z0, xf, yf, zf]
-                            BoundingPolygon: [
-                                detection.boundingBox[0],
-                                detection.boundingBox[1],
-                                0,
-                                detection.boundingBox[2],
-                                detection.boundingBox[3],
-                                0,
-                            ],
-                        },
-                        ATDAssessmentSequence: {
-                            ThreatCategory: 'ANOMALY',
-                            ThreatCategoryDescription: detection.class,
-                            ATDAbilityAssessment: 'SHIELD',
-                            ATDAssessmentFlag: 'THREAT',
-                            ATDAssessmentProbability: detection.confidence,
-                        },
-                    };
+                    if (
+                        detection.binaryMask !== undefined &&
+                        detection.binaryMask.length > 0 &&
+                        detection.binaryMask[0].length > 0
+                    ) {
+                        let maskPixelData = new Uint8Array(
+                            detection.binaryMask[0]
+                        ).buffer;
+                        dataset.ThreatSequence = {
+                            PotentialThreatObjectID: 0,
+                            PTORepresentationSequence: {
+                                ReferencedInstanceSequence: [
+                                    {
+                                        ReferencedSOPClassUID:
+                                            '1.2.840.10008.5.1.4.1.1.501.2.1',
+                                        ReferencedSOPInstanceUID:
+                                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                                    },
+                                ],
+                                ThreatROIVoxelSequence: [
+                                    {
+                                        ThreatROIBase: [
+                                            detection.binaryMask[1][0],
+                                            detection.binaryMask[1][1],
+                                            0,
+                                        ],
+                                        ThreatROIExtents: [
+                                            detection.binaryMask[2][0],
+                                            detection.binaryMask[2][1],
+                                            0,
+                                        ],
+                                        ThreatROIBitmap: maskPixelData,
+                                    },
+                                ],
+                                // [x0, y0, z0, xf, yf, zf]
+                                BoundingPolygon: [
+                                    detection.boundingBox[0],
+                                    detection.boundingBox[1],
+                                    0,
+                                    detection.boundingBox[2],
+                                    detection.boundingBox[3],
+                                    0,
+                                ],
+                            },
+                            ATDAssessmentSequence: {
+                                ThreatCategory: 'ANOMALY',
+                                ThreatCategoryDescription: detection.className,
+                                ATDAbilityAssessment: 'SHIELD',
+                                ATDAssessmentFlag: 'THREAT',
+                                ATDAssessmentProbability:
+                                    detection.confidence / 100,
+                            },
+                        };
+                    } else {
+                        dataset.ThreatSequence = {
+                            PotentialThreatObjectID: 0,
+                            PTORepresentationSequence: {
+                                ReferencedInstanceSequence: [
+                                    {
+                                        ReferencedSOPClassUID:
+                                            '1.2.840.10008.5.1.4.1.1.501.2.1',
+                                        ReferencedSOPInstanceUID:
+                                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                                    },
+                                ],
+                                // [x0, y0, z0, xf, yf, zf]
+                                BoundingPolygon: [
+                                    detection.boundingBox[0],
+                                    detection.boundingBox[1],
+                                    0,
+                                    detection.boundingBox[2],
+                                    detection.boundingBox[3],
+                                    0,
+                                ],
+                            },
+                            ATDAssessmentSequence: {
+                                ThreatCategory: 'ANOMALY',
+                                ThreatCategoryDescription: detection.className,
+                                ATDAbilityAssessment: 'SHIELD',
+                                ATDAssessmentFlag: 'THREAT',
+                                ATDAssessmentProbability:
+                                    detection.confidence / 100,
+                            },
+                        };
+                    }
                     dataset.AcquisitionContextSequence = {
                         ConceptNameCodeSequence: {
                             CodeMeaning: 0,
@@ -505,9 +563,10 @@ export default class Dicos {
                     dataset.NumberOfTotalObjects = 1;
                     // Create the Dicom Dictionary file
                     let dicomDict = new dcmjs.data.DicomDict({});
-                    dicomDict.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
-                        dataset
-                    );
+                    dicomDict.dict =
+                        dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
+                            dataset
+                        );
                     // Create the buffer from the denaturalized data set populated above
                     let new_file_WriterBuffer = dicomDict.write();
                     // Create a blob with this buffer

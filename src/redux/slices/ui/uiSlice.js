@@ -5,6 +5,7 @@ const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     annotationMode: constants.annotationMode.NO_TOOL,
+    detectionType: constants.detectionType.NO_TOOL,
     isEditLabelWidgetVisible: false,
     isFABVisible: false,
     isDetectionContextVisible: false,
@@ -27,12 +28,22 @@ const initialState = {
     detectorConfigType: '',
     seriesType: '',
     studyType: '',
+    displaySettings: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * updateDetectionType
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.detectionType} action.payload - Constant value for the detection type.
+         */
+        updateDetectionType: (state, action) => {
+            const { detectionType } = action.payload;
+            state.detectionType = detectionType;
+        },
         /**
          * updateEditionMode
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -50,7 +61,8 @@ const uiSlice = createSlice({
             switch (editionMode) {
                 case constants.editionMode.LABEL:
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
-                    state.detectionLabelEditPosition = detectionLabelEditPosition;
+                    state.detectionLabelEditPosition =
+                        detectionLabelEditPosition;
             }
         },
         /**
@@ -115,6 +127,7 @@ const uiSlice = createSlice({
          */
         resetSelectedDetectionBoxesUpdate: (state) => {
             (state.cornerstoneMode = constants.cornerstoneMode.SELECTION),
+                (state.detectionType = constants.detectionType.NO_TOOL),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.isDetectionContextVisible = false),
                 (state.detectionContextPosition = {
@@ -128,6 +141,7 @@ const uiSlice = createSlice({
          */
         resetSelectedDetectionBoxesElseUpdate: (state) => {
             (state.isDetectionContextVisible = false),
+                (state.detectionType = constants.detectionType.NO_TOOL),
                 (state.editionMode = constants.editionMode.NO_TOOL),
                 (state.detectionContextPosition = {
                     top: 0,
@@ -227,6 +241,7 @@ const uiSlice = createSlice({
         emptyAreaClickUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
@@ -243,6 +258,7 @@ const uiSlice = createSlice({
         onMouseLeaveNoFilesUpdate: (state) => {
             state.isFABVisible = false;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
@@ -263,7 +279,7 @@ const uiSlice = createSlice({
             state.editionMode = constants.editionMode.NO_TOOL;
         },
         /**
-         * resetSelectedDetectionBoxesUpdate
+         * menuDetectionSelectedUpdate
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         menuDetectionSelectedUpdate: (state) => {
@@ -285,6 +301,7 @@ const uiSlice = createSlice({
         deleteDetectionUpdate: (state) => {
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
+            state.detectionType = constants.detectionType.NO_TOOL;
             state.isDetectionContextVisible = false;
         },
         /**
@@ -293,16 +310,20 @@ const uiSlice = createSlice({
          * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
          */
         selectConfigInfoUpdate: (state, action) => {
-            const {
-                detectorType,
-                detectorConfigType,
-                seriesType,
-                studyType,
-            } = action.payload;
+            const { detectorType, detectorConfigType, seriesType, studyType } =
+                action.payload;
             state.detectorType = detectorType;
             state.detectorConfigType = detectorConfigType;
             state.seriesType = seriesType;
             state.studyType = studyType;
+        },
+        /**
+         * setDisplaySettings
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value determining wether or not to display the settings component.
+         */
+        setDisplaySettings: (state, action) => {
+            state.displaySettings = action.payload;
         },
     },
 });
@@ -310,9 +331,15 @@ const uiSlice = createSlice({
 /**
  * getIsFabVisible
  * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the FAB is Visible
+ * @returns {Boolean} Returns whether the FAB is visible
  */
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
+/**
+ * getDisplaySettings
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Boolean} Returns whether the display settings component is visible
+ */
+export const getDisplaySettings = (state) => state.ui.displaySettings;
 /**
  * getCornerstoneMode
  * @param {State} state Passed in via useSelector/mapStateToProps
@@ -320,11 +347,11 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
- * getAnnotationMode
+ * getDetectionType
  * @param {State} state Passed in via useSelector
- * @returns {constants.editionMode} The constant for the current edition mode.
+ * @returns {constants.detectionType} The constant for the current detectionType.
  */
-export const getAnnotationMode = (state) => state.ui.annotationMode;
+export const getDetectionType = (state) => state.ui.detectionType;
 /**
  * getEditionMode
  * @param {State} state Passed in via useSelector
@@ -458,6 +485,7 @@ export const getDetectionContextInfo = (state) => {
 
 // Exporting the Actions for the Reducers
 export const {
+    updateDetectionType,
     updateCornerstoneMode,
     updateFABVisibility,
     updateIsDetectionContextVisible,
