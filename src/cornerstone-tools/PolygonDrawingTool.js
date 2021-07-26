@@ -41,25 +41,20 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         this._modifying = false;
 
         // Create bound callback functions for private event loops
-        this._drawingMouseDownCallback = this._drawingMouseDownCallback.bind(
-            this
-        );
-        this._drawingMouseMoveCallback = this._drawingMouseMoveCallback.bind(
-            this
-        );
+        this._drawingMouseDownCallback =
+            this._drawingMouseDownCallback.bind(this);
+        this._drawingMouseMoveCallback =
+            this._drawingMouseMoveCallback.bind(this);
         this._drawingMouseUpCallback = this._drawingMouseUpCallback.bind(this);
-        this._drawingMouseDoubleClickCallback = this._drawingMouseDoubleClickCallback.bind(
-            this
-        );
+        this._drawingMouseDoubleClickCallback =
+            this._drawingMouseDoubleClickCallback.bind(this);
         this._editMouseUpCallback = this._editMouseUpCallback.bind(this);
         this._editMouseDragCallback = this._editMouseDragCallback.bind(this);
 
-        this._drawingTouchStartCallback = this._drawingTouchStartCallback.bind(
-            this
-        );
-        this._drawingDoubleTapClickCallback = this._drawingDoubleTapClickCallback.bind(
-            this
-        );
+        this._drawingTouchStartCallback =
+            this._drawingTouchStartCallback.bind(this);
+        this._drawingDoubleTapClickCallback =
+            this._drawingDoubleTapClickCallback.bind(this);
         this._editTouchDragCallback = this._editTouchDragCallback.bind(this);
     }
 
@@ -1165,11 +1160,12 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const points = data.handles.points;
         let invalidHandlePlacement = false;
         data.canComplete = false;
-        const mouseAtOriginHandle = this._isDistanceSmallerThanCompleteSpacingCanvas(
-            element,
-            points[0],
-            mousePoint
-        );
+        const mouseAtOriginHandle =
+            this._isDistanceSmallerThanCompleteSpacingCanvas(
+                element,
+                points[0],
+                mousePoint
+            );
         if (
             mouseAtOriginHandle &&
             !freehandIntersect.end(points) &&
@@ -1211,8 +1207,11 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         );
         data.active = true;
         data.highlight = true;
-        points[currentHandle].x = config.mouseLocation.handles.start.x;
-        points[currentHandle].y = config.mouseLocation.handles.start.y;
+        let newPoint = {
+            x: config.mouseLocation.handles.start.x,
+            y: config.mouseLocation.handles.start.y,
+        };
+        points[currentHandle] = newPoint;
 
         handleIndex = this._getPrevHandleIndex(currentHandle, points);
 
