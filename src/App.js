@@ -179,7 +179,7 @@ class App extends Component {
             },
             () => {
                 this.state.commandServer.connect();
-                this.getFilesFromCommandServer();
+                this.getFileFromCommandServer();
                 this.updateNumberOfFiles();
             }
         );
@@ -542,20 +542,22 @@ class App extends Component {
     }
 
     /**
-     * getFilesFromCommandServer - Socket Listener to get files from command server then send them
+     * getFileFromCommandServer - Socket Listener to get files from command server then send them
      *                           - to the file server directly after
      *
      * @return {Promise} Promise
      */
-    async getFilesFromCommandServer() {
+    async getFileFromCommandServer() {
         if (
             this.props.currentProcessingFile === null &&
             this.state.commandServer !== null
         ) {
+            console.log('asking for new image');
             this.state.commandServer.emit('newImg');
         }
         if (this.state.commandServer !== null) {
             this.state.commandServer.on('img', (data) => {
+                console.log('got new image');
                 this.loadNextImage(data.image, data.fileName);
             });
         }
@@ -569,6 +571,7 @@ class App extends Component {
     async updateNumberOfFiles() {
         if (this.state.commandServer !== null) {
             this.state.commandServer.on('numberOfFiles', (data) => {
+                console.log(data);
                 if (!this.props.numFilesInQueue > 0 && data > 0) {
                     const updateImageViewportTop = this.state.imageViewportTop;
                     updateImageViewportTop.style.visibility = 'visible';
@@ -716,161 +719,133 @@ class App extends Component {
      * @return {None} None
      */
     nextImageClick(e) {
-        // TODO: James B. - These fetch calls can be refactored into the serverSlice with Async Thunk calls.
-        axios
-            .get(`${constants.server.FILE_SERVER_ADDRESS}/confirm`)
-            .then((res) => {
-                if (res.data.confirm === 'image-removed') {
-                    this.props.validateDetections();
-                    const stackXML = document.implementation.createDocument(
-                        '',
-                        '',
-                        null
-                    );
-                    const prolog = '<?xml version="1.0" encoding="utf-8"?>';
-                    const imageElem = stackXML.createElement('image');
-                    const mimeType = new Blob(['image/openraster'], {
-                        type: 'text/plain;charset=utf-8',
-                    });
-                    const newOra = new JSZip();
-                    newOra.file('mimetype', mimeType, { compression: null });
-                    let stackCounter = 1;
-                    const listOfPromises = [];
-                    // Loop through each stack, being either top or side currently
-                    this.state.myOra.stackData.forEach((stack) => {
-                        const stackElem = stackXML.createElement('stack');
-                        stackElem.setAttribute(
-                            'name',
-                            `SOP Instance UID #${stackCounter}`
-                        );
-                        stackElem.setAttribute('view', stack.view);
-                        const pixelLayer = stackXML.createElement('layer');
-                        // We always know the first element in the stack.blob data is pixel element
-                        pixelLayer.setAttribute(
-                            'src',
-                            `data/${stack.view}_pixel_data.dcs`
-                        );
-                        newOra.file(
-                            `data/${stack.view}_pixel_data.dcs`,
-                            stack.blobData[0].blob
-                        );
-                        const topStackIndex =
-                            this.state.myOra.stackData.findIndex((stack) => {
-                                return constants.viewport.TOP === stack.view;
-                            });
-                        const sideStackIndex =
-                            this.state.myOra.stackData.findIndex((stack) => {
-                                return constants.viewport.SIDE === stack.view;
-                            });
-                        stackElem.appendChild(pixelLayer);
-                        if (stack.view === 'top') {
-                            // Loop through each detection and only the top view of the detection
-                            const topDetections = getTopDetections(
-                                this.props.detections
-                            );
-                            for (let j = 0; j < topDetections.length; j++) {
-                                let threatPromise = Dicos.detectionObjectToBlob(
-                                    topDetections[j],
-                                    this.state.myOra.stackData[topStackIndex]
-                                        .blobData[0].blob
-                                ).then((threatBlob) => {
-                                    newOra.file(
-                                        `data/top_threat_detection_${j + 1}_${
-                                            topDetections[j].algorithm
-                                        }.dcs`,
-                                        threatBlob
-                                    );
-                                    let newLayer =
-                                        stackXML.createElement('layer');
-                                    newLayer.setAttribute(
-                                        'src',
-                                        `data/top_threat_detection_${j + 1}_${
-                                            topDetections[j].algorithm
-                                        }.dcs`
-                                    );
-                                    newLayer.setAttribute(
-                                        'UUID',
-                                        `${topDetections[j].uuid}`
-                                    );
-                                    stackElem.appendChild(newLayer);
-                                });
-                                listOfPromises.push(threatPromise);
-                            }
-                            // Loop through each detection and only the side view of the detection
-                        } else if (stack.view === 'side') {
-                            const sideDetections = getSideDetections(
-                                this.props.detections
-                            );
-                            for (let i = 0; i < sideDetections.length; i++) {
-                                let threatPromise = Dicos.detectionObjectToBlob(
-                                    sideDetections[i],
-                                    this.state.myOra.stackData[sideStackIndex]
-                                        .blobData[0].blob
-                                ).then((threatBlob) => {
-                                    newOra.file(
-                                        `data/side_threat_detection_${i + 1}_${
-                                            sideDetections[i].algorithm
-                                        }.dcs`,
-                                        threatBlob
-                                    );
-                                    let newLayer =
-                                        stackXML.createElement('layer');
-                                    newLayer.setAttribute(
-                                        'src',
-                                        `data/side_threat_detection_${i + 1}_${
-                                            sideDetections[i].algorithm
-                                        }.dcs`
-                                    );
-                                    newLayer.setAttribute(
-                                        'UUID',
-                                        `${sideDetections[i].uuid}`
-                                    );
-                                    stackElem.appendChild(newLayer);
-                                });
-                                listOfPromises.push(threatPromise);
-                            }
-                        }
-                        stackCounter++;
-                        imageElem.appendChild(stackElem);
-                    });
-                    const promiseOfList = Promise.all(listOfPromises);
-                    promiseOfList.then(() => {
-                        stackXML.appendChild(imageElem);
-
-                        newOra.file(
-                            'stack.xml',
-                            new Blob(
-                                [
-                                    prolog +
-                                        new XMLSerializer().serializeToString(
-                                            stackXML
-                                        ),
-                                ],
-                                { type: 'application/xml ' }
-                            )
-                        );
-                        newOra
-                            .generateAsync({ type: 'blob' })
-                            .then((oraBlob) => {
-                                this.sendImageToCommandServer(oraBlob).then(
-                                    // eslint-disable-next-line no-unused-vars
-                                    (res) => {
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.setUpload(false);
-                                        this.getNextImage();
-                                    }
-                                );
-                            });
-                    });
-                } else if (res.data.confirm === 'image-not-removed') {
-                    console.log("File server couldn't remove the next image");
-                } else if (res.data.confirm === 'no-next-image') {
-                    alert('No next image');
+        this.props.validateDetections();
+        const stackXML = document.implementation.createDocument('', '', null);
+        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
+        const imageElem = stackXML.createElement('image');
+        const mimeType = new Blob(['image/openraster'], {
+            type: 'text/plain;charset=utf-8',
+        });
+        const newOra = new JSZip();
+        newOra.file('mimetype', mimeType, { compression: null });
+        let stackCounter = 1;
+        const listOfPromises = [];
+        // Loop through each stack, being either top or side currently
+        this.state.myOra.stackData.forEach((stack) => {
+            const stackElem = stackXML.createElement('stack');
+            stackElem.setAttribute('name', `SOP Instance UID #${stackCounter}`);
+            stackElem.setAttribute('view', stack.view);
+            const pixelLayer = stackXML.createElement('layer');
+            // We always know the first element in the stack.blob data is pixel element
+            pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.dcs`);
+            newOra.file(
+                `data/${stack.view}_pixel_data.dcs`,
+                stack.blobData[0].blob
+            );
+            const topStackIndex = this.state.myOra.stackData.findIndex(
+                (stack) => {
+                    return constants.viewport.TOP === stack.view;
                 }
-            })
-            .catch((err) => {
-                console.log(err);
+            );
+            const sideStackIndex = this.state.myOra.stackData.findIndex(
+                (stack) => {
+                    return constants.viewport.SIDE === stack.view;
+                }
+            );
+            stackElem.appendChild(pixelLayer);
+            if (stack.view === 'top') {
+                // Loop through each detection and only the top view of the detection
+                const topDetections = getTopDetections(this.props.detections);
+                for (let j = 0; j < topDetections.length; j++) {
+                    let threatPromise = Dicos.detectionObjectToBlob(
+                        topDetections[j],
+                        this.state.myOra.stackData[topStackIndex].blobData[0]
+                            .blob
+                    ).then((threatBlob) => {
+                        newOra.file(
+                            `data/top_threat_detection_${j + 1}_${
+                                topDetections[j].algorithm
+                            }.dcs`,
+                            threatBlob
+                        );
+                        let newLayer = stackXML.createElement('layer');
+                        newLayer.setAttribute(
+                            'src',
+                            `data/top_threat_detection_${j + 1}_${
+                                topDetections[j].algorithm
+                            }.dcs`
+                        );
+                        newLayer.setAttribute(
+                            'UUID',
+                            `${topDetections[j].uuid}`
+                        );
+                        stackElem.appendChild(newLayer);
+                    });
+                    listOfPromises.push(threatPromise);
+                }
+                // Loop through each detection and only the side view of the detection
+            } else if (stack.view === 'side') {
+                const sideDetections = getSideDetections(this.props.detections);
+                for (let i = 0; i < sideDetections.length; i++) {
+                    let threatPromise = Dicos.detectionObjectToBlob(
+                        sideDetections[i],
+                        this.state.myOra.stackData[sideStackIndex].blobData[0]
+                            .blob
+                    ).then((threatBlob) => {
+                        newOra.file(
+                            `data/side_threat_detection_${i + 1}_${
+                                sideDetections[i].algorithm
+                            }.dcs`,
+                            threatBlob
+                        );
+                        let newLayer = stackXML.createElement('layer');
+                        newLayer.setAttribute(
+                            'src',
+                            `data/side_threat_detection_${i + 1}_${
+                                sideDetections[i].algorithm
+                            }.dcs`
+                        );
+                        newLayer.setAttribute(
+                            'UUID',
+                            `${sideDetections[i].uuid}`
+                        );
+                        stackElem.appendChild(newLayer);
+                    });
+                    listOfPromises.push(threatPromise);
+                }
+            }
+            stackCounter++;
+            imageElem.appendChild(stackElem);
+        });
+        const promiseOfList = Promise.all(listOfPromises);
+        promiseOfList.then(() => {
+            stackXML.appendChild(imageElem);
+
+            newOra.file(
+                'stack.xml',
+                new Blob(
+                    [prolog + new XMLSerializer().serializeToString(stackXML)],
+                    { type: 'application/xml ' }
+                )
+            );
+            newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
+                this.props.setCurrentProcessingFile(null);
+                this.setState(
+                    {
+                        myOra: new ORA(),
+                    },
+                    () => this.props.resetDetections()
+                );
+                this.sendImageToCommandServer(oraBlob).then(
+                    // eslint-disable-next-line no-unused-vars
+                    (res) => {
+                        this.resetSelectedDetectionBoxes(e);
+                        this.props.setUpload(false);
+                        this.getFileFromCommandServer();
+                    }
+                );
             });
+        });
     }
 
     /**
