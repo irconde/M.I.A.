@@ -43,7 +43,7 @@
         "react-dev-utils": "^10.2.1"
     },
     "scripts": {
-        "start": "npm-run-all -p load-env server react",
+        "start": "npm-run-all -p load-env react",
         "load-env": "node -r dotenv/config",
         "react": "react-scripts start",
         "server": "cd server && node server.js",
