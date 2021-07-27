@@ -176,16 +176,6 @@ export default class Utils {
         });
     }
 
-    /**
-     * getFilenameFromURI - Methods that extracts the name of a file for the corresponding given Uri
-     *
-     * @param {String} uri - String value that represents the location of a img file within an ORA file
-     * @return {MouseEvent} fileName - String value with the name of the file
-     */
-    static getFilenameFromURI(fileSrcPath) {
-        return fileSrcPath.split('/')[3];
-    }
-
     static changeViewport(singleViewport) {
         let viewportTop = document.getElementById('dicomImageLeft');
         let viewportSide = document.getElementById('dicomImageRight');

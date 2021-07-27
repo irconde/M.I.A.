@@ -620,9 +620,7 @@ class App extends Component {
      * @return {type} None
      */
     loadNextImage(image, fileName) {
-        const fileNameProcessing = Utils.getFilenameFromURI(fileName);
-        console.log(fileNameProcessing);
-        this.props.setCurrentProcessingFile(fileNameProcessing);
+        this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
         // This is our list of stacks we will append to the myOra object in our promise all
