@@ -45,8 +45,8 @@ const initialState = {
     /** @type Detection */
     selectedDetection: null,
 
-    // Normal detectionSet data using the algorithm name as the key and the detectionSet as the value
-    /** @type Object<string, DetectionSet> */
+    // As commented above
+    /** @type Interface Detection */
     detectionLabels: [],
 };
 
@@ -91,11 +91,10 @@ const detectionsSlice = createSlice({
                 validation: null,
                 textColor: 'white',
             });
-            state.detections[
-                state.detections.length - 1
-            ].displayColor = getDetectionColor(
-                state.detections[state.detections.length - 1]
-            );
+            state.detections[state.detections.length - 1].displayColor =
+                getDetectionColor(
+                    state.detections[state.detections.length - 1]
+                );
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
