@@ -318,7 +318,6 @@ class App extends Component {
 
     async monitorConnectionEvent() {
         if (this.state.commandServer !== null) {
-            console.log('not null');
             this.state.commandServer.on('disconnect', () => {
                 this.props.setConnected(false);
                 this.onNoImageLeft();
@@ -566,12 +565,10 @@ class App extends Component {
             this.props.currentProcessingFile === null &&
             this.state.commandServer !== null
         ) {
-            console.log('asking for new image');
             this.state.commandServer.emit('currentFile', (response) => {
-                console.log(response);
                 if (response.status === 'Ok') {
                     this.loadNextImage(
-                        response.image,
+                        response.file,
                         response.fileName,
                         response.numberOfFiles
                     );
@@ -597,12 +594,11 @@ class App extends Component {
      * @return {None} None
      */
     onNoImageLeft() {
-        console.log('no image left');
         let updateImageViewport = this.state.imageViewportTop;
         let updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
-        let verticalDivider = document.getElementById('verticalDivider');
+        const verticalDivider = document.getElementById('verticalDivider');
         verticalDivider.classList.add('dividerHidden');
         verticalDivider.classList.remove('dividerVisible');
         this.props.setNumFilesInQueue(0);
@@ -1050,7 +1046,7 @@ class App extends Component {
                             Dicos.dictionary['NumberOfAlarmObjects'].tag
                         ) === undefined
                     ) {
-                        console.log('No Potential Threat Objects detected');
+                        // console.log('No Potential Threat Objects detected');
                         return;
                     }
                     // for every threat found, create a new Detection object and store all Detection
