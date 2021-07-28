@@ -4,6 +4,10 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 
+const IconStyle = styled.div`
+    margin: 1rem 2.5rem 0.5rem 0rem;
+`;
+
 const SettingsIcon = ({ title }) => {
     function getModalStyle() {
         return {
@@ -45,10 +49,6 @@ const SettingsIcon = ({ title }) => {
             <button onClick={() => setOpen(false)}>Close</button>
         </div>
     );
-
-    const IconStyle = styled.div`
-        margin: 1rem 2.5rem 0.5rem 0rem;
-    `;
 
     return (
         <>

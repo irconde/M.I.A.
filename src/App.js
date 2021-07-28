@@ -29,6 +29,7 @@ import {
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,
+    setConnected,
 } from './redux/slices/server/serverSlice';
 import {
     resetDetections,
@@ -125,6 +126,7 @@ class App extends Component {
             tapDetector: new TapDetector(),
             commandServer: null,
         };
+        this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
@@ -177,6 +179,7 @@ class App extends Component {
             },
             () => {
                 this.state.commandServer.connect();
+                this.monitorConnectionEvent();
                 this.getFileFromCommandServer();
             }
         );
@@ -306,10 +309,24 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         this.state.commandServer.disconnect();
+        this.props.setConnected(false);
         this.stopListeningClickEvents();
         window.removeEventListener('resize', this.resizeListener);
         document.body.removeEventListener('mousemove', this.onMouseMoved);
         document.body.removeEventListener('mouseleave', this.onMouseLeave);
+    }
+
+    async monitorConnectionEvent() {
+        if (this.state.commandServer !== null) {
+            console.log('not null');
+            this.state.commandServer.on('disconnect', () => {
+                this.props.setConnected(false);
+                this.onNoImageLeft();
+            });
+            this.state.commandServer.on('connect', () => {
+                this.props.setConnected(true);
+            });
+        }
     }
 
     /**
@@ -551,11 +568,14 @@ class App extends Component {
         ) {
             console.log('asking for new image');
             this.state.commandServer.emit('currentFile', (response) => {
-                this.loadNextImage(
-                    response.image,
-                    response.fileName,
-                    response.numberOfFiles
-                );
+                console.log(response);
+                if (response.status === 'Ok') {
+                    this.loadNextImage(
+                        response.image,
+                        response.fileName,
+                        response.numberOfFiles
+                    );
+                } else this.onNoImageLeft();
             });
         }
     }
@@ -577,10 +597,15 @@ class App extends Component {
      * @return {None} None
      */
     onNoImageLeft() {
+        console.log('no image left');
         let updateImageViewport = this.state.imageViewportTop;
         let updateImageViewportSide = this.state.imageViewportSide;
         updateImageViewport.style.visibility = 'hidden';
         updateImageViewportSide.style.visibility = 'hidden';
+        let verticalDivider = document.getElementById('verticalDivider');
+        verticalDivider.classList.add('dividerHidden');
+        verticalDivider.classList.remove('dividerVisible');
+        this.props.setNumFilesInQueue(0);
         this.props.updateFABVisibility(false);
         this.setState({
             imageViewportTop: updateImageViewport,
@@ -951,7 +976,7 @@ class App extends Component {
                 // Threat Sequence information
                 const threatSequence = image.elements.x40101011;
                 if (threatSequence == null) {
-                    console.log('No Threat Sequence');
+                    // console.log('No Threat Sequence');
                     return;
                 }
                 if (
@@ -1014,7 +1039,7 @@ class App extends Component {
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
                     if (threatSequence == null) {
-                        console.log('No Threat Sequence');
+                        // console.log('No Threat Sequence');
                         return;
                     }
                     if (
@@ -2491,6 +2516,7 @@ const mapDispatchToProps = {
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
     updateDetectionVisibility,
+    setConnected,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
