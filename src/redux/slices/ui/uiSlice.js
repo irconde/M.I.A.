@@ -230,6 +230,7 @@ const uiSlice = createSlice({
             const { singleViewport, receiveTime } = action.payload;
             state.singleViewport = singleViewport;
             state.receiveTime = receiveTime;
+            state.isFABVisible = true;
         },
         /**
          * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.

@@ -140,7 +140,6 @@ class App extends Component {
         this.resetSelectedDetectionBoxes =
             this.resetSelectedDetectionBoxes.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);
-        this.updateNumberOfFiles = this.updateNumberOfFiles.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
         this.calculateviewPortWidthAndHeight =
@@ -179,7 +178,6 @@ class App extends Component {
             () => {
                 this.state.commandServer.connect();
                 this.getFileFromCommandServer();
-                this.updateNumberOfFiles();
             }
         );
         this.state.imageViewportTop.addEventListener(
@@ -552,35 +550,12 @@ class App extends Component {
             this.state.commandServer !== null
         ) {
             console.log('asking for new image');
-            this.state.commandServer.emit('newImg');
-        }
-        if (this.state.commandServer !== null) {
-            this.state.commandServer.on('img', (data) => {
-                console.log('got new image');
-                this.loadNextImage(data.image, data.fileName);
-            });
-        }
-    }
-
-    /**
-     * updateNumberOfFiles - Opens a socket to constantly monitor the number of files with the file server
-     *
-     * @return {Promise} Promise
-     */
-    async updateNumberOfFiles() {
-        if (this.state.commandServer !== null) {
-            this.state.commandServer.on('numberOfFiles', (data) => {
-                console.log(data);
-                if (!this.props.numFilesInQueue > 0 && data > 0) {
-                    const updateImageViewportTop = this.state.imageViewportTop;
-                    updateImageViewportTop.style.visibility = 'visible';
-                    this.setState({
-                        imageViewportTop: updateImageViewportTop,
-                    });
-                    // this.getNextImage();
-                }
-                this.props.updateFABVisibility(data > 0);
-                this.props.setNumFilesInQueue(data);
+            this.state.commandServer.emit('currentFile', (response) => {
+                this.loadNextImage(
+                    response.image,
+                    response.fileName,
+                    response.numberOfFiles
+                );
             });
         }
     }
@@ -619,7 +594,7 @@ class App extends Component {
      * @param {String} fileName
      * @return {type} None
      */
-    loadNextImage(image, fileName) {
+    loadNextImage(image, fileName, numberOfFiles) {
         this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
@@ -687,11 +662,18 @@ class App extends Component {
                     const promiseOfList = Promise.all(listOfPromises);
                     // Once we have all the layers...
                     promiseOfList.then(() => {
+                        const updateImageViewportTop =
+                            this.state.imageViewportTop;
+                        updateImageViewportTop.style.visibility = 'visible';
+                        this.setState({
+                            imageViewportTop: updateImageViewportTop,
+                        });
                         this.state.myOra.stackData = listOfStacks;
                         this.props.newFileReceivedUpdate({
                             singleViewport: listOfStacks.length < 2,
                             receiveTime: Date.now(),
                         });
+                        this.props.setNumFilesInQueue(numberOfFiles);
                         Utils.changeViewport(this.props.singleViewport);
                         if (this.props.singleViewport) {
                             cornerstone.resize(
@@ -701,6 +683,7 @@ class App extends Component {
                         } else {
                             cornerstone.resize(this.state.imageViewportTop);
                         }
+
                         this.props.resetDetections();
                         this.loadAndViewImage();
                     });
