@@ -20,7 +20,7 @@ const SettingsIcon = ({ title }) => {
         setOpen(false);
     };
 
-    const [settingsInputIP, setSettingsInputIP] = useState();
+    const [settingsInputIP, setSettingsInputIP] = useState("");
 
     // const handleChange = e => {
     //     setBody(e.target.value);
