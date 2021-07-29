@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Grid, Paper, Button, Divider, Typography, TextField } from '@material-ui/core';
+import { Grid, Paper, Button, Divider, Typography, TextField, InputLabel, FormControl, Input } from '@material-ui/core';
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { CircularProgress } from "@material-ui/core";
@@ -20,16 +20,16 @@ const SettingsIcon = ({ title }) => {
         setOpen(false);
     };
 
-    const [textBody, setBody] = useState("");
+    const [settingsInputIP, setSettingsInputIP] = useState();
 
-    const handleChange = e => {
-        setBody(e.target.value);
-    };
+    // const handleChange = e => {
+    //     setBody(e.target.value);
+    // };
     
-    const handleSubmit = e => {
-      e.preventDefault();
-      console.log("body", textBody);
-    };
+    // const handleSubmit = e => {
+    //   e.preventDefault();
+    //   console.log("body", textBody);
+    // };
 
     function getModalStyle() {
         return {
@@ -91,12 +91,19 @@ const SettingsIcon = ({ title }) => {
             form: {
                 margin: theme.spacing(1),
             },
+            formControl: {
+              margin: theme.spacing.unit,
+            },
+            container: {
+              display: 'flex',
+              flexWrap: 'wrap',
+            },
         }
     });
 
     const classes = useStyles();
 
-    const body = (
+    let body = (
             <Paper 
                 style={modalStyle}
                 elevation={3}
@@ -124,13 +131,11 @@ const SettingsIcon = ({ title }) => {
                         <div className={classes.optionsContainer}>
                             <div className={classes.localFileOptions}>
                                 <h1>Local file settings</h1>
-                                <form onSubmit={handleSubmit} noValidate autoComplete="off">
-                                    <TextField></TextField>
-                                <button type="submit" variant="contained" color="primary">
-                                Submit
-                                {false && <CircularProgress />}
-                                </button>
-                                </form>
+                                <TextField></TextField>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor="name-simple">Name</InputLabel>
+                                    <Input id="name-simple" value={settingsInputIP} onChange={(e) => {setSettingsInputIP(e.target.value)}} />
+                                </FormControl>
                             </div>
 
                             <div className={classes.remoteServiceOptions}> 
