@@ -2511,8 +2511,7 @@ class App extends Component {
                             el.addEventListener('selectstart', (e) => {
                                 e.preventDefault();
                             });
-                    }}
-                    onMouseDown={(e) => e.preventDefault()}>
+                    }}>
                     <TopBar />
                     <SideMenu
                         nextImageClick={this.nextImageClick}

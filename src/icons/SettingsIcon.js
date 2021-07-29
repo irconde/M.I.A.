@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Grid, Paper, Button, Divider, Typography, TextField, InputLabel, FormControl, Input } from '@material-ui/core';
-import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles';
+import {
+    Grid,
+    Paper,
+    Button,
+    Divider,
+    Typography,
+    TextField,
+    InputLabel,
+    FormControl,
+    Input,
+} from '@material-ui/core';
+import {
+    makeStyles,
+    createTheme,
+    ThemeProvider,
+} from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from '@material-ui/core';
+
+const IconStyle = styled.div`
+    margin: 1rem 2.5rem 0.5rem 0rem;
+`;
 
 const SettingsIcon = ({ title }) => {
-
     const [modalStyle] = useState(getModalStyle);
     const [remoteSelected, selector] = useState(false);
     const [open, setOpen] = useState(false);
@@ -20,12 +37,12 @@ const SettingsIcon = ({ title }) => {
         setOpen(false);
     };
 
-    const [settingsInputIP, setSettingsInputIP] = useState("");
+    const [settingsInputIP, setSettingsInputIP] = useState('test');
 
     // const handleChange = e => {
     //     setBody(e.target.value);
     // };
-    
+
     // const handleSubmit = e => {
     //   e.preventDefault();
     //   console.log("body", textBody);
@@ -41,9 +58,9 @@ const SettingsIcon = ({ title }) => {
 
     const theme = createTheme({
         palette: {
-          type: 'dark',
+            type: 'dark',
         },
-      });
+    });
 
     const useStyles = makeStyles((theme) => {
         return {
@@ -55,13 +72,11 @@ const SettingsIcon = ({ title }) => {
                 padding: theme.spacing(2, 4, 3),
             },
             paper: {
-              padding: theme.spacing(1),
-              textAlign: 'center',
-              color: theme.palette.text.primary,
+                padding: theme.spacing(1),
+                textAlign: 'center',
+                color: theme.palette.text.primary,
             },
-            selector: {
-
-            },
+            selector: {},
             links: {
                 fontSize: theme.typography.fontSize,
                 color: theme.palette.primary,
@@ -77,7 +92,7 @@ const SettingsIcon = ({ title }) => {
                 flexGrow: 1,
             },
             topSection: {
-                margin: theme.spacing(2,1),
+                margin: theme.spacing(2, 1),
             },
             optionsContainer: {
                 padding: theme.spacing(2),
@@ -92,69 +107,82 @@ const SettingsIcon = ({ title }) => {
                 margin: theme.spacing(1),
             },
             formControl: {
-              margin: theme.spacing.unit,
+                margin: theme.spacing.unit,
             },
             container: {
-              display: 'flex',
-              flexWrap: 'wrap',
+                display: 'flex',
+                flexWrap: 'wrap',
             },
-        }
+        };
     });
 
     const classes = useStyles();
 
     let body = (
-            <Paper 
-                style={modalStyle}
-                elevation={3}
-                className={classes.modal}>
-                    <div className={classes.root}>
-                        <Grid container 
-                        spacing={2}
-                        direction={'row'}
-                        justifyContent={'center'}
-                        className={classes.topSection}>
-                            <Grid item>
-                                <Button variant="body2" className={remoteSelected ? classes.links : classes.linkSelected} onClick={() => selector(false)}>
-                                Local files
-                                </Button>
-                            </Grid>
-                            <Divider orientation="vertical" flexItem />
-                            <Grid item>
-                                <Button variant="body2" className={remoteSelected ? classes.linkSelected : classes.links} onClick={() => selector(true)}>
-                                Remote service
-                                </Button>
-                            </Grid>
-                        </Grid>
-                        <Divider variant="middle"/>
+        <Paper style={modalStyle} elevation={3} className={classes.modal}>
+            <div className={classes.root}>
+                <Grid
+                    container
+                    spacing={2}
+                    direction={'row'}
+                    justifyContent={'center'}
+                    className={classes.topSection}>
+                    <Grid item>
+                        <Button
+                            variant="body2"
+                            className={
+                                remoteSelected
+                                    ? classes.links
+                                    : classes.linkSelected
+                            }
+                            onClick={() => selector(false)}>
+                            Local files
+                        </Button>
+                    </Grid>
+                    <Divider orientation="vertical" flexItem />
+                    <Grid item>
+                        <Button
+                            variant="body2"
+                            className={
+                                remoteSelected
+                                    ? classes.linkSelected
+                                    : classes.links
+                            }
+                            onClick={() => selector(true)}>
+                            Remote service
+                        </Button>
+                    </Grid>
+                </Grid>
+                <Divider variant="middle" />
 
-                        <div className={classes.optionsContainer}>
-                            <div className={classes.localFileOptions}>
-                                <h1>Local file settings</h1>
-                                <TextField></TextField>
-                                <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor="name-simple">Name</InputLabel>
-                                    <Input id="name-simple" value={settingsInputIP} onChange={(e) => {setSettingsInputIP(e.target.value)}} />
-                                </FormControl>
-                            </div>
-
-                            <div className={classes.remoteServiceOptions}> 
-                                <h1>Remote service settings</h1>
-                            </div>
-
-                        </div>
-
-                        <Button onClick={() => setOpen(false)}>Close</Button>
+                <div className={classes.optionsContainer}>
+                    <div className={classes.localFileOptions}>
+                        <h1>Local file settings</h1>
+                        <FormControl className={classes.formControl}>
+                            <InputLabel htmlFor="name-simple">Name</InputLabel>
+                            <Input
+                                id="name-simple"
+                                value={settingsInputIP}
+                                onChange={(e) => {
+                                    console.log(e.target.value);
+                                    setSettingsInputIP(e.target.value);
+                                }}
+                            />
+                        </FormControl>
                     </div>
-            </Paper>
+
+                    <div className={classes.remoteServiceOptions}>
+                        <h1>Remote service settings</h1>
+                    </div>
+                </div>
+
+                <Button onClick={() => setOpen(false)}>Close</Button>
+            </div>
+        </Paper>
     );
 
-    const IconStyle = styled.div`
-        margin: 1rem 2.5rem 0.5rem 0rem;
-    `;
-
     return (
-        <ThemeProvider theme={ theme }>
+        <ThemeProvider theme={theme}>
             <>
                 <IconStyle onClick={handleOpen}>
                     <svg
@@ -189,7 +217,7 @@ const SettingsIcon = ({ title }) => {
                         </g>
                     </svg>
                 </IconStyle>
-                
+
                 <Modal
                     open={open}
                     onClose={handleClose}
