@@ -320,7 +320,6 @@ class App extends Component {
         if (this.state.commandServer !== null) {
             this.state.commandServer.on('disconnect', () => {
                 this.props.setConnected(false);
-                this.onNoImageLeft();
             });
             this.state.commandServer.on('connect', () => {
                 this.props.setConnected(true);
@@ -555,8 +554,7 @@ class App extends Component {
     }
 
     /**
-     * getFileFromCommandServer - Socket Listener to get files from command server then send them
-     *                           - to the file server directly after
+     * getFileFromCommandServer - Socket Listener to get files from command server and load it once received
      *
      * @return {Promise} Promise
      */
