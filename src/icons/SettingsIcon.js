@@ -11,6 +11,8 @@ import {
     InputLabel,
     FormControl,
     Input,
+    FormControlLabel,
+    Checkbox,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -37,16 +39,22 @@ const SettingsIcon = ({ title }) => {
         setOpen(false);
     };
 
-    const [settingsInputIP, setSettingsInputIP] = useState('test');
+    const [settingsInputIP, setSettingsInputIP] = useState('');
+    const [settingsInputPort, setSettingsInputPort] = useState('');
+    const [autoConnectSet, setAutoConnect] = useState(false);
+    const [connection, setConnectionStatus] = useState(false);
+    const [connectionChecked, setConnectionChecked] = useState(false);
+    const [connectionLoading, setConnectionLoading] = useState(false);
 
-    // const handleChange = e => {
-    //     setBody(e.target.value);
-    // };
-
-    // const handleSubmit = e => {
-    //   e.preventDefault();
-    //   console.log("body", textBody);
-    // };
+    const checkConnection = () => {
+        var connection = Math.random() >= 0.5 ? true : false;
+        setConnectionChecked(true);
+        setConnectionLoading(true);
+        setInterval(() => {
+            setConnectionLoading(false);
+        }, 3000);
+        return connection;
+    };
 
     function getModalStyle() {
         return {
@@ -109,6 +117,27 @@ const SettingsIcon = ({ title }) => {
             formControl: {
                 margin: theme.spacing.unit,
             },
+            textField: {
+                margin: theme.spacing.unit,
+            },
+            closeButton: {
+                marginTop: theme.spacing(2),
+                float: 'right',
+            },
+            connectionLabel: {
+                margin: 'auto',
+                display: connectionLoading ? 'none' : 'initial',
+            },
+            connectionSection: {
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'start',
+                marginTop: theme.spacing(2),
+            },
+            circularProgress: {
+                marginRight: theme.spacing(2),
+                display: connectionLoading ? 'initial' : 'none',
+            },
             container: {
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -158,25 +187,80 @@ const SettingsIcon = ({ title }) => {
                 <div className={classes.optionsContainer}>
                     <div className={classes.localFileOptions}>
                         <h1>Local file settings</h1>
-                        <FormControl className={classes.formControl}>
-                            <InputLabel htmlFor="name-simple">Name</InputLabel>
-                            <Input
-                                id="name-simple"
-                                value={settingsInputIP}
-                                onChange={(e) => {
-                                    console.log(e.target.value);
-                                    setSettingsInputIP(e.target.value);
-                                }}
-                            />
-                        </FormControl>
                     </div>
 
                     <div className={classes.remoteServiceOptions}>
                         <h1>Remote service settings</h1>
+                        <FormControl className={classes.formControl}>
+                            <TextField
+                                required
+                                className={classes.textField}
+                                id="standard-required"
+                                label="IP Address"
+                                value={settingsInputIP}
+                                onChange={(e) => {
+                                    setSettingsInputIP(e.target.value);
+                                }}
+                            />
+                            <TextField
+                                required
+                                id="standard-required"
+                                className={classes.textField}
+                                label="Port"
+                                value={settingsInputPort}
+                                onChange={(e) => {
+                                    setSettingsInputPort(e.target.value);
+                                }}
+                                inputProps={{
+                                    maxLength: 4,
+                                    inputMode: 'numeric',
+                                    pattern: '[0-9]*',
+                                }}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={autoConnectSet}
+                                        onChange={() => {
+                                            autoConnectSet
+                                                ? setAutoConnect(false)
+                                                : setAutoConnect(true);
+                                        }}
+                                        name="autoConnect"
+                                    />
+                                }
+                                label="Autoconnect?"
+                            />
+                            <Button
+                                className={classes.closeButton}
+                                variant="outlined"
+                                onClick={() => {
+                                    setConnectionStatus(checkConnection());
+                                }}>
+                                Check connection
+                            </Button>
+                            <div className={classes.connectionSection}>
+                                <CircularProgress
+                                    className={classes.circularProgress}
+                                />
+                                <Typography className={classes.connectionLabel}>
+                                    {!connectionChecked
+                                        ? ''
+                                        : connection
+                                        ? 'Connection successful.'
+                                        : 'Connection failed.'}
+                                </Typography>
+                            </div>
+                        </FormControl>
                     </div>
                 </div>
 
-                <Button onClick={() => setOpen(false)}>Close</Button>
+                <Button
+                    className={classes.closeButton}
+                    variant="outlined"
+                    onClick={() => setOpen(false)}>
+                    Close
+                </Button>
             </div>
         </Paper>
     );
