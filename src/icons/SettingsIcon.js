@@ -10,9 +10,10 @@ import {
     TextField,
     InputLabel,
     FormControl,
-    Input,
+    Select,
     FormControlLabel,
     Checkbox,
+    MenuItem,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -45,7 +46,14 @@ const SettingsIcon = ({ title }) => {
     const [connection, setConnectionStatus] = useState(false);
     const [connectionChecked, setConnectionChecked] = useState(false);
     const [connectionLoading, setConnectionLoading] = useState(false);
+    const [fileFormatOption, setFileFormatOption] = useState('');
+    const [openFileFormat, setOpenFileFormat] = useState(false);
+    const [annotationsFormatOption, setAnnotationsFormatOption] = useState('');
+    const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
+    const [pathInput, setPath] = useState('');
+    const [suffixInput, setSuffix] = useState('');
 
+    //Simulates checking connection.
     const checkConnection = () => {
         var connection = Math.random() >= 0.5 ? true : false;
         setConnectionChecked(true);
@@ -54,6 +62,11 @@ const SettingsIcon = ({ title }) => {
             setConnectionLoading(false);
         }, 3000);
         return connection;
+    };
+
+    const getPath = () => {
+        var path = 'C:/user_example/test_output_folder';
+        return path;
     };
 
     function getModalStyle() {
@@ -138,6 +151,19 @@ const SettingsIcon = ({ title }) => {
                 marginRight: theme.spacing(2),
                 display: connectionLoading ? 'initial' : 'none',
             },
+            displayListSection: {
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'start',
+                marginBottom: theme.spacing(2),
+            },
+            sectionLabel: {
+                marginRight: theme.spacing(2),
+            },
+            outputFolderSection: {
+                display: 'flex',
+                flexDirection: 'column',
+            },
             container: {
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -187,6 +213,99 @@ const SettingsIcon = ({ title }) => {
                 <div className={classes.optionsContainer}>
                     <div className={classes.localFileOptions}>
                         <h1>Local file settings</h1>
+
+                        <FormControl className={classes.formControl}>
+                            <div className={classes.displayListSection}>
+                                <Typography className={classes.sectionLabel}>
+                                    Output file format:
+                                </Typography>
+                                <Select
+                                    open={openFileFormat}
+                                    onClose={() => {
+                                        setOpenFileFormat(false);
+                                    }}
+                                    onOpen={() => {
+                                        setOpenFileFormat(true);
+                                    }}
+                                    value={fileFormatOption}
+                                    onChange={(e) => {
+                                        setFileFormatOption(e.target.value);
+                                    }}>
+                                    <MenuItem value={'ORA'}>ORA</MenuItem>
+                                    <MenuItem value={'ZIP'}>ZIP</MenuItem>
+                                </Select>
+                            </div>
+
+                            <div className={classes.displayListSection}>
+                                <Typography className={classes.sectionLabel}>
+                                    Annotations format:
+                                </Typography>
+                                <Select
+                                    open={openAnnotationsFormat}
+                                    onClose={() => {
+                                        setOpenAnnotationsFormat(false);
+                                    }}
+                                    onOpen={() => {
+                                        setOpenAnnotationsFormat(true);
+                                    }}
+                                    value={annotationsFormatOption}
+                                    onChange={(e) => {
+                                        setAnnotationsFormatOption(
+                                            e.target.value
+                                        );
+                                    }}>
+                                    <MenuItem value={'MS COCO'}>
+                                        MS COCO
+                                    </MenuItem>
+                                    <MenuItem value={'Pascal VOC'}>
+                                        Pascal VOC
+                                    </MenuItem>
+                                </Select>
+                            </div>
+                            <div className={classes.outputFolderSection}>
+                                <div
+                                    className={
+                                        classes.outputFolderSectionLabel
+                                    }>
+                                    <Typography>Output folder path:</Typography>
+                                </div>
+                                <div
+                                    className={
+                                        classes.outputFolderSectionContent
+                                    }>
+                                    <TextField
+                                        required
+                                        className={classes.textField}
+                                        id="standard-required"
+                                        label="Path:"
+                                        value={pathInput}
+                                        onChange={(e) => {
+                                            setPath(e.target.value);
+                                        }}
+                                    />
+                                    <Button
+                                        className={classes.pathButton}
+                                        variant="outlined"
+                                        onClick={() => {
+                                            setPath(getPath());
+                                        }}>
+                                        Add path
+                                    </Button>
+                                </div>
+                                <div className={classes.suffixSection}>
+                                    <TextField
+                                        required
+                                        className={classes.textField}
+                                        id="standard-required"
+                                        label="Save files with suffix:"
+                                        value={suffixInput}
+                                        onChange={(e) => {
+                                            setSuffix(e.target.value);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </FormControl>
                     </div>
 
                     <div className={classes.remoteServiceOptions}>
@@ -196,7 +315,7 @@ const SettingsIcon = ({ title }) => {
                                 required
                                 className={classes.textField}
                                 id="standard-required"
-                                label="IP Address"
+                                label="IP Address:"
                                 value={settingsInputIP}
                                 onChange={(e) => {
                                     setSettingsInputIP(e.target.value);
@@ -206,7 +325,7 @@ const SettingsIcon = ({ title }) => {
                                 required
                                 id="standard-required"
                                 className={classes.textField}
-                                label="Port"
+                                label="Port:"
                                 value={settingsInputPort}
                                 onChange={(e) => {
                                     setSettingsInputPort(e.target.value);
