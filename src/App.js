@@ -75,6 +75,7 @@ import {
     resetSelectedDetectionBoxesElseUpdate,
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
+    setInputLabel,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -1493,7 +1494,13 @@ class App extends Component {
             }
             // Click on an empty area
             if (clickedPos === constants.selection.NO_SELECTION) {
-                // Only clear if a detection is selected
+                if (
+                    this.props.editionMode === constants.editionMode.LABEL &&
+                    this.props.inputLabel !== ''
+                ) {
+                    this.editDetectionLabel(this.props.inputLabel);
+                    this.props.setInputLabel('');
+                }
                 this.props.clearAllSelection();
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
@@ -2554,6 +2561,7 @@ const mapStateToProps = (state) => {
         singleViewport: ui.singleViewport,
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
+        inputLabel: ui.inputLabel,
     };
 };
 
@@ -2600,6 +2608,7 @@ const mapDispatchToProps = {
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
     updateDetectionVisibility,
+    setInputLabel,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
