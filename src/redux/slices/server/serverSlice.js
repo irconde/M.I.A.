@@ -29,28 +29,6 @@ const serverSlice = createSlice({
         setCurrentProcessingFile: (state, action) => {
             state.currentProcessingFile = action.payload;
         },
-        setCommandServerConnection: (state, action) => {
-            const { payload } = action;
-            // action payload is either connect or disconnect
-            if (payload.action.toLowerCase() === 'connect') {
-                payload.socket.connect();
-                state.isConnected = true;
-            } else {
-                payload.socket.disconnect();
-                state.isConnected = false;
-            }
-        },
-        setFileServerConnection: (state, action) => {
-            const { payload } = action;
-            // action payload is either connect or disconnect
-            if (payload.action.toLowerCase() === 'connect') {
-                //TODO: Do we want to keep track of file server connection status in the store?
-                // Currently, in `App.js` we are only updating `isConnected` for command server
-                payload.socket.connect();
-            } else {
-                payload.socket.disconnect();
-            }
-        },
     },
 });
 
@@ -63,8 +41,6 @@ export const {
     setNumFilesInQueue,
     setProcessingHost,
     setCurrentProcessingFile,
-    setCommandServerConnection,
-    setFileServerConnection,
 } = serverSlice.actions;
 
 // Selectors
