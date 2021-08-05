@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
+
 const IconStyle = styled.div`
     margin: 1rem 2.5rem 0.5rem 0rem;
 `;
+
 const SettingsIcon = ({ title }) => {
     function getModalStyle() {
         return {

@@ -176,39 +176,6 @@ export default class Utils {
         });
     }
 
-    /**
-     * getFilenameFromURI - Methods that extracts the name of a file for the corresponding given Uri
-     *
-     * @param {String} uri - String value that represents the location of a img file within an ORA file
-     * @return {MouseEvent} fileName - String value with the name of the file
-     */
-    static getFilenameFromURI(fileSrcPath) {
-        const userAgent = window.navigator.userAgent,
-            platform = window.navigator.platform,
-            macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
-            windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
-            iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-        let os = null;
-        let fileName = null;
-        if (macosPlatforms.indexOf(platform) !== -1) {
-            os = 'Mac';
-            fileName = fileSrcPath.split('/')[1];
-        } else if (iosPlatforms.indexOf(platform) !== -1) {
-            os = 'iOS';
-            fileName = fileSrcPath.split('/')[1];
-        } else if (windowsPlatforms.indexOf(platform) !== -1) {
-            os = 'Windows';
-            fileName = fileSrcPath.split('\\')[1];
-        } else if (/Android/.test(userAgent)) {
-            os = 'Android';
-            fileName = fileSrcPath.split('/')[1];
-        } else if (!os && /Linux/.test(platform)) {
-            os = 'Linux';
-            fileName = fileSrcPath.split('/')[1];
-        }
-        return fileName;
-    }
-
     static changeViewport(singleViewport) {
         let viewportTop = document.getElementById('dicomImageLeft');
         let viewportSide = document.getElementById('dicomImageRight');
