@@ -1150,14 +1150,17 @@ class App extends Component {
                                 threatSequence.items[m]
                             )
                         );
-                        var pixelData = Dicos.retrieveMaskData(image);
+                        const maskData = Dicos.retrieveMaskData(
+                            threatSequence.items[m],
+                            image
+                        );
                         self.props.addDetection({
                             algorithm: algorithmName,
                             className: objectClass,
                             confidence: confidenceLevel,
                             view: constants.viewport.SIDE,
                             boundingBox: boundingBoxCoords,
-                            binaryMask: pixelData,
+                            binaryMask: maskData,
                             polygonMask: [],
                             uuid: currentRightImage.uuid,
                         });
@@ -1550,14 +1553,15 @@ class App extends Component {
     getDetectionType(detection) {
         let type;
         if (
-            !this.props.selectedDetection.binaryMask ||
-            this.props.selectedDetection.binaryMask.length === 1
+            this.props.selectedDetection.binaryMask.length !== 0 &&
+            this.props.selectedDetection.binaryMask[0].length !== 0 &&
+            this.props.selectedDetection.polygonMask.length === 0
         ) {
-            type = constants.detectionType.BOUNDING;
+            type = constants.detectionType.BINARY;
         } else if (this.props.selectedDetection.polygonMask.length !== 0) {
             type = constants.detectionType.POLYGON;
         } else {
-            type = constants.detectionType.BINARY;
+            type = constants.detectionType.BOUNDING;
         }
         return type;
     }
