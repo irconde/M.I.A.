@@ -29,6 +29,7 @@ const initialState = {
     seriesType: '',
     studyType: '',
     displaySettings: false,
+    isSettingsVisible: false,
 };
 
 const uiSlice = createSlice({
@@ -325,6 +326,14 @@ const uiSlice = createSlice({
         setDisplaySettings: (state, action) => {
             state.displaySettings = action.payload;
         },
+        /**
+         * toggleSettingsVisibility
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - Boolean value determining whether or not to display the settings modal window.
+         */
+        toggleSettingsVisibility: (state, action) => {
+            state.isSettingsVisible = action.payload;
+        },
     },
 });
 
@@ -437,6 +446,12 @@ export const getSeriesType = (state) => state.ui.seriesType;
  */
 export const getStudyType = (state) => state.ui.studyType;
 /**
+ * getSettingsVisibility
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} The boolean whether settings is visible.
+ */
+export const getSettingsVisibility = (state) => state.ui.isSettingsVisible;
+/**
  * getConfigInfo
  * @param {State} state Passed in via useSelector/mapStateToProps
  * @returns {Object} An object containing the configuration info.
@@ -508,6 +523,7 @@ export const {
     resetSelectedDetectionBoxesUpdate,
     resetSelectedDetectionBoxesElseUpdate,
     onLabelEditionEnd,
+    toggleSettingsVisibility,
 } = uiSlice.actions;
 
 // Export the reducer for the store
