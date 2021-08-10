@@ -30,12 +30,21 @@ const initialState = {
     studyType: '',
     displaySettings: false,
     isSettingsVisible: false,
+    inputLabel: '',
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * setInputLabel
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action.payload
+         */
+        setInputLabel: (state, action) => {
+            state.inputLabel = action.payload;
+        },
         /**
          * updateDetectionType
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -231,6 +240,7 @@ const uiSlice = createSlice({
             const { singleViewport, receiveTime } = action.payload;
             state.singleViewport = singleViewport;
             state.receiveTime = receiveTime;
+            state.isFABVisible = true;
         },
         /**
          * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
@@ -337,6 +347,12 @@ const uiSlice = createSlice({
     },
 });
 
+/**
+ * getInputLabel
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {String} Returns the current input value
+ */
+export const getInputLabel = (state) => state.ui.inputLabel;
 /**
  * getIsFabVisible
  * @param {State} state Passed in via useSelector/mapStateToProps
@@ -524,6 +540,7 @@ export const {
     resetSelectedDetectionBoxesElseUpdate,
     onLabelEditionEnd,
     toggleSettingsVisibility,
+    setInputLabel,
 } = uiSlice.actions;
 
 // Export the reducer for the store

@@ -9,12 +9,6 @@ export const selection = {
     ALL_SELECTED: 999,
 };
 
-export const server = {
-    FILE_SERVER_ADDRESS: 'http://127.0.0.1:4002',
-    PROTOCOL: 'http://',
-    FILE_SERVER_PORT: ':4002',
-};
-
 export const colors = {
     WHITE: '#FFFFFF',
     YELLOW: '#F7B500',

@@ -5,8 +5,12 @@ import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
-import { useSelector } from 'react-redux';
-import { getDetectionContextInfo } from '../../redux/slices/ui/uiSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    getDetectionContextInfo,
+    getInputLabel,
+    setInputLabel,
+} from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
 
 const EditLabelWrapper = styled.div`
@@ -56,19 +60,13 @@ const EditLabelWrapper = styled.div`
  * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabel = ({ onLabelChange }) => {
+    const dispatch = useDispatch();
     const reduxInfo = useSelector(getDetectionContextInfo);
-    const {
-        zoomSide,
-        zoomTop,
-        viewport,
-        position,
-        width,
-        font,
-        isVisible,
-    } = reduxInfo;
+    const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
+        reduxInfo;
     const labels = useSelector(getDetectionLabels);
     const [isListOpen, setIsListOpen] = useState(false);
-    const [newLabel, setNewLabel] = useState('');
+    const newLabel = useSelector(getInputLabel);
     const inputField = useRef(null);
 
     const placeholder = 'Input text';
@@ -80,7 +78,7 @@ const EditLabel = ({ onLabelChange }) => {
     // Clear input field when list is opened
     useEffect(() => {
         if (isListOpen) {
-            setNewLabel('');
+            dispatch(setInputLabel(''));
         }
     }, [isListOpen]);
     useEffect(() => {
@@ -114,7 +112,7 @@ const EditLabel = ({ onLabelChange }) => {
             onLabelChange(
                 Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
             );
-            setNewLabel('');
+            dispatch(setInputLabel(''));
         }
     };
 
@@ -143,7 +141,9 @@ const EditLabel = ({ onLabelChange }) => {
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
                         onChange={(e) =>
-                            setNewLabel(e.target.value.toUpperCase())
+                            dispatch(
+                                setInputLabel(e.target.value.toUpperCase())
+                            )
                         }
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
