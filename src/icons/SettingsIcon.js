@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import SettingsModal from '../components/SettingsModal/SettingsModal';
@@ -9,7 +9,7 @@ const IconStyle = styled.div`
     margin: 1rem 2.5rem 0.5rem 0rem;
 `;
 
-const SettingsIcon = ({ title }) => {
+const SettingsIcon = (props) => {
     const dispatch = useDispatch();
 
     const handleOpen = () => {
@@ -25,7 +25,7 @@ const SettingsIcon = ({ title }) => {
                     viewBox="0 0 24 24"
                     version="1.1"
                     xmlns="http://www.w3.org/2000/svg">
-                    <title>{title}</title>
+                    <title>{props.title}</title>
                     <g
                         id="Page-1"
                         stroke="none"
@@ -52,13 +52,17 @@ const SettingsIcon = ({ title }) => {
                 </svg>
             </IconStyle>
 
-            <SettingsModal></SettingsModal>
+            <SettingsModal
+                connectToCommandServer={
+                    props.connectToCommandServer
+                }></SettingsModal>
         </>
     );
 };
 
 SettingsIcon.propTypes = {
     title: PropTypes.string,
+    connectToCommandServer: PropTypes.func,
 };
 
 export default SettingsIcon;

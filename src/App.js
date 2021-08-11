@@ -76,7 +76,6 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
-import Settings from './components/Settings/Settings';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -128,6 +127,7 @@ class App extends Component {
             commandServer: null,
         };
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
+        this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
@@ -166,6 +166,24 @@ class App extends Component {
             this.stopListeningClickEvents.bind(this);
     }
 
+    connectToCommandServer(update = false) {
+        this.props.setProcessingHost(
+            `http://${this.props.remoteIp}:${this.props.remotePort}`
+        );
+        this.setState(
+            {
+                commandServer: socketIOClient(
+                    `http://${this.props.remoteIp}:${this.props.remotePort}`
+                ),
+            },
+            () => {
+                this.state.commandServer.connect();
+                this.monitorConnectionEvent();
+                this.getFileFromCommandServer(update);
+            }
+        );
+    }
+
     /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
@@ -173,17 +191,7 @@ class App extends Component {
      */
     componentDidMount() {
         // Connect socket servers
-        this.props.setProcessingHost(constants.COMMAND_SERVER);
-        this.setState(
-            {
-                commandServer: socketIOClient(constants.COMMAND_SERVER),
-            },
-            () => {
-                this.state.commandServer.connect();
-                this.monitorConnectionEvent();
-                this.getFileFromCommandServer();
-            }
-        );
+        this.connectToCommandServer();
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -559,10 +567,11 @@ class App extends Component {
      *
      * @return {Promise} Promise
      */
-    async getFileFromCommandServer() {
+    async getFileFromCommandServer(update = false) {
         if (
-            this.props.currentProcessingFile === null &&
-            this.state.commandServer !== null
+            (this.props.currentProcessingFile === null &&
+                this.state.commandServer !== null) ||
+            update === true
         ) {
             this.state.commandServer.emit('currentFile', (response) => {
                 if (response.status === 'Ok') {
@@ -1462,7 +1471,7 @@ class App extends Component {
      * @param {Object} detection
      * @return {constants.detectionType} type
      */
-    getDetectionType(detection) {
+    getDetectionType() {
         let type;
         if (
             this.props.selectedDetection.binaryMask.length !== 0 &&
@@ -2435,7 +2444,9 @@ class App extends Component {
                                 e.preventDefault();
                             });
                     }}>
-                    <TopBar />
+                    <TopBar
+                        connectToCommandServer={this.connectToCommandServer}
+                    />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
@@ -2450,7 +2461,6 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
-                    <Settings />
                 </div>
             </div>
         );
@@ -2458,7 +2468,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections, ui } = state;
+    const { server, detections, ui, settings } = state;
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
@@ -2477,6 +2487,10 @@ const mapStateToProps = (state) => {
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
+        // Settings
+        remoteIp: settings.settings.remoteIp,
+        remotePort: settings.settings.remotePort,
+        autoConnect: settings.settings.autoConnect,
     };
 };
 

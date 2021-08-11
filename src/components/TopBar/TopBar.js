@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/FileQueueIcon';
 import SettingsIcon from '../../icons/SettingsIcon';
@@ -6,7 +7,7 @@ import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 
-const TopBar = () => {
+const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const {
         processingFile,
@@ -102,7 +103,10 @@ const TopBar = () => {
                     isConnected={isConnected}
                     style={styles.icon}
                 />
-                <SettingsIcon title="Settings" />
+                <SettingsIcon
+                    connectToCommandServer={props.connectToCommandServer}
+                    title="Settings"
+                />
             </div>
         </div>
     ) : (
@@ -127,10 +131,17 @@ const TopBar = () => {
                     isConnected={isConnected}
                     style={styles.lastIcon}
                 />
-                <SettingsIcon title="Settings" />
+                <SettingsIcon
+                    connectToCommandServer={props.connectToCommandServer}
+                    title="Settings"
+                />
             </div>
         </div>
     );
+};
+
+TopBar.propTypes = {
+    connectToCommandServer: PropTypes.func,
 };
 
 export default TopBar;

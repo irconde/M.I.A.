@@ -27,14 +27,23 @@ import {
     toggleSettingsVisibility,
     getSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
+import {
+    getSettings,
+    saveCookieData,
+    setAutoConnect,
+    setRemoteIp,
+    setRemotePort,
+} from '../../redux/slices/settings/settingsSlice';
 
-const SettingsModal = () => {
+const SettingsModal = (props) => {
+    const settings = useSelector(getSettings);
+    const { remoteIp, remotePort, autoConnect } = settings;
     const [modalStyle] = useState(getModalStyle);
     const [remoteSelected, selector] = useState(false);
 
-    const [settingsInputIP, setSettingsInputIP] = useState('');
-    const [settingsInputPort, setSettingsInputPort] = useState('');
-    const [autoConnectSet, setAutoConnect] = useState(false);
+    // const [settingsInputIP, setSettingsInputIP] = useState('');
+    // const [settingsInputPort, setSettingsInputPort] = useState('');
+    // const [autoConnectSet, setAutoConnect] = useState(false);
     const [connection, setConnectionStatus] = useState(false);
     const [connectionChecked, setConnectionChecked] = useState(false);
     const [connectionLoading, setConnectionLoading] = useState(false);
@@ -315,9 +324,9 @@ const SettingsModal = () => {
                                 className={classes.textField}
                                 id="standard-required"
                                 label="IP Address:"
-                                value={settingsInputIP}
+                                value={remoteIp}
                                 onChange={(e) => {
-                                    setSettingsInputIP(e.target.value);
+                                    dispatch(setRemoteIp(e.target.value));
                                 }}
                             />
                             <TextField
@@ -325,9 +334,9 @@ const SettingsModal = () => {
                                 id="standard-required"
                                 className={classes.textField}
                                 label="Port:"
-                                value={settingsInputPort}
+                                value={remotePort}
                                 onChange={(e) => {
-                                    setSettingsInputPort(e.target.value);
+                                    dispatch(setRemotePort(e.target.value));
                                 }}
                                 inputProps={{
                                     maxLength: 4,
@@ -338,24 +347,26 @@ const SettingsModal = () => {
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={autoConnectSet}
+                                        checked={autoConnect}
                                         onChange={() => {
-                                            autoConnectSet
-                                                ? setAutoConnect(false)
-                                                : setAutoConnect(true);
+                                            dispatch(
+                                                setAutoConnect(!autoConnect)
+                                            );
                                         }}
                                         name="autoConnect"
                                     />
                                 }
-                                label="Autoconnect?"
+                                label="AutoConnect?"
                             />
                             <Button
                                 className={classes.closeButton}
                                 variant="outlined"
                                 onClick={() => {
-                                    setConnectionStatus(checkConnection());
+                                    // setConnectionStatus(checkConnection());
+                                    dispatch(saveCookieData());
+                                    props.connectToCommandServer(true);
                                 }}>
-                                Check connection
+                                Connect
                             </Button>
                             <div className={classes.connectionSection}>
                                 <CircularProgress
@@ -398,6 +409,7 @@ const SettingsModal = () => {
 
 SettingsModal.propTypes = {
     title: PropTypes.string,
+    connectToCommandServer: PropTypes.func,
 };
 
 export default SettingsModal;

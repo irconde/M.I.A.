@@ -90,7 +90,6 @@ export const events = {
 
 export const OPERATOR = 'OPERATOR';
 export const BOUNDING_BOX_AREA_THRESHOLD = 10;
-export const COMMAND_SERVER = process.env.REACT_APP_COMMAND_SERVER;
 export const ALGORITHM = 'Algorithm';
 export const MAX_LABEL_LENGTH = 10;
 export const ZERO_DEGREE_TRANSFORM = 'rotate(0deg)';
