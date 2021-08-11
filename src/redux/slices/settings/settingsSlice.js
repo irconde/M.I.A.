@@ -6,11 +6,19 @@ import * as constants from '../../../utils/Constants';
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');
 
+const storeCookieData = (settings) => {
+    myCookie.set('settings', settings, {
+        path: '/',
+        maxAge: COOKIE.TIME, // Current time is 3 hours
+    });
+};
+
 let settings;
 const defaultSettings = {
     remoteIp: process.env.REACT_APP_COMMAND_SERVER_IP,
     remotePort: process.env.REACT_APP_COMMAND_SERVER_PORT,
     autoConnect: true,
+    fileFormat: 'ORA',
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -38,16 +46,10 @@ const settingsSlice = createSlice({
          */
         setCookieData: (state, action) => {
             state.settings = action.payload;
-            myCookie.set('settings', action.payload, {
-                path: '/',
-                maxAge: COOKIE.TIME, // Current time is 3 hours
-            });
+            storeCookieData(state.settings);
         },
         saveCookieData: (state) => {
-            myCookie.set('settings', state.settings, {
-                path: '/',
-                maxAge: COOKIE.TIME, // Current time is 3 hours
-            });
+            storeCookieData(state.settings);
         },
         /**
          * removeCookieData - Will delete the current settings cookie and reset the settings to default
@@ -60,12 +62,19 @@ const settingsSlice = createSlice({
         },
         setRemoteIp: (state, action) => {
             state.settings.remoteIp = action.payload;
+            storeCookieData(state.settings);
         },
         setRemotePort: (state, action) => {
             state.settings.remotePort = action.payload;
+            storeCookieData(state.settings);
         },
         setAutoConnect: (state, action) => {
             state.settings.autoConnect = action.payload;
+            storeCookieData(state.settings);
+        },
+        setFileFormat: (state, action) => {
+            state.settings.fileFormat = action.payload;
+            storeCookieData(state.settings);
         },
     },
 });
@@ -78,6 +87,7 @@ export const {
     setRemoteIp,
     setRemotePort,
     setAutoConnect,
+    setFileFormat,
 } = settingsSlice.actions;
 
 // Selectors

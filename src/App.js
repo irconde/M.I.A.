@@ -592,7 +592,10 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        this.state.commandServer.emit('fileFromClient', file);
+        this.state.commandServer.emit('fileFromClient', {
+            file,
+            fileFormat: this.props.fileFormat,
+        });
     }
 
     /**
@@ -837,7 +840,7 @@ class App extends Component {
                     { type: 'application/xml ' }
                 )
             );
-            newOra.generateAsync({ type: 'blob' }).then((oraBlob) => {
+            newOra.generateAsync({ type: 'nodebuffer' }).then((oraBlob) => {
                 this.props.setCurrentProcessingFile(null);
                 this.setState(
                     {
@@ -2491,6 +2494,7 @@ const mapStateToProps = (state) => {
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
         autoConnect: settings.settings.autoConnect,
+        fileFormat: settings.settings.fileFormat,
     };
 };
 

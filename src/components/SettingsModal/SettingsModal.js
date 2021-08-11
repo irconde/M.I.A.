@@ -31,6 +31,7 @@ import {
     getSettings,
     saveCookieData,
     setAutoConnect,
+    setFileFormat,
     setRemoteIp,
     setRemotePort,
 } from '../../redux/slices/settings/settingsSlice';
@@ -41,13 +42,11 @@ import {
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
-    const { remoteIp, remotePort, autoConnect } = settings;
+    const { remoteIp, remotePort, autoConnect, fileFormat } = settings;
     const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
     const [remoteSelected, selector] = useState(false);
-    const [displayConnectionResult, setDisplayConnectionResult] =
-        useState(false);
-    const [fileFormatOption, setFileFormatOption] = useState('');
+    // const [fileFormatOption, setFileFormatOption] = useState('');
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [annotationsFormatOption, setAnnotationsFormatOption] = useState('');
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
@@ -234,9 +233,9 @@ const SettingsModal = (props) => {
                                     onOpen={() => {
                                         setOpenFileFormat(true);
                                     }}
-                                    value={fileFormatOption}
+                                    value={fileFormat}
                                     onChange={(e) => {
-                                        setFileFormatOption(e.target.value);
+                                        dispatch(setFileFormat(e.target.value));
                                     }}>
                                     <MenuItem value={'ORA'}>ORA</MenuItem>
                                     <MenuItem value={'ZIP'}>ZIP</MenuItem>
@@ -371,7 +370,6 @@ const SettingsModal = (props) => {
                                 variant="outlined"
                                 onClick={() => {
                                     // setConnectionStatus(checkConnection());
-                                    dispatch(saveCookieData());
                                     dispatch(setConnected(false));
                                     setTimeout(() => {
                                         props.connectToCommandServer(true);
