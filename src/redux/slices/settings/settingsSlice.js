@@ -19,6 +19,9 @@ const defaultSettings = {
     remotePort: process.env.REACT_APP_COMMAND_SERVER_PORT,
     autoConnect: true,
     fileFormat: 'ORA',
+    annotationsFormat: '',
+    localFileOutput: '',
+    fileSuffix: '',
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -76,6 +79,18 @@ const settingsSlice = createSlice({
             state.settings.fileFormat = action.payload;
             storeCookieData(state.settings);
         },
+        setAnnotationsFormat: (state, action) => {
+            state.settings.annotationsFormat = action.payload;
+            storeCookieData(state.settings);
+        },
+        setLocalFileOutput: (state, action) => {
+            state.settings.localFileOutput = action.payload;
+            storeCookieData(state.settings);
+        },
+        setFileSuffix: (state, action) => {
+            state.settings.fileSuffix = action.payload;
+            storeCookieData(state.settings);
+        },
     },
 });
 
@@ -88,6 +103,9 @@ export const {
     setRemotePort,
     setAutoConnect,
     setFileFormat,
+    setAnnotationsFormat,
+    setLocalFileOutput,
+    setFileSuffix,
 } = settingsSlice.actions;
 
 // Selectors

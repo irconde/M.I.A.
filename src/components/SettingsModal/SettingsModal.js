@@ -29,9 +29,11 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import {
     getSettings,
-    saveCookieData,
+    setAnnotationsFormat,
     setAutoConnect,
     setFileFormat,
+    setFileSuffix,
+    setLocalFileOutput,
     setRemoteIp,
     setRemotePort,
 } from '../../redux/slices/settings/settingsSlice';
@@ -42,30 +44,25 @@ import {
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
-    const { remoteIp, remotePort, autoConnect, fileFormat } = settings;
+    const {
+        remoteIp,
+        remotePort,
+        autoConnect,
+        fileFormat,
+        annotationsFormat,
+        localFileOutput,
+        fileSuffix,
+    } = settings;
     const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
     const [remoteSelected, selector] = useState(false);
-    // const [fileFormatOption, setFileFormatOption] = useState('');
     const [openFileFormat, setOpenFileFormat] = useState(false);
-    const [annotationsFormatOption, setAnnotationsFormatOption] = useState('');
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
-    const [pathInput, setPath] = useState('');
-    const [suffixInput, setSuffix] = useState('');
+    // const [pathInput, setPath] = useState('');
+    // const [suffixInput, setSuffix] = useState('');
 
     const settingsVisibility = useSelector(getSettingsVisibility);
     const dispatch = useDispatch();
-
-    //Simulates checking connection.
-    // const checkConnection = () => {
-    //     var connection = Math.random() >= 0.5 ? true : false;
-    //     setConnectionChecked(true);
-    //     setConnectionLoading(true);
-    //     setInterval(() => {
-    //         setConnectionLoading(false);
-    //     }, 3000);
-    //     return connection;
-    // };
 
     const getPath = () => {
         var path = 'C:/user_example/test_output_folder';
@@ -254,10 +251,10 @@ const SettingsModal = (props) => {
                                     onOpen={() => {
                                         setOpenAnnotationsFormat(true);
                                     }}
-                                    value={annotationsFormatOption}
+                                    value={annotationsFormat}
                                     onChange={(e) => {
-                                        setAnnotationsFormatOption(
-                                            e.target.value
+                                        dispatch(
+                                            setAnnotationsFormat(e.target.value)
                                         );
                                     }}>
                                     <MenuItem value={'MS COCO'}>
@@ -284,16 +281,22 @@ const SettingsModal = (props) => {
                                         className={classes.textField}
                                         id="standard-required"
                                         label="Path:"
-                                        value={pathInput}
+                                        value={localFileOutput}
                                         onChange={(e) => {
-                                            setPath(e.target.value);
+                                            dispatch(
+                                                setLocalFileOutput(
+                                                    e.target.value
+                                                )
+                                            );
                                         }}
                                     />
                                     <Button
                                         className={classes.pathButton}
                                         variant="outlined"
                                         onClick={() => {
-                                            setPath(getPath());
+                                            dispatch(
+                                                setLocalFileOutput(getPath())
+                                            );
                                         }}>
                                         Add path
                                     </Button>
@@ -304,9 +307,11 @@ const SettingsModal = (props) => {
                                         className={classes.textField}
                                         id="standard-required"
                                         label="Save files with suffix:"
-                                        value={suffixInput}
+                                        value={fileSuffix}
                                         onChange={(e) => {
-                                            setSuffix(e.target.value);
+                                            dispatch(
+                                                setFileSuffix(e.target.value)
+                                            );
                                         }}
                                     />
                                 </div>
