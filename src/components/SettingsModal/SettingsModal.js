@@ -34,19 +34,19 @@ import {
     setRemoteIp,
     setRemotePort,
 } from '../../redux/slices/settings/settingsSlice';
+import {
+    getConnected,
+    setConnected,
+} from '../../redux/slices/server/serverSlice';
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
     const { remoteIp, remotePort, autoConnect } = settings;
+    const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
     const [remoteSelected, selector] = useState(false);
-
-    // const [settingsInputIP, setSettingsInputIP] = useState('');
-    // const [settingsInputPort, setSettingsInputPort] = useState('');
-    // const [autoConnectSet, setAutoConnect] = useState(false);
-    const [connection, setConnectionStatus] = useState(false);
-    const [connectionChecked, setConnectionChecked] = useState(false);
-    const [connectionLoading, setConnectionLoading] = useState(false);
+    const [displayConnectionResult, setDisplayConnectionResult] =
+        useState(false);
     const [fileFormatOption, setFileFormatOption] = useState('');
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [annotationsFormatOption, setAnnotationsFormatOption] = useState('');
@@ -58,15 +58,15 @@ const SettingsModal = (props) => {
     const dispatch = useDispatch();
 
     //Simulates checking connection.
-    const checkConnection = () => {
-        var connection = Math.random() >= 0.5 ? true : false;
-        setConnectionChecked(true);
-        setConnectionLoading(true);
-        setInterval(() => {
-            setConnectionLoading(false);
-        }, 3000);
-        return connection;
-    };
+    // const checkConnection = () => {
+    //     var connection = Math.random() >= 0.5 ? true : false;
+    //     setConnectionChecked(true);
+    //     setConnectionLoading(true);
+    //     setInterval(() => {
+    //         setConnectionLoading(false);
+    //     }, 3000);
+    //     return connection;
+    // };
 
     const getPath = () => {
         var path = 'C:/user_example/test_output_folder';
@@ -147,7 +147,6 @@ const SettingsModal = (props) => {
             },
             connectionLabel: {
                 margin: 'auto',
-                display: connectionLoading ? 'none' : 'initial',
             },
             connectionSection: {
                 display: 'flex',
@@ -157,7 +156,7 @@ const SettingsModal = (props) => {
             },
             circularProgress: {
                 marginRight: theme.spacing(2),
-                display: connectionLoading ? 'initial' : 'none',
+                display: connected ? 'none' : 'initial',
             },
             displayListSection: {
                 display: 'flex',
@@ -358,28 +357,28 @@ const SettingsModal = (props) => {
                                 }
                                 label="AutoConnect?"
                             />
+                            <div className={classes.connectionSection}>
+                                <CircularProgress
+                                    className={classes.circularProgress}
+                                />
+                                <Typography className={classes.connectionLabel}>
+                                    {connected ? 'Connected' : 'Connecting...'}
+                                </Typography>
+                            </div>
+
                             <Button
                                 className={classes.closeButton}
                                 variant="outlined"
                                 onClick={() => {
                                     // setConnectionStatus(checkConnection());
                                     dispatch(saveCookieData());
-                                    props.connectToCommandServer(true);
+                                    dispatch(setConnected(false));
+                                    setTimeout(() => {
+                                        props.connectToCommandServer(true);
+                                    }, 750);
                                 }}>
                                 Connect
                             </Button>
-                            <div className={classes.connectionSection}>
-                                <CircularProgress
-                                    className={classes.circularProgress}
-                                />
-                                <Typography className={classes.connectionLabel}>
-                                    {!connectionChecked
-                                        ? ''
-                                        : connection
-                                        ? 'Connection successful.'
-                                        : 'Connection failed.'}
-                                </Typography>
-                            </div>
                         </FormControl>
                     </div>
                 </div>
