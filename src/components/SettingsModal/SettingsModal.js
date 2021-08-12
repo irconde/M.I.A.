@@ -11,6 +11,7 @@ import {
     TextField,
     InputLabel,
     FormControl,
+    FormGroup,
     Select,
     FormControlLabel,
     Checkbox,
@@ -41,6 +42,7 @@ import {
     getConnected,
     setConnected,
 } from '../../redux/slices/server/serverSlice';
+import SettingsCog from '../../icons/SettingsCog';
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
@@ -55,12 +57,8 @@ const SettingsModal = (props) => {
     } = settings;
     const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
-    const [remoteSelected, selector] = useState(false);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
-    // const [pathInput, setPath] = useState('');
-    // const [suffixInput, setSuffix] = useState('');
-
     const settingsVisibility = useSelector(getSettingsVisibility);
     const dispatch = useDispatch();
 
@@ -74,6 +72,9 @@ const SettingsModal = (props) => {
             top: `50%`,
             left: `50%`,
             transform: `translate(-50%, -50%)`,
+            backgroundColor: '#1f1f1f',
+            border: '0',
+            outline: 'none',
         };
     }
 
@@ -91,7 +92,6 @@ const SettingsModal = (props) => {
         return {
             modal: {
                 position: 'absolute',
-                border: '2px solid #000',
                 minWidth: '60vw',
                 boxShadow: theme.shadows[5],
                 padding: theme.spacing(2, 4, 3),
@@ -116,30 +116,24 @@ const SettingsModal = (props) => {
             root: {
                 flexGrow: 1,
             },
-            topSection: {
-                margin: theme.spacing(2, 1),
-            },
             optionsContainer: {
                 padding: theme.spacing(2),
-            },
-            localFileOptions: {
-                display: remoteSelected ? 'none' : 'initial',
-            },
-            remoteServiceOptions: {
-                display: remoteSelected ? 'initial' : 'none',
             },
             form: {
                 margin: theme.spacing(1),
             },
             formControl: {
-                margin: theme.spacing.unit,
+                margin: theme.spacing(1),
             },
             textField: {
-                margin: theme.spacing.unit,
+                margin: theme.spacing(1),
             },
-            closeButton: {
+            saveButton: {
                 marginTop: theme.spacing(2),
                 float: 'right',
+                backgroundColor: '#367eff',
+                display: 'flex',
+                alignSelf: 'flex-end',
             },
             connectionLabel: {
                 margin: 'auto',
@@ -169,7 +163,17 @@ const SettingsModal = (props) => {
             },
             container: {
                 display: 'flex',
-                flexWrap: 'wrap',
+            },
+            greyText: {
+                color: 'gray',
+            },
+            settingsContainer: {
+                display: 'flex',
+                flexDirection: 'row',
+            },
+            settingsCogwheel: {
+                marginTop: '1.6rem',
+                marginRight: '1.5rem',
             },
         };
     });
@@ -179,45 +183,92 @@ const SettingsModal = (props) => {
     let body = (
         <Paper style={modalStyle} elevation={3} className={classes.modal}>
             <div className={classes.root}>
-                <Grid
-                    container
-                    spacing={2}
-                    direction={'row'}
-                    justifyContent={'center'}
-                    className={classes.topSection}>
-                    <Grid item>
-                        <Button
-                            variant="body2"
-                            className={
-                                remoteSelected
-                                    ? classes.links
-                                    : classes.linkSelected
-                            }
-                            onClick={() => selector(false)}>
-                            Local files
-                        </Button>
-                    </Grid>
-                    <Divider orientation="vertical" flexItem />
-                    <Grid item>
-                        <Button
-                            variant="body2"
-                            className={
-                                remoteSelected
-                                    ? classes.linkSelected
-                                    : classes.links
-                            }
-                            onClick={() => selector(true)}>
-                            Remote service
-                        </Button>
-                    </Grid>
-                </Grid>
+                <div className={classes.settingsContainer}>
+                    <div className={classes.settingsCogwheel}>
+                        <SettingsCog title={props.title} />
+                    </div>
+                    <h2>Settings</h2>
+                </div>
                 <Divider variant="middle" />
+                <FormGroup className={classes.formControl}>
+                    <div className={classes.optionsContainer}>
+                        <div>
+                            <h4>Work connected to a remote service</h4>
+                            <p className={classes.greyText}>
+                                Chose the option if you want to receive/send
+                                images from/to a server
+                            </p>
+                            <FormControl>
+                                <TextField
+                                    required
+                                    className={classes.textField}
+                                    id="remoteIp"
+                                    label="IP Address:"
+                                    value={remoteIp}
+                                    onChange={(e) => {
+                                        dispatch(setRemoteIp(e.target.value));
+                                    }}
+                                />
+                            </FormControl>
+                            <FormControl>
+                                <TextField
+                                    required
+                                    id="remotePort"
+                                    className={classes.textField}
+                                    label="Port:"
+                                    value={remotePort}
+                                    onChange={(e) => {
+                                        dispatch(setRemotePort(e.target.value));
+                                    }}
+                                    inputProps={{
+                                        maxLength: 4,
+                                        inputMode: 'numeric',
+                                        pattern: '[0-9]*',
+                                    }}
+                                />
+                            </FormControl>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={autoConnect}
+                                        onChange={() => {
+                                            dispatch(
+                                                setAutoConnect(!autoConnect)
+                                            );
+                                        }}
+                                        name="autoConnect"
+                                    />
+                                }
+                                label="AutoConnect?"
+                            />
+                            <div className={classes.connectionSection}>
+                                <CircularProgress
+                                    className={classes.circularProgress}
+                                />
+                                <Typography className={classes.connectionLabel}>
+                                    {connected ? 'Connected' : 'Connecting...'}
+                                </Typography>
+                            </div>
 
-                <div className={classes.optionsContainer}>
-                    <div className={classes.localFileOptions}>
-                        <h1>Local file settings</h1>
-
-                        <FormControl className={classes.formControl}>
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    // setConnectionStatus(checkConnection());
+                                    dispatch(setConnected(false));
+                                    setTimeout(() => {
+                                        props.connectToCommandServer(true);
+                                    }, 750);
+                                }}>
+                                Connect
+                            </Button>
+                        </div>
+                        <Divider variant="middle" />
+                        <div>
+                            <h4>File management</h4>
+                            <p className={classes.greyText}>
+                                Default file management options to streamline
+                                file input and output
+                            </p>
                             <div className={classes.displayListSection}>
                                 <Typography className={classes.sectionLabel}>
                                     Output file format:
@@ -276,20 +327,22 @@ const SettingsModal = (props) => {
                                     className={
                                         classes.outputFolderSectionContent
                                     }>
-                                    <TextField
-                                        required
-                                        className={classes.textField}
-                                        id="standard-required"
-                                        label="Path:"
-                                        value={localFileOutput}
-                                        onChange={(e) => {
-                                            dispatch(
-                                                setLocalFileOutput(
-                                                    e.target.value
-                                                )
-                                            );
-                                        }}
-                                    />
+                                    <FormControl>
+                                        <TextField
+                                            required
+                                            className={classes.textField}
+                                            id="localFileOutput"
+                                            label="Path:"
+                                            value={localFileOutput}
+                                            onChange={(e) => {
+                                                dispatch(
+                                                    setLocalFileOutput(
+                                                        e.target.value
+                                                    )
+                                                );
+                                            }}
+                                        />
+                                    </FormControl>
                                     <Button
                                         className={classes.pathButton}
                                         variant="outlined"
@@ -302,96 +355,34 @@ const SettingsModal = (props) => {
                                     </Button>
                                 </div>
                                 <div className={classes.suffixSection}>
-                                    <TextField
-                                        required
-                                        className={classes.textField}
-                                        id="standard-required"
-                                        label="Save files with suffix:"
-                                        value={fileSuffix}
-                                        onChange={(e) => {
-                                            dispatch(
-                                                setFileSuffix(e.target.value)
-                                            );
-                                        }}
-                                    />
+                                    <FormControl>
+                                        <TextField
+                                            required
+                                            className={classes.textField}
+                                            id="outputSuffix"
+                                            label="Save files with suffix:"
+                                            value={fileSuffix}
+                                            onChange={(e) => {
+                                                dispatch(
+                                                    setFileSuffix(
+                                                        e.target.value
+                                                    )
+                                                );
+                                            }}
+                                        />
+                                    </FormControl>
                                 </div>
                             </div>
-                        </FormControl>
+                        </div>
                     </div>
 
-                    <div className={classes.remoteServiceOptions}>
-                        <h1>Remote service settings</h1>
-                        <FormControl className={classes.formControl}>
-                            <TextField
-                                required
-                                className={classes.textField}
-                                id="standard-required"
-                                label="IP Address:"
-                                value={remoteIp}
-                                onChange={(e) => {
-                                    dispatch(setRemoteIp(e.target.value));
-                                }}
-                            />
-                            <TextField
-                                required
-                                id="standard-required"
-                                className={classes.textField}
-                                label="Port:"
-                                value={remotePort}
-                                onChange={(e) => {
-                                    dispatch(setRemotePort(e.target.value));
-                                }}
-                                inputProps={{
-                                    maxLength: 4,
-                                    inputMode: 'numeric',
-                                    pattern: '[0-9]*',
-                                }}
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={autoConnect}
-                                        onChange={() => {
-                                            dispatch(
-                                                setAutoConnect(!autoConnect)
-                                            );
-                                        }}
-                                        name="autoConnect"
-                                    />
-                                }
-                                label="AutoConnect?"
-                            />
-                            <div className={classes.connectionSection}>
-                                <CircularProgress
-                                    className={classes.circularProgress}
-                                />
-                                <Typography className={classes.connectionLabel}>
-                                    {connected ? 'Connected' : 'Connecting...'}
-                                </Typography>
-                            </div>
-
-                            <Button
-                                className={classes.closeButton}
-                                variant="outlined"
-                                onClick={() => {
-                                    // setConnectionStatus(checkConnection());
-                                    dispatch(setConnected(false));
-                                    setTimeout(() => {
-                                        props.connectToCommandServer(true);
-                                    }, 750);
-                                }}>
-                                Connect
-                            </Button>
-                        </FormControl>
-                    </div>
-                </div>
-
-                <Button
-                    className={classes.closeButton}
-                    variant="outlined"
-                    onClick={() => handleClose()}>
-                    Close
-                </Button>
+                    <Button
+                        className={classes.saveButton}
+                        variant="outlined"
+                        onClick={() => handleClose()}>
+                        Save Settings
+                    </Button>
+                </FormGroup>
             </div>
         </Paper>
     );
