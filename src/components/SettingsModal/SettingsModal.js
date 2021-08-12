@@ -48,6 +48,8 @@ import {
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
 import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
+import ConnectionResult from './ConnectionResult';
+import socketIOClient from 'socket.io-client';
 
 const CustomSwitch = withStyles({
     colorSecondary: {
@@ -78,7 +80,8 @@ const SettingsModal = (props) => {
     const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
-
+    const [connectionDisplay, setConnectionDisplay] = useState(false);
+    const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const dispatch = useDispatch();
@@ -98,6 +101,37 @@ const SettingsModal = (props) => {
             fontFamily: 'NotoSansJP',
         };
     }
+
+    const testConnection = () => {
+        const testConnection = socketIOClient(
+            `http://${remoteIp}:${remotePort}`
+        );
+        testConnection.connect();
+        testConnection.on('connect', () => {
+            setTimeout(() => {
+                setTestConnectionResult(true);
+                setConnectionDisplay(true);
+                setTimeout(() => {
+                    setTestConnectionResult(false);
+                    setConnectionDisplay(false);
+                }, 1750);
+            }, 750);
+        });
+        testConnection.on('connect_error', (err) => {
+            console.log(`connect_error due to ${err.message}`);
+            if (err.message === 'xhr poll error') {
+                testConnection.disconnect();
+                setTimeout(() => {
+                    setTestConnectionResult(false);
+                    setConnectionDisplay(true);
+                    setTimeout(() => {
+                        setTestConnectionResult(false);
+                        setConnectionDisplay(false);
+                    }, 1750);
+                }, 750);
+            }
+        });
+    };
 
     const handleClose = () => {
         dispatch(toggleSettingsVisibility(false));
@@ -373,27 +407,25 @@ const SettingsModal = (props) => {
                                 />
                             </div>
 
-                            <div className={classes.connectionSection}>
-                                <CircularProgress
-                                    className={classes.circularProgress}
-                                />
-                                <Typography className={classes.connectionLabel}>
-                                    {connected ? 'Connected' : 'Connecting...'}
-                                </Typography>
-                            </div>
-
                             <Button
                                 variant="outlined"
                                 disabled={!remoteOrLocal}
                                 onClick={() => {
-                                    // setConnectionStatus(checkConnection());
-                                    dispatch(setConnected(false));
-                                    setTimeout(() => {
-                                        props.connectToCommandServer(true);
-                                    }, 750);
+                                    testConnection();
+                                    // // setConnectionStatus(checkConnection());
+                                    // dispatch(setConnected(false));
+                                    // setTimeout(() => {
+                                    //     props.connectToCommandServer(true);
+                                    // }, 750);
                                 }}>
                                 Check Connection
                             </Button>
+                            <div className={classes.connectionSection}>
+                                <ConnectionResult
+                                    display={connectionDisplay}
+                                    connected={testConnectionResult}
+                                />
+                            </div>
                         </div>
                         <Divider variant="middle" />
                         <div>
