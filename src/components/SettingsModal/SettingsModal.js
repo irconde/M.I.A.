@@ -47,6 +47,7 @@ import {
 } from '../../redux/slices/server/serverSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
+import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
 
 const CustomSwitch = withStyles({
     colorSecondary: {
@@ -93,8 +94,8 @@ const SettingsModal = (props) => {
             left: `50%`,
             transform: `translate(-50%, -50%)`,
             backgroundColor: '#1f1f1f',
-            border: '0',
             outline: 'none',
+            fontFamily: 'NotoSansJP',
         };
     }
 
@@ -243,6 +244,22 @@ const SettingsModal = (props) => {
                 lineHeight: 'normal',
                 letterSpacing: 'normal',
                 color: '#fff',
+                marginBottom: '0.25rem',
+            },
+            remoteInputContainer: {
+                display: 'inline-flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+            },
+            cloudIconContainer: {
+                alignSelf: 'center',
+            },
+            autoConnectContainer: {
+                display: 'inline-block',
+                float: 'right',
+            },
+            flexAuto: {
+                flex: 'auto',
             },
         };
     });
@@ -291,53 +308,71 @@ const SettingsModal = (props) => {
                                 Choose the option if you want to receive/send
                                 images from/to a server
                             </p>
-                            <FormControl>
-                                <TextField
-                                    required
-                                    className={classes.textField}
-                                    id="remoteIp"
-                                    placeholder="Host"
-                                    value={remoteIp}
-                                    disabled={!remoteOrLocal}
-                                    onChange={(e) => {
-                                        dispatch(setRemoteIp(e.target.value));
-                                    }}
-                                />
-                            </FormControl>
-                            <span>:</span>
-                            <FormControl>
-                                <TextField
-                                    required
-                                    id="remotePort"
-                                    className={classes.textField}
-                                    placeholder="Port"
-                                    value={remotePort}
-                                    onChange={(e) => {
-                                        dispatch(setRemotePort(e.target.value));
-                                    }}
-                                    disabled={!remoteOrLocal}
-                                    inputProps={{
-                                        maxLength: 4,
-                                        inputMode: 'numeric',
-                                        pattern: '[0-9]*',
-                                    }}
-                                />
-                            </FormControl>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
+                            <div className={classes.remoteInputContainer}>
+                                <div className={classes.cloudIconContainer}>
+                                    <CloudIcon />
+                                </div>
+                                <FormControl className={classes.flexAuto}>
+                                    <TextField
+                                        required
+                                        className={classes.textField}
+                                        id="remoteIp"
+                                        placeholder="Host"
+                                        value={remoteIp}
                                         disabled={!remoteOrLocal}
-                                        checked={autoConnect}
-                                        onChange={() => {
+                                        inputProps={{
+                                            size: 30,
+                                        }}
+                                        onChange={(e) => {
                                             dispatch(
-                                                setAutoConnect(!autoConnect)
+                                                setRemoteIp(e.target.value)
                                             );
                                         }}
-                                        name="autoConnect"
                                     />
-                                }
-                                label="AutoConnect?"
-                            />
+                                </FormControl>
+                                <span className={classes.cloudIconContainer}>
+                                    :
+                                </span>
+                                <FormControl>
+                                    <TextField
+                                        required
+                                        id="remotePort"
+                                        className={classes.textField}
+                                        placeholder="Port"
+                                        value={remotePort}
+                                        onChange={(e) => {
+                                            dispatch(
+                                                setRemotePort(e.target.value)
+                                            );
+                                        }}
+                                        disabled={!remoteOrLocal}
+                                        inputProps={{
+                                            size: 6,
+                                            maxLength: 5,
+                                            inputMode: 'numeric',
+                                            pattern: '[0-9]*',
+                                        }}
+                                    />
+                                </FormControl>
+                            </div>
+                            <div className={classes.autoConnectContainer}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            disabled={!remoteOrLocal}
+                                            checked={autoConnect}
+                                            onChange={() => {
+                                                dispatch(
+                                                    setAutoConnect(!autoConnect)
+                                                );
+                                            }}
+                                            name="autoConnect"
+                                        />
+                                    }
+                                    label="Autoconnect"
+                                />
+                            </div>
+
                             <div className={classes.connectionSection}>
                                 <CircularProgress
                                     className={classes.circularProgress}
@@ -357,7 +392,7 @@ const SettingsModal = (props) => {
                                         props.connectToCommandServer(true);
                                     }, 750);
                                 }}>
-                                Connect
+                                Check Connection
                             </Button>
                         </div>
                         <Divider variant="middle" />
