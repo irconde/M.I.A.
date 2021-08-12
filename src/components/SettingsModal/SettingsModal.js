@@ -16,6 +16,8 @@ import {
     FormControlLabel,
     Checkbox,
     MenuItem,
+    Switch,
+    withStyles,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -36,6 +38,7 @@ import {
     setFileSuffix,
     setLocalFileOutput,
     setRemoteIp,
+    setRemoteOrLocal,
     setRemotePort,
 } from '../../redux/slices/settings/settingsSlice';
 import {
@@ -43,6 +46,21 @@ import {
     setConnected,
 } from '../../redux/slices/server/serverSlice';
 import SettingsCog from '../../icons/SettingsCog';
+import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
+
+const CustomSwitch = withStyles({
+    colorSecondary: {
+        '&.Mui-checked + .MuiSwitch-track': {
+            backgroundColor: '#367eff',
+        },
+    },
+    track: {
+        backgroundColor: '#fff',
+    },
+    thumb: {
+        backgroundColor: 'black',
+    },
+})(Switch);
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
@@ -54,10 +72,12 @@ const SettingsModal = (props) => {
         annotationsFormat,
         localFileOutput,
         fileSuffix,
+        remoteOrLocal,
     } = settings;
     const connected = useSelector(getConnected);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
+
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const dispatch = useDispatch();
@@ -90,6 +110,14 @@ const SettingsModal = (props) => {
 
     const useStyles = makeStyles((theme) => {
         return {
+            remoteWorkContainer: {
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+            },
+            switchContainer: {
+                alignSelf: 'flex-end',
+            },
             modal: {
                 position: 'absolute',
                 minWidth: '60vw',
@@ -134,6 +162,11 @@ const SettingsModal = (props) => {
                 backgroundColor: '#367eff',
                 display: 'flex',
                 alignSelf: 'flex-end',
+                outline: 'none',
+                '&:hover': {
+                    backgroundColor: '#71a4ff',
+                    outline: 'none',
+                },
             },
             connectionLabel: {
                 margin: 'auto',
@@ -165,15 +198,51 @@ const SettingsModal = (props) => {
                 display: 'flex',
             },
             greyText: {
-                color: 'gray',
+                color: '#9d9d9d',
+                fontSize: '10px',
             },
             settingsContainer: {
                 display: 'flex',
                 flexDirection: 'row',
+                justifyContent: 'space-between',
+                margin: '1rem 0',
             },
             settingsCogwheel: {
-                marginTop: '1.6rem',
+                marginRight: '0.5rem',
+                marginLeft: '1rem',
+                width: '20px',
+                height: '20px',
+                alignSelf: 'center',
+            },
+            closeIconStyle: {
                 marginRight: '1.5rem',
+                alignSelf: 'center',
+                width: '24px',
+                height: '24px',
+                cursor: 'pointer',
+            },
+            settingsText: {
+                objectFit: 'contain',
+                fontFamily: 'NotoSansJP',
+                fontSize: '26px',
+                fontWeight: '500',
+                fontStretch: 'normal',
+                fontStyle: 'normal',
+                lineHeight: 'normal',
+                letterSpacing: 'normal',
+                color: '#fff',
+                flex: 'auto',
+                alignSelf: 'center',
+            },
+            optionText: {
+                fontFamily: 'NotoSansJP',
+                fontSize: '18px',
+                fontWeight: 'normal',
+                fontStretch: 'normal',
+                fontStyle: 'normal',
+                lineHeight: 'normal',
+                letterSpacing: 'normal',
+                color: '#fff',
             },
         };
     });
@@ -187,15 +256,39 @@ const SettingsModal = (props) => {
                     <div className={classes.settingsCogwheel}>
                         <SettingsCog title={props.title} />
                     </div>
-                    <h2>Settings</h2>
+                    <div className={classes.settingsText}>Settings</div>
+                    <div
+                        onClick={() => handleClose()}
+                        className={classes.closeIconStyle}>
+                        <CloseIcon />
+                    </div>
                 </div>
                 <Divider variant="middle" />
                 <FormGroup className={classes.formControl}>
                     <div className={classes.optionsContainer}>
                         <div>
-                            <h4>Work connected to a remote service</h4>
+                            <div className={classes.remoteWorkContainer}>
+                                <p className={classes.optionText}>
+                                    Work connected to a remote service
+                                </p>
+                                <div className={classes.switchContainer}>
+                                    <CustomSwitch
+                                        checked={remoteOrLocal}
+                                        size="small"
+                                        onChange={() =>
+                                            dispatch(
+                                                setRemoteOrLocal(!remoteOrLocal)
+                                            )
+                                        }
+                                        name="remoteOrLocal"
+                                        inputProps={{
+                                            'aria-label': 'secondary checkbox',
+                                        }}
+                                    />
+                                </div>
+                            </div>
                             <p className={classes.greyText}>
-                                Chose the option if you want to receive/send
+                                Choose the option if you want to receive/send
                                 images from/to a server
                             </p>
                             <FormControl>
@@ -203,23 +296,26 @@ const SettingsModal = (props) => {
                                     required
                                     className={classes.textField}
                                     id="remoteIp"
-                                    label="IP Address:"
+                                    placeholder="Host"
                                     value={remoteIp}
+                                    disabled={!remoteOrLocal}
                                     onChange={(e) => {
                                         dispatch(setRemoteIp(e.target.value));
                                     }}
                                 />
                             </FormControl>
+                            <span>:</span>
                             <FormControl>
                                 <TextField
                                     required
                                     id="remotePort"
                                     className={classes.textField}
-                                    label="Port:"
+                                    placeholder="Port"
                                     value={remotePort}
                                     onChange={(e) => {
                                         dispatch(setRemotePort(e.target.value));
                                     }}
+                                    disabled={!remoteOrLocal}
                                     inputProps={{
                                         maxLength: 4,
                                         inputMode: 'numeric',
@@ -230,6 +326,7 @@ const SettingsModal = (props) => {
                             <FormControlLabel
                                 control={
                                     <Checkbox
+                                        disabled={!remoteOrLocal}
                                         checked={autoConnect}
                                         onChange={() => {
                                             dispatch(
@@ -252,6 +349,7 @@ const SettingsModal = (props) => {
 
                             <Button
                                 variant="outlined"
+                                disabled={!remoteOrLocal}
                                 onClick={() => {
                                     // setConnectionStatus(checkConnection());
                                     dispatch(setConnected(false));
@@ -264,7 +362,9 @@ const SettingsModal = (props) => {
                         </div>
                         <Divider variant="middle" />
                         <div>
-                            <h4>File management</h4>
+                            <p className={classes.optionText}>
+                                File management
+                            </p>
                             <p className={classes.greyText}>
                                 Default file management options to streamline
                                 file input and output
@@ -334,6 +434,7 @@ const SettingsModal = (props) => {
                                             id="localFileOutput"
                                             label="Path:"
                                             value={localFileOutput}
+                                            disabled={remoteOrLocal}
                                             onChange={(e) => {
                                                 dispatch(
                                                     setLocalFileOutput(
@@ -345,6 +446,7 @@ const SettingsModal = (props) => {
                                     </FormControl>
                                     <Button
                                         className={classes.pathButton}
+                                        disabled={remoteOrLocal}
                                         variant="outlined"
                                         onClick={() => {
                                             dispatch(

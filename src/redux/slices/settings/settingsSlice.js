@@ -22,6 +22,7 @@ const defaultSettings = {
     annotationsFormat: '',
     localFileOutput: '',
     fileSuffix: '',
+    remoteOrLocal: true,
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -91,6 +92,10 @@ const settingsSlice = createSlice({
             state.settings.fileSuffix = action.payload;
             storeCookieData(state.settings);
         },
+        setRemoteOrLocal: (state, action) => {
+            state.settings.remoteOrLocal = action.payload;
+            storeCookieData(state.settings);
+        },
     },
 });
 
@@ -106,6 +111,7 @@ export const {
     setAnnotationsFormat,
     setLocalFileOutput,
     setFileSuffix,
+    setRemoteOrLocal,
 } = settingsSlice.actions;
 
 // Selectors
