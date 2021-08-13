@@ -1,22 +1,50 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ReactComponent as ConnectionSuccessful } from '../../icons/ic_verified.svg';
-import { ReactComponent as ConnectionFailure } from '../../icons/ic_error.svg';
+
+import ConnectionErrorIcon from '../../icons/ConnectionErrorIcon.js';
+import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
 
 const ConnectionResult = (props) => {
+    const containerStyle = {
+        display: 'flex',
+        flexDirection: 'row',
+    };
+    const svgContainerStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        margin: '0.4rem',
+    };
+    const svgStyle = {
+        height: '24px',
+        width: '24px',
+    };
+    const redColor = '#519e00';
+    const greenColor = '#d94545';
     if (props.display === true) {
         if (props.connected === true) {
             return (
-                <div>
-                    <ConnectionSuccessful />
-                    <p style={{ color: '#519e00' }}>Connection Successful</p>
+                <div style={containerStyle}>
+                    <ConnectionVerifiedIcon
+                        style={svgContainerStyle}
+                        svgStyle={{
+                            ...svgStyle,
+                            color: redColor,
+                        }}
+                    />
+                    <p style={{ color: redColor }}>Connection Successful</p>
                 </div>
             );
         } else {
             return (
-                <div>
-                    <ConnectionFailure />
-                    <p style={{ color: '#d94545' }}>Server unreachable</p>
+                <div style={containerStyle}>
+                    <ConnectionErrorIcon
+                        style={svgContainerStyle}
+                        svgStyle={{
+                            ...svgStyle,
+                            color: greenColor,
+                        }}
+                    />
+                    <p style={{ color: greenColor }}>Server unreachable</p>
                 </div>
             );
         }

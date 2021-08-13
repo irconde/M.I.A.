@@ -48,6 +48,7 @@ import {
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
 import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
+import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 
@@ -81,6 +82,7 @@ const SettingsModal = (props) => {
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [connectionDisplay, setConnectionDisplay] = useState(false);
+    const [connecting, setConnecting] = useState(false);
     const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
@@ -107,10 +109,12 @@ const SettingsModal = (props) => {
             `http://${remoteIp}:${remotePort}`
         );
         testConnection.connect();
+        setConnecting(true);
         testConnection.on('connect', () => {
             setTimeout(() => {
                 setTestConnectionResult(true);
                 setConnectionDisplay(true);
+                setConnecting(false);
                 setTimeout(() => {
                     setTestConnectionResult(false);
                     setConnectionDisplay(false);
@@ -124,6 +128,7 @@ const SettingsModal = (props) => {
                 setTimeout(() => {
                     setTestConnectionResult(false);
                     setConnectionDisplay(true);
+                    setConnecting(false);
                     setTimeout(() => {
                         setTestConnectionResult(false);
                         setConnectionDisplay(false);
@@ -145,6 +150,13 @@ const SettingsModal = (props) => {
 
     const useStyles = makeStyles((theme) => {
         return {
+            checkIcon: {
+                margin: '0.3rem',
+                display: 'flex',
+            },
+            checkConnectionButton: {
+                color: '#367eff',
+            },
             remoteWorkContainer: {
                 display: 'flex',
                 flexDirection: 'row',
@@ -211,6 +223,7 @@ const SettingsModal = (props) => {
                 flexDirection: 'row',
                 justifyContent: 'start',
                 marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
             },
             circularProgress: {
                 marginRight: theme.spacing(2),
@@ -406,21 +419,34 @@ const SettingsModal = (props) => {
                                     label="Autoconnect"
                                 />
                             </div>
-
-                            <Button
-                                variant="outlined"
-                                disabled={!remoteOrLocal}
-                                onClick={() => {
-                                    testConnection();
-                                    // // setConnectionStatus(checkConnection());
-                                    // dispatch(setConnected(false));
-                                    // setTimeout(() => {
-                                    //     props.connectToCommandServer(true);
-                                    // }, 750);
-                                }}>
-                                Check Connection
-                            </Button>
                             <div className={classes.connectionSection}>
+                                <Button
+                                    variant="outlined"
+                                    className={classes.checkConnectionButton}
+                                    disabled={!remoteOrLocal}
+                                    onClick={() => {
+                                        testConnection();
+                                    }}>
+                                    {connecting ? (
+                                        <div className={classes.checkIcon}>
+                                            <CircularProgress size={'22px'} />
+                                        </div>
+                                    ) : (
+                                        <CheckConnectionIcon
+                                            style={{
+                                                margin: '0.3rem',
+                                                display: 'flex',
+                                            }}
+                                            svgStyle={{
+                                                height: '24px',
+                                                width: '24px',
+                                                color: '#367eff',
+                                            }}
+                                        />
+                                    )}
+                                    Check Connection
+                                </Button>
+
                                 <ConnectionResult
                                     display={connectionDisplay}
                                     connected={testConnectionResult}

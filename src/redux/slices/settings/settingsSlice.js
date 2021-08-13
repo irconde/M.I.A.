@@ -21,7 +21,7 @@ const defaultSettings = {
     fileFormat: 'ORA',
     annotationsFormat: '',
     localFileOutput: '',
-    fileSuffix: '',
+    fileSuffix: '_img',
     remoteOrLocal: true,
 };
 if (cookieData !== undefined) {

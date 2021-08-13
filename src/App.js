@@ -592,6 +592,7 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
+        // todo: add suffix to data sent to server
         this.state.commandServer.emit('fileFromClient', {
             file,
             fileFormat: this.props.fileFormat,
