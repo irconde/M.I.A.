@@ -49,6 +49,10 @@ import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
 import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
+import FileOpenIcon from '../../icons/FileOpenIcon.js';
+import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
+import FileFormatIcon from '../../icons/FileFormatIcon.js';
+import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 
@@ -475,9 +479,22 @@ const SettingsModal = (props) => {
                             </p>
                             <div className={classes.workingDirectory}>
                                 <FormControl className={classes.longTextField}>
+                                    <FileOpenIcon
+                                        style={{
+                                            margin: '0.3rem',
+                                            display: 'flex',
+                                        }}
+                                        svgStyle={{
+                                            height: '24px',
+                                            width: '24px',
+                                            color:
+                                                remoteOrLocal === true
+                                                    ? '#d1d1d1'
+                                                    : '#ffffff',
+                                        }}
+                                    />
                                     <TextField
                                         required
-                                        // fullWidth={true}
                                         id="localFileOutput"
                                         placeholder={'Working directory'}
                                         value={localFileOutput}
@@ -508,6 +525,17 @@ const SettingsModal = (props) => {
                                 </Button>
                             </div>
                             <div className={classes.displayListSection}>
+                                <FileFormatIcon
+                                    style={{
+                                        margin: '0.3rem',
+                                        display: 'flex',
+                                    }}
+                                    svgStyle={{
+                                        height: '24px',
+                                        width: '24px',
+                                        color: '#ffffff',
+                                    }}
+                                />
                                 <Select
                                     displayEmpty={true}
                                     open={openFileFormat}
@@ -527,6 +555,17 @@ const SettingsModal = (props) => {
                                     <MenuItem value={'ORA'}>ORA</MenuItem>
                                     <MenuItem value={'ZIP'}>ZIP</MenuItem>
                                 </Select>
+                                <FileAnnotationsIcon
+                                    style={{
+                                        margin: '0.3rem',
+                                        display: 'flex',
+                                    }}
+                                    svgStyle={{
+                                        height: '24px',
+                                        width: '24px',
+                                        color: '#ffffff',
+                                    }}
+                                />
                                 <Select
                                     displayEmpty={true}
                                     open={openAnnotationsFormat}
@@ -552,6 +591,17 @@ const SettingsModal = (props) => {
                                         Pascal VOC
                                     </MenuItem>
                                 </Select>
+                                <FileSuffixIcon
+                                    style={{
+                                        margin: '0.3rem',
+                                        display: 'flex',
+                                    }}
+                                    svgStyle={{
+                                        height: '24px',
+                                        width: '24px',
+                                        color: '#ffffff',
+                                    }}
+                                />
                                 <FormControl>
                                     <TextField
                                         required

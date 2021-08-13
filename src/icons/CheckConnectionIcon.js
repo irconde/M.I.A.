@@ -7,7 +7,7 @@ const CheckConnectionIcon = (props) => {
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height={props.svgStyle.height}
-                viewBox="0 0 24 24"
+                viewBox={`0 0 ${props.svgStyle.width} ${props.svgStyle.height}`}
                 width={props.svgStyle.width}
                 fill={props.svgStyle.color}>
                 <path d="M0 0h24v24H0z" fill="none" />
