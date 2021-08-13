@@ -67,6 +67,7 @@ const CustomSwitch = withStyles({
 })(Switch);
 
 const SettingsModal = (props) => {
+    // TODO: Do we update the settings as typed or upon save settings?
     const settings = useSelector(getSettings);
     const {
         remoteIp,
@@ -152,6 +153,12 @@ const SettingsModal = (props) => {
 
     const useStyles = makeStyles((theme) => {
         return {
+            workingDirectory: {
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-evenly',
+            },
             checkIcon: {
                 margin: '0.3rem',
                 display: 'flex',
@@ -203,6 +210,9 @@ const SettingsModal = (props) => {
             textField: {
                 margin: theme.spacing(1),
             },
+            longTextField: {
+                width: '-webkit-fill-available',
+            },
             saveButton: {
                 marginTop: theme.spacing(2),
                 float: 'right',
@@ -233,6 +243,7 @@ const SettingsModal = (props) => {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'start',
+                alignItems: 'center',
                 marginBottom: theme.spacing(2),
             },
             sectionLabel: {
@@ -453,7 +464,7 @@ const SettingsModal = (props) => {
                                 />
                             </div>
                         </div>
-                        <Divider variant="middle" />
+                        <Divider style={{ margin: 'auto' }} variant="middle" />
                         <div>
                             <p className={classes.optionText}>
                                 File management
@@ -462,11 +473,43 @@ const SettingsModal = (props) => {
                                 Default file management options to streamline
                                 file input and output
                             </p>
+                            <div className={classes.workingDirectory}>
+                                <FormControl className={classes.longTextField}>
+                                    <TextField
+                                        required
+                                        // fullWidth={true}
+                                        id="localFileOutput"
+                                        placeholder={'Working directory'}
+                                        value={localFileOutput}
+                                        disabled={remoteOrLocal}
+                                        inputProps={
+                                            {
+                                                // size: '40',
+                                            }
+                                        }
+                                        onChange={(e) => {
+                                            dispatch(
+                                                setLocalFileOutput(
+                                                    e.target.value
+                                                )
+                                            );
+                                        }}
+                                    />
+                                </FormControl>
+                                <Button
+                                    className={classes.pathButton}
+                                    disabled={remoteOrLocal}
+                                    variant="outlined"
+                                    size={'small'}
+                                    onClick={() => {
+                                        dispatch(setLocalFileOutput(getPath()));
+                                    }}>
+                                    Select Folder
+                                </Button>
+                            </div>
                             <div className={classes.displayListSection}>
-                                <Typography className={classes.sectionLabel}>
-                                    Output file format:
-                                </Typography>
                                 <Select
+                                    displayEmpty={true}
                                     open={openFileFormat}
                                     onClose={() => {
                                         setOpenFileFormat(false);
@@ -478,16 +521,14 @@ const SettingsModal = (props) => {
                                     onChange={(e) => {
                                         dispatch(setFileFormat(e.target.value));
                                     }}>
+                                    <MenuItem value={''}>
+                                        Output file format
+                                    </MenuItem>
                                     <MenuItem value={'ORA'}>ORA</MenuItem>
                                     <MenuItem value={'ZIP'}>ZIP</MenuItem>
                                 </Select>
-                            </div>
-
-                            <div className={classes.displayListSection}>
-                                <Typography className={classes.sectionLabel}>
-                                    Annotations format:
-                                </Typography>
                                 <Select
+                                    displayEmpty={true}
                                     open={openAnnotationsFormat}
                                     onClose={() => {
                                         setOpenAnnotationsFormat(false);
@@ -501,6 +542,9 @@ const SettingsModal = (props) => {
                                             setAnnotationsFormat(e.target.value)
                                         );
                                     }}>
+                                    <MenuItem value={''}>
+                                        Annotations format
+                                    </MenuItem>
                                     <MenuItem value={'MS COCO'}>
                                         MS COCO
                                     </MenuItem>
@@ -508,65 +552,20 @@ const SettingsModal = (props) => {
                                         Pascal VOC
                                     </MenuItem>
                                 </Select>
-                            </div>
-                            <div className={classes.outputFolderSection}>
-                                <div
-                                    className={
-                                        classes.outputFolderSectionLabel
-                                    }>
-                                    <Typography>Output folder path:</Typography>
-                                </div>
-                                <div
-                                    className={
-                                        classes.outputFolderSectionContent
-                                    }>
-                                    <FormControl>
-                                        <TextField
-                                            required
-                                            className={classes.textField}
-                                            id="localFileOutput"
-                                            label="Path:"
-                                            value={localFileOutput}
-                                            disabled={remoteOrLocal}
-                                            onChange={(e) => {
-                                                dispatch(
-                                                    setLocalFileOutput(
-                                                        e.target.value
-                                                    )
-                                                );
-                                            }}
-                                        />
-                                    </FormControl>
-                                    <Button
-                                        className={classes.pathButton}
-                                        disabled={remoteOrLocal}
-                                        variant="outlined"
-                                        onClick={() => {
+                                <FormControl>
+                                    <TextField
+                                        required
+                                        className={classes.textField}
+                                        id="outputSuffix"
+                                        placeholder="Filename suffix"
+                                        value={fileSuffix}
+                                        onChange={(e) => {
                                             dispatch(
-                                                setLocalFileOutput(getPath())
+                                                setFileSuffix(e.target.value)
                                             );
-                                        }}>
-                                        Add path
-                                    </Button>
-                                </div>
-                                <div className={classes.suffixSection}>
-                                    <FormControl>
-                                        <TextField
-                                            required
-                                            className={classes.textField}
-                                            id="outputSuffix"
-                                            label="Save files with suffix:"
-                                            value={fileSuffix}
-                                            onChange={(e) => {
-                                                dispatch(
-                                                    setFileSuffix(
-                                                        e.target.value
-                                                    )
-                                                );
-                                            }}
-                                        />
-                                    </FormControl>
-                                </div>
+                                        }}
+                                    />
+                                </FormControl>
                             </div>
                         </div>
                     </div>

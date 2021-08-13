@@ -42,12 +42,12 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * setCookieData - Will set the cookie 'settings' to the passed in object
+         * setSettings - Will set the cookie 'settings' to the passed in object
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Object} action Object containing key values for settings to be set in the cookie
          */
-        setCookieData: (state, action) => {
+        setSettings: (state, action) => {
             state.settings = action.payload;
             storeCookieData(state.settings);
         },
@@ -100,7 +100,7 @@ const settingsSlice = createSlice({
 
 // Actions
 export const {
-    setCookieData,
+    setSettings,
     saveCookieData,
     removeCookieData,
     setRemoteIp,
