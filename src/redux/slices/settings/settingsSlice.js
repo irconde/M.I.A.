@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { Cookies } from 'react-cookie';
 import { COOKIE } from '../../../utils/Constants';
-import * as constants from '../../../utils/Constants';
 
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');

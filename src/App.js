@@ -596,6 +596,7 @@ class App extends Component {
         this.state.commandServer.emit('fileFromClient', {
             file,
             fileFormat: this.props.fileFormat,
+            fileSuffix: this.props.fileSuffix,
         });
     }
 
@@ -2496,6 +2497,7 @@ const mapStateToProps = (state) => {
         remotePort: settings.settings.remotePort,
         autoConnect: settings.settings.autoConnect,
         fileFormat: settings.settings.fileFormat,
+        fileSuffix: settings.settings.fileSuffix,
     };
 };
 
