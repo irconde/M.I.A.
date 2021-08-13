@@ -95,12 +95,14 @@ const SettingsModal = (props) => {
 
     function getModalStyle() {
         return {
+            position: 'absolute',
             top: `50%`,
             left: `50%`,
             transform: `translate(-50%, -50%)`,
             backgroundColor: '#1f1f1f',
             outline: 'none',
             fontFamily: 'NotoSansJP',
+            minWidth: '30vw',
         };
     }
 
@@ -166,8 +168,6 @@ const SettingsModal = (props) => {
                 alignSelf: 'flex-end',
             },
             modal: {
-                position: 'absolute',
-                minWidth: '60vw',
                 boxShadow: theme.shadows[5],
                 padding: theme.spacing(2, 4, 3),
             },
@@ -587,8 +587,8 @@ const SettingsModal = (props) => {
             <Modal
                 open={settingsVisibility}
                 onClose={() => handleClose()}
-                aria-labelledby="simple-modal-title"
-                aria-describedby="simple-modal-description">
+                aria-labelledby="settings-window"
+                aria-describedby="control the apps remote and local settings">
                 {body}
             </Modal>
         </ThemeProvider>

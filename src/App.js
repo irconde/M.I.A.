@@ -842,7 +842,7 @@ class App extends Component {
                     { type: 'application/xml ' }
                 )
             );
-            newOra.generateAsync({ type: 'nodebuffer' }).then((oraBlob) => {
+            newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
                 this.props.setCurrentProcessingFile(null);
                 this.setState(
                     {
@@ -850,7 +850,7 @@ class App extends Component {
                     },
                     () => this.props.resetDetections()
                 );
-                this.sendImageToCommandServer(oraBlob).then(
+                this.sendImageToCommandServer(file).then(
                     // eslint-disable-next-line no-unused-vars
                     (res) => {
                         this.resetSelectedDetectionBoxes(e);
