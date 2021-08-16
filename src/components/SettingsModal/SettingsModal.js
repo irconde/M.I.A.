@@ -32,6 +32,7 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import {
     getSettings,
+    saveSettings,
     setAnnotationsFormat,
     setAutoConnect,
     setFileFormat,
@@ -41,10 +42,6 @@ import {
     setRemoteOrLocal,
     setRemotePort,
 } from '../../redux/slices/settings/settingsSlice';
-import {
-    getConnected,
-    setConnected,
-} from '../../redux/slices/server/serverSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
 import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
@@ -72,18 +69,25 @@ import socketIOClient from 'socket.io-client';
 
 const SettingsModal = (props) => {
     // TODO: Do we update the settings as typed or upon save settings?
-    const settings = useSelector(getSettings);
-    const {
-        remoteIp,
-        remotePort,
-        autoConnect,
-        fileFormat,
-        annotationsFormat,
-        localFileOutput,
-        fileSuffix,
-        remoteOrLocal,
-    } = settings;
-    const connected = useSelector(getConnected);
+    // const settings = useSelector(getSettings);
+    // const {
+    //     remoteIp,
+    //     remotePort,
+    //     autoConnect,
+    //     fileFormat,
+    //     annotationsFormat,
+    //     localFileOutput,
+    //     fileSuffix,
+    //     remoteOrLocal,
+    // } = settings;
+    const [remoteIp, setRemoteIp] = useState('');
+    const [remotePort, setRemotePort] = useState('');
+    const [autoConnect, setAutoConnect] = useState(true);
+    const [fileFormat, setFileFormat] = useState('');
+    const [annotationsFormat, setAnnotationsFormat] = useState('');
+    const [localFileOutput, setLocalFileOutput] = useState('');
+    const [fileSuffix, setFileSuffix] = useState('');
+    const [remoteOrLocal, setRemoteOrLocal] = useState(true);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [connectionDisplay, setConnectionDisplay] = useState(false);
@@ -138,7 +142,10 @@ const SettingsModal = (props) => {
         });
         testConnection.on('connect_error', (err) => {
             console.log(`connect_error due to ${err.message}`);
-            if (err.message === 'xhr poll error') {
+            if (
+                err.message === 'xhr poll error' ||
+                err.message === 'server error'
+            ) {
                 testConnection.disconnect();
                 setTimeout(() => {
                     setTestConnectionResult(false);
@@ -154,6 +161,32 @@ const SettingsModal = (props) => {
     };
 
     const handleClose = () => {
+        dispatch(
+            saveSettings({
+                remoteIp,
+                remotePort,
+                autoConnect,
+                localFileOutput,
+                fileFormat,
+                annotationsFormat,
+                fileSuffix,
+            })
+        );
+        dispatch(toggleSettingsVisibility(false));
+    };
+
+    const saveSettingsEvent = () => {
+        dispatch(
+            saveSettings({
+                remoteIp,
+                remotePort,
+                autoConnect,
+                localFileOutput,
+                fileFormat,
+                annotationsFormat,
+                fileSuffix,
+            })
+        );
         dispatch(toggleSettingsVisibility(false));
     };
 
@@ -258,12 +291,12 @@ const SettingsModal = (props) => {
             },
             circularProgress: {
                 marginRight: theme.spacing(2),
-                display: connected ? 'none' : 'initial',
+                display: connecting ? 'none' : 'initial',
             },
             displayListSection: {
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: 'start',
+                justifyContent: 'space-evenly',
                 alignItems: 'center',
                 marginBottom: theme.spacing(2),
                 marginTop: theme.spacing(4),
@@ -374,9 +407,7 @@ const SettingsModal = (props) => {
                                         checked={remoteOrLocal}
                                         size="small"
                                         onChange={() =>
-                                            dispatch(
-                                                setRemoteOrLocal(!remoteOrLocal)
-                                            )
+                                            setRemoteOrLocal(!remoteOrLocal)
                                         }
                                         color="primary"
                                         name="remoteOrLocal"
@@ -406,9 +437,7 @@ const SettingsModal = (props) => {
                                             size: 30,
                                         }}
                                         onChange={(e) => {
-                                            dispatch(
-                                                setRemoteIp(e.target.value)
-                                            );
+                                            setRemoteIp(e.target.value);
                                         }}
                                     />
                                 </FormControl>
@@ -423,9 +452,7 @@ const SettingsModal = (props) => {
                                         placeholder="Port"
                                         value={remotePort}
                                         onChange={(e) => {
-                                            dispatch(
-                                                setRemotePort(e.target.value)
-                                            );
+                                            setRemotePort(e.target.value);
                                         }}
                                         disabled={!remoteOrLocal}
                                         inputProps={{
@@ -445,9 +472,7 @@ const SettingsModal = (props) => {
                                             color={'primary'}
                                             checked={autoConnect}
                                             onChange={() => {
-                                                dispatch(
-                                                    setAutoConnect(!autoConnect)
-                                                );
+                                                setAutoConnect(!autoConnect);
                                             }}
                                             name="autoConnect"
                                         />
@@ -503,7 +528,7 @@ const SettingsModal = (props) => {
                                             ...svgStyle,
                                             color:
                                                 remoteOrLocal === true
-                                                    ? '#d1d1d1'
+                                                    ? '#9d9d9d'
                                                     : '#ffffff',
                                         }}
                                     />
@@ -518,11 +543,7 @@ const SettingsModal = (props) => {
                                             size: '40',
                                         }}
                                         onChange={(e) => {
-                                            dispatch(
-                                                setLocalFileOutput(
-                                                    e.target.value
-                                                )
-                                            );
+                                            setLocalFileOutput(e.target.value);
                                         }}
                                     />
                                 </FormControl>
@@ -532,7 +553,7 @@ const SettingsModal = (props) => {
                                     variant="outlined"
                                     size={'small'}
                                     onClick={() => {
-                                        dispatch(setLocalFileOutput(getPath()));
+                                        setLocalFileOutput(getPath());
                                     }}>
                                     Select Folder
                                 </Button>
@@ -553,13 +574,17 @@ const SettingsModal = (props) => {
                                     }}
                                     value={fileFormat}
                                     onChange={(e) => {
-                                        dispatch(setFileFormat(e.target.value));
+                                        setFileFormat(e.target.value);
                                     }}>
                                     <MenuItem value={''}>
                                         Output file format
                                     </MenuItem>
-                                    <MenuItem value={'ORA'}>ORA</MenuItem>
-                                    <MenuItem value={'ZIP'}>ZIP</MenuItem>
+                                    <MenuItem value={'ORA'}>
+                                        Open Raster
+                                    </MenuItem>
+                                    <MenuItem value={'ZIP'}>
+                                        Zip Archive
+                                    </MenuItem>
                                 </Select>
                                 <FileAnnotationsIcon
                                     style={svgContainerStyle}
@@ -576,9 +601,7 @@ const SettingsModal = (props) => {
                                     }}
                                     value={annotationsFormat}
                                     onChange={(e) => {
-                                        dispatch(
-                                            setAnnotationsFormat(e.target.value)
-                                        );
+                                        setAnnotationsFormat(e.target.value);
                                     }}>
                                     <MenuItem value={''}>
                                         Annotations format
@@ -601,10 +624,11 @@ const SettingsModal = (props) => {
                                         id="outputSuffix"
                                         placeholder="Filename suffix"
                                         value={fileSuffix}
+                                        inputProps={{
+                                            size: '10',
+                                        }}
                                         onChange={(e) => {
-                                            dispatch(
-                                                setFileSuffix(e.target.value)
-                                            );
+                                            setFileSuffix(e.target.value);
                                         }}
                                     />
                                 </FormControl>
@@ -615,7 +639,7 @@ const SettingsModal = (props) => {
                     <Button
                         className={classes.saveButton}
                         variant="outlined"
-                        onClick={() => handleClose()}>
+                        onClick={() => saveSettingsEvent()}>
                         Save Settings
                     </Button>
                 </FormGroup>

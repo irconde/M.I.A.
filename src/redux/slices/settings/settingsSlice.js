@@ -54,6 +54,15 @@ const settingsSlice = createSlice({
         saveCookieData: (state) => {
             storeCookieData(state.settings);
         },
+        saveSettings: (state, action) => {
+            for (let key in action.payload) {
+                if (action.payload[key] !== '') {
+                    state.settings[key] = action.payload[key];
+                }
+                // detection[key] = update[key];
+            }
+            storeCookieData(state.settings);
+        },
         /**
          * removeCookieData - Will delete the current settings cookie and reset the settings to default
          *
@@ -101,6 +110,7 @@ const settingsSlice = createSlice({
 // Actions
 export const {
     setSettings,
+    saveSettings,
     saveCookieData,
     removeCookieData,
     setRemoteIp,
