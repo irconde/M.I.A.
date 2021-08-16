@@ -13,6 +13,8 @@ import {
     Checkbox,
     MenuItem,
     Switch,
+    Snackbar,
+    SnackbarContent,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -27,7 +29,7 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import { saveSettings } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
-import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
+import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
 import CloudIcon from '../../icons/CloudIcon.js';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
@@ -38,6 +40,7 @@ import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 
 const SettingsModal = (props) => {
+    const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState('');
     const [remotePort, setRemotePort] = useState('');
     const [autoConnect, setAutoConnect] = useState(true);
@@ -66,6 +69,13 @@ const SettingsModal = (props) => {
     const getPath = () => {
         var path = 'C:/user_example/test_output_folder';
         return path;
+    };
+
+    const handleSnackBarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackBarOpen(false);
     };
 
     function getModalStyle() {
@@ -123,6 +133,7 @@ const SettingsModal = (props) => {
     };
 
     const saveSettingsEvent = () => {
+        setSnackBarOpen(true);
         dispatch(
             saveSettings({
                 remoteIp,
@@ -151,6 +162,10 @@ const SettingsModal = (props) => {
 
     const useStyles = makeStyles((theme) => {
         return {
+            snackBarClass: {
+                backgroundColor: '#1f1f1f',
+                color: '#ffffff',
+            },
             workingDirectory: {
                 display: 'flex',
                 flexDirection: 'row',
@@ -338,7 +353,7 @@ const SettingsModal = (props) => {
                     <div
                         onClick={() => handleClose()}
                         className={classes.closeIconStyle}>
-                        <CloseIcon />
+                        <IcCloseIcon />
                     </div>
                 </div>
                 <Divider variant="middle" />
@@ -613,6 +628,19 @@ const SettingsModal = (props) => {
                 aria-describedby="control the apps remote and local settings">
                 {body}
             </Modal>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                open={snackBarOpen}
+                autoHideDuration={3000}
+                onClose={handleSnackBarClose}>
+                <SnackbarContent
+                    message="Settings Saved"
+                    className={classes.snackBarClass}
+                />
+            </Snackbar>
         </ThemeProvider>
     );
 };
