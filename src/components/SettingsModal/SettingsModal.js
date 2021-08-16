@@ -15,6 +15,7 @@ import {
     Switch,
     Snackbar,
     SnackbarContent,
+    FormHelperText,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -170,7 +171,7 @@ const SettingsModal = (props) => {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'space-evenly',
+                justifyContent: 'space-between',
             },
             checkIcon: {
                 margin: '0.3rem',
@@ -276,6 +277,9 @@ const SettingsModal = (props) => {
             greyText: {
                 color: '#9d9d9d',
                 fontSize: '10px',
+            },
+            disabledText: {
+                color: '#9d9d9d',
             },
             settingsContainer: {
                 display: 'flex',
@@ -535,56 +539,72 @@ const SettingsModal = (props) => {
                                     style={svgContainerStyle}
                                     svgStyle={svgStyle}
                                 />
-                                <Select
-                                    displayEmpty={true}
-                                    open={openFileFormat}
-                                    onClose={() => {
-                                        setOpenFileFormat(false);
-                                    }}
-                                    onOpen={() => {
-                                        setOpenFileFormat(true);
-                                    }}
-                                    value={fileFormat}
-                                    onChange={(e) => {
-                                        setFileFormat(e.target.value);
-                                    }}>
-                                    <MenuItem value={''}>
-                                        Output file format
-                                    </MenuItem>
-                                    <MenuItem value={'ORA'}>
-                                        Open Raster
-                                    </MenuItem>
-                                    <MenuItem value={'ZIP'}>
-                                        Zip Archive
-                                    </MenuItem>
-                                </Select>
+                                <FormControl>
+                                    <Select
+                                        displayEmpty={true}
+                                        open={openFileFormat}
+                                        className={
+                                            fileFormat === ''
+                                                ? classes.disabledText
+                                                : null
+                                        }
+                                        onClose={() => {
+                                            setOpenFileFormat(false);
+                                        }}
+                                        onOpen={() => {
+                                            setOpenFileFormat(true);
+                                        }}
+                                        value={fileFormat}
+                                        onChange={(e) => {
+                                            setFileFormat(e.target.value);
+                                        }}>
+                                        <MenuItem value={''} disabled>
+                                            Output file format
+                                        </MenuItem>
+                                        <MenuItem value={'ORA'}>
+                                            Open Raster
+                                        </MenuItem>
+                                        <MenuItem value={'ZIP'}>
+                                            Zip Archive
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <FileAnnotationsIcon
                                     style={svgContainerStyle}
                                     svgStyle={svgStyle}
                                 />
-                                <Select
-                                    displayEmpty={true}
-                                    open={openAnnotationsFormat}
-                                    onClose={() => {
-                                        setOpenAnnotationsFormat(false);
-                                    }}
-                                    onOpen={() => {
-                                        setOpenAnnotationsFormat(true);
-                                    }}
-                                    value={annotationsFormat}
-                                    onChange={(e) => {
-                                        setAnnotationsFormat(e.target.value);
-                                    }}>
-                                    <MenuItem value={''}>
-                                        Annotations format
-                                    </MenuItem>
-                                    <MenuItem value={'MS COCO'}>
-                                        MS COCO
-                                    </MenuItem>
-                                    <MenuItem value={'Pascal VOC'}>
-                                        Pascal VOC
-                                    </MenuItem>
-                                </Select>
+                                <FormControl>
+                                    <Select
+                                        displayEmpty={true}
+                                        open={openAnnotationsFormat}
+                                        className={
+                                            annotationsFormat === ''
+                                                ? classes.disabledText
+                                                : null
+                                        }
+                                        onClose={() => {
+                                            setOpenAnnotationsFormat(false);
+                                        }}
+                                        onOpen={() => {
+                                            setOpenAnnotationsFormat(true);
+                                        }}
+                                        value={annotationsFormat}
+                                        onChange={(e) => {
+                                            setAnnotationsFormat(
+                                                e.target.value
+                                            );
+                                        }}>
+                                        <MenuItem disabled value={''}>
+                                            Annotations format
+                                        </MenuItem>
+                                        <MenuItem value={'MS COCO'}>
+                                            MS COCO
+                                        </MenuItem>
+                                        <MenuItem value={'Pascal VOC'}>
+                                            Pascal VOC
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <FileSuffixIcon
                                     style={svgContainerStyle}
                                     svgStyle={svgStyle}
