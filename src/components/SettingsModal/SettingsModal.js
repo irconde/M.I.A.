@@ -146,6 +146,11 @@ const SettingsModal = (props) => {
             })
         );
         dispatch(toggleSettingsVisibility(false));
+        if (remoteIp !== '' || remotePort !== '') {
+            setTimeout(() => {
+                props.connectToCommandServer(true);
+            }, 0);
+        }
     };
 
     const theme = createTheme({
