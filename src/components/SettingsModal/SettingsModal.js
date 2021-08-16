@@ -15,7 +15,6 @@ import {
     Switch,
     Snackbar,
     SnackbarContent,
-    FormHelperText,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -163,6 +162,9 @@ const SettingsModal = (props) => {
 
     const useStyles = makeStyles((theme) => {
         return {
+            pathButton: {
+                color: '#367eff',
+            },
             snackBarClass: {
                 backgroundColor: '#1f1f1f',
                 color: '#ffffff',
@@ -465,7 +467,7 @@ const SettingsModal = (props) => {
                                     }}>
                                     {connecting ? (
                                         <div className={classes.checkIcon}>
-                                            <CircularProgress size={'22px'} />
+                                            <CircularProgress size={'24px'} />
                                         </div>
                                     ) : (
                                         <CheckConnectionIcon
@@ -527,7 +529,7 @@ const SettingsModal = (props) => {
                                     className={classes.pathButton}
                                     disabled={remoteOrLocal}
                                     variant="outlined"
-                                    size={'small'}
+                                    size="medium"
                                     onClick={() => {
                                         setLocalFileOutput(getPath());
                                     }}>

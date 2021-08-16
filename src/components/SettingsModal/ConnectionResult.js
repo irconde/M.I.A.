@@ -6,14 +6,15 @@ import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
 
 const ConnectionResult = (props) => {
     const containerStyle = {
-        display: 'flex',
+        display: 'inline-flex',
         flexDirection: 'row',
         flexShrink: '0',
     };
     const svgContainerStyle = {
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'center',
-        marginLeft: '0.4rem',
+        marginLeft: '0.8rem',
+        marginRight: '0.25rem',
     };
     const svgStyle = {
         height: '24px',
