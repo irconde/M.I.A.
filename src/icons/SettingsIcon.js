@@ -19,7 +19,9 @@ const SettingsIcon = (props) => {
 
     return (
         <>
-            <IconStyle onClick={() => handleOpen()}>
+            <IconStyle
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleOpen()}>
                 <SettingsCog title={props.title} />
             </IconStyle>
 

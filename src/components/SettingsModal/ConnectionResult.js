@@ -8,11 +8,12 @@ const ConnectionResult = (props) => {
     const containerStyle = {
         display: 'flex',
         flexDirection: 'row',
+        flexShrink: '0',
     };
     const svgContainerStyle = {
         display: 'flex',
         alignItems: 'center',
-        margin: '0.4rem',
+        marginLeft: '0.4rem',
     };
     const svgStyle = {
         height: '24px',

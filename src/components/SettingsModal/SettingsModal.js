@@ -56,19 +56,19 @@ import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 
-const CustomSwitch = withStyles({
-    colorSecondary: {
-        '&.Mui-checked + .MuiSwitch-track': {
-            backgroundColor: '#367eff',
-        },
-    },
-    track: {
-        backgroundColor: '#fff',
-    },
-    thumb: {
-        backgroundColor: 'black',
-    },
-})(Switch);
+// const CustomSwitch = withStyles({
+//     colorSecondary: {
+//         '&.Mui-checked + .MuiSwitch-track': {
+//             backgroundColor: '#367eff',
+//         },
+//     },
+//     track: {
+//         backgroundColor: '#fff',
+//     },
+//     thumb: {
+//         backgroundColor: 'black',
+//     },
+// })(Switch);
 
 const SettingsModal = (props) => {
     // TODO: Do we update the settings as typed or upon save settings?
@@ -92,7 +92,15 @@ const SettingsModal = (props) => {
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const dispatch = useDispatch();
-
+    const svgContainerStyle = {
+        margin: '0.3rem',
+        display: 'flex',
+    };
+    const svgStyle = {
+        height: '24px',
+        width: '24px',
+        color: '#ffffff',
+    };
     const getPath = () => {
         var path = 'C:/user_example/test_output_folder';
         return path;
@@ -152,6 +160,12 @@ const SettingsModal = (props) => {
     const theme = createTheme({
         palette: {
             type: 'dark',
+            primary: {
+                light: '#5e97ff',
+                main: '#367eff',
+                dark: '#2558b2',
+                contrastText: '#9d9d9d',
+            },
         },
     });
 
@@ -215,7 +229,9 @@ const SettingsModal = (props) => {
                 margin: theme.spacing(1),
             },
             longTextField: {
-                width: '-webkit-fill-available',
+                // width: '-webkit-fill-available',
+                display: 'flex',
+                flexDirection: 'row',
             },
             saveButton: {
                 marginTop: theme.spacing(2),
@@ -225,7 +241,7 @@ const SettingsModal = (props) => {
                 alignSelf: 'flex-end',
                 outline: 'none',
                 '&:hover': {
-                    backgroundColor: '#71a4ff',
+                    backgroundColor: '#5e97ff',
                     outline: 'none',
                 },
             },
@@ -234,6 +250,7 @@ const SettingsModal = (props) => {
             },
             connectionSection: {
                 display: 'flex',
+                flexShrink: '0',
                 flexDirection: 'row',
                 justifyContent: 'start',
                 marginTop: theme.spacing(2),
@@ -249,6 +266,7 @@ const SettingsModal = (props) => {
                 justifyContent: 'start',
                 alignItems: 'center',
                 marginBottom: theme.spacing(2),
+                marginTop: theme.spacing(4),
             },
             sectionLabel: {
                 marginRight: theme.spacing(2),
@@ -319,6 +337,7 @@ const SettingsModal = (props) => {
             autoConnectContainer: {
                 display: 'inline-block',
                 float: 'right',
+                color: '#9d9d9d',
             },
             flexAuto: {
                 flex: 'auto',
@@ -351,7 +370,7 @@ const SettingsModal = (props) => {
                                     Work connected to a remote service
                                 </p>
                                 <div className={classes.switchContainer}>
-                                    <CustomSwitch
+                                    <Switch
                                         checked={remoteOrLocal}
                                         size="small"
                                         onChange={() =>
@@ -359,6 +378,7 @@ const SettingsModal = (props) => {
                                                 setRemoteOrLocal(!remoteOrLocal)
                                             )
                                         }
+                                        color="primary"
                                         name="remoteOrLocal"
                                         inputProps={{
                                             'aria-label': 'secondary checkbox',
@@ -422,6 +442,7 @@ const SettingsModal = (props) => {
                                     control={
                                         <Checkbox
                                             disabled={!remoteOrLocal}
+                                            color={'primary'}
                                             checked={autoConnect}
                                             onChange={() => {
                                                 dispatch(
@@ -437,6 +458,7 @@ const SettingsModal = (props) => {
                             <div className={classes.connectionSection}>
                                 <Button
                                     variant="outlined"
+                                    size="small"
                                     className={classes.checkConnectionButton}
                                     disabled={!remoteOrLocal}
                                     onClick={() => {
@@ -448,13 +470,9 @@ const SettingsModal = (props) => {
                                         </div>
                                     ) : (
                                         <CheckConnectionIcon
-                                            style={{
-                                                margin: '0.3rem',
-                                                display: 'flex',
-                                            }}
+                                            style={svgContainerStyle}
                                             svgStyle={{
-                                                height: '24px',
-                                                width: '24px',
+                                                ...svgStyle,
                                                 color: '#367eff',
                                             }}
                                         />
@@ -480,13 +498,9 @@ const SettingsModal = (props) => {
                             <div className={classes.workingDirectory}>
                                 <FormControl className={classes.longTextField}>
                                     <FileOpenIcon
-                                        style={{
-                                            margin: '0.3rem',
-                                            display: 'flex',
-                                        }}
+                                        style={svgContainerStyle}
                                         svgStyle={{
-                                            height: '24px',
-                                            width: '24px',
+                                            ...svgStyle,
                                             color:
                                                 remoteOrLocal === true
                                                     ? '#d1d1d1'
@@ -495,15 +509,14 @@ const SettingsModal = (props) => {
                                     />
                                     <TextField
                                         required
+                                        fullWidth={true}
                                         id="localFileOutput"
                                         placeholder={'Working directory'}
                                         value={localFileOutput}
                                         disabled={remoteOrLocal}
-                                        inputProps={
-                                            {
-                                                // size: '40',
-                                            }
-                                        }
+                                        inputProps={{
+                                            size: '40',
+                                        }}
                                         onChange={(e) => {
                                             dispatch(
                                                 setLocalFileOutput(
@@ -526,15 +539,8 @@ const SettingsModal = (props) => {
                             </div>
                             <div className={classes.displayListSection}>
                                 <FileFormatIcon
-                                    style={{
-                                        margin: '0.3rem',
-                                        display: 'flex',
-                                    }}
-                                    svgStyle={{
-                                        height: '24px',
-                                        width: '24px',
-                                        color: '#ffffff',
-                                    }}
+                                    style={svgContainerStyle}
+                                    svgStyle={svgStyle}
                                 />
                                 <Select
                                     displayEmpty={true}
@@ -556,15 +562,8 @@ const SettingsModal = (props) => {
                                     <MenuItem value={'ZIP'}>ZIP</MenuItem>
                                 </Select>
                                 <FileAnnotationsIcon
-                                    style={{
-                                        margin: '0.3rem',
-                                        display: 'flex',
-                                    }}
-                                    svgStyle={{
-                                        height: '24px',
-                                        width: '24px',
-                                        color: '#ffffff',
-                                    }}
+                                    style={svgContainerStyle}
+                                    svgStyle={svgStyle}
                                 />
                                 <Select
                                     displayEmpty={true}
@@ -592,15 +591,8 @@ const SettingsModal = (props) => {
                                     </MenuItem>
                                 </Select>
                                 <FileSuffixIcon
-                                    style={{
-                                        margin: '0.3rem',
-                                        display: 'flex',
-                                    }}
-                                    svgStyle={{
-                                        height: '24px',
-                                        width: '24px',
-                                        color: '#ffffff',
-                                    }}
+                                    style={svgContainerStyle}
+                                    svgStyle={svgStyle}
                                 />
                                 <FormControl>
                                     <TextField
