@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import {
-    Grid,
     Paper,
     Button,
     Divider,
-    Typography,
     TextField,
-    InputLabel,
     FormControl,
     FormGroup,
     Select,
@@ -17,7 +13,6 @@ import {
     Checkbox,
     MenuItem,
     Switch,
-    withStyles,
 } from '@material-ui/core';
 import {
     makeStyles,
@@ -30,21 +25,10 @@ import {
     toggleSettingsVisibility,
     getSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
-import {
-    getSettings,
-    saveSettings,
-    setAnnotationsFormat,
-    setAutoConnect,
-    setFileFormat,
-    setFileSuffix,
-    setLocalFileOutput,
-    setRemoteIp,
-    setRemoteOrLocal,
-    setRemotePort,
-} from '../../redux/slices/settings/settingsSlice';
+import { saveSettings } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as CloseIcon } from '../../icons/ic_close.svg';
-import { ReactComponent as CloudIcon } from '../../icons/ic_cloud.svg';
+import CloudIcon from '../../icons/CloudIcon.js';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
@@ -53,33 +37,7 @@ import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 
-// const CustomSwitch = withStyles({
-//     colorSecondary: {
-//         '&.Mui-checked + .MuiSwitch-track': {
-//             backgroundColor: '#367eff',
-//         },
-//     },
-//     track: {
-//         backgroundColor: '#fff',
-//     },
-//     thumb: {
-//         backgroundColor: 'black',
-//     },
-// })(Switch);
-
 const SettingsModal = (props) => {
-    // TODO: Do we update the settings as typed or upon save settings?
-    // const settings = useSelector(getSettings);
-    // const {
-    //     remoteIp,
-    //     remotePort,
-    //     autoConnect,
-    //     fileFormat,
-    //     annotationsFormat,
-    //     localFileOutput,
-    //     fileSuffix,
-    //     remoteOrLocal,
-    // } = settings;
     const [remoteIp, setRemoteIp] = useState('');
     const [remotePort, setRemotePort] = useState('');
     const [autoConnect, setAutoConnect] = useState(true);
@@ -161,17 +119,6 @@ const SettingsModal = (props) => {
     };
 
     const handleClose = () => {
-        dispatch(
-            saveSettings({
-                remoteIp,
-                remotePort,
-                autoConnect,
-                localFileOutput,
-                fileFormat,
-                annotationsFormat,
-                fileSuffix,
-            })
-        );
         dispatch(toggleSettingsVisibility(false));
     };
 
@@ -423,7 +370,15 @@ const SettingsModal = (props) => {
                             </p>
                             <div className={classes.remoteInputContainer}>
                                 <div className={classes.cloudIconContainer}>
-                                    <CloudIcon />
+                                    <CloudIcon
+                                        style={svgContainerStyle}
+                                        svgStyle={{
+                                            ...svgStyle,
+                                            color: remoteOrLocal
+                                                ? '#ffffff'
+                                                : '#9d9d9d',
+                                        }}
+                                    />
                                 </div>
                                 <FormControl className={classes.flexAuto}>
                                     <TextField
@@ -498,7 +453,9 @@ const SettingsModal = (props) => {
                                             style={svgContainerStyle}
                                             svgStyle={{
                                                 ...svgStyle,
-                                                color: '#367eff',
+                                                color: remoteOrLocal
+                                                    ? '#367eff'
+                                                    : '#9d9d9d',
                                             }}
                                         />
                                     )}

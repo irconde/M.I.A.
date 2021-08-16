@@ -173,7 +173,8 @@ class App extends Component {
         this.setState(
             {
                 commandServer: socketIOClient(
-                    `http://${this.props.remoteIp}:${this.props.remotePort}`
+                    `http://${this.props.remoteIp}:${this.props.remotePort}`,
+                    { autoConnect: this.props.autoConnect }
                 ),
             },
             () => {
