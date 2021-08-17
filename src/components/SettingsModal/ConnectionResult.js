@@ -9,6 +9,7 @@ const ConnectionResult = (props) => {
         display: 'inline-flex',
         flexDirection: 'row',
         flexShrink: '0',
+        alignItems: 'center',
     };
     const svgContainerStyle = {
         display: 'inline-flex',
@@ -33,7 +34,9 @@ const ConnectionResult = (props) => {
                             color: redColor,
                         }}
                     />
-                    <p style={{ color: redColor }}>Connection Successful</p>
+                    <span style={{ color: redColor }}>
+                        Connection Successful
+                    </span>
                 </div>
             );
         } else {
@@ -46,7 +49,9 @@ const ConnectionResult = (props) => {
                             color: greenColor,
                         }}
                     />
-                    <p style={{ color: greenColor }}>Server unreachable</p>
+                    <span style={{ color: greenColor }}>
+                        Server unreachable
+                    </span>
                 </div>
             );
         }

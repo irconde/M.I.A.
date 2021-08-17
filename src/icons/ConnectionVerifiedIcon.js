@@ -6,7 +6,9 @@ const ConnectionVerifiedIcon = (props) => {
         <div style={props.style}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                enableBackground="new 0 0 24 24"
+                enableBackground={`0 0 ${parseInt(
+                    props.svgStyle.width
+                )} ${parseInt(props.svgStyle.height)}`}
                 height={props.svgStyle.height}
                 viewBox={`0 0 ${parseInt(props.svgStyle.width)} ${parseInt(
                     props.svgStyle.height

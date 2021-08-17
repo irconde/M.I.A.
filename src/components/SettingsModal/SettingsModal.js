@@ -255,9 +255,11 @@ const SettingsModal = (props) => {
                 display: 'flex',
                 flexShrink: '0',
                 flexDirection: 'row',
-                justifyContent: 'start',
                 marginTop: theme.spacing(2),
                 marginBottom: theme.spacing(2),
+                justifyContent: 'flex-start',
+                alignContent: 'center',
+                alignItems: 'center',
             },
             circularProgress: {
                 marginRight: theme.spacing(2),
@@ -492,6 +494,17 @@ const SettingsModal = (props) => {
                                     display={connectionDisplay}
                                     connected={testConnectionResult}
                                 />
+                                {/* <Button
+                                    variant="outlined"
+                                    size="small"
+                                    className={classes.checkConnectionButton}
+                                    onClick={() => {
+                                        setConnectionDisplay(
+                                            !connectionDisplay
+                                        );
+                                    }}>
+                                    Toggle
+                                </Button> */}
                             </div>
                         </div>
                         <Divider style={{ margin: 'auto' }} variant="middle" />
