@@ -200,7 +200,9 @@ class App extends Component {
      */
     componentDidMount() {
         // Connect socket servers
-        this.connectToCommandServer();
+        if (this.props.firstDisplaySettings === false) {
+            this.connectToCommandServer();
+        }
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -2521,6 +2523,7 @@ const mapStateToProps = (state) => {
         autoConnect: settings.settings.autoConnect,
         fileFormat: settings.settings.fileFormat,
         fileSuffix: settings.settings.fileSuffix,
+        firstDisplaySettings: settings.settings.firstDisplaySettings,
     };
 };
 

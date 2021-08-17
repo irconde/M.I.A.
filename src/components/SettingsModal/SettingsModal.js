@@ -41,10 +41,10 @@ import socketIOClient from 'socket.io-client';
 
 const SettingsModal = (props) => {
     const [snackBarOpen, setSnackBarOpen] = useState(false);
-    const [remoteIp, setRemoteIp] = useState('');
-    const [remotePort, setRemotePort] = useState('');
+    const [remoteIp, setRemoteIp] = useState('127.0.0.1');
+    const [remotePort, setRemotePort] = useState('4001');
     const [autoConnect, setAutoConnect] = useState(true);
-    const [fileFormat, setFileFormat] = useState('');
+    const [fileFormat, setFileFormat] = useState('ORA');
     const [annotationsFormat, setAnnotationsFormat] = useState('');
     const [localFileOutput, setLocalFileOutput] = useState('');
     const [fileSuffix, setFileSuffix] = useState('');
@@ -581,6 +581,7 @@ const SettingsModal = (props) => {
                                     <Select
                                         displayEmpty={true}
                                         open={openFileFormat}
+                                        defaultValue={'ORA'}
                                         className={
                                             fileFormat === ''
                                                 ? classes.disabledText

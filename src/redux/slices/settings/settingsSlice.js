@@ -22,6 +22,7 @@ const defaultSettings = {
     localFileOutput: '',
     fileSuffix: '_img',
     remoteOrLocal: true,
+    firstDisplaySettings: true,
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -49,6 +50,7 @@ const settingsSlice = createSlice({
          */
         setSettings: (state, action) => {
             state.settings = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -66,6 +68,7 @@ const settingsSlice = createSlice({
                 }
                 // detection[key] = update[key];
             }
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -76,6 +79,7 @@ const settingsSlice = createSlice({
         removeCookieData: (state) => {
             myCookie.remove('settings');
             state.settings = defaultSettings;
+            state.settings.firstDisplaySettings = true;
         },
         /**
          * setRemoteIp - Sets the remote ip to the passed in action
@@ -85,6 +89,7 @@ const settingsSlice = createSlice({
          */
         setRemoteIp: (state, action) => {
             state.settings.remoteIp = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -95,6 +100,7 @@ const settingsSlice = createSlice({
          */
         setRemotePort: (state, action) => {
             state.settings.remotePort = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -105,6 +111,7 @@ const settingsSlice = createSlice({
          */
         setAutoConnect: (state, action) => {
             state.settings.autoConnect = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -115,6 +122,7 @@ const settingsSlice = createSlice({
          */
         setFileFormat: (state, action) => {
             state.settings.fileFormat = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -125,6 +133,7 @@ const settingsSlice = createSlice({
          */
         setAnnotationsFormat: (state, action) => {
             state.settings.annotationsFormat = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -135,6 +144,7 @@ const settingsSlice = createSlice({
          */
         setLocalFileOutput: (state, action) => {
             state.settings.localFileOutput = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -145,6 +155,7 @@ const settingsSlice = createSlice({
          */
         setFileSuffix: (state, action) => {
             state.settings.fileSuffix = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
@@ -155,6 +166,7 @@ const settingsSlice = createSlice({
          */
         setRemoteOrLocal: (state, action) => {
             state.settings.remoteOrLocal = action.payload;
+            state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
     },
@@ -186,5 +198,8 @@ export const getRemoteConnectionInfo = (state) => {
         autoConnect: state.settings.settings.autoConnect,
     };
 };
+
+export const getFirstDisplaySettings = (state) =>
+    state.settings.settings.firstDisplaySettings;
 
 export default settingsSlice.reducer;
