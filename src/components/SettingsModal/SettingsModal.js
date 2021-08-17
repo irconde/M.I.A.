@@ -71,6 +71,13 @@ const SettingsModal = (props) => {
         return path;
     };
 
+    /**
+     * handleSnackBarClose - Event handler for when the snackbar closes
+     *
+     * @param {Event} event
+     * @param {String} reason
+     * @returns
+     */
     const handleSnackBarClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -78,6 +85,11 @@ const SettingsModal = (props) => {
         setSnackBarOpen(false);
     };
 
+    /**
+     * getModalStyle - Returns the main modal body style
+     *
+     * @returns {Object} Containing styles for the modal
+     */
     function getModalStyle() {
         return {
             position: 'absolute',
@@ -91,6 +103,13 @@ const SettingsModal = (props) => {
         };
     }
 
+    /**
+     * testConnection - Will a test connection with the typed input fields. This does some simulation
+     *                  by using setTimeout to provide useful user interaction and feedback.
+     *
+     * @param {None}
+     * @returns {None}
+     */
     const testConnection = () => {
         const testConnection = socketIOClient(
             `http://${remoteIp}:${remotePort}`
@@ -128,10 +147,20 @@ const SettingsModal = (props) => {
         });
     };
 
+    /**
+     * handleClose - For when the user taps the Close X Icon or outside the modal window. Does not save settings.
+     *
+     * @param {None}
+     * @returns {None}
+     */
     const handleClose = () => {
         dispatch(toggleSettingsVisibility(false));
     };
 
+    /**
+     * saveSettingsEvent - For when the save settings button is tapped. Will send all data to the settings slice.
+     *                     If the user entered connection information it will change the command server to the new one.
+     */
     const saveSettingsEvent = () => {
         setSnackBarOpen(true);
         dispatch(

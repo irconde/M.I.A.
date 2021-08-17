@@ -51,6 +51,11 @@ const settingsSlice = createSlice({
             state.settings = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * saveCookieData - Will save the current settings into a cookie
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         saveCookieData: (state) => {
             storeCookieData(state.settings);
         },
@@ -72,34 +77,82 @@ const settingsSlice = createSlice({
             myCookie.remove('settings');
             state.settings = defaultSettings;
         },
+        /**
+         * setRemoteIp - Sets the remote ip to the passed in action
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String with the ip of the remote server
+         */
         setRemoteIp: (state, action) => {
             state.settings.remoteIp = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setRemotePort - Sets the remote port to the passed in action
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String with the port of the remote server
+         */
         setRemotePort: (state, action) => {
             state.settings.remotePort = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setAutoConnect - Sets wether the app should automatically connect to the command server
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action True/False to auto connect
+         */
         setAutoConnect: (state, action) => {
             state.settings.autoConnect = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setFileFormat - Sets the file output format, ora/zip
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String value determining ora xor zip
+         */
         setFileFormat: (state, action) => {
             state.settings.fileFormat = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setAnnotationsFormat - Sets the file annotation format
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String value containing the annotation format
+         */
         setAnnotationsFormat: (state, action) => {
             state.settings.annotationsFormat = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setLocalFileOutput - Sets the local file output path to save files to
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String value of the local path
+         */
         setLocalFileOutput: (state, action) => {
             state.settings.localFileOutput = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setFileSuffix - Sets the file suffix
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action String value of the file suffix
+         */
         setFileSuffix: (state, action) => {
             state.settings.fileSuffix = action.payload;
             storeCookieData(state.settings);
         },
+        /**
+         * setRemoteOrLocal - Determines wether the App is using a local or remote service
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action Boolean value true = remote and false = local
+         */
         setRemoteOrLocal: (state, action) => {
             state.settings.remoteOrLocal = action.payload;
             storeCookieData(state.settings);

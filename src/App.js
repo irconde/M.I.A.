@@ -166,6 +166,14 @@ class App extends Component {
             this.stopListeningClickEvents.bind(this);
     }
 
+    /**
+     * connectToCommandServer - This function houses the code to connect to a server, then it starts
+     *                          listening for connection events. Lastly it is what trigger to ask for a file
+     *                          from the command server.
+     *
+     * @param {Boolean} update Optional variable for when the settings changes the command server
+     * @returns {None}
+     */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
             `http://${this.props.remoteIp}:${this.props.remotePort}`
@@ -326,6 +334,12 @@ class App extends Component {
         document.body.removeEventListener('mouseleave', this.onMouseLeave);
     }
 
+    /**
+     * monitorConnectionEvent - This function houses the events for connectivity with the command server.
+     *
+     * @param {None}
+     * @returns {None}
+     */
     async monitorConnectionEvent() {
         if (this.state.commandServer !== null) {
             this.state.commandServer.on('disconnect', () => {
@@ -333,6 +347,15 @@ class App extends Component {
             });
             this.state.commandServer.on('connect', () => {
                 this.props.setConnected(true);
+            });
+            this.state.commandServer.on('connect_error', (err) => {
+                console.log(`connect_error due to ${err.message}`);
+                if (
+                    err.message === 'xhr poll error' ||
+                    err.message === 'server error'
+                ) {
+                    this.props.setConnected(false);
+                }
             });
         }
     }
@@ -593,7 +616,6 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        // todo: add suffix to data sent to server
         this.state.commandServer.emit('fileFromClient', {
             file,
             fileFormat: this.props.fileFormat,
