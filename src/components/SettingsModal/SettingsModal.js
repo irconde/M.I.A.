@@ -98,7 +98,7 @@ const SettingsModal = (props) => {
             transform: `translate(-50%, -50%)`,
             backgroundColor: '#1f1f1f',
             outline: 'none',
-            fontFamily: 'NotoSansJP',
+            fontFamily: 'Noto Sans JP',
             minWidth: '30vw',
         };
     }
@@ -341,7 +341,7 @@ const SettingsModal = (props) => {
             },
             settingsText: {
                 objectFit: 'contain',
-                fontFamily: 'NotoSansJP',
+                fontFamily: 'Noto Sans JP',
                 fontSize: '26px',
                 fontWeight: '500',
                 fontStretch: 'normal',
@@ -353,7 +353,7 @@ const SettingsModal = (props) => {
                 alignSelf: 'center',
             },
             optionText: {
-                fontFamily: 'NotoSansJP',
+                fontFamily: 'Noto Sans JP',
                 fontSize: '18px',
                 fontWeight: 'normal',
                 fontStretch: 'normal',
