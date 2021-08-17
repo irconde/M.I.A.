@@ -285,7 +285,7 @@ const SettingsModal = (props) => {
             },
             greyText: {
                 color: '#9d9d9d',
-                fontSize: '10px',
+                fontSize: '12px',
             },
             disabledText: {
                 color: '#9d9d9d',
@@ -494,17 +494,6 @@ const SettingsModal = (props) => {
                                     display={connectionDisplay}
                                     connected={testConnectionResult}
                                 />
-                                {/* <Button
-                                    variant="outlined"
-                                    size="small"
-                                    className={classes.checkConnectionButton}
-                                    onClick={() => {
-                                        setConnectionDisplay(
-                                            !connectionDisplay
-                                        );
-                                    }}>
-                                    Toggle
-                                </Button> */}
                             </div>
                         </div>
                         <Divider style={{ margin: 'auto' }} variant="middle" />
