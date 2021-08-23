@@ -759,10 +759,62 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
+        const currentDate = Date.now();
+        const dd = String(currentDate.getDate()).padStart(2, '0');
+        const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = currentDate.getFullYear();
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
             // Convert to MS COCO
+            const COCO_DATA = {
+                info: {
+                    description: 'Annotated file from Pilot GUI',
+                    contributor: 'Pilot GUI',
+                    url: '',
+                    version: '1.0',
+                    year: currentDate.getFullYear(),
+                    data_created: `${yyyy}/${mm}/${dd}`,
+                },
+                licenses: [
+                    {
+                        url: '',
+                        id: 1,
+                        name: '',
+                    },
+                ],
+                images: [
+                    {
+                        id: 'image_id',
+                        license: 1,
+                        width: 500,
+                        height: 500,
+                        date_captured: currentDate,
+                        file_name: 'convert to jpg',
+                        coco_url: 'local path, set by server',
+                        flickr_url: 'wont be used',
+                    },
+                ],
+                annotations: [
+                    {
+                        id: 'annotation_id',
+                        image_id: 'image_id',
+                        category_id: 3,
+                        iscrowd: 0,
+                        area: 500,
+                        // x_min, y_min, width, height
+                        bbox: [222, 300, 40, 50],
+                        segmentation: [[]],
+                    },
+                ],
+                categories: [
+                    {
+                        supercategory: 'Object',
+                        id: 3,
+                        name: 'Detection',
+                    },
+                ],
+            };
         } else if (
             this.props.annotationsFormat ===
             constants.SETTINGS.ANNOTATIONS.PASCAL
@@ -1653,12 +1705,13 @@ class App extends Component {
                         data[0].polygonCoords
                     );
                 }
-                // const binaryMask = [data[0].binaryMask[0], [coords[0], coords[1]], data[0].binaryMask[2];
-                binaryMask = [
-                    data[0].binaryMask[0],
-                    [coords[0], coords[1]],
-                    [coords[2] - coords[0], coords[3] - coords[1]],
-                ];
+                if (data[0].binaryMask !== undefined) {
+                    binaryMask = [
+                        data[0].binaryMask[0],
+                        [coords[0], coords[1]],
+                        [coords[2] - coords[0], coords[3] - coords[1]],
+                    ];
+                }
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
@@ -1731,7 +1784,11 @@ class App extends Component {
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
                             // TODO; Add binary mask coords
-                            binaryMask: [[]],
+                            binaryMask: [
+                                [],
+                                [coords[0], coords[1]],
+                                [coords[2] - coords[0], coords[3] - coords[1]],
+                            ],
                             polygonMask: [],
                             uuid,
                         });
