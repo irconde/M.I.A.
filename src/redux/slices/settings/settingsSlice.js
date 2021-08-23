@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { Cookies } from 'react-cookie';
-import { COOKIE } from '../../../utils/Constants';
+import { COOKIE, SETTINGS } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');
@@ -17,7 +17,7 @@ const defaultSettings = {
     remoteIp: process.env.REACT_APP_COMMAND_SERVER_IP,
     remotePort: process.env.REACT_APP_COMMAND_SERVER_PORT,
     autoConnect: true,
-    fileFormat: 'ORA',
+    fileFormat: SETTINGS.OUTPUT_FORMATS.ORA,
     annotationsFormat: '',
     localFileOutput: '',
     fileSuffix: '_img',

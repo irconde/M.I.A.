@@ -38,6 +38,7 @@ import FileFormatIcon from '../../icons/FileFormatIcon.js';
 import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
+import { SETTINGS } from '../../utils/Constants';
 
 const SettingsModal = (props) => {
     const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -636,12 +637,27 @@ const SettingsModal = (props) => {
                                         <MenuItem disabled value={''}>
                                             Annotations format
                                         </MenuItem>
-                                        <MenuItem value={'MS COCO'}>
-                                            MS COCO
-                                        </MenuItem>
-                                        <MenuItem value={'Pascal VOC'}>
-                                            Pascal VOC
-                                        </MenuItem>
+                                        {Object.keys(SETTINGS.ANNOTATIONS).map(
+                                            (key, index) => {
+                                                return (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={
+                                                            SETTINGS
+                                                                .ANNOTATIONS[
+                                                                key
+                                                            ]
+                                                        }>
+                                                        {
+                                                            SETTINGS
+                                                                .ANNOTATIONS[
+                                                                key
+                                                            ]
+                                                        }
+                                                    </MenuItem>
+                                                );
+                                            }
+                                        )}
                                     </Select>
                                 </FormControl>
                                 <FileSuffixIcon

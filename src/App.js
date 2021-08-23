@@ -759,132 +759,160 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
-        const stackXML = document.implementation.createDocument('', '', null);
-        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
-        const imageElem = stackXML.createElement('image');
-        const mimeType = new Blob(['image/openraster'], {
-            type: 'text/plain;charset=utf-8',
-        });
-        const newOra = new JSZip();
-        newOra.file('mimetype', mimeType, { compression: null });
-        let stackCounter = 1;
-        const listOfPromises = [];
-        // Loop through each stack, being either top or side currently
-        this.state.myOra.stackData.forEach((stack) => {
-            const stackElem = stackXML.createElement('stack');
-            stackElem.setAttribute('name', `SOP Instance UID #${stackCounter}`);
-            stackElem.setAttribute('view', stack.view);
-            const pixelLayer = stackXML.createElement('layer');
-            // We always know the first element in the stack.blob data is pixel element
-            pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.dcs`);
-            newOra.file(
-                `data/${stack.view}_pixel_data.dcs`,
-                stack.blobData[0].blob
+        if (
+            this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
+        ) {
+            // Convert to MS COCO
+        } else if (
+            this.props.annotationsFormat ===
+            constants.SETTINGS.ANNOTATIONS.PASCAL
+        ) {
+            // Convert to PASCAL
+        } else {
+            const stackXML = document.implementation.createDocument(
+                '',
+                '',
+                null
             );
-            const topStackIndex = this.state.myOra.stackData.findIndex(
-                (stack) => {
-                    return constants.viewport.TOP === stack.view;
-                }
-            );
-            const sideStackIndex = this.state.myOra.stackData.findIndex(
-                (stack) => {
-                    return constants.viewport.SIDE === stack.view;
-                }
-            );
-            stackElem.appendChild(pixelLayer);
-            if (stack.view === 'top') {
-                // Loop through each detection and only the top view of the detection
-                const topDetections = getTopDetections(this.props.detections);
-                for (let j = 0; j < topDetections.length; j++) {
-                    let threatPromise = Dicos.detectionObjectToBlob(
-                        topDetections[j],
-                        this.state.myOra.stackData[topStackIndex].blobData[0]
-                            .blob
-                    ).then((threatBlob) => {
-                        newOra.file(
-                            `data/top_threat_detection_${j + 1}_${
-                                topDetections[j].algorithm
-                            }.dcs`,
-                            threatBlob
-                        );
-                        let newLayer = stackXML.createElement('layer');
-                        newLayer.setAttribute(
-                            'src',
-                            `data/top_threat_detection_${j + 1}_${
-                                topDetections[j].algorithm
-                            }.dcs`
-                        );
-                        newLayer.setAttribute(
-                            'UUID',
-                            `${topDetections[j].uuid}`
-                        );
-                        stackElem.appendChild(newLayer);
-                    });
-                    listOfPromises.push(threatPromise);
-                }
-                // Loop through each detection and only the side view of the detection
-            } else if (stack.view === 'side') {
-                const sideDetections = getSideDetections(this.props.detections);
-                for (let i = 0; i < sideDetections.length; i++) {
-                    let threatPromise = Dicos.detectionObjectToBlob(
-                        sideDetections[i],
-                        this.state.myOra.stackData[sideStackIndex].blobData[0]
-                            .blob
-                    ).then((threatBlob) => {
-                        newOra.file(
-                            `data/side_threat_detection_${i + 1}_${
-                                sideDetections[i].algorithm
-                            }.dcs`,
-                            threatBlob
-                        );
-                        let newLayer = stackXML.createElement('layer');
-                        newLayer.setAttribute(
-                            'src',
-                            `data/side_threat_detection_${i + 1}_${
-                                sideDetections[i].algorithm
-                            }.dcs`
-                        );
-                        newLayer.setAttribute(
-                            'UUID',
-                            `${sideDetections[i].uuid}`
-                        );
-                        stackElem.appendChild(newLayer);
-                    });
-                    listOfPromises.push(threatPromise);
-                }
-            }
-            stackCounter++;
-            imageElem.appendChild(stackElem);
-        });
-        const promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then(() => {
-            stackXML.appendChild(imageElem);
-
-            newOra.file(
-                'stack.xml',
-                new Blob(
-                    [prolog + new XMLSerializer().serializeToString(stackXML)],
-                    { type: 'application/xml ' }
-                )
-            );
-            newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
-                this.props.setCurrentProcessingFile(null);
-                this.setState(
-                    {
-                        myOra: new ORA(),
-                    },
-                    () => this.props.resetDetections()
+            const prolog = '<?xml version="1.0" encoding="utf-8"?>';
+            const imageElem = stackXML.createElement('image');
+            const mimeType = new Blob(['image/openraster'], {
+                type: 'text/plain;charset=utf-8',
+            });
+            const newOra = new JSZip();
+            newOra.file('mimetype', mimeType, { compression: null });
+            let stackCounter = 1;
+            const listOfPromises = [];
+            // Loop through each stack, being either top or side currently
+            this.state.myOra.stackData.forEach((stack) => {
+                const stackElem = stackXML.createElement('stack');
+                stackElem.setAttribute(
+                    'name',
+                    `SOP Instance UID #${stackCounter}`
                 );
-                this.sendImageToCommandServer(file).then(
-                    // eslint-disable-next-line no-unused-vars
-                    (res) => {
-                        this.resetSelectedDetectionBoxes(e);
-                        this.props.setUpload(false);
-                        this.getFileFromCommandServer();
+                stackElem.setAttribute('view', stack.view);
+                const pixelLayer = stackXML.createElement('layer');
+                // We always know the first element in the stack.blob data is pixel element
+                pixelLayer.setAttribute(
+                    'src',
+                    `data/${stack.view}_pixel_data.dcs`
+                );
+                newOra.file(
+                    `data/${stack.view}_pixel_data.dcs`,
+                    stack.blobData[0].blob
+                );
+                const topStackIndex = this.state.myOra.stackData.findIndex(
+                    (stack) => {
+                        return constants.viewport.TOP === stack.view;
                     }
                 );
+                const sideStackIndex = this.state.myOra.stackData.findIndex(
+                    (stack) => {
+                        return constants.viewport.SIDE === stack.view;
+                    }
+                );
+                stackElem.appendChild(pixelLayer);
+                if (stack.view === 'top') {
+                    // Loop through each detection and only the top view of the detection
+                    const topDetections = getTopDetections(
+                        this.props.detections
+                    );
+                    for (let j = 0; j < topDetections.length; j++) {
+                        let threatPromise = Dicos.detectionObjectToBlob(
+                            topDetections[j],
+                            this.state.myOra.stackData[topStackIndex]
+                                .blobData[0].blob
+                        ).then((threatBlob) => {
+                            newOra.file(
+                                `data/top_threat_detection_${j + 1}_${
+                                    topDetections[j].algorithm
+                                }.dcs`,
+                                threatBlob
+                            );
+                            let newLayer = stackXML.createElement('layer');
+                            newLayer.setAttribute(
+                                'src',
+                                `data/top_threat_detection_${j + 1}_${
+                                    topDetections[j].algorithm
+                                }.dcs`
+                            );
+                            newLayer.setAttribute(
+                                'UUID',
+                                `${topDetections[j].uuid}`
+                            );
+                            stackElem.appendChild(newLayer);
+                        });
+                        listOfPromises.push(threatPromise);
+                    }
+                    // Loop through each detection and only the side view of the detection
+                } else if (stack.view === 'side') {
+                    const sideDetections = getSideDetections(
+                        this.props.detections
+                    );
+                    for (let i = 0; i < sideDetections.length; i++) {
+                        let threatPromise = Dicos.detectionObjectToBlob(
+                            sideDetections[i],
+                            this.state.myOra.stackData[sideStackIndex]
+                                .blobData[0].blob
+                        ).then((threatBlob) => {
+                            newOra.file(
+                                `data/side_threat_detection_${i + 1}_${
+                                    sideDetections[i].algorithm
+                                }.dcs`,
+                                threatBlob
+                            );
+                            let newLayer = stackXML.createElement('layer');
+                            newLayer.setAttribute(
+                                'src',
+                                `data/side_threat_detection_${i + 1}_${
+                                    sideDetections[i].algorithm
+                                }.dcs`
+                            );
+                            newLayer.setAttribute(
+                                'UUID',
+                                `${sideDetections[i].uuid}`
+                            );
+                            stackElem.appendChild(newLayer);
+                        });
+                        listOfPromises.push(threatPromise);
+                    }
+                }
+                stackCounter++;
+                imageElem.appendChild(stackElem);
             });
-        });
+            const promiseOfList = Promise.all(listOfPromises);
+            promiseOfList.then(() => {
+                stackXML.appendChild(imageElem);
+
+                newOra.file(
+                    'stack.xml',
+                    new Blob(
+                        [
+                            prolog +
+                                new XMLSerializer().serializeToString(stackXML),
+                        ],
+                        { type: 'application/xml ' }
+                    )
+                );
+                newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
+                    this.props.setCurrentProcessingFile(null);
+                    this.setState(
+                        {
+                            myOra: new ORA(),
+                        },
+                        () => this.props.resetDetections()
+                    );
+                    this.sendImageToCommandServer(file).then(
+                        // eslint-disable-next-line no-unused-vars
+                        (res) => {
+                            this.resetSelectedDetectionBoxes(e);
+                            this.props.setUpload(false);
+                            this.getFileFromCommandServer();
+                        }
+                    );
+                });
+            });
+        }
     }
 
     /**
@@ -1592,7 +1620,7 @@ class App extends Component {
             ) {
                 return;
             }
-            let newDetection, coords, boundingBoxArea, polygonMask;
+            let newDetection, coords, boundingBoxArea, polygonMask, binaryMask;
             if (
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
@@ -1625,6 +1653,12 @@ class App extends Component {
                         data[0].polygonCoords
                     );
                 }
+                // const binaryMask = [data[0].binaryMask[0], [coords[0], coords[1]], data[0].binaryMask[2];
+                binaryMask = [
+                    data[0].binaryMask[0],
+                    [coords[0], coords[1]],
+                    data[0].binaryMask[2],
+                ];
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
@@ -1636,7 +1670,7 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    binaryMask: [],
+                    binaryMask,
                     polygonMask: polygonMask,
                 };
             } else if (
@@ -1659,7 +1693,7 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    binaryMask: [[]],
+                    binaryMask,
                     polygonMask,
                 };
             }
@@ -1696,6 +1730,7 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
+                            // TODO; Add binary mask coords
                             binaryMask: [[]],
                             polygonMask: [],
                             uuid,
@@ -1721,7 +1756,6 @@ class App extends Component {
                             polygonMask
                         )
                     ) {
-                        let mask_b = [];
                         if (
                             this.props.selectedDetection &&
                             this.props.editionMode !==
@@ -1735,18 +1769,19 @@ class App extends Component {
                                     coords,
                                     this.props.selectedDetection.polygonMask
                                 );
-                                mask_b = Utils.polygonToBinaryMask(polygonMask);
+                                binaryMask =
+                                    Utils.polygonToBinaryMask(polygonMask);
                             } else if (
                                 this.props.selectedDetection.binaryMask.length >
                                     0 &&
                                 this.props.selectedDetection.binaryMask[0]
                                     .length > 0
                             ) {
-                                mask_b = cloneDeep(
+                                binaryMask = cloneDeep(
                                     this.props.selectedDetection.binaryMask
                                 );
-                                mask_b[1][0] = coords[0];
-                                mask_b[1][1] = coords[1];
+                                binaryMask[1][0] = coords[0];
+                                binaryMask[1][1] = coords[1];
                             }
                         }
                         self.props.updateDetection({
@@ -1754,7 +1789,7 @@ class App extends Component {
                             update: {
                                 boundingBox: coords,
                                 polygonMask: polygonMask,
-                                binaryMask: mask_b,
+                                binaryMask,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2140,6 +2175,7 @@ class App extends Component {
                         this.props.selectedDetection.polygonMask !== null
                             ? this.props.selectedDetection.polygonMask
                             : undefined,
+                    binaryMask: this.props.selectedDetection.binaryMask,
                 };
                 if (
                     this.props.selectedDetection.view === constants.viewport.TOP
@@ -2186,6 +2222,7 @@ class App extends Component {
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
+                    binaryMask: this.props.selectedDetection.binaryMask,
                 };
 
                 if (
@@ -2449,9 +2486,9 @@ class App extends Component {
      * @returns {None} None
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        this.resetSelectedDetectionBoxes(event);
+        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        // else this.props.onMouseLeaveNoFilesUpdate();
+        // this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
@@ -2524,6 +2561,7 @@ const mapStateToProps = (state) => {
         fileFormat: settings.settings.fileFormat,
         fileSuffix: settings.settings.fileSuffix,
         firstDisplaySettings: settings.settings.firstDisplaySettings,
+        annotationsFormat: settings.settings.annotationsFormat,
     };
 };
 

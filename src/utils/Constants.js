@@ -99,3 +99,14 @@ export const COOKIE = {
     // In seconds, 10800 = 3 hours
     TIME: 10800,
 };
+
+export const SETTINGS = {
+    ANNOTATIONS: {
+        COCO: 'MS COCO',
+        PASCAL: 'Pascal VOC',
+    },
+    OUTPUT_FORMATS: {
+        ORA: 'Open Raster',
+        ZIP: 'Zip Archive',
+    },
+};
