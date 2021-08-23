@@ -1657,7 +1657,7 @@ class App extends Component {
                 binaryMask = [
                     data[0].binaryMask[0],
                     [coords[0], coords[1]],
-                    data[0].binaryMask[2],
+                    [coords[2] - coords[0], coords[3] - coords[1]],
                 ];
                 newDetection = {
                     uuid: data[0].uuid,
