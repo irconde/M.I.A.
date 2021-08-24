@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { getCornerstoneMode } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
+import { getConnected } from '../../redux/slices/server/serverSlice';
 
 const NextButtonContainer = styled.div`
     width: 100%;
@@ -36,9 +37,11 @@ const NextButtonContainer = styled.div`
 const NextButton = ({ nextImageClick }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const selectedDetection = useSelector(getSelectedDetection);
+    const connected = useSelector(getConnected);
     const enableNextButton =
         !selectedDetection &&
-        cornerstoneMode === constants.cornerstoneMode.SELECTION;
+        cornerstoneMode === constants.cornerstoneMode.SELECTION &&
+        connected === true;
     const handleClick = (e) => {
         if (enableNextButton) {
             nextImageClick(e);
