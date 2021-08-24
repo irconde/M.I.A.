@@ -76,7 +76,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
-import { buildCocoDataset } from './utils/Coco';
+import { buildCocoDataZip } from './utils/Coco';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -767,11 +767,20 @@ class App extends Component {
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
             // Convert to MS COCO
-            const cocoDataset = buildCocoDataset(
-                this.state.myOra,
-                this.props.detections
+            buildCocoDataZip(this.state.myOra, this.props.detections).then(
+                (cocoFile) => {
+                    this.sendImageToCommandServer(cocoFile).then(
+                        // eslint-disable-next-line no-unused-vars
+                        (res) => {
+                            this.props.setCurrentProcessingFile(null);
+                            this.props.resetDetections();
+                            this.resetSelectedDetectionBoxes(e);
+                            this.props.setUpload(false);
+                            this.getFileFromCommandServer();
+                        }
+                    );
+                }
             );
-            console.log(cocoDataset);
         } else if (
             this.props.annotationsFormat ===
             constants.SETTINGS.ANNOTATIONS.PASCAL
@@ -904,6 +913,7 @@ class App extends Component {
                     )
                 );
                 newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
+                    console.log(file);
                     this.props.setCurrentProcessingFile(null);
                     this.setState(
                         {

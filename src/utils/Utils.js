@@ -392,9 +392,9 @@ export default class Utils {
     }
 
     /**
-     * handleDataToArray - Convert list of handles into an array of float values
+     * polygonDataToCoordArray - Convert list of handles into an array of float values
      *
-     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @param {Array<Number>} polygonData - list of handles, i.e., the vertices, of a polygon
      */
     static polygonDataToCoordArray(polygonData) {
         let points = [];

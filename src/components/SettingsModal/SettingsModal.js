@@ -45,7 +45,7 @@ const SettingsModal = (props) => {
     const [remoteIp, setRemoteIp] = useState('127.0.0.1');
     const [remotePort, setRemotePort] = useState('4001');
     const [autoConnect, setAutoConnect] = useState(true);
-    const [fileFormat, setFileFormat] = useState('ORA');
+    const [fileFormat, setFileFormat] = useState('Open Raster');
     const [annotationsFormat, setAnnotationsFormat] = useState('');
     const [localFileOutput, setLocalFileOutput] = useState('');
     const [fileSuffix, setFileSuffix] = useState('');
@@ -582,7 +582,7 @@ const SettingsModal = (props) => {
                                     <Select
                                         displayEmpty={true}
                                         open={openFileFormat}
-                                        defaultValue={'ORA'}
+                                        defaultValue="Open Raster"
                                         className={
                                             fileFormat === ''
                                                 ? classes.disabledText
@@ -601,10 +601,10 @@ const SettingsModal = (props) => {
                                         <MenuItem value={''} disabled>
                                             Output file format
                                         </MenuItem>
-                                        <MenuItem value={'ORA'}>
+                                        <MenuItem value={'Open Raster'}>
                                             Open Raster
                                         </MenuItem>
-                                        <MenuItem value={'ZIP'}>
+                                        <MenuItem value={'Zip Archive'}>
                                             Zip Archive
                                         </MenuItem>
                                     </Select>
