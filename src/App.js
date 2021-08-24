@@ -358,10 +358,12 @@ class App extends Component {
                         err.message === 'server error'
                     ) {
                         this.props.setConnected(false);
+                        this.state.commandServer.disconnect();
                     }
                 });
             } catch (error) {
                 this.props.setConnected(false);
+                this.state.commandServer.disconnect();
             }
         }
     }
