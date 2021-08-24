@@ -76,6 +76,8 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
+import { Button } from '@material-ui/core';
+import { buildCocoDataset } from './utils/Coco';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -350,15 +352,18 @@ class App extends Component {
             this.state.commandServer.on('connect', () => {
                 this.props.setConnected(true);
             });
-            this.state.commandServer.on('connect_error', (err) => {
-                console.log(`connect_error due to ${err.message}`);
-                if (
-                    err.message === 'xhr poll error' ||
-                    err.message === 'server error'
-                ) {
-                    this.props.setConnected(false);
-                }
-            });
+            try {
+                this.state.commandServer.on('connect_error', (err) => {
+                    if (
+                        err.message === 'xhr poll error' ||
+                        err.message === 'server error'
+                    ) {
+                        this.props.setConnected(false);
+                    }
+                });
+            } catch (error) {
+                this.props.setConnected(false);
+            }
         }
     }
 
@@ -1013,6 +1018,9 @@ class App extends Component {
             );
             viewport.translation.y = constants.viewportStyle.ORIGIN;
             viewport.scale = self.props.zoomLevelTop;
+            // eslint-disable-next-line react/no-direct-mutation-state
+            self.state.myOra.stackData[0].dimensions =
+                viewport.displayedArea.brhc;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
@@ -1034,6 +1042,8 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                self.state.myOra.stackData[1].dimensions =
+                    viewport.displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -2585,6 +2595,15 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
+                    <Button
+                        onClick={() => {
+                            buildCocoDataset(
+                                this.state.myOra,
+                                this.props.detections
+                            );
+                        }}>
+                        Test
+                    </Button>
                 </div>
             </div>
         );
