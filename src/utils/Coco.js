@@ -1,13 +1,30 @@
+import Utils from './Utils';
+
 export const buildCocoDataset = (myOra, detections) => {
     const currentDate = new Date();
     const dd = String(currentDate.getDate()).padStart(2, '0');
     const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
     const yyyy = currentDate.getFullYear();
+    const info = {
+        description: 'Annotated file from Pilot GUI',
+        contributor: 'Pilot GUI',
+        url: '',
+        version: '1.0',
+        year: currentDate.getFullYear(),
+        data_created: `${yyyy}/${mm}/${dd}`,
+    };
     const licenses = [
         {
             url: '',
             id: 1,
             name: '',
+        },
+    ];
+    const categories = [
+        {
+            supercategory: 'food',
+            id: 55,
+            name: 'orange',
         },
     ];
     const images = [];
@@ -48,13 +65,26 @@ export const buildCocoDataset = (myOra, detections) => {
                         detection.binaryMask[2][0],
                         detection.binaryMask[2][1],
                     ],
-                    segmentation: [],
+                    segmentation:
+                        detection.polygonMask.length > 0
+                            ? [
+                                  Utils.polygonDataToCoordArray(
+                                      detection.polygonMask
+                                  ),
+                              ]
+                            : [],
                 });
                 annotationID++;
             }
         }
         imageID++;
     });
-    console.log(images);
-    console.log(annotations);
+    const cocoDataset = {
+        info,
+        licenses,
+        images,
+        annotations,
+        categories,
+    };
+    return cocoDataset;
 };
