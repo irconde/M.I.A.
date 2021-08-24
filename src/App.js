@@ -1004,6 +1004,7 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                // eslint-disable-next-line react/no-direct-mutation-state
                 self.state.myOra.stackData[1].dimensions =
                     viewport.displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
@@ -1755,7 +1756,6 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
-                            // TODO; Add binary mask coords
                             binaryMask: [
                                 [],
                                 [coords[0], coords[1]],

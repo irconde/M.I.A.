@@ -1,16 +1,10 @@
-# Pilot GUI version 2.9.0
+# Pilot GUI version 3.2.0
 
 The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple detections or objects identified as potentially of interest by the system itself.
 
 Through this client, the pilot system provides the user with visual feedback on the results derived from the different deep learning workflows executed on the server side. The several algorithms that constitute the business logic are implemented as a remote service, while the client is conceived as a tool that allows the user to efficiently and effectively inspect the detections received in the form of DICOS+TDR files packed in an tailored OpenRaster (ORA) file.
 
-In particular, the project contains a React App and a File Queue Server to manage locally the DICOS-TDR images received from the server. The ORA files are stored temporarily in the 'img' folder inside the server directory.
-
-```
-<ROOT>\server\img
-```
-
-Every ORA file will be removed from the Pilot GUI local storage once the operator finishes validating the detections included in all the related DICOS file processed and navigates to the next one.
+In particular, the project contains a React App to manage the current DICOS-TDR image received from the server.
 
 ## Build and development pre-requisites
 
@@ -70,7 +64,7 @@ serve -s build
 
 ## Mock file server
 
-You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends ORA files to the react-based client at a given interval, and it also manages the persistence of the amended ORA files sent back from the Pilot GUI.
+You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends a ORA file to the react-based client when the client requests the current file.
 
 The files being sent are located in the "static/img" directory.
 
@@ -78,7 +72,7 @@ The files being sent are located in the "static/img" directory.
 <ROOT>\static\img
 ```
 
-Each file is sent at the given interval and will send all the files until the last one then ending sending anymore files. Optionally, you can set it to reset back at the start of the index and send the same files.
+Each file is sent when the client requests the current file from the command server. Optionally, you can set it to reset back at the start of the index and send the same files.
 
 Images returned from the Pilot GUI are saved in the "returned" image folder
 
