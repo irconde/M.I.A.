@@ -2515,9 +2515,9 @@ class App extends Component {
      * @returns {None} None
      */
     onMouseLeave(event) {
-        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        // else this.props.onMouseLeaveNoFilesUpdate();
-        // this.resetSelectedDetectionBoxes(event);
+        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        else this.props.onMouseLeaveNoFilesUpdate();
+        this.resetSelectedDetectionBoxes(event);
     }
 
     render() {

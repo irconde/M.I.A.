@@ -55,6 +55,7 @@ export const buildCocoDataZip = async (myOra, detections) => {
                 coco_url: '',
                 flickr_url: '',
             });
+            // TODO: Implement converting the blob of type image/dcs to a jpeg image
             cocoZip.file(
                 `${stack.view}_pixel_data.dcs`,
                 stack.blobData[0].blob
@@ -65,12 +66,16 @@ export const buildCocoDataZip = async (myOra, detections) => {
                     (det) => det.uuid === stack.blobData[i].uuid
                 );
                 if (detection !== undefined) {
+                    // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
+                    //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
                     annotations.push({
                         id: annotationID,
                         image_id: imageID,
                         iscrowd: 0,
                         // TODO: Implement better category selection for annotations
                         category_id: 55,
+                        // TODO: Area for polygon masks is not the polygon mask but the bbox
+                        //       For accuracy, need to find area of a polygon mask if it exists
                         area: Math.abs(
                             (detection.boundingBox[0] -
                                 detection.boundingBox[2]) *
