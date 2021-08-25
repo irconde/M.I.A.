@@ -46,7 +46,7 @@ const SettingsModal = (props) => {
     const [remotePort, setRemotePort] = useState('4001');
     const [autoConnect, setAutoConnect] = useState(true);
     const [fileFormat, setFileFormat] = useState('Open Raster');
-    const [annotationsFormat, setAnnotationsFormat] = useState('');
+    const [annotationsFormat, setAnnotationsFormat] = useState('DICOS TDR');
     const [localFileOutput, setLocalFileOutput] = useState('');
     const [fileSuffix, setFileSuffix] = useState('');
     const [remoteOrLocal, setRemoteOrLocal] = useState(true);

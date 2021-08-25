@@ -104,6 +104,7 @@ export const SETTINGS = {
     ANNOTATIONS: {
         COCO: 'MS COCO',
         PASCAL: 'Pascal VOC',
+        TDR: 'DICOS TDR',
     },
     OUTPUT_FORMATS: {
         ORA: 'Open Raster',

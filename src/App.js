@@ -788,7 +788,9 @@ class App extends Component {
             constants.SETTINGS.ANNOTATIONS.PASCAL
         ) {
             // Convert to PASCAL
-        } else {
+        } else if (
+            this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.TDR
+        ) {
             const stackXML = document.implementation.createDocument(
                 '',
                 '',

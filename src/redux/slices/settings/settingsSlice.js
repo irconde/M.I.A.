@@ -18,7 +18,7 @@ const defaultSettings = {
     remotePort: process.env.REACT_APP_COMMAND_SERVER_PORT,
     autoConnect: true,
     fileFormat: SETTINGS.OUTPUT_FORMATS.ORA,
-    annotationsFormat: '',
+    annotationsFormat: SETTINGS.ANNOTATIONS.TDR,
     localFileOutput: '',
     fileSuffix: '_img',
     remoteOrLocal: true,
