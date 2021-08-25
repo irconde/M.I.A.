@@ -27,7 +27,10 @@ import {
     toggleSettingsVisibility,
     getSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
-import { saveSettings } from '../../redux/slices/settings/settingsSlice';
+import {
+    getSettings,
+    saveSettings,
+} from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
 import CloudIcon from '../../icons/CloudIcon.js';
@@ -41,12 +44,15 @@ import socketIOClient from 'socket.io-client';
 import { SETTINGS } from '../../utils/Constants';
 
 const SettingsModal = (props) => {
+    const settings = useSelector(getSettings);
     const [snackBarOpen, setSnackBarOpen] = useState(false);
-    const [remoteIp, setRemoteIp] = useState('127.0.0.1');
-    const [remotePort, setRemotePort] = useState('4001');
-    const [autoConnect, setAutoConnect] = useState(true);
-    const [fileFormat, setFileFormat] = useState('Open Raster');
-    const [annotationsFormat, setAnnotationsFormat] = useState('DICOS TDR');
+    const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
+    const [remotePort, setRemotePort] = useState(settings.remotePort);
+    const [autoConnect, setAutoConnect] = useState(settings.autoConnect);
+    const [fileFormat, setFileFormat] = useState(settings.fileFormat);
+    const [annotationsFormat, setAnnotationsFormat] = useState(
+        settings.annotationsFormat
+    );
     const [localFileOutput, setLocalFileOutput] = useState('');
     const [fileSuffix, setFileSuffix] = useState('');
     const [remoteOrLocal, setRemoteOrLocal] = useState(true);
