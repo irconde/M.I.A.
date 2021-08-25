@@ -26,6 +26,7 @@ export const buildCocoDataZip = async (myOra, detections) => {
             year: currentDate.getFullYear(),
             data_created: `${yyyy}/${mm}/${dd}`,
         };
+        // TODO: DICOS files do not have a license encoded, determine what license we need to use.
         const licenses = [
             {
                 url: '',
