@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
 import { Component } from 'react';
+import UPNG from 'upng-js';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -23,6 +24,7 @@ import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
+const downloadFileAuto = require('downloadify');
 import {
     setUpload,
     setDownload,
@@ -77,6 +79,7 @@ import {
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
+import { Button } from '@material-ui/core';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -2561,6 +2564,81 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
+                    <Button
+                        onClick={() => {
+                            const imageTop = cornerstone.getImage(
+                                this.state.imageViewportTop
+                            );
+                            const pixelTop = imageTop.getPixelData();
+                            const pixels = new Uint8Array(
+                                pixelTop.buffer,
+                                pixelTop.byteOffset,
+                                pixelTop.byteLength
+                            );
+                            const blob = new Blob([pixels], {
+                                type: 'image/png',
+                            });
+                            console.log(URL.createObjectURL(blob));
+                            const aref = document.createElement('a');
+                            aref.href = URL.createObjectURL(blob);
+                            aref.download = 'test.png';
+                            aref.click();
+
+                            // const buf = Buffer.from(pixels.buffer);
+                            // const test = new Uint8ClampedArray(
+                            //     buf.buffer,
+                            //     buf.byteOffset,
+                            //     buf.byteLength
+                            // );
+                            // for (let y = 0; y < imageTop.height; y++) {
+                            //     for (let x = 0; x < imageTop.width; x++) {
+                            //         const i = (y * imageTop.width + x) * 4;
+                            //         test[i] = x; // red
+                            //         test[i + 1] = y; // green
+                            //         test[i + 2] = 0; // blue
+                            //         test[i + 3] = 255; // alpha
+                            //     }
+                            // }
+
+                            // const imageData = new ImageData(
+                            //     test,
+                            //     imageTop.width,
+                            //     imageTop.height
+                            // );
+                            // ctx.putImageData(imageData, 0, 0);
+
+                            // console.log(buf.toString('base64'));
+                            // const image = new Image();
+                            // image.onload = () => {
+                            //     console.log('onload');
+                            //     ctx.drawImage(image);
+                            //     console.log(canvas);
+                            // };
+                            // image.src =
+                            //     'data:image/png;base64,' +
+                            //     buf.toString('base64');
+                            // console.log(pixels.byteLength);
+                            // const png = UPNG.encode(
+                            //     pixels,
+                            //     imageTop.width,
+                            //     imageTop.height,
+                            //     0
+                            // );
+                            // console.log(png);
+                            // canvas.width = imageTop.width;
+                            // canvas.height = imageTop.height;
+                            // const ctx = canvas.getContext('2d');
+                            // const img = new ImageData(
+                            //     pixels.buffer,
+                            //     imageTop.width,
+                            //     imageTop.height
+                            // );
+                            // ctx.putImageData(img, 0, 0);
+                            // console.log(ctx);
+                            // console.log(canvas);
+                        }}>
+                        Test
+                    </Button>
                 </div>
             </div>
         );
