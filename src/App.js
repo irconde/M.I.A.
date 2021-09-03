@@ -2566,76 +2566,39 @@ class App extends Component {
                     <NoFileSign />
                     <Button
                         onClick={() => {
+                            const pixels = new Uint8ClampedArray(
+                                this.state.myOra.stackData[0].pixelData
+                            );
                             const imageTop = cornerstone.getImage(
                                 this.state.imageViewportTop
                             );
-                            const pixelTop = imageTop.getPixelData();
-                            const pixels = new Uint8Array(
-                                pixelTop.buffer,
-                                pixelTop.byteOffset,
-                                pixelTop.byteLength
+                            const test = [];
+                            let i = 0;
+                            for (let y = 0; y < imageTop.height; y++) {
+                                for (let x = 0; x < imageTop.width; x++) {
+                                    // const i = (y * imageTop.width + x) * 4;
+                                    test[i] = pixels[i]; // red
+                                    test[i + 1] = pixels[i + 1]; // green
+                                    test[i + 2] = pixels[i + 2]; // blue
+                                    test[i + 3] = 255; // alpha
+                                    i += 4;
+                                }
+                            }
+                            const anotherTest = new Uint8ClampedArray(test);
+                            console.log(anotherTest);
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+
+                            const imageData = new ImageData(
+                                anotherTest,
+                                imageTop.width,
+                                imageTop.height
                             );
-                            const blob = new Blob([pixels], {
-                                type: 'image/png',
-                            });
-                            console.log(URL.createObjectURL(blob));
+                            ctx.putImageData(imageData, 0, 0);
                             const aref = document.createElement('a');
-                            aref.href = URL.createObjectURL(blob);
+                            aref.href = canvas.toDataURL();
                             aref.download = 'test.png';
                             aref.click();
-
-                            // const buf = Buffer.from(pixels.buffer);
-                            // const test = new Uint8ClampedArray(
-                            //     buf.buffer,
-                            //     buf.byteOffset,
-                            //     buf.byteLength
-                            // );
-                            // for (let y = 0; y < imageTop.height; y++) {
-                            //     for (let x = 0; x < imageTop.width; x++) {
-                            //         const i = (y * imageTop.width + x) * 4;
-                            //         test[i] = x; // red
-                            //         test[i + 1] = y; // green
-                            //         test[i + 2] = 0; // blue
-                            //         test[i + 3] = 255; // alpha
-                            //     }
-                            // }
-
-                            // const imageData = new ImageData(
-                            //     test,
-                            //     imageTop.width,
-                            //     imageTop.height
-                            // );
-                            // ctx.putImageData(imageData, 0, 0);
-
-                            // console.log(buf.toString('base64'));
-                            // const image = new Image();
-                            // image.onload = () => {
-                            //     console.log('onload');
-                            //     ctx.drawImage(image);
-                            //     console.log(canvas);
-                            // };
-                            // image.src =
-                            //     'data:image/png;base64,' +
-                            //     buf.toString('base64');
-                            // console.log(pixels.byteLength);
-                            // const png = UPNG.encode(
-                            //     pixels,
-                            //     imageTop.width,
-                            //     imageTop.height,
-                            //     0
-                            // );
-                            // console.log(png);
-                            // canvas.width = imageTop.width;
-                            // canvas.height = imageTop.height;
-                            // const ctx = canvas.getContext('2d');
-                            // const img = new ImageData(
-                            //     pixels.buffer,
-                            //     imageTop.width,
-                            //     imageTop.height
-                            // );
-                            // ctx.putImageData(img, 0, 0);
-                            // console.log(ctx);
-                            // console.log(canvas);
                         }}>
                         Test
                     </Button>
