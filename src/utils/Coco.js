@@ -9,6 +9,8 @@ import Utils from './Utils';
  *
  * @param {Object} myOra
  * @param {Array<Detections>} detections
+ * @param {Array<DOMElement>} viewports
+ * @param {cornerstone} cornerstone
  * @returns {nodebuffer}
  */
 export const buildCocoDataZip = async (
