@@ -996,9 +996,6 @@ class App extends Component {
                 image,
                 viewport
             );
-            // TODO. Here you can access the original pixel data
-            console.log('Pixel data top');
-            console.log(image.getPixelData());
         });
         if (this.props.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
@@ -2569,31 +2566,34 @@ class App extends Component {
                     <NoFileSign />
                     <Button
                         onClick={() => {
-                            const pixels = new Uint8ClampedArray(
-                                this.state.myOra.stackData[0].pixelData
-                            );
                             const imageTop = cornerstone.getImage(
                                 this.state.imageViewportTop
                             );
-                            const test = [];
-                            let i = 0;
-                            for (let y = 0; y < imageTop.height; y++) {
-                                for (let x = 0; x < imageTop.width; x++) {
-                                    // const i = (y * imageTop.width + x) * 4;
-                                    test[i] = pixels[i]; // red
-                                    test[i + 1] = pixels[i + 1]; // green
-                                    test[i + 2] = pixels[i + 2]; // blue
-                                    test[i + 3] = 255; // alpha
-                                    i += 4;
-                                }
+                            const pixelData = imageTop.getPixelData();
+                            const EightbitPixels = new Uint8ClampedArray(
+                                4 * imageTop.width * imageTop.height
+                            );
+                            let z = 0;
+                            const intervals = Utils.buildIntervals();
+                            for (let i = 0; i < pixelData.length; i++) {
+                                const greyValue = Utils.findGrayValue(
+                                    pixelData[i],
+                                    intervals
+                                );
+                                EightbitPixels[z] = greyValue;
+                                EightbitPixels[z + 1] = greyValue;
+                                EightbitPixels[z + 2] = greyValue;
+                                EightbitPixels[z + 3] = 255;
+                                z += 4;
                             }
-                            const anotherTest = new Uint8ClampedArray(test);
-                            console.log(anotherTest);
+                            console.log(EightbitPixels.length);
+                            console.log(
+                                `Width: ${imageTop.width} | Height: ${imageTop.height}`
+                            );
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
-
                             const imageData = new ImageData(
-                                anotherTest,
+                                EightbitPixels,
                                 imageTop.width,
                                 imageTop.height
                             );

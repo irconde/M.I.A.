@@ -109,6 +109,25 @@ export default class Utils {
         return true;
     }
 
+    static buildIntervals() {
+        const intervals = [{ min: 0, max: 255 }];
+        for (let i = 255; i < 65535; i += 256) {
+            intervals.push({ min: i, max: i + 256 });
+        }
+        return intervals;
+    }
+
+    static findGrayValue(greyScale, intervals) {
+        let result;
+        for (let x = 0; x < intervals.length; x++) {
+            if (this.inRange(greyScale, intervals[x].min, intervals[x].max)) {
+                result = x;
+                break;
+            }
+        }
+        return result;
+    }
+
     /**
      * b64toBlob - Converts binary64 encoding to a blob to display
      *
