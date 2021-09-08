@@ -11,7 +11,12 @@ import Utils from './Utils';
  * @param {Array<Detections>} detections
  * @returns {nodebuffer}
  */
-export const buildCocoDataZip = async (myOra, detections) => {
+export const buildCocoDataZip = async (
+    myOra,
+    detections,
+    viewports,
+    cornerstone
+) => {
     return new Promise((resolve, reject) => {
         const currentDate = new Date();
         const dd = String(currentDate.getDate()).padStart(2, '0');
@@ -45,6 +50,17 @@ export const buildCocoDataZip = async (myOra, detections) => {
         const annotations = [];
         let imageID = 1;
         let annotationID = 1;
+        const listOfPromises = [];
+
+        myOra.stackData.forEach((stack, index) => {
+            const pngPromise = dicosPixelDataToPng(
+                cornerstone,
+                viewports[index]
+            ).then((blob) => {
+                cocoZip.file(`${stack.view}_pixel_data.png`, blob);
+            });
+            listOfPromises.push(pngPromise);
+        });
         myOra.stackData.forEach((stack) => {
             images.push({
                 id: imageID,
@@ -52,15 +68,11 @@ export const buildCocoDataZip = async (myOra, detections) => {
                 width: stack.dimensions.x,
                 height: stack.dimensions.y,
                 date_captured: currentDate,
-                file_name: `${stack.view}_pixel_data.jpg`,
+                file_name: `${stack.view}_pixel_data.png`,
                 coco_url: '',
                 flickr_url: '',
             });
-            // TODO: Implement converting the blob of type image/dcs to a jpeg image
-            cocoZip.file(
-                `${stack.view}_pixel_data.dcs`,
-                stack.blobData[0].blob
-            );
+
             for (let i = 1; i < stack.blobData.length; i++) {
                 //
                 const detection = detections.find(
@@ -112,8 +124,44 @@ export const buildCocoDataZip = async (myOra, detections) => {
         };
         cocoZip.file('annotations.json', JSON.stringify(cocoDataset));
 
-        cocoZip.generateAsync({ type: 'nodebuffer' }).then((file) => {
-            resolve(file);
+        const promiseOfList = Promise.all(listOfPromises);
+        promiseOfList.then(() => {
+            cocoZip.generateAsync({ type: 'nodebuffer' }).then((file) => {
+                resolve(file);
+            });
         });
+    });
+};
+
+const dicosPixelDataToPng = async (cornerstone, imageViewport) => {
+    return new Promise((resolve, reject) => {
+        const image = cornerstone.getImage(imageViewport);
+        const pixelData = image.getPixelData();
+        const EightbitPixels = new Uint8ClampedArray(
+            4 * image.width * image.height
+        );
+        let z = 0;
+        const intervals = Utils.buildIntervals();
+        for (let i = 0; i < pixelData.length; i++) {
+            const greyValue = Utils.findGrayValue(pixelData[i], intervals);
+            EightbitPixels[z] = greyValue;
+            EightbitPixels[z + 1] = greyValue;
+            EightbitPixels[z + 2] = greyValue;
+            EightbitPixels[z + 3] = 255;
+            z += 4;
+        }
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.canvas.width = image.width;
+        ctx.canvas.height = image.height;
+        const imageData = new ImageData(
+            EightbitPixels,
+            image.width,
+            image.height
+        );
+        ctx.putImageData(imageData, 0, 0);
+        canvas.toBlob((blob) => {
+            resolve(blob);
+        }, 'image/png');
     });
 };

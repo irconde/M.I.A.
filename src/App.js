@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import { Component } from 'react';
-import UPNG from 'upng-js';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -24,7 +23,6 @@ import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
-const downloadFileAuto = require('downloadify');
 import {
     setUpload,
     setDownload,
@@ -772,20 +770,26 @@ class App extends Component {
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
             // Convert to MS COCO
-            buildCocoDataZip(this.state.myOra, this.props.detections).then(
-                (cocoFile) => {
-                    this.sendImageToCommandServer(cocoFile).then(
-                        // eslint-disable-next-line no-unused-vars
-                        (res) => {
-                            this.props.setCurrentProcessingFile(null);
-                            this.props.resetDetections();
-                            this.resetSelectedDetectionBoxes(e);
-                            this.props.setUpload(false);
-                            this.getFileFromCommandServer();
-                        }
-                    );
-                }
-            );
+            const viewports = [this.state.imageViewportTop];
+            if (this.props.singleViewport === false)
+                viewports.push(this.state.imageViewportSide);
+            buildCocoDataZip(
+                this.state.myOra,
+                this.props.detections,
+                viewports,
+                cornerstone
+            ).then((cocoFile) => {
+                this.sendImageToCommandServer(cocoFile).then(
+                    // eslint-disable-next-line no-unused-vars
+                    (res) => {
+                        this.props.setCurrentProcessingFile(null);
+                        this.props.resetDetections();
+                        this.resetSelectedDetectionBoxes(e);
+                        this.props.setUpload(false);
+                        this.getFileFromCommandServer();
+                    }
+                );
+            });
         } else if (
             this.props.annotationsFormat ===
             constants.SETTINGS.ANNOTATIONS.PASCAL
@@ -2564,49 +2568,6 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
-                    <Button
-                        onClick={() => {
-                            const imageTop = cornerstone.getImage(
-                                this.state.imageViewportTop
-                            );
-                            const pixelData = imageTop.getPixelData();
-                            const EightbitPixels = new Uint8ClampedArray(
-                                4 * imageTop.width * imageTop.height
-                            );
-                            let z = 0;
-                            const intervals = Utils.buildIntervals();
-                            for (let i = 0; i < pixelData.length; i++) {
-                                const greyValue = Utils.findGrayValue(
-                                    pixelData[i],
-                                    intervals
-                                );
-                                EightbitPixels[z] = greyValue;
-                                EightbitPixels[z + 1] = greyValue;
-                                EightbitPixels[z + 2] = greyValue;
-                                EightbitPixels[z + 3] = 255;
-                                z += 4;
-                            }
-                            console.log(EightbitPixels.length);
-                            console.log(
-                                `Width: ${imageTop.width} | Height: ${imageTop.height}`
-                            );
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            ctx.canvas.width = imageTop.width;
-                            ctx.canvas.height = imageTop.height;
-                            const imageData = new ImageData(
-                                EightbitPixels,
-                                imageTop.width,
-                                imageTop.height
-                            );
-                            ctx.putImageData(imageData, 0, 0);
-                            const aref = document.createElement('a');
-                            aref.href = canvas.toDataURL();
-                            aref.download = 'test.png';
-                            aref.click();
-                        }}>
-                        Test
-                    </Button>
                 </div>
             </div>
         );
