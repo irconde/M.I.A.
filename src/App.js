@@ -996,6 +996,9 @@ class App extends Component {
                 image,
                 viewport
             );
+            // TODO. Here you can access the original pixel data
+            console.log('Pixel data top');
+            console.log(image.getPixelData());
         });
         if (this.props.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
