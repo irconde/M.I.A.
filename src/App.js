@@ -2592,6 +2592,8 @@ class App extends Component {
                             );
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
+                            ctx.canvas.width = imageTop.width;
+                            ctx.canvas.height = imageTop.height;
                             const imageData = new ImageData(
                                 EightbitPixels,
                                 imageTop.width,
