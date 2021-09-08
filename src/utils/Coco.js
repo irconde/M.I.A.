@@ -51,17 +51,7 @@ export const buildCocoDataZip = async (
         let imageID = 1;
         let annotationID = 1;
         const listOfPromises = [];
-
         myOra.stackData.forEach((stack, index) => {
-            const pngPromise = dicosPixelDataToPng(
-                cornerstone,
-                viewports[index]
-            ).then((blob) => {
-                cocoZip.file(`${stack.view}_pixel_data.png`, blob);
-            });
-            listOfPromises.push(pngPromise);
-        });
-        myOra.stackData.forEach((stack) => {
             images.push({
                 id: imageID,
                 license: licenses[0].id,
@@ -72,6 +62,14 @@ export const buildCocoDataZip = async (
                 coco_url: '',
                 flickr_url: '',
             });
+
+            const pngPromise = dicosPixelDataToPng(
+                cornerstone,
+                viewports[index]
+            ).then((blob) => {
+                cocoZip.file(`${stack.view}_pixel_data.png`, blob);
+            });
+            listOfPromises.push(pngPromise);
 
             for (let i = 1; i < stack.blobData.length; i++) {
                 //
