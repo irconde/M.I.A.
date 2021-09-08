@@ -131,6 +131,17 @@ export const buildCocoDataZip = async (
     });
 };
 
+/**
+ * dicosPixelDataToPng - This function takes in the cornerstone viewport element holder and the cornerstone variable
+ *                       that is created in App.js. It will pull the Pixel data from cornerstone as Uint16Array in 16 Bit
+ *                       grey scale value. It converts the 16 bit grey scale value into a 8 bit value (0-255). This is the
+ *                       grey color produced by setting the R, G, & B Values to this one 8 bit value. This produces a Uint8ClampedArray
+ *                       in RGBA format to be loaded onto a canvas element to be finally returned as a Blob of type image/png
+ *
+ * @param {cornerstone} cornerstone
+ * @param {DOMElement} imageViewport
+ * @returns {Promise} That resolves to a blob of type image/png
+ */
 const dicosPixelDataToPng = async (cornerstone, imageViewport) => {
     return new Promise((resolve, reject) => {
         const image = cornerstone.getImage(imageViewport);

@@ -77,7 +77,6 @@ import {
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
-import { Button } from '@material-ui/core';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
