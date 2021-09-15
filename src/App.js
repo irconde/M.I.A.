@@ -23,7 +23,6 @@ import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
-import { Button } from '@material-ui/core';
 import {
     setUpload,
     setDownload,
@@ -2534,6 +2533,7 @@ class App extends Component {
                     }}>
                     <TopBar
                         connectToCommandServer={this.connectToCommandServer}
+                        cornerstone={cornerstone}
                     />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
@@ -2549,16 +2549,6 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
-                    <Button
-                        onClick={() => {
-                            Utils.setFullScreenViewport(
-                                cornerstone,
-                                !this.props.collapsedSideMenu
-                            );
-                            this.props.toggleCollapsedSideMenu();
-                        }}>
-                        Toggle
-                    </Button>
                 </div>
             </div>
         );

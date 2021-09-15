@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
+import Utils from '../../../utils/Utils';
 
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
@@ -43,8 +44,12 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action.payload
          */
-        toggleCollapsedSideMenu: (state) => {
+        toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
+            Utils.setFullScreenViewport(
+                action.payload,
+                state.collapsedSideMenu
+            );
         },
         /**
          * setInputLabel
