@@ -23,7 +23,7 @@ const initialState = {
     },
     zoomLevelTop: constants.viewportStyle.ZOOM,
     zoomLevelSide: constants.viewportStyle.ZOOM,
-    singleViewport: true,
+    singleViewport: false,
     receiveTime: null,
     detectorType: '',
     detectorConfigType: '',
@@ -48,7 +48,8 @@ const uiSlice = createSlice({
             state.collapsedSideMenu = !state.collapsedSideMenu;
             Utils.setFullScreenViewport(
                 action.payload,
-                state.collapsedSideMenu
+                state.collapsedSideMenu,
+                state.singleViewport
             );
         },
         /**

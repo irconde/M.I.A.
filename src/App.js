@@ -289,7 +289,11 @@ class App extends Component {
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
-        Utils.setFullScreenViewport(cornerstone, this.props.collapsedSideMenu);
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
         this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
@@ -471,7 +475,11 @@ class App extends Component {
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        Utils.setFullScreenViewport(cornerstone, this.props.collapsedSideMenu);
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
         if (this.props.selectDetection) {
             this.props.clearAllSelection();
             this.appUpdateImage();

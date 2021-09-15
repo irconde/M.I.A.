@@ -242,40 +242,55 @@ export default class Utils {
         }
     }
 
-    static setFullScreenViewport(cornerstone, fullscreen) {
-        const viewportTop = document.getElementById('dicomImageLeft');
-        const viewportSide = document.getElementById('dicomImageRight');
-        const verticalDivider = document.getElementById('verticalDivider');
-        if (fullscreen === true) {
+    static setFullScreenViewport(cornerstone, fullscreen, singleViewport) {
+        let viewports = [];
+        if (singleViewport === false) {
+            const viewportTop = document.getElementById('dicomImageLeft');
+            const viewportSide = document.getElementById('dicomImageRight');
+            viewports.push(viewportTop);
+            viewports.push(viewportSide);
             viewportTop.style.width = '';
             viewportSide.style.width = '';
             viewportSide.style.left = '';
+            const verticalDivider = document.getElementById('verticalDivider');
+            if (fullscreen === true) {
+                const width = window.innerWidth / 2 + constants.RESOLUTION_UNIT;
 
-            const width = window.innerWidth / 2 + constants.RESOLUTION_UNIT;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                verticalDivider.style.left = viewportTop.style.width;
+                viewportSide.style.left =
+                    viewportTop.style.width + verticalDivider.style.width;
+            } else {
+                const width =
+                    (window.innerWidth - constants.sideMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
 
-            viewportSide.style.width = width;
-            viewportTop.style.width = width;
-            verticalDivider.style.left = viewportTop.style.width;
-            viewportSide.style.left =
-                viewportTop.style.width + verticalDivider.style.width;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                verticalDivider.style.left = viewportTop.style.width;
+                viewportSide.style.left =
+                    viewportTop.style.width + verticalDivider.style.width;
+            }
         } else {
-            viewportTop.style.width = '';
-            viewportSide.style.width = '';
-            viewportSide.style.left = '';
-
-            const width =
-                (window.innerWidth - constants.sideMenuWidth) / 2 +
-                constants.RESOLUTION_UNIT;
-
-            viewportSide.style.width = width;
-            viewportTop.style.width = width;
-            verticalDivider.style.left = viewportTop.style.width;
-            viewportSide.style.left =
-                viewportTop.style.width + verticalDivider.style.width;
+            const singleViewport = document.getElementById('dicomImageLeft');
+            viewports.push(singleViewport);
+            singleViewport.style.width = '';
+            if (fullscreen === true) {
+                const width = window.innerWidth + constants.RESOLUTION_UNIT;
+                singleViewport.width = width;
+            } else {
+                const width =
+                    window.innerWidth -
+                    constants.sideMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.width = width;
+            }
         }
         try {
-            cornerstone.resize(viewportTop);
-            cornerstone.resize(viewportSide);
+            viewports.forEach((viewport) => {
+                cornerstone.resize(viewport);
+            });
         } catch (error) {
             console.log('Cornerstone Elements not enabled yet');
         }
