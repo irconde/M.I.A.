@@ -31,12 +31,21 @@ const initialState = {
     displaySettings: false,
     isSettingsVisible: false,
     inputLabel: '',
+    collapsedSideMenu: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * setInputLabel
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action.payload
+         */
+        toggleCollapsedSideMenu: (state) => {
+            state.collapsedSideMenu = !state.collapsedSideMenu;
+        },
         /**
          * setInputLabel
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -514,6 +523,8 @@ export const getDetectionContextInfo = (state) => {
     };
 };
 
+export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+
 // Exporting the Actions for the Reducers
 export const {
     updateDetectionType,
@@ -541,6 +552,7 @@ export const {
     onLabelEditionEnd,
     toggleSettingsVisibility,
     setInputLabel,
+    toggleCollapsedSideMenu,
 } = uiSlice.actions;
 
 // Export the reducer for the store

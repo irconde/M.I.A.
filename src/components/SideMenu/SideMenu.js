@@ -7,9 +7,11 @@ import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';
 import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
+import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
 
 const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const algorithms = useSelector(getDetectionsByAlgorithm);
+    const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
     const treeStyle = {
         top: '0',
@@ -21,7 +23,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const numOfFiles = useSelector(getNumFilesInQueue);
     const enableMenu = numOfFiles > 0;
     // Checking to see if there is any data in myDetections
-    if (algorithms.length > 0 && enableMenu) {
+    if (algorithms.length > 0 && enableMenu && collapsedSideMenu === false) {
         return (
             <div
                 className="treeview-main"

@@ -23,6 +23,7 @@ import BoundPolyFAB from './components/FAB/BoundPolyFAB';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
+import { Button } from '@material-ui/core';
 import {
     setUpload,
     setDownload,
@@ -73,6 +74,7 @@ import {
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
     setInputLabel,
+    toggleCollapsedSideMenu,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -2567,6 +2569,16 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
+                    <Button
+                        onClick={() => {
+                            Utils.setFullScreenViewport(
+                                cornerstone,
+                                !this.props.collapsedSideMenu
+                            );
+                            this.props.toggleCollapsedSideMenu();
+                        }}>
+                        Toggle
+                    </Button>
                 </div>
             </div>
         );
@@ -2593,6 +2605,7 @@ const mapStateToProps = (state) => {
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
+        collapsedSideMenu: ui.collapsedSideMenu,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -2647,6 +2660,7 @@ const mapDispatchToProps = {
     updateDetectionVisibility,
     setInputLabel,
     setConnected,
+    toggleCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
