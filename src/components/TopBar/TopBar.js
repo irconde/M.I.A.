@@ -64,7 +64,7 @@ const TopBar = (props) => {
             color: 'white',
         },
         icon: {
-            margin: '1.25rem',
+            margin: '0.75rem',
         },
         lastIcon: {
             margin: '0.5rem 2.5rem 0.5rem 0rem',
@@ -104,8 +104,12 @@ const TopBar = (props) => {
                     isConnected={isConnected}
                     style={styles.icon}
                 />
-                <MenuToggleIcon cornerstone={props.cornerstone} />
+                <MenuToggleIcon
+                    style={styles.icon}
+                    cornerstone={props.cornerstone}
+                />
                 <SettingsIcon
+                    style={styles.lastIcon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
                 />
@@ -131,9 +135,12 @@ const TopBar = (props) => {
                 />
                 <ConnectionStatus
                     isConnected={isConnected}
-                    style={styles.lastIcon}
+                    style={styles.icon}
                 />
-                <MenuToggleIcon cornerstone={props.cornerstone} />
+                <MenuToggleIcon
+                    style={styles.icon}
+                    cornerstone={props.cornerstone}
+                />
                 <SettingsIcon
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"

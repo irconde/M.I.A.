@@ -16,6 +16,7 @@ export default configureStore({
             ignoredActions: [
                 'server/setCommandServerConnection',
                 'server/setFileServerConnection',
+                'ui/toggleCollapsedSideMenu',
             ],
         },
     }),

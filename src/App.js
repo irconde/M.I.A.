@@ -73,7 +73,6 @@ import {
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
     setInputLabel,
-    toggleCollapsedSideMenu,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -2630,7 +2629,6 @@ const mapDispatchToProps = {
     updateDetectionVisibility,
     setInputLabel,
     setConnected,
-    toggleCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

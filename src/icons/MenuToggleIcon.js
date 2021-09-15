@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { toggleCollapsedSideMenu } from '../redux/slices/ui/uiSlice';
 
 const MenuToggleIcon = (props) => {
@@ -9,6 +9,7 @@ const MenuToggleIcon = (props) => {
         dispatch(toggleCollapsedSideMenu(props.cornerstone));
     };
     const divStyle = {
+        ...props.style,
         cursor: 'pointer',
     };
     return (
@@ -50,6 +51,7 @@ const MenuToggleIcon = (props) => {
 
 MenuToggleIcon.propTypes = {
     cornerstone: PropTypes.object,
+    style: PropTypes.object,
 };
 
 export default MenuToggleIcon;
