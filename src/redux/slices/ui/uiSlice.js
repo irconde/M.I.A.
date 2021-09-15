@@ -40,9 +40,9 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * setInputLabel
+         * toggleCollapsedSideMenu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload
+         * @param {Object} action.payload
          */
         toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;

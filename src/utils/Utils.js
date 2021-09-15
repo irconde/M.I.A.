@@ -242,7 +242,16 @@ export default class Utils {
         }
     }
 
+    /**
+     * setFullScreenViewport - Performs the calculations for the widths and position of viewports.
+     *                         It will use the cornerstone object to perform the resize on the canvas elements
+     *
+     * @param {Object} cornerstone
+     * @param {Boolean} fullscreen
+     * @param {Boolean} singleViewport
+     */
     static setFullScreenViewport(cornerstone, fullscreen, singleViewport) {
+        // Array of viewport or viewports to loop through and resize at the end
         let viewports = [];
         if (singleViewport === false) {
             const viewportTop = document.getElementById('dicomImageLeft');
@@ -287,6 +296,7 @@ export default class Utils {
                 singleViewport.width = width;
             }
         }
+        // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
         try {
             viewports.forEach((viewport) => {
                 cornerstone.resize(viewport);
