@@ -332,7 +332,7 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
-        // this.state.commandServer.disconnect();
+        this.state.commandServer.disconnect();
         this.props.setConnected(false);
         this.stopListeningClickEvents();
         window.removeEventListener('resize', this.resizeListener);
