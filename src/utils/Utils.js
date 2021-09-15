@@ -273,8 +273,12 @@ export default class Utils {
             viewportSide.style.left =
                 viewportTop.style.width + verticalDivider.style.width;
         }
-        cornerstone.resize(viewportTop);
-        cornerstone.resize(viewportSide);
+        try {
+            cornerstone.resize(viewportTop);
+            cornerstone.resize(viewportSide);
+        } catch (error) {
+            console.log('Cornerstone Elements not enabled yet');
+        }
     }
 
     /**

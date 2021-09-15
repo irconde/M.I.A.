@@ -148,8 +148,6 @@ class App extends Component {
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight =
-            this.calculateviewPortWidthAndHeight.bind(this);
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
@@ -285,7 +283,7 @@ class App extends Component {
         );
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
-        this.calculateviewPortWidthAndHeight();
+
         this.props.updateFABVisibility(
             this.props.numberOfFilesInQueue > 0 ? true : false
         );
@@ -293,6 +291,7 @@ class App extends Component {
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
+        Utils.setFullScreenViewport(cornerstone, this.props.collapsedSideMenu);
         this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
@@ -331,7 +330,7 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
-        this.state.commandServer.disconnect();
+        // this.state.commandServer.disconnect();
         this.props.setConnected(false);
         this.stopListeningClickEvents();
         window.removeEventListener('resize', this.resizeListener);
@@ -433,25 +432,6 @@ class App extends Component {
     }
 
     /**
-     * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
-     *
-     * @returns {None} None
-     */
-    calculateviewPortWidthAndHeight() {
-        document.getElementsByClassName('twoViewportsSide')[0].style.width =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.RESOLUTION_UNIT;
-        document.getElementsByClassName('twoViewportsTop')[0].style.width =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.RESOLUTION_UNIT;
-        document.getElementById('verticalDivider').style.left =
-            document.getElementsByClassName('twoViewportsTop')[0].style.width;
-        document.getElementsByClassName('twoViewportsSide')[0].style.left =
-            document.getElementsByClassName('twoViewportsTop')[0].style.width +
-            document.getElementById('verticalDivider').style.width;
-    }
-
-    /**
      * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
      *
      * @returns {type} None
@@ -493,7 +473,7 @@ class App extends Component {
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        this.calculateviewPortWidthAndHeight();
+        Utils.setFullScreenViewport(cornerstone, this.props.collapsedSideMenu);
         if (this.props.selectDetection) {
             this.props.clearAllSelection();
             this.appUpdateImage();
