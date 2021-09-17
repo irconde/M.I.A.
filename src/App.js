@@ -722,15 +722,6 @@ class App extends Component {
                         });
                         this.props.setNumFilesInQueue(numberOfFiles);
                         Utils.changeViewport(this.props.singleViewport);
-                        if (this.props.singleViewport) {
-                            cornerstone.resize(
-                                this.state.imageViewportTop,
-                                true
-                            );
-                        } else {
-                            cornerstone.resize(this.state.imageViewportTop);
-                        }
-
                         this.props.resetDetections();
                         this.loadAndViewImage();
                     });
