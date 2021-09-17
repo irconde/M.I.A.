@@ -905,7 +905,6 @@ class App extends Component {
                     )
                 );
                 newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
-                    console.log(file);
                     this.props.setCurrentProcessingFile(null);
                     this.setState(
                         {

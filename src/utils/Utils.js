@@ -287,13 +287,13 @@ export default class Utils {
             singleViewport.style.width = '';
             if (fullscreen === true) {
                 const width = window.innerWidth + constants.RESOLUTION_UNIT;
-                singleViewport.width = width;
+                singleViewport.style.width = width;
             } else {
                 const width =
                     window.innerWidth -
                     constants.sideMenuWidth +
                     constants.RESOLUTION_UNIT;
-                singleViewport.width = width;
+                singleViewport.style.width = width;
             }
         }
         // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
