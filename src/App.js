@@ -289,12 +289,6 @@ class App extends Component {
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
-        this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
@@ -1015,6 +1009,12 @@ class App extends Component {
                 );
             });
         }
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
+        this.recalculateZoomLevel();
     }
 
     /**
