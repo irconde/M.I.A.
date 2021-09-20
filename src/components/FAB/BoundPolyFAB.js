@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
     getCornerstoneMode,
+    getCollapsedSideMenu,
 } from '../../redux/slices/ui/uiSlice';
 
 /**
@@ -36,6 +37,11 @@ const FABContainer = styled.div`
     width: max-content;
     margin-left: auto;
     margin-right: auto;
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
+    -ms-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
 
     @keyframes fadein {
         from {
@@ -75,6 +81,7 @@ const FABContainer = styled.div`
 const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     const isVisible = useSelector(getIsFabVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
+    const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const handleClick = (e, cb) => {
         if (
             isVisible &&
@@ -84,7 +91,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         }
     };
     // Calculating screen size and setting horizontal value accordingly.
-    let leftPX = '-' + constants.sideMenuWidth + 'px';
+    let leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
 
     let fabOpacity;
     let show;

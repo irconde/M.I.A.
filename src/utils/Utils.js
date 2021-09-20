@@ -243,6 +243,70 @@ export default class Utils {
     }
 
     /**
+     * setFullScreenViewport - Performs the calculations for the widths and position of viewports.
+     *                         It will use the cornerstone object to perform the resize on the canvas elements
+     *
+     * @param {Object} cornerstone
+     * @param {Boolean} fullscreen
+     * @param {Boolean} singleViewport
+     */
+    static setFullScreenViewport(cornerstone, fullscreen, singleViewport) {
+        // Array of viewport or viewports to loop through and resize at the end
+        let viewports = [];
+        if (singleViewport === false) {
+            const viewportTop = document.getElementById('dicomImageLeft');
+            const viewportSide = document.getElementById('dicomImageRight');
+            viewports.push(viewportTop);
+            viewports.push(viewportSide);
+            viewportTop.style.width = '';
+            viewportSide.style.width = '';
+            viewportSide.style.left = '';
+            const verticalDivider = document.getElementById('verticalDivider');
+            if (fullscreen === true) {
+                const width = window.innerWidth / 2 + constants.RESOLUTION_UNIT;
+
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                verticalDivider.style.left = viewportTop.style.width;
+                viewportSide.style.left =
+                    viewportTop.style.width + verticalDivider.style.width;
+            } else {
+                const width =
+                    (window.innerWidth - constants.sideMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
+
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                verticalDivider.style.left = viewportTop.style.width;
+                viewportSide.style.left =
+                    viewportTop.style.width + verticalDivider.style.width;
+            }
+        } else {
+            const singleViewport = document.getElementById('dicomImageLeft');
+            viewports.push(singleViewport);
+            singleViewport.style.width = '';
+            if (fullscreen === true) {
+                const width = window.innerWidth + constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+            } else {
+                const width =
+                    window.innerWidth -
+                    constants.sideMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+            }
+        }
+        // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
+        try {
+            viewports.forEach((viewport) => {
+                cornerstone.resize(viewport);
+            });
+        } catch (error) {
+            console.log('Cornerstone Elements not enabled yet');
+        }
+    }
+
+    /**
      * getDataFromViewport - Get data required for validation buttons' proper rendering
      *
      * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset

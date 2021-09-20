@@ -6,6 +6,7 @@ import SettingsIcon from '../../icons/SettingsIcon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
+import MenuToggleIcon from '../../icons/MenuToggleIcon';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
@@ -63,7 +64,7 @@ const TopBar = (props) => {
             color: 'white',
         },
         icon: {
-            margin: '1.25rem',
+            margin: '0.75rem',
         },
         lastIcon: {
             margin: '0.5rem 2.5rem 0.5rem 0rem',
@@ -103,7 +104,12 @@ const TopBar = (props) => {
                     isConnected={isConnected}
                     style={styles.icon}
                 />
+                <MenuToggleIcon
+                    style={styles.icon}
+                    cornerstone={props.cornerstone}
+                />
                 <SettingsIcon
+                    style={styles.lastIcon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
                 />
@@ -129,7 +135,11 @@ const TopBar = (props) => {
                 />
                 <ConnectionStatus
                     isConnected={isConnected}
-                    style={styles.lastIcon}
+                    style={styles.icon}
+                />
+                <MenuToggleIcon
+                    style={styles.icon}
+                    cornerstone={props.cornerstone}
                 />
                 <SettingsIcon
                     connectToCommandServer={props.connectToCommandServer}
@@ -142,6 +152,7 @@ const TopBar = (props) => {
 
 TopBar.propTypes = {
     connectToCommandServer: PropTypes.func,
+    cornerstone: PropTypes.object,
 };
 
 export default TopBar;

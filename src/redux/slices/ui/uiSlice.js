@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
+import Utils from '../../../utils/Utils';
 
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
@@ -22,7 +23,7 @@ const initialState = {
     },
     zoomLevelTop: constants.viewportStyle.ZOOM,
     zoomLevelSide: constants.viewportStyle.ZOOM,
-    singleViewport: true,
+    singleViewport: false,
     receiveTime: null,
     detectorType: '',
     detectorConfigType: '',
@@ -31,12 +32,26 @@ const initialState = {
     displaySettings: false,
     isSettingsVisible: false,
     inputLabel: '',
+    collapsedSideMenu: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * toggleCollapsedSideMenu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload
+         */
+        toggleCollapsedSideMenu: (state, action) => {
+            state.collapsedSideMenu = !state.collapsedSideMenu;
+            Utils.setFullScreenViewport(
+                action.payload,
+                state.collapsedSideMenu,
+                state.singleViewport
+            );
+        },
         /**
          * setInputLabel
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -514,6 +529,8 @@ export const getDetectionContextInfo = (state) => {
     };
 };
 
+export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+
 // Exporting the Actions for the Reducers
 export const {
     updateDetectionType,
@@ -541,6 +558,7 @@ export const {
     onLabelEditionEnd,
     toggleSettingsVisibility,
     setInputLabel,
+    toggleCollapsedSideMenu,
 } = uiSlice.actions;
 
 // Export the reducer for the store

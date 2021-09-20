@@ -21,7 +21,6 @@ body {
 }
 
 .singleViewportTop {
-    width: 100vw;
     height: 100vh;
     top: 0;
     left: 0;
@@ -37,7 +36,6 @@ body {
 }
 
 .twoViewportsTop {
-    width: 44%;
     height: 100vh;
     top: 0;
     position: absolute;
@@ -70,11 +68,19 @@ body {
 }
 
 .twoViewportsSide {
-    width: 41%;
     height: 100vh;
     top: 0;
-    left: 58%;
     position: absolute;
+}
+
+.side-menu-container {
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
+    -ms-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
+    position: fixed;
+    right: 0;
 }
 
 .treeview-main {
@@ -99,6 +105,7 @@ body {
     fill: #63b1de;
 }
 
-#selectedTop, #selectedSide {
+#selectedTop,
+#selectedSide {
     cursor: none;
 }

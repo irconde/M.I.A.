@@ -146,8 +146,6 @@ class App extends Component {
         this.hideContextMenu = this.hideContextMenu.bind(this);
         this.appUpdateImage = this.appUpdateImage.bind(this);
         this.resizeListener = this.resizeListener.bind(this);
-        this.calculateviewPortWidthAndHeight =
-            this.calculateviewPortWidthAndHeight.bind(this);
         this.recalculateZoomLevel = this.recalculateZoomLevel.bind(this);
         this.onBoundingBoxSelected = this.onBoundingBoxSelected.bind(this);
         this.onPolygonMaskSelected = this.onPolygonMaskSelected.bind(this);
@@ -283,7 +281,7 @@ class App extends Component {
         );
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
-        this.calculateviewPortWidthAndHeight();
+
         this.props.updateFABVisibility(
             this.props.numberOfFilesInQueue > 0 ? true : false
         );
@@ -291,7 +289,6 @@ class App extends Component {
             this.state.imageViewportTop,
             this.state.imageViewportSide
         );
-        this.recalculateZoomLevel();
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
@@ -431,25 +428,6 @@ class App extends Component {
     }
 
     /**
-     * calculateviewPortWidthAndHeight - Function to calculate the ViewPorts width and Height.
-     *
-     * @returns {None} None
-     */
-    calculateviewPortWidthAndHeight() {
-        document.getElementsByClassName('twoViewportsSide')[0].style.width =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.RESOLUTION_UNIT;
-        document.getElementsByClassName('twoViewportsTop')[0].style.width =
-            (window.innerWidth - constants.sideMenuWidth) / 2 +
-            constants.RESOLUTION_UNIT;
-        document.getElementById('verticalDivider').style.left =
-            document.getElementsByClassName('twoViewportsTop')[0].style.width;
-        document.getElementsByClassName('twoViewportsSide')[0].style.left =
-            document.getElementsByClassName('twoViewportsTop')[0].style.width +
-            document.getElementById('verticalDivider').style.width;
-    }
-
-    /**
      * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
      *
      * @returns {type} None
@@ -491,7 +469,11 @@ class App extends Component {
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        this.calculateviewPortWidthAndHeight();
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
         if (this.props.selectDetection) {
             this.props.clearAllSelection();
             this.appUpdateImage();
@@ -740,15 +722,6 @@ class App extends Component {
                         });
                         this.props.setNumFilesInQueue(numberOfFiles);
                         Utils.changeViewport(this.props.singleViewport);
-                        if (this.props.singleViewport) {
-                            cornerstone.resize(
-                                this.state.imageViewportTop,
-                                true
-                            );
-                        } else {
-                            cornerstone.resize(this.state.imageViewportTop);
-                        }
-
                         this.props.resetDetections();
                         this.loadAndViewImage();
                     });
@@ -923,7 +896,6 @@ class App extends Component {
                     )
                 );
                 newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
-                    console.log(file);
                     this.props.setCurrentProcessingFile(null);
                     this.setState(
                         {
@@ -1027,6 +999,12 @@ class App extends Component {
                 );
             });
         }
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
+        this.recalculateZoomLevel();
     }
 
     /**
@@ -2552,6 +2530,7 @@ class App extends Component {
                     }}>
                     <TopBar
                         connectToCommandServer={this.connectToCommandServer}
+                        cornerstone={cornerstone}
                     />
                     <SideMenu
                         nextImageClick={this.nextImageClick}
@@ -2593,6 +2572,7 @@ const mapStateToProps = (state) => {
         isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
+        collapsedSideMenu: ui.collapsedSideMenu,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,

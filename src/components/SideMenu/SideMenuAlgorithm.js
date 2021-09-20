@@ -112,7 +112,9 @@ const SideMenuAlgorithm = ({ detections, resetCornerstoneTools }) => {
     };
     return (
         <div>
-            <MetaData isVisible={isAlgorithmSelected !== '' ? true : false} />
+            <MetaData
+                isVisible={isAlgorithmSelected === algorithm ? true : false}
+            />
             <div
                 style={
                     isAlgorithmSelected === algorithm && isVisible

@@ -20,12 +20,13 @@ const SettingsIcon = (props) => {
     const handleOpen = () => {
         dispatch(toggleSettingsVisibility(true));
     };
-
+    const style = {
+        ...props.style,
+        cursor: 'pointer',
+    };
     return (
         <>
-            <IconStyle
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleOpen()}>
+            <IconStyle style={style} onClick={() => handleOpen()}>
                 <SettingsCog title={props.title} />
             </IconStyle>
 
@@ -40,6 +41,7 @@ const SettingsIcon = (props) => {
 SettingsIcon.propTypes = {
     title: PropTypes.string,
     connectToCommandServer: PropTypes.func,
+    style: PropTypes.object,
 };
 
 export default SettingsIcon;
