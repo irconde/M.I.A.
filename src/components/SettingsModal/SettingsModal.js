@@ -66,7 +66,9 @@ const SettingsModal = (props) => {
     const dispatch = useDispatch();
     const svgContainerStyle = {
         margin: '0.3rem',
+        marginRight: '1rem',
         display: 'flex',
+        float: 'left',
     };
     const svgStyle = {
         height: '24px',
@@ -205,6 +207,9 @@ const SettingsModal = (props) => {
         return {
             pathButton: {
                 color: '#367eff',
+                textTransform: 'none',
+                paddingLeft: theme.spacing(3),
+                paddingRight: theme.spacing(3),
             },
             snackBarClass: {
                 backgroundColor: '#1f1f1f',
@@ -222,6 +227,9 @@ const SettingsModal = (props) => {
             },
             checkConnectionButton: {
                 color: '#367eff',
+                textTransform: 'none',
+                paddingLeft: theme.spacing(3),
+                paddingRight: theme.spacing(3),
             },
             remoteWorkContainer: {
                 display: 'flex',
@@ -255,22 +263,17 @@ const SettingsModal = (props) => {
             root: {
                 flexGrow: 1,
             },
-            optionsContainer: {
-                padding: theme.spacing(2),
-            },
+            optionsContainer: {},
             form: {
                 margin: theme.spacing(1),
             },
-            formControl: {
-                margin: theme.spacing(1),
-            },
-            textField: {
-                margin: theme.spacing(1),
-            },
+            formControl: {},
+            textField: {},
             longTextField: {
                 // width: '-webkit-fill-available',
                 display: 'flex',
                 flexDirection: 'row',
+                width: '70%',
             },
             saveButton: {
                 marginTop: theme.spacing(2),
@@ -304,8 +307,9 @@ const SettingsModal = (props) => {
             displayListSection: {
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: 'space-evenly',
-                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                // alignItems: 'center',
                 marginBottom: theme.spacing(2),
                 marginTop: theme.spacing(4),
             },
@@ -322,6 +326,8 @@ const SettingsModal = (props) => {
             greyText: {
                 color: '#9d9d9d',
                 fontSize: '12px',
+                margin: '0',
+                marginBottom: '2rem',
             },
             disabledText: {
                 color: '#9d9d9d',
@@ -333,8 +339,8 @@ const SettingsModal = (props) => {
                 margin: '1rem 0',
             },
             settingsCogwheel: {
-                marginRight: '0.5rem',
-                marginLeft: '1rem',
+                marginRight: '1rem',
+                marginLeft: '0',
                 width: '20px',
                 height: '20px',
                 alignSelf: 'center',
@@ -361,7 +367,7 @@ const SettingsModal = (props) => {
             },
             optionText: {
                 fontFamily: 'Noto Sans JP',
-                fontSize: '18px',
+                fontSize: '1rem',
                 fontWeight: 'normal',
                 fontStretch: 'normal',
                 fontStyle: 'normal',
@@ -369,11 +375,13 @@ const SettingsModal = (props) => {
                 letterSpacing: 'normal',
                 color: '#fff',
                 marginBottom: '0.25rem',
+                marginTop: '0.75rem',
             },
             remoteInputContainer: {
                 display: 'inline-flex',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                width: '70%',
             },
             cloudIconContainer: {
                 alignSelf: 'center',
@@ -382,9 +390,24 @@ const SettingsModal = (props) => {
                 display: 'inline-block',
                 float: 'right',
                 color: '#9d9d9d',
+                marginTop: 'auto',
             },
             flexAuto: {
                 flex: 'auto',
+            },
+            remoteWorkRow: {
+                display: 'flex',
+                justifyContent: 'space-between',
+            },
+            displayListSectionItem: {
+                display: 'flex',
+                justifyContent: 'flex-start',
+                flexDirection: 'row',
+                flexGrow: '1',
+                width: '33%',
+            },
+            displayListSectionInput: {
+                width: '70%',
             },
         };
     });
@@ -405,7 +428,7 @@ const SettingsModal = (props) => {
                         <IcCloseIcon />
                     </div>
                 </div>
-                <Divider variant="middle" />
+                <Divider style={{ margin: 'auto' }} variant="middle" />
                 <FormGroup className={classes.formControl}>
                     <div className={classes.optionsContainer}>
                         <div>
@@ -432,72 +455,84 @@ const SettingsModal = (props) => {
                                 Choose the option if you want to receive/send
                                 images from/to a server
                             </p>
-                            <div className={classes.remoteInputContainer}>
-                                <div className={classes.cloudIconContainer}>
-                                    <CloudIcon
-                                        style={svgContainerStyle}
-                                        svgStyle={{
-                                            ...svgStyle,
-                                            color: remoteOrLocal
-                                                ? '#ffffff'
-                                                : '#9d9d9d',
-                                        }}
+
+                            <div className={classes.remoteWorkRow}>
+                                <div className={classes.remoteInputContainer}>
+                                    <div className={classes.cloudIconContainer}>
+                                        <CloudIcon
+                                            style={svgContainerStyle}
+                                            svgStyle={{
+                                                ...svgStyle,
+                                                color: remoteOrLocal
+                                                    ? '#ffffff'
+                                                    : '#9d9d9d',
+                                            }}
+                                        />
+                                    </div>
+                                    <FormControl className={classes.flexAuto}>
+                                        <TextField
+                                            required
+                                            className={classes.textField}
+                                            id="remoteIp"
+                                            placeholder="Host"
+                                            value={remoteIp}
+                                            disabled={!remoteOrLocal}
+                                            inputProps={{
+                                                size: 30,
+                                            }}
+                                            onChange={(e) => {
+                                                setRemoteIp(e.target.value);
+                                            }}
+                                            style={{
+                                                marginRight: '0.75rem',
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <span
+                                        className={classes.cloudIconContainer}>
+                                        :
+                                    </span>
+                                    <FormControl>
+                                        <TextField
+                                            required
+                                            id="remotePort"
+                                            className={classes.textField}
+                                            placeholder="Port"
+                                            value={remotePort}
+                                            onChange={(e) => {
+                                                setRemotePort(e.target.value);
+                                            }}
+                                            disabled={!remoteOrLocal}
+                                            inputProps={{
+                                                size: 6,
+                                                maxLength: 5,
+                                                inputMode: 'numeric',
+                                                pattern: '[0-9]*',
+                                            }}
+                                            style={{
+                                                marginLeft: '0.75rem',
+                                            }}
+                                        />
+                                    </FormControl>
+                                </div>
+                                <div className={classes.autoConnectContainer}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                disabled={!remoteOrLocal}
+                                                color={'primary'}
+                                                checked={autoConnect}
+                                                onChange={() => {
+                                                    setAutoConnect(
+                                                        !autoConnect
+                                                    );
+                                                }}
+                                                name="autoConnect"
+                                            />
+                                        }
+                                        label="Autoconnect"
                                     />
                                 </div>
-                                <FormControl className={classes.flexAuto}>
-                                    <TextField
-                                        required
-                                        className={classes.textField}
-                                        id="remoteIp"
-                                        placeholder="Host"
-                                        value={remoteIp}
-                                        disabled={!remoteOrLocal}
-                                        inputProps={{
-                                            size: 30,
-                                        }}
-                                        onChange={(e) => {
-                                            setRemoteIp(e.target.value);
-                                        }}
-                                    />
-                                </FormControl>
-                                <span className={classes.cloudIconContainer}>
-                                    :
-                                </span>
-                                <FormControl>
-                                    <TextField
-                                        required
-                                        id="remotePort"
-                                        className={classes.textField}
-                                        placeholder="Port"
-                                        value={remotePort}
-                                        onChange={(e) => {
-                                            setRemotePort(e.target.value);
-                                        }}
-                                        disabled={!remoteOrLocal}
-                                        inputProps={{
-                                            size: 6,
-                                            maxLength: 5,
-                                            inputMode: 'numeric',
-                                            pattern: '[0-9]*',
-                                        }}
-                                    />
-                                </FormControl>
-                            </div>
-                            <div className={classes.autoConnectContainer}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            disabled={!remoteOrLocal}
-                                            color={'primary'}
-                                            checked={autoConnect}
-                                            onChange={() => {
-                                                setAutoConnect(!autoConnect);
-                                            }}
-                                            name="autoConnect"
-                                        />
-                                    }
-                                    label="Autoconnect"
-                                />
                             </div>
                             <div className={classes.connectionSection}>
                                 <Button
@@ -523,7 +558,7 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                     )}
-                                    Check Connection
+                                    Check connection
                                 </Button>
 
                                 <ConnectionResult
@@ -580,71 +615,81 @@ const SettingsModal = (props) => {
                                 </Button>
                             </div>
                             <div className={classes.displayListSection}>
-                                <FileFormatIcon
-                                    style={svgContainerStyle}
-                                    svgStyle={svgStyle}
-                                />
-                                <FormControl>
-                                    <Select
-                                        displayEmpty={true}
-                                        open={openFileFormat}
-                                        defaultValue="Open Raster"
+                                <div className={classes.displayListSectionItem}>
+                                    <FileFormatIcon
+                                        style={svgContainerStyle}
+                                        svgStyle={svgStyle}
+                                    />
+                                    <FormControl
                                         className={
-                                            fileFormat === ''
-                                                ? classes.disabledText
-                                                : null
-                                        }
-                                        onClose={() => {
-                                            setOpenFileFormat(false);
-                                        }}
-                                        onOpen={() => {
-                                            setOpenFileFormat(true);
-                                        }}
-                                        value={fileFormat}
-                                        onChange={(e) => {
-                                            setFileFormat(e.target.value);
-                                        }}>
-                                        <MenuItem value={''} disabled>
-                                            Output file format
-                                        </MenuItem>
-                                        <MenuItem value={'Open Raster'}>
-                                            Open Raster
-                                        </MenuItem>
-                                        <MenuItem value={'Zip Archive'}>
-                                            Zip Archive
-                                        </MenuItem>
-                                    </Select>
-                                </FormControl>
-                                <FileAnnotationsIcon
-                                    style={svgContainerStyle}
-                                    svgStyle={svgStyle}
-                                />
-                                <FormControl>
-                                    <Select
-                                        displayEmpty={true}
-                                        open={openAnnotationsFormat}
+                                            classes.displayListSectionInput
+                                        }>
+                                        <Select
+                                            displayEmpty={true}
+                                            open={openFileFormat}
+                                            defaultValue="Open Raster"
+                                            className={
+                                                fileFormat === ''
+                                                    ? classes.disabledText
+                                                    : null
+                                            }
+                                            onClose={() => {
+                                                setOpenFileFormat(false);
+                                            }}
+                                            onOpen={() => {
+                                                setOpenFileFormat(true);
+                                            }}
+                                            value={fileFormat}
+                                            onChange={(e) => {
+                                                setFileFormat(e.target.value);
+                                            }}>
+                                            <MenuItem value={''} disabled>
+                                                Output file format
+                                            </MenuItem>
+                                            <MenuItem value={'Open Raster'}>
+                                                Open Raster
+                                            </MenuItem>
+                                            <MenuItem value={'Zip Archive'}>
+                                                Zip Archive
+                                            </MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                                <div className={classes.displayListSectionItem}>
+                                    <FileAnnotationsIcon
+                                        style={svgContainerStyle}
+                                        svgStyle={svgStyle}
+                                    />
+                                    <FormControl
                                         className={
-                                            annotationsFormat === ''
-                                                ? classes.disabledText
-                                                : null
-                                        }
-                                        onClose={() => {
-                                            setOpenAnnotationsFormat(false);
-                                        }}
-                                        onOpen={() => {
-                                            setOpenAnnotationsFormat(true);
-                                        }}
-                                        value={annotationsFormat}
-                                        onChange={(e) => {
-                                            setAnnotationsFormat(
-                                                e.target.value
-                                            );
-                                        }}>
-                                        <MenuItem disabled value={''}>
-                                            Annotations format
-                                        </MenuItem>
-                                        {Object.keys(SETTINGS.ANNOTATIONS).map(
-                                            (key, index) => {
+                                            classes.displayListSectionInput
+                                        }>
+                                        <Select
+                                            displayEmpty={true}
+                                            open={openAnnotationsFormat}
+                                            className={
+                                                annotationsFormat === ''
+                                                    ? classes.disabledText
+                                                    : null
+                                            }
+                                            onClose={() => {
+                                                setOpenAnnotationsFormat(false);
+                                            }}
+                                            onOpen={() => {
+                                                setOpenAnnotationsFormat(true);
+                                            }}
+                                            value={annotationsFormat}
+                                            onChange={(e) => {
+                                                setAnnotationsFormat(
+                                                    e.target.value
+                                                );
+                                            }}>
+                                            <MenuItem disabled value={''}>
+                                                Annotations format
+                                            </MenuItem>
+                                            {Object.keys(
+                                                SETTINGS.ANNOTATIONS
+                                            ).map((key, index) => {
                                                 return (
                                                     <MenuItem
                                                         key={index}
@@ -662,29 +707,34 @@ const SettingsModal = (props) => {
                                                         }
                                                     </MenuItem>
                                                 );
-                                            }
-                                        )}
-                                    </Select>
-                                </FormControl>
-                                <FileSuffixIcon
-                                    style={svgContainerStyle}
-                                    svgStyle={svgStyle}
-                                />
-                                <FormControl>
-                                    <TextField
-                                        required
-                                        className={classes.textField}
-                                        id="outputSuffix"
-                                        placeholder="Filename suffix"
-                                        value={fileSuffix}
-                                        inputProps={{
-                                            size: '10',
-                                        }}
-                                        onChange={(e) => {
-                                            setFileSuffix(e.target.value);
-                                        }}
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                                <div className={classes.displayListSectionItem}>
+                                    <FileSuffixIcon
+                                        style={svgContainerStyle}
+                                        svgStyle={svgStyle}
                                     />
-                                </FormControl>
+                                    <FormControl
+                                        className={
+                                            classes.displayListSectionInput
+                                        }>
+                                        <TextField
+                                            required
+                                            className={classes.textField}
+                                            id="outputSuffix"
+                                            placeholder="Filename suffix"
+                                            value={fileSuffix}
+                                            inputProps={{
+                                                size: '10',
+                                            }}
+                                            onChange={(e) => {
+                                                setFileSuffix(e.target.value);
+                                            }}
+                                        />
+                                    </FormControl>
+                                </div>
                             </div>
                         </div>
                     </div>
