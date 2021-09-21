@@ -8,10 +8,13 @@ import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectio
 import SideMenuAlgorithm from './SideMenuAlgorithm';
 import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
+import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
+import SaveButton from './SaveButton';
 
 const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(${sideMenuWidth})`,
@@ -36,7 +39,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const prevIsMenuCollapsed = usePrevious(collapsedSideMenu);
     useEffect(() => {
         // If we didn't check to make sure the value changed with the previous value
-        // The component would re-render infinitely and crash, as the useEffect runs everytime
+        // The component would re-render infinitely and crash, as the useEffect runs every time
         // the component is rendered
         if (prevIsMenuCollapsed !== collapsedSideMenu) {
             if (collapsedSideMenu === true) {
@@ -54,7 +57,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
     const numOfFiles = useSelector(getNumFilesInQueue);
     const enableMenu = numOfFiles > 0;
     // Checking to see if there is any data in myDetections
-    if (algorithms.length > 0 && enableMenu) {
+    if (enableMenu) {
         return (
             <div style={translateStyle} className="side-menu-container">
                 <div
@@ -85,7 +88,11 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
                               })
                             : null}
                     </div>
-                    <NextButton nextImageClick={nextImageClick} />
+                    {remoteOrLocal === true ? (
+                        <NextButton nextImageClick={nextImageClick} />
+                    ) : (
+                        <SaveButton saveImageClick={nextImageClick} />
+                    )}
                 </div>
             </div>
         );

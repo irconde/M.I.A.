@@ -7,9 +7,13 @@ import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
+import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
+import { ReactComponent as OpenIcon } from '../../icons/ic_open_file.svg';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
+
     const {
         processingFile,
         connectedServer,
@@ -76,34 +80,67 @@ const TopBar = (props) => {
             color: '#6A6A6A',
             fontWeight: 'bold',
         },
+        verticalDivider: {
+            border: '1px solid gray',
+            height: '50%',
+        },
+        openFileContainer: {
+            position: 'fixed',
+            left: '1.5%',
+            top: '1.5%',
+            cursor: 'pointer',
+            display: 'flex',
+            height: 'inherit',
+        },
     };
 
     return processingFile ? (
-        <div>
+        <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
-                <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
-                <span style={styles.typeInfo}>Connected to </span>&nbsp;&nbsp;
-                {connectedServer} &nbsp;
-                <span style={styles.divider}>/</span>&nbsp;
-                <span style={styles.typeInfo}>Processing</span>&nbsp;&nbsp;
+                {remoteOrLocal === true ? (
+                    <React.Fragment>
+                        <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
+                        <span style={styles.typeInfo}>Connected to </span>
+                        &nbsp;&nbsp;
+                        {connectedServer} &nbsp;
+                        <span style={styles.divider}>/</span>&nbsp;
+                        <span style={styles.typeInfo}>Processing</span>
+                        &nbsp;&nbsp;
+                    </React.Fragment>
+                ) : (
+                    <div style={styles.openFileContainer}>
+                        <OpenIcon />
+                        <span style={styles.typeInfo}>OPEN FILE</span>
+                        <div style={styles.verticalDivider} />
+                    </div>
+                )}
                 {processingFile} &nbsp;
-                <span style={styles.typeInfo}>file</span>
+                {remoteOrLocal === true ? (
+                    <span style={styles.typeInfo}>file</span>
+                ) : null}
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                <FileQueueIcon
-                    title="Number of Files"
-                    numberOfFiles={numberOfFiles}
-                    style={styles.icon}
-                />
-                <FileUploadStatus
-                    isDownload={isDownload}
-                    isUpload={isUpload}
-                    styles={styles.icon}
-                />
-                <ConnectionStatus
-                    isConnected={isConnected}
-                    style={styles.icon}
-                />
+                {remoteOrLocal === true ? (
+                    <React.Fragment>
+                        <FileQueueIcon
+                            title="Number of Files"
+                            numberOfFiles={numberOfFiles}
+                            style={styles.icon}
+                        />
+                        <FileUploadStatus
+                            isDownload={isDownload}
+                            isUpload={isUpload}
+                            styles={styles.icon}
+                        />
+                        <ConnectionStatus
+                            isConnected={isConnected}
+                            style={styles.icon}
+                        />
+                    </React.Fragment>
+                ) : (
+                    <div style={styles.verticalDivider}></div>
+                )}
+
                 <MenuToggleIcon
                     style={styles.icon}
                     cornerstone={props.cornerstone}

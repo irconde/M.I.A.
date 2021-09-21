@@ -190,6 +190,8 @@ export const {
 
 // Selectors
 export const getSettings = (state) => state.settings.settings;
+export const getRemoteOrLocal = (state) =>
+    state.settings.settings.remoteOrLocal;
 
 export const getRemoteConnectionInfo = (state) => {
     return {

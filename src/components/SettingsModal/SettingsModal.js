@@ -179,6 +179,7 @@ const SettingsModal = (props) => {
                 fileFormat,
                 annotationsFormat,
                 fileSuffix,
+                remoteOrLocal,
             })
         );
         dispatch(toggleSettingsVisibility(false));

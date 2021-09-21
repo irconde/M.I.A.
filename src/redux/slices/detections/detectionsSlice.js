@@ -48,6 +48,7 @@ const initialState = {
     // As commented above
     /** @type Interface Detection */
     detectionLabels: [],
+    detectionChanged: false,
 };
 
 const detectionsSlice = createSlice({
@@ -97,6 +98,9 @@ const detectionsSlice = createSlice({
                 );
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
+            }
+            if (className === constants.commonDetections.UNKNOWN) {
+                state.detectionChanged = true;
             }
         },
         // Adds detections
@@ -189,8 +193,10 @@ const detectionsSlice = createSlice({
             if (detection !== undefined) {
                 for (let key in update) detection[key] = update[key];
                 if (state.selectedDetection) {
-                    if (state.selectedDetection.uuid === detection.uuid)
+                    if (state.selectedDetection.uuid === detection.uuid) {
                         state.selectedDetection = detection;
+                        state.detectionChanged = true;
+                    }
                 }
             }
         },
@@ -209,6 +215,7 @@ const detectionsSlice = createSlice({
                     hue: 'random',
                     luminosity: 'bright',
                 });
+                state.detectionChanged = true;
                 if (state.detectionLabels.indexOf(className) === -1) {
                     state.detectionLabels.push(className);
                 }
@@ -221,6 +228,7 @@ const detectionsSlice = createSlice({
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
             });
+            state.detectionChanged = true;
         },
         // Marks all DetectionSets as validated by the user
         validateDetections: (state) => {
@@ -428,6 +436,8 @@ const getDetectionColor = (detection, uuid) => {
     }
     return detection.color;
 };
+
+export const getDetectionChanged = (state) => state.detections.detectionChanged;
 
 export const {
     resetDetections,
