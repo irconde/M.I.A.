@@ -60,6 +60,7 @@ const detectionsSlice = createSlice({
             state.selectedAlgorithm = '';
             state.selectedDetection = null;
             state.detections = [];
+            state.detectionChanged = false;
         },
         // Adds detection
         addDetection: (state, action) => {

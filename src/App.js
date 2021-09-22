@@ -927,6 +927,7 @@ class App extends Component {
                                     this.resetSelectedDetectionBoxes(e);
                                     this.props.setUpload(false);
                                     this.getFileFromCommandServer();
+                                    this.props.setReceiveTime(null);
                                 }
                             );
                         });
@@ -934,27 +935,25 @@ class App extends Component {
                     newOra
                         .generateAsync({ type: 'blob' })
                         .then(async (file) => {
-                            this.props.setCurrentProcessingFile(null);
-                            this.setState(
-                                {
-                                    myOra: new ORA(),
-                                },
-                                () => this.props.resetDetections()
-                            );
-                            await fileSave(file, {
+                            fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
                                     constants.SETTINGS.OUTPUT_FORMATS.ORA
                                         ? 'ora'
                                         : 'zip'
                                 }`,
+                            }).then(() => {
+                                this.setState({
+                                    myOra: new ORA(),
+                                });
+                                this.onNoImageLeft();
+                                this.props.setCurrentProcessingFile(null);
+                                this.resetSelectedDetectionBoxes(e);
+                                this.props.resetDetections();
+                                this.props.setReceiveTime(null);
                             });
-
-                            this.resetSelectedDetectionBoxes(e);
-                            this.onNoImageLeft();
                         });
                 }
-                this.props.setReceiveTime(null);
             });
         }
     }

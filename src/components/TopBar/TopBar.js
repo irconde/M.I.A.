@@ -9,8 +9,6 @@ import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
-import { fileOpen } from 'browser-fs-access';
-import Utils from '../../utils/Utils';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
