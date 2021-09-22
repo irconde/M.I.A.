@@ -8,7 +8,7 @@ import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
-import { ReactComponent as OpenIcon } from '../../icons/ic_open_file.svg';
+import OpenIcon from '../../icons/OpenIcon';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
@@ -85,12 +85,17 @@ const TopBar = (props) => {
             height: '50%',
         },
         openFileContainer: {
-            position: 'fixed',
-            left: '1.5%',
-            top: '1.5%',
             cursor: 'pointer',
             display: 'flex',
             height: 'inherit',
+            width: 'inherit',
+            alignItems: 'center',
+            position: 'absolute',
+        },
+        openFileText: {
+            marginRight: '1.5rem',
+            fontWeight: '400',
+            fontSize: 'medium',
         },
     };
 
@@ -109,8 +114,15 @@ const TopBar = (props) => {
                     </React.Fragment>
                 ) : (
                     <div style={styles.openFileContainer}>
-                        <OpenIcon />
-                        <span style={styles.typeInfo}>OPEN FILE</span>
+                        <OpenIcon
+                            title="Open File"
+                            style={{
+                                marginRight: '0.5rem',
+                                marginLeft: '2%',
+                                display: 'inherit',
+                            }}
+                        />
+                        <span style={styles.openFileText}>OPEN FILE</span>
                         <div style={styles.verticalDivider} />
                     </div>
                 )}
