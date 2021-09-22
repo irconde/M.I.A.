@@ -183,7 +183,7 @@ const SettingsModal = (props) => {
             })
         );
         dispatch(toggleSettingsVisibility(false));
-        if (remoteIp !== '' || remotePort !== '') {
+        if ((remoteOrLocal === true && remoteIp !== '') || remotePort !== '') {
             setTimeout(() => {
                 props.connectToCommandServer(true);
             }, 0);

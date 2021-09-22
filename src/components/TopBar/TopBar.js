@@ -137,18 +137,16 @@ const TopBar = (props) => {
                             style={styles.icon}
                         />
                     </React.Fragment>
-                ) : (
-                    <div style={styles.verticalDivider}></div>
-                )}
-
-                <MenuToggleIcon
-                    style={styles.icon}
-                    cornerstone={props.cornerstone}
-                />
+                ) : null}
+                <div style={styles.verticalDivider}></div>
                 <SettingsIcon
-                    style={styles.lastIcon}
+                    style={styles.icon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
+                />
+                <MenuToggleIcon
+                    style={styles.lastIcon}
+                    cornerstone={props.cornerstone}
                 />
             </div>
         </div>
