@@ -9,6 +9,7 @@ import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
+import { fileOpen } from 'browser-fs-access';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
@@ -99,6 +100,11 @@ const TopBar = (props) => {
         },
     };
 
+    const fileOpenHandler = async () => {
+        const blob = await fileOpen();
+        console.log(blob);
+    };
+
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
@@ -113,7 +119,9 @@ const TopBar = (props) => {
                         &nbsp;&nbsp;
                     </React.Fragment>
                 ) : (
-                    <div style={styles.openFileContainer}>
+                    <div
+                        style={styles.openFileContainer}
+                        onClick={() => fileOpenHandler()}>
                         <OpenIcon
                             title="Open File"
                             style={{

@@ -35,7 +35,10 @@ const SaveButtonContainer = styled.div`
 const SaveButton = ({ saveImageClick }) => {
     const detectionChanged = useSelector(getDetectionChanged);
     return (
-        <SaveButtonContainer enabled={detectionChanged} id="saveButton">
+        <SaveButtonContainer
+            enabled={detectionChanged}
+            onClick={() => saveImageClick()}
+            id="saveButton">
             <SaveIcon
                 title="Save File"
                 style={{ marginRight: '4%', display: 'inherit' }}

@@ -77,6 +77,7 @@ import {
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
+import { fileSave } from 'browser-fs-access';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -751,6 +752,7 @@ class App extends Component {
                 viewports,
                 cornerstone
             ).then((cocoFile) => {
+                // TODO: remote or local
                 this.sendImageToCommandServer(cocoFile).then(
                     // eslint-disable-next-line no-unused-vars
                     (res) => {
@@ -895,23 +897,49 @@ class App extends Component {
                         { type: 'application/xml ' }
                     )
                 );
-                newOra.generateAsync({ type: 'nodebuffer' }).then((file) => {
-                    this.props.setCurrentProcessingFile(null);
-                    this.setState(
-                        {
-                            myOra: new ORA(),
-                        },
-                        () => this.props.resetDetections()
-                    );
-                    this.sendImageToCommandServer(file).then(
-                        // eslint-disable-next-line no-unused-vars
-                        (res) => {
+                if (this.props.remoteOrLocal === true) {
+                    newOra
+                        .generateAsync({ type: 'nodebuffer' })
+                        .then((file) => {
+                            this.props.setCurrentProcessingFile(null);
+                            this.setState(
+                                {
+                                    myOra: new ORA(),
+                                },
+                                () => this.props.resetDetections()
+                            );
+                            this.sendImageToCommandServer(file).then(
+                                // eslint-disable-next-line no-unused-vars
+                                (res) => {
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.setUpload(false);
+                                    this.getFileFromCommandServer();
+                                }
+                            );
+                        });
+                } else {
+                    newOra
+                        .generateAsync({ type: 'blob' })
+                        .then(async (file) => {
+                            this.props.setCurrentProcessingFile(null);
+                            this.setState(
+                                {
+                                    myOra: new ORA(),
+                                },
+                                () => this.props.resetDetections()
+                            );
+                            await fileSave(file, {
+                                fileName: `1${this.props.fileSuffix}.${
+                                    this.props.fileFormat ===
+                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                        ? 'ora'
+                                        : 'zip'
+                                }`,
+                            });
                             this.resetSelectedDetectionBoxes(e);
-                            this.props.setUpload(false);
-                            this.getFileFromCommandServer();
-                        }
-                    );
-                });
+                            this.onNoImageLeft();
+                        });
+                }
             });
         }
     }
@@ -2581,6 +2609,7 @@ const mapStateToProps = (state) => {
         fileSuffix: settings.settings.fileSuffix,
         firstDisplaySettings: settings.settings.firstDisplaySettings,
         annotationsFormat: settings.settings.annotationsFormat,
+        remoteOrLocal: settings.settings.remoteOrLocal,
     };
 };
 

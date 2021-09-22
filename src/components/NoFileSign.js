@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { getNumFilesInQueue } from '../redux/slices/server/serverSlice';
 import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
+import { getRemoteOrLocal } from '../redux/slices/settings/settingsSlice';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
@@ -9,6 +10,7 @@ import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
  */
 const NoFileSign = () => {
     const isVisible = useSelector(getNumFilesInQueue);
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
     const paragraphStyle = {
         fontWeight: '500',
         marginTop: '0.0rem',
@@ -39,7 +41,14 @@ const NoFileSign = () => {
         return (
             <div style={divStyle}>
                 <NoFilesIcon title="NoFilesAvailable" style={imgStyle} />
-                <p style={paragraphStyle}> · No file available ·</p>
+                <p style={paragraphStyle}>
+                    {' '}
+                    ·{' '}
+                    {remoteOrLocal === true
+                        ? 'No file available'
+                        : 'Select a file'}{' '}
+                    ·
+                </p>
             </div>
         );
     }
