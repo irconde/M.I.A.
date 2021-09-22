@@ -7,7 +7,10 @@ import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';
 import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
-import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
+import {
+    getCollapsedSideMenu,
+    getReceivedTime,
+} from '../../redux/slices/ui/uiSlice';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './SaveButton';
 
@@ -54,10 +57,9 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
         }
     });
 
-    const numOfFiles = useSelector(getNumFilesInQueue);
-    const enableMenu = numOfFiles > 0;
+    const enableMenu = useSelector(getReceivedTime);
     // Checking to see if there is any data in myDetections
-    if (enableMenu) {
+    if (enableMenu !== null) {
         return (
             <div style={translateStyle} className="side-menu-container">
                 <div

@@ -359,6 +359,9 @@ const uiSlice = createSlice({
         toggleSettingsVisibility: (state, action) => {
             state.isSettingsVisible = action.payload;
         },
+        setReceiveTime: (state, action) => {
+            state.receiveTime = action.payload;
+        },
     },
 });
 
@@ -530,6 +533,7 @@ export const getDetectionContextInfo = (state) => {
 };
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+export const getReceivedTime = (state) => state.ui.receiveTime;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -559,6 +563,7 @@ export const {
     toggleSettingsVisibility,
     setInputLabel,
     toggleCollapsedSideMenu,
+    setReceiveTime,
 } = uiSlice.actions;
 
 // Export the reducer for the store

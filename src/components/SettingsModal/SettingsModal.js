@@ -55,7 +55,7 @@ const SettingsModal = (props) => {
     );
     const [localFileOutput, setLocalFileOutput] = useState('');
     const [fileSuffix, setFileSuffix] = useState('');
-    const [remoteOrLocal, setRemoteOrLocal] = useState(true);
+    const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [connectionDisplay, setConnectionDisplay] = useState(false);

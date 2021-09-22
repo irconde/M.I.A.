@@ -73,11 +73,12 @@ import {
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
     setInputLabel,
+    setReceiveTime,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
-import { fileSave } from 'browser-fs-access';
+import { fileSave, fileOpen } from 'browser-fs-access';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -128,6 +129,7 @@ class App extends Component {
             tapDetector: new TapDetector(),
             commandServer: null,
         };
+        this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
@@ -201,7 +203,9 @@ class App extends Component {
     componentDidMount() {
         // Connect socket servers
         if (this.props.firstDisplaySettings === false) {
-            this.connectToCommandServer();
+            if (this.props.remoteOrLocal === true) {
+                this.connectToCommandServer();
+            }
         }
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
@@ -600,6 +604,15 @@ class App extends Component {
         }
     }
 
+    getFileFromLocal() {
+        fileOpen().then((blob) => {
+            Utils.blobToBase64(blob).then((b64) => {
+                // Won't work as this.props and this isn't defined in the same context when called this way
+                this.loadNextImage(b64, blob.name);
+            });
+        });
+    }
+
     /**
      * sendImageToCommandServer - Socket IO to send a file to the server
      * @param {Blob} Blob - which file we are sending
@@ -642,7 +655,7 @@ class App extends Component {
      * @param {String} fileName
      * @return {type} None
      */
-    loadNextImage(image, fileName, numberOfFiles) {
+    loadNextImage(image, fileName, numberOfFiles = 0) {
         this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
@@ -936,10 +949,12 @@ class App extends Component {
                                         : 'zip'
                                 }`,
                             });
+
                             this.resetSelectedDetectionBoxes(e);
                             this.onNoImageLeft();
                         });
                 }
+                this.props.setReceiveTime(null);
             });
         }
     }
@@ -2558,6 +2573,7 @@ class App extends Component {
                     }}>
                     <TopBar
                         connectToCommandServer={this.connectToCommandServer}
+                        getFileFromLocal={this.getFileFromLocal}
                         cornerstone={cornerstone}
                     />
                     <SideMenu
@@ -2656,6 +2672,7 @@ const mapDispatchToProps = {
     updateDetectionVisibility,
     setInputLabel,
     setConnected,
+    setReceiveTime,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

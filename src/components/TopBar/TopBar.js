@@ -10,6 +10,7 @@ import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
 import { fileOpen } from 'browser-fs-access';
+import Utils from '../../utils/Utils';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
@@ -100,11 +101,6 @@ const TopBar = (props) => {
         },
     };
 
-    const fileOpenHandler = async () => {
-        const blob = await fileOpen();
-        console.log(blob);
-    };
-
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
@@ -121,7 +117,7 @@ const TopBar = (props) => {
                 ) : (
                     <div
                         style={styles.openFileContainer}
-                        onClick={() => fileOpenHandler()}>
+                        onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
                             title="Open File"
                             style={{
@@ -173,32 +169,62 @@ const TopBar = (props) => {
     ) : (
         <div>
             <div style={styles.titleLabelContainer}>
-                <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
-                <span style={styles.typeInfo}>Connected to </span>&nbsp;&nbsp;
-                {connectedServer} &nbsp;
+                {remoteOrLocal === true ? (
+                    <React.Fragment>
+                        <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
+                        <span style={styles.typeInfo}>Connected to </span>
+                        &nbsp;&nbsp;
+                        {connectedServer} &nbsp; &nbsp;&nbsp;
+                    </React.Fragment>
+                ) : (
+                    <div
+                        style={styles.openFileContainer}
+                        onClick={() => props.getFileFromLocal()}>
+                        <OpenIcon
+                            title="Open File"
+                            style={{
+                                marginRight: '0.5rem',
+                                marginLeft: '2%',
+                                display: 'inherit',
+                            }}
+                        />
+                        <span style={styles.openFileText}>OPEN FILE</span>
+                        <div style={styles.verticalDivider} />
+                    </div>
+                )}
+                {processingFile} &nbsp;
+                {remoteOrLocal === true ? (
+                    <span style={styles.typeInfo}>file</span>
+                ) : null}
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                <FileQueueIcon
-                    title="Number of Files"
-                    numberOfFiles={numberOfFiles}
-                    style={styles.icon}
-                />
-                <FileUploadStatus
-                    isDownload={isDownload}
-                    isUpload={isUpload}
-                    styles={styles.icon}
-                />
-                <ConnectionStatus
-                    isConnected={isConnected}
-                    style={styles.icon}
-                />
-                <MenuToggleIcon
-                    style={styles.icon}
-                    cornerstone={props.cornerstone}
-                />
+                {remoteOrLocal === true ? (
+                    <React.Fragment>
+                        <FileQueueIcon
+                            title="Number of Files"
+                            numberOfFiles={numberOfFiles}
+                            style={styles.icon}
+                        />
+                        <FileUploadStatus
+                            isDownload={isDownload}
+                            isUpload={isUpload}
+                            styles={styles.icon}
+                        />
+                        <ConnectionStatus
+                            isConnected={isConnected}
+                            style={styles.icon}
+                        />
+                    </React.Fragment>
+                ) : null}
+                <div style={styles.verticalDivider}></div>
                 <SettingsIcon
+                    style={styles.icon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
+                />
+                <MenuToggleIcon
+                    style={styles.lastIcon}
+                    cornerstone={props.cornerstone}
                 />
             </div>
         </div>
@@ -208,6 +234,7 @@ const TopBar = (props) => {
 TopBar.propTypes = {
     connectToCommandServer: PropTypes.func,
     cornerstone: PropTypes.object,
+    getFileFromLocal: PropTypes.func,
 };
 
 export default TopBar;
