@@ -6,7 +6,6 @@ import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithm from './SideMenuAlgorithm';
-import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 import {
     getCollapsedSideMenu,
     getReceivedTime,
@@ -15,6 +14,7 @@ import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './SaveButton';
 
 const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
+    const enableMenu = useSelector(getReceivedTime);
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
@@ -57,8 +57,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
         }
     });
 
-    const enableMenu = useSelector(getReceivedTime);
-    // Checking to see if there is any data in myDetections
+    // Checking to see if the app has a file received via local or remote using the received time from the uiSlice
     if (enableMenu !== null) {
         return (
             <div style={translateStyle} className="side-menu-container">

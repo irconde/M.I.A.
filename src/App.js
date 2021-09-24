@@ -208,8 +208,10 @@ class App extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {
-                this.state.commandServer.disconnect();
-                this.props.setConnected(false);
+                if (this.state.commandServer !== null) {
+                    this.state.commandServer.disconnect();
+                    this.props.setConnected(false);
+                }
                 return true;
             } else return false;
         } else return false;
@@ -351,7 +353,8 @@ class App extends Component {
             'cornerstonetoolstouchpinch',
             this.resetSelectedDetectionBoxes
         );
-        this.state.commandServer.disconnect();
+        if (this.state.commandServer !== null)
+            this.state.commandServer.disconnect();
         this.props.setConnected(false);
         this.stopListeningClickEvents();
         window.removeEventListener('resize', this.resizeListener);

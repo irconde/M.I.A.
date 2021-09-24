@@ -110,6 +110,11 @@ export default class Dicos {
 
         const dataSet = image.dataSet;
         if (dataSet === undefined) return;
+        if (
+            dataSet.elements.x40101037.items[0].dataSet.elements.x40101001 ===
+            undefined
+        )
+            return;
         const baseDataSet =
             dataSet.elements.x40101037.items[0].dataSet.elements.x40101001
                 .items[0].dataSet;
@@ -156,15 +161,21 @@ export default class Dicos {
             );
             bBoxIndex++;
         }
-        const pixelDataElement =
+        let arrayPixelData = [];
+        if (
             image.dataSet.elements.x40101037.items[0].dataSet.elements.x40101001
-                .items[0].dataSet.elements.x40101006;
-        let pixelData = new Uint8Array(
-            data.byteArray.buffer,
-            pixelDataElement.dataOffset,
-            pixelDataElement.length
-        );
-        const arrayPixelData = Array.from(pixelData);
+                .items[0].dataSet.elements.x40101006 !== undefined
+        ) {
+            const pixelDataElement =
+                image.dataSet.elements.x40101037.items[0].dataSet.elements
+                    .x40101001.items[0].dataSet.elements.x40101006;
+            let pixelData = new Uint8Array(
+                data.byteArray.buffer,
+                pixelDataElement.dataOffset,
+                pixelDataElement.length
+            );
+            arrayPixelData = Array.from(pixelData);
+        }
         return [arrayPixelData, baseCoords, extentsCoords];
     }
 
@@ -190,138 +201,6 @@ export default class Dicos {
         return image.dataSet.elements.x40101038.items[0].dataSet.float(
             Dicos.dictionary['ATDAssessmentProbability'].tag
         );
-    }
-
-    /**
-     * @static write - Method that takes validation information and the original
-     * DICOS data and generates the data to be encoded in the amended DICOS file
-     *
-     * @param  {type} detection      Detection object we are using to make a DICOM blob
-     * @param  {type} image          Original DICOS Blob data
-     * @param  {type} startTime      Time the client displayed image on screen -- used to create 'Total Processing Time'
-     * @returns {Promise}            Promise once the file reader is complete
-     */
-    static async dataToBlob(detection, image, startTime) {
-        var today = new Date();
-        var dd = String(today.getDate()).padStart(2, '0');
-        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        var yyyy = today.getFullYear();
-
-        var fileReader = new FileReader();
-        return new Promise((resolve, reject) => {
-            fileReader.onerror = () => {
-                fileReader.abort();
-                reject('Unable to load file');
-            };
-            fileReader.onload = function (event) {
-                image = event.target.result;
-                var dicomDict = dcmjs.data.DicomMessage.readFile(image);
-                var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
-                    dicomDict.dict
-                );
-                let copiedData = dataset;
-                let instanceNumber = copiedData.InstanceNumber;
-                var numberAlarmObjs = copiedData.NumberOfAlarmObjects;
-                var numberTotalObjs = copiedData.NumberOfTotalObjects;
-                instanceNumber = instanceNumber * 4;
-
-                copiedData.InstanceNumber = instanceNumber;
-                copiedData.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
-                copiedData.InstanceCreationTime =
-                    today.getHours() +
-                    ':' +
-                    today.getMinutes() +
-                    ':' +
-                    today.getSeconds();
-                copiedData.AcquisitionNumber = instanceNumber;
-                copiedData.TotalProcessingTime = startTime - Date.now();
-                copiedData.TDRType = 'OPERATOR';
-                copiedData.OperatorIdentificationSequence = {
-                    vrMap: {},
-                    PersonIdentificationCodeSequence: {
-                        CodeValue: 'none',
-                        CodingSchemeDesignator: 'none',
-                        CodingSchemeVersion: '1.1.1',
-                        CodeMeaning: 'none',
-                        vrMap: {},
-                    },
-                    PersonAddress: '123 Main Street',
-                    PersonTelephoneNumbers: '1112223333',
-                    OrganizationName: 'The Organization',
-                    OrganizationAddress: '123 Main Street',
-                    OrganizationCodeSequence: {
-                        CodeValue: 'none',
-                        CodingSchemeDesignator: 'none',
-                        CodingSchemeVersion: '1.1.1',
-                        CodeMeaning: 'none',
-                        vrMap: {},
-                    },
-                };
-
-                copiedData.abortFlag = 'SUCCESS';
-                copiedData.AdditionalScreeningPerformed = 'YES';
-                copiedData.AdditionalInspectionSelectionCriteria = 'RANDOM';
-                if (copiedData.ThreatSequence) {
-                    copiedData.ThreatSequence['ReferencedPTOSequence'] = {
-                        vrMap: {},
-                        PotentialThreatObjectID:
-                            copiedData.ThreatSequence[
-                                'PotentialThreatObjectID'
-                            ],
-                        ReferencedTDRInstanceSequence: {
-                            ReferencedSOPClassUID: copiedData.SOPClassUID,
-                            ReferencedSOPInstanceUID: copiedData.SOPInstanceUID,
-                            vrMap: {},
-                        },
-                    };
-                }
-                copiedData.ThreatSequence['ATDAssessmentSequence'][
-                    'ThreatCategoryDescription'
-                ] = detection.feedback ? 'CONFIRM' : 'REJECT';
-                copiedData.ThreatSequence['ATDAssessmentSequence'][
-                    'ATDAssessmentProbability'
-                ] = 1;
-
-                if (detection.feedback === true) {
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ATDAssessmentFlag'
-                    ] = 'THREAT';
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ATDAbilityAssessment'
-                    ] = 'NO_INTERFERENCE';
-                } else if (detection.feedback === false) {
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ATDAssessmentFlag'
-                    ] = 'NO_THREAT';
-                    copiedData.ThreatSequence['ATDAssessmentSequence'][
-                        'ATDAbilityAssessment'
-                    ] = 'NO_INTERFERENCE';
-                    numberAlarmObjs = numberAlarmObjs - 1;
-                    numberTotalObjs = numberTotalObjs - 1;
-                    copiedData.NumberOfAlarmObjects = numberAlarmObjs;
-                    copiedData.NumberOfTotalObjects = numberTotalObjs;
-                }
-                copiedData.ThreatSequence.PTORepresentationSequence.BoundingPolygon =
-                    [
-                        detection.boundingBox[0],
-                        detection.boundingBox[1],
-                        0,
-                        detection.boundingBox[2],
-                        detection.boundingBox[3],
-                        0,
-                    ];
-                dicomDict.dict =
-                    dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
-                        copiedData
-                    );
-                let new_file_WriterBuffer = dicomDict.write();
-                var file = new Blob([new_file_WriterBuffer], {
-                    type: 'image/dcs',
-                });
-                resolve(file);
-            };
-            fileReader.readAsArrayBuffer(image);
-        });
     }
 
     /**
@@ -509,6 +388,20 @@ export default class Dicos {
                                             '1.2.840.10008.5.1.4.1.1.501.2.1',
                                         ReferencedSOPInstanceUID:
                                             '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                                    },
+                                ],
+                                ThreatROIVoxelSequence: [
+                                    {
+                                        ThreatROIBase: [
+                                            detection.binaryMask[1][0],
+                                            detection.binaryMask[1][1],
+                                            0,
+                                        ],
+                                        ThreatROIExtents: [
+                                            detection.binaryMask[2][0],
+                                            detection.binaryMask[2][1],
+                                            0,
+                                        ],
                                     },
                                 ],
                                 // [x0, y0, z0, xf, yf, zf]

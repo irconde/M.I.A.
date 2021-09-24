@@ -129,9 +129,6 @@ const TopBar = (props) => {
                     </div>
                 )}
                 {processingFile} &nbsp;
-                {remoteOrLocal === true ? (
-                    <span style={styles.typeInfo}>file</span>
-                ) : null}
             </div>
             <div style={styles.connectionStatusIconsContainer}>
                 {remoteOrLocal === true ? (
@@ -191,9 +188,6 @@ const TopBar = (props) => {
                     </div>
                 )}
                 {processingFile} &nbsp;
-                {remoteOrLocal === true ? (
-                    <span style={styles.typeInfo}>file</span>
-                ) : null}
             </div>
             <div style={styles.connectionStatusIconsContainer}>
                 {remoteOrLocal === true ? (
