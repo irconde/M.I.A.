@@ -92,7 +92,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
                     {remoteOrLocal === true ? (
                         <NextButton nextImageClick={nextImageClick} />
                     ) : (
-                        <SaveButton saveImageClick={nextImageClick} />
+                        <SaveButton nextImageClick={nextImageClick} />
                     )}
                 </div>
             </div>

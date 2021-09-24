@@ -282,7 +282,6 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         onMouseLeaveNoFilesUpdate: (state) => {
-            state.isFABVisible = false;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;

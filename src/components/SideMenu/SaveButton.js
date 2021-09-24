@@ -32,12 +32,12 @@ const SaveButtonContainer = styled.div`
     }
 `;
 
-const SaveButton = ({ saveImageClick }) => {
+const SaveButton = ({ nextImageClick }) => {
     const detectionChanged = useSelector(getDetectionChanged);
     return (
         <SaveButtonContainer
             enabled={detectionChanged}
-            onClick={() => saveImageClick()}
+            onClick={() => nextImageClick()}
             id="saveButton">
             <SaveIcon
                 title="Save File"
@@ -49,7 +49,7 @@ const SaveButton = ({ saveImageClick }) => {
 };
 
 SaveButton.propTypes = {
-    saveImageClick: PropTypes.func.isRequired,
+    nextImageClick: PropTypes.func.isRequired,
 };
 
 export default SaveButton;
