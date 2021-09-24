@@ -4,8 +4,8 @@ import Utils from './Utils';
 /**
  * buildCocoDataZip - Will take in the pixel data via myOra and blob format, along with
  *                    the detections via an array. It will build the needed JSON format for
- *                    the MS COCO dataset. It will return a nodebuffer stream of the archive file
- *                    to send to the command/file server
+ *                    the MS COCO dataset. It will return a blob of the archive file to send to
+ *                    a server or be stored locally.
  *
  * @param {Object} myOra
  * @param {Array<Detections>} detections
@@ -126,9 +126,7 @@ export const buildCocoDataZip = async (
 
         const promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then(() => {
-            cocoZip.generateAsync({ type: 'nodebuffer' }).then((file) => {
-                resolve(file);
-            });
+            resolve(cocoZip);
         });
     });
 };

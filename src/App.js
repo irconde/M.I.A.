@@ -196,6 +196,26 @@ class App extends Component {
     }
 
     /**
+     * shouldComponentUpdate - Gets called by an update (in changes to props or state). It is called before render(),
+     *                         returning false means we can skip the update. Where returning true means we need to update the render().
+     *                         Namely, this is an edge case for if a user is connected to a server, then decides to use the
+     *                         local mode option, this handles the disconnect.
+     *
+     * @param {Object} nextProps
+     * @param {Object} nextState
+     * @returns {Boolean} True - to update | False - to skip the update
+     */
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
+            if (nextProps.remoteOrLocal === false) {
+                this.state.commandServer.disconnect();
+                this.props.setConnected(false);
+                return true;
+            } else return false;
+        } else return false;
+    }
+
+    /**
      * componentDidMount - Method invoked after all elements on the page are rendered properly
      *
      * @return {None} None
@@ -604,13 +624,25 @@ class App extends Component {
         }
     }
 
+    /**
+     * getFileFromLocal - Function called from the TopBar Icon OpenFile. Uses the
+     *                    browser-fs-access library to load a file as a blob. Which
+     *                    then needs to be converted to base64 to be loaded into the app.
+     * @param {None}
+     * @returns {None}
+     */
     getFileFromLocal() {
-        fileOpen().then((blob) => {
-            Utils.blobToBase64(blob).then((b64) => {
-                // Won't work as this.props and this isn't defined in the same context when called this way
-                this.loadNextImage(b64, blob.name);
+        fileOpen()
+            .then((blob) => {
+                Utils.blobToBase64(blob).then((b64) => {
+                    this.loadNextImage(b64, blob.name);
+                });
+            })
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    console.log(error);
+                }
             });
-        });
     }
 
     /**
@@ -764,18 +796,45 @@ class App extends Component {
                 this.props.detections,
                 viewports,
                 cornerstone
-            ).then((cocoFile) => {
-                // TODO: remote or local
-                this.sendImageToCommandServer(cocoFile).then(
-                    // eslint-disable-next-line no-unused-vars
-                    (res) => {
-                        this.props.setCurrentProcessingFile(null);
-                        this.props.resetDetections();
-                        this.resetSelectedDetectionBoxes(e);
-                        this.props.setUpload(false);
-                        this.getFileFromCommandServer();
-                    }
-                );
+            ).then((cocoZip) => {
+                if (this.props.remoteOrLocal === true) {
+                    cocoZip
+                        .generateAsync({ type: 'nodebuffer' })
+                        .then((file) => {
+                            this.sendImageToCommandServer(file).then(
+                                // eslint-disable-next-line no-unused-vars
+                                (res) => {
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.props.resetDetections();
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.setUpload(false);
+                                    this.getFileFromCommandServer();
+                                }
+                            );
+                        });
+                } else {
+                    cocoZip
+                        .generateAsync({ type: 'blob' })
+                        .then(async (file) => {
+                            fileSave(file, {
+                                fileName: `1${this.props.fileSuffix}.${
+                                    this.props.fileFormat ===
+                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                        ? 'ora'
+                                        : 'zip'
+                                }`,
+                            }).then(() => {
+                                this.setState({
+                                    myOra: new ORA(),
+                                });
+                                this.onNoImageLeft();
+                                this.props.setCurrentProcessingFile(null);
+                                this.resetSelectedDetectionBoxes(e);
+                                this.props.resetDetections();
+                                this.props.setReceiveTime(null);
+                            });
+                        });
+                }
             });
         } else if (
             this.props.annotationsFormat ===
@@ -2547,7 +2606,8 @@ class App extends Component {
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
         else this.props.onMouseLeaveNoFilesUpdate();
-        this.resetSelectedDetectionBoxes(event);
+        if (this.props.selectedDetection !== null)
+            this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
