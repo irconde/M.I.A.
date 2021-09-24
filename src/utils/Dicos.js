@@ -393,13 +393,21 @@ export default class Dicos {
                                 ThreatROIVoxelSequence: [
                                     {
                                         ThreatROIBase: [
-                                            detection.binaryMask[1][0],
-                                            detection.binaryMask[1][1],
+                                            detection.binaryMask !== undefined
+                                                ? detection.binaryMask[1][0]
+                                                : 0,
+                                            detection.binaryMask !== undefined
+                                                ? detection.binaryMask[1][1]
+                                                : 0,
                                             0,
                                         ],
                                         ThreatROIExtents: [
-                                            detection.binaryMask[2][0],
-                                            detection.binaryMask[2][1],
+                                            detection.binaryMask !== undefined
+                                                ? detection.binaryMask[2][0]
+                                                : 0,
+                                            detection.binaryMask !== undefined
+                                                ? detection.binaryMask[2][1]
+                                                : 0,
                                             0,
                                         ],
                                     },
