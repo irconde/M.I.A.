@@ -15,6 +15,7 @@ const MenuToggleIcon = (props) => {
     return (
         <div style={divStyle} onClick={toggleClickHandler}>
             <svg
+                style={{ marginTop: 'auto', marginBottom: 'auto' }}
                 width="32px"
                 height="32px"
                 viewBox="0 0 32 32"

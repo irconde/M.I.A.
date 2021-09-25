@@ -104,14 +104,14 @@ const TopBar = (props) => {
                     isConnected={isConnected}
                     style={styles.icon}
                 />
-                <MenuToggleIcon
-                    style={styles.icon}
-                    cornerstone={props.cornerstone}
-                />
                 <SettingsIcon
-                    style={styles.lastIcon}
+                    style={styles.icon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
+                />
+                <MenuToggleIcon
+                    style={styles.lastIcon}
+                    cornerstone={props.cornerstone}
                 />
             </div>
         </div>

@@ -241,7 +241,7 @@ const SettingsModal = (props) => {
             },
             modal: {
                 boxShadow: theme.shadows[5],
-                padding: theme.spacing(2, 4, 3),
+                padding: theme.spacing(2, 4, 4),
             },
             paper: {
                 padding: theme.spacing(1),
@@ -346,7 +346,6 @@ const SettingsModal = (props) => {
                 alignSelf: 'center',
             },
             closeIconStyle: {
-                marginRight: '1.5rem',
                 alignSelf: 'center',
                 width: '24px',
                 height: '24px',
@@ -355,7 +354,7 @@ const SettingsModal = (props) => {
             settingsText: {
                 objectFit: 'contain',
                 fontFamily: 'Noto Sans JP',
-                fontSize: '26px',
+                fontSize: '22px',
                 fontWeight: '500',
                 fontStretch: 'normal',
                 fontStyle: 'normal',
