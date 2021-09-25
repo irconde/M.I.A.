@@ -69,9 +69,10 @@ const TopBar = (props) => {
         },
         icon: {
             margin: '0.75rem',
+            marginLeft: '1.25rem',
         },
         lastIcon: {
-            margin: '0.5rem 2.5rem 0.5rem 0rem',
+            margin: '0.5rem 1.5rem 0.5rem 0rem',
         },
         typeInfo: {
             color: '#C3C3C3',
@@ -81,7 +82,7 @@ const TopBar = (props) => {
             fontWeight: 'bold',
         },
         verticalDivider: {
-            border: '1px solid gray',
+            border: '1px solid #5B5B5B',
             height: '50%',
         },
         openFileContainer: {
@@ -119,8 +120,8 @@ const TopBar = (props) => {
                         <OpenIcon
                             title="Open File"
                             style={{
-                                marginRight: '0.5rem',
-                                marginLeft: '2%',
+                                marginRight: '0.75rem',
+                                marginLeft: '1.5rem',
                                 display: 'inherit',
                             }}
                         />
@@ -178,8 +179,8 @@ const TopBar = (props) => {
                         <OpenIcon
                             title="Open File"
                             style={{
-                                marginRight: '0.5rem',
-                                marginLeft: '2%',
+                                marginRight: '0.75rem',
+                                marginLeft: '1.5rem',
                                 display: 'inherit',
                             }}
                         />
