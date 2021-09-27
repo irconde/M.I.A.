@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 const SettingsCog = (props) => {
     return (
         <svg
+            style={props.style}
             width="24px"
             height="24px"
             viewBox="0 0 24 24"
@@ -39,6 +40,7 @@ const SettingsCog = (props) => {
 
 SettingsCog.propTypes = {
     title: PropTypes.string,
+    style: PropTypes.object,
 };
 
 export default SettingsCog;

@@ -9,6 +9,10 @@ import { getFirstDisplaySettings } from '../redux/slices/settings/settingsSlice'
 
 const IconStyle = styled.div`
     margin: 1rem 2.5rem 0.5rem 0rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-contents: center;
 `;
 
 const SettingsIcon = (props) => {
@@ -27,7 +31,10 @@ const SettingsIcon = (props) => {
     return (
         <>
             <IconStyle style={style} onClick={() => handleOpen()}>
-                <SettingsCog title={props.title} />
+                <SettingsCog
+                    style={{ marginTop: 'auto', marginBottom: 'auto' }}
+                    title={props.title}
+                />
             </IconStyle>
 
             <SettingsModal
