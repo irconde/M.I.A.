@@ -2,8 +2,49 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
+import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
+import * as constants from '../../utils/Constants';
 import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
 import SaveIcon from '../../icons/SaveIcon';
+
+const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
+
+const CollapsedSaveButtonContainer = styled.div`
+    width: 75px;
+    margin: 50px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #367eff;
+    height: 75px;
+    border-radius: 50%;
+    transition: all 0.3s ease-in;
+    display: flex;
+    justify-content: center;
+
+    opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
+        height: 2em;
+        width: auto;
+        margin-right: 0.5em;
+    }
+
+    div svg {
+        height: 2em;
+        width: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+        transition: all 0.1s ease-in;
+    }
+
+    &:hover {
+        cursor: pointer;
+
+        div svg {
+            height: 4em;
+            width: auto;
+        }
+    }
+`;
 
 const SaveButtonContainer = styled.div`
     width: 100%;
@@ -32,24 +73,45 @@ const SaveButtonContainer = styled.div`
     }
 `;
 
-const SaveButton = ({ nextImageClick }) => {
+const SaveButton = ({ nextImageClick, collapseBtn = false }) => {
+    const isCollapsed = useSelector(getCollapsedSideMenu);
     const detectionChanged = useSelector(getDetectionChanged);
-    return (
-        <SaveButtonContainer
-            enabled={detectionChanged}
-            onClick={() => nextImageClick()}
-            id="saveButton">
-            <SaveIcon
-                title="Save File"
-                style={{ marginRight: '4%', display: 'inherit' }}
-            />
-            <p style={{ display: 'contents' }}>Save File</p>
-        </SaveButtonContainer>
-    );
+    if (collapseBtn)
+        return (
+            <CollapsedSaveButtonContainer
+                enabled={detectionChanged}
+                onClick={() => nextImageClick()}
+                isCollapsed={isCollapsed}
+                style={{
+                    transform: isCollapsed
+                        ? 'translate(0)'
+                        : `translate(${sideMenuWidth})`,
+                }}
+                id="collapsedSaveButton">
+                <SaveIcon
+                    title="Save File"
+                    style={{ marginRight: '4%', display: 'inherit' }}
+                />
+            </CollapsedSaveButtonContainer>
+        );
+    else
+        return (
+            <SaveButtonContainer
+                enabled={detectionChanged}
+                onClick={() => nextImageClick()}
+                id="saveButton">
+                <SaveIcon
+                    title="Save File"
+                    style={{ marginRight: '4%', display: 'inherit' }}
+                />
+                <p style={{ display: 'contents' }}>Save File</p>
+            </SaveButtonContainer>
+        );
 };
 
 SaveButton.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
+    collapseBtn: PropTypes.bool,
 };
 
 export default SaveButton;

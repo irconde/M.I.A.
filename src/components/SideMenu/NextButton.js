@@ -3,10 +3,52 @@ import styled from 'styled-components';
 import nextIcon from '../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getCornerstoneMode } from '../../redux/slices/ui/uiSlice';
+import {
+    getCornerstoneMode,
+    getCollapsedSideMenu,
+} from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import { getConnected } from '../../redux/slices/server/serverSlice';
+
+const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
+
+const CollapsedNextButtonContainer = styled.div`
+    width: 75px;
+    margin: 50px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #367eff;
+    height: 75px;
+    border-radius: 50%;
+    transition: all 0.3s ease-in;
+    display: flex;
+    justify-content: center;
+
+    opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
+        height: 2em;
+        width: auto;
+        margin-right: 0.5em;
+    }
+
+    img {
+        height: 2em;
+        width: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+        transition: all 0.1s ease-in;
+    }
+
+    &:hover {
+        cursor: pointer;
+
+        img {
+            height: 4em;
+            width: auto;
+        }
+    }
+`;
 
 const NextButtonContainer = styled.div`
     width: 100%;
@@ -34,10 +76,11 @@ const NextButtonContainer = styled.div`
     }
 `;
 
-const NextButton = ({ nextImageClick }) => {
+const NextButton = ({ nextImageClick, collapseBtn = false }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const selectedDetection = useSelector(getSelectedDetection);
     const connected = useSelector(getConnected);
+    const isCollapsed = useSelector(getCollapsedSideMenu);
     const enableNextButton =
         !selectedDetection &&
         cornerstoneMode === constants.cornerstoneMode.SELECTION &&
@@ -47,19 +90,37 @@ const NextButton = ({ nextImageClick }) => {
             nextImageClick(e);
         }
     };
-    return (
-        <NextButtonContainer
-            enabled={enableNextButton}
-            onClick={handleClick}
-            id="nextButton">
-            <p>Next</p>
-            <img src={nextIcon} />
-        </NextButtonContainer>
-    );
+
+    if (collapseBtn)
+        return (
+            <CollapsedNextButtonContainer
+                enabled={enableNextButton}
+                onClick={handleClick}
+                isCollapsed={isCollapsed}
+                style={{
+                    transform: isCollapsed
+                        ? 'translate(0)'
+                        : `translate(${sideMenuWidth})`,
+                }}
+                id="collapsedNextButton">
+                <img src={nextIcon} />
+            </CollapsedNextButtonContainer>
+        );
+    else
+        return (
+            <NextButtonContainer
+                enabled={enableNextButton}
+                onClick={handleClick}
+                id="nextButton">
+                <p>Next</p>
+                <img src={nextIcon} />
+            </NextButtonContainer>
+        );
 };
 
 NextButton.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
+    collapseBtn: PropTypes.bool,
 };
 
 export default NextButton;

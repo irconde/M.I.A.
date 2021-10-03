@@ -12,6 +12,8 @@ import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
 import TapDetector from './utils/TapDetector';
 import SideMenu from './components/SideMenu/SideMenu';
+import NextButton from './components/SideMenu/NextButton';
+import SaveButton from './components/SideMenu/SaveButton';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
 import NoFileSign from './components/NoFileSign';
@@ -2614,6 +2616,7 @@ class App extends Component {
     }
 
     render() {
+        console.log(this.props.remoteOrLocal);
         return (
             <div>
                 <div
@@ -2642,6 +2645,17 @@ class App extends Component {
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
                     />
+                    {this.props.remoteOrLocal === true ? (
+                        <NextButton
+                            collapseBtn={true}
+                            nextImageClick={this.nextImageClick}
+                        />
+                    ) : (
+                        <SaveButton
+                            collapseBtn={true}
+                            nextImageClick={this.nextImageClick}
+                        />
+                    )}
                     <div id="algorithm-outputs"></div>
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
