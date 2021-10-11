@@ -10,6 +10,7 @@ import {
 import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import { getConnected } from '../../redux/slices/server/serverSlice';
+import Fab from '@mui/material/Fab';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
@@ -19,9 +20,7 @@ const CollapsedNextButtonContainer = styled.div`
     position: absolute;
     bottom: 0;
     right: 0;
-    background-color: #367eff;
-    height: 75px;
-    border-radius: 50%;
+    transform: translate(${sideMenuWidth})
     transition: all 0.3s ease-in;
     display: flex;
     justify-content: center;
@@ -42,11 +41,6 @@ const CollapsedNextButtonContainer = styled.div`
 
     &:hover {
         cursor: pointer;
-
-        img {
-            height: 4em;
-            width: auto;
-        }
     }
 `;
 
@@ -94,16 +88,19 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
     if (collapseBtn)
         return (
             <CollapsedNextButtonContainer
-                enabled={enableNextButton}
-                onClick={handleClick}
                 isCollapsed={isCollapsed}
                 style={{
+                    transition: 'all 0.3s ease-in',
                     transform: isCollapsed
-                        ? 'translate(0)'
-                        : `translate(${sideMenuWidth})`,
-                }}
-                id="collapsedNextButton">
-                <img src={nextIcon} />
+                        ? 'translateY(0)'
+                        : `translateY(${sideMenuWidth})`,
+                }}>
+                <Fab
+                    onClick={handleClick}
+                    disabled={!enableNextButton}
+                    color="primary">
+                    {!enableNextButton ? <></> : <img src={nextIcon} />}
+                </Fab>
             </CollapsedNextButtonContainer>
         );
     else

@@ -6,6 +6,7 @@ import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
 import SaveIcon from '../../icons/SaveIcon';
+import { Fab } from '@mui/material';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
@@ -15,9 +16,7 @@ const CollapsedSaveButtonContainer = styled.div`
     position: absolute;
     bottom: 0;
     right: 0;
-    background-color: #367eff;
-    height: 75px;
-    border-radius: 50%;
+    transform: translate(${sideMenuWidth})
     transition: all 0.3s ease-in;
     display: flex;
     justify-content: center;
@@ -28,7 +27,7 @@ const CollapsedSaveButtonContainer = styled.div`
         margin-right: 0.5em;
     }
 
-    div svg {
+    img {
         height: 2em;
         width: auto;
         margin-top: auto;
@@ -38,11 +37,6 @@ const CollapsedSaveButtonContainer = styled.div`
 
     &:hover {
         cursor: pointer;
-
-        div svg {
-            height: 4em;
-            width: auto;
-        }
     }
 `;
 
@@ -79,19 +73,26 @@ const SaveButton = ({ nextImageClick, collapseBtn = false }) => {
     if (collapseBtn)
         return (
             <CollapsedSaveButtonContainer
-                enabled={detectionChanged}
-                onClick={() => nextImageClick()}
                 isCollapsed={isCollapsed}
                 style={{
+                    transition: 'all 0.3s ease-in',
                     transform: isCollapsed
-                        ? 'translate(0)'
-                        : `translate(${sideMenuWidth})`,
-                }}
-                id="collapsedSaveButton">
-                <SaveIcon
-                    title="Save File"
-                    style={{ marginRight: '4%', display: 'inherit' }}
-                />
+                        ? 'translateY(0)'
+                        : `translateY(${sideMenuWidth})`,
+                }}>
+                <Fab
+                    onClick={() => nextImageClick()}
+                    disabled={detectionChanged}
+                    color="primary">
+                    {detectionChanged ? (
+                        <></>
+                    ) : (
+                        <SaveIcon
+                            title="Save File"
+                            style={{ display: 'inherit' }}
+                        />
+                    )}
+                </Fab>
             </CollapsedSaveButtonContainer>
         );
     else

@@ -59,44 +59,88 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
 
     // Checking to see if the app has a file received via local or remote using the received time from the uiSlice
     if (enableMenu !== null) {
-        return (
-            <div style={translateStyle} className="side-menu-container">
+        // iif already collapsed, render the sidemenu, but inverted
+        if (collapsedSideMenu) {
+            return (
                 <div
-                    className="treeview-main"
-                    style={{
-                        width: sideMenuWidth,
-                        height: document.documentElement.clientHeight,
-                    }}>
-                    {/* How we create the trees and their nodes is using map */}
+                    style={{ ...translateStyle, transition: 'none' }}
+                    className="side-menu-container">
                     <div
+                        className="treeview-main"
                         style={{
-                            height:
-                                constants.sideMenuPaddingTop +
-                                constants.RESOLUTION_UNIT,
-                        }}></div>
-                    <div style={treeStyle}>
-                        {algorithms.length > 0
-                            ? algorithms.map((detections, i) => {
-                                  return (
-                                      <SideMenuAlgorithm
-                                          key={i}
-                                          detections={detections}
-                                          resetCornerstoneTools={
-                                              resetCornerstoneTools
-                                          }
-                                      />
-                                  );
-                              })
-                            : null}
+                            width: sideMenuWidth,
+                            height: document.documentElement.clientHeight,
+                        }}>
+                        {/* How we create the trees and their nodes is using map */}
+                        <div
+                            style={{
+                                height:
+                                    constants.sideMenuPaddingTop +
+                                    constants.RESOLUTION_UNIT,
+                            }}></div>
+                        <div style={treeStyle}>
+                            {algorithms.length > 0
+                                ? algorithms.map((detections, i) => {
+                                      return (
+                                          <SideMenuAlgorithm
+                                              key={i}
+                                              detections={detections}
+                                              resetCornerstoneTools={
+                                                  resetCornerstoneTools
+                                              }
+                                          />
+                                      );
+                                  })
+                                : null}
+                        </div>
+                        {remoteOrLocal === true ? (
+                            <NextButton nextImageClick={nextImageClick} />
+                        ) : (
+                            <SaveButton nextImageClick={nextImageClick} />
+                        )}
                     </div>
-                    {remoteOrLocal === true ? (
-                        <NextButton nextImageClick={nextImageClick} />
-                    ) : (
-                        <SaveButton nextImageClick={nextImageClick} />
-                    )}
                 </div>
-            </div>
-        );
+            );
+        } else {
+            return (
+                <div style={translateStyle} className="side-menu-container">
+                    <div
+                        className="treeview-main"
+                        style={{
+                            width: sideMenuWidth,
+                            height: document.documentElement.clientHeight,
+                        }}>
+                        {/* How we create the trees and their nodes is using map */}
+                        <div
+                            style={{
+                                height:
+                                    constants.sideMenuPaddingTop +
+                                    constants.RESOLUTION_UNIT,
+                            }}></div>
+                        <div style={treeStyle}>
+                            {algorithms.length > 0
+                                ? algorithms.map((detections, i) => {
+                                      return (
+                                          <SideMenuAlgorithm
+                                              key={i}
+                                              detections={detections}
+                                              resetCornerstoneTools={
+                                                  resetCornerstoneTools
+                                              }
+                                          />
+                                      );
+                                  })
+                                : null}
+                        </div>
+                        {remoteOrLocal === true ? (
+                            <NextButton nextImageClick={nextImageClick} />
+                        ) : (
+                            <SaveButton nextImageClick={nextImageClick} />
+                        )}
+                    </div>
+                </div>
+            );
+        }
     } else {
         return <div />;
     }

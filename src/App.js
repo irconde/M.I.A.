@@ -1069,8 +1069,9 @@ class App extends Component {
             viewport.translation.y = constants.viewportStyle.ORIGIN;
             viewport.scale = self.props.zoomLevelTop;
             // eslint-disable-next-line react/no-direct-mutation-state
-            self.state.myOra.stackData[0].dimensions =
-                viewport.displayedArea.brhc;
+            if (viewport.displayedArea !== undefined)
+                self.state.myOra.stackData[0].dimensions =
+                    viewport.displayedArea.brhc;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
@@ -1093,8 +1094,9 @@ class App extends Component {
                     image
                 );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                self.state.myOra.stackData[1].dimensions =
-                    viewport.displayedArea.brhc;
+                if (viewport.displayedArea !== undefined)
+                    self.state.myOra.stackData[1].dimensions =
+                        viewport.displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
