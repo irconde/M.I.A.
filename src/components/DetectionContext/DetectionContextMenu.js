@@ -125,7 +125,9 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                         </IconContainer>
                         {detectionType !== constants.detectionType.BINARY && (
                             <IconContainer
-                                onClick={() => handleClick(editionMode.COLOR)}
+                                onClick={() =>
+                                    handleClick(editionMode.BOUNDING)
+                                }
                                 selected={
                                     selectedOption === editionMode.BOUNDING
                                 }>
