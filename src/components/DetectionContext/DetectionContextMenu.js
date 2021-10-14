@@ -19,6 +19,7 @@ import {
     getDetectionContextPosition,
     getDetectionType,
 } from '../../redux/slices/ui/uiSlice';
+import { getSelectedDetectionColor } from '../../redux/slices/detections/detectionsSlice';
 
 const Positioner = styled.div`
     position: absolute;
@@ -86,6 +87,7 @@ const DeleteWidget = styled.div`
     }
 `;
 const DetectionContextMenu = ({ setSelectedOption }) => {
+    const selectedDetectionColor = useSelector(getSelectedDetectionColor);
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
     const position = useSelector(getDetectionContextPosition);
@@ -110,11 +112,20 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             selected={selectedOption === editionMode.LABEL}>
                             <TextIcon />
                         </IconContainer>
+                        <IconContainer
+                            selected={selectedOption === editionMode.COLOR}>
+                            <div
+                                style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    border: 'solid 2px #464646',
+                                    backgroundColor: selectedDetectionColor,
+                                }}
+                            />
+                        </IconContainer>
                         {detectionType !== constants.detectionType.BINARY && (
                             <IconContainer
-                                onClick={() =>
-                                    handleClick(editionMode.BOUNDING)
-                                }
+                                onClick={() => handleClick(editionMode.COLOR)}
                                 selected={
                                     selectedOption === editionMode.BOUNDING
                                 }>

@@ -76,6 +76,7 @@ export const editionMode = {
     POLYGON: 'polygon',
     DELETE: 'delete',
     NO_TOOL: 'none',
+    COLOR: 'color',
 };
 export const commonDetections = {
     APPLE: 'apple',

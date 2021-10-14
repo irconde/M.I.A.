@@ -409,6 +409,18 @@ export const getSelectedDetection = (state) =>
     state.detections.selectedDetection;
 
 /**
+ * getSelectedDetectionColor
+ * @param {Store} state Passed in via useSelector/mapDispatchToProps
+ * @returns {String} The hex color of the detection
+ */
+export const getSelectedDetectionColor = (state) => {
+    if (state.detections.selectedDetection !== null) {
+        return state.detections.selectedDetection.color;
+    } else {
+        return '';
+    }
+};
+/**
  * getSelectedAlgorithm
  * @param {Store} state Passed in via useSelector/mapDispatchToProps
  * @returns {String} The currently selected algorithm
