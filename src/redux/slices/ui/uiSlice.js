@@ -33,6 +33,7 @@ const initialState = {
     isSettingsVisible: false,
     inputLabel: '',
     collapsedSideMenu: false,
+    colorPickerVisible: false,
 };
 
 const uiSlice = createSlice({
@@ -269,6 +270,7 @@ const uiSlice = createSlice({
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.detectionType = constants.detectionType.NO_TOOL;
             state.editionMode = constants.editionMode.NO_TOOL;
+            state.colorPickerVisible = false;
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
             state.detectionContextPosition.top = 0;
@@ -360,6 +362,10 @@ const uiSlice = createSlice({
         },
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
+        },
+        colorPickerUpdate: (state, action) => {
+            const { colorPickerVisible } = action.payload;
+            state.colorPickerVisible = colorPickerVisible;
         },
     },
 });
@@ -454,6 +460,12 @@ export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
  * @returns {Number} The calculated zoom for cornerstone for the side(or right) view.
  */
 export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
+export const getZoomLevels = (state) => {
+    return {
+        zoomLevelTop: state.ui.zoomLevelTop,
+        zoomLevelSide: state.ui.zoomLevelSide,
+    };
+};
 /**
  * getDetectorType
  * @param {State} state Passed in via useSelector/mapStateToProps
@@ -533,6 +545,7 @@ export const getDetectionContextInfo = (state) => {
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getReceivedTime = (state) => state.ui.receiveTime;
+export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -563,6 +576,7 @@ export const {
     setInputLabel,
     toggleCollapsedSideMenu,
     setReceiveTime,
+    colorPickerUpdate,
 } = uiSlice.actions;
 
 // Export the reducer for the store

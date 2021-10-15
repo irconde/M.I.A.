@@ -76,11 +76,13 @@ import {
     onLabelEditionEnd,
     setInputLabel,
     setReceiveTime,
+    colorPickerUpdate,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileSave, fileOpen } from 'browser-fs-access';
+import ColorPicker from './components/DetectionContext/ColorPicker';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -2436,6 +2438,14 @@ class App extends Component {
                     editionMode: constants.editionMode.MOVE,
                 });
                 this.appUpdateImage();
+            } else if (
+                mode === constants.editionMode.COLOR &&
+                this.props.selectedDetection
+            ) {
+                console.log('color click');
+                this.props.colorPickerUpdate({
+                    colorPickerVisible: true,
+                });
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
             }
@@ -2618,7 +2628,6 @@ class App extends Component {
     }
 
     render() {
-        console.log(this.props.remoteOrLocal);
         return (
             <div>
                 <div
@@ -2662,6 +2671,7 @@ class App extends Component {
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
                     />
+                    <ColorPicker />
                     <EditLabel onLabelChange={this.editDetectionLabel} />
                     <BoundPolyFAB
                         onBoundingSelect={this.onBoundingBoxSelected}
@@ -2751,6 +2761,7 @@ const mapDispatchToProps = {
     setInputLabel,
     setConnected,
     setReceiveTime,
+    colorPickerUpdate,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

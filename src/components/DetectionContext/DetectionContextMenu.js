@@ -113,6 +113,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             <TextIcon />
                         </IconContainer>
                         <IconContainer
+                            onClick={() => handleClick(editionMode.COLOR)}
                             selected={selectedOption === editionMode.COLOR}>
                             <div
                                 style={{

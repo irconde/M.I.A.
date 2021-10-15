@@ -420,6 +420,11 @@ export const getSelectedDetectionColor = (state) => {
         return '';
     }
 };
+export const getSelectedDetectionViewport = (state) => {
+    if (state.detections.selectedDetection) {
+        return state.detections.selectedDetection.view;
+    }
+};
 /**
  * getSelectedAlgorithm
  * @param {Store} state Passed in via useSelector/mapDispatchToProps
