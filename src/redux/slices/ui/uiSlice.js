@@ -33,6 +33,8 @@ const initialState = {
     isSettingsVisible: false,
     inputLabel: '',
     collapsedSideMenu: false,
+    numberOfFiles: 0,
+    localFileOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -358,8 +360,17 @@ const uiSlice = createSlice({
         toggleSettingsVisibility: (state, action) => {
             state.isSettingsVisible = action.payload;
         },
+
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
+        },
+
+        setNumberOfFiles: (state, action) => {
+            state.numberOfFiles = action.payload;
+        },
+
+        setLocalFileOpen: (state, action) => {
+            state.localFileOpen = action.payload;
         },
     },
 });
@@ -533,6 +544,8 @@ export const getDetectionContextInfo = (state) => {
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getReceivedTime = (state) => state.ui.receiveTime;
+export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
+export const getLocalFileOpen = (state) => state.ui.localFileOpen;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -563,6 +576,8 @@ export const {
     setInputLabel,
     toggleCollapsedSideMenu,
     setReceiveTime,
+    setNumberOfFiles,
+    setLocalFileOpen,
 } = uiSlice.actions;
 
 // Export the reducer for the store

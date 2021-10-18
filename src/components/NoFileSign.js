@@ -2,14 +2,16 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
 import { getRemoteOrLocal } from '../redux/slices/settings/settingsSlice';
-import { getReceivedTime } from '../redux/slices/ui/uiSlice';
+import { getNumberOfFiles, getLocalFileOpen } from '../redux/slices/ui/uiSlice';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
  * provide user with feedback when there are no pending files on the file queue
  */
 const NoFileSign = () => {
-    const isVisible = useSelector(getReceivedTime);
+    const numberOfFiles = useSelector(getNumberOfFiles);
+    const localFileOpen = useSelector(getLocalFileOpen);
+    let isVisible = numberOfFiles <= 0 ? false : true;
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const paragraphStyle = {
         fontWeight: '500',
@@ -35,7 +37,7 @@ const NoFileSign = () => {
         height: '90%',
     };
 
-    if (isVisible !== null) {
+    if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
         return <div></div>;
     } else {
         return (
