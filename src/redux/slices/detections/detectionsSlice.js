@@ -283,6 +283,9 @@ const detectionsSlice = createSlice({
                 }
             });
         },
+        updateDetectionColors: (state, action) => {
+            console.log('update colors call');
+        },
     },
 });
 
@@ -425,6 +428,11 @@ export const getSelectedDetectionViewport = (state) => {
         return state.detections.selectedDetection.view;
     }
 };
+export const getSelectedDetectionClassName = (state) => {
+    if (state.detections.selectedDetection) {
+        return state.detections.selectedDetection.className;
+    }
+};
 /**
  * getSelectedAlgorithm
  * @param {Store} state Passed in via useSelector/mapDispatchToProps
@@ -473,6 +481,7 @@ export const {
     updateDetectionSetVisibility,
     updateDetectionVisibility,
     clearSelectedAlgorithm,
+    updateDetectionColors,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

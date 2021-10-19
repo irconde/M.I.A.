@@ -82,7 +82,7 @@ import DetectionContextMenu from './components/DetectionContext/DetectionContext
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileSave, fileOpen } from 'browser-fs-access';
-import ColorPicker from './components/DetectionContext/ColorPicker';
+import ColorPicker from './components/Color/ColorPicker';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
