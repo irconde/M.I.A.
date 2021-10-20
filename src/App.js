@@ -76,7 +76,7 @@ import {
     onLabelEditionEnd,
     setInputLabel,
     setReceiveTime,
-    colorPickerUpdate,
+    colorPickerToggle,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -1448,12 +1448,18 @@ class App extends Component {
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            context.strokeStyle = data[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
-                : data[j].displayColor;
-            context.fillStyle = data[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
-                : data[j].displayColor;
+            context.strokeStyle =
+                this.props.editionMode === constants.editionMode.COLOR
+                    ? data[j].color
+                    : data[j].selected
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
+            context.fillStyle =
+                this.props.editionMode === constants.editionMode.COLOR
+                    ? data[j].color
+                    : data[j].selected
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -2442,10 +2448,7 @@ class App extends Component {
                 mode === constants.editionMode.COLOR &&
                 this.props.selectedDetection
             ) {
-                console.log('color click');
-                this.props.colorPickerUpdate({
-                    colorPickerVisible: true,
-                });
+                this.props.colorPickerToggle();
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
             }
@@ -2705,6 +2708,7 @@ const mapStateToProps = (state) => {
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
+        colorPickerVisible: ui.colorPickerVisible,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -2761,7 +2765,7 @@ const mapDispatchToProps = {
     setInputLabel,
     setConnected,
     setReceiveTime,
-    colorPickerUpdate,
+    colorPickerToggle,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

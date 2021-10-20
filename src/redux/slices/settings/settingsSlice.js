@@ -23,7 +23,6 @@ const defaultSettings = {
     fileSuffix: '_img',
     remoteOrLocal: true,
     firstDisplaySettings: true,
-    missMatchedClassNames: [],
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -170,18 +169,6 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
-        addMissMatchedClassName: (state, action) => {
-            const { className, color } = action.payload;
-            const foundIndex = state.settings.missMatchedClassNames.findIndex(
-                (el) => el.className === className
-            );
-            if (foundIndex === -1) {
-                state.settings.missMatchedClassNames.push({ className, color });
-            } else {
-                state.settings.missMatchedClassNames[foundIndex].color = color;
-            }
-            storeCookieData(state.settings);
-        },
     },
 });
 
@@ -199,7 +186,6 @@ export const {
     setLocalFileOutput,
     setFileSuffix,
     setRemoteOrLocal,
-    addMissMatchedClassName,
 } = settingsSlice.actions;
 
 // Selectors

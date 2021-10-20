@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getSelectedDetectionViewport,
     getSelectedDetectionClassName,
+    addMissMatchedClassName,
 } from '../../redux/slices/detections/detectionsSlice';
-import { addMissMatchedClassName } from '../../redux/slices/settings/settingsSlice';
 import {
     getColorPickerVisible,
     getDetectionContextPosition,
@@ -43,16 +43,6 @@ const ColorPicker = () => {
             <div style={containerStyle}>
                 <TwitterPicker
                     color={color}
-                    styles={{
-                        card: {
-                            width: '276px',
-                            background: '#fff',
-                            border: '0 solid rgba(0,0,0,0.25)',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
-                            borderRadius: '4px',
-                            position: 'relative',
-                        },
-                    }}
                     onChangeComplete={(color) => colorChangeComplete(color)}
                     triangle="top-left"
                 />

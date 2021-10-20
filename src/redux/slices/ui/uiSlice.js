@@ -363,9 +363,8 @@ const uiSlice = createSlice({
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
         },
-        colorPickerUpdate: (state, action) => {
-            const { colorPickerVisible } = action.payload;
-            state.colorPickerVisible = colorPickerVisible;
+        colorPickerToggle: (state) => {
+            state.colorPickerVisible = !state.colorPickerVisible;
         },
     },
 });
@@ -576,7 +575,7 @@ export const {
     setInputLabel,
     toggleCollapsedSideMenu,
     setReceiveTime,
-    colorPickerUpdate,
+    colorPickerToggle,
 } = uiSlice.actions;
 
 // Export the reducer for the store

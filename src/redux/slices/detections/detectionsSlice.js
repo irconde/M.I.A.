@@ -3,6 +3,7 @@ import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../../../utils/Utils';
+import { Cookies } from 'react-cookie';
 
 // interface Detection {
 //     // Unique Identifier
@@ -37,6 +38,22 @@ import Utils from '../../../utils/Utils';
 //     textColor: string;
 // }
 
+const myCookie = new Cookies();
+const cookieData = myCookie.get('detections');
+let missMatchedClassNames = [];
+const storeCookieData = (classNames) => {
+    myCookie.set('detections', classNames, {
+        path: '/',
+        maxAge: constants.COOKIE.TIME, // Current time is 3 hours
+    });
+};
+
+if (cookieData !== undefined) {
+    missMatchedClassNames = cookieData;
+} else {
+    storeCookieData(missMatchedClassNames);
+}
+
 const initialState = {
     detections: [],
     // Selection data
@@ -49,6 +66,7 @@ const initialState = {
     /** @type Interface Detection */
     detectionLabels: [],
     detectionChanged: false,
+    missMatchedClassNames,
 };
 
 const detectionsSlice = createSlice({
@@ -93,10 +111,20 @@ const detectionsSlice = createSlice({
                 validation: null,
                 textColor: 'white',
             });
-            state.detections[state.detections.length - 1].displayColor =
-                getDetectionColor(
-                    state.detections[state.detections.length - 1]
-                );
+            const foundIndex = state.missMatchedClassNames.findIndex(
+                (el) => el.className === className
+            );
+            if (foundIndex !== -1) {
+                state.detections[state.detections.length - 1].displayColor =
+                    state.missMatchedClassNames[foundIndex].color;
+                state.detections[state.detections.length - 1].color =
+                    state.missMatchedClassNames[foundIndex].color;
+            } else {
+                state.detections[state.detections.length - 1].displayColor =
+                    getDetectionColor(
+                        state.detections[state.detections.length - 1]
+                    );
+            }
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
@@ -283,8 +311,27 @@ const detectionsSlice = createSlice({
                 }
             });
         },
-        updateDetectionColors: (state, action) => {
-            console.log('update colors call');
+        addMissMatchedClassName: (state, action) => {
+            const { className, color } = action.payload;
+            const foundIndex = state.missMatchedClassNames.findIndex(
+                (el) => el.className === className
+            );
+            if (foundIndex === -1) {
+                state.missMatchedClassNames.push({ className, color });
+            } else {
+                state.missMatchedClassNames[foundIndex].color = color;
+            }
+            storeCookieData(state.missMatchedClassNames);
+            state.missMatchedClassNames.forEach((missMatched) => {
+                const foundIndex = state.detections.findIndex(
+                    (det) => det.className === missMatched.className
+                );
+                if (foundIndex !== -1) {
+                    state.detections[foundIndex].color = missMatched.color;
+                    state.detections[foundIndex].displayColor =
+                        missMatched.color;
+                }
+            });
         },
     },
 });
@@ -482,6 +529,7 @@ export const {
     updateDetectionVisibility,
     clearSelectedAlgorithm,
     updateDetectionColors,
+    addMissMatchedClassName,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;
