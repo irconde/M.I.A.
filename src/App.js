@@ -1448,18 +1448,12 @@ class App extends Component {
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            context.strokeStyle =
-                this.props.editionMode === constants.editionMode.COLOR
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
-            context.fillStyle =
-                this.props.editionMode === constants.editionMode.COLOR
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
+            context.strokeStyle = data[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : data[j].displayColor;
+            context.fillStyle = data[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : data[j].displayColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -1604,7 +1598,10 @@ class App extends Component {
                 return;
             }
             // Click on an empty area
-            if (clickedPos === constants.selection.NO_SELECTION) {
+            if (
+                clickedPos === constants.selection.NO_SELECTION &&
+                this.props.editionMode !== constants.editionMode.COLOR
+            ) {
                 if (
                     this.props.editionMode === constants.editionMode.LABEL &&
                     this.props.inputLabel !== ''
@@ -1616,6 +1613,14 @@ class App extends Component {
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
                 this.appUpdateImage();
+            } else if (
+                clickedPos === constants.selection.NO_SELECTION &&
+                this.props.editionMode === constants.editionMode.COLOR
+            ) {
+                this.props.colorPickerToggle();
+                this.props.updateEditionMode({
+                    editionMode: constants.editionMode.NO_TOOL,
+                });
             } else {
                 // Clicked on detection
                 if (
