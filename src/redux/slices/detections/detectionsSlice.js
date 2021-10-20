@@ -332,6 +332,10 @@ const detectionsSlice = createSlice({
                         missMatched.color;
                 }
             });
+            if (state.selectedDetection.className === className) {
+                state.selectedDetection.color = color;
+                state.selectedDetection.displayColor = color;
+            }
         },
     },
 });

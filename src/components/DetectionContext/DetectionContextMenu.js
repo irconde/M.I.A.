@@ -6,11 +6,7 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
-import {
-    editionMode,
-    annotationMode,
-    detectionContextStyle,
-} from '../../utils/Constants';
+import { editionMode, detectionContextStyle } from '../../utils/Constants';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {

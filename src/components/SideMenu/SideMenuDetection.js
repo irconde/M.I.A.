@@ -9,6 +9,7 @@ import {
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+import { detectionStyle } from '../../utils/Constants';
 
 const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
     const dispatch = useDispatch();
@@ -70,7 +71,6 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
             resetCornerstoneTools();
         }
     };
-
     // We only display an open eye if both algorithm and detection are visible.
     if (detection.visible === true) {
         return (
@@ -81,7 +81,7 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
                     detection.selected
                         ? {
                               ...containerStyle,
-                              backgroundColor: detection.displayColor,
+                              backgroundColor: detectionStyle.SELECTED_COLOR,
                           }
                         : containerStyle
                 }>

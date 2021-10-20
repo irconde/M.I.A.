@@ -2451,6 +2451,7 @@ class App extends Component {
                 this.props.colorPickerToggle();
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
+                this.props.colorPickerToggle();
             }
 
             this.props.updateEditionMode(payload);
@@ -2708,7 +2709,6 @@ const mapStateToProps = (state) => {
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
-        colorPickerVisible: ui.colorPickerVisible,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
