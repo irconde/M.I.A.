@@ -311,6 +311,12 @@ const detectionsSlice = createSlice({
                 }
             });
         },
+        /**
+         * addMissMatchedClassName - For when a color is picked, it tests if that color is in the array
+         *                           of miss matched class names. If it isn't, its name and corresponding color are added.
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object<className, color>} action Object containing the name of the detection and it's new color
+         */
         addMissMatchedClassName: (state, action) => {
             const { className, color } = action.payload;
             const foundIndex = state.missMatchedClassNames.findIndex(

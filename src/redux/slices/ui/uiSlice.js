@@ -46,14 +46,6 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Object} action.payload
          */
-        setColorChanged: (state) => {
-            state.colorChanged = true;
-        },
-        /**
-         * toggleCollapsedSideMenu
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload
-         */
         toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
             Utils.setFullScreenViewport(
@@ -381,9 +373,25 @@ const uiSlice = createSlice({
         toggleSettingsVisibility: (state, action) => {
             state.isSettingsVisible = action.payload;
         },
+        /**
+         * setReceiveTime - For when a color is picked in the color picker
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action.payload - String result from Date.now()
+         */
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
         },
+        /**
+         * setColorChanged - For when a color is picked in the color picker
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        setColorChanged: (state) => {
+            state.colorChanged = true;
+        },
+        /**
+         * colorPickerToggle - Toggles the color picker visible boolean
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         colorPickerToggle: (state) => {
             state.colorPickerVisible = !state.colorPickerVisible;
         },
