@@ -99,6 +99,7 @@ const uiSlice = createSlice({
         exitEditionModeUpdate: (state) => {
             state.isDetectionContextVisible = false;
             state.isEditLabelWidgetVisible = false;
+            state.colorPickerVisible = false;
         },
         /**
          * updateCornerstoneMode

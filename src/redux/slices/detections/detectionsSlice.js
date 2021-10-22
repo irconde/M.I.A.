@@ -323,14 +323,12 @@ const detectionsSlice = createSlice({
             }
             storeCookieData(state.missMatchedClassNames);
             state.missMatchedClassNames.forEach((missMatched) => {
-                const foundIndex = state.detections.findIndex(
-                    (det) => det.className === missMatched.className
-                );
-                if (foundIndex !== -1) {
-                    state.detections[foundIndex].color = missMatched.color;
-                    state.detections[foundIndex].displayColor =
-                        missMatched.color;
-                }
+                state.detections.forEach((det) => {
+                    if (missMatched.className === det.className) {
+                        det.color = missMatched.color;
+                        det.displayColor = missMatched.color;
+                    }
+                });
             });
             if (state.selectedDetection.className === className) {
                 state.selectedDetection.color = color;

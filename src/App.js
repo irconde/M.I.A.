@@ -1617,7 +1617,6 @@ class App extends Component {
                 clickedPos === constants.selection.NO_SELECTION &&
                 this.props.editionMode === constants.editionMode.COLOR
             ) {
-                this.props.colorPickerToggle();
                 this.props.updateEditionMode({
                     editionMode: constants.editionMode.NO_TOOL,
                 });
@@ -1727,6 +1726,11 @@ class App extends Component {
                     this.resetSelectedDetectionBoxes(event);
                 } else {
                     this.props.updateIsDetectionContextVisible(true);
+                    if (
+                        this.props.editionMode === constants.editionMode.COLOR
+                    ) {
+                        this.props.colorPickerToggle();
+                    }
                     // Only show the detection if we are still in the same viewport (from event data) as the detection
                     if (
                         (this.props.selectedDetection.view ===
@@ -2456,7 +2460,6 @@ class App extends Component {
                 this.props.colorPickerToggle();
             } else if (mode === constants.editionMode.NO_TOOL) {
                 this.resetCornerstoneTool();
-                this.props.colorPickerToggle();
             }
 
             this.props.updateEditionMode(payload);
