@@ -34,7 +34,6 @@ const initialState = {
     inputLabel: '',
     collapsedSideMenu: false,
     colorPickerVisible: false,
-    colorChanged: false,
 };
 
 const uiSlice = createSlice({
@@ -382,13 +381,6 @@ const uiSlice = createSlice({
             state.receiveTime = action.payload;
         },
         /**
-         * setColorChanged - For when a color is picked in the color picker
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        setColorChanged: (state) => {
-            state.colorChanged = true;
-        },
-        /**
          * colorPickerToggle - Toggles the color picker visible boolean
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -605,7 +597,6 @@ export const {
     toggleCollapsedSideMenu,
     setReceiveTime,
     colorPickerToggle,
-    setColorChanged,
 } = uiSlice.actions;
 
 // Export the reducer for the store

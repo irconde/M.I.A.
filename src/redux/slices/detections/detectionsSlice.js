@@ -332,7 +332,9 @@ const detectionsSlice = createSlice({
                 state.detections.forEach((det) => {
                     if (missMatched.className === det.className) {
                         det.color = missMatched.color;
-                        det.displayColor = missMatched.color;
+                        if (det.uuid === state.selectedDetection.uuid) {
+                            det.displayColor = missMatched.color;
+                        }
                     }
                 });
             });
@@ -340,6 +342,23 @@ const detectionsSlice = createSlice({
                 state.selectedDetection.color = color;
                 state.selectedDetection.displayColor = color;
             }
+        },
+        /**
+         * updateMissMatchedClassName - For when the color picker is closed, it will update all existing detections
+         *                              with the same name as the color selected from the color picker
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        updateMissMatchedClassName: (state) => {
+            state.missMatchedClassNames.forEach((missMatched) => {
+                state.detections.forEach((det) => {
+                    if (missMatched.className === det.className) {
+                        det.color = missMatched.color;
+                        if (det.uuid !== state.selectedDetection.uuid) {
+                            det.displayColor = missMatched.color;
+                        }
+                    }
+                });
+            });
         },
     },
 });
@@ -554,6 +573,7 @@ export const {
     clearSelectedAlgorithm,
     updateDetectionColors,
     addMissMatchedClassName,
+    updateMissMatchedClassName,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

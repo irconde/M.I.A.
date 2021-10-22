@@ -50,6 +50,7 @@ import {
     updateDetectionSetVisibility,
     updateDetectionVisibility,
     hasDetectionCoordinatesChanged,
+    updateMissMatchedClassName,
 } from './redux/slices/detections/detectionsSlice';
 import {
     updateFABVisibility,
@@ -1448,12 +1449,20 @@ class App extends Component {
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            context.strokeStyle = data[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
-                : data[j].displayColor;
-            context.fillStyle = data[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
-                : data[j].displayColor;
+            context.strokeStyle =
+                this.props.editionMode === constants.editionMode.COLOR &&
+                data[j].selected
+                    ? data[j].color
+                    : data[j].selected
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
+            context.fillStyle =
+                this.props.editionMode === constants.editionMode.COLOR &&
+                data[j].selected
+                    ? data[j].color
+                    : data[j].selected
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -1729,13 +1738,8 @@ class App extends Component {
                     if (
                         this.props.editionMode === constants.editionMode.COLOR
                     ) {
-                        if (this.props.colorChanged) {
-                            this.props.colorPickerToggle();
-                        } else {
-                            this.props.updateEditionMode({
-                                editionMode: constants.editionMode.NO_TOOL,
-                            });
-                        }
+                        this.props.colorPickerToggle();
+                        this.props.updateMissMatchedClassName();
                     }
                     // Only show the detection if we are still in the same viewport (from event data) as the detection
                     if (
@@ -2639,10 +2643,10 @@ class App extends Component {
      * @returns {None} None
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);
+        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        // else this.props.onMouseLeaveNoFilesUpdate();
+        // if (this.props.selectedDetection !== null)
+        //     this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
@@ -2724,7 +2728,6 @@ const mapStateToProps = (state) => {
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
         colorPickerVisible: ui.colorPickerVisible,
-        colorChanged: ui.colorChanged,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -2782,6 +2785,7 @@ const mapDispatchToProps = {
     setConnected,
     setReceiveTime,
     colorPickerToggle,
+    updateMissMatchedClassName,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

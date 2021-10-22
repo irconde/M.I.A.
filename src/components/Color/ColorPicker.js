@@ -11,7 +11,6 @@ import {
     getColorPickerVisible,
     getDetectionContextPosition,
     getZoomLevels,
-    setColorChanged,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 
@@ -75,7 +74,6 @@ const ColorPicker = () => {
                 color: color.hex,
             })
         );
-        dispatch(setColorChanged());
     };
     if (isVisible === true) {
         return (
