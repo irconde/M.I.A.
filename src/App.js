@@ -78,6 +78,8 @@ import {
     setInputLabel,
     setReceiveTime,
     colorPickerToggle,
+    setNumberOfFiles,
+    setLocalFileOpen,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -622,12 +624,16 @@ class App extends Component {
         ) {
             this.state.commandServer.emit('currentFile', (response) => {
                 if (response.status === 'Ok') {
+                    this.props.setNumberOfFiles(response.numberOfFiles);
                     this.loadNextImage(
                         response.file,
                         response.fileName,
                         response.numberOfFiles
                     );
-                } else this.onNoImageLeft();
+                } else {
+                    this.props.setNumberOfFiles(0);
+                    this.onNoImageLeft();
+                }
             });
         }
     }
@@ -643,11 +649,13 @@ class App extends Component {
         fileOpen()
             .then((blob) => {
                 Utils.blobToBase64(blob).then((b64) => {
+                    this.props.setLocalFileOpen(true);
                     this.loadNextImage(b64, blob.name);
                 });
             })
             .catch((error) => {
                 if (error.name !== 'AbortError') {
+                    this.props.setLocalFileOpen(false);
                     console.log(error);
                 }
             });
@@ -792,6 +800,7 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
+        this.props.setLocalFileOpen(false);
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
@@ -2786,6 +2795,8 @@ const mapDispatchToProps = {
     setReceiveTime,
     colorPickerToggle,
     updateMissMatchedClassName,
+    setNumberOfFiles,
+    setLocalFileOpen,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

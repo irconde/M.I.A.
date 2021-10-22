@@ -34,6 +34,8 @@ const initialState = {
     inputLabel: '',
     collapsedSideMenu: false,
     colorPickerVisible: false,
+    numberOfFiles: 0,
+    localFileOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -387,6 +389,22 @@ const uiSlice = createSlice({
         colorPickerToggle: (state) => {
             state.colorPickerVisible = !state.colorPickerVisible;
         },
+        /**
+         * setNumberOfFiles - Sets the number of files in the command server left to be sent
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Number} action.payload - Number of files left to be served
+         */
+        setNumberOfFiles: (state, action) => {
+            state.numberOfFiles = action.payload;
+        },
+        /**
+         * setLocalFileOpen - Determines wether the App is working with a local file or remote file
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Boolean} action.payload - True if we have a local file open, false if not, wether remote or not.
+         */
+        setLocalFileOpen: (state, action) => {
+            state.localFileOpen = action.payload;
+        },
     },
 });
 
@@ -566,6 +584,8 @@ export const getDetectionContextInfo = (state) => {
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getReceivedTime = (state) => state.ui.receiveTime;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
+export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
+export const getLocalFileOpen = (state) => state.ui.localFileOpen;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -597,6 +617,8 @@ export const {
     toggleCollapsedSideMenu,
     setReceiveTime,
     colorPickerToggle,
+    setNumberOfFiles,
+    setLocalFileOpen,
 } = uiSlice.actions;
 
 // Export the reducer for the store
