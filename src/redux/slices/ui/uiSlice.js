@@ -89,6 +89,16 @@ const uiSlice = createSlice({
                     state.detectionLabelEditWidth = detectionLabelEditWidth;
                     state.detectionLabelEditPosition =
                         detectionLabelEditPosition;
+                    state.colorPickerVisible = false;
+                    break;
+                case constants.editionMode.BOUNDING:
+                case constants.editionMode.NO_TOOL:
+                case constants.editionMode.MOVE:
+                case constants.editionMode.POLYGON:
+                    state.colorPickerVisible = false;
+                    break;
+                case constants.editionMode.COLOR:
+                    state.colorPickerVisible = true;
             }
         },
         /**
