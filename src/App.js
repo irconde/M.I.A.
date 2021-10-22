@@ -1729,7 +1729,13 @@ class App extends Component {
                     if (
                         this.props.editionMode === constants.editionMode.COLOR
                     ) {
-                        this.props.colorPickerToggle();
+                        if (this.props.colorChanged) {
+                            this.props.colorPickerToggle();
+                        } else {
+                            this.props.updateEditionMode({
+                                editionMode: constants.editionMode.NO_TOOL,
+                            });
+                        }
                     }
                     // Only show the detection if we are still in the same viewport (from event data) as the detection
                     if (
@@ -2718,6 +2724,7 @@ const mapStateToProps = (state) => {
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
         colorPickerVisible: ui.colorPickerVisible,
+        colorChanged: ui.colorChanged,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,

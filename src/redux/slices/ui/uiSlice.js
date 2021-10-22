@@ -34,12 +34,21 @@ const initialState = {
     inputLabel: '',
     collapsedSideMenu: false,
     colorPickerVisible: false,
+    colorChanged: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * toggleCollapsedSideMenu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload
+         */
+        setColorChanged: (state) => {
+            state.colorChanged = true;
+        },
         /**
          * toggleCollapsedSideMenu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -96,6 +105,7 @@ const uiSlice = createSlice({
                 case constants.editionMode.MOVE:
                 case constants.editionMode.POLYGON:
                     state.colorPickerVisible = false;
+                    state.colorChanged = false;
                     break;
                 case constants.editionMode.COLOR:
                     state.colorPickerVisible = true;
@@ -587,6 +597,7 @@ export const {
     toggleCollapsedSideMenu,
     setReceiveTime,
     colorPickerToggle,
+    setColorChanged,
 } = uiSlice.actions;
 
 // Export the reducer for the store
