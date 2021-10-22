@@ -484,6 +484,22 @@ export const getSelectedDetectionClassName = (state) => {
         return state.detections.selectedDetection.className;
     }
 };
+export const getSelectedDetectionWidthAndHeight = (state) => {
+    if (state.detections.selectedDetection) {
+        const width = Math.abs(
+            state.detections.selectedDetection.boundingBox[2] -
+                state.detections.selectedDetection.boundingBox[0]
+        );
+        const height = Math.abs(
+            state.detections.selectedDetection.boundingBox[3] -
+                state.detections.selectedDetection.boundingBox[1]
+        );
+        return {
+            width,
+            height,
+        };
+    } else return null;
+};
 /**
  * getSelectedAlgorithm
  * @param {Store} state Passed in via useSelector/mapDispatchToProps
