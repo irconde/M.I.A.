@@ -13,7 +13,11 @@ import {
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './SaveButton';
 
-const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
+const SideMenu = ({
+    nextImageClick,
+    resetCornerstoneTools,
+    renderDetectionContextMenu,
+}) => {
     const enableMenu = useSelector(getReceivedTime);
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
@@ -88,6 +92,9 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
                                               resetCornerstoneTools={
                                                   resetCornerstoneTools
                                               }
+                                              renderDetectionContextMenu={
+                                                  renderDetectionContextMenu
+                                              }
                                           />
                                       );
                                   })
@@ -127,6 +134,9 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
                                               resetCornerstoneTools={
                                                   resetCornerstoneTools
                                               }
+                                              renderDetectionContextMenu={
+                                                  renderDetectionContextMenu
+                                              }
                                           />
                                       );
                                   })
@@ -149,6 +159,7 @@ const SideMenu = ({ nextImageClick, resetCornerstoneTools }) => {
 SideMenu.propTypes = {
     nextImageClick: PropTypes.func.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
+    renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
 export default SideMenu;

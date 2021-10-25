@@ -2214,12 +2214,20 @@ class App extends Component {
      *
      * @returns {None} None
      */
-    renderDetectionContextMenu(event, draggedData = undefined) {
-        if (this.props.selectedDetection !== null) {
+    renderDetectionContextMenu(
+        event,
+        draggedData = undefined,
+        sideMenuDetection = null
+    ) {
+        const selectedDetection =
+            this.props.selectedDetection !== null
+                ? this.props.selectedDetection
+                : sideMenuDetection !== null
+                ? sideMenuDetection
+                : null;
+        if (selectedDetection !== null) {
             const viewportInfo = Utils.eventToViewportInfo(event);
-            const detectionData = draggedData
-                ? draggedData
-                : this.props.selectedDetection;
+            const detectionData = draggedData ? draggedData : selectedDetection;
 
             const contextMenuPos = this.getContextMenuPos(
                 viewportInfo,
@@ -2692,6 +2700,9 @@ class App extends Component {
                     <SideMenu
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
+                        renderDetectionContextMenu={
+                            this.renderDetectionContextMenu
+                        }
                     />
                     {this.props.remoteOrLocal === true ? (
                         <NextButton

@@ -8,10 +8,17 @@ import {
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
-import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+import {
+    detectionSelectedUpdate,
+    menuDetectionSelectedUpdate,
+} from '../../redux/slices/ui/uiSlice';
 import { detectionStyle } from '../../utils/Constants';
 
-const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
+const SideMenuDetection = ({
+    detection,
+    resetCornerstoneTools,
+    renderDetectionContextMenu,
+}) => {
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -67,8 +74,9 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
             dispatch(selectDetection(detection.uuid));
-            dispatch(menuDetectionSelectedUpdate());
+            dispatch(detectionSelectedUpdate());
             resetCornerstoneTools();
+            renderDetectionContextMenu(e, undefined, detection);
         }
     };
     // We only display an open eye if both algorithm and detection are visible.
@@ -135,6 +143,7 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
+    renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
 export default SideMenuDetection;
