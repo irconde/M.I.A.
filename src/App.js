@@ -2219,20 +2219,45 @@ class App extends Component {
         draggedData = undefined,
         sideMenuDetection = null
     ) {
-        const selectedDetection =
+        let selectedDetection =
             this.props.selectedDetection !== null
                 ? this.props.selectedDetection
                 : sideMenuDetection !== null
                 ? sideMenuDetection
                 : null;
+
+        selectedDetection = sideMenuDetection
+            ? sideMenuDetection
+            : selectedDetection;
+
         if (selectedDetection !== null) {
-            const viewportInfo = Utils.eventToViewportInfo(event);
+            const viewportInfo =
+                sideMenuDetection === null
+                    ? Utils.eventToViewportInfo(event)
+                    : selectedDetection.view === 'top'
+                    ? Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportTop
+                          )
+                      )
+                    : Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportSide
+                          )
+                      );
             const detectionData = draggedData ? draggedData : selectedDetection;
+
+            console.log(selectedDetection.boundingBox);
+
+            console.log(detectionData.boundingBox);
 
             const contextMenuPos = this.getContextMenuPos(
                 viewportInfo,
                 detectionData.boundingBox
             );
+
             this.props.updateDetectionContextPosition({
                 top: contextMenuPos.y,
                 left: contextMenuPos.x,

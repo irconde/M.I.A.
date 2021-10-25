@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { MAX_LABEL_LENGTH } from '../../utils/Constants';
@@ -19,6 +19,23 @@ const SideMenuDetection = ({
     resetCornerstoneTools,
     renderDetectionContextMenu,
 }) => {
+    // function useCompare(val) {
+    //     const prevVal = usePrevious(val);
+    //     return prevVal !== val;
+    // }
+
+    // // Helper hook
+    // function usePrevious(value) {
+    //     const ref = useRef();
+    //     useEffect(() => {
+    //         ref.current = value;
+    //     });
+    //     return ref.current;
+    // }
+
+    // const hasDetectionChanged = useCompare(detection);
+    // const previousDetection = usePrevious(detection);
+    //const [newDetection, setNewDetection] = useState(detection);
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -76,6 +93,10 @@ const SideMenuDetection = ({
             dispatch(selectDetection(detection.uuid));
             dispatch(detectionSelectedUpdate());
             resetCornerstoneTools();
+            console.log(
+                'BOUNDINGBOX DATA IN SELECTION: ',
+                detection.boundingBox
+            );
             renderDetectionContextMenu(e, undefined, detection);
         }
     };
