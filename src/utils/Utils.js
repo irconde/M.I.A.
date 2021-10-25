@@ -350,7 +350,6 @@ export default class Utils {
         let viewportInfo = {};
         let viewport = undefined;
         let offsetLeft = 0;
-        console.log(e);
         if (e.detail !== null) {
             if (e.detail.element !== undefined) {
                 if (e.detail.element.id === 'dicomImageLeft') {
