@@ -2249,10 +2249,6 @@ class App extends Component {
                       );
             const detectionData = draggedData ? draggedData : selectedDetection;
 
-            console.log(selectedDetection.boundingBox);
-
-            console.log(detectionData.boundingBox);
-
             const contextMenuPos = this.getContextMenuPos(
                 viewportInfo,
                 detectionData.boundingBox

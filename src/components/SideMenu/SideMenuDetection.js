@@ -93,10 +93,6 @@ const SideMenuDetection = ({
             dispatch(selectDetection(detection.uuid));
             dispatch(detectionSelectedUpdate());
             resetCornerstoneTools();
-            console.log(
-                'BOUNDINGBOX DATA IN SELECTION: ',
-                detection.boundingBox
-            );
             renderDetectionContextMenu(e, undefined, detection);
         }
     };
