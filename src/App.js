@@ -1602,7 +1602,8 @@ class App extends Component {
                     Utils.pointInRect(
                         mousePos,
                         combinedDetections[j].boundingBox
-                    )
+                    ) &&
+                    !combinedDetections[j].selected // check if detection is already selected?
                 ) {
                     clickedPos = j;
                     break;
@@ -1641,9 +1642,13 @@ class App extends Component {
             } else {
                 // Clicked on detection
                 if (
-                    combinedDetections[clickedPos].visible !== false &&
-                    this.props.cornerstoneMode ===
-                        constants.cornerstoneMode.SELECTION
+                    (combinedDetections[clickedPos].visible !== false &&
+                        this.props.cornerstoneMode ===
+                            constants.cornerstoneMode.SELECTION) ||
+                    (combinedDetections[clickedPos].visible !== false &&
+                        this.props.cornerstoneMode ===
+                            constants.cornerstoneMode.EDITION &&
+                        !combinedDetections[clickedPos].selected)
                 ) {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
@@ -1660,7 +1665,8 @@ class App extends Component {
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
                     this.props.cornerstoneMode ===
-                        constants.cornerstoneMode.EDITION
+                        constants.cornerstoneMode.EDITION &&
+                    combinedDetections[clickedPos].selected
                 ) {
                     // We are in edition mode and clicked the same detection that is in edition mode
                     // In other words, clicking the same detection again after having selected it
