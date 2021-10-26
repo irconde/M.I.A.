@@ -1677,6 +1677,12 @@ class App extends Component {
                     this.appUpdateImage();
                 }
             }
+        } else {
+            // There are no detections on the viewport clicked (still must clear the currently selected detection)
+            this.props.clearAllSelection();
+            this.props.emptyAreaClickUpdate();
+            this.resetCornerstoneTool();
+            this.appUpdateImage();
         }
     }
 
