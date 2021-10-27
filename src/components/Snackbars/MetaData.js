@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Info } from '../SideMenu/Icons';
 import { useSelector } from 'react-redux';
 import { getConfigInfo } from '../../redux/slices/ui/uiSlice';
+import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
 import * as constants from '../../utils/Constants';
 
@@ -10,7 +11,10 @@ import * as constants from '../../utils/Constants';
  * GUI widget that provides the user with information regarding a particular
  * object detection algorithm
  */
-const MetaData = ({ isVisible }) => {
+const MetaData = () => {
+    // TODO: Change isVisible to getSelectedAlgorithmInformation that simply returns the information
+    const selectedAlgorithm = useSelector(getSelectedAlgorithm);
+    const isVisible = selectedAlgorithm !== '' ? true : false;
     const configInfo = useSelector(getConfigInfo);
     const deviceType = useSelector(getDeviceType);
     const slashLineStyle = {
@@ -35,16 +39,13 @@ const MetaData = ({ isVisible }) => {
         paddingRight: '1rem',
         position: 'fixed',
         top: '5rem',
-        right: 0,
+        // Width of screen - side menu width / 2
+        left: '45%',
         backgroundColor: 'rgba(38, 38, 38, 0.5)',
         borderRadius: '2.0rem',
         textAlign: 'left',
         color: '#ffffff',
         width: 'max-content',
-        transform:
-            deviceType === constants.DEVICE_TYPE.DESKTOP
-                ? 'translateX(-115%)'
-                : 'translateX(-47%)',
     };
 
     if (!isVisible) {

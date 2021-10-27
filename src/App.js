@@ -86,6 +86,7 @@ import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileSave, fileOpen } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
+import MetaData from './components/Snackbars/MetaData';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -2765,6 +2766,7 @@ class App extends Component {
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
                     <NoFileSign />
+                    <MetaData />
                 </div>
             </div>
         );

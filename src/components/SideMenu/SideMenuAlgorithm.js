@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import MetaData from '../Snackbars/MetaData';
 import TreeDetection from './SideMenuDetection';
 import * as Icons from './Icons';
 import * as constants from '../../utils/Constants';
@@ -120,9 +119,6 @@ const SideMenuAlgorithm = ({
     };
     return (
         <div>
-            <MetaData
-                isVisible={isAlgorithmSelected === algorithm ? true : false}
-            />
             <div
                 style={
                     isAlgorithmSelected === algorithm && isVisible
