@@ -1681,6 +1681,12 @@ class App extends Component {
                     this.appUpdateImage();
                 }
             }
+        } else {
+            // There are no detections on the viewport clicked (still must clear the currently selected detection)
+            this.props.clearAllSelection();
+            this.props.emptyAreaClickUpdate();
+            this.resetCornerstoneTool();
+            this.appUpdateImage();
         }
     }
 
@@ -2218,17 +2224,46 @@ class App extends Component {
      *
      * @returns {None} None
      */
-    renderDetectionContextMenu(event, draggedData = undefined) {
-        if (this.props.selectedDetection !== null) {
-            const viewportInfo = Utils.eventToViewportInfo(event);
-            const detectionData = draggedData
-                ? draggedData
-                : this.props.selectedDetection;
+    renderDetectionContextMenu(
+        event,
+        draggedData = undefined,
+        sideMenuDetection = null
+    ) {
+        let selectedDetection =
+            this.props.selectedDetection !== null
+                ? this.props.selectedDetection
+                : sideMenuDetection !== null
+                ? sideMenuDetection
+                : null;
+
+        selectedDetection = sideMenuDetection
+            ? sideMenuDetection
+            : selectedDetection;
+
+        if (selectedDetection !== null) {
+            const viewportInfo =
+                sideMenuDetection === null
+                    ? Utils.eventToViewportInfo(event)
+                    : selectedDetection.view === 'top'
+                    ? Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportTop
+                          )
+                      )
+                    : Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportSide
+                          )
+                      );
+            const detectionData = draggedData ? draggedData : selectedDetection;
 
             const contextMenuPos = this.getContextMenuPos(
                 viewportInfo,
                 detectionData.boundingBox
             );
+
             this.props.updateDetectionContextPosition({
                 top: contextMenuPos.y,
                 left: contextMenuPos.x,
@@ -2697,6 +2732,9 @@ class App extends Component {
                     <SideMenu
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
+                        renderDetectionContextMenu={
+                            this.renderDetectionContextMenu
+                        }
                     />
                     {this.props.remoteOrLocal === true ? (
                         <NextButton

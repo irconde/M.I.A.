@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { MAX_LABEL_LENGTH } from '../../utils/Constants';
@@ -8,10 +8,34 @@ import {
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
-import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+import {
+    detectionSelectedUpdate,
+    menuDetectionSelectedUpdate,
+} from '../../redux/slices/ui/uiSlice';
 import { detectionStyle } from '../../utils/Constants';
 
-const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
+const SideMenuDetection = ({
+    detection,
+    resetCornerstoneTools,
+    renderDetectionContextMenu,
+}) => {
+    // function useCompare(val) {
+    //     const prevVal = usePrevious(val);
+    //     return prevVal !== val;
+    // }
+
+    // // Helper hook
+    // function usePrevious(value) {
+    //     const ref = useRef();
+    //     useEffect(() => {
+    //         ref.current = value;
+    //     });
+    //     return ref.current;
+    // }
+
+    // const hasDetectionChanged = useCompare(detection);
+    // const previousDetection = usePrevious(detection);
+    //const [newDetection, setNewDetection] = useState(detection);
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -67,8 +91,9 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
             dispatch(selectDetection(detection.uuid));
-            dispatch(menuDetectionSelectedUpdate());
+            dispatch(detectionSelectedUpdate());
             resetCornerstoneTools();
+            renderDetectionContextMenu(e, undefined, detection);
         }
     };
     // We only display an open eye if both algorithm and detection are visible.
@@ -135,6 +160,7 @@ const SideMenuDetection = ({ detection, resetCornerstoneTools }) => {
 SideMenuDetection.propTypes = {
     detection: PropTypes.object.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
+    renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
 export default SideMenuDetection;

@@ -13,7 +13,11 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
-const SideMenuAlgorithm = ({ detections, resetCornerstoneTools }) => {
+const SideMenuAlgorithm = ({
+    detections,
+    resetCornerstoneTools,
+    renderDetectionContextMenu,
+}) => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(true);
     let [isVisible, setIsVisible] = useState(true);
@@ -172,6 +176,9 @@ const SideMenuAlgorithm = ({ detections, resetCornerstoneTools }) => {
                                 detection={detection}
                                 key={index}
                                 resetCornerstoneTools={resetCornerstoneTools}
+                                renderDetectionContextMenu={
+                                    renderDetectionContextMenu
+                                }
                             />
                         );
                     })
@@ -187,6 +194,7 @@ const SideMenuAlgorithm = ({ detections, resetCornerstoneTools }) => {
 SideMenuAlgorithm.propTypes = {
     detections: PropTypes.array.isRequired,
     resetCornerstoneTools: PropTypes.func.isRequired,
+    renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
 export default SideMenuAlgorithm;
