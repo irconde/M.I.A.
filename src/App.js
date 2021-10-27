@@ -523,17 +523,24 @@ class App extends Component {
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
                 this.props.clearAllSelection();
             } else {
-                // Need to re-calculate detection context position and possibly the label if in edition mode
                 if (this.props.editionMode === constants.editionMode.LABEL) {
                     //
-                    const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
+                    let editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                         this.props.selectedDetection
                     );
-                    // TODO: Tablet?
-                    const widgetPosition = {
+                    let widgetPosition = {
                         top: editLabelWidgetPosInfo.y,
                         left: editLabelWidgetPosInfo.x,
                     };
+                    if (
+                        this.props.deviceType === constants.DEVICE_TYPE.TABLET
+                    ) {
+                        widgetPosition.top -=
+                            this.props.selectedDetection.view ===
+                            constants.viewport.TOP
+                                ? this.props.zoomLevelTop / 5
+                                : this.props.zoomLevelSide / 5;
+                    }
                     this.props.updateEditLabelPosition({
                         detectionLabelEditWidth:
                             editLabelWidgetPosInfo.boundingWidth,
