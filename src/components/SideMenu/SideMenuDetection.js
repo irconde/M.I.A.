@@ -5,12 +5,13 @@ import { MAX_LABEL_LENGTH } from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useDispatch } from 'react-redux';
 import {
+    clearAllSelection,
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
     detectionSelectedUpdate,
-    menuDetectionSelectedUpdate,
+    hideContextMenuUpdate,
 } from '../../redux/slices/ui/uiSlice';
 import { detectionStyle } from '../../utils/Constants';
 
@@ -19,23 +20,6 @@ const SideMenuDetection = ({
     resetCornerstoneTools,
     renderDetectionContextMenu,
 }) => {
-    // function useCompare(val) {
-    //     const prevVal = usePrevious(val);
-    //     return prevVal !== val;
-    // }
-
-    // // Helper hook
-    // function usePrevious(value) {
-    //     const ref = useRef();
-    //     useEffect(() => {
-    //         ref.current = value;
-    //     });
-    //     return ref.current;
-    // }
-
-    // const hasDetectionChanged = useCompare(detection);
-    // const previousDetection = usePrevious(detection);
-    //const [newDetection, setNewDetection] = useState(detection);
     const dispatch = useDispatch();
     const detectionBGStyle = {
         width: '0.75rem',
@@ -79,6 +63,10 @@ const SideMenuDetection = ({
             e.target.id === 'hidden-eye'
         ) {
             dispatch(updateDetectionVisibility(detection.uuid));
+            if (detection.selected === true) {
+                dispatch(hideContextMenuUpdate());
+                dispatch(clearAllSelection());
+            }
         }
     };
 

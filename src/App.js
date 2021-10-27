@@ -525,10 +525,10 @@ class App extends Component {
             } else {
                 if (this.props.editionMode === constants.editionMode.LABEL) {
                     //
-                    let editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
+                    const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                         this.props.selectedDetection
                     );
-                    let widgetPosition = {
+                    const widgetPosition = {
                         top: editLabelWidgetPosInfo.y,
                         left: editLabelWidgetPosInfo.x,
                     };
@@ -540,6 +540,12 @@ class App extends Component {
                             constants.viewport.TOP
                                 ? this.props.zoomLevelTop / 5
                                 : this.props.zoomLevelSide / 5;
+                        if (
+                            this.props.selectedDetection.view ===
+                            constants.viewport.SIDE
+                        ) {
+                            widgetPosition.left += 150;
+                        }
                     }
                     this.props.updateEditLabelPosition({
                         detectionLabelEditWidth:

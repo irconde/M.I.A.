@@ -248,6 +248,16 @@ const detectionsSlice = createSlice({
                 if (state.detectionLabels.indexOf(className) === -1) {
                     state.detectionLabels.push(className);
                 }
+                state.missMatchedClassNames.forEach((missMatched) => {
+                    state.detections.forEach((det) => {
+                        if (missMatched.className === det.className) {
+                            det.color = missMatched.color;
+                            if (det.uuid === state.selectedDetection.uuid) {
+                                det.displayColor = missMatched.color;
+                            }
+                        }
+                    });
+                });
             }
         },
         // Deletes a detection.
