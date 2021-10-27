@@ -10,6 +10,7 @@ import {
     getCornerstoneMode,
     getCollapsedSideMenu,
 } from '../../redux/slices/ui/uiSlice';
+import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -22,7 +23,8 @@ import {
 const FABContainer = styled.div`
     position: absolute;
     left: ${(props) => props.leftPX};
-    bottom: 5%;
+    bottom: ${(props) =>
+        props.deviceType === constants.DEVICE_TYPE.DESKTOP ? '5%' : '2%'};
     padding: 0.7rem 1.25rem;
     background-color: #313131;
     color: #fff;
@@ -82,6 +84,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     const isVisible = useSelector(getIsFabVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
+    const deviceType = useSelector(getDeviceType);
     const handleClick = (e, cb) => {
         if (
             isVisible &&
@@ -122,7 +125,11 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     }
 
     return (
-        <FABContainer leftPX={leftPX} fabOpacity={fabOpacity} show={show}>
+        <FABContainer
+            leftPX={leftPX}
+            fabOpacity={fabOpacity}
+            show={show}
+            deviceType={deviceType}>
             <div
                 className="fabOption"
                 onClick={(e) => handleClick(e, onBoundingSelect)}>
