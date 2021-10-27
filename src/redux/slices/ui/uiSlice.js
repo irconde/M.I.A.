@@ -104,6 +104,12 @@ const uiSlice = createSlice({
                     state.colorPickerVisible = true;
             }
         },
+        updateEditLabelPosition: (state, action) => {
+            const { detectionLabelEditWidth, detectionLabelEditPosition } =
+                action.payload;
+            state.detectionLabelEditWidth = detectionLabelEditWidth;
+            state.detectionLabelEditPosition = detectionLabelEditPosition;
+        },
         /**
          * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
          *                         to not display the detection context widget.
@@ -280,7 +286,6 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         emptyAreaClickUpdate: (state) => {
-            console.log('empty area reducer');
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.detectionType = constants.detectionType.NO_TOOL;
@@ -620,6 +625,7 @@ export const {
     colorPickerToggle,
     setNumberOfFiles,
     setLocalFileOpen,
+    updateEditLabelPosition,
 } = uiSlice.actions;
 
 // Export the reducer for the store

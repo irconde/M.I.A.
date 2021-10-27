@@ -80,6 +80,7 @@ import {
     colorPickerToggle,
     setNumberOfFiles,
     setLocalFileOpen,
+    updateEditLabelPosition,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -523,6 +524,22 @@ class App extends Component {
                 this.props.clearAllSelection();
             } else {
                 // Need to re-calculate detection context position and possibly the label if in edition mode
+                if (this.props.editionMode === constants.editionMode.LABEL) {
+                    //
+                    const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
+                        this.props.selectedDetection
+                    );
+                    // TODO: Tablet?
+                    const widgetPosition = {
+                        top: editLabelWidgetPosInfo.y,
+                        left: editLabelWidgetPosInfo.x,
+                    };
+                    this.props.updateEditLabelPosition({
+                        detectionLabelEditWidth:
+                            editLabelWidgetPosInfo.boundingWidth,
+                        detectionLabelEditPosition: widgetPosition,
+                    });
+                }
             }
         }
     }
@@ -2624,12 +2641,10 @@ class App extends Component {
                     currentViewport.id === 'dicomImageRight'
                         ? constants.viewport.SIDE
                         : constants.viewport.TOP;
-
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
                     y: bbox[1] - labelHeight,
                 });
-                console.log(x + ' ' + y);
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
@@ -2855,6 +2870,7 @@ const mapDispatchToProps = {
     updateMissMatchedClassName,
     setNumberOfFiles,
     setLocalFileOpen,
+    updateEditLabelPosition,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
