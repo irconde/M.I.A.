@@ -78,10 +78,15 @@ const SideMenuDetection = ({
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            dispatch(selectDetection(detection.uuid));
-            dispatch(detectionSelectedUpdate());
-            resetCornerstoneTools();
-            renderDetectionContextMenu(e, undefined, detection);
+            if (detection.selected === false) {
+                dispatch(selectDetection(detection.uuid));
+                dispatch(detectionSelectedUpdate());
+                resetCornerstoneTools();
+                renderDetectionContextMenu(e, undefined, detection);
+            } else {
+                dispatch(hideContextMenuUpdate());
+                dispatch(clearAllSelection());
+            }
         }
     };
     // We only display an open eye if both algorithm and detection are visible.
