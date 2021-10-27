@@ -95,8 +95,12 @@ const SideMenuAlgorithm = ({
             isExpanded &&
             isVisible
         ) {
-            dispatch(selectDetectionSet(algorithm));
-            dispatch(menuDetectionSelectedUpdate());
+            if (isAlgorithmSelected !== algorithm) {
+                dispatch(selectDetectionSet(algorithm));
+                dispatch(menuDetectionSelectedUpdate());
+            } else {
+                dispatch(clearAllSelection());
+            }
             resetCornerstoneTools();
         } else {
             if (e.target.id == 'arrow' || e.target.id == 'Path') {

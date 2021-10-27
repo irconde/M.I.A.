@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
 import { MAX_LABEL_LENGTH } from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     clearAllSelection,
+    getSelectedAlgorithm,
     selectDetection,
     updateDetectionVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
@@ -21,6 +22,7 @@ const SideMenuDetection = ({
     renderDetectionContextMenu,
 }) => {
     const dispatch = useDispatch();
+    const selectedAlgorithm = useSelector(getSelectedAlgorithm);
     const detectionBGStyle = {
         width: '0.75rem',
         height: '0.75rem',
@@ -78,7 +80,10 @@ const SideMenuDetection = ({
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
-            if (detection.selected === false) {
+            if (
+                detection.selected === false ||
+                detection.algorithm === selectedAlgorithm
+            ) {
                 dispatch(selectDetection(detection.uuid));
                 dispatch(detectionSelectedUpdate());
                 resetCornerstoneTools();
