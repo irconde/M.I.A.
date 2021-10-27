@@ -496,6 +496,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @returns {Number|Object|Boolean}
      */
     _pointNearHandle(element, data, coords) {
+        if (data === undefined) return;
         if (data.handles === undefined || data.handles.points === undefined) {
             return;
         }
