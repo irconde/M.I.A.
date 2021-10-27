@@ -39,11 +39,12 @@ const ColorPicker = () => {
                         top:
                             detectionContextPosition.top +
                             zoomLevels.zoomLevelTop +
-                            widthAndHeight.height / 2.25,
+                            widthAndHeight.height +
+                            2.25,
                         left:
                             detectionContextPosition.left +
                             zoomLevels.zoomLevelTop +
-                            widthAndHeight.height / 4,
+                            widthAndHeight.width / 1.5,
                     });
                 } else if (selectedViewport === constants.viewport.SIDE) {
                     setContainerStyle({
