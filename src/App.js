@@ -512,6 +512,8 @@ class App extends Component {
         if (this.props.selectDetection) {
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
                 this.props.clearAllSelection();
+            } else {
+                // Need to re-calculate detection context position and possibly the label if in edition mode
             }
             this.appUpdateImage();
         }
