@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Info } from '../SideMenu/Icons';
 import { useSelector } from 'react-redux';
 import { getConfigInfo } from '../../redux/slices/ui/uiSlice';
+import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
+import * as constants from '../../utils/Constants';
 
 /**
  * GUI widget that provides the user with information regarding a particular
@@ -10,7 +12,7 @@ import { getConfigInfo } from '../../redux/slices/ui/uiSlice';
  */
 const MetaData = ({ isVisible }) => {
     const configInfo = useSelector(getConfigInfo);
-
+    const deviceType = useSelector(getDeviceType);
     const slashLineStyle = {
         fontFamily: 'Noto Sans JP Black',
         color: '#367FFF',
@@ -33,13 +35,16 @@ const MetaData = ({ isVisible }) => {
         paddingRight: '1rem',
         position: 'fixed',
         top: '5rem',
-        left: '60%',
+        right: 0,
         backgroundColor: 'rgba(38, 38, 38, 0.5)',
         borderRadius: '2.0rem',
         textAlign: 'left',
         color: '#ffffff',
         width: 'max-content',
-        transform: 'translateX(-100%)',
+        transform:
+            deviceType === constants.DEVICE_TYPE.DESKTOP
+                ? 'translateX(-115%)'
+                : 'translateX(-47%)',
     };
 
     if (!isVisible) {
