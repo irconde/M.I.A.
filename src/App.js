@@ -521,8 +521,10 @@ class App extends Component {
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
                 this.props.clearAllSelection();
             } else {
+                // For when a resize event occurs and the device type is tablet or mobile
                 if (this.props.editionMode === constants.editionMode.LABEL) {
-                    //
+                    // Re-calculating edit label position for when on a tablet a user edits a label
+                    // the on-screen keyboard will cause a re-size event and thus the edit label needs to be re-calculated
                     const editLabelWidgetPosInfo = this.getEditLabelWidgetPos(
                         this.props.selectedDetection
                     );
@@ -2343,7 +2345,6 @@ class App extends Component {
                     detectionData,
                     detectionData.boundingBox
                 );
-                // TODO: Tablet?
                 const widgetPosition = {
                     top: editLabelWidgetPosInfo.y,
                     left: editLabelWidgetPosInfo.x,
@@ -2704,10 +2705,10 @@ class App extends Component {
      * @returns {None} None
      */
     onMouseLeave(event) {
-        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        // else this.props.onMouseLeaveNoFilesUpdate();
-        // if (this.props.selectedDetection !== null)
-        //     this.resetSelectedDetectionBoxes(event);
+        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        else this.props.onMouseLeaveNoFilesUpdate();
+        if (this.props.selectedDetection !== null)
+            this.resetSelectedDetectionBoxes(event);
     }
 
     render() {

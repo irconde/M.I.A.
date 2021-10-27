@@ -190,10 +190,24 @@ export const {
 } = settingsSlice.actions;
 
 // Selectors
+/**
+ * getSettings - Returns the settings object
+ * @param {Object} state
+ * @returns {Object<Settings>}
+ */
 export const getSettings = (state) => state.settings.settings;
+/**
+ * getRemoteOrLocal - Boolean value for wether the connection is remote === true, or local === false
+ * @param {Object} state
+ * @returns {Boolean}
+ */
 export const getRemoteOrLocal = (state) =>
     state.settings.settings.remoteOrLocal;
-
+/**
+ * getRemoteConnectionInfo - Returns the remote connection info: ip, port, autoconnect.
+ * @param {Object} state
+ * @returns {Object<remoteIp: String; remotePort: String; autoConnect: Boolean>}
+ */
 export const getRemoteConnectionInfo = (state) => {
     return {
         remoteIp: state.settings.settings.remoteIp,
@@ -202,9 +216,19 @@ export const getRemoteConnectionInfo = (state) => {
     };
 };
 
+/**
+ * getFirstDisplaySettings - Determines if the settings should be displayed on first load or not
+ * @param {Object} state
+ * @returns {Boolean}
+ */
 export const getFirstDisplaySettings = (state) =>
     state.settings.settings.firstDisplaySettings;
 
+/**
+ * getDeviceType - Returns the type of device, desktop, mobile, tablet
+ * @param {Object} state
+ * @returns {constants.DEVICE_TYPE}
+ */
 export const getDeviceType = (state) => state.settings.settings.deviceType;
 
 export default settingsSlice.reducer;

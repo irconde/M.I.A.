@@ -511,16 +511,31 @@ export const getSelectedDetectionColor = (state) => {
         return '';
     }
 };
+/**
+ * getSelectedDetectionViewport - Returns the viewport for the current detection
+ * @param {Object} state
+ * @returns {constants.viewport}
+ */
 export const getSelectedDetectionViewport = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.view;
     }
 };
+/**
+ * getSelectedDetectionClassName - Returns the selected detection class name label
+ * @param {Object} state
+ * @returns {String}
+ */
 export const getSelectedDetectionClassName = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.className;
     }
 };
+/**
+ * getSelectedDetectionWidthAndHeight - Will calculate and return the selected detections width and height
+ * @param {Object} state
+ * @returns {Object<width: Number; height: Number>}
+ */
 export const getSelectedDetectionWidthAndHeight = (state) => {
     if (state.detections.selectedDetection) {
         const width = Math.abs(
@@ -567,8 +582,18 @@ const getDetectionColor = (detection, uuid) => {
     return detection.color;
 };
 
+/**
+ * getDetectionChanged - Returns if any of the detections has changed
+ * @param {Object} state
+ * @returns {Boolean}
+ */
 export const getDetectionChanged = (state) => state.detections.detectionChanged;
 
+/**
+ * getSelectedDetectionType - Returns the detection type for the currently selected detection
+ * @param {Object} state
+ * @returns {constants.detectionType}
+ */
 export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.detectionType;
