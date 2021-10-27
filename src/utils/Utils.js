@@ -436,6 +436,11 @@ export default class Utils {
         return screenSize;
     }
 
+    /**
+     * deviceType - Determines the device type based on the navigator userAgent
+     * @params {None}
+     * @returns {constants.DEVICE_TYPE}
+     */
     static deviceType = () => {
         const ua = navigator.userAgent;
         if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {

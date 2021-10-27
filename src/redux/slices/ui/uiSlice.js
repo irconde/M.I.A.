@@ -94,6 +94,11 @@ const uiSlice = createSlice({
                     state.colorPickerVisible = true;
             }
         },
+        /**
+         * updateEditLabelPosition - Simply updates the label position, namely for resize events
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload - Object containing detectionLabelEditWidth & detectionLabelEditPosition.
+         */
         updateEditLabelPosition: (state, action) => {
             const { detectionLabelEditWidth, detectionLabelEditPosition } =
                 action.payload;
