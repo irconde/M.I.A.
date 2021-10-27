@@ -11,10 +11,7 @@ import {
     getInputLabel,
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
-import {
-    getDetectionLabels,
-    getSelectedDetection,
-} from '../../redux/slices/detections/detectionsSlice';
+import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -111,7 +108,6 @@ const EditLabel = ({ onLabelChange }) => {
      * @param {KeyboardEvent} e event fired for every key press
      */
     const submitFromInput = (e) => {
-        console.log(e.key);
         if (e.key === 'Enter') {
             onLabelChange(
                 Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)

@@ -32,6 +32,7 @@ const ColorPicker = () => {
     useEffect(() => {
         if (widthAndHeight !== null) {
             if (previousWidthAndHeight !== widthAndHeight) {
+                // TODO: Derive formula to calculate scalar based on screen size and if possible pixel density
                 if (selectedViewport === constants.viewport.TOP) {
                     setContainerStyle({
                         position: 'absolute',
