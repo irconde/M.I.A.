@@ -250,6 +250,10 @@ class App extends Component {
             'cornerstonetoolsmousedrag',
             this.hideContextMenu
         );
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolstouchdrag',
+            this.hideContextMenu
+        );
         this.state.imageViewportTop.addEventListener('mouseup', (event) => {
             const newEvent = Utils.mockCornerstoneEvent(
                 event,
@@ -287,6 +291,10 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolsmousedrag',
+            this.hideContextMenu
+        );
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolstouchdrag',
             this.hideContextMenu
         );
         this.state.imageViewportSide.addEventListener('mouseup', (event) => {
@@ -510,12 +518,12 @@ class App extends Component {
             this.props.singleViewport
         );
         if (this.props.selectDetection) {
+            this.appUpdateImage();
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
                 this.props.clearAllSelection();
             } else {
                 // Need to re-calculate detection context position and possibly the label if in edition mode
             }
-            this.appUpdateImage();
         }
     }
 
