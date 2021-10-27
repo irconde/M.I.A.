@@ -112,3 +112,9 @@ export const SETTINGS = {
         ZIP: 'Zip Archive',
     },
 };
+
+export const DEVICE_TYPE = {
+    TABLET: 'tablet',
+    MOBILE: 'mobile',
+    DESKTOP: 'desktop',
+};

@@ -161,6 +161,7 @@ const detectionsSlice = createSlice({
         // Clears selection data for all detections
         // No action payload used
         clearAllSelection: (state) => {
+            console.log('clear all reducer');
             state.detections.forEach((det) => {
                 det.selected = false;
                 if (det.visible) {

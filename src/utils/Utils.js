@@ -414,6 +414,20 @@ export default class Utils {
         return screenSize;
     }
 
+    static deviceType = () => {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+            return constants.DEVICE_TYPE.TABLET;
+        } else if (
+            /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(
+                ua
+            )
+        ) {
+            return constants.DEVICE_TYPE.MOBILE;
+        }
+        return constants.DEVICE_TYPE.DESKTOP;
+    };
+
     /**
      * inRange - Checks if the current passed in value is inside the specified
      *           min and max range.

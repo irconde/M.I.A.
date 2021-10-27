@@ -23,6 +23,7 @@ const defaultSettings = {
     fileSuffix: '_img',
     remoteOrLocal: true,
     firstDisplaySettings: true,
+    deviceType: '',
 };
 if (cookieData !== undefined) {
     settings = cookieData;
@@ -203,5 +204,7 @@ export const getRemoteConnectionInfo = (state) => {
 
 export const getFirstDisplaySettings = (state) =>
     state.settings.settings.firstDisplaySettings;
+
+export const getDeviceType = (state) => state.settings.settings.deviceType;
 
 export default settingsSlice.reducer;

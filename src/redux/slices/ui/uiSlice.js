@@ -280,6 +280,7 @@ const uiSlice = createSlice({
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         emptyAreaClickUpdate: (state) => {
+            console.log('empty area reducer');
             state.isFABVisible = true;
             state.cornerstoneMode = constants.cornerstoneMode.SELECTION;
             state.detectionType = constants.detectionType.NO_TOOL;

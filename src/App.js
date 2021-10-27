@@ -510,7 +510,11 @@ class App extends Component {
             this.props.singleViewport
         );
         if (this.props.selectDetection) {
-            this.props.clearAllSelection();
+            console.log('@513');
+            console.log(this.props.deviceType);
+            if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
+                this.props.clearAllSelection();
+            }
             this.appUpdateImage();
         }
     }
@@ -1628,6 +1632,7 @@ class App extends Component {
                     this.editDetectionLabel(this.props.inputLabel);
                     this.props.setInputLabel('');
                 }
+                console.log('@1633');
                 this.props.clearAllSelection();
                 this.props.emptyAreaClickUpdate();
                 this.resetCornerstoneTool();
@@ -1991,6 +1996,7 @@ class App extends Component {
                 ) {
                     self.props.emptyAreaClickUpdate();
                     self.resetCornerstoneTool();
+                    console.log('@1995');
                     self.props.clearAllSelection();
                     self.appUpdateImage();
                 } else if (
@@ -2073,6 +2079,7 @@ class App extends Component {
                 });
 
                 this.resetCornerstoneTool();
+                console.log('@2078');
                 this.props.clearAllSelection();
                 this.appUpdateImage();
                 this.props.emptyAreaClickUpdate();
@@ -2093,6 +2100,7 @@ class App extends Component {
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            console.log('@2099');
             this.props.clearAllSelection();
             this.props.resetSelectedDetectionBoxesUpdate();
             this.resetCornerstoneTool();
@@ -2125,6 +2133,7 @@ class App extends Component {
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
+            console.log('@2131');
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
             this.props.updateCornerstoneMode({
@@ -2148,6 +2157,7 @@ class App extends Component {
             this.props.cornerstoneMode === constants.cornerstoneMode.SELECTION
         ) {
             this.stopListeningClickEvents();
+            console.log('@2156');
             this.props.clearAllSelection();
             this.resetCornerstoneTool();
             this.props.updateCornerstoneMode({
@@ -2296,6 +2306,7 @@ class App extends Component {
                     detectionData,
                     detectionData.boundingBox
                 );
+                // TODO: Tablet?
                 const widgetPosition = {
                     top: editLabelWidgetPosInfo.y,
                     left: editLabelWidgetPosInfo.x,
@@ -2581,6 +2592,7 @@ class App extends Component {
                     x: bbox[0] + gap,
                     y: bbox[1] - labelHeight,
                 });
+                console.log(x + ' ' + y);
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
@@ -2628,7 +2640,7 @@ class App extends Component {
                 );
             }
             // Reset remaining DetectionSets to `un-selected` state
-
+            console.log('@2036');
             this.props.clearAllSelection();
             this.props.deleteDetectionUpdate();
             this.resetCornerstoneTool();
@@ -2752,6 +2764,7 @@ const mapStateToProps = (state) => {
         firstDisplaySettings: settings.settings.firstDisplaySettings,
         annotationsFormat: settings.settings.annotationsFormat,
         remoteOrLocal: settings.settings.remoteOrLocal,
+        deviceType: settings.settings.deviceType,
     };
 };
 

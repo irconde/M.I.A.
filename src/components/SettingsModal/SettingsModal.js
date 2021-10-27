@@ -42,6 +42,7 @@ import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 import { SETTINGS } from '../../utils/Constants';
+import Utils from '../../utils/Utils';
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
@@ -182,6 +183,7 @@ const SettingsModal = (props) => {
                 annotationsFormat,
                 fileSuffix,
                 remoteOrLocal,
+                deviceType: Utils.deviceType(),
             })
         );
         dispatch(toggleSettingsVisibility(false));
