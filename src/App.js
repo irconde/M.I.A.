@@ -56,7 +56,6 @@ import {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDetectionType,
     updateEditionMode,
     emptyAreaClickUpdate,
     onMouseLeaveNoFilesUpdate,
@@ -149,7 +148,6 @@ class App extends Component {
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
-        this.getDetectionType = this.getDetectionType.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
         this.resetSelectedDetectionBoxes =
@@ -1695,12 +1693,6 @@ class App extends Component {
                     this.props.selectDetection(
                         combinedDetections[clickedPos].uuid
                     );
-                    const detectionType = this.getDetectionType(
-                        this.props.selectedDetection
-                    );
-                    this.props.updateDetectionType({
-                        detectionType: detectionType,
-                    });
                     this.props.detectionSelectedUpdate();
                     this.renderDetectionContextMenu(e);
                     this.appUpdateImage();
@@ -1726,28 +1718,6 @@ class App extends Component {
             this.resetCornerstoneTool();
             this.appUpdateImage();
         }
-    }
-
-    /**
-     * getDetectionType - Utility method that determines a detection's type according to constants.detectionType.
-     *
-     * @param {Object} detection
-     * @return {constants.detectionType} type
-     */
-    getDetectionType() {
-        let type;
-        if (
-            this.props.selectedDetection.binaryMask.length !== 0 &&
-            this.props.selectedDetection.binaryMask[0].length !== 0 &&
-            this.props.selectedDetection.polygonMask.length === 0
-        ) {
-            type = constants.detectionType.BINARY;
-        } else if (this.props.selectedDetection.polygonMask.length !== 0) {
-            type = constants.detectionType.POLYGON;
-        } else {
-            type = constants.detectionType.BOUNDING;
-        }
-        return type;
     }
 
     /**
@@ -2734,10 +2704,10 @@ class App extends Component {
      * @returns {None} None
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);
+        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        // else this.props.onMouseLeaveNoFilesUpdate();
+        // if (this.props.selectedDetection !== null)
+        //     this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
@@ -2856,7 +2826,6 @@ const mapDispatchToProps = {
     updateFABVisibility,
     updateIsDetectionContextVisible,
     updateCornerstoneMode,
-    updateDetectionType,
     updateEditionMode,
     emptyAreaClickUpdate,
     onMouseLeaveNoFilesUpdate,

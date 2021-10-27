@@ -111,6 +111,10 @@ const detectionsSlice = createSlice({
                 validation: null,
                 textColor: 'white',
             });
+            state.detections[state.detections.length - 1].detectionType =
+                Utils.getDetectionType(
+                    state.detections[state.detections.length - 1]
+                );
             const foundIndex = state.missMatchedClassNames.findIndex(
                 (el) => el.className === className
             );
@@ -564,6 +568,12 @@ const getDetectionColor = (detection, uuid) => {
 };
 
 export const getDetectionChanged = (state) => state.detections.detectionChanged;
+
+export const getSelectedDetectionType = (state) => {
+    if (state.detections.selectedDetection) {
+        return state.detections.selectedDetection.detectionType;
+    }
+};
 
 export const {
     resetDetections,

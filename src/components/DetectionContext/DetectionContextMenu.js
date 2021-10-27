@@ -13,9 +13,11 @@ import {
     getEditionMode,
     getIsDetectionContextVisible,
     getDetectionContextPosition,
-    getDetectionType,
 } from '../../redux/slices/ui/uiSlice';
-import { getSelectedDetectionColor } from '../../redux/slices/detections/detectionsSlice';
+import {
+    getSelectedDetectionColor,
+    getSelectedDetectionType,
+} from '../../redux/slices/detections/detectionsSlice';
 
 const Positioner = styled.div`
     position: absolute;
@@ -96,7 +98,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             );
         }
     };
-    const detectionType = useSelector(getDetectionType);
+    const detectionType = useSelector(getSelectedDetectionType);
     if (isVisible === true) {
         return (
             <Positioner position={position}>

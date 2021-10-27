@@ -78,6 +78,28 @@ export default class Utils {
     }
 
     /**
+     * getDetectionType - Utility method that determines a detection's type according to constants.detectionType.
+     *
+     * @param {Object} detection
+     * @return {constants.detectionType} type
+     */
+    static getDetectionType(detection) {
+        let type;
+        if (
+            detection.binaryMask.length !== 0 &&
+            detection.binaryMask[0].length !== 0 &&
+            detection.polygonMask.length === 0
+        ) {
+            type = constants.detectionType.BINARY;
+        } else if (detection.polygonMask.length !== 0) {
+            type = constants.detectionType.POLYGON;
+        } else {
+            type = constants.detectionType.BOUNDING;
+        }
+        return type;
+    }
+
+    /**
      * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
      *
      * @param  {type} point 2D point with two coordinates, x and y
