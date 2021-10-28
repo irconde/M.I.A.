@@ -2,21 +2,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Info } from '../SideMenu/Icons';
 import { useSelector } from 'react-redux';
-import { getConfigInfo } from '../../redux/slices/ui/uiSlice';
+import {
+    getCollapsedSideMenu,
+    getConfigInfo,
+} from '../../redux/slices/ui/uiSlice';
 import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
-import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
-import * as constants from '../../utils/Constants';
 
 /**
  * GUI widget that provides the user with information regarding a particular
  * object detection algorithm
  */
 const MetaData = () => {
-    // TODO: Change isVisible to getSelectedAlgorithmInformation that simply returns the information
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
     const isVisible = selectedAlgorithm !== '' ? true : false;
     const configInfo = useSelector(getConfigInfo);
-    const deviceType = useSelector(getDeviceType);
+    const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const slashLineStyle = {
         fontFamily: 'Noto Sans JP Black',
         color: '#367FFF',
@@ -40,7 +40,9 @@ const MetaData = () => {
         position: 'fixed',
         top: '5rem',
         // Width of screen - side menu width / 2
-        left: '45%',
+        left: '50%',
+        transform:
+            sideMenuCollapsed === true ? 'translate(-50%)' : 'translate(-65%)',
         backgroundColor: 'rgba(38, 38, 38, 0.5)',
         borderRadius: '2.0rem',
         textAlign: 'left',
