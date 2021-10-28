@@ -42,7 +42,7 @@ const MetaData = () => {
         // Width of screen - side menu width / 2
         left: '50%',
         transform:
-            sideMenuCollapsed === true ? 'translate(-50%)' : 'translate(-65%)',
+            sideMenuCollapsed === true ? 'translate(-50%)' : 'translate(-68%)',
         backgroundColor: 'rgba(38, 38, 38, 0.5)',
         borderRadius: '2.0rem',
         textAlign: 'left',
