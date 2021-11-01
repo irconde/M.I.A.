@@ -2,7 +2,7 @@
  * Class that encompasses any secondary method to support the primary features of the client
  */
 import * as constants from './Constants';
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import randomColor from 'randomcolor';
 const cloneDeep = require('lodash.clonedeep');
 
@@ -411,9 +411,22 @@ export default class Utils {
         let fakeEvent = { ...e };
         fakeEvent.detail = { ...fakeEvent.detail, element: element };
         fakeEvent.target = element;
-
         return fakeEvent;
     }
+    /**
+     * usePrevious - For use in functional components to compare a current value with the next value in a
+     *               useEffect in the functional component.
+     * @param {Any} value - Any type allowed
+     * @returns {Ref.current}
+     */
+    static usePrevious = (value) => {
+        const ref = useRef();
+        useEffect(() => {
+            ref.current = value;
+        });
+        return ref.current;
+    };
+
     /**
      * getScreenSize - Simply retrieves the device's screen size that is accessing the application.
      *

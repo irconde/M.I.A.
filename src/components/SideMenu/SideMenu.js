@@ -12,6 +12,7 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './SaveButton';
+import Utils from '../../utils/Utils';
 
 const SideMenu = ({
     nextImageClick,
@@ -33,17 +34,9 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
-
     // This will create a ref to the previous value passed in, it how in
     // functional components you can get the prior state to see if a change occurred
-    const usePrevious = (value) => {
-        const ref = useRef();
-        useEffect(() => {
-            ref.current = value;
-        });
-        return ref.current;
-    };
-    const prevIsMenuCollapsed = usePrevious(collapsedSideMenu);
+    const prevIsMenuCollapsed = Utils.usePrevious(collapsedSideMenu);
     useEffect(() => {
         // If we didn't check to make sure the value changed with the previous value
         // The component would re-render infinitely and crash, as the useEffect runs every time

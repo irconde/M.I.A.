@@ -217,14 +217,26 @@ class App extends Component {
             this.props.selectedDetection &&
             this.props.collapsedSideMenu !== nextProps.collapsedSideMenu
         ) {
-            this.renderDetectionContextMenu(
-                Utils.mockCornerstoneEvent(
-                    {},
-                    this.props.selectedDetection.view === constants.viewport.TOP
-                        ? this.state.imageViewportTop
-                        : this.state.imageViewportSide
-                )
-            );
+            setTimeout(() => {
+                this.renderDetectionContextMenu(
+                    Utils.mockCornerstoneEvent(
+                        {},
+                        this.props.selectedDetection.view ===
+                            constants.viewport.TOP
+                            ? this.state.imageViewportTop
+                            : this.state.imageViewportSide
+                    )
+                );
+            }, 0);
+            // this.renderDetectionContextMenu(
+            //     Utils.mockCornerstoneEvent(
+            //         {},
+            //         this.props.selectedDetection.view === constants.viewport.TOP
+            //             ? nextState.imageViewportTop
+            //             : nextState.imageViewportSide
+            //     )
+            // );
+            return true;
         }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {

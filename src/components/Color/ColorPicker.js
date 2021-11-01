@@ -13,6 +13,7 @@ import {
     getZoomLevels,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
+import Utils from '../../utils/Utils';
 
 const ColorPicker = () => {
     const isVisible = useSelector(getColorPickerVisible);
@@ -20,14 +21,7 @@ const ColorPicker = () => {
     const zoomLevels = useSelector(getZoomLevels);
     const selectedViewport = useSelector(getSelectedDetectionViewport);
     const widthAndHeight = useSelector(getSelectedDetectionWidthAndHeight);
-    const usePrevious = (value) => {
-        const ref = useRef();
-        useEffect(() => {
-            ref.current = value;
-        });
-        return ref.current;
-    };
-    const previousWidthAndHeight = usePrevious(widthAndHeight);
+    const previousWidthAndHeight = Utils.usePrevious(widthAndHeight);
     const [containerStyle, setContainerStyle] = useState({});
     useEffect(() => {
         if (widthAndHeight !== null) {

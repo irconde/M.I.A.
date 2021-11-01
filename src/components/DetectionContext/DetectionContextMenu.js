@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
@@ -18,12 +18,14 @@ import {
     getSelectedDetectionColor,
     getSelectedDetectionType,
 } from '../../redux/slices/detections/detectionsSlice';
+import Utils from '../../utils/Utils';
 
 const Positioner = styled.div`
     position: absolute;
     top: ${(props) => `${props.position.top}px`};
     left: ${(props) => `${props.position.left}px`};
     z-index: 500;
+    transition: ${(props) => `${props.transitionStyle}`};
 `;
 const FlexContainer = styled.div`
     display: flex;
@@ -98,10 +100,19 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             );
         }
     };
+    const [transitionStyle, setTransitionStyle] = useState();
+    const prevIsVisible = Utils.usePrevious(isVisible);
+    useEffect(() => {
+        if (prevIsVisible !== isVisible) {
+            setTransitionStyle('');
+        } else {
+            setTransitionStyle('all 0.3s ease-in');
+        }
+    });
     const detectionType = useSelector(getSelectedDetectionType);
     if (isVisible === true) {
         return (
-            <Positioner position={position}>
+            <Positioner position={position} transitionStyle={transitionStyle}>
                 <FlexContainer>
                     <MainWidget>
                         <IconContainer
