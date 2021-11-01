@@ -106,7 +106,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
         if (prevIsVisible !== isVisible) {
             setTransitionStyle('');
         } else {
-            setTransitionStyle('all 0.3s ease-in');
+            setTransitionStyle('all 0.2s ease-in');
         }
     });
     const detectionType = useSelector(getSelectedDetectionType);
