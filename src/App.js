@@ -213,6 +213,19 @@ class App extends Component {
      * @returns {Boolean} True - to update | False - to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (
+            this.props.selectedDetection &&
+            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu
+        ) {
+            this.renderDetectionContextMenu(
+                Utils.mockCornerstoneEvent(
+                    {},
+                    this.props.selectedDetection.view === constants.viewport.TOP
+                        ? this.state.imageViewportTop
+                        : this.state.imageViewportSide
+                )
+            );
+        }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {
                 if (this.state.commandServer !== null) {
