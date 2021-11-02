@@ -285,7 +285,7 @@ class App extends Component {
         );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         this.state.imageViewportTop.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
@@ -327,7 +327,7 @@ class App extends Component {
         );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         this.state.imageViewportSide.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
@@ -367,7 +367,7 @@ class App extends Component {
         );
         this.state.imageViewportTop.removeEventListener(
             'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         this.state.imageViewportSide.removeEventListener(
             'cornerstoneimagerendered',
@@ -383,7 +383,7 @@ class App extends Component {
         );
         this.state.imageViewportSide.removeEventListener(
             'cornerstonetoolstouchpinch',
-            this.resetSelectedDetectionBoxes
+            this.hideContextMenu
         );
         if (this.state.commandServer !== null)
             this.state.commandServer.disconnect();
