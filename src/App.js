@@ -228,14 +228,6 @@ class App extends Component {
                     )
                 );
             }, 0);
-            // this.renderDetectionContextMenu(
-            //     Utils.mockCornerstoneEvent(
-            //         {},
-            //         this.props.selectedDetection.view === constants.viewport.TOP
-            //             ? nextState.imageViewportTop
-            //             : nextState.imageViewportSide
-            //     )
-            // );
             return true;
         }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
