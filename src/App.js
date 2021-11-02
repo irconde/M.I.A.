@@ -2136,7 +2136,9 @@ class App extends Component {
             this.resetCornerstoneTool();
             this.appUpdateImage();
         } else if (this.props.selectedDetection) {
-            setTimeout(() => this.renderDetectionContextMenu(e), 0);
+            setTimeout(() => {
+                this.renderDetectionContextMenu(e);
+            }, 5);
         }
     }
 
