@@ -7,6 +7,7 @@ import {
     getSelectedDetectionClassName,
     addMissMatchedClassName,
     getSelectedDetectionWidthAndHeight,
+    getSelectedDetectionType,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
     getColorPickerVisible,
@@ -22,13 +23,26 @@ const ColorPicker = () => {
     const zoomLevels = useSelector(getZoomLevels);
     const selectedViewport = useSelector(getSelectedDetectionViewport);
     const widthAndHeight = useSelector(getSelectedDetectionWidthAndHeight);
-    const previousWidthAndHeight = Utils.usePrevious(widthAndHeight);
+    const selectedDetectionType = useSelector(getSelectedDetectionType);
+    const usePrevious = (value) => {
+        const ref = useRef();
+        useEffect(() => {
+            ref.current = value;
+        });
+        return ref.current;
+    };
+    const previousWidthAndHeight = usePrevious(widthAndHeight);
     const [containerStyle, setContainerStyle] = useState({});
     useEffect(() => {
         if (widthAndHeight !== null) {
             if (previousWidthAndHeight !== widthAndHeight) {
                 // TODO: Derive formula to calculate scalar based on screen size and if possible pixel density
-                // OR: Use transform: translate(0..)
+                let menuOffset =
+                    selectedDetectionType === 'binary'
+                        ? 35
+                        : selectedDetectionType === 'bounding'
+                        ? 25
+                        : 15;
                 if (selectedViewport === constants.viewport.TOP) {
                     setContainerStyle({
                         position: 'absolute',
@@ -40,7 +54,7 @@ const ColorPicker = () => {
                         left:
                             detectionContextPosition.left +
                             zoomLevels.zoomLevelTop +
-                            25,
+                            menuOffset,
                     });
                 } else if (selectedViewport === constants.viewport.SIDE) {
                     setContainerStyle({
@@ -53,7 +67,7 @@ const ColorPicker = () => {
                         left:
                             detectionContextPosition.left +
                             zoomLevels.zoomLevelSide +
-                            25,
+                            menuOffset,
                     });
                 }
             }
