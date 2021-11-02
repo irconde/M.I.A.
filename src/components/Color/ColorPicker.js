@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TwitterPicker } from 'react-color';
 import { useDispatch, useSelector } from 'react-redux';
+import { detectionContextStyle } from '../../utils/Constants';
 import {
     getSelectedDetectionViewport,
     getSelectedDetectionClassName,
@@ -34,12 +35,12 @@ const ColorPicker = () => {
                         top:
                             detectionContextPosition.top +
                             zoomLevels.zoomLevelTop +
-                            widthAndHeight.height +
-                            2.25,
+                            detectionContextStyle.HEIGHT +
+                            10,
                         left:
                             detectionContextPosition.left +
                             zoomLevels.zoomLevelTop +
-                            widthAndHeight.width / 1.5,
+                            25,
                     });
                 } else if (selectedViewport === constants.viewport.SIDE) {
                     setContainerStyle({
@@ -47,11 +48,12 @@ const ColorPicker = () => {
                         top:
                             detectionContextPosition.top +
                             zoomLevels.zoomLevelSide +
-                            widthAndHeight.height / 2,
+                            detectionContextStyle.HEIGHT +
+                            10,
                         left:
                             detectionContextPosition.left +
                             zoomLevels.zoomLevelSide +
-                            widthAndHeight.height / 3.75,
+                            25,
                     });
                 }
             }
