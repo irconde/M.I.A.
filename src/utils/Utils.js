@@ -401,6 +401,7 @@ export default class Utils {
         viewportInfo['offset'] = offsetLeft;
         return viewportInfo;
     }
+
     /**
      * Used to mock CustomEvents for mouse events that cornerstone does not have custom events for
      * such as 'mouseup'
@@ -413,6 +414,7 @@ export default class Utils {
         fakeEvent.target = element;
         return fakeEvent;
     }
+
     /**
      * usePrevious - For use in functional components to compare a current value with the next value in a
      *               useEffect in the functional component.

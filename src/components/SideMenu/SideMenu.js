@@ -34,8 +34,6 @@ const SideMenu = ({
         width: '100%',
         height: 'inherit',
     };
-    // This will create a ref to the previous value passed in, it how in
-    // functional components you can get the prior state to see if a change occurred
     const prevIsMenuCollapsed = Utils.usePrevious(collapsedSideMenu);
     useEffect(() => {
         // If we didn't check to make sure the value changed with the previous value
