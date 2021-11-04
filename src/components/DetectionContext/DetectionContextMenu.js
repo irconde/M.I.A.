@@ -13,6 +13,7 @@ import {
     getEditionMode,
     getIsDetectionContextVisible,
     getDetectionContextPosition,
+    getRecentScroll,
 } from '../../redux/slices/ui/uiSlice';
 import {
     getSelectedDetectionColor,
@@ -91,6 +92,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
     const position = useSelector(getDetectionContextPosition);
+    const recentScroll = useSelector(getRecentScroll);
     const handleClick = (type) => {
         if ([...Object.values(constants.editionMode)].includes(type)) {
             setSelectedOption(type);
@@ -110,7 +112,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
         }
     });
     const detectionType = useSelector(getSelectedDetectionType);
-    if (isVisible === true) {
+    if (isVisible === true && !recentScroll) {
         return (
             <Positioner position={position} transitionStyle={transitionStyle}>
                 <FlexContainer>

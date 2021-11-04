@@ -80,6 +80,7 @@ import {
     setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
+    updateRecentScroll,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -151,6 +152,7 @@ class App extends Component {
         this.onMouseClicked = this.onMouseClicked.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
+        this.onMouseWheel = this.onMouseWheel.bind(this);
         this.resetSelectedDetectionBoxes =
             this.resetSelectedDetectionBoxes.bind(this);
         this.hideContextMenu = this.hideContextMenu.bind(this);
@@ -283,6 +285,11 @@ class App extends Component {
             'cornerstonetoolsmousewheel',
             this.resetSelectedDetectionBoxes
         );
+
+        this.state.imageViewportTop.addEventListener(
+            'cornerstonetoolsmousewheel',
+            this.onMouseWheel
+        );
         this.state.imageViewportTop.addEventListener(
             'cornerstonetoolstouchpinch',
             this.hideContextMenu
@@ -325,6 +332,11 @@ class App extends Component {
             'cornerstonetoolsmousewheel',
             this.resetSelectedDetectionBoxes
         );
+
+        this.state.imageViewportSide.addEventListener(
+            'cornerstonetoolsmousewheel',
+            this.onMouseWheel
+        );
         this.state.imageViewportSide.addEventListener(
             'cornerstonetoolstouchpinch',
             this.hideContextMenu
@@ -366,6 +378,10 @@ class App extends Component {
             this.resetSelectedDetectionBoxes
         );
         this.state.imageViewportTop.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.onMouseWheel
+        );
+        this.state.imageViewportTop.removeEventListener(
             'cornerstonetoolstouchpinch',
             this.hideContextMenu
         );
@@ -380,6 +396,10 @@ class App extends Component {
         this.state.imageViewportSide.removeEventListener(
             'cornerstonetoolsmousewheel',
             this.resetSelectedDetectionBoxes
+        );
+        this.state.imageViewportSide.removeEventListener(
+            'cornerstonetoolsmousewheel',
+            this.onMouseWheel
         );
         this.state.imageViewportSide.removeEventListener(
             'cornerstonetoolstouchpinch',
@@ -2717,6 +2737,23 @@ class App extends Component {
     }
 
     /**
+     * onMouseWheel - Called when mouse wheel event is fired.
+     *
+     * @returns {None} None
+     */
+    onMouseWheel() {
+        if (this.props.selectedDetection !== null) {
+            let timer;
+            clearTimeout(timer);
+
+            this.props.updateRecentScroll(true);
+            timer = setTimeout(() => {
+                this.props.updateRecentScroll(false); // if it makes it to the timeout, it will set recentScroll to false
+            }, 250);
+        }
+    }
+
+    /**
      * onMouseLeave - Event handler for if the mouse leaves the window. It mainly serves
      *                as a way to make sure a user does not try to drag a detection out of
      *                the window.
@@ -2875,6 +2912,7 @@ const mapDispatchToProps = {
     setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
+    updateRecentScroll,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

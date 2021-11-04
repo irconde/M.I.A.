@@ -35,6 +35,7 @@ const initialState = {
     colorPickerVisible: false,
     numberOfFiles: 0,
     localFileOpen: false,
+    recentScroll: false,
 };
 
 const uiSlice = createSlice({
@@ -401,6 +402,13 @@ const uiSlice = createSlice({
         setLocalFileOpen: (state, action) => {
             state.localFileOpen = action.payload;
         },
+        /**
+         * updateRecentScroll - Update scroll flag to reset to true before waiting 1000ms and resetting to false
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        updateRecentScroll: (state, action) => {
+            state.recentScroll = action.payload;
+        },
     },
 });
 
@@ -576,6 +584,7 @@ export const getReceivedTime = (state) => state.ui.receiveTime;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
 export const getLocalFileOpen = (state) => state.ui.localFileOpen;
+export const getRecentScroll = (state) => state.ui.recentScroll;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -609,6 +618,7 @@ export const {
     setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
+    updateRecentScroll,
 } = uiSlice.actions;
 
 // Export the reducer for the store
