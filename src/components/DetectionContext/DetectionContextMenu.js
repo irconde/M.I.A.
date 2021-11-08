@@ -26,8 +26,8 @@ const Positioner = styled.div`
     top: ${(props) => `${props.position.top}px`};
     left: ${(props) => `${props.position.left}px`};
     z-index: 500;
-    transition: ${(props) => `${props.transitionStyle}`};
 `;
+
 const FlexContainer = styled.div`
     display: flex;
     align-items: center;
