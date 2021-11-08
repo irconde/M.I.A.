@@ -31,8 +31,8 @@ const Positioner = styled.div`
 const FlexContainer = styled.div`
     display: flex;
     align-items: center;
-    width: ${detectionContextStyle.WIDTH}px;
 `;
+
 const MainWidget = styled.div`
     display: flex;
     align-items: center;
