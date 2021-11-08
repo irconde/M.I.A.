@@ -137,6 +137,7 @@ class App extends Component {
             activeViewport: 'dicomImageLeft',
             tapDetector: new TapDetector(),
             commandServer: null,
+            timer: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
@@ -2743,13 +2744,13 @@ class App extends Component {
      */
     onMouseWheel() {
         if (this.props.selectedDetection !== null) {
-            let timer;
-            clearTimeout(timer);
-
             this.props.updateRecentScroll(true);
-            timer = setTimeout(() => {
-                this.props.updateRecentScroll(false); // if it makes it to the timeout, it will set recentScroll to false
-            }, 250);
+            clearTimeout(this.state.timer);
+            this.setState({
+                timer: setTimeout(() => {
+                    this.props.updateRecentScroll(false);
+                }, 250),
+            });
         }
     }
 
