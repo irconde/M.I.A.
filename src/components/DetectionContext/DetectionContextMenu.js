@@ -19,7 +19,6 @@ import {
     getSelectedDetectionColor,
     getSelectedDetectionType,
 } from '../../redux/slices/detections/detectionsSlice';
-import Utils from '../../utils/Utils';
 
 const Positioner = styled.div`
     position: absolute;
@@ -102,19 +101,11 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             );
         }
     };
-    const [transitionStyle, setTransitionStyle] = useState();
-    const prevIsVisible = Utils.usePrevious(isVisible);
-    useEffect(() => {
-        if (prevIsVisible !== isVisible) {
-            setTransitionStyle('');
-        } else {
-            setTransitionStyle('all 0.2s ease-in');
-        }
-    });
+
     const detectionType = useSelector(getSelectedDetectionType);
     if (isVisible === true && !recentScroll) {
         return (
-            <Positioner position={position} transitionStyle={transitionStyle}>
+            <Positioner position={position}>
                 <FlexContainer>
                     <MainWidget>
                         <IconContainer
