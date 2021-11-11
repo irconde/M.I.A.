@@ -1,5 +1,7 @@
 {
     "name": "dna-client-ui",
+    "productName": "dna-client-ui",
+    "main": "electron/main.js",
     "version": "0.1.0",
     "private": true,
     "dependencies": {
@@ -45,6 +47,8 @@
     },
     "scripts": {
         "start": "npm-run-all -p load-env react",
+        "start-electron": "set BROWSER=none && react-scripts start",
+        "load-electron": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
         "load-env": "node -r dotenv/config",
         "react": "react-scripts start",
         "build": "react-scripts build",
@@ -70,6 +74,7 @@
     "devDependencies": {
         "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
         "babel-eslint": "^10.1.0",
+        "electron": "^15.3.1",
         "eslint": "^7.19.0",
         "eslint-config-prettier": "^7.2.0",
         "eslint-plugin-import": "^2.22.1",
