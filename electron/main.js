@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, screen } = require('electron');
 const path = require('path');
 const url = require('url');
 let mainWindow;
@@ -10,8 +10,10 @@ function createWindow() {
             protocol: 'file:',
             slashes: true,
         });
-    // TODO: Dynamic window width based on user's screen size
-    mainWindow = new BrowserWindow({ width: 1920, height: 1080 });
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
+    mainWindow = new BrowserWindow({ width, height });
+    mainWindow.maximize();
     mainWindow.loadURL(startUrl);
     mainWindow.on('closed', function () {
         mainWindow = null;
