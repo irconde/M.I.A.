@@ -47,8 +47,12 @@
     },
     "scripts": {
         "start": "npm-run-all -p load-env react",
-        "start-electron": "set BROWSER=none && react-scripts start",
-        "load-electron": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+        "start-electron": "run-script-os",
+        "start-electron:win32": "set BROWSER=none && react-scripts start",
+        "start-electron:darwin:linux": "export BROWSER=none && react-scripts start",
+        "load-electron": "run-script-os",
+        "load-electron:win32": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+        "load-electron:darwin:linux": "export ELECTRON_START_URL=http://localhost:3000 && electron .",
         "load-env": "node -r dotenv/config",
         "react": "react-scripts start",
         "build": "react-scripts build",
@@ -81,6 +85,7 @@
         "eslint-plugin-prettier": "^3.3.1",
         "eslint-plugin-react": "^7.22.0",
         "jsdoc": "^3.6.7",
-        "prettier": "^2.2.1"
+        "prettier": "^2.2.1",
+        "run-script-os": "^1.1.6"
     }
 }
