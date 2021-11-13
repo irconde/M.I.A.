@@ -1,16 +1,17 @@
 {
     "name": "dna-client-ui",
     "productName": "dna-client-ui",
-    "main": "electron/main.js",
+    "main": "public/electron.js",
     "version": "0.1.0",
     "private": true,
+    "homepage": "./",
     "dependencies": {
         "@babel/core": "^7.13.0",
         "@emotion/react": "^11.4.1",
         "@emotion/styled": "^11.3.0",
         "@material-ui/core": "^4.12.2",
         "@material-ui/icons": "^4.11.2",
-        "@mui/material": "^5.0.3",
+        "@mui/material": "^5.0.0",
         "@reduxjs/toolkit": "^1.5.0",
         "@testing-library/jest-dom": "^5.11.9",
         "@testing-library/react": "^11.2.5",
@@ -56,9 +57,22 @@
         "load-env": "node -r dotenv/config",
         "react": "react-scripts start",
         "build": "react-scripts build",
+        "build-electron": "electron-builder",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "lint": "eslint \"src/**/*.{js,jsx}\" --quiet"
+    },
+    "build": {
+        "appId": "edu.ualr.dna.pilot.gui",
+        "files": [
+            "build/**/*",
+            "node_modules/**/*",
+            "dist/**/*",
+            "package.json"
+        ],
+        "directories": {
+            "buildResources": "assets"
+        }
     },
     "eslintConfig": {
         "extends": "react-app"
@@ -79,6 +93,7 @@
         "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
         "babel-eslint": "^10.1.0",
         "electron": "^15.3.1",
+        "electron-builder": "^22.13.1",
         "eslint": "^7.19.0",
         "eslint-config-prettier": "^7.2.0",
         "eslint-plugin-import": "^2.22.1",
