@@ -1,31 +1,34 @@
-const { app, BrowserWindow, screen } = require('electron');
+const electron = require('electron');
+const app = electron.app;
+const BrowserWindow = electron.BrowserWindow;
+const screen = electron.screen;
 const path = require('path');
-const url = require('url');
+const isDev = require('electron-is-dev');
+
 let mainWindow;
+
 function createWindow() {
-    const startUrl =
-        process.env.ELECTRON_START_URL ||
-        url.format({
-            pathname: path.join(__dirname, '../index.html'),
-            protocol: 'file:',
-            slashes: true,
-        });
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
     mainWindow = new BrowserWindow({ width, height });
+    mainWindow.loadURL(
+        isDev
+            ? 'http://localhost:3000'
+            : `file://${path.join(__dirname, '../build/index.html')}`
+    );
     mainWindow.maximize();
-    mainWindow.loadURL(startUrl);
-    mainWindow.on('closed', function () {
-        mainWindow = null;
-    });
+    mainWindow.on('closed', () => (mainWindow = null));
 }
+
 app.on('ready', createWindow);
-app.on('window-all-closed', function () {
+
+app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
-app.on('activate', function () {
+
+app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
     }
