@@ -18,6 +18,7 @@ function createWindow() {
     );
     mainWindow.maximize();
     mainWindow.on('closed', () => (mainWindow = null));
+    if (!isDev) mainWindow.removeMenu();
 }
 
 app.on('ready', createWindow);
