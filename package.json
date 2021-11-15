@@ -43,8 +43,7 @@
         "react-scripts": "^4.0.1",
         "socket.io-client": "^2.3.0",
         "styled-components": "^5.2.1",
-        "uuid": "^8.3.2",
-        "wait-on": "^6.0.0"
+        "uuid": "^8.3.2"
     },
     "resolutions": {
         "react-dev-utils": "^10.2.1"
