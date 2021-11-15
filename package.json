@@ -52,7 +52,7 @@
         "start": "npm-run-all -p load-env react",
         "start-electron": "run-script-os",
         "start-electron:win32": "set BROWSER=none && concurrently \"npm run start\" \"npm run load-electron\"",
-        "start-electron:darwin:linux": "export BROWSER=none && react-scripts start",
+        "start-electron:darwin:linux": "export BROWSER=none && concurrently \"npm run start\" \"npm run load-electron\"",
         "load-electron": "electron .",
         "load-env": "node -r dotenv/config",
         "react": "react-scripts start",
