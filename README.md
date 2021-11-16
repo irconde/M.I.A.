@@ -18,7 +18,7 @@ Additionally, the Pilot GUI is intended to connect to, and work with a remote se
 
 In order to run the application locally, create a `.env` file at the root of the project.
 
-Add the environment variables below to this file:
+If not already created, add the environment variables below to this file:
 
 ```
 REACT_APP_COMMAND_SERVER_IP=127.0.0.1
@@ -53,10 +53,12 @@ Same as above but this time running the command:
 npm run start-electron
 ```
 
-If you wish to use a different IP than the one contained in the `.env`: Note that we use the environment variable REACT_APP_COMMAND_SERVER to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service running on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
+#### Specify Command Server
+
+If you wish to use a different IP than the one contained in the `.env`. Then we use the environment variable `REACT_APP_COMMAND_SERVER` and `REACT_APP_COMMAND_SERVER_PORT` to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service running on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
 
 ```
-REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 npm start
+REACT_APP_COMMAND_SERVER=http://127.0.0.1 REACT_APP_COMMAND_SERVER_PORT=4001 npm start
 ```
 
 ## Building the client
@@ -90,7 +92,7 @@ This will create an installer, based on the Operating System built on, in the `.
 
 You can test the client developed in this project using a mock server that can be accessed in [this code repository](https://bitbucket.org/eac-ualr/dna-atr-socket.io-server/src/master/). This server acts as substitute of the actual command server of the Pilot system. It sends a ORA file to the react-based client when the client requests the current file.
 
-The files being sent are located in the "static/img" directory.
+The files being sent are located in the `static/img` directory.
 
 ```
 <ROOT>\static\img
@@ -98,7 +100,7 @@ The files being sent are located in the "static/img" directory.
 
 Each file is sent when the client requests the current file from the command server. Optionally, you can set it to reset back at the start of the index and send the same files.
 
-Images returned from the Pilot GUI are saved in the "returned" image folder
+Images returned from the Pilot GUI are saved in the `static/returned` image folder
 
 ```
 <ROOT>\static\returned
