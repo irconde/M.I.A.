@@ -55,10 +55,10 @@ npm run start-electron
 
 #### Specify Command Server
 
-If you wish to use a different IP than the one contained in the `.env`. Then we use the environment variable `REACT_APP_COMMAND_SERVER` and `REACT_APP_COMMAND_SERVER_PORT` to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service running on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
+If you wish to use a different IP than the one contained in the `.env`. Then we use the environment variable `REACT_APP_COMMAND_SERVER_IP` and `REACT_APP_COMMAND_SERVER_PORT` to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service running on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
 
 ```
-REACT_APP_COMMAND_SERVER=http://127.0.0.1 REACT_APP_COMMAND_SERVER_PORT=4001 npm start
+REACT_APP_COMMAND_SERVER_IP=127.0.0.1 REACT_APP_COMMAND_SERVER_PORT=4001 npm start
 ```
 
 ## Building the client
