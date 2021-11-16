@@ -64,7 +64,19 @@
         "lint": "eslint \"src/**/*.{js,jsx}\" --quiet"
     },
     "build": {
-        "appId": "edu.ualr.eac.dna.pilot.gui"
+        "appId": "edu.ualr.eac.dna.pilot.gui",
+        "directories": {
+            "buildResources": "build"
+        },
+        "files": [
+            "build/**/*"
+        ],
+        "win": {
+            "icon": "build/icon.ico"
+        },
+        "mac": {
+            "icon": "build/icon.icns"
+        }
     },
     "eslintConfig": {
         "extends": "react-app"

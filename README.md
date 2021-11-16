@@ -1,4 +1,4 @@
-# Pilot GUI version 3.5.0
+# Pilot GUI version 3.6.0a
 
 The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple detections or objects identified as potentially of interest by the system itself.
 
@@ -21,8 +21,10 @@ In order to run the application locally, create a `.env` file at the root of the
 Add the environment variables below to this file:
 
 ```
-REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001
+REACT_APP_COMMAND_SERVER_IP=127.0.0.1
+REACT_APP_COMMAND_SERVER_PORT=4001
 FAST_REFRESH=false
+ELECTRON_START_URL=http://127.0.0.1:3000
 ```
 
 ## Installation of dependencies
@@ -35,19 +37,31 @@ npm install
 
 ## Starting the client in development mode
 
+### Web Client
+
 Again, using terminal and being at the root folder of the project, it is possible to start the client in development mode by using this command:
 
 ```
-REACT_APP_COMMAND_SERVER=http://<SERVER_IP>:<SERVER_PORT> npm start
+npm start
 ```
 
-Note that we use the environment variable REACT_APP_COMMAND_SERVER to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service runing on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
+### Desktop Client
+
+Same as above but this time running the command:
+
+```
+npm run start-electron
+```
+
+If you wish to use a different IP than the one contained in the `.env`: Note that we use the environment variable REACT_APP_COMMAND_SERVER to launch the client with a given ip and port number. Thus, for example, if the client has to be connected to a service running on a machine with the 127.0.0.1 ip number and through the 4001 port, the command to be used is:
 
 ```
 REACT_APP_COMMAND_SERVER=http://127.0.0.1:4001 npm start
 ```
 
 ## Building the client
+
+### Web Client
 
 To create an optimized production build run from the terminal the following command:
 
@@ -61,6 +75,16 @@ As a result, a build folder is created with all the necessary files. At that poi
 yarn global add serve
 serve -s build
 ```
+
+### Desktop Client
+
+To create an optimized production build run from the terminal the following command:
+
+```
+npm run build-electron
+```
+
+This will create an installer, based on the Operating System built on, in the `./dist` folder. For e.g., built on Windows results in `./dist/Pilot GUI Setup version.number.exe`. Once installed, you can simply launch the Desktop like any other application.
 
 ## Mock file server
 
