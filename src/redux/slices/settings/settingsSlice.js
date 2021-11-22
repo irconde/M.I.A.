@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { createSlice } from '@reduxjs/toolkit';
 import { Cookies } from 'react-cookie';
 import { COOKIE, SETTINGS } from '../../../utils/Constants';
@@ -24,7 +25,9 @@ const defaultSettings = {
     remoteOrLocal: true,
     firstDisplaySettings: true,
     deviceType: '',
+    hasFileOutput: false,
 };
+
 if (cookieData !== undefined) {
     settings = cookieData;
 } else {
@@ -51,6 +54,8 @@ const settingsSlice = createSlice({
          */
         setSettings: (state, action) => {
             state.settings = action.payload;
+            state.settings.hasFileOutput =
+                action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
@@ -69,6 +74,8 @@ const settingsSlice = createSlice({
                 }
                 // detection[key] = update[key];
             }
+            state.settings.hasFileOutput =
+                action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
@@ -203,6 +210,20 @@ export const getSettings = (state) => state.settings.settings;
  */
 export const getRemoteOrLocal = (state) =>
     state.settings.settings.remoteOrLocal;
+/**
+ * getHasFileOutput - Boolean value for whether file output is clear or not
+ * @param {Object} state
+ * @returns {Boolean}
+ */
+export const getHasFileOutput = (state) =>
+    state.settings.settings.hasFileOutput;
+/**
+ * getLocalFileOutput - String value for file output
+ * @param {Object} state
+ * @returns {String}
+ */
+export const getLocalFileOutput = (state) =>
+    state.settings.settings.localFileOutput;
 /**
  * getRemoteConnectionInfo - Returns the remote connection info: ip, port, autoconnect.
  * @param {Object} state

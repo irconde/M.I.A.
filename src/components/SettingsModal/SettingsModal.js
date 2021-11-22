@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -28,6 +28,7 @@ import {
     getSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
 import {
+    getLocalFileOutput,
     getSettings,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
@@ -46,6 +47,7 @@ import Utils from '../../utils/Utils';
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
+    const initLocalFileOutput = useSelector(getLocalFileOutput);
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -54,7 +56,9 @@ const SettingsModal = (props) => {
     const [annotationsFormat, setAnnotationsFormat] = useState(
         settings.annotationsFormat
     );
-    const [localFileOutput, setLocalFileOutput] = useState('');
+    const [localFileOutput, setLocalFileOutput] = useState(
+        initLocalFileOutput !== '' ? initLocalFileOutput : ''
+    );
     const [fileSuffix, setFileSuffix] = useState('');
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
@@ -80,6 +84,8 @@ const SettingsModal = (props) => {
         var path = 'C:/user_example/test_output_folder';
         return path;
     };
+
+    useEffect(() => {}, []);
 
     /**
      * handleSnackBarClose - Event handler for when the snackbar closes

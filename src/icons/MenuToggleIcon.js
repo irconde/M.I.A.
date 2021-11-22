@@ -5,10 +5,12 @@ import {
     getReceivedTime,
     toggleCollapsedSideMenu,
 } from '../redux/slices/ui/uiSlice';
+import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
 
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const visible = useSelector(getReceivedTime);
+    const hasFileOutput = useSelector(getHasFileOutput);
     const toggleClickHandler = () => {
         dispatch(toggleCollapsedSideMenu(props.cornerstone));
     };
@@ -16,7 +18,7 @@ const MenuToggleIcon = (props) => {
         ...props.style,
         cursor: 'pointer',
     };
-    if (visible !== null) {
+    if (visible !== null || hasFileOutput) {
         return (
             <div style={divStyle} onClick={toggleClickHandler}>
                 <svg

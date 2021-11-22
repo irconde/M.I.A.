@@ -1,7 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
-import { getRemoteOrLocal } from '../redux/slices/settings/settingsSlice';
+import {
+    getHasFileOutput,
+    getRemoteOrLocal,
+} from '../redux/slices/settings/settingsSlice';
 import { getNumberOfFiles, getLocalFileOpen } from '../redux/slices/ui/uiSlice';
 
 /**
@@ -13,6 +16,7 @@ const NoFileSign = () => {
     const localFileOpen = useSelector(getLocalFileOpen);
     let isVisible = numberOfFiles <= 0 ? false : true;
     const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const hasFileOutput = useSelector(getHasFileOutput);
     const paragraphStyle = {
         fontWeight: '500',
         marginTop: '0.0rem',
@@ -46,7 +50,8 @@ const NoFileSign = () => {
                 <p style={paragraphStyle}>
                     {' '}
                     ·{' '}
-                    {remoteOrLocal === true
+                    {remoteOrLocal === true ||
+                    (remoteOrLocal === false && hasFileOutput === true)
                         ? 'No file available'
                         : 'Select a file'}{' '}
                     ·

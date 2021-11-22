@@ -2801,7 +2801,8 @@ class App extends Component {
                             this.renderDetectionContextMenu
                         }
                     />
-                    {this.props.remoteOrLocal === true ? (
+                    {this.props.remoteOrLocal === true ||
+                    (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
                         <NextButton
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
@@ -2861,6 +2862,7 @@ const mapStateToProps = (state) => {
         firstDisplaySettings: settings.settings.firstDisplaySettings,
         annotationsFormat: settings.settings.annotationsFormat,
         remoteOrLocal: settings.settings.remoteOrLocal,
+        hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
     };
 };

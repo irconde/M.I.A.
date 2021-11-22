@@ -7,12 +7,18 @@ import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
-import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
+import {
+    getRemoteOrLocal,
+    getHasFileOutput,
+    getLocalFileOutput,
+} from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const hasFileOutput = useSelector(getHasFileOutput);
+    const localFileOutput = useSelector(getLocalFileOutput);
 
     const {
         processingFile,
@@ -100,10 +106,14 @@ const TopBar = (props) => {
         },
     };
 
+    console.log('Remote/Local: ', remoteOrLocal);
+    console.log('hasFileOutput: ', hasFileOutput);
+
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
@@ -132,7 +142,8 @@ const TopBar = (props) => {
                 {processingFile} &nbsp;
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <FileQueueIcon
                             title="Number of Files"
@@ -165,12 +176,16 @@ const TopBar = (props) => {
     ) : (
         <div>
             <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer} &nbsp; &nbsp;&nbsp;
+                        {connectedServer
+                            ? connectedServer
+                            : localFileOutput}{' '}
+                        &nbsp; &nbsp;&nbsp;
                     </React.Fragment>
                 ) : (
                     <div
@@ -191,7 +206,8 @@ const TopBar = (props) => {
                 {processingFile} &nbsp;
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <FileQueueIcon
                             title="Number of Files"
