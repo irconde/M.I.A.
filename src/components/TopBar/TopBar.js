@@ -106,9 +106,6 @@ const TopBar = (props) => {
         },
     };
 
-    console.log('Remote/Local: ', remoteOrLocal);
-    console.log('hasFileOutput: ', hasFileOutput);
-
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
