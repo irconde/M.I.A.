@@ -44,6 +44,7 @@ import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 import { SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
+const { ipcRenderer } = window.require('electron');
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
@@ -616,8 +617,15 @@ const SettingsModal = (props) => {
                                     disabled={remoteOrLocal}
                                     variant="outlined"
                                     size="medium"
+                                    id="btnFolder"
                                     onClick={() => {
-                                        setLocalFileOutput(getPath());
+                                        //setLocalFileOutput(getPath());
+                                        console.log(
+                                            ipcRenderer.sendSync(
+                                                'test-message',
+                                                'pong'
+                                            )
+                                        );
                                     }}>
                                     Select Folder
                                 </Button>
