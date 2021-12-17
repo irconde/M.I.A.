@@ -47,16 +47,10 @@ app.on('activate', () => {
     }
 });
 
-<<<<<<< HEAD
 // TODO: Implement constant sharing between React and Electron for channel names
 ipcMain.handle('test-message', async (event, args) => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
     });
     return result;
-=======
-ipcMain.on('test-message', (event, args) => {
-    console.log(args);
-    event.reply('test-message', 'pong');
->>>>>>> 75550b6 (Testing of React making a call to the Electron module. Electron module recieves and console logs but the React app, renderer, freezes afterwards.)
 });
