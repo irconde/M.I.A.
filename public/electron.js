@@ -47,10 +47,10 @@ app.on('activate', () => {
     }
 });
 
+// TODO: Implement constant sharing between React and Electron for channel names
 ipcMain.handle('test-message', async (event, args) => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
     });
-    console.log(result);
     return result;
 });

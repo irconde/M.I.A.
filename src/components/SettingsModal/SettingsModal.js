@@ -602,6 +602,7 @@ const SettingsModal = (props) => {
                                                     : '#ffffff',
                                         }}
                                     />
+                                    {/* TODO: For a user typing a directory, verify it exists when finished typing */}
                                     <TextField
                                         required
                                         fullWidth={true}
@@ -632,9 +633,14 @@ const SettingsModal = (props) => {
                                                 )
                                                 .then((result) => {
                                                     console.log(result);
-                                                    setLocalFileOutput(
-                                                        result.filePaths[0]
-                                                    );
+                                                    if (
+                                                        result.canceled ===
+                                                        false
+                                                    ) {
+                                                        setLocalFileOutput(
+                                                            result.filePaths[0]
+                                                        );
+                                                    }
                                                 })
                                                 .catch((err) => {
                                                     console.log(err);
