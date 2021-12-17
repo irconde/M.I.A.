@@ -45,7 +45,11 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.on('test-message', (event, args) => {
-    console.log(args);
-    event.reply('test-message', 'pong');
+ipcMain.handle('test-message', async (event, args) => {
+    const myPromise = new Promise((resolve) => {
+        console.log(args);
+        args = [[...args], 'pong'];
+        resolve(args);
+    });
+    return myPromise;
 });

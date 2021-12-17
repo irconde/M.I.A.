@@ -620,12 +620,11 @@ const SettingsModal = (props) => {
                                     id="btnFolder"
                                     onClick={() => {
                                         //setLocalFileOutput(getPath());
-                                        console.log(
-                                            ipcRenderer.sendSync(
-                                                'test-message',
-                                                'pong'
-                                            )
-                                        );
+                                        ipcRenderer
+                                            .invoke('test-message', 'ping')
+                                            .then((result) => {
+                                                console.log(result);
+                                            });
                                     }}>
                                     Select Folder
                                 </Button>
