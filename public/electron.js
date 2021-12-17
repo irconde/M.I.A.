@@ -5,6 +5,7 @@ const BrowserWindow = electron.BrowserWindow;
 const screen = electron.screen;
 const path = require('path');
 const isDev = require('electron-is-dev');
+const fs = require('fs');
 
 let mainWindow;
 
@@ -46,10 +47,12 @@ app.on('activate', () => {
 });
 
 ipcMain.handle('test-message', async (event, args) => {
-    const myPromise = new Promise((resolve) => {
-        console.log(args);
-        args = [[...args], 'pong'];
-        resolve(args);
+    console.log(args);
+    const myPromise = new Promise((resolve, reject) => {
+        fs.appendFile('test.txt', args, (err) => {
+            if (err) reject(err);
+            else resolve(`File test.txt saved!`);
+        });
     });
     return myPromise;
 });

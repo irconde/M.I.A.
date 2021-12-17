@@ -621,9 +621,15 @@ const SettingsModal = (props) => {
                                     onClick={() => {
                                         //setLocalFileOutput(getPath());
                                         ipcRenderer
-                                            .invoke('test-message', 'ping')
+                                            .invoke(
+                                                'test-message',
+                                                'test file text'
+                                            )
                                             .then((result) => {
                                                 console.log(result);
+                                            })
+                                            .catch((err) => {
+                                                console.log(err);
                                             });
                                     }}>
                                     Select Folder
