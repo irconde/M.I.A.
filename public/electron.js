@@ -3,6 +3,7 @@ const ipcMain = electron.ipcMain;
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const screen = electron.screen;
+const dialog = electron.dialog;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -47,12 +48,9 @@ app.on('activate', () => {
 });
 
 ipcMain.handle('test-message', async (event, args) => {
-    console.log(args);
-    const myPromise = new Promise((resolve, reject) => {
-        fs.appendFile('test.txt', args, (err) => {
-            if (err) reject(err);
-            else resolve(`File test.txt saved!`);
-        });
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
     });
-    return myPromise;
+    console.log(result);
+    return result;
 });

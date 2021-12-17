@@ -624,7 +624,6 @@ const SettingsModal = (props) => {
                                     size="medium"
                                     id="btnFolder"
                                     onClick={() => {
-                                        //setLocalFileOutput(getPath());
                                         if (isElectron()) {
                                             ipcRenderer
                                                 .invoke(
@@ -633,6 +632,9 @@ const SettingsModal = (props) => {
                                                 )
                                                 .then((result) => {
                                                     console.log(result);
+                                                    setLocalFileOutput(
+                                                        result.filePaths[0]
+                                                    );
                                                 })
                                                 .catch((err) => {
                                                     console.log(err);
