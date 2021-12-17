@@ -44,7 +44,12 @@ import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 import { SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
-const { ipcRenderer } = window.require('electron');
+import isElectron from 'is-electron';
+let ipcRenderer;
+if (isElectron()) {
+    const electron = window.require('electron');
+    ipcRenderer = electron.ipcRenderer;
+}
 
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
@@ -620,17 +625,19 @@ const SettingsModal = (props) => {
                                     id="btnFolder"
                                     onClick={() => {
                                         //setLocalFileOutput(getPath());
-                                        ipcRenderer
-                                            .invoke(
-                                                'test-message',
-                                                'test file text'
-                                            )
-                                            .then((result) => {
-                                                console.log(result);
-                                            })
-                                            .catch((err) => {
-                                                console.log(err);
-                                            });
+                                        if (isElectron()) {
+                                            ipcRenderer
+                                                .invoke(
+                                                    'test-message',
+                                                    'test file text'
+                                                )
+                                                .then((result) => {
+                                                    console.log(result);
+                                                })
+                                                .catch((err) => {
+                                                    console.log(err);
+                                                });
+                                        }
                                     }}>
                                     Select Folder
                                 </Button>
