@@ -91,8 +91,6 @@ const SettingsModal = (props) => {
         return path;
     };
 
-    useEffect(() => {}, []);
-
     /**
      * handleSnackBarClose - Event handler for when the snackbar closes
      *
@@ -412,6 +410,7 @@ const SettingsModal = (props) => {
             remoteWorkRow: {
                 display: 'flex',
                 justifyContent: 'space-between',
+                marginTop: '2rem',
             },
             displayListSectionItem: {
                 display: 'flex',
@@ -450,25 +449,34 @@ const SettingsModal = (props) => {
                                 <p className={classes.optionText}>
                                     Work connected to a remote service
                                 </p>
-                                <div className={classes.switchContainer}>
-                                    <Switch
-                                        checked={remoteOrLocal}
-                                        size="small"
-                                        onChange={() =>
-                                            setRemoteOrLocal(!remoteOrLocal)
-                                        }
-                                        color="primary"
-                                        name="remoteOrLocal"
-                                        inputProps={{
-                                            'aria-label': 'secondary checkbox',
-                                        }}
-                                    />
-                                </div>
+                                {isElectron() ? (
+                                    <div className={classes.switchContainer}>
+                                        <Switch
+                                            checked={remoteOrLocal}
+                                            size="small"
+                                            onChange={() =>
+                                                setRemoteOrLocal(!remoteOrLocal)
+                                            }
+                                            color="primary"
+                                            name="remoteOrLocal"
+                                            inputProps={{
+                                                'aria-label':
+                                                    'secondary checkbox',
+                                            }}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div></div>
+                                )}
                             </div>
-                            <p className={classes.greyText}>
-                                Choose the option if you want to receive/send
-                                images from/to a server
-                            </p>
+                            {isElectron() ? (
+                                <p className={classes.greyText}>
+                                    Choose the option if you want to
+                                    receive/send images from/to a server
+                                </p>
+                            ) : (
+                                <></>
+                            )}
 
                             <div className={classes.remoteWorkRow}>
                                 <div className={classes.remoteInputContainer}>
@@ -581,198 +589,240 @@ const SettingsModal = (props) => {
                                 />
                             </div>
                         </div>
-                        <Divider style={{ margin: 'auto' }} variant="middle" />
-                        <div>
-                            <p className={classes.optionText}>
-                                File management
-                            </p>
-                            <p className={classes.greyText}>
-                                Default file management options to streamline
-                                file input and output
-                            </p>
-                            <div className={classes.workingDirectory}>
-                                <FormControl className={classes.longTextField}>
-                                    <FileOpenIcon
-                                        style={svgContainerStyle}
-                                        svgStyle={{
-                                            ...svgStyle,
-                                            color:
-                                                remoteOrLocal === true
-                                                    ? '#9d9d9d'
-                                                    : '#ffffff',
-                                        }}
-                                    />
-                                    {/* TODO: For a user typing a directory, verify it exists when finished typing */}
-                                    <TextField
-                                        required
-                                        fullWidth={true}
-                                        id="localFileOutput"
-                                        placeholder={'Working directory'}
-                                        value={localFileOutput}
-                                        disabled={remoteOrLocal}
-                                        inputProps={{
-                                            size: '40',
-                                        }}
-                                        onChange={(e) => {
-                                            setLocalFileOutput(e.target.value);
-                                        }}
-                                    />
-                                </FormControl>
-                                <Button
-                                    className={classes.pathButton}
-                                    disabled={remoteOrLocal}
-                                    variant="outlined"
-                                    size="medium"
-                                    id="btnFolder"
-                                    onClick={() => {
-                                        if (isElectron()) {
-                                            ipcRenderer
-                                                .invoke(
-                                                    'test-message',
-                                                    'test file text'
-                                                )
-                                                .then((result) => {
-                                                    console.log(result);
-                                                    if (
-                                                        result.canceled ===
-                                                        false
-                                                    ) {
-                                                        setLocalFileOutput(
-                                                            result.filePaths[0]
-                                                        );
+                        {isElectron() ? (
+                            <div>
+                                <Divider
+                                    style={{ margin: 'auto' }}
+                                    variant="middle"
+                                />
+                                <div>
+                                    <p className={classes.optionText}>
+                                        File management
+                                    </p>
+                                    <p className={classes.greyText}>
+                                        Default file management options to
+                                        streamline file input and output
+                                    </p>
+                                    <div className={classes.workingDirectory}>
+                                        <FormControl
+                                            className={classes.longTextField}>
+                                            <FileOpenIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={{
+                                                    ...svgStyle,
+                                                    color:
+                                                        remoteOrLocal === true
+                                                            ? '#9d9d9d'
+                                                            : '#ffffff',
+                                                }}
+                                            />
+                                            {/* TODO: For a user typing a directory, verify it exists when finished typing */}
+                                            <TextField
+                                                required
+                                                fullWidth={true}
+                                                id="localFileOutput"
+                                                placeholder={
+                                                    'Working directory'
+                                                }
+                                                value={localFileOutput}
+                                                disabled={remoteOrLocal}
+                                                inputProps={{
+                                                    size: '40',
+                                                }}
+                                                onChange={(e) => {
+                                                    setLocalFileOutput(
+                                                        e.target.value
+                                                    );
+                                                }}
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            className={classes.pathButton}
+                                            disabled={remoteOrLocal}
+                                            variant="outlined"
+                                            size="medium"
+                                            id="btnFolder"
+                                            onClick={() => {
+                                                if (isElectron()) {
+                                                    ipcRenderer
+                                                        .invoke(
+                                                            'test-message',
+                                                            'test file text'
+                                                        )
+                                                        .then((result) => {
+                                                            console.log(result);
+                                                            if (
+                                                                result.canceled ===
+                                                                false
+                                                            ) {
+                                                                setLocalFileOutput(
+                                                                    result
+                                                                        .filePaths[0]
+                                                                );
+                                                            }
+                                                        })
+                                                        .catch((err) => {
+                                                            console.log(err);
+                                                        });
+                                                }
+                                            }}>
+                                            Select Folder
+                                        </Button>
+                                    </div>
+                                    <div className={classes.displayListSection}>
+                                        <div
+                                            className={
+                                                classes.displayListSectionItem
+                                            }>
+                                            <FileFormatIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={svgStyle}
+                                            />
+                                            <FormControl
+                                                className={
+                                                    classes.displayListSectionInput
+                                                }>
+                                                <Select
+                                                    displayEmpty={true}
+                                                    open={openFileFormat}
+                                                    defaultValue="Open Raster"
+                                                    className={
+                                                        fileFormat === ''
+                                                            ? classes.disabledText
+                                                            : null
                                                     }
-                                                })
-                                                .catch((err) => {
-                                                    console.log(err);
-                                                });
-                                        }
-                                    }}>
-                                    Select Folder
-                                </Button>
-                            </div>
-                            <div className={classes.displayListSection}>
-                                <div className={classes.displayListSectionItem}>
-                                    <FileFormatIcon
-                                        style={svgContainerStyle}
-                                        svgStyle={svgStyle}
-                                    />
-                                    <FormControl
-                                        className={
-                                            classes.displayListSectionInput
-                                        }>
-                                        <Select
-                                            displayEmpty={true}
-                                            open={openFileFormat}
-                                            defaultValue="Open Raster"
-                                            className={
-                                                fileFormat === ''
-                                                    ? classes.disabledText
-                                                    : null
-                                            }
-                                            onClose={() => {
-                                                setOpenFileFormat(false);
-                                            }}
-                                            onOpen={() => {
-                                                setOpenFileFormat(true);
-                                            }}
-                                            value={fileFormat}
-                                            onChange={(e) => {
-                                                setFileFormat(e.target.value);
-                                            }}>
-                                            <MenuItem value={''} disabled>
-                                                Output file format
-                                            </MenuItem>
-                                            <MenuItem value={'Open Raster'}>
-                                                Open Raster
-                                            </MenuItem>
-                                            <MenuItem value={'Zip Archive'}>
-                                                Zip Archive
-                                            </MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                                <div className={classes.displayListSectionItem}>
-                                    <FileAnnotationsIcon
-                                        style={svgContainerStyle}
-                                        svgStyle={svgStyle}
-                                    />
-                                    <FormControl
-                                        className={
-                                            classes.displayListSectionInput
-                                        }>
-                                        <Select
-                                            displayEmpty={true}
-                                            open={openAnnotationsFormat}
-                                            className={
-                                                annotationsFormat === ''
-                                                    ? classes.disabledText
-                                                    : null
-                                            }
-                                            onClose={() => {
-                                                setOpenAnnotationsFormat(false);
-                                            }}
-                                            onOpen={() => {
-                                                setOpenAnnotationsFormat(true);
-                                            }}
-                                            value={annotationsFormat}
-                                            onChange={(e) => {
-                                                setAnnotationsFormat(
-                                                    e.target.value
-                                                );
-                                            }}>
-                                            <MenuItem disabled value={''}>
-                                                Annotations format
-                                            </MenuItem>
-                                            {Object.keys(
-                                                SETTINGS.ANNOTATIONS
-                                            ).map((key, index) => {
-                                                return (
+                                                    onClose={() => {
+                                                        setOpenFileFormat(
+                                                            false
+                                                        );
+                                                    }}
+                                                    onOpen={() => {
+                                                        setOpenFileFormat(true);
+                                                    }}
+                                                    value={fileFormat}
+                                                    onChange={(e) => {
+                                                        setFileFormat(
+                                                            e.target.value
+                                                        );
+                                                    }}>
                                                     <MenuItem
-                                                        key={index}
-                                                        value={
-                                                            SETTINGS
-                                                                .ANNOTATIONS[
-                                                                key
-                                                            ]
-                                                        }>
-                                                        {
-                                                            SETTINGS
-                                                                .ANNOTATIONS[
-                                                                key
-                                                            ]
-                                                        }
+                                                        value={''}
+                                                        disabled>
+                                                        Output file format
                                                     </MenuItem>
-                                                );
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                                <div className={classes.displayListSectionItem}>
-                                    <FileSuffixIcon
-                                        style={svgContainerStyle}
-                                        svgStyle={svgStyle}
-                                    />
-                                    <FormControl
-                                        className={
-                                            classes.displayListSectionInput
-                                        }>
-                                        <TextField
-                                            required
-                                            className={classes.textField}
-                                            id="outputSuffix"
-                                            placeholder="Filename suffix"
-                                            value={fileSuffix}
-                                            inputProps={{
-                                                size: '10',
-                                            }}
-                                            onChange={(e) => {
-                                                setFileSuffix(e.target.value);
-                                            }}
-                                        />
-                                    </FormControl>
+                                                    <MenuItem
+                                                        value={'Open Raster'}>
+                                                        Open Raster
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        value={'Zip Archive'}>
+                                                        Zip Archive
+                                                    </MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+                                        <div
+                                            className={
+                                                classes.displayListSectionItem
+                                            }>
+                                            <FileAnnotationsIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={svgStyle}
+                                            />
+                                            <FormControl
+                                                className={
+                                                    classes.displayListSectionInput
+                                                }>
+                                                <Select
+                                                    displayEmpty={true}
+                                                    open={openAnnotationsFormat}
+                                                    className={
+                                                        annotationsFormat === ''
+                                                            ? classes.disabledText
+                                                            : null
+                                                    }
+                                                    onClose={() => {
+                                                        setOpenAnnotationsFormat(
+                                                            false
+                                                        );
+                                                    }}
+                                                    onOpen={() => {
+                                                        setOpenAnnotationsFormat(
+                                                            true
+                                                        );
+                                                    }}
+                                                    value={annotationsFormat}
+                                                    onChange={(e) => {
+                                                        setAnnotationsFormat(
+                                                            e.target.value
+                                                        );
+                                                    }}>
+                                                    <MenuItem
+                                                        disabled
+                                                        value={''}>
+                                                        Annotations format
+                                                    </MenuItem>
+                                                    {Object.keys(
+                                                        SETTINGS.ANNOTATIONS
+                                                    ).map((key, index) => {
+                                                        return (
+                                                            <MenuItem
+                                                                key={index}
+                                                                value={
+                                                                    SETTINGS
+                                                                        .ANNOTATIONS[
+                                                                        key
+                                                                    ]
+                                                                }>
+                                                                {
+                                                                    SETTINGS
+                                                                        .ANNOTATIONS[
+                                                                        key
+                                                                    ]
+                                                                }
+                                                            </MenuItem>
+                                                        );
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+                                        <div
+                                            className={
+                                                classes.displayListSectionItem
+                                            }>
+                                            <FileSuffixIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={svgStyle}
+                                            />
+                                            <FormControl
+                                                className={
+                                                    classes.displayListSectionInput
+                                                }>
+                                                <TextField
+                                                    required
+                                                    className={
+                                                        classes.textField
+                                                    }
+                                                    id="outputSuffix"
+                                                    placeholder="Filename suffix"
+                                                    value={fileSuffix}
+                                                    inputProps={{
+                                                        size: '10',
+                                                    }}
+                                                    onChange={(e) => {
+                                                        setFileSuffix(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <></>
+                        )}
                     </div>
 
                     <Button
