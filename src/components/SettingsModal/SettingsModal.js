@@ -589,20 +589,20 @@ const SettingsModal = (props) => {
                                 />
                             </div>
                         </div>
-                        {isElectron() ? (
+                        <div>
+                            <Divider
+                                style={{ margin: 'auto' }}
+                                variant="middle"
+                            />
                             <div>
-                                <Divider
-                                    style={{ margin: 'auto' }}
-                                    variant="middle"
-                                />
-                                <div>
-                                    <p className={classes.optionText}>
-                                        File management
-                                    </p>
-                                    <p className={classes.greyText}>
-                                        Default file management options to
-                                        streamline file input and output
-                                    </p>
+                                <p className={classes.optionText}>
+                                    File management
+                                </p>
+                                <p className={classes.greyText}>
+                                    Default file management options to
+                                    streamline file input and output
+                                </p>
+                                {isElectron() ? (
                                     <div className={classes.workingDirectory}>
                                         <FormControl
                                             className={classes.longTextField}>
@@ -669,160 +669,150 @@ const SettingsModal = (props) => {
                                             Select Folder
                                         </Button>
                                     </div>
-                                    <div className={classes.displayListSection}>
-                                        <div
+                                ) : (
+                                    <></>
+                                )}
+                                <div className={classes.displayListSection}>
+                                    <div
+                                        className={
+                                            classes.displayListSectionItem
+                                        }>
+                                        <FileFormatIcon
+                                            style={svgContainerStyle}
+                                            svgStyle={svgStyle}
+                                        />
+                                        <FormControl
                                             className={
-                                                classes.displayListSectionItem
+                                                classes.displayListSectionInput
                                             }>
-                                            <FileFormatIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={svgStyle}
-                                            />
-                                            <FormControl
+                                            <Select
+                                                displayEmpty={true}
+                                                open={openFileFormat}
+                                                defaultValue="Open Raster"
                                                 className={
-                                                    classes.displayListSectionInput
-                                                }>
-                                                <Select
-                                                    displayEmpty={true}
-                                                    open={openFileFormat}
-                                                    defaultValue="Open Raster"
-                                                    className={
-                                                        fileFormat === ''
-                                                            ? classes.disabledText
-                                                            : null
-                                                    }
-                                                    onClose={() => {
-                                                        setOpenFileFormat(
-                                                            false
-                                                        );
-                                                    }}
-                                                    onOpen={() => {
-                                                        setOpenFileFormat(true);
-                                                    }}
-                                                    value={fileFormat}
-                                                    onChange={(e) => {
-                                                        setFileFormat(
-                                                            e.target.value
-                                                        );
-                                                    }}>
-                                                    <MenuItem
-                                                        value={''}
-                                                        disabled>
-                                                        Output file format
-                                                    </MenuItem>
-                                                    <MenuItem
-                                                        value={'Open Raster'}>
-                                                        Open Raster
-                                                    </MenuItem>
-                                                    <MenuItem
-                                                        value={'Zip Archive'}>
-                                                        Zip Archive
-                                                    </MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </div>
-                                        <div
+                                                    fileFormat === ''
+                                                        ? classes.disabledText
+                                                        : null
+                                                }
+                                                onClose={() => {
+                                                    setOpenFileFormat(false);
+                                                }}
+                                                onOpen={() => {
+                                                    setOpenFileFormat(true);
+                                                }}
+                                                value={fileFormat}
+                                                onChange={(e) => {
+                                                    setFileFormat(
+                                                        e.target.value
+                                                    );
+                                                }}>
+                                                <MenuItem value={''} disabled>
+                                                    Output file format
+                                                </MenuItem>
+                                                <MenuItem value={'Open Raster'}>
+                                                    Open Raster
+                                                </MenuItem>
+                                                <MenuItem value={'Zip Archive'}>
+                                                    Zip Archive
+                                                </MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+                                    <div
+                                        className={
+                                            classes.displayListSectionItem
+                                        }>
+                                        <FileAnnotationsIcon
+                                            style={svgContainerStyle}
+                                            svgStyle={svgStyle}
+                                        />
+                                        <FormControl
                                             className={
-                                                classes.displayListSectionItem
+                                                classes.displayListSectionInput
                                             }>
-                                            <FileAnnotationsIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={svgStyle}
-                                            />
-                                            <FormControl
+                                            <Select
+                                                displayEmpty={true}
+                                                open={openAnnotationsFormat}
                                                 className={
-                                                    classes.displayListSectionInput
-                                                }>
-                                                <Select
-                                                    displayEmpty={true}
-                                                    open={openAnnotationsFormat}
-                                                    className={
-                                                        annotationsFormat === ''
-                                                            ? classes.disabledText
-                                                            : null
-                                                    }
-                                                    onClose={() => {
-                                                        setOpenAnnotationsFormat(
-                                                            false
-                                                        );
-                                                    }}
-                                                    onOpen={() => {
-                                                        setOpenAnnotationsFormat(
-                                                            true
-                                                        );
-                                                    }}
-                                                    value={annotationsFormat}
-                                                    onChange={(e) => {
-                                                        setAnnotationsFormat(
-                                                            e.target.value
-                                                        );
-                                                    }}>
-                                                    <MenuItem
-                                                        disabled
-                                                        value={''}>
-                                                        Annotations format
-                                                    </MenuItem>
-                                                    {Object.keys(
-                                                        SETTINGS.ANNOTATIONS
-                                                    ).map((key, index) => {
-                                                        return (
-                                                            <MenuItem
-                                                                key={index}
-                                                                value={
-                                                                    SETTINGS
-                                                                        .ANNOTATIONS[
-                                                                        key
-                                                                    ]
-                                                                }>
-                                                                {
-                                                                    SETTINGS
-                                                                        .ANNOTATIONS[
-                                                                        key
-                                                                    ]
-                                                                }
-                                                            </MenuItem>
-                                                        );
-                                                    })}
-                                                </Select>
-                                            </FormControl>
-                                        </div>
-                                        <div
+                                                    annotationsFormat === ''
+                                                        ? classes.disabledText
+                                                        : null
+                                                }
+                                                onClose={() => {
+                                                    setOpenAnnotationsFormat(
+                                                        false
+                                                    );
+                                                }}
+                                                onOpen={() => {
+                                                    setOpenAnnotationsFormat(
+                                                        true
+                                                    );
+                                                }}
+                                                value={annotationsFormat}
+                                                onChange={(e) => {
+                                                    setAnnotationsFormat(
+                                                        e.target.value
+                                                    );
+                                                }}>
+                                                <MenuItem disabled value={''}>
+                                                    Annotations format
+                                                </MenuItem>
+                                                {Object.keys(
+                                                    SETTINGS.ANNOTATIONS
+                                                ).map((key, index) => {
+                                                    return (
+                                                        <MenuItem
+                                                            key={index}
+                                                            value={
+                                                                SETTINGS
+                                                                    .ANNOTATIONS[
+                                                                    key
+                                                                ]
+                                                            }>
+                                                            {
+                                                                SETTINGS
+                                                                    .ANNOTATIONS[
+                                                                    key
+                                                                ]
+                                                            }
+                                                        </MenuItem>
+                                                    );
+                                                })}
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+                                    <div
+                                        className={
+                                            classes.displayListSectionItem
+                                        }>
+                                        <FileSuffixIcon
+                                            style={svgContainerStyle}
+                                            svgStyle={svgStyle}
+                                        />
+                                        <FormControl
                                             className={
-                                                classes.displayListSectionItem
+                                                classes.displayListSectionInput
                                             }>
-                                            <FileSuffixIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={svgStyle}
+                                            <TextField
+                                                required
+                                                className={classes.textField}
+                                                id="outputSuffix"
+                                                placeholder="Filename suffix"
+                                                value={fileSuffix}
+                                                inputProps={{
+                                                    size: '10',
+                                                }}
+                                                onChange={(e) => {
+                                                    setFileSuffix(
+                                                        e.target.value
+                                                    );
+                                                }}
                                             />
-                                            <FormControl
-                                                className={
-                                                    classes.displayListSectionInput
-                                                }>
-                                                <TextField
-                                                    required
-                                                    className={
-                                                        classes.textField
-                                                    }
-                                                    id="outputSuffix"
-                                                    placeholder="Filename suffix"
-                                                    value={fileSuffix}
-                                                    inputProps={{
-                                                        size: '10',
-                                                    }}
-                                                    onChange={(e) => {
-                                                        setFileSuffix(
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                />
-                                            </FormControl>
-                                        </div>
+                                        </FormControl>
                                     </div>
                                 </div>
                             </div>
-                        ) : (
-                            <></>
-                        )}
+                        </div>
                     </div>
 
                     <Button
