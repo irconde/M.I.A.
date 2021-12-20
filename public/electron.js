@@ -7,6 +7,7 @@ const dialog = electron.dialog;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
+const Constants = require('./Constants');
 
 let mainWindow;
 
@@ -48,7 +49,7 @@ app.on('activate', () => {
 });
 
 // TODO: Implement constant sharing between React and Electron for channel names
-ipcMain.handle('test-message', async (event, args) => {
+ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
     });

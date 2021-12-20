@@ -42,7 +42,7 @@ import FileFormatIcon from '../../icons/FileFormatIcon.js';
 import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
-import { SETTINGS } from '../../utils/Constants';
+import { SETTINGS, Channels } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
 let ipcRenderer;

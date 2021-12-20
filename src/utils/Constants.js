@@ -118,3 +118,7 @@ export const DEVICE_TYPE = {
     MOBILE: 'mobile',
     DESKTOP: 'desktop',
 };
+
+export const Channels = {
+    selectDirectory: 'select-directory',
+};
