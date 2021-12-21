@@ -646,14 +646,15 @@ const SettingsModal = (props) => {
                                                 if (isElectron()) {
                                                     ipcRenderer
                                                         .invoke(
-                                                            'test-message',
-                                                            'test file text'
+                                                            Channels.selectDirectory
                                                         )
                                                         .then((result) => {
                                                             console.log(result);
                                                             if (
                                                                 result.canceled ===
-                                                                false
+                                                                    false &&
+                                                                result.filePaths
+                                                                    .length > 0
                                                             ) {
                                                                 setLocalFileOutput(
                                                                     result
