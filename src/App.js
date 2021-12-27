@@ -88,6 +88,12 @@ import { buildCocoDataZip } from './utils/Coco';
 import { fileSave, fileOpen } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
+import isElectron from 'is-electron';
+let ipcRenderer;
+if (isElectron()) {
+    const electron = window.require('electron');
+    ipcRenderer = electron.ipcRenderer;
+}
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -140,6 +146,8 @@ class App extends Component {
             timer: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
+        this.getFileFromLocalDirectory =
+            this.getFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
@@ -238,6 +246,7 @@ class App extends Component {
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
+                    // TODO: Initial grab?
                 }
                 return true;
             } else return false;
@@ -254,6 +263,8 @@ class App extends Component {
         if (this.props.firstDisplaySettings === false) {
             if (this.props.remoteOrLocal === true) {
                 this.connectToCommandServer();
+            } else if (isElectron() && this.props.localFileOutput !== '') {
+                this.getFileFromLocalDirectory();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -740,6 +751,27 @@ class App extends Component {
                     console.log(error);
                 }
             });
+    }
+
+    /**
+     * getFileFromLocalDirectory - Calls the Electron channel to invoke the next file from the selected
+     *                             file system folder.
+     *
+     * @param {None}
+     * @returns {None}
+     */
+    getFileFromLocalDirectory() {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(
+                    constants.Channels.getNextFile,
+                    this.props.localFileOutput
+                )
+                .then((result) => {
+                    this.loadNextImage(result, '1_img.ora', 1);
+                })
+                .catch((error) => {});
+        }
     }
 
     /**
@@ -2864,6 +2896,7 @@ const mapStateToProps = (state) => {
         remoteOrLocal: settings.settings.remoteOrLocal,
         hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
+        localFileOutput: settings.settings.localFileOutput,
     };
 };
 

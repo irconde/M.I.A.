@@ -7,6 +7,8 @@ const dialog = electron.dialog;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
+const util = require('util');
+const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
 
 let mainWindow;
@@ -48,10 +50,26 @@ app.on('activate', () => {
     }
 });
 
-// TODO: Implement constant sharing between React and Electron for channel names
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
+    });
+    return result;
+});
+ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        if (fs.existsSync(args)) {
+            const filePath = `${args}\\1_img.ora`;
+            const fileData = fs.readFileSync(filePath);
+            const file = Buffer.from(fileData).toString('base64');
+            resolve(file);
+            // readdir(args).then((result) => {
+            //     const files = result;
+            //     console.log(files);
+            //     console.log(files.length);
+            //     resolve();
+            // });
+        }
     });
     return result;
 });
