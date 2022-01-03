@@ -763,28 +763,23 @@ class App extends Component {
      * @returns {None}
      */
     getFileFromLocalDirectory() {
-        console.log('getFileFromLocalDirectory');
         if (isElectron()) {
-            console.log('isElectron true');
-            setTimeout(() => {
-                ipcRenderer
-                    .invoke(
-                        constants.Channels.getNextFile,
-                        this.props.localFileOutput
-                    )
-                    .then((result) => {
-                        console.log('then');
-                        this.props.setLocalFileOpen(true);
-                        this.loadNextImage(
-                            result.file,
-                            result.fileName,
-                            result.numberOfFiles
-                        );
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            }, 0);
+            ipcRenderer
+                .invoke(
+                    constants.Channels.getNextFile,
+                    this.props.localFileOutput
+                )
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles
+                    );
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         }
     }
 

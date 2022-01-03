@@ -64,20 +64,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
                     dialogResult.canceled === false &&
                     dialogResult.filePaths.length > 0
                 ) {
-                    if (fs.existsSync(dialogResult.filePaths[0])) {
-                        readdir(dialogResult.filePaths[0]).then(
-                            (filesResult) => {
-                                filesResult.forEach((file) => {
-                                    if (validateFileExtension(file) === true) {
-                                        files.push(
-                                            `${dialogResult.filePaths[0]}\\${file}`
-                                        );
-                                    }
-                                });
-                                resolve(dialogResult);
-                            }
-                        );
-                    }
+                    loadFilesFromPath(dialogResult.filePaths[0]);
                 }
                 resolve(dialogResult);
             })
@@ -85,20 +72,26 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     });
     return result;
 });
+
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (files.length > 0) {
             if (fs.existsSync(files[0])) {
-                const fileData = fs.readFileSync(files[0]);
-                const file = Buffer.from(fileData).toString('base64');
-                const splitPath = files[0].split('\\');
-                const fileName = splitPath[splitPath.length - 1];
-                const promiseResult = {
-                    file: file,
-                    fileName: fileName,
-                    numberOfFiles: files.length,
-                };
-                resolve(promiseResult);
+                resolve(loadFile());
+            }
+        } else {
+            if (fs.existsSync(args)) {
+                loadFilesFromPath(args)
+                    .then(() => {
+                        if (files.length > 0) {
+                            resolve(loadFile());
+                        } else {
+                            reject('No files loaded');
+                        }
+                    })
+                    .catch(() => {
+                        reject('No such directory');
+                    });
             }
         }
     });
@@ -108,4 +101,35 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
 const validateFileExtension = (fileName) => {
     if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
     else return false;
+};
+
+const loadFilesFromPath = async (path) => {
+    const result = new Promise((resolve, reject) => {
+        if (fs.existsSync(path)) {
+            readdir(path).then((filesResult) => {
+                filesResult.forEach((file) => {
+                    if (validateFileExtension(file) === true) {
+                        files.push(`${path}\\${file}`);
+                    }
+                });
+                resolve();
+            });
+        } else {
+            reject();
+        }
+    });
+    return result;
+};
+
+const loadFile = () => {
+    const fileData = fs.readFileSync(files[0]);
+    const file = Buffer.from(fileData).toString('base64');
+    const splitPath = files[0].split('\\');
+    const fileName = splitPath[splitPath.length - 1];
+    const result = {
+        file: file,
+        fileName: fileName,
+        numberOfFiles: files.length,
+    };
+    return result;
 };
