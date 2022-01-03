@@ -12,6 +12,7 @@ const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
 
 let mainWindow;
+let files = [];
 
 function createWindow() {
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -51,8 +52,32 @@ app.on('activate', () => {
 });
 
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
-    const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
+    const result = new Promise((resolve, reject) => {
+        dialog
+            .showOpenDialog({
+                properties: ['openDirectory'],
+            })
+            .then((dialogResult) => {
+                if (
+                    dialogResult.canceled === false &&
+                    dialogResult.filePaths.length > 0
+                ) {
+                    if (fs.existsSync(dialogResult.filePaths[0])) {
+                        readdir(dialogResult.filePaths[0]).then(
+                            (filesResult) => {
+                                filesResult.forEach((file) => {
+                                    files.push(
+                                        `${dialogResult.filePaths[0]}\\${file}`
+                                    );
+                                });
+                                resolve(dialogResult);
+                            }
+                        );
+                    }
+                }
+                resolve(dialogResult);
+            })
+            .catch((err) => reject(err));
     });
     return result;
 });
@@ -63,12 +88,6 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
             const fileData = fs.readFileSync(filePath);
             const file = Buffer.from(fileData).toString('base64');
             resolve(file);
-            // readdir(args).then((result) => {
-            //     const files = result;
-            //     console.log(files);
-            //     console.log(files.length);
-            //     resolve();
-            // });
         }
     });
     return result;
