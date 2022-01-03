@@ -246,7 +246,9 @@ class App extends Component {
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
-                    // TODO: Initial grab?
+                    if (this.props.localFileOutput !== '') {
+                        this.getFileFromLocalDirectory();
+                    }
                 }
                 return true;
             } else return false;
@@ -761,17 +763,28 @@ class App extends Component {
      * @returns {None}
      */
     getFileFromLocalDirectory() {
+        console.log('getFileFromLocalDirectory');
         if (isElectron()) {
-            ipcRenderer
-                .invoke(
-                    constants.Channels.getNextFile,
-                    this.props.localFileOutput
-                )
-                .then((result) => {
-                    this.props.setLocalFileOpen(true);
-                    this.loadNextImage(result, '1_img.ora', 3);
-                })
-                .catch((error) => {});
+            console.log('isElectron true');
+            setTimeout(() => {
+                ipcRenderer
+                    .invoke(
+                        constants.Channels.getNextFile,
+                        this.props.localFileOutput
+                    )
+                    .then((result) => {
+                        console.log('then');
+                        this.props.setLocalFileOpen(true);
+                        this.loadNextImage(
+                            result.file,
+                            result.fileName,
+                            result.numberOfFiles
+                        );
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            }, 0);
         }
     }
 

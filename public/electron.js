@@ -91,7 +91,14 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
             if (fs.existsSync(files[0])) {
                 const fileData = fs.readFileSync(files[0]);
                 const file = Buffer.from(fileData).toString('base64');
-                resolve(file);
+                const splitPath = files[0].split('\\');
+                const fileName = splitPath[splitPath.length - 1];
+                const promiseResult = {
+                    file: file,
+                    fileName: fileName,
+                    numberOfFiles: files.length,
+                };
+                resolve(promiseResult);
             }
         }
     });
