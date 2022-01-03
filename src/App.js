@@ -768,7 +768,8 @@ class App extends Component {
                     this.props.localFileOutput
                 )
                 .then((result) => {
-                    this.loadNextImage(result, '1_img.ora', 1);
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(result, '1_img.ora', 3);
                 })
                 .catch((error) => {});
         }

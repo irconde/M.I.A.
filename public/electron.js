@@ -68,14 +68,12 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
                         readdir(dialogResult.filePaths[0]).then(
                             (filesResult) => {
                                 filesResult.forEach((file) => {
-                                    console.log(file);
                                     if (validateFileExtension(file) === true) {
                                         files.push(
                                             `${dialogResult.filePaths[0]}\\${file}`
                                         );
                                     }
                                 });
-                                console.log(files);
                                 resolve(dialogResult);
                             }
                         );
@@ -89,11 +87,12 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
 });
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        if (fs.existsSync(args)) {
-            const filePath = `${args}\\1_img.ora`;
-            const fileData = fs.readFileSync(filePath);
-            const file = Buffer.from(fileData).toString('base64');
-            resolve(file);
+        if (files.length > 0) {
+            if (fs.existsSync(files[0])) {
+                const fileData = fs.readFileSync(files[0]);
+                const file = Buffer.from(fileData).toString('base64');
+                resolve(file);
+            }
         }
     });
     return result;
