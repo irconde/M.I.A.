@@ -13,6 +13,8 @@ const Constants = require('./Constants');
 
 let mainWindow;
 let files = [];
+const oraExp = /\.ora$/;
+const dcsExp = /\.dcs$/;
 
 function createWindow() {
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -66,10 +68,14 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
                         readdir(dialogResult.filePaths[0]).then(
                             (filesResult) => {
                                 filesResult.forEach((file) => {
-                                    files.push(
-                                        `${dialogResult.filePaths[0]}\\${file}`
-                                    );
+                                    console.log(file);
+                                    if (validateFileExtension(file) === true) {
+                                        files.push(
+                                            `${dialogResult.filePaths[0]}\\${file}`
+                                        );
+                                    }
                                 });
+                                console.log(files);
                                 resolve(dialogResult);
                             }
                         );
@@ -92,3 +98,8 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     });
     return result;
 });
+
+const validateFileExtension = (fileName) => {
+    if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
+    else return false;
+};
