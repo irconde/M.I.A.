@@ -246,7 +246,7 @@ class App extends Component {
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
-                    if (this.props.localFileOutput !== '') {
+                    if (isElectron() && this.props.localFileOutput !== '') {
                         this.getFileFromLocalDirectory();
                     }
                 }
@@ -718,7 +718,6 @@ class App extends Component {
         ) {
             this.state.commandServer.emit('currentFile', (response) => {
                 if (response.status === 'Ok') {
-                    this.props.setNumberOfFiles(response.numberOfFiles);
                     this.loadNextImage(
                         response.file,
                         response.fileName,
@@ -955,6 +954,7 @@ class App extends Component {
                     cocoZip
                         .generateAsync({ type: 'blob' })
                         .then(async (file) => {
+                            // TODO: Implement saving in electron
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
@@ -1133,6 +1133,7 @@ class App extends Component {
                     newOra
                         .generateAsync({ type: 'blob' })
                         .then(async (file) => {
+                            // TODO: Implement electron saving
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===

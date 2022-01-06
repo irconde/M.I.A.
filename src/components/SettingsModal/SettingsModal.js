@@ -65,7 +65,7 @@ const SettingsModal = (props) => {
     const [localFileOutput, setLocalFileOutput] = useState(
         initLocalFileOutput !== '' ? initLocalFileOutput : ''
     );
-    const [fileSuffix, setFileSuffix] = useState('');
+    const [fileSuffix, setFileSuffix] = useState(settings.fileSuffix);
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);

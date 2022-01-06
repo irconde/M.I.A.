@@ -115,7 +115,10 @@ const TopBar = (props) => {
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer} &nbsp;
+                        {connectedServer !== null
+                            ? connectedServer
+                            : localFileOutput}{' '}
+                        &nbsp;
                         <span style={styles.divider}>/</span>&nbsp;
                         <span style={styles.typeInfo}>Processing</span>
                         &nbsp;&nbsp;
@@ -179,7 +182,7 @@ const TopBar = (props) => {
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer
+                        {connectedServer !== null
                             ? connectedServer
                             : localFileOutput}{' '}
                         &nbsp; &nbsp;&nbsp;
