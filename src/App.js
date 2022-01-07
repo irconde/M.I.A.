@@ -151,7 +151,8 @@ class App extends Component {
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
-        this.sendImageToElectron = this.sendImageToElectron.bind(this);
+        this.sendImageToLocalDirectory =
+            this.sendImageToLocalDirectory.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -796,7 +797,13 @@ class App extends Component {
         });
     }
 
-    async sendImageToElectron(file) {
+    /**
+     * sendImageToLocalDirectory - Sends the needed information to save the current file in the selected
+     *                             this.props.localFileOutput path via Electron channels.
+     * @param {Blob} file
+     * @returns {Promise}
+     */
+    async sendImageToLocalDirectory(file) {
         const result = new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
                 ipcRenderer
@@ -804,6 +811,7 @@ class App extends Component {
                         file,
                         fileDirectory: this.props.localFileOutput,
                         fileFormat: this.props.fileFormat,
+                        fileName: this.props.currentProcessingFile,
                         fileSuffix: this.props.fileSuffix,
                     })
                     .then((result) => {
@@ -974,14 +982,11 @@ class App extends Component {
                             );
                         });
                 } else {
-                    cocoZip
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
-                            if (
-                                isElectron() &&
-                                this.props.localFileOutput !== ''
-                            ) {
-                                this.sendImageToElectron(file)
+                    if (isElectron() && this.props.localFileOutput !== '') {
+                        cocoZip
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
                                             myOra: new ORA(),
@@ -997,8 +1002,11 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            } else {
-                                // TODO: Implement saving in electron
+                            });
+                    } else {
+                        cocoZip
+                            .generateAsync({ type: 'blob' })
+                            .then(async (file) => {
                                 fileSave(file, {
                                     fileName: `1${this.props.fileSuffix}.${
                                         this.props.fileFormat ===
@@ -1016,8 +1024,8 @@ class App extends Component {
                                     this.props.resetDetections();
                                     this.props.setReceiveTime(null);
                                 });
-                            }
-                        });
+                            });
+                    }
                 }
             });
         } else if (
@@ -1175,15 +1183,11 @@ class App extends Component {
                             );
                         });
                 } else {
-                    newOra
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
-                            // TODO: Implement electron saving
-                            if (
-                                isElectron &&
-                                this.props.localFileOutput !== ''
-                            ) {
-                                this.sendImageToElectron(file)
+                    if (isElectron && this.props.localFileOutput !== '') {
+                        newOra
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
                                             myOra: new ORA(),
@@ -1199,7 +1203,11 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            } else {
+                            });
+                    } else {
+                        newOra
+                            .generateAsync({ type: 'blob' })
+                            .then(async (file) => {
                                 fileSave(file, {
                                     fileName: `1${this.props.fileSuffix}.${
                                         this.props.fileFormat ===
@@ -1217,8 +1225,8 @@ class App extends Component {
                                     this.props.resetDetections();
                                     this.props.setReceiveTime(null);
                                 });
-                            }
-                        });
+                            });
+                    }
                 }
             });
         }

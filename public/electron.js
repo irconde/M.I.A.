@@ -10,6 +10,7 @@ const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
+let fileSavedCounter = 1;
 
 let mainWindow;
 let files = [];
@@ -100,8 +101,27 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        console.log(args);
-        resolve('test successful');
+        let fileName;
+        if (args.fileSuffix !== '') {
+            fileName = `${fileSavedCounter}${args.fileSuffix}`;
+        } else {
+            fileName = args.fileName;
+        }
+        if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
+            fileName += '.ora';
+        } else if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP) {
+            fileName += '.zip';
+        }
+        let filePath = `${args.fileDirectory}\\${fileName}`;
+        fs.writeFile(filePath, args.file, (error) => {
+            if (error) {
+                reject(error);
+            } else {
+                console.log('File saved');
+                fileSavedCounter++;
+                resolve('File saved');
+            }
+        });
     });
     return result;
 });
