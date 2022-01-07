@@ -41,9 +41,6 @@ const NoFileSign = () => {
         width: '90%',
         height: '90%',
     };
-    console.log(numberOfFiles);
-    console.log(isVisible);
-    console.log(remoteOrLocal);
     if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
         return <div></div>;
     } else {
