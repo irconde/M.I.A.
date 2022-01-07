@@ -98,6 +98,14 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     return result;
 });
 
+ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        console.log(args);
+        resolve('test successful');
+    });
+    return result;
+});
+
 const validateFileExtension = (fileName) => {
     if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
     else return false;

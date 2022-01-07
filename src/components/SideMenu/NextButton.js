@@ -11,6 +11,7 @@ import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import { getConnected } from '../../redux/slices/server/serverSlice';
 import Fab from '@mui/material/Fab';
+import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
@@ -75,10 +76,11 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
     const selectedDetection = useSelector(getSelectedDetection);
     const connected = useSelector(getConnected);
     const isCollapsed = useSelector(getCollapsedSideMenu);
+    const localFileOutput = useSelector(getLocalFileOutput);
     const enableNextButton =
         !selectedDetection &&
         cornerstoneMode === constants.cornerstoneMode.SELECTION &&
-        connected === true;
+        (connected === true || localFileOutput !== '');
     const handleClick = (e) => {
         if (enableNextButton) {
             nextImageClick(e);

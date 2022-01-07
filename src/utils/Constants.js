@@ -122,4 +122,5 @@ export const DEVICE_TYPE = {
 export const Channels = {
     selectDirectory: 'select-directory',
     getNextFile: 'get-next-file',
+    saveCurrentFile: 'save-current-file',
 };

@@ -77,7 +77,6 @@ import {
     setInputLabel,
     setReceiveTime,
     colorPickerToggle,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
@@ -152,6 +151,7 @@ class App extends Component {
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
+        this.sendImageToElectron = this.sendImageToElectron.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -724,7 +724,7 @@ class App extends Component {
                         response.numberOfFiles
                     );
                 } else {
-                    this.props.setNumberOfFiles(0);
+                    this.props.setNumFilesInQueue(0);
                     this.onNoImageLeft();
                 }
             });
@@ -794,6 +794,29 @@ class App extends Component {
             fileFormat: this.props.fileFormat,
             fileSuffix: this.props.fileSuffix,
         });
+    }
+
+    async sendImageToElectron(file) {
+        const result = new Promise((resolve, reject) => {
+            if (isElectron() && this.props.localFileOutput !== '') {
+                ipcRenderer
+                    .invoke(constants.Channels.saveCurrentFile, {
+                        file,
+                        fileDirectory: this.props.localFileOutput,
+                        fileFormat: this.props.fileFormat,
+                        fileSuffix: this.props.fileSuffix,
+                    })
+                    .then((result) => {
+                        console.log(result);
+                        resolve();
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject();
+                    });
+            }
+        });
+        return result;
     }
 
     /**
@@ -954,24 +977,46 @@ class App extends Component {
                     cocoZip
                         .generateAsync({ type: 'blob' })
                         .then(async (file) => {
-                            // TODO: Implement saving in electron
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
+                            if (
+                                isElectron() &&
+                                this.props.localFileOutput !== ''
+                            ) {
+                                this.sendImageToElectron(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.onNoImageLeft();
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            } else {
+                                // TODO: Implement saving in electron
+                                fileSave(file, {
+                                    fileName: `1${this.props.fileSuffix}.${
+                                        this.props.fileFormat ===
+                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                            ? 'ora'
+                                            : 'zip'
+                                    }`,
+                                }).then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+                                    this.onNoImageLeft();
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
                                 });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
-                            });
+                            }
                         });
                 }
             });
@@ -1134,23 +1179,45 @@ class App extends Component {
                         .generateAsync({ type: 'blob' })
                         .then(async (file) => {
                             // TODO: Implement electron saving
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
+                            if (
+                                isElectron &&
+                                this.props.localFileOutput !== ''
+                            ) {
+                                this.sendImageToElectron(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.onNoImageLeft();
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            } else {
+                                fileSave(file, {
+                                    fileName: `1${this.props.fileSuffix}.${
+                                        this.props.fileFormat ===
+                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                            ? 'ora'
+                                            : 'zip'
+                                    }`,
+                                }).then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+                                    this.onNoImageLeft();
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
                                 });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
-                            });
+                            }
                         });
                 }
             });
@@ -2955,7 +3022,6 @@ const mapDispatchToProps = {
     setReceiveTime,
     colorPickerToggle,
     updateMissMatchedClassName,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
