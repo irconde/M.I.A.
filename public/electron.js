@@ -101,27 +101,38 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        let fileName;
-        if (args.fileSuffix !== '') {
-            fileName = `${fileSavedCounter}${args.fileSuffix}`;
-        } else {
-            fileName = args.fileName;
+        const returnedFilePath = `${args.fileDirectory}\\returned`;
+        if (fs.existsSync(returnedFilePath) === false) {
+            fs.mkdirSync(returnedFilePath);
         }
-        if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
-            fileName += '.ora';
-        } else if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP) {
-            fileName += '.zip';
-        }
-        let filePath = `${args.fileDirectory}\\${fileName}`;
-        fs.writeFile(filePath, args.file, (error) => {
-            if (error) {
+        readdir(returnedFilePath)
+            .then((returnedFiles) => {
+                let fileName;
+                const numReturnedFiles = returnedFiles.length;
+                if (args.fileSuffix !== '') {
+                    fileName = `${numReturnedFiles + 1}${args.fileSuffix}`;
+                }
+                if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
+                    fileName += '.ora';
+                } else if (
+                    args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP
+                ) {
+                    fileName += '.zip';
+                }
+                const filePath = `${returnedFilePath}\\${fileName}`;
+                fs.writeFile(filePath, args.file, (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        fileSavedCounter++;
+                        files.shift();
+                        resolve('File saved');
+                    }
+                });
+            })
+            .catch((error) => {
                 reject(error);
-            } else {
-                fileSavedCounter++;
-                files.shift();
-                resolve('File saved');
-            }
-        });
+            });
     });
     return result;
 });
