@@ -998,6 +998,7 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);
@@ -1183,7 +1184,7 @@ class App extends Component {
                             );
                         });
                 } else {
-                    if (isElectron && this.props.localFileOutput !== '') {
+                    if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
                             .generateAsync({ type: 'nodebuffer' })
                             .then(async (file) => {
@@ -1199,6 +1200,7 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);

@@ -118,6 +118,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                 reject(error);
             } else {
                 fileSavedCounter++;
+                files.shift();
                 resolve('File saved');
             }
         });
