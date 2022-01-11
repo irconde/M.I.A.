@@ -649,7 +649,6 @@ const SettingsModal = (props) => {
                                                             Channels.selectDirectory
                                                         )
                                                         .then((result) => {
-                                                            console.log(result);
                                                             if (
                                                                 result.canceled ===
                                                                     false &&

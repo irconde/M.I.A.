@@ -244,12 +244,12 @@ class App extends Component {
         }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {
+                if (isElectron() && nextProps.localFileOutput !== '') {
+                    this.getFileFromLocalDirectory();
+                }
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
-                    if (isElectron() && this.props.localFileOutput !== '') {
-                        this.getFileFromLocalDirectory();
-                    }
                 }
                 return true;
             } else return false;

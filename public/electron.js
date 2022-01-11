@@ -117,7 +117,6 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
             if (error) {
                 reject(error);
             } else {
-                console.log('File saved');
                 fileSavedCounter++;
                 resolve('File saved');
             }
