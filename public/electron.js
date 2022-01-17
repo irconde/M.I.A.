@@ -14,6 +14,7 @@ let fileSavedCounter = 1;
 
 let mainWindow;
 let files = [];
+let filesOutputted = [];
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
 
@@ -120,12 +121,13 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     fileName += '.zip';
                 }
                 const filePath = `${returnedFilePath}\\${fileName}`;
+                // TODO: Check if file exists, recreate file name, refactor into function
                 fs.writeFile(filePath, args.file, (error) => {
                     if (error) {
                         reject(error);
                     } else {
                         fileSavedCounter++;
-                        files.shift();
+                        filesOutputted.push(files.shift());
                         resolve('File saved');
                     }
                 });
@@ -137,6 +139,8 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return result;
 });
 
+const generateFileName = (args) => {};
+
 const validateFileExtension = (fileName) => {
     if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
     else return false;
@@ -145,14 +149,23 @@ const validateFileExtension = (fileName) => {
 const loadFilesFromPath = async (path) => {
     const result = new Promise((resolve, reject) => {
         if (fs.existsSync(path)) {
-            readdir(path).then((filesResult) => {
-                filesResult.forEach((file) => {
-                    if (validateFileExtension(file) === true) {
-                        files.push(`${path}\\${file}`);
-                    }
+            readdir(path)
+                .then((filesResult) => {
+                    filesResult.forEach((file) => {
+                        const filePath = `${path}\\${file}`;
+                        if (
+                            validateFileExtension(file) === true &&
+                            filesOutputted.includes(filePath) === false
+                        ) {
+                            files.push(filePath);
+                        }
+                    });
+                    resolve();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
                 });
-                resolve();
-            });
         } else {
             reject();
         }

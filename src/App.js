@@ -800,7 +800,7 @@ class App extends Component {
     /**
      * sendImageToLocalDirectory - Sends the needed information to save the current file in the selected
      *                             this.props.localFileOutput path via Electron channels.
-     * @param {Blob} file
+     * @param {Buffer} file
      * @returns {Promise}
      */
     async sendImageToLocalDirectory(file) {
