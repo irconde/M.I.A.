@@ -815,12 +815,10 @@ class App extends Component {
                         fileSuffix: this.props.fileSuffix,
                     })
                     .then((result) => {
-                        console.log(result);
-                        resolve();
+                        resolve(result);
                     })
                     .catch((error) => {
-                        console.log(error);
-                        reject();
+                        reject(error);
                     });
             }
         });

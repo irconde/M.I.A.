@@ -10,7 +10,6 @@ const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
-let fileSavedCounter = 1;
 
 let mainWindow;
 let files = [];
@@ -108,25 +107,19 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         }
         readdir(returnedFilePath)
             .then((returnedFiles) => {
-                let fileName;
-                const numReturnedFiles = returnedFiles.length;
-                if (args.fileSuffix !== '') {
-                    fileName = `${numReturnedFiles + 1}${args.fileSuffix}`;
-                }
-                if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
-                    fileName += '.ora';
-                } else if (
-                    args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP
-                ) {
-                    fileName += '.zip';
-                }
-                const filePath = `${returnedFilePath}\\${fileName}`;
-                // TODO: Check if file exists, recreate file name, refactor into function
+                const fileIndex = findMaxFileSuffix(
+                    args.fileNameSuffix,
+                    returnedFiles
+                );
+                const filePath = generateFileName(
+                    args,
+                    fileIndex,
+                    returnedFilePath
+                );
                 fs.writeFile(filePath, args.file, (error) => {
                     if (error) {
                         reject(error);
                     } else {
-                        fileSavedCounter++;
                         filesOutputted.push(files.shift());
                         resolve('File saved');
                     }
@@ -139,7 +132,34 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return result;
 });
 
-const generateFileName = (args) => {};
+const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
+    let result = 1;
+    const fileNameSuffixRegExp = new RegExp(fileNameSuffix, 'i');
+    returnedFiles.forEach((filePath) => {
+        const splitPath = filePath.split('\\');
+        const fileName = splitPath[splitPath.length - 1];
+        if (fileNameSuffixRegExp.test(fileName)) {
+            const numbers = fileName.match(/\d+/g);
+            const testNumber = parseInt(numbers[0]);
+            if (testNumber > result) result = testNumber;
+        }
+    });
+    return result;
+};
+
+const generateFileName = (args, fileIndex, returnedFilePath) => {
+    let fileName;
+    if (args.fileSuffix !== '') {
+        fileName = `${fileIndex + 1}${args.fileSuffix}`;
+    }
+    if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
+        fileName += '.ora';
+    } else if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP) {
+        fileName += '.zip';
+    }
+    let filePath = `${returnedFilePath}\\${fileName}`;
+    return filePath;
+};
 
 const validateFileExtension = (fileName) => {
     if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
@@ -151,6 +171,7 @@ const loadFilesFromPath = async (path) => {
         if (fs.existsSync(path)) {
             readdir(path)
                 .then((filesResult) => {
+                    files = [];
                     filesResult.forEach((file) => {
                         const filePath = `${path}\\${file}`;
                         if (
