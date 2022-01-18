@@ -725,7 +725,6 @@ class App extends Component {
                         response.numberOfFiles
                     );
                 } else {
-                    this.props.setNumFilesInQueue(0);
                     this.onNoImageLeft();
                 }
             });
@@ -778,7 +777,8 @@ class App extends Component {
                     );
                 })
                 .catch((error) => {
-                    console.log(error);
+                    this.props.setLocalFileOpen(false);
+                    this.onNoImageLeft();
                 });
         }
     }
