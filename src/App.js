@@ -950,7 +950,6 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
-        this.props.setLocalFileOpen(false);
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
@@ -989,7 +988,6 @@ class App extends Component {
                                         this.setState({
                                             myOra: new ORA(),
                                         });
-                                        this.onNoImageLeft();
                                         this.props.setCurrentProcessingFile(
                                             null
                                         );
@@ -1191,7 +1189,6 @@ class App extends Component {
                                         this.setState({
                                             myOra: new ORA(),
                                         });
-                                        this.onNoImageLeft();
                                         this.props.setCurrentProcessingFile(
                                             null
                                         );
