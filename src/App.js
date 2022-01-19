@@ -854,6 +854,9 @@ class App extends Component {
      * @return {type} None
      */
     loadNextImage(image, fileName, numberOfFiles = 0) {
+        // Loading a file initially from a local workspace can call loadNextImage twice
+        // Which creates duplicate detections. This ensures that the same file is never loaded twice
+        if (fileName === this.props.currentProcessingFile) return;
         this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
