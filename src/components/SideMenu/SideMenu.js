@@ -55,9 +55,8 @@ const SideMenu = ({
             }
         }
     });
-
     // Checking to see if the app has a file received via local or remote using the received time from the uiSlice
-    if (enableMenu !== null || hasFileOutput) {
+    if (enableMenu !== null) {
         // iif already collapsed, render the sidemenu, but inverted
         if (collapsedSideMenu) {
             return (

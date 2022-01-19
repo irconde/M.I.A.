@@ -778,6 +778,7 @@ class App extends Component {
                 })
                 .catch((error) => {
                     this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
                     this.onNoImageLeft();
                 });
         }
@@ -1018,11 +1019,12 @@ class App extends Component {
                                     this.setState({
                                         myOra: new ORA(),
                                     });
-                                    this.onNoImageLeft();
+
                                     this.props.setCurrentProcessingFile(null);
                                     this.resetSelectedDetectionBoxes(e);
                                     this.props.resetDetections();
                                     this.props.setReceiveTime(null);
+                                    this.onNoImageLeft();
                                 });
                             });
                     }
