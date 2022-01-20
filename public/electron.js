@@ -24,6 +24,8 @@ function createWindow() {
         width,
         height,
         webPreferences: {
+            // Node Integration enables the use of the Node.JS File system
+            // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
             nodeIntegration: true,
             contextIsolation: false,
         },
@@ -54,6 +56,12 @@ app.on('activate', () => {
     }
 });
 
+/**
+ * Channels - Select Directory - A channel between the main process (electron) and the renderer process (react).
+ *                               This returns an object with a cancelled value and an array containing the file path
+ *                               if selected.
+ * @returns {Object<canceled: Boolean; filePaths: Array<String>>}
+ */
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         dialog
@@ -75,6 +83,14 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     return result;
 });
 
+/**
+ * Channels - Get Next File - Loads the next file if the path provided exists. This function will
+ *            ensure that the path exists, if the file names aren't loaded, it will load them. Then,
+ *            it will return the Base64 binary string of the next file.
+ *
+ * @param {String} - File directory path sent from react
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
+ */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (files.length > 0) {
@@ -100,6 +116,13 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     return result;
 });
 
+/**
+ * Channels - Save Current File - Occurs when the user clicks next in react. It saves the file the returned path
+ *                                of the file path passed in. As well, it moves the file queue ahead to the next file.
+ *
+ * @param {Object<file: Buffer; fileDirectory: String; fileFormat: String; fileName: String; fileSuffix: String>}
+ * @returns {String} Result
+ */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         const returnedFilePath = `${args.fileDirectory}\\returned`;
@@ -133,6 +156,13 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return result;
 });
 
+/**
+ * findMaxFileSuffix - Finds the maximum number used in the already saved files in the returned path
+ *
+ * @param {String} fileNameSuffix
+ * @param {Array<String>} returnedFiles
+ * @returns {Number}
+ */
 const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
     let result = 0;
     const fileNameSuffixRegExp = new RegExp(fileNameSuffix, 'i');
@@ -148,6 +178,15 @@ const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
     return result;
 };
 
+/**
+ * generateFileName - Uses the passed in arguments to generate a full file path from a file name,
+ *                    directory, suffix, and output format.
+ *
+ * @param {Object<fileSuffix: String; fileFormat: String>} args
+ * @param {Number} fileIndex
+ * @param {String} returnedFilePath
+ * @returns {String}
+ */
 const generateFileName = (args, fileIndex, returnedFilePath) => {
     let fileName;
     if (args.fileSuffix !== '') {
@@ -162,11 +201,24 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
     return filePath;
 };
 
+/**
+ * validateFileExtension - Ensures that the file name being passed is in of type .ora or .dcs
+ *
+ * @param {String} fileName
+ * @returns {Boolean}
+ */
 const validateFileExtension = (fileName) => {
     if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
     else return false;
 };
 
+/**
+ * loadFilesFromPath - Will load the files from the passed in path directory, and will validate that
+ *                     the files in the directory are of correct type. I.E. .png, .jpg etc. won't be loaded.
+ *
+ * @param {String} path
+ * @returns {Promise}
+ */
 const loadFilesFromPath = async (path) => {
     const result = new Promise((resolve, reject) => {
         if (fs.existsSync(path)) {
@@ -195,6 +247,12 @@ const loadFilesFromPath = async (path) => {
     return result;
 };
 
+/**
+ * loadFile  - Loads the file from the front of the file queue and returns an object with its data
+ *             and information about the file name and number of files in the directory.
+ *
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
+ */
 const loadFile = () => {
     const fileData = fs.readFileSync(files[0]);
     const file = Buffer.from(fileData).toString('base64');
