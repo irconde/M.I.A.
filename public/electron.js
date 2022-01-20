@@ -65,6 +65,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
                     dialogResult.canceled === false &&
                     dialogResult.filePaths.length > 0
                 ) {
+                    filesOutputted = [];
                     loadFilesFromPath(dialogResult.filePaths[0]);
                 }
                 resolve(dialogResult);
@@ -133,7 +134,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 });
 
 const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
-    let result = 1;
+    let result = 0;
     const fileNameSuffixRegExp = new RegExp(fileNameSuffix, 'i');
     returnedFiles.forEach((filePath) => {
         const splitPath = filePath.split('\\');
@@ -150,9 +151,7 @@ const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
 const generateFileName = (args, fileIndex, returnedFilePath) => {
     let fileName;
     if (args.fileSuffix !== '') {
-        fileName = `${fileIndex === 1 ? fileIndex : fileIndex + 1}${
-            args.fileSuffix
-        }`;
+        fileName = `${fileIndex + 1}${args.fileSuffix}`;
     }
     if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ORA) {
         fileName += '.ora';

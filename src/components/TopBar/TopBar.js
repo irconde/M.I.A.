@@ -104,7 +104,6 @@ const TopBar = (props) => {
             fontSize: 'medium',
         },
     };
-
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
@@ -149,7 +148,7 @@ const TopBar = (props) => {
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        {localFileOutput === '' ? (
+                        {remoteOrLocal === true ? (
                             <React.Fragment>
                                 <FileUploadStatus
                                     isDownload={isDownload}
@@ -217,7 +216,7 @@ const TopBar = (props) => {
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        {localFileOutput === '' ? (
+                        {remoteOrLocal === true ? (
                             <React.Fragment>
                                 <FileUploadStatus
                                     isDownload={isDownload}
