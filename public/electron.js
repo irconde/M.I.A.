@@ -83,6 +83,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
+    filesOutputted = [];
     const result = await loadFilesFromPath(args);
     return result;
 });
@@ -229,7 +230,6 @@ const loadFilesFromPath = async (path) => {
             readdir(path)
                 .then((filesResult) => {
                     files = [];
-                    filesOutputted = [];
                     filesResult.forEach((file) => {
                         const filePath = `${path}\\${file}`;
                         if (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -86,11 +86,6 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
-    const getPath = () => {
-        var path = 'C:/user_example/test_output_folder';
-        return path;
-    };
-
     /**
      * handleSnackBarClose - Event handler for when the snackbar closes
      *
