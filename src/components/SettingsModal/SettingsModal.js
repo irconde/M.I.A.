@@ -182,25 +182,55 @@ const SettingsModal = (props) => {
      *                     If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
-        setSnackBarOpen(true);
-        dispatch(
-            saveSettings({
-                remoteIp,
-                remotePort,
-                autoConnect,
-                localFileOutput,
-                fileFormat,
-                annotationsFormat,
-                fileSuffix,
-                remoteOrLocal,
-                deviceType: Utils.deviceType(),
-            })
-        );
-        dispatch(toggleSettingsVisibility(false));
-        if (remoteOrLocal === true && (remoteIp !== '' || remotePort !== '')) {
-            setTimeout(() => {
-                props.connectToCommandServer(true);
-            }, 0);
+        if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {
+            ipcRenderer
+                .invoke(Channels.loadFiles, localFileOutput)
+                .then((result) => {
+                    console.log(result);
+                    setSnackBarOpen(true);
+                    dispatch(
+                        saveSettings({
+                            remoteIp,
+                            remotePort,
+                            autoConnect,
+                            localFileOutput,
+                            fileFormat,
+                            annotationsFormat,
+                            fileSuffix,
+                            remoteOrLocal,
+                            deviceType: Utils.deviceType(),
+                        })
+                    );
+                    dispatch(toggleSettingsVisibility(false));
+                })
+                .catch((error) => {
+                    // TODO: Error handling for an incorrectly typed directory
+                    console.log(error);
+                });
+        } else {
+            setSnackBarOpen(true);
+            dispatch(
+                saveSettings({
+                    remoteIp,
+                    remotePort,
+                    autoConnect,
+                    localFileOutput,
+                    fileFormat,
+                    annotationsFormat,
+                    fileSuffix,
+                    remoteOrLocal,
+                    deviceType: Utils.deviceType(),
+                })
+            );
+            dispatch(toggleSettingsVisibility(false));
+            if (
+                remoteOrLocal === true &&
+                (remoteIp !== '' || remotePort !== '')
+            ) {
+                setTimeout(() => {
+                    props.connectToCommandServer(true);
+                }, 0);
+            }
         }
     };
 

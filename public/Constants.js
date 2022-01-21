@@ -1,5 +1,6 @@
 module.exports.Channels = {
     selectDirectory: 'select-directory',
+    loadFiles: 'load-files',
     getNextFile: 'get-next-file',
     saveCurrentFile: 'save-current-file',
 };

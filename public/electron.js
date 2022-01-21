@@ -69,17 +69,21 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
                 properties: ['openDirectory'],
             })
             .then((dialogResult) => {
-                if (
-                    dialogResult.canceled === false &&
-                    dialogResult.filePaths.length > 0
-                ) {
-                    filesOutputted = [];
-                    loadFilesFromPath(dialogResult.filePaths[0]);
-                }
                 resolve(dialogResult);
             })
             .catch((err) => reject(err));
     });
+    return result;
+});
+
+/**
+ * Channels - Load Files - Loads the file from the passed in directory via the args parameter
+ *
+ * @param {String} - Directory location, i.e. D:\images
+ * @returns {Promise}
+ */
+ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
+    const result = await loadFilesFromPath(args);
     return result;
 });
 
@@ -107,8 +111,8 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                             reject('No files loaded');
                         }
                     })
-                    .catch(() => {
-                        reject('No such directory');
+                    .catch((error) => {
+                        reject(error);
                     });
             }
         }
@@ -225,6 +229,7 @@ const loadFilesFromPath = async (path) => {
             readdir(path)
                 .then((filesResult) => {
                     files = [];
+                    filesOutputted = [];
                     filesResult.forEach((file) => {
                         const filePath = `${path}\\${file}`;
                         if (
@@ -234,14 +239,14 @@ const loadFilesFromPath = async (path) => {
                             files.push(filePath);
                         }
                     });
-                    resolve();
+                    resolve('files loaded');
                 })
                 .catch((error) => {
                     console.log(error);
                     reject(error);
                 });
         } else {
-            reject();
+            reject('directory does not exist');
         }
     });
     return result;
