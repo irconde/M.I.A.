@@ -63,15 +63,8 @@ app.on('activate', () => {
  * @returns {Object<canceled: Boolean; filePaths: Array<String>>}
  */
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
-        dialog
-            .showOpenDialog({
-                properties: ['openDirectory'],
-            })
-            .then((dialogResult) => {
-                resolve(dialogResult);
-            })
-            .catch((err) => reject(err));
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
     });
     return result;
 });
