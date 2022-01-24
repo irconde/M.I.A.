@@ -165,7 +165,12 @@ const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
     let result = 0;
     const fileNameSuffixRegExp = new RegExp(fileNameSuffix, 'i');
     returnedFiles.forEach((filePath) => {
-        const splitPath = filePath.split('\\');
+        let splitPath;
+        if (process.platform === 'win32') {
+            splitPath = filePath.split('\\');
+        } else {
+            splitPath = filePath.split('/');
+        }
         const fileName = splitPath[splitPath.length - 1];
         if (fileNameSuffixRegExp.test(fileName)) {
             const numbers = fileName.match(/\d+/g);
@@ -195,8 +200,11 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
     } else if (args.fileFormat === Constants.Settings.OUTPUT_FORMATS.ZIP) {
         fileName += '.zip';
     }
-    let filePath = `${returnedFilePath}\\${fileName}`;
-    return filePath;
+    if (process.platform === 'win32') {
+        return `${returnedFilePath}\\${fileName}`;
+    } else {
+        return `${returnedFilePath}/${fileName}`;
+    }
 };
 
 /**
@@ -224,7 +232,12 @@ const loadFilesFromPath = async (path) => {
                 .then((filesResult) => {
                     files = [];
                     filesResult.forEach((file) => {
-                        const filePath = `${path}\\${file}`;
+                        let filePath;
+                        if (process.platform === 'win32') {
+                            filePath = `${path}\\${file}`;
+                        } else {
+                            filePath = `${path}/${file}`;
+                        }
                         if (
                             validateFileExtension(file) === true &&
                             filesOutputted.includes(filePath) === false
@@ -254,7 +267,13 @@ const loadFilesFromPath = async (path) => {
 const loadFile = () => {
     const fileData = fs.readFileSync(files[0]);
     const file = Buffer.from(fileData).toString('base64');
-    const splitPath = files[0].split('\\');
+    let splitPath;
+    if (process.platform === 'win32') {
+        splitPath = files[0].split('\\');
+    } else {
+        splitPath = files[0].split('/');
+    }
+
     const fileName = splitPath[splitPath.length - 1];
     const result = {
         file: file,
