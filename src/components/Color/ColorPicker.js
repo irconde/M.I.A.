@@ -15,7 +15,6 @@ import {
     getZoomLevels,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
-import Utils from '../../utils/Utils';
 
 const ColorPicker = () => {
     const isVisible = useSelector(getColorPickerVisible);

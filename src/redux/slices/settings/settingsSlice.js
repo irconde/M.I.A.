@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { createSlice } from '@reduxjs/toolkit';
 import { Cookies } from 'react-cookie';
 import { COOKIE, SETTINGS } from '../../../utils/Constants';

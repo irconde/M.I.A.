@@ -77,7 +77,6 @@ import {
     setInputLabel,
     setReceiveTime,
     colorPickerToggle,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
@@ -88,6 +87,12 @@ import { buildCocoDataZip } from './utils/Coco';
 import { fileSave, fileOpen } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
+import isElectron from 'is-electron';
+let ipcRenderer;
+if (isElectron()) {
+    const electron = window.require('electron');
+    ipcRenderer = electron.ipcRenderer;
+}
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -140,10 +145,14 @@ class App extends Component {
             timer: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
+        this.getFileFromLocalDirectory =
+            this.getFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
+        this.sendImageToLocalDirectory =
+            this.sendImageToLocalDirectory.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -235,6 +244,9 @@ class App extends Component {
         }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {
+                if (isElectron() && nextProps.localFileOutput !== '') {
+                    this.getFileFromLocalDirectory();
+                }
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
@@ -254,6 +266,8 @@ class App extends Component {
         if (this.props.firstDisplaySettings === false) {
             if (this.props.remoteOrLocal === true) {
                 this.connectToCommandServer();
+            } else if (isElectron() && this.props.localFileOutput !== '') {
+                this.getFileFromLocalDirectory();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -705,14 +719,12 @@ class App extends Component {
         ) {
             this.state.commandServer.emit('currentFile', (response) => {
                 if (response.status === 'Ok') {
-                    this.props.setNumberOfFiles(response.numberOfFiles);
                     this.loadNextImage(
                         response.file,
                         response.fileName,
                         response.numberOfFiles
                     );
                 } else {
-                    this.props.setNumberOfFiles(0);
                     this.onNoImageLeft();
                 }
             });
@@ -743,6 +755,36 @@ class App extends Component {
     }
 
     /**
+     * getFileFromLocalDirectory - Calls the Electron channel to invoke the next file from the selected
+     *                             file system folder.
+     *
+     * @param {None}
+     * @returns {None}
+     */
+    getFileFromLocalDirectory() {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(
+                    constants.Channels.getNextFile,
+                    this.props.localFileOutput
+                )
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles
+                    );
+                })
+                .catch((error) => {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                });
+        }
+    }
+
+    /**
      * sendImageToCommandServer - Socket IO to send a file to the server
      * @param {Blob} Blob - which file we are sending
      * @return {type} None
@@ -754,6 +796,34 @@ class App extends Component {
             fileFormat: this.props.fileFormat,
             fileSuffix: this.props.fileSuffix,
         });
+    }
+
+    /**
+     * sendImageToLocalDirectory - Sends the needed information to save the current file in the selected
+     *                             this.props.localFileOutput path via Electron channels.
+     * @param {Buffer} file
+     * @returns {Promise}
+     */
+    async sendImageToLocalDirectory(file) {
+        const result = new Promise((resolve, reject) => {
+            if (isElectron() && this.props.localFileOutput !== '') {
+                ipcRenderer
+                    .invoke(constants.Channels.saveCurrentFile, {
+                        file,
+                        fileDirectory: this.props.localFileOutput,
+                        fileFormat: this.props.fileFormat,
+                        fileName: this.props.currentProcessingFile,
+                        fileSuffix: this.props.fileSuffix,
+                    })
+                    .then((result) => {
+                        resolve(result);
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            }
+        });
+        return result;
     }
 
     /**
@@ -785,6 +855,9 @@ class App extends Component {
      * @return {type} None
      */
     loadNextImage(image, fileName, numberOfFiles = 0) {
+        // Loading a file initially from a local workspace can call loadNextImage twice
+        // Which creates duplicate detections. This ensures that the same file is never loaded twice
+        if (fileName === this.props.currentProcessingFile) return;
         this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
@@ -881,7 +954,6 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
-        this.props.setLocalFileOpen(false);
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
@@ -911,27 +983,51 @@ class App extends Component {
                             );
                         });
                 } else {
-                    cocoZip
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
-                                });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
+                    if (isElectron() && this.props.localFileOutput !== '') {
+                        cocoZip
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                this.sendImageToLocalDirectory(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
                             });
-                        });
+                    } else {
+                        cocoZip
+                            .generateAsync({ type: 'blob' })
+                            .then(async (file) => {
+                                fileSave(file, {
+                                    fileName: `1${this.props.fileSuffix}.${
+                                        this.props.fileFormat ===
+                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                            ? 'ora'
+                                            : 'zip'
+                                    }`,
+                                }).then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
+                                    this.onNoImageLeft();
+                                });
+                            });
+                    }
                 }
             });
         } else if (
@@ -1089,27 +1185,50 @@ class App extends Component {
                             );
                         });
                 } else {
-                    newOra
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
-                                });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
+                    if (isElectron() && this.props.localFileOutput !== '') {
+                        newOra
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                this.sendImageToLocalDirectory(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
                             });
-                        });
+                    } else {
+                        newOra
+                            .generateAsync({ type: 'blob' })
+                            .then(async (file) => {
+                                fileSave(file, {
+                                    fileName: `1${this.props.fileSuffix}.${
+                                        this.props.fileFormat ===
+                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                            ? 'ora'
+                                            : 'zip'
+                                    }`,
+                                }).then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+                                    this.onNoImageLeft();
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
+                                });
+                            });
+                    }
                 }
             });
         }
@@ -2864,6 +2983,7 @@ const mapStateToProps = (state) => {
         remoteOrLocal: settings.settings.remoteOrLocal,
         hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
+        localFileOutput: settings.settings.localFileOutput,
     };
 };
 
@@ -2912,7 +3032,6 @@ const mapDispatchToProps = {
     setReceiveTime,
     colorPickerToggle,
     updateMissMatchedClassName,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,

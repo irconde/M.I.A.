@@ -75,10 +75,9 @@ const TopBar = (props) => {
         },
         icon: {
             margin: '0.75rem',
-            marginLeft: '1.25rem',
         },
         lastIcon: {
-            margin: '0.5rem 1.5rem 0.5rem 0rem',
+            margin: '0.5rem 1.5rem 0.5rem -0.5rem',
         },
         typeInfo: {
             color: '#C3C3C3',
@@ -105,7 +104,6 @@ const TopBar = (props) => {
             fontSize: 'medium',
         },
     };
-
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
@@ -115,7 +113,10 @@ const TopBar = (props) => {
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer} &nbsp;
+                        {connectedServer !== null
+                            ? connectedServer
+                            : localFileOutput}{' '}
+                        &nbsp;
                         <span style={styles.divider}>/</span>&nbsp;
                         <span style={styles.typeInfo}>Processing</span>
                         &nbsp;&nbsp;
@@ -147,15 +148,19 @@ const TopBar = (props) => {
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        <FileUploadStatus
-                            isDownload={isDownload}
-                            isUpload={isUpload}
-                            styles={styles.icon}
-                        />
-                        <ConnectionStatus
-                            isConnected={isConnected}
-                            style={styles.icon}
-                        />
+                        {remoteOrLocal === true ? (
+                            <React.Fragment>
+                                <FileUploadStatus
+                                    isDownload={isDownload}
+                                    isUpload={isUpload}
+                                    styles={styles.icon}
+                                />
+                                <ConnectionStatus
+                                    isConnected={isConnected}
+                                    style={styles.icon}
+                                />
+                            </React.Fragment>
+                        ) : null}
                     </React.Fragment>
                 ) : null}
                 <div style={styles.verticalDivider}></div>
@@ -179,7 +184,7 @@ const TopBar = (props) => {
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer
+                        {connectedServer !== null
                             ? connectedServer
                             : localFileOutput}{' '}
                         &nbsp; &nbsp;&nbsp;
@@ -211,15 +216,19 @@ const TopBar = (props) => {
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        <FileUploadStatus
-                            isDownload={isDownload}
-                            isUpload={isUpload}
-                            styles={styles.icon}
-                        />
-                        <ConnectionStatus
-                            isConnected={isConnected}
-                            style={styles.icon}
-                        />
+                        {remoteOrLocal === true ? (
+                            <React.Fragment>
+                                <FileUploadStatus
+                                    isDownload={isDownload}
+                                    isUpload={isUpload}
+                                    styles={styles.icon}
+                                />
+                                <ConnectionStatus
+                                    isConnected={isConnected}
+                                    style={styles.icon}
+                                />
+                            </React.Fragment>
+                        ) : null}
                     </React.Fragment>
                 ) : null}
                 <div style={styles.verticalDivider}></div>

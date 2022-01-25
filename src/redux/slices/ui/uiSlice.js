@@ -387,14 +387,6 @@ const uiSlice = createSlice({
             state.colorPickerVisible = !state.colorPickerVisible;
         },
         /**
-         * setNumberOfFiles - Sets the number of files in the command server left to be sent
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action.payload - Number of files left to be served
-         */
-        setNumberOfFiles: (state, action) => {
-            state.numberOfFiles = action.payload;
-        },
-        /**
          * setLocalFileOpen - Determines wether the App is working with a local file or remote file
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Boolean} action.payload - True if we have a local file open, false if not, wether remote or not.
@@ -615,7 +607,6 @@ export const {
     toggleCollapsedSideMenu,
     setReceiveTime,
     colorPickerToggle,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -65,7 +65,7 @@ const SettingsModal = (props) => {
     const [localFileOutput, setLocalFileOutput] = useState(
         initLocalFileOutput !== '' ? initLocalFileOutput : ''
     );
-    const [fileSuffix, setFileSuffix] = useState('');
+    const [fileSuffix, setFileSuffix] = useState(settings.fileSuffix);
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
@@ -86,11 +86,6 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
-    const getPath = () => {
-        var path = 'C:/user_example/test_output_folder';
-        return path;
-    };
-
     /**
      * handleSnackBarClose - Event handler for when the snackbar closes
      *
@@ -182,25 +177,55 @@ const SettingsModal = (props) => {
      *                     If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
-        setSnackBarOpen(true);
-        dispatch(
-            saveSettings({
-                remoteIp,
-                remotePort,
-                autoConnect,
-                localFileOutput,
-                fileFormat,
-                annotationsFormat,
-                fileSuffix,
-                remoteOrLocal,
-                deviceType: Utils.deviceType(),
-            })
-        );
-        dispatch(toggleSettingsVisibility(false));
-        if (remoteOrLocal === true && (remoteIp !== '' || remotePort !== '')) {
-            setTimeout(() => {
-                props.connectToCommandServer(true);
-            }, 0);
+        if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {
+            ipcRenderer
+                .invoke(Channels.loadFiles, localFileOutput)
+                .then((result) => {
+                    console.log(result);
+                    setSnackBarOpen(true);
+                    dispatch(
+                        saveSettings({
+                            remoteIp,
+                            remotePort,
+                            autoConnect,
+                            localFileOutput,
+                            fileFormat,
+                            annotationsFormat,
+                            fileSuffix,
+                            remoteOrLocal,
+                            deviceType: Utils.deviceType(),
+                        })
+                    );
+                    dispatch(toggleSettingsVisibility(false));
+                })
+                .catch((error) => {
+                    // TODO: Error handling for an incorrectly typed directory
+                    console.log(error);
+                });
+        } else {
+            setSnackBarOpen(true);
+            dispatch(
+                saveSettings({
+                    remoteIp,
+                    remotePort,
+                    autoConnect,
+                    localFileOutput,
+                    fileFormat,
+                    annotationsFormat,
+                    fileSuffix,
+                    remoteOrLocal,
+                    deviceType: Utils.deviceType(),
+                })
+            );
+            dispatch(toggleSettingsVisibility(false));
+            if (
+                remoteOrLocal === true &&
+                (remoteIp !== '' || remotePort !== '')
+            ) {
+                setTimeout(() => {
+                    props.connectToCommandServer(true);
+                }, 0);
+            }
         }
     };
 
@@ -649,7 +674,6 @@ const SettingsModal = (props) => {
                                                             Channels.selectDirectory
                                                         )
                                                         .then((result) => {
-                                                            console.log(result);
                                                             if (
                                                                 result.canceled ===
                                                                     false &&
