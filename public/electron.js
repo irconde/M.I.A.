@@ -123,7 +123,12 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        const returnedFilePath = `${args.fileDirectory}\\returned`;
+        let returnedFilePath;
+        if (process.platform === 'win32') {
+            returnedFilePath = `${args.fileDirectory}\\returned`;
+        } else {
+            returnedFilePath = `${args.fileDirectory}/returned`;
+        }
         if (fs.existsSync(returnedFilePath) === false) {
             fs.mkdirSync(returnedFilePath);
         }
