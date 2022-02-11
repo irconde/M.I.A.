@@ -3,10 +3,35 @@
  */
 import * as constants from './Constants';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
 const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
+    /**
+     * loadImage - Custom cornerstone image loader; Takes arrayBuffer provided to utilize arrayBufferToImage from
+     * CornerstoneJS's web image loader library. Returns a promise that resolves a Cornerstone Image Object.
+     *
+     * @param {String} imageId
+     * @param {Array} arrayBuffer
+     */
+    static async loadImage(imageId, arrayBuffer) {
+        const promise = new Promise((resolve, reject) => {
+            const imagePromise = arrayBufferToImage(arrayBuffer);
+            imagePromise
+                .then((image) => {
+                    const imageObject = createImage(image, imageId);
+                    imageObject.rgba = true;
+                    resolve(imageObject);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+
+        return promise;
+    }
+
     /**
      * @static decimalToPercentage - Method that converts a decimal value into a percentage
      *

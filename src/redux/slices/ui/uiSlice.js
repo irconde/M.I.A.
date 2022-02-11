@@ -36,6 +36,7 @@ const initialState = {
     numberOfFiles: 0,
     localFileOpen: false,
     recentScroll: false,
+    currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
 };
 
 const uiSlice = createSlice({
@@ -395,6 +396,14 @@ const uiSlice = createSlice({
             state.localFileOpen = action.payload;
         },
         /**
+         * setCurrentFileFormat - Determines wether the App is working with a local file or remote file
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {String} action.payload - Format of currently processed file
+         */
+        setCurrentFileFormat: (state, action) => {
+            state.currentFileFormat = action.payload;
+        },
+        /**
          * updateRecentScroll - Update scroll flag to reset to true before waiting 1000ms and resetting to false
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -576,6 +585,7 @@ export const getReceivedTime = (state) => state.ui.receiveTime;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
 export const getLocalFileOpen = (state) => state.ui.localFileOpen;
+export const getCurrentFileFormat = (state) => state.ui.currentFileFormat;
 export const getRecentScroll = (state) => state.ui.recentScroll;
 
 // Exporting the Actions for the Reducers
@@ -608,6 +618,7 @@ export const {
     setReceiveTime,
     colorPickerToggle,
     setLocalFileOpen,
+    setCurrentFileFormat,
     updateEditLabelPosition,
     updateRecentScroll,
 } = uiSlice.actions;

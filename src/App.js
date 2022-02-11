@@ -7,6 +7,7 @@ import dicomParser from 'dicom-parser';
 import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
+import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import ORA from './utils/ORA.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
@@ -80,6 +81,7 @@ import {
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
+    setCurrentFileFormat,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
@@ -93,6 +95,7 @@ if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
+import { current } from '@reduxjs/toolkit';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -114,6 +117,8 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
         },
     },
 });
+cornerstoneWebImageLoader.external.cornerstone = cornerstone;
+cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
@@ -865,83 +870,169 @@ class App extends Component {
         let listOfStacks = [];
         // Lets load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
-            // First, after loading, we need to check our stack.xml
-            myZip
-                .file('stack.xml')
-                .async('string')
-                .then(async (stackFile) => {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(
-                        stackFile,
-                        'text/xml'
-                    );
-                    const xmlStack = xmlDoc.getElementsByTagName('stack');
-                    // We loop through each stack. Creating a new stack object to store our info
-                    // for now, we are just grabbing the location of the dicos file in the ora file
-                    for (let stackData of xmlStack) {
-                        let currentStack = {
-                            name: stackData.getAttribute('name'),
-                            view: stackData.getAttribute('view'),
-                            rawData: [],
-                            blobData: [],
-                            pixelData: null,
-                        };
-                        let layerData = stackData.getElementsByTagName('layer');
-                        for (let imageSrc of layerData) {
-                            currentStack.rawData.push(
-                                imageSrc.getAttribute('src')
-                            );
-                        }
-                        // We have finished creating the current stack's object
-                        // add it onto our holder variable for now
-                        listOfStacks.push(currentStack);
-                    }
-                    // Now we loop through the data we have collected
-                    // We know the first layer of each stack is pixel data, which we need as an array buffer
-                    // Which we got from i===0.
-                    // No matter what however, every layer gets converted a blob and added to the data set
-                    for (let j = 0; j < listOfStacks.length; j++) {
-                        for (
-                            let i = 0;
-                            i < listOfStacks[j].rawData.length;
-                            i++
-                        ) {
+            if (myZip.file('annotations.json')) {
+                this.props.setCurrentFileFormat(
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                );
+                console.log('Current image format: MS COCO');
+                // First, after loading, we need to check our stack.xml
+                myZip
+                    .file('annotations.json')
+                    .async('string')
+                    .then(async (jsonData) => {
+                        const data = JSON.parse(jsonData);
+                        var imageCount = data['images'].length;
+                        // We loop through each stack. Creating a new stack object to store our info
+                        // for now, we are just grabbing the location of the dicos file in the ora file
+                        for (var i = 0; i < imageCount; i++) {
+                            let currentStack = {
+                                name: `SOP Instance UID #${i + 1}`,
+                                view:
+                                    data['images'][i]['id'] === 1
+                                        ? 'top'
+                                        : 'side',
+                                rawData: [], // 'data/000.png', 'data/001.json'
+                                arrayBuf: null,
+                            };
+
+                            let annotations = {};
+
+                            for (
+                                var j = 0;
+                                j < data['annotations'].length;
+                                j++
+                            ) {
+                                if (
+                                    data['annotations'][j]['image_id'] ===
+                                    i + 1
+                                )
+                                    annotations[data['annotations'][j]['id']] =
+                                        data['annotations'][j];
+                            }
+
                             await myZip
-                                .file(listOfStacks[j].rawData[i])
-                                .async('base64')
+                                .file(data['images'][i]['file_name'])
+                                .async('arraybuffer')
                                 .then((imageData) => {
-                                    if (i === 0)
-                                        listOfStacks[j].pixelData =
-                                            Utils.base64ToArrayBuffer(
-                                                imageData
-                                            );
-                                    listOfStacks[j].blobData.push({
-                                        blob: Utils.b64toBlob(imageData),
-                                        uuid: uuidv4(),
-                                    });
+                                    currentStack.arrayBuf = imageData;
                                 });
+
+                            Object.keys(annotations).forEach(function (key) {
+                                currentStack.rawData.push(annotations[key]);
+                            });
+                            // We have finished creating the current stack's object
+                            // add it onto our holder variable for now
+                            listOfStacks.push(currentStack);
                         }
-                    }
-                    const promiseOfList = Promise.all(listOfPromises);
-                    // Once we have all the layers...
-                    promiseOfList.then(() => {
-                        const updateImageViewportTop =
-                            this.state.imageViewportTop;
-                        updateImageViewportTop.style.visibility = 'visible';
-                        this.setState({
-                            imageViewportTop: updateImageViewportTop,
+
+                        const promiseOfList = Promise.all(listOfPromises);
+                        // Once we have all the layers...
+                        promiseOfList.then(() => {
+                            const updateImageViewportTop =
+                                this.state.imageViewportTop;
+                            updateImageViewportTop.style.visibility = 'visible';
+                            this.setState({
+                                imageViewportTop: updateImageViewportTop,
+                            });
+                            this.state.myOra.stackData = listOfStacks;
+                            this.props.newFileReceivedUpdate({
+                                singleViewport: listOfStacks.length < 2,
+                                receiveTime: Date.now(),
+                            });
+                            this.props.setNumFilesInQueue(numberOfFiles);
+                            Utils.changeViewport(this.props.singleViewport);
+                            this.props.resetDetections();
+                            this.loadAndViewImage();
                         });
-                        this.state.myOra.stackData = listOfStacks;
-                        this.props.newFileReceivedUpdate({
-                            singleViewport: listOfStacks.length < 2,
-                            receiveTime: Date.now(),
-                        });
-                        this.props.setNumFilesInQueue(numberOfFiles);
-                        Utils.changeViewport(this.props.singleViewport);
-                        this.props.resetDetections();
-                        this.loadAndViewImage();
                     });
-                });
+            } else if (myZip.file('stack.xml')) {
+                this.props.setCurrentFileFormat(
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                );
+                console.log('Current image format: TDR-DICOS');
+                // First, after loading, we need to check our stack.xml
+                myZip
+                    .file('stack.xml')
+                    .async('string')
+                    .then(async (stackFile) => {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(
+                            stackFile,
+                            'text/xml'
+                        );
+                        const xmlStack = xmlDoc.getElementsByTagName('stack');
+
+                        // We loop through each stack. Creating a new stack object to store our info
+                        // for now, we are just grabbing the location of the dicos file in the ora file
+                        for (let stackData of xmlStack) {
+                            let currentStack = {
+                                name: stackData.getAttribute('name'),
+                                view: stackData.getAttribute('view'),
+                                rawData: [],
+                                blobData: [],
+                                pixelData: null,
+                            };
+                            let layerData =
+                                stackData.getElementsByTagName('layer');
+                            for (let imageSrc of layerData) {
+                                currentStack.rawData.push(
+                                    imageSrc.getAttribute('src')
+                                );
+                            }
+                            // We have finished creating the current stack's object
+                            // add it onto our holder variable for now
+                            listOfStacks.push(currentStack);
+                        }
+                        // Now we loop through the data we have collected
+                        // We know the first layer of each stack is pixel data, which we need as an array buffer
+                        // Which we got from i===0.
+                        // No matter what however, every layer gets converted a blob and added to the data set
+                        for (let j = 0; j < listOfStacks.length; j++) {
+                            for (
+                                let i = 0;
+                                i < listOfStacks[j].rawData.length;
+                                i++
+                            ) {
+                                await myZip
+                                    .file(listOfStacks[j].rawData[i])
+                                    .async('base64')
+                                    .then((imageData) => {
+                                        if (i === 0)
+                                            listOfStacks[j].pixelData =
+                                                Utils.base64ToArrayBuffer(
+                                                    imageData
+                                                );
+                                        listOfStacks[j].blobData.push({
+                                            blob: Utils.b64toBlob(imageData),
+                                            uuid: uuidv4(),
+                                        });
+                                    });
+                            }
+                        }
+                        const promiseOfList = Promise.all(listOfPromises);
+                        // Once we have all the layers...
+                        promiseOfList.then(() => {
+                            const updateImageViewportTop =
+                                this.state.imageViewportTop;
+                            updateImageViewportTop.style.visibility = 'visible';
+                            this.setState({
+                                imageViewportTop: updateImageViewportTop,
+                            });
+                            this.state.myOra.stackData = listOfStacks;
+                            this.props.newFileReceivedUpdate({
+                                singleViewport: listOfStacks.length < 2,
+                                receiveTime: Date.now(),
+                            });
+                            this.props.setNumFilesInQueue(numberOfFiles);
+                            Utils.changeViewport(this.props.singleViewport);
+                            this.props.resetDetections();
+                            this.loadAndViewImage();
+                        });
+                    });
+            } else {
+                console.log('Image format not supported.');
+                return null;
+            }
         });
     }
 
@@ -1234,22 +1325,97 @@ class App extends Component {
     loadAndViewImage() {
         let dataImagesLeft = [];
         let dataImagesRight = [];
-        this.displayDICOSimage();
-        // all other images do not have pixel data -- cornerstoneJS will fail and send an error
-        // if pixel data is missing in the dicom/dicos file. To parse out only the data,
-        // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
-        // the file data and call loadDICOSdata() to store the data in a DetectionSet
-        if (this.state.myOra.stackData[0].blobData.length === 1) {
-            dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
-        } else {
-            dataImagesLeft = this.state.myOra.stackData[0].blobData;
-        }
-        if (this.props.singleViewport === false) {
-            if (this.state.myOra.stackData[1] !== undefined) {
-                dataImagesRight = this.state.myOra.stackData[1].blobData;
+        if (
+            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.TDR
+        ) {
+            this.displayDICOSimage();
+
+            // all other images do not have pixel data -- cornerstoneJS will fail and send an error
+            // if pixel data is missing in the dicom/dicos file. To parse out only the data,
+            // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
+            // the file data and call loadDICOSdata() to store the data in a DetectionSet
+            if (this.state.myOra.stackData[0].blobData.length === 1) {
+                dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
+            } else {
+                dataImagesLeft = this.state.myOra.stackData[0].blobData;
             }
+            if (this.props.singleViewport === false) {
+                if (this.state.myOra.stackData[1] !== undefined) {
+                    dataImagesRight = this.state.myOra.stackData[1].blobData;
+                }
+            }
+            this.loadDICOSdata(dataImagesLeft, dataImagesRight);
+        } else if (
+            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.COCO
+        ) {
+            this.displayCOCOimage();
+            this.loadCOCOdata();
         }
-        this.loadDICOSdata(dataImagesLeft, dataImagesRight);
+    }
+
+    /**
+     * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
+     *
+     * @return {None} None
+     */
+    async displayCOCOimage() {
+        // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
+        const self = this;
+
+        let imageId = 'coco:0';
+        Utils.loadImage(imageId, self.state.myOra.stackData[0].arrayBuf).then(
+            function (image) {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    self.state.imageViewportTop,
+                    image
+                );
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = self.props.zoomLevelTop;
+                // eslint-disable-next-line react/no-direct-mutation-state
+                if (viewport.displayedArea !== undefined)
+                    self.state.myOra.stackData[0].dimensions =
+                        viewport.displayedArea.brhc;
+                self.setState({ viewport: viewport });
+                cornerstone.displayImage(
+                    self.state.imageViewportTop,
+                    image,
+                    viewport
+                );
+            }
+        );
+        imageId = 'coco:1';
+        if (this.props.singleViewport === false) {
+            const updatedImageViewportSide = this.state.imageViewportSide;
+            updatedImageViewportSide.style.visibility = 'visible';
+            this.setState({ imageViewportSide: updatedImageViewportSide });
+            Utils.loadImage(
+                imageId,
+                self.state.myOra.stackData[1].arrayBuf
+            ).then(function (image) {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    self.state.imageViewportSide,
+                    image
+                );
+                // eslint-disable-next-line react/no-direct-mutation-state
+                if (viewport.displayedArea !== undefined)
+                    self.state.myOra.stackData[1].dimensions =
+                        viewport.displayedArea.brhc;
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = self.props.zoomLevelSide;
+                self.setState({ viewport: viewport });
+                cornerstone.displayImage(
+                    self.state.imageViewportSide,
+                    image,
+                    viewport
+                );
+            });
+        }
+        Utils.setFullScreenViewport(
+            cornerstone,
+            this.props.collapsedSideMenu,
+            this.props.singleViewport
+        );
+        this.recalculateZoomLevel();
     }
 
     /**
@@ -1316,6 +1482,54 @@ class App extends Component {
             this.props.singleViewport
         );
         this.recalculateZoomLevel();
+    }
+
+    /**
+     * loadCOCOdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     *
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
+     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
+     * @return {None} None
+     */
+    loadCOCOdata() {
+        const self = this;
+        const imagesLeft = self.state.myOra.stackData[0].rawData;
+        for (let i = 0; i < imagesLeft.length; i++) {
+            imagesLeft[i].bbox[2] =
+                imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
+            imagesLeft[i].bbox[3] =
+                imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
+            self.props.addDetection({
+                algorithm: 'COCO-TEST-ALGO' + i,
+                className: 'COCO-TEST-CLASS' + i,
+                confidence: 11,
+                view: constants.viewport.TOP,
+                boundingBox: imagesLeft[i].bbox,
+                binaryMask: [],
+                polygonMask: [],
+                uuid: imagesLeft[i].id, // need to add? maybe image_id?
+            });
+        }
+
+        if (this.props.singleViewport === false) {
+            const imagesRight = self.state.myOra.stackData[1].rawData;
+            for (var j = 0; j < imagesRight.length; j++) {
+                imagesRight[j].bbox[2] =
+                    imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
+                imagesRight[j].bbox[3] =
+                    imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
+                self.props.addDetection({
+                    algorithm: 'COCO-TEST-ALGO' + j,
+                    className: 'COCO-TEST-CLASS' + j,
+                    confidence: 11,
+                    view: constants.viewport.SIDE,
+                    boundingBox: imagesRight[j].bbox,
+                    binaryMask: [],
+                    polygonMask: [],
+                    uuid: imagesRight[j].id, // need to add? maybe image_id?
+                });
+            }
+        }
     }
 
     /**
@@ -2963,6 +3177,7 @@ const mapStateToProps = (state) => {
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
         colorPickerVisible: ui.colorPickerVisible,
+        currentFileFormat: ui.currentFileFormat,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -3026,6 +3241,7 @@ const mapDispatchToProps = {
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
+    setCurrentFileFormat,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
