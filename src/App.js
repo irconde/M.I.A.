@@ -1905,7 +1905,11 @@ class App extends Component {
                 this.renderPolygonMasks(data[j].polygonMask, context);
             } else {
                 // Binary mask rendering
-                Utils.renderBinaryMasks(data[j].binaryMask, context);
+                if (
+                    this.props.currentFileFormat !==
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                )
+                    Utils.renderBinaryMasks(data[j].binaryMask, context);
             }
 
             context.globalAlpha = 1.0;
@@ -2248,15 +2252,154 @@ class App extends Component {
                 return newDetection.view === stack.view;
             });
             const self = this;
-            Dicos.detectionObjectToBlob(
-                newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0].blob
-            ).then((newBlob) => {
-                const uuid = uuidv4();
-                self.state.myOra.stackData[stackIndex].blobData.push({
-                    blob: newBlob,
-                    uuid,
+
+            if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.TDR
+            ) {
+                console.log('DICOS dragged.');
+                Dicos.detectionObjectToBlob(
+                    newDetection,
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                ).then((newBlob) => {
+                    const uuid = uuidv4();
+                    self.state.myOra.stackData[stackIndex].blobData.push({
+                        blob: newBlob,
+                        uuid,
+                    });
+                    if (data[0] === undefined) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetSelectedDetectionBoxes(event);
+                        return;
+                    }
+                    // When the updating detection is false, this means we are creating a new detection
+                    if (data[0].updatingDetection === false) {
+                        const operator = constants.OPERATOR;
+                        if (
+                            boundingBoxArea >
+                            constants.BOUNDING_BOX_AREA_THRESHOLD
+                        ) {
+                            self.props.addDetection({
+                                algorithm: operator,
+                                boundingBox: coords,
+                                className: data[0].class,
+                                confidence: data[0].confidence,
+                                view:
+                                    viewport === self.state.imageViewportTop
+                                        ? constants.viewport.TOP
+                                        : constants.viewport.SIDE,
+                                binaryMask: [],
+                                polygonMask: [],
+                                uuid,
+                            });
+                            self.appUpdateImage();
+                        } else {
+                            self.props.updateCornerstoneMode({
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.SELECTION,
+                            });
+                            self.resetCornerstoneTool();
+                        }
+                    } else {
+                        // Updating existing Detection's bounding box
+                        const { uuid } = data[0];
+
+                        // Only update the Detection if the boundingBox actually changes
+                        if (
+                            hasDetectionCoordinatesChanged(
+                                self.props.detections,
+                                uuid,
+                                coords,
+                                polygonMask
+                            )
+                        ) {
+                            if (
+                                this.props.selectedDetection &&
+                                this.props.editionMode !==
+                                    constants.editionMode.POLYGON
+                            ) {
+                                if (
+                                    this.props.selectedDetection.polygonMask
+                                        .length > 0
+                                ) {
+                                    polygonMask = Utils.calculatePolygonMask(
+                                        coords,
+                                        this.props.selectedDetection.polygonMask
+                                    );
+                                    binaryMask =
+                                        Utils.polygonToBinaryMask(polygonMask);
+                                } else if (
+                                    this.props.selectedDetection.binaryMask
+                                        .length > 0 &&
+                                    this.props.selectedDetection.binaryMask[0]
+                                        .length > 0
+                                ) {
+                                    binaryMask = cloneDeep(
+                                        this.props.selectedDetection.binaryMask
+                                    );
+                                    binaryMask[1][0] = coords[0];
+                                    binaryMask[1][1] = coords[1];
+                                }
+                            }
+                            self.props.updateDetection({
+                                uuid: data[0].uuid,
+                                update: {
+                                    boundingBox: coords,
+                                    polygonMask: polygonMask,
+                                    binaryMask,
+                                },
+                            });
+                            const viewportInfo =
+                                Utils.eventToViewportInfo(event);
+                            const contextMenuPos = self.getContextMenuPos(
+                                viewportInfo,
+                                coords
+                            );
+                            const detectionData = self.props.detections.find(
+                                (det) => det.uuid === data[0].uuid
+                            );
+                            const editLabelWidgetPosInfo =
+                                self.getEditLabelWidgetPos(
+                                    detectionData,
+                                    coords
+                                );
+                            let widgetPosition = {
+                                top: editLabelWidgetPosInfo.y,
+                                left: editLabelWidgetPosInfo.x,
+                            };
+                            self.props.onDragEndWidgetUpdate({
+                                detectionLabelEditWidth:
+                                    editLabelWidgetPosInfo.boundingWidth,
+                                detectionLabelEditPosition: widgetPosition,
+                                contextMenuPos,
+                            });
+                            // Detection coordinates changed and we need to re-render the detection context widget
+                            if (this.props.selectedDetection) {
+                                this.renderDetectionContextMenu(event);
+                            }
+                        }
+                    }
+                    if (
+                        self.props.cornerstoneMode ===
+                        constants.cornerstoneMode.ANNOTATION
+                    ) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetCornerstoneTool();
+                        self.props.clearAllSelection();
+                        self.appUpdateImage();
+                    } else if (
+                        self.props.cornerstoneMode ===
+                        constants.cornerstoneMode.EDITION
+                    ) {
+                        self.props.updateIsDetectionContextVisible(true);
+                        self.appUpdateImage();
+                    }
                 });
+            } else if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.COCO
+            ) {
+                console.log('COCO annotation dragged.');
                 if (data[0] === undefined) {
                     self.props.emptyAreaClickUpdate();
                     self.resetSelectedDetectionBoxes(event);
@@ -2268,6 +2411,12 @@ class App extends Component {
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
+                        var maxId = 0;
+                        self.state.myOra.stackData.forEach((viewport) => {
+                            viewport.rawData.forEach((detection) => {
+                                if (detection.id > maxId) maxId = detection.id;
+                            });
+                        });
                         self.props.addDetection({
                             algorithm: operator,
                             boundingBox: coords,
@@ -2277,13 +2426,9 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
-                            binaryMask: [
-                                [],
-                                [coords[0], coords[1]],
-                                [coords[2] - coords[0], coords[3] - coords[1]],
-                            ],
+                            binaryMask: [],
                             polygonMask: [],
-                            uuid,
+                            uuid: maxId + 1,
                         });
                         self.appUpdateImage();
                     } else {
@@ -2338,8 +2483,10 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                polygonMask: polygonMask,
-                                binaryMask,
+                                /* vvv Currently causing issue vvv */
+                                // polygonMask: polygonMask ? polygonMask : null,
+                                // binaryMask: binaryMask ? binaryMask : null,
+                                /* ^^^ Currently causing issue ^^^ */
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2368,22 +2515,7 @@ class App extends Component {
                         }
                     }
                 }
-                if (
-                    self.props.cornerstoneMode ===
-                    constants.cornerstoneMode.ANNOTATION
-                ) {
-                    self.props.emptyAreaClickUpdate();
-                    self.resetCornerstoneTool();
-                    self.props.clearAllSelection();
-                    self.appUpdateImage();
-                } else if (
-                    self.props.cornerstoneMode ===
-                    constants.cornerstoneMode.EDITION
-                ) {
-                    self.props.updateIsDetectionContextVisible(true);
-                    self.appUpdateImage();
-                }
-            });
+            }
         }
     }
 
