@@ -583,6 +583,23 @@ export default class Utils {
     }
 
     /**
+     * coordArrayToPolygonData - Convert list of handles into an array of float values
+     *
+     * @param {Array<Number>} coordArray - list of handles, i.e., the vertices, of a polygon (x_1, y_1, x_2, y_2, ...x_n, y_n )
+     */
+    static coordArrayToPolygonData(coordArray) {
+        let data = {};
+        let count = 0;
+        for (let i = 0; i < coordArray.length; i += 2) {
+            let x = coordArray[i];
+            let y = coordArray[i + 1];
+            data[count] = { x: x, y: y };
+            count++;
+        }
+        return data;
+    }
+
+    /**
      * polygonDataToXYArray - Convert list of handles into an array of objects with x, y float values
      *                        It will as well, calculate anchor points in percentage values of each point
      *                        corresponding to each wall of the bounding box(top/bottom/left/right). Which

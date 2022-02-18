@@ -1494,6 +1494,7 @@ class App extends Component {
     loadCOCOdata() {
         const self = this;
         const imagesLeft = self.state.myOra.stackData[0].rawData;
+        console.log(imagesLeft);
         for (let i = 0; i < imagesLeft.length; i++) {
             imagesLeft[i].bbox[2] =
                 imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
@@ -1506,8 +1507,16 @@ class App extends Component {
                 view: constants.viewport.TOP,
                 boundingBox: imagesLeft[i].bbox,
                 binaryMask: [],
-                polygonMask: [],
-                uuid: imagesLeft[i].id, // need to add? maybe image_id?
+                polygonMask:
+                    imagesLeft[i].segmentation.length > 0
+                        ? Utils.polygonDataToXYArray(
+                              Utils.coordArrayToPolygonData(
+                                  imagesLeft[i].segmentation[0]
+                              ),
+                              imagesLeft[i].bbox
+                          )
+                        : [],
+                uuid: imagesLeft[i].id,
             });
         }
 
@@ -1525,8 +1534,16 @@ class App extends Component {
                     view: constants.viewport.SIDE,
                     boundingBox: imagesRight[j].bbox,
                     binaryMask: [],
-                    polygonMask: [],
-                    uuid: imagesRight[j].id, // need to add? maybe image_id?
+                    polygonMask:
+                        imagesRight[j].segmentation.length > 0
+                            ? Utils.polygonDataToXYArray(
+                                  Utils.coordArrayToPolygonData(
+                                      imagesRight[j].segmentation[0]
+                                  ),
+                                  imagesRight[j].bbox
+                              )
+                            : [],
+                    uuid: imagesRight[j].id,
                 });
             }
         }
@@ -2171,6 +2188,12 @@ class App extends Component {
                 return;
             }
             let newDetection, coords, boundingBoxArea, polygonMask, binaryMask;
+            console.log(
+                'this.props.cornerstoneMode',
+                this.props.cornerstoneMode
+            );
+            console.log('this.props.annotationMode', this.props.annotationMode);
+            console.log('this.props.editionMode', this.props.editionMode);
             if (
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
@@ -2227,6 +2250,7 @@ class App extends Component {
             } else if (
                 this.props.editionMode === constants.editionMode.POLYGON
             ) {
+                //console.log(data[0].handles.points);
                 // Poly
                 coords = Utils.calculateBoundingBox(data[0].handles.points);
                 polygonMask = Utils.polygonDataToXYArray(
@@ -2244,7 +2268,7 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    binaryMask,
+                    //binaryMask,
                     polygonMask,
                 };
             }
@@ -2483,10 +2507,8 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                /* vvv Currently causing issue vvv */
-                                // polygonMask: polygonMask ? polygonMask : null,
-                                // binaryMask: binaryMask ? binaryMask : null,
-                                /* ^^^ Currently causing issue ^^^ */
+                                polygonMask: polygonMask ? polygonMask : null,
+                                binaryMask: binaryMask ? binaryMask : null,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2559,20 +2581,61 @@ class App extends Component {
                 return newDetection.view === stack.view;
             });
             let self = this;
-            Dicos.detectionObjectToBlob(
-                newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0].blob
-            ).then((newBlob) => {
-                const uuid = uuidv4();
-                self.state.myOra.stackData[stackIndex].blobData.push({
-                    blob: newBlob,
-                    uuid,
+            if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.TDR
+            ) {
+                Dicos.detectionObjectToBlob(
+                    newDetection,
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                ).then((newBlob) => {
+                    const uuid = uuidv4();
+                    self.state.myOra.stackData[stackIndex].blobData.push({
+                        blob: newBlob,
+                        uuid,
+                    });
+                    if (polygonData === undefined) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetSelectedDetectionBoxes(event);
+                        return;
+                    }
+                    self.props.addDetection({
+                        algorithm: constants.OPERATOR,
+                        boundingBox: boundingBoxCoords,
+                        className: polygonData.class,
+                        confidence: polygonData.confidence,
+                        view:
+                            viewport === self.state.imageViewportTop
+                                ? constants.viewport.TOP
+                                : constants.viewport.SIDE,
+                        binaryMask: binaryData,
+                        polygonMask: polygonCoords,
+                        uuid,
+                    });
+
+                    this.resetCornerstoneTool();
+                    this.props.clearAllSelection();
+                    this.appUpdateImage();
+                    this.props.emptyAreaClickUpdate();
+                    setTimeout(() => {
+                        this.startListeningClickEvents();
+                    }, 500);
                 });
+            } else if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.COCO
+            ) {
                 if (polygonData === undefined) {
                     self.props.emptyAreaClickUpdate();
                     self.resetSelectedDetectionBoxes(event);
                     return;
                 }
+                var maxId = 0;
+                self.state.myOra.stackData.forEach((viewport) => {
+                    viewport.rawData.forEach((detection) => {
+                        if (detection.id > maxId) maxId = detection.id;
+                    });
+                });
                 self.props.addDetection({
                     algorithm: constants.OPERATOR,
                     boundingBox: boundingBoxCoords,
@@ -2584,7 +2647,7 @@ class App extends Component {
                             : constants.viewport.SIDE,
                     binaryMask: binaryData,
                     polygonMask: polygonCoords,
-                    uuid,
+                    uuid: maxId + 1,
                 });
 
                 this.resetCornerstoneTool();
@@ -2594,7 +2657,7 @@ class App extends Component {
                 setTimeout(() => {
                     this.startListeningClickEvents();
                 }, 500);
-            });
+            }
         }
     }
 
