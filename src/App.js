@@ -870,61 +870,90 @@ class App extends Component {
         let listOfStacks = [];
         // Lets load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
-            if (myZip.file('annotations.json')) {
-                this.props.setCurrentFileFormat(
-                    constants.SETTINGS.ANNOTATIONS.COCO
-                );
-                console.log('Current image format: MS COCO');
-                // First, after loading, we need to check our stack.xml
-                myZip
-                    .file('annotations.json')
-                    .async('string')
-                    .then(async (jsonData) => {
-                        const data = JSON.parse(jsonData);
-                        var imageCount = data['images'].length;
+            //First, after loading, we need to check our stack.xml
+            myZip
+                .file('stack.xml')
+                .async('string')
+                .then(async (stackFile) => {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(
+                        stackFile,
+                        'text/xml'
+                    );
+                    const xmlStack = xmlDoc.getElementsByTagName('stack');
+                    const xmlImage = xmlDoc.getElementsByTagName('image');
+
+                    const currentFileFormat =
+                        xmlImage[0].getAttribute('format');
+
+                    if (
+                        currentFileFormat ===
+                        constants.SETTINGS.ANNOTATIONS.COCO
+                    ) {
+                        this.props.setCurrentFileFormat(
+                            constants.SETTINGS.ANNOTATIONS.COCO
+                        );
+                        console.log('Current image format: MS COCO');
+
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
-                        for (var i = 0; i < imageCount; i++) {
+                        for (let stackData of xmlStack) {
                             let currentStack = {
-                                name: `SOP Instance UID #${i + 1}`,
-                                view:
-                                    data['images'][i]['id'] === 1
-                                        ? 'top'
-                                        : 'side',
-                                rawData: [], // 'data/000.png', 'data/001.json'
+                                name: stackData.getAttribute('name'),
+                                view: stackData.getAttribute('view'),
+                                rawData: [],
+                                formattedData: [],
                                 arrayBuf: null,
                             };
-
-                            let annotations = {};
-
-                            for (
-                                var j = 0;
-                                j < data['annotations'].length;
-                                j++
-                            ) {
-                                if (
-                                    data['annotations'][j]['image_id'] ===
-                                    i + 1
-                                )
-                                    annotations[data['annotations'][j]['id']] =
-                                        data['annotations'][j];
+                            let layerData =
+                                stackData.getElementsByTagName('layer');
+                            for (let imageSrc of layerData) {
+                                currentStack.rawData.push(
+                                    imageSrc.getAttribute('src')
+                                );
                             }
-
-                            await myZip
-                                .file(data['images'][i]['file_name'])
-                                .async('arraybuffer')
-                                .then((imageData) => {
-                                    currentStack.arrayBuf = imageData;
-                                });
-
-                            Object.keys(annotations).forEach(function (key) {
-                                currentStack.rawData.push(annotations[key]);
-                            });
                             // We have finished creating the current stack's object
                             // add it onto our holder variable for now
                             listOfStacks.push(currentStack);
                         }
-
+                        // Now we loop through the data we have collected
+                        // We know the first layer of each stack is pixel data, which we need as an array buffer
+                        // Which we got from i===0.
+                        for (let j = 0; j < listOfStacks.length; j++) {
+                            for (
+                                let i = 0;
+                                i < listOfStacks[j].rawData.length;
+                                i++
+                            ) {
+                                if (i === 0) {
+                                    await myZip
+                                        .file(listOfStacks[j].rawData[i])
+                                        .async('base64')
+                                        .then((imageData) => {
+                                            listOfStacks[j].arrayBuf =
+                                                Utils.base64ToArrayBuffer(
+                                                    imageData
+                                                );
+                                        });
+                                } else {
+                                    await myZip
+                                        .file(listOfStacks[j].rawData[i])
+                                        .async('string')
+                                        .then((jsonData) => {
+                                            const data = JSON.parse(jsonData);
+                                            var combinedData = {};
+                                            combinedData = {
+                                                algorithm:
+                                                    data['info']['algorithm'],
+                                                ...data['annotations'][0],
+                                            };
+                                            listOfStacks[j].formattedData.push(
+                                                combinedData
+                                            );
+                                        });
+                                }
+                            }
+                        }
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -944,24 +973,13 @@ class App extends Component {
                             this.props.resetDetections();
                             this.loadAndViewImage();
                         });
-                    });
-            } else if (myZip.file('stack.xml')) {
-                this.props.setCurrentFileFormat(
-                    constants.SETTINGS.ANNOTATIONS.TDR
-                );
-                console.log('Current image format: TDR-DICOS');
-                // First, after loading, we need to check our stack.xml
-                myZip
-                    .file('stack.xml')
-                    .async('string')
-                    .then(async (stackFile) => {
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(
-                            stackFile,
-                            'text/xml'
+                    } else if (
+                        currentFileFormat === constants.SETTINGS.ANNOTATIONS.TDR
+                    ) {
+                        this.props.setCurrentFileFormat(
+                            constants.SETTINGS.ANNOTATIONS.TDR
                         );
-                        const xmlStack = xmlDoc.getElementsByTagName('stack');
-
+                        console.log('Current image format: TDR-DICOS');
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
                         for (let stackData of xmlStack) {
@@ -1028,11 +1046,11 @@ class App extends Component {
                             this.props.resetDetections();
                             this.loadAndViewImage();
                         });
-                    });
-            } else {
-                console.log('Image format not supported.');
-                return null;
-            }
+                    } else {
+                        console.log('File format not supported.');
+                        return null;
+                    }
+                });
         });
     }
 
@@ -1493,17 +1511,17 @@ class App extends Component {
      */
     loadCOCOdata() {
         const self = this;
-        const imagesLeft = self.state.myOra.stackData[0].rawData;
-        console.log(imagesLeft);
+        const imagesLeft = self.state.myOra.stackData[0].formattedData;
+
         for (let i = 0; i < imagesLeft.length; i++) {
             imagesLeft[i].bbox[2] =
                 imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
             imagesLeft[i].bbox[3] =
                 imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
             self.props.addDetection({
-                algorithm: 'COCO-TEST-ALGO' + i,
-                className: 'COCO-TEST-CLASS' + i,
-                confidence: 11,
+                algorithm: imagesLeft[i].algorithm,
+                className: imagesLeft[i].className,
+                confidence: imagesLeft[i].confidence,
                 view: constants.viewport.TOP,
                 boundingBox: imagesLeft[i].bbox,
                 binaryMask: [],
@@ -1521,16 +1539,17 @@ class App extends Component {
         }
 
         if (this.props.singleViewport === false) {
-            const imagesRight = self.state.myOra.stackData[1].rawData;
+            const imagesRight = self.state.myOra.stackData[1].formattedData;
+
             for (var j = 0; j < imagesRight.length; j++) {
                 imagesRight[j].bbox[2] =
                     imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
                 imagesRight[j].bbox[3] =
                     imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
                 self.props.addDetection({
-                    algorithm: 'COCO-TEST-ALGO' + j,
-                    className: 'COCO-TEST-CLASS' + j,
-                    confidence: 11,
+                    algorithm: imagesRight[j].algorithm,
+                    className: imagesRight[j].className,
+                    confidence: imagesRight[j].confidence,
                     view: constants.viewport.SIDE,
                     boundingBox: imagesRight[j].bbox,
                     binaryMask: [],
@@ -2188,12 +2207,6 @@ class App extends Component {
                 return;
             }
             let newDetection, coords, boundingBoxArea, polygonMask, binaryMask;
-            console.log(
-                'this.props.cornerstoneMode',
-                this.props.cornerstoneMode
-            );
-            console.log('this.props.annotationMode', this.props.annotationMode);
-            console.log('this.props.editionMode', this.props.editionMode);
             if (
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
@@ -2250,7 +2263,6 @@ class App extends Component {
             } else if (
                 this.props.editionMode === constants.editionMode.POLYGON
             ) {
-                //console.log(data[0].handles.points);
                 // Poly
                 coords = Utils.calculateBoundingBox(data[0].handles.points);
                 polygonMask = Utils.polygonDataToXYArray(
@@ -2436,11 +2448,11 @@ class App extends Component {
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
                         var maxId = 0;
-                        self.state.myOra.stackData.forEach((viewport) => {
-                            viewport.rawData.forEach((detection) => {
-                                if (detection.id > maxId) maxId = detection.id;
-                            });
+
+                        this.props.detections.forEach((detection) => {
+                            if (detection.uuid > maxId) maxId = detection.uuid;
                         });
+
                         self.props.addDetection({
                             algorithm: operator,
                             boundingBox: coords,
@@ -2490,7 +2502,7 @@ class App extends Component {
                                 );
                                 binaryMask =
                                     Utils.polygonToBinaryMask(polygonMask);
-                            } else if (
+                            } /*else if (
                                 this.props.selectedDetection.binaryMask.length >
                                     0 &&
                                 this.props.selectedDetection.binaryMask[0]
@@ -2501,7 +2513,7 @@ class App extends Component {
                                 );
                                 binaryMask[1][0] = coords[0];
                                 binaryMask[1][1] = coords[1];
-                            }
+                            }*/
                         }
                         self.props.updateDetection({
                             uuid: data[0].uuid,
@@ -2536,6 +2548,21 @@ class App extends Component {
                             this.renderDetectionContextMenu(event);
                         }
                     }
+                }
+                if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION
+                ) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.appUpdateImage();
+                } else if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION
+                ) {
+                    self.props.updateIsDetectionContextVisible(true);
+                    self.appUpdateImage();
                 }
             }
         }
@@ -2631,11 +2658,11 @@ class App extends Component {
                     return;
                 }
                 var maxId = 0;
-                self.state.myOra.stackData.forEach((viewport) => {
-                    viewport.rawData.forEach((detection) => {
-                        if (detection.id > maxId) maxId = detection.id;
-                    });
+
+                this.props.detections.forEach((detection) => {
+                    if (detection.uuid > maxId) maxId = detection.uuid;
                 });
+
                 self.props.addDetection({
                     algorithm: constants.OPERATOR,
                     boundingBox: boundingBoxCoords,
@@ -3217,23 +3244,31 @@ class App extends Component {
         if (this.props.selectedDetection) {
             this.props.deleteDetection(this.props.selectedDetection.uuid);
             if (this.props.selectedDetection.view === constants.viewport.TOP) {
-                this.state.myOra.setStackBlobData(
-                    0,
-                    this.state.myOra.stackData[0].blobData.filter(
-                        (blob) =>
-                            blob.uuid !== this.props.selectedDetection.uuid
-                    )
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                )
+                    this.state.myOra.setStackBlobData(
+                        0,
+                        this.state.myOra.stackData[0].blobData.filter(
+                            (blob) =>
+                                blob.uuid !== this.props.selectedDetection.uuid
+                        )
+                    );
             } else if (
                 this.props.selectedDetection.view === constants.viewport.SIDE
             ) {
-                this.state.myOra.setStackBlobData(
-                    1,
-                    this.state.myOra.stackData[1].blobData.filter(
-                        (blob) =>
-                            blob.uuid !== this.props.selectedDetection.uuid
-                    )
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                )
+                    this.state.myOra.setStackBlobData(
+                        1,
+                        this.state.myOra.stackData[1].blobData.filter(
+                            (blob) =>
+                                blob.uuid !== this.props.selectedDetection.uuid
+                        )
+                    );
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
