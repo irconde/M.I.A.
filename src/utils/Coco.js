@@ -35,14 +35,6 @@ export const buildCocoDataZip = async (
         const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
         const yyyy = currentDate.getFullYear();
 
-        const info = {
-            description: 'Annotated file from Pilot GUI',
-            contributor: 'Pilot GUI',
-            url: '',
-            version: '1.0',
-            year: currentDate.getFullYear(),
-            data_created: `${yyyy}/${mm}/${dd}`,
-        };
         // TODO: DICOS files do not have a license encoded, determine what license we need to use.
         const licenses = [
             {
@@ -101,7 +93,6 @@ export const buildCocoDataZip = async (
                         id: annotationID,
                         image_id: imageID,
                         className: detection.className,
-                        algorithm: detection.algorithm,
                         confidence: detection.confidence,
                         iscrowd: 0,
                         // TODO: Implement better category selection for annotations
@@ -129,6 +120,15 @@ export const buildCocoDataZip = async (
                                   ]
                                 : [],
                     });
+                    const info = {
+                        description: 'Annotated file from Pilot GUI',
+                        contributor: 'Pilot GUI',
+                        url: '',
+                        version: '1.0',
+                        year: currentDate.getFullYear(),
+                        data_created: `${yyyy}/${mm}/${dd}`,
+                        algorithm: detection.algorithm,
+                    };
                     const cocoDataset = {
                         info,
                         licenses,
