@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import Utils from './Utils';
+import { SETTINGS } from './Constants';
 
 /**
  * buildCocoDataZip - Will take in the pixel data via myOra and blob format, along with
@@ -20,11 +21,20 @@ export const buildCocoDataZip = async (
     cornerstone
 ) => {
     return new Promise((resolve, reject) => {
+        const cocoZip = new JSZip();
+        const stackXML = document.implementation.createDocument('', '', null);
+        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
+        const imageElem = stackXML.createElement('image');
+        imageElem.setAttribute('format', SETTINGS.ANNOTATIONS.COCO);
+        const mimeType = new Blob(['image/openraster'], {
+            type: 'text/plain;charset=utf-8',
+        });
+        cocoZip.file('mimetype', mimeType, { compression: null });
         const currentDate = new Date();
         const dd = String(currentDate.getDate()).padStart(2, '0');
         const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
         const yyyy = currentDate.getFullYear();
-        const cocoZip = new JSZip();
+
         const info = {
             description: 'Annotated file from Pilot GUI',
             contributor: 'Pilot GUI',
@@ -48,12 +58,16 @@ export const buildCocoDataZip = async (
                 name: 'orange',
             },
         ];
-        const images = [];
-        const annotations = [];
+
         let imageID = 1;
         let annotationID = 1;
         const listOfPromises = [];
         myOra.stackData.forEach((stack, index) => {
+            const stackElem = stackXML.createElement('stack');
+            stackElem.setAttribute('name', `SOP Instance UID #${index + 1}`);
+            stackElem.setAttribute('view', stack.view);
+            const pixelLayer = stackXML.createElement('layer');
+            const images = [];
             images.push({
                 id: imageID,
                 license: licenses[0].id,
@@ -64,12 +78,13 @@ export const buildCocoDataZip = async (
                 coco_url: '',
                 flickr_url: '',
             });
-
+            pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.png`);
+            stackElem.appendChild(pixelLayer);
             const pngPromise = dicosPixelDataToPng(
                 cornerstone,
                 viewports[index]
             ).then((blob) => {
-                cocoZip.file(`${stack.view}_pixel_data.png`, blob);
+                cocoZip.file(`data/${stack.view}_pixel_data.png`, blob);
             });
             listOfPromises.push(pngPromise);
 
@@ -79,11 +94,15 @@ export const buildCocoDataZip = async (
                     (det) => det.uuid === stack.blobData[i].uuid
                 );
                 if (detection !== undefined) {
+                    let annotations = [];
                     // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
                     //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
                     annotations.push({
                         id: annotationID,
                         image_id: imageID,
+                        className: detection.className,
+                        algorithm: detection.algorithm,
+                        confidence: detection.confidence,
                         iscrowd: 0,
                         // TODO: Implement better category selection for annotations
                         category_id: 55,
@@ -110,22 +129,40 @@ export const buildCocoDataZip = async (
                                   ]
                                 : [],
                     });
+                    const cocoDataset = {
+                        info,
+                        licenses,
+                        images,
+                        annotations,
+                        categories,
+                    };
+                    cocoZip.file(
+                        `data/${stack.view}_annotation_${annotationID}.json`,
+                        JSON.stringify(cocoDataset, null, 4)
+                    );
+                    const newLayer = stackXML.createElement('layer');
+                    newLayer.setAttribute(
+                        'src',
+                        `data/${stack.view}_annotation_${annotationID}.json`
+                    );
+                    stackElem.appendChild(newLayer);
                     annotationID++;
                 }
             }
             imageID++;
+            imageElem.appendChild(stackElem);
         });
-        const cocoDataset = {
-            info,
-            licenses,
-            images,
-            annotations,
-            categories,
-        };
-        cocoZip.file('annotations.json', JSON.stringify(cocoDataset));
 
         const promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then(() => {
+            stackXML.appendChild(imageElem);
+            cocoZip.file(
+                'stack.xml',
+                new Blob(
+                    [prolog + new XMLSerializer().serializeToString(stackXML)],
+                    { type: 'application/xml ' }
+                )
+            );
             resolve(cocoZip);
         });
     });

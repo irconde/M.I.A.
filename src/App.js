@@ -1045,12 +1045,17 @@ class App extends Component {
             );
             const prolog = '<?xml version="1.0" encoding="utf-8"?>';
             const imageElem = stackXML.createElement('image');
+            imageElem.setAttribute(
+                'format',
+                constants.SETTINGS.ANNOTATIONS.TDR
+            );
             const mimeType = new Blob(['image/openraster'], {
                 type: 'text/plain;charset=utf-8',
             });
             const newOra = new JSZip();
             newOra.file('mimetype', mimeType, { compression: null });
             let stackCounter = 1;
+            let annotationID = 1;
             const listOfPromises = [];
             // Loop through each stack, being either top or side currently
             this.state.myOra.stackData.forEach((stack) => {
@@ -1093,23 +1098,16 @@ class App extends Component {
                                 .blobData[0].blob
                         ).then((threatBlob) => {
                             newOra.file(
-                                `data/top_threat_detection_${j + 1}_${
-                                    topDetections[j].algorithm
-                                }.dcs`,
+                                `data/top_threat_detection_${annotationID}.dcs`,
                                 threatBlob
                             );
                             let newLayer = stackXML.createElement('layer');
                             newLayer.setAttribute(
                                 'src',
-                                `data/top_threat_detection_${j + 1}_${
-                                    topDetections[j].algorithm
-                                }.dcs`
-                            );
-                            newLayer.setAttribute(
-                                'UUID',
-                                `${topDetections[j].uuid}`
+                                `data/top_threat_detection_${annotationID}.dcs`
                             );
                             stackElem.appendChild(newLayer);
+                            annotationID++;
                         });
                         listOfPromises.push(threatPromise);
                     }
@@ -1125,23 +1123,16 @@ class App extends Component {
                                 .blobData[0].blob
                         ).then((threatBlob) => {
                             newOra.file(
-                                `data/side_threat_detection_${i + 1}_${
-                                    sideDetections[i].algorithm
-                                }.dcs`,
+                                `data/side_threat_detection_${annotationID}.dcs`,
                                 threatBlob
                             );
                             let newLayer = stackXML.createElement('layer');
                             newLayer.setAttribute(
                                 'src',
-                                `data/side_threat_detection_${i + 1}_${
-                                    sideDetections[i].algorithm
-                                }.dcs`
-                            );
-                            newLayer.setAttribute(
-                                'UUID',
-                                `${sideDetections[i].uuid}`
+                                `data/side_threat_detection_${annotationID}.dcs`
                             );
                             stackElem.appendChild(newLayer);
+                            annotationID++;
                         });
                         listOfPromises.push(threatPromise);
                     }
