@@ -882,6 +882,10 @@ class App extends Component {
                     );
                     const xmlStack = xmlDoc.getElementsByTagName('stack');
                     const xmlImage = xmlDoc.getElementsByTagName('image');
+                    const xmlLayer = xmlDoc.getElementsByTagName('layer');
+
+                    const tempFile = xmlLayer[0].getAttribute('src');
+                    var fileExtension = tempFile.split('.').pop();
 
                     const currentFileFormat =
                         xmlImage[0].getAttribute('format');
@@ -974,7 +978,9 @@ class App extends Component {
                             this.loadAndViewImage();
                         });
                     } else if (
-                        currentFileFormat === constants.SETTINGS.ANNOTATIONS.TDR
+                        currentFileFormat ===
+                            constants.SETTINGS.ANNOTATIONS.TDR ||
+                        fileExtension === 'dcs'
                     ) {
                         this.props.setCurrentFileFormat(
                             constants.SETTINGS.ANNOTATIONS.TDR
