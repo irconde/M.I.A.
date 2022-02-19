@@ -2286,7 +2286,7 @@ class App extends Component {
                             ? constants.viewport.TOP
                             : constants.viewport.SIDE,
                     validation: true,
-                    //binaryMask,
+                    binaryMask,
                     polygonMask,
                 };
             }
@@ -2330,7 +2330,15 @@ class App extends Component {
                                     viewport === self.state.imageViewportTop
                                         ? constants.viewport.TOP
                                         : constants.viewport.SIDE,
-                                binaryMask: [],
+
+                                binaryMask: [
+                                    [],
+                                    [coords[0], coords[1]],
+                                    [
+                                        coords[2] - coords[0],
+                                        coords[3] - coords[1],
+                                    ],
+                                ],
                                 polygonMask: [],
                                 uuid,
                             });
