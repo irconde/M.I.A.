@@ -96,6 +96,7 @@ if (isElectron()) {
     ipcRenderer = electron.ipcRenderer;
 }
 import { current } from '@reduxjs/toolkit';
+import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -3391,6 +3392,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
+                    <LazyImageMenu />
                     <NoFileSign />
                     <MetaData />
                 </div>
