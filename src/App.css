@@ -110,17 +110,15 @@ body {
 }
 
 .lazy-image-menu-container {
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
-    transition: all 0.3s ease-in;
-    position: fixed;
+    position: absolute;
     left: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     background-color: #1f1f1f;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     color: white;
+    resize: horizontal;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
 }

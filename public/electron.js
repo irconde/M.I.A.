@@ -284,6 +284,7 @@ const loadFile = () => {
         file: file,
         fileName: fileName,
         numberOfFiles: files.length,
+        thumbnails: files,
     };
     return result;
 };

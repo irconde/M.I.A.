@@ -95,7 +95,6 @@ if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
-import { current } from '@reduxjs/toolkit';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
@@ -149,6 +148,7 @@ class App extends Component {
             tapDetector: new TapDetector(),
             commandServer: null,
             timer: null,
+            thumbnails: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.getFileFromLocalDirectory =
@@ -259,7 +259,9 @@ class App extends Component {
                 }
                 return true;
             } else return false;
-        } else return false;
+        }
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
+        return false;
     }
 
     /**
@@ -779,7 +781,8 @@ class App extends Component {
                     this.loadNextImage(
                         result.file,
                         result.fileName,
-                        result.numberOfFiles
+                        result.numberOfFiles,
+                        result.thumbnails
                     );
                 })
                 .catch((error) => {
@@ -860,7 +863,7 @@ class App extends Component {
      * @param {String} fileName
      * @return {type} None
      */
-    loadNextImage(image, fileName, numberOfFiles = 0) {
+    loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
         // Loading a file initially from a local workspace can call loadNextImage twice
         // Which creates duplicate detections. This ensures that the same file is never loaded twice
         if (fileName === this.props.currentProcessingFile) return;
@@ -967,6 +970,7 @@ class App extends Component {
                             updateImageViewportTop.style.visibility = 'visible';
                             this.setState({
                                 imageViewportTop: updateImageViewportTop,
+                                thumbnails,
                             });
                             this.state.myOra.stackData = listOfStacks;
                             this.props.newFileReceivedUpdate({
@@ -1042,6 +1046,7 @@ class App extends Component {
                             updateImageViewportTop.style.visibility = 'visible';
                             this.setState({
                                 imageViewportTop: updateImageViewportTop,
+                                thumbnails,
                             });
                             this.state.myOra.stackData = listOfStacks;
                             this.props.newFileReceivedUpdate({
@@ -3392,7 +3397,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <LazyImageMenu />
+                    <LazyImageMenu thumbnails={this.state.thumbnails} />
                     <NoFileSign />
                     <MetaData />
                 </div>

@@ -6,6 +6,7 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import * as constants from '../../utils/Constants';
+import LazyImageContainer from './LazyImageContainer';
 
 function LazyImageMenu(props) {
     const fileOutputPath = useSelector(getLocalFileOutput);
@@ -21,7 +22,17 @@ function LazyImageMenu(props) {
                     width: sideMenuWidth,
                     height: document.documentElement.clientHeight,
                 }}>
-                Lazy Image Container!
+                <div
+                    style={{
+                        height:
+                            constants.sideMenuPaddingTop +
+                            constants.RESOLUTION_UNIT,
+                    }}></div>
+                {props.thumbnails !== null
+                    ? props.thumbnails.map((file, index) => {
+                          return <LazyImageContainer key={index} file={file} />;
+                      })
+                    : null}
             </div>
         );
     } else return null;
