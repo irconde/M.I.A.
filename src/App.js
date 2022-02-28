@@ -872,6 +872,8 @@ class App extends Component {
         let listOfPromises = [];
         // This is our list of stacks we will append to the myOra object in our promise all
         let listOfStacks = [];
+
+        let contentType;
         // Lets load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
             //First, after loading, we need to check our stack.xml
@@ -911,6 +913,7 @@ class App extends Component {
                                 view: stackData.getAttribute('view'),
                                 rawData: [],
                                 formattedData: [],
+                                blobData: [],
                                 arrayBuf: null,
                             };
                             let layerData =
@@ -933,6 +936,22 @@ class App extends Component {
                                 i < listOfStacks[j].rawData.length;
                                 i++
                             ) {
+                                await myZip
+                                    .file(listOfStacks[j].rawData[i])
+                                    .async('base64')
+                                    .then((imageData) => {
+                                        i === 0
+                                            ? (contentType = 'image/png')
+                                            : (contentType =
+                                                  'application/json');
+                                        listOfStacks[j].blobData.push({
+                                            blob: Utils.b64toBlob(
+                                                imageData,
+                                                contentType
+                                            ),
+                                            uuid: uuidv4(),
+                                        });
+                                    });
                                 if (i === 0) {
                                     await myZip
                                         .file(listOfStacks[j].rawData[i])
@@ -962,6 +981,7 @@ class App extends Component {
                                 }
                             }
                         }
+
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -1086,7 +1106,8 @@ class App extends Component {
                 this.state.myOra,
                 this.props.detections,
                 viewports,
-                cornerstone
+                cornerstone,
+                this.props.currentFileFormat
             ).then((cocoZip) => {
                 if (this.props.remoteOrLocal === true) {
                     cocoZip
@@ -2305,7 +2326,6 @@ class App extends Component {
                 this.props.currentFileFormat ===
                 constants.SETTINGS.ANNOTATIONS.TDR
             ) {
-                console.log('DICOS dragged.');
                 Dicos.detectionObjectToBlob(
                     newDetection,
                     self.state.myOra.stackData[stackIndex].blobData[0].blob
@@ -2455,7 +2475,6 @@ class App extends Component {
                 this.props.currentFileFormat ===
                 constants.SETTINGS.ANNOTATIONS.COCO
             ) {
-                console.log('COCO annotation dragged.');
                 if (data[0] === undefined) {
                     self.props.emptyAreaClickUpdate();
                     self.resetSelectedDetectionBoxes(event);
@@ -2482,7 +2501,12 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
-                            binaryMask: [],
+
+                            binaryMask: [
+                                [],
+                                [coords[0], coords[1]],
+                                [coords[2] - coords[0], coords[3] - coords[1]],
+                            ],
                             polygonMask: [],
                             uuid: maxId + 1,
                         });
@@ -2522,7 +2546,7 @@ class App extends Component {
                                 );
                                 binaryMask =
                                     Utils.polygonToBinaryMask(polygonMask);
-                            } /*else if (
+                            } else if (
                                 this.props.selectedDetection.binaryMask.length >
                                     0 &&
                                 this.props.selectedDetection.binaryMask[0]
@@ -2533,7 +2557,7 @@ class App extends Component {
                                 );
                                 binaryMask[1][0] = coords[0];
                                 binaryMask[1][1] = coords[1];
-                            }*/
+                            }
                         }
                         self.props.updateDetection({
                             uuid: data[0].uuid,
