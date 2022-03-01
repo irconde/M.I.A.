@@ -7,10 +7,14 @@ const ImageContainer = styled.div`
     border: 1px solid white;
     overflow-x: hidden;
     padding: 0.75rem;
+    margin: 1.5rem;
+    background-color: grey;
+    height: 96px;
+    width: 96px;
 `;
 
 function LazyImageContainer(props) {
-    return <ImageContainer>{props.file}</ImageContainer>;
+    return <ImageContainer></ImageContainer>;
 }
 
 LazyImageContainer.propTypes = {

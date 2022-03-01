@@ -5,16 +5,18 @@ import {
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
+import { getCollapsedLazyMenu } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import LazyImageContainer from './LazyImageContainer';
 
 function LazyImageMenu(props) {
+    const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
     const fileOutputPath = useSelector(getLocalFileOutput);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const desktopMode =
         isElectron() && fileOutputPath !== '' && remoteOrLocal === false;
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
-    if (desktopMode === true) {
+    if (desktopMode && !collapsedLazyMenu) {
         return (
             <div
                 className="lazy-image-menu-container"

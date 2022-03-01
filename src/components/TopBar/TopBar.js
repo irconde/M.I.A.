@@ -13,6 +13,8 @@ import {
     getLocalFileOutput,
 } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
+import isElectron from 'is-electron';
+import LazyMenuToggleIcon from '../../icons/LazyMenuToggleIcon';
 
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
@@ -38,11 +40,15 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '100%',
-            zIndex: '999',
+            zIndex: '1',
             alignItems: 'center',
             justifyContent: 'flex-end',
             color: 'white',
             boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
+        },
+        lazyMenuToggleContainer: {
+            position: 'absolute',
+            zIndex: '2',
         },
         titleLabelContainer: {
             position: 'absolute',
@@ -52,7 +58,7 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '100%',
-            zIndex: '999',
+            zIndex: '1',
             alignItems: 'center',
             color: 'white',
             justifyContent: 'center',
@@ -67,7 +73,7 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '35%',
-            zIndex: '999',
+            zIndex: '1',
             marginLeft: '65%',
             alignItems: 'center',
             justifyContent: 'flex-end',
@@ -106,6 +112,15 @@ const TopBar = (props) => {
     };
     return processingFile ? (
         <div style={{ width: '100%' }}>
+            {isElectron() &&
+            localFileOutput !== '' &&
+            remoteOrLocal === false ? (
+                <LazyMenuToggleIcon
+                    style={styles.lazyMenuToggleContainer}
+                    cornerstone={props.cornerstone}>
+                    Test
+                </LazyMenuToggleIcon>
+            ) : null}
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (

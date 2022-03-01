@@ -116,9 +116,27 @@ body {
     overflow-x: hidden;
     overflow-y: visible;
     color: white;
-    resize: horizontal;
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
     align-items: center;
+}
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #d6d5d5;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #5e5d5d;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
