@@ -56,15 +56,7 @@ function LazyImageMenu(props) {
                     style={{
                         width: sideMenuWidth,
                         height: document.documentElement.clientHeight,
-                    }}>
-                    {props.thumbnails !== null
-                        ? props.thumbnails.map((file, index) => {
-                              return (
-                                  <LazyImageContainer key={index} file={file} />
-                              );
-                          })
-                        : null}
-                </div>
+                    }}></div>
             </div>
         );
     } else if (desktopMode && !collapsedLazyMenu) {

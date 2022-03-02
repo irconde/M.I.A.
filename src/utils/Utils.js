@@ -395,14 +395,29 @@ export default class Utils {
                 singleViewport.style.width = width;
                 singleViewport.style.left = 0;
                 // TODO: add other conditions
+            } else if (collapsedLazyMenu && !collapsedSideMenu) {
+                //
+                const width =
+                    window.innerWidth -
+                    constants.sideMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+                singleViewport.style.left = 0;
+            } else if (!collapsedLazyMenu && collapsedSideMenu) {
+                //
+                const width =
+                    window.innerWidth -
+                    constants.sideMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+                singleViewport.style.left = constants.sideMenuWidth + 'px';
             } else {
                 const width =
                     window.innerWidth -
                     totalMenuWidth +
                     constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
-                if (desktopMode && !collapsedLazyMenu)
-                    singleViewport.style.left = constants.sideMenuWidth;
+                singleViewport.style.left = constants.sideMenuWidth + 'px';
             }
         }
         // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
