@@ -290,16 +290,29 @@ export default class Utils {
     }
 
     /**
-     * setFullScreenViewport - Performs the calculations for the widths and position of viewports.
+     * calculateViewportDimensions - Performs the calculations for the widths and position of viewports.
      *                         It will use the cornerstone object to perform the resize on the canvas elements
      *
      * @param {Object} cornerstone
-     * @param {Boolean} fullscreen
      * @param {Boolean} singleViewport
+     * @param {Boolean} collapsedSideMenu
+     * @param {Boolean} collapsedLazyMenu
+     * @param {Boolean} desktopMode
+     *
      */
-    static setFullScreenViewport(cornerstone, fullscreen, singleViewport) {
+    static calculateViewportDimensions(
+        cornerstone,
+        singleViewport,
+        collapsedSideMenu,
+        collapsedLazyMenu = true,
+        desktopMode = false
+    ) {
         // Array of viewport or viewports to loop through and resize at the end
         let viewports = [];
+        const totalMenuWidth =
+            !collapsedLazyMenu && !collapsedSideMenu && desktopMode
+                ? constants.sideMenuWidth * 2
+                : constants.sideMenuWidth;
         if (singleViewport === false) {
             const viewportTop = document.getElementById('dicomImageLeft');
             const viewportSide = document.getElementById('dicomImageRight');
@@ -309,38 +322,87 @@ export default class Utils {
             viewportSide.style.width = '';
             viewportSide.style.left = '';
             const verticalDivider = document.getElementById('verticalDivider');
-            if (fullscreen === true) {
+            if (collapsedLazyMenu && collapsedSideMenu) {
+                // Both menus are collapsed
                 const width = window.innerWidth / 2 + constants.RESOLUTION_UNIT;
-
                 viewportSide.style.width = width;
                 viewportTop.style.width = width;
+                viewportTop.style.left = 0;
                 verticalDivider.style.left = viewportTop.style.width;
                 viewportSide.style.left =
                     viewportTop.style.width + verticalDivider.style.width;
-            } else {
+            } else if (collapsedLazyMenu && !collapsedSideMenu) {
+                // Only one menu is collapsed, lazy menu is collapsed
                 const width =
                     (window.innerWidth - constants.sideMenuWidth) / 2 +
                     constants.RESOLUTION_UNIT;
-
                 viewportSide.style.width = width;
                 viewportTop.style.width = width;
+                viewportTop.style.left = 0;
                 verticalDivider.style.left = viewportTop.style.width;
                 viewportSide.style.left =
                     viewportTop.style.width + verticalDivider.style.width;
+            } else if (!collapsedLazyMenu && collapsedSideMenu) {
+                const width =
+                    (window.innerWidth - constants.sideMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                if (desktopMode) {
+                    viewportTop.style.left = constants.sideMenuWidth + 'px';
+                    verticalDivider.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                    viewportSide.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                } else {
+                    verticalDivider.style.left = viewportTop.style.width;
+                    viewportSide.style.left =
+                        viewportTop.style.width + verticalDivider.style.width;
+                }
+            } else {
+                // Both menus are visible
+                const width =
+                    (window.innerWidth - totalMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                if (desktopMode) {
+                    viewportTop.style.left = constants.sideMenuWidth + 'px';
+                    verticalDivider.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                    viewportSide.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                } else {
+                    verticalDivider.style.left = viewportTop.style.width;
+                    viewportSide.style.left =
+                        viewportTop.style.width + verticalDivider.style.width;
+                }
             }
         } else {
             const singleViewport = document.getElementById('dicomImageLeft');
             viewports.push(singleViewport);
             singleViewport.style.width = '';
-            if (fullscreen === true) {
+            if (collapsedLazyMenu && collapsedSideMenu) {
                 const width = window.innerWidth + constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
+                singleViewport.style.left = 0;
+                // TODO: add other conditions
             } else {
                 const width =
                     window.innerWidth -
-                    constants.sideMenuWidth +
+                    totalMenuWidth +
                     constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
+                if (desktopMode && !collapsedLazyMenu)
+                    singleViewport.style.left = constants.sideMenuWidth;
             }
         }
         // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image

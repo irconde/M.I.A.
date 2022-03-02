@@ -572,11 +572,26 @@ class App extends Component {
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
+
         if (this.props.selectDetection) {
             this.appUpdateImage();
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
@@ -1461,11 +1476,25 @@ class App extends Component {
                 );
             });
         }
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
         this.recalculateZoomLevel();
     }
 
@@ -1527,11 +1556,25 @@ class App extends Component {
                 );
             });
         }
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
         this.recalculateZoomLevel();
     }
 
@@ -3451,6 +3494,7 @@ const mapStateToProps = (state) => {
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
+        collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
         // Settings

@@ -51,11 +51,21 @@ const uiSlice = createSlice({
          */
         toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            Utils.setFullScreenViewport(
-                action.payload,
-                state.collapsedSideMenu,
-                state.singleViewport
-            );
+            if (state.localFileOpen) {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu,
+                    state.collapsedLazyMenu,
+                    true
+                );
+            } else {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu
+                );
+            }
         },
         /**
          * toggleCollapsedSideMenu
@@ -64,11 +74,13 @@ const uiSlice = createSlice({
          */
         toggleCollapsedLazyMenu: (state, action) => {
             state.collapsedLazyMenu = !state.collapsedLazyMenu;
-            // Utils.setFullScreenViewport(
-            //     action.payload,
-            //     state.collapsedSideMenu,
-            //     state.singleViewport
-            // );
+            Utils.calculateViewportDimensions(
+                action.payload,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                state.collapsedLazyMenu,
+                true
+            );
         },
         /**
          * setInputLabel

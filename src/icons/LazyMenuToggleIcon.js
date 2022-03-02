@@ -6,7 +6,7 @@ import { toggleCollapsedLazyMenu } from '../redux/slices/ui/uiSlice';
 const LazyMenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const toggleClickHandler = () => {
-        dispatch(toggleCollapsedLazyMenu());
+        dispatch(toggleCollapsedLazyMenu(props.cornerstone));
     };
     const divStyle = {
         ...props.style,

@@ -117,9 +117,8 @@ const TopBar = (props) => {
             remoteOrLocal === false ? (
                 <LazyMenuToggleIcon
                     style={styles.lazyMenuToggleContainer}
-                    cornerstone={props.cornerstone}>
-                    Test
-                </LazyMenuToggleIcon>
+                    cornerstone={props.cornerstone}
+                />
             ) : null}
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
@@ -192,6 +191,14 @@ const TopBar = (props) => {
         </div>
     ) : (
         <div>
+            {isElectron() &&
+            localFileOutput !== '' &&
+            remoteOrLocal === false ? (
+                <LazyMenuToggleIcon
+                    style={styles.lazyMenuToggleContainer}
+                    cornerstone={props.cornerstone}
+                />
+            ) : null}
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
