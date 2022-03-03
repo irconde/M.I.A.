@@ -11,14 +11,20 @@ const ImageContainer = styled.div`
     background-color: grey;
     height: 96px;
     width: 96px;
+    cursor: pointer;
 `;
 
 function LazyImageContainer(props) {
-    return <ImageContainer></ImageContainer>;
+    return (
+        <ImageContainer
+            onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
+            title={props.file}></ImageContainer>
+    );
 }
 
 LazyImageContainer.propTypes = {
     file: PropTypes.string,
+    getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 
 export default LazyImageContainer;

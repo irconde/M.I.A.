@@ -66,23 +66,28 @@ function LazyImageMenu(props) {
                 style={{
                     ...translateStyle,
                 }}>
-                <div
+                {/* <div
                     style={{
                         height:
                             constants.sideMenuPaddingTop +
                             constants.RESOLUTION_UNIT,
                         width: '100%',
-                    }}></div>
+                    }}></div> */}
                 <div
                     className="lazy-images-container"
                     style={{
                         width: sideMenuWidth,
-                        height: document.documentElement.clientHeight,
                     }}>
                     {props.thumbnails !== null
                         ? props.thumbnails.map((file, index) => {
                               return (
-                                  <LazyImageContainer key={index} file={file} />
+                                  <LazyImageContainer
+                                      getSpecificFileFromLocalDirectory={
+                                          props.getSpecificFileFromLocalDirectory
+                                      }
+                                      key={index}
+                                      file={file}
+                                  />
                               );
                           })
                         : null}

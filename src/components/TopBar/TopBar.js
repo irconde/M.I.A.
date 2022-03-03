@@ -112,14 +112,6 @@ const TopBar = (props) => {
     };
     return processingFile ? (
         <div style={{ width: '100%' }}>
-            {isElectron() &&
-            localFileOutput !== '' &&
-            remoteOrLocal === false ? (
-                <LazyMenuToggleIcon
-                    style={styles.lazyMenuToggleContainer}
-                    cornerstone={props.cornerstone}
-                />
-            ) : null}
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
@@ -191,14 +183,6 @@ const TopBar = (props) => {
         </div>
     ) : (
         <div>
-            {isElectron() &&
-            localFileOutput !== '' &&
-            remoteOrLocal === false ? (
-                <LazyMenuToggleIcon
-                    style={styles.lazyMenuToggleContainer}
-                    cornerstone={props.cornerstone}
-                />
-            ) : null}
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (

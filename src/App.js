@@ -153,6 +153,8 @@ class App extends Component {
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.getFileFromLocalDirectory =
             this.getFileFromLocalDirectory.bind(this);
+        this.getSpecificFileFromLocalDirectory =
+            this.getSpecificFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
@@ -791,6 +793,27 @@ class App extends Component {
                     constants.Channels.getNextFile,
                     this.props.localFileOutput
                 )
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles,
+                        result.thumbnails
+                    );
+                })
+                .catch((error) => {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                });
+        }
+    }
+
+    getSpecificFileFromLocalDirectory(filePath) {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(constants.Channels.getSpecificFile, filePath)
                 .then((result) => {
                     this.props.setLocalFileOpen(true);
                     this.loadNextImage(
@@ -3464,7 +3487,12 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <LazyImageMenu thumbnails={this.state.thumbnails} />
+                    <LazyImageMenu
+                        getSpecificFileFromLocalDirectory={
+                            this.getSpecificFileFromLocalDirectory
+                        }
+                        thumbnails={this.state.thumbnails}
+                    />
                     <NoFileSign />
                     <MetaData />
                 </div>

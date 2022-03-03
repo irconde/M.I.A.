@@ -87,20 +87,20 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  *            it will return the Base64 binary string of the next file.
  *
  * @param {String} - File directory path sent from react
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number thumbnails: Array<String>>}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (files.length > 0) {
             if (fs.existsSync(files[0])) {
-                resolve(loadFile());
+                resolve(loadFile(files[0]));
             }
         } else {
             if (fs.existsSync(args)) {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
-                            resolve(loadFile());
+                            resolve(loadFile(files[0]));
                         } else {
                             reject('No files loaded');
                         }
@@ -109,6 +109,25 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                         reject(error);
                     });
             }
+        }
+    });
+    return result;
+});
+
+/**
+ * Channels - Get Specific File - Loads the specified file if the path provided exists. If so it will
+ *                                it will load the file and then, it will return the Base64 binary string of the next file.
+ *                                Along with other information about the file and other files in the path.
+ *
+ * @param {String} - File path sent from react
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
+ */
+ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        if (fs.existsSync(args)) {
+            resolve(loadFile(args));
+        } else {
+            reject('File path does not exist');
         }
     });
     return result;
@@ -269,14 +288,14 @@ const loadFilesFromPath = async (path) => {
  *
  * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
  */
-const loadFile = () => {
-    const fileData = fs.readFileSync(files[0]);
+const loadFile = (filePath) => {
+    const fileData = fs.readFileSync(filePath);
     const file = Buffer.from(fileData).toString('base64');
     let splitPath;
     if (process.platform === 'win32') {
-        splitPath = files[0].split('\\');
+        splitPath = filePath.split('\\');
     } else {
-        splitPath = files[0].split('/');
+        splitPath = filePath.split('/');
     }
 
     const fileName = splitPath[splitPath.length - 1];

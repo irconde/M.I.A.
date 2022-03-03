@@ -112,6 +112,7 @@ body {
 .lazy-image-menu-container {
     position: fixed;
     left: 0;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: visible;
     background-color: #1f1f1f;
@@ -127,6 +128,7 @@ body {
     flex-flow: row wrap;
     justify-content: center;
     align-items: center;
+    padding: 3rem 0;
 }
 
 /* width */
