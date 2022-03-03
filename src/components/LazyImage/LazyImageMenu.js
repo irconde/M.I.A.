@@ -5,12 +5,16 @@ import {
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import { getCollapsedLazyMenu } from '../../redux/slices/ui/uiSlice';
+import {
+    getCollapsedLazyMenu,
+    getLocalFileOpen,
+} from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
 
 function LazyImageMenu(props) {
+    const enableMenu = useSelector(getLocalFileOpen);
     const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
     const fileOutputPath = useSelector(getLocalFileOutput);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
@@ -36,64 +40,66 @@ function LazyImageMenu(props) {
             }
         }
     });
-    if (desktopMode && collapsedLazyMenu) {
-        return (
-            <div
-                className="lazy-image-menu-container"
-                style={{
-                    ...translateStyle,
-                    transition: 'none',
-                }}>
+    if (enableMenu) {
+        if (desktopMode && collapsedLazyMenu) {
+            return (
                 <div
+                    className="lazy-image-menu-container"
                     style={{
-                        height:
-                            constants.sideMenuPaddingTop +
-                            constants.RESOLUTION_UNIT,
-                        width: '100%',
-                    }}></div>
+                        ...translateStyle,
+                        transition: 'none',
+                    }}>
+                    <div
+                        style={{
+                            height:
+                                constants.sideMenuPaddingTop +
+                                constants.RESOLUTION_UNIT,
+                            width: '100%',
+                        }}></div>
+                    <div
+                        className="lazy-images-container"
+                        style={{
+                            width: sideMenuWidth,
+                            height: document.documentElement.clientHeight,
+                        }}></div>
+                </div>
+            );
+        } else if (desktopMode && !collapsedLazyMenu) {
+            return (
                 <div
-                    className="lazy-images-container"
+                    className="lazy-image-menu-container"
                     style={{
-                        width: sideMenuWidth,
-                        height: document.documentElement.clientHeight,
-                    }}></div>
-            </div>
-        );
-    } else if (desktopMode && !collapsedLazyMenu) {
-        return (
-            <div
-                className="lazy-image-menu-container"
-                style={{
-                    ...translateStyle,
-                }}>
-                {/* <div
+                        ...translateStyle,
+                    }}>
+                    {/* <div
                     style={{
                         height:
                             constants.sideMenuPaddingTop +
                             constants.RESOLUTION_UNIT,
                         width: '100%',
                     }}></div> */}
-                <div
-                    className="lazy-images-container"
-                    style={{
-                        width: sideMenuWidth,
-                    }}>
-                    {props.thumbnails !== null
-                        ? props.thumbnails.map((file, index) => {
-                              return (
-                                  <LazyImageContainer
-                                      getSpecificFileFromLocalDirectory={
-                                          props.getSpecificFileFromLocalDirectory
-                                      }
-                                      key={index}
-                                      file={file}
-                                  />
-                              );
-                          })
-                        : null}
+                    <div
+                        className="lazy-images-container"
+                        style={{
+                            width: sideMenuWidth,
+                        }}>
+                        {props.thumbnails !== null
+                            ? props.thumbnails.map((file, index) => {
+                                  return (
+                                      <LazyImageContainer
+                                          getSpecificFileFromLocalDirectory={
+                                              props.getSpecificFileFromLocalDirectory
+                                          }
+                                          key={index}
+                                          file={file}
+                                      />
+                                  );
+                              })
+                            : null}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        } else return null;
     } else return null;
 }
 

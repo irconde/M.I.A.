@@ -181,7 +181,6 @@ const SettingsModal = (props) => {
             ipcRenderer
                 .invoke(Channels.loadFiles, localFileOutput)
                 .then((result) => {
-                    console.log(result);
                     setSnackBarOpen(true);
                     dispatch(
                         saveSettings({

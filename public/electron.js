@@ -13,7 +13,7 @@ const Constants = require('./Constants');
 
 let mainWindow;
 let files = [];
-let filesOutputted = [];
+let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
 
@@ -76,7 +76,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
-    filesOutputted = [];
+    currentFileIndex = 0;
     const result = await loadFilesFromPath(args);
     return result;
 });
@@ -91,16 +91,18 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        if (files.length > 0) {
-            if (fs.existsSync(files[0])) {
-                resolve(loadFile(files[0]));
+        if (files.length > 0 && currentFileIndex < files.length) {
+            if (fs.existsSync(files[currentFileIndex])) {
+                resolve(loadFile(files[currentFileIndex]));
             }
+        } else if (files.length !== 0 && currentFileIndex >= files.length) {
+            reject('End of queue');
         } else {
             if (fs.existsSync(args)) {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
-                            resolve(loadFile(files[0]));
+                            resolve(loadFile(files[currentFileIndex]));
                         } else {
                             reject('No files loaded');
                         }
@@ -108,6 +110,8 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                     .catch((error) => {
                         reject(error);
                     });
+            } else {
+                reject('Path does not exist');
             }
         }
     });
@@ -125,6 +129,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
 ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (fs.existsSync(args)) {
+            currentFileIndex = files.findIndex((filePath) => filePath === args);
             resolve(loadFile(args));
         } else {
             reject('File path does not exist');
@@ -166,7 +171,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     if (error) {
                         reject(error);
                     } else {
-                        filesOutputted.push(files.shift());
+                        currentFileIndex++;
                         resolve('File saved');
                     }
                 });
@@ -262,10 +267,7 @@ const loadFilesFromPath = async (path) => {
                         } else {
                             filePath = `${path}/${file}`;
                         }
-                        if (
-                            validateFileExtension(file) === true &&
-                            filesOutputted.includes(filePath) === false
-                        ) {
+                        if (validateFileExtension(file) === true) {
                             files.push(filePath);
                         }
                     });
@@ -304,7 +306,7 @@ const loadFile = (filePath) => {
         file: file,
         fileName: fileName,
         numberOfFiles: files.length,
-        thumbnails: filesOutputted.concat(files),
+        thumbnails: files,
     };
     return result;
 };
