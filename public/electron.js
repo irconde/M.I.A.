@@ -154,7 +154,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         readdir(returnedFilePath)
             .then((returnedFiles) => {
                 const fileIndex = findMaxFileSuffix(
-                    args.fileNameSuffix,
+                    args.fileSuffix,
                     returnedFiles
                 );
                 const filePath = generateFileName(
@@ -286,6 +286,7 @@ const loadFilesFromPath = async (path) => {
  * loadFile  - Loads the file from the front of the file queue and returns an object with its data
  *             and information about the file name and number of files in the directory.
  *
+ * @param {String} filePath Specific location of the file, ie D:\images\1_img.ora
  * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
  */
 const loadFile = (filePath) => {
