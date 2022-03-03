@@ -304,7 +304,7 @@ const loadFile = (filePath) => {
         file: file,
         fileName: fileName,
         numberOfFiles: files.length,
-        thumbnails: files,
+        thumbnails: filesOutputted.concat(files),
     };
     return result;
 };
