@@ -810,6 +810,13 @@ class App extends Component {
         }
     }
 
+    /**
+     * getSpecificFileFromLocalDirectory - Operates in a similar way to getFileFromLocalDirectory, but instead
+     *                                     this functions specifies the exact file path instead of a general path.
+     *                                     IE D:\images\1_img.ora.
+     * @param {String} filePath
+     * @returns {None}
+     */
     getSpecificFileFromLocalDirectory(filePath) {
         if (isElectron()) {
             ipcRenderer

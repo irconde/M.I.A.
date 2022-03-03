@@ -87,7 +87,7 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  *            it will return the Base64 binary string of the next file.
  *
  * @param {String} - File directory path sent from react
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number thumbnails: Array<String>>}
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {

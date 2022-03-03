@@ -394,7 +394,6 @@ export default class Utils {
                 const width = window.innerWidth + constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
                 singleViewport.style.left = 0;
-                // TODO: add other conditions
             } else if (collapsedLazyMenu && !collapsedSideMenu) {
                 //
                 const width =
