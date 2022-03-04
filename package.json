@@ -64,7 +64,7 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
-        "docs": "jsdoc -c jsdoc.json"
+        "docs": "jsdoc -c jsdoc.json -t ./node_modules/better-docs"
     },
     "build": {
         "appId": "edu.ualr.eac.dna.pilot.gui",
