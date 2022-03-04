@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-    Paper,
     Button,
-    Divider,
-    TextField,
-    FormControl,
-    FormGroup,
-    Select,
-    FormControlLabel,
     Checkbox,
+    CircularProgress,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
     MenuItem,
-    Switch,
+    Paper,
+    Select,
     Snackbar,
     SnackbarContent,
+    Switch,
+    TextField,
 } from '@material-ui/core';
 import {
-    makeStyles,
     createTheme,
+    makeStyles,
     ThemeProvider,
 } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-import { CircularProgress } from '@material-ui/core';
 import {
-    toggleSettingsVisibility,
     getSettingsVisibility,
+    toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
 import {
     getLocalFileOutput,
@@ -42,9 +42,10 @@ import FileFormatIcon from '../../icons/FileFormatIcon.js';
 import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
-import { SETTINGS, Channels } from '../../utils/Constants';
+import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
+
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
@@ -86,12 +87,12 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
+
     /**
      * handleSnackBarClose - Event handler for when the snackbar closes
      *
      * @param {Event} event
      * @param {String} reason
-     * @returns
      */
     const handleSnackBarClose = (event, reason) => {
         if (reason === 'clickaway') {

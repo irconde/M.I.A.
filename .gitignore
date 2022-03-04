@@ -32,3 +32,6 @@ yarn-error.log*
 
 # VSCode Settings
 /.vscode
+
+# Docs
+/docs

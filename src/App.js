@@ -1,6 +1,5 @@
 import './App.css';
-import React from 'react';
-import { Component } from 'react';
+import React, { Component } from 'react';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -27,75 +26,76 @@ import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
 import {
-    setUpload,
+    setConnected,
+    setCurrentProcessingFile,
     setDownload,
     setNumFilesInQueue,
     setProcessingHost,
-    setCurrentProcessingFile,
-    setConnected,
+    setUpload,
 } from './redux/slices/server/serverSlice';
 import {
-    resetDetections,
     addDetection,
     addDetections,
     clearAllSelection,
+    deleteDetection,
+    editDetectionLabel,
+    getSideDetections,
+    getTopDetections,
+    hasDetectionCoordinatesChanged,
+    resetDetections,
     selectDetection,
     selectDetectionSet,
-    getTopDetections,
-    getSideDetections,
-    updateDetection,
     updatedDetectionSet,
-    editDetectionLabel,
-    deleteDetection,
-    validateDetections,
+    updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
-    hasDetectionCoordinatesChanged,
     updateMissMatchedClassName,
+    validateDetections,
 } from './redux/slices/detections/detectionsSlice';
 import {
-    updateFABVisibility,
-    updateIsDetectionContextVisible,
-    updateCornerstoneMode,
-    updateEditionMode,
-    emptyAreaClickUpdate,
-    onMouseLeaveNoFilesUpdate,
-    detectionSelectedUpdate,
-    labelSelectedUpdate,
+    colorPickerToggle,
     deleteDetectionUpdate,
+    detectionSelectedUpdate,
+    emptyAreaClickUpdate,
     exitEditionModeUpdate,
-    updateDetectionContextPosition,
-    updateZoomLevels,
-    updateZoomLevelTop,
-    updateZoomLevelSide,
-    selectConfigInfoUpdate,
-    newFileReceivedUpdate,
     hideContextMenuUpdate,
-    resetSelectedDetectionBoxesUpdate,
-    resetSelectedDetectionBoxesElseUpdate,
+    labelSelectedUpdate,
+    newFileReceivedUpdate,
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
-    setInputLabel,
-    setReceiveTime,
-    colorPickerToggle,
-    setLocalFileOpen,
-    updateEditLabelPosition,
-    updateRecentScroll,
+    onMouseLeaveNoFilesUpdate,
+    resetSelectedDetectionBoxesElseUpdate,
+    resetSelectedDetectionBoxesUpdate,
+    selectConfigInfoUpdate,
     setCurrentFileFormat,
+    setInputLabel,
+    setLocalFileOpen,
+    setReceiveTime,
+    updateCornerstoneMode,
+    updateDetectionContextPosition,
+    updateEditionMode,
+    updateEditLabelPosition,
+    updateFABVisibility,
+    updateIsDetectionContextVisible,
+    updateRecentScroll,
+    updateZoomLevels,
+    updateZoomLevelSide,
+    updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
-import { fileSave, fileOpen } from 'browser-fs-access';
+import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
+import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
-import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -1135,7 +1135,7 @@ class App extends Component {
      * nextImageClick() - When the operator taps next, we send to the file server to remove the
      *                  - current image, then when that is complete, we send the image to the command
      *                  - server. Finally, calling getNextImage to display another image if there is one
-     * @param {Event} Event
+     * @param {Event} e
      * @return {None} None
      */
     nextImageClick(e) {
@@ -1609,10 +1609,9 @@ class App extends Component {
     }
 
     /**
-     * loadCOCOdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * loadCOCOdata - Method to pull all the data regarding the threat detections from a file formatted
+     * according to the MS COCO standard
      *
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
      * @return {None} None
      */
     loadCOCOdata() {
@@ -1675,10 +1674,10 @@ class App extends Component {
     }
 
     /**
-     * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * loadDICOSdata - Method that parses a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
+     * @param  {Array} imagesLeft - list of DICOS+TDR data from  algorithm
+     * @param  {Array} imagesRight - list of DICOS+TDR data from  algorithm
      * @return {None} None
      */
     loadDICOSdata(imagesLeft, imagesRight) {
@@ -2889,8 +2888,8 @@ class App extends Component {
      * getContextMenuPos - Get position of context menu based on the associated bounding box.
      *
      * @param {DOMElement} viewportInfo viewport info
-     * @param {Array<Number>} coords bounding box' corners' coordinates
-     * @returns {Object{Number: x; Number: y}}
+     * @param {Array.number} coords bounding box' corners' coordinates
+     * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {

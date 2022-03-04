@@ -5,6 +5,7 @@ import * as constants from './Constants';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
+
 const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
@@ -680,7 +681,7 @@ export default class Utils {
      *                        represents its position as a percentage value inside the bounding box.
      *
      * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>}
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -728,8 +729,8 @@ export default class Utils {
      * calculateMaskAnchorPoints - Will recalculate the anchor points of a polygon mask
      *
      * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns
+     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
      */
     static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -747,8 +748,8 @@ export default class Utils {
      * calculatePolygonMask - Calculate the coordinates of the bounding box for a given polygon
      *
      * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>} - newPolygonData with updated points based on anchor points
+     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} - newPolygonData with updated points based on anchor points
      */
     static calculatePolygonMask(boundingBox, polygonData) {
         let newPolygonData = cloneDeep(polygonData);
