@@ -10,6 +10,7 @@ const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
+const fsWin = require('fswin');
 
 let mainWindow;
 let files = [];
@@ -271,6 +272,7 @@ const loadFilesFromPath = async (path) => {
                             files.push(filePath);
                         }
                     });
+                    generateThumbNails(path);
                     resolve('files loaded');
                 })
                 .catch((error) => {
@@ -309,4 +311,24 @@ const loadFile = (filePath) => {
         thumbnails: files,
     };
     return result;
+};
+
+const generateThumbNails = (path) => {
+    createThumbnailsPath(path);
+};
+
+const createThumbnailsPath = (path) => {
+    let thumbnailsPath;
+    if (process.platform === 'win32') {
+        thumbnailsPath = `${path}\\.thumbnails`;
+        if (!fs.existsSync(thumbnailsPath)) {
+            fs.mkdirSync(thumbnailsPath);
+            fsWin.setAttributesSync(thumbnailsPath, { IS_HIDDEN: true });
+        }
+    } else {
+        thumbnailsPath = `${path}/.thumbnails`;
+        if (!fs.existsSync(thumbnailsPath)) {
+            fs.mkdirSync(thumbnailsPath);
+        }
+    }
 };
