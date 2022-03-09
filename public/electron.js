@@ -11,12 +11,16 @@ const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
 const fsWin = require('fswin');
+const JSZip = require('jszip');
+const parseString = require('xml2js').parseString;
+const sharp = require('sharp');
 
 let mainWindow;
 let files = [];
 let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
+const pngExp = /\.png$/;
 
 function createWindow() {
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -244,8 +248,21 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
  * @returns {Boolean}
  */
 const validateFileExtension = (fileName) => {
-    if (oraExp.test(fileName) || dcsExp.test(fileName)) return true;
+    if (oraExp.test(fileName)) return true;
     else return false;
+};
+/**
+ * validateImageExtension - Ensures that the file name being passed is in of type .ora or .dcs
+ *
+ * @param {String} fileName
+ * @returns {Boolean}
+ */
+const validateImageExtension = (fileName) => {
+    if (dcsExp.test(fileName))
+        return { result: true, type: Constants.Settings.ANNOTATIONS.TDR };
+    else if (pngExp.test(fileName))
+        return { result: true, type: Constants.Settings.ANNOTATIONS.COCO };
+    else return { result: false };
 };
 
 /**
@@ -313,8 +330,107 @@ const loadFile = (filePath) => {
     return result;
 };
 
-const generateThumbNails = (path) => {
-    createThumbnailsPath(path);
+const generateThumbNails = async (path) => {
+    const thumbnailsPath = createThumbnailsPath(path);
+    readdir(path)
+        .then((filesResult) => {
+            let thumbnails = [];
+            filesResult.forEach((fileName) => {
+                if (validateFileExtension(fileName)) {
+                    let filePath;
+                    if (process.platform === 'win32') {
+                        filePath = `${path}\\${fileName}`;
+                    } else {
+                        filePath = `${path}/${fileName}`;
+                    }
+                    try {
+                        const fileData = fs.readFileSync(filePath);
+                        const fileObject =
+                            Buffer.from(fileData).toString('base64');
+                        const myZip = new JSZip();
+                        myZip
+                            .loadAsync(fileObject, { base64: true })
+                            .then(() => {
+                                myZip
+                                    .file('stack.xml')
+                                    .async('string')
+                                    .then((stackFile) => {
+                                        parseString(
+                                            stackFile,
+                                            (error, result) => {
+                                                if (error === null) {
+                                                    let newThumbnail = [];
+                                                    result.image.stack.forEach(
+                                                        (stack) => {
+                                                            console.log(
+                                                                `File: ${stack.layer[0].$.src}`
+                                                            );
+                                                            let saveThumbnailPath =
+                                                                process.platform ===
+                                                                'win32'
+                                                                    ? `${path}\\.thumbnails\\${fileName}_thumbnail_${stack.$.view}.png`
+                                                                    : `${path}/.thumbnails/${fileName}_thumbnail_${stack.$.view}.png`;
+                                                            newThumbnail.push({
+                                                                image: filePath,
+                                                                thumbnail:
+                                                                    saveThumbnailPath,
+                                                            });
+                                                            myZip
+                                                                .file(
+                                                                    stack
+                                                                        .layer[0]
+                                                                        .$.src
+                                                                )
+                                                                .async(
+                                                                    'nodebuffer'
+                                                                )
+                                                                .then(
+                                                                    (
+                                                                        imageData
+                                                                    ) => {
+                                                                        sharp(
+                                                                            imageData
+                                                                        )
+                                                                            .resize(
+                                                                                96,
+                                                                                96
+                                                                            )
+                                                                            .toFile(
+                                                                                saveThumbnailPath,
+                                                                                (
+                                                                                    error,
+                                                                                    info
+                                                                                ) => {
+                                                                                    console.log(
+                                                                                        error
+                                                                                    );
+                                                                                    console.log(
+                                                                                        info
+                                                                                    );
+                                                                                }
+                                                                            );
+                                                                    }
+                                                                );
+                                                        }
+                                                    );
+                                                    thumbnails.push(
+                                                        newThumbnail
+                                                    );
+                                                    console.log(thumbnails);
+                                                } else console.log(error);
+                                            }
+                                        );
+                                    });
+                            });
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
 };
 
 const createThumbnailsPath = (path) => {
@@ -331,4 +447,5 @@ const createThumbnailsPath = (path) => {
             fs.mkdirSync(thumbnailsPath);
         }
     }
+    return thumbnailsPath;
 };
