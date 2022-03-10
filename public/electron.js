@@ -10,10 +10,12 @@ const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const Constants = require('./Constants');
+const Utils = require('./Utils');
 const fsWin = require('fswin');
 const JSZip = require('jszip');
 const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
+const dicomParser = require('dicom-parser');
 
 let mainWindow;
 let files = [];
@@ -382,41 +384,203 @@ const generateThumbNails = async (path) => {
                                                                         .$.src
                                                                 )
                                                                 .async(
-                                                                    'nodebuffer'
+                                                                    'arraybuffer'
                                                                 )
                                                                 .then(
                                                                     (
                                                                         imageData
                                                                     ) => {
-                                                                        sharp(
-                                                                            imageData
-                                                                        )
-                                                                            .resize(
-                                                                                96,
-                                                                                96
-                                                                            )
-                                                                            .toFile(
-                                                                                saveThumbnailPath,
-                                                                                (
-                                                                                    error,
-                                                                                    info
-                                                                                ) => {
-                                                                                    console.log(
-                                                                                        error
-                                                                                    );
-                                                                                    console.log(
-                                                                                        info
-                                                                                    );
-                                                                                }
+                                                                        console.log(
+                                                                            'file loaded'
+                                                                        );
+                                                                        const byteArray =
+                                                                            new Uint8Array(
+                                                                                imageData
                                                                             );
+                                                                        try {
+                                                                            // Allow raw files
+                                                                            const options =
+                                                                                {
+                                                                                    TransferSyntaxUID:
+                                                                                        '1.2.840.10008.1.2',
+                                                                                };
+                                                                            // Parse the byte array to get a DataSet object that has the parsed contents
+                                                                            const dataSet =
+                                                                                dicomParser.parseDicom(
+                                                                                    byteArray,
+                                                                                    options
+                                                                                );
+
+                                                                            // get the pixel data element (contains the offset and length of the data)
+                                                                            const pixelDataElement =
+                                                                                dataSet
+                                                                                    .elements
+                                                                                    .x7fe00010;
+
+                                                                            // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+                                                                            const pixelData =
+                                                                                new Uint16Array(
+                                                                                    dataSet.byteArray.buffer,
+                                                                                    pixelDataElement.dataOffset,
+                                                                                    pixelDataElement.length /
+                                                                                        2
+                                                                                );
+                                                                            const intervals =
+                                                                                Utils.buildIntervals();
+                                                                            const height =
+                                                                                dataSet.int16(
+                                                                                    'x00280010'
+                                                                                );
+                                                                            const width =
+                                                                                dataSet.int16(
+                                                                                    'x00280011'
+                                                                                );
+                                                                            const EightbitPixels =
+                                                                                new Uint8ClampedArray(
+                                                                                    4 *
+                                                                                        width *
+                                                                                        height
+                                                                                );
+                                                                            let z = 0;
+                                                                            for (
+                                                                                let i = 0;
+                                                                                i <
+                                                                                pixelData.length;
+                                                                                i++
+                                                                            ) {
+                                                                                const greyValue =
+                                                                                    Utils.findGrayValue(
+                                                                                        pixelData[
+                                                                                            i
+                                                                                        ],
+                                                                                        intervals
+                                                                                    );
+                                                                                EightbitPixels[
+                                                                                    z
+                                                                                ] =
+                                                                                    greyValue;
+                                                                                EightbitPixels[
+                                                                                    z +
+                                                                                        1
+                                                                                ] =
+                                                                                    greyValue;
+                                                                                EightbitPixels[
+                                                                                    z +
+                                                                                        2
+                                                                                ] =
+                                                                                    greyValue;
+                                                                                EightbitPixels[
+                                                                                    z +
+                                                                                        3
+                                                                                ] = 255;
+                                                                                z += 4;
+                                                                            }
+                                                                            sharp(
+                                                                                EightbitPixels,
+                                                                                {
+                                                                                    raw: {
+                                                                                        width,
+                                                                                        height,
+                                                                                        channels: 4,
+                                                                                    },
+                                                                                }
+                                                                            )
+                                                                                .resize(
+                                                                                    96,
+                                                                                    96
+                                                                                )
+                                                                                .toFile(
+                                                                                    saveThumbnailPath,
+                                                                                    (
+                                                                                        error,
+                                                                                        info
+                                                                                    ) => {
+                                                                                        console.log(
+                                                                                            error
+                                                                                        );
+                                                                                        console.log(
+                                                                                            info
+                                                                                        );
+                                                                                        thumbnails.push(
+                                                                                            newThumbnail
+                                                                                        );
+                                                                                        fs.writeFileSync(
+                                                                                            `${thumbnailsPath}${
+                                                                                                process.platform ===
+                                                                                                'win32'
+                                                                                                    ? '\\'
+                                                                                                    : '/'
+                                                                                            }database.json`,
+                                                                                            JSON.stringify(
+                                                                                                thumbnails,
+                                                                                                null,
+                                                                                                4
+                                                                                            )
+                                                                                        );
+                                                                                    }
+                                                                                );
+                                                                        } catch (ex) {
+                                                                            console.log(
+                                                                                'Error parsing byte stream',
+                                                                                ex
+                                                                            );
+                                                                        }
                                                                     }
                                                                 );
+                                                            // myZip
+                                                            //     .file(
+                                                            //         stack
+                                                            //             .layer[0]
+                                                            //             .$.src
+                                                            //     )
+                                                            //     .async(
+                                                            //         'nodebuffer'
+                                                            //     )
+                                                            //     .then(
+                                                            //         (
+                                                            //             imageData
+                                                            //         ) => {
+                                                            //             sharp(
+                                                            //                 imageData
+                                                            //             )
+                                                            //                 .resize(
+                                                            //                     96,
+                                                            //                     96
+                                                            //                 )
+                                                            //                 .toFile(
+                                                            //                     saveThumbnailPath,
+                                                            //                     (
+                                                            //                         error,
+                                                            //                         info
+                                                            //                     ) => {
+                                                            //                         console.log(
+                                                            //                             error
+                                                            //                         );
+                                                            //                         console.log(
+                                                            //                             info
+                                                            //                         );
+                                                            //                         thumbnails.push(
+                                                            //                             newThumbnail
+                                                            //                         );
+                                                            //                         fs.writeFileSync(
+                                                            //                             `${thumbnailsPath}${
+                                                            //                                 process.platform ===
+                                                            //                                 'win32'
+                                                            //                                     ? '\\'
+                                                            //                                     : '/'
+                                                            //                             }database.json`,
+                                                            //                             JSON.stringify(
+                                                            //                                 thumbnails,
+                                                            //                                 null,
+                                                            //                                 4
+                                                            //                             )
+                                                            //                         );
+                                                            //                     }
+                                                            //                 );
+                                                            //         }
+                                                            //     );
                                                         }
                                                     );
-                                                    thumbnails.push(
-                                                        newThumbnail
-                                                    );
-                                                    console.log(thumbnails);
                                                 } else console.log(error);
                                             }
                                         );
