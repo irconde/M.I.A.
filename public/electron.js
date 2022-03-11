@@ -19,6 +19,8 @@ const dicomParser = require('dicom-parser');
 
 let mainWindow;
 let files = [];
+let thumbnails = [];
+let thumbnailPath = '';
 let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
@@ -291,7 +293,7 @@ const loadFilesFromPath = async (path) => {
                             files.push(filePath);
                         }
                     });
-                    generateThumbNails(path);
+                    startThumbnailThread(path);
                     resolve('files loaded');
                 })
                 .catch((error) => {
@@ -332,284 +334,255 @@ const loadFile = (filePath) => {
     return result;
 };
 
-const generateThumbNails = async (path) => {
-    const thumbnailsPath = createThumbnailsPath(path);
-    readdir(path)
-        .then((filesResult) => {
-            let thumbnails = [];
-            filesResult.forEach((fileName) => {
-                if (validateFileExtension(fileName)) {
-                    let filePath;
-                    if (process.platform === 'win32') {
-                        filePath = `${path}\\${fileName}`;
-                    } else {
-                        filePath = `${path}/${fileName}`;
-                    }
-                    try {
-                        const fileData = fs.readFileSync(filePath);
-                        const fileObject =
-                            Buffer.from(fileData).toString('base64');
-                        const myZip = new JSZip();
-                        myZip
-                            .loadAsync(fileObject, { base64: true })
-                            .then(() => {
-                                myZip
-                                    .file('stack.xml')
-                                    .async('string')
-                                    .then((stackFile) => {
-                                        parseString(
-                                            stackFile,
-                                            (error, result) => {
-                                                if (error === null) {
-                                                    let newThumbnail = [];
-                                                    result.image.stack.forEach(
-                                                        (stack) => {
-                                                            console.log(
-                                                                `File: ${stack.layer[0].$.src}`
-                                                            );
-                                                            let saveThumbnailPath =
-                                                                process.platform ===
-                                                                'win32'
-                                                                    ? `${path}\\.thumbnails\\${fileName}_thumbnail_${stack.$.view}.png`
-                                                                    : `${path}/.thumbnails/${fileName}_thumbnail_${stack.$.view}.png`;
-                                                            newThumbnail.push({
-                                                                image: filePath,
-                                                                thumbnail:
-                                                                    saveThumbnailPath,
-                                                            });
-                                                            myZip
-                                                                .file(
-                                                                    stack
-                                                                        .layer[0]
-                                                                        .$.src
-                                                                )
-                                                                .async(
-                                                                    'arraybuffer'
-                                                                )
-                                                                .then(
-                                                                    (
-                                                                        imageData
-                                                                    ) => {
-                                                                        console.log(
-                                                                            'file loaded'
-                                                                        );
-                                                                        const byteArray =
-                                                                            new Uint8Array(
-                                                                                imageData
-                                                                            );
-                                                                        try {
-                                                                            // Allow raw files
-                                                                            const options =
-                                                                                {
-                                                                                    TransferSyntaxUID:
-                                                                                        '1.2.840.10008.1.2',
-                                                                                };
-                                                                            // Parse the byte array to get a DataSet object that has the parsed contents
-                                                                            const dataSet =
-                                                                                dicomParser.parseDicom(
-                                                                                    byteArray,
-                                                                                    options
-                                                                                );
-
-                                                                            // get the pixel data element (contains the offset and length of the data)
-                                                                            const pixelDataElement =
-                                                                                dataSet
-                                                                                    .elements
-                                                                                    .x7fe00010;
-
-                                                                            // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
-                                                                            const pixelData =
-                                                                                new Uint16Array(
-                                                                                    dataSet.byteArray.buffer,
-                                                                                    pixelDataElement.dataOffset,
-                                                                                    pixelDataElement.length /
-                                                                                        2
-                                                                                );
-                                                                            const intervals =
-                                                                                Utils.buildIntervals();
-                                                                            const height =
-                                                                                dataSet.int16(
-                                                                                    'x00280010'
-                                                                                );
-                                                                            const width =
-                                                                                dataSet.int16(
-                                                                                    'x00280011'
-                                                                                );
-                                                                            const EightbitPixels =
-                                                                                new Uint8ClampedArray(
-                                                                                    4 *
-                                                                                        width *
-                                                                                        height
-                                                                                );
-                                                                            let z = 0;
-                                                                            for (
-                                                                                let i = 0;
-                                                                                i <
-                                                                                pixelData.length;
-                                                                                i++
-                                                                            ) {
-                                                                                const greyValue =
-                                                                                    Utils.findGrayValue(
-                                                                                        pixelData[
-                                                                                            i
-                                                                                        ],
-                                                                                        intervals
-                                                                                    );
-                                                                                EightbitPixels[
-                                                                                    z
-                                                                                ] =
-                                                                                    greyValue;
-                                                                                EightbitPixels[
-                                                                                    z +
-                                                                                        1
-                                                                                ] =
-                                                                                    greyValue;
-                                                                                EightbitPixels[
-                                                                                    z +
-                                                                                        2
-                                                                                ] =
-                                                                                    greyValue;
-                                                                                EightbitPixels[
-                                                                                    z +
-                                                                                        3
-                                                                                ] = 255;
-                                                                                z += 4;
-                                                                            }
-                                                                            sharp(
-                                                                                EightbitPixels,
-                                                                                {
-                                                                                    raw: {
-                                                                                        width,
-                                                                                        height,
-                                                                                        channels: 4,
-                                                                                    },
-                                                                                }
-                                                                            )
-                                                                                .resize(
-                                                                                    96,
-                                                                                    96
-                                                                                )
-                                                                                .toFile(
-                                                                                    saveThumbnailPath,
-                                                                                    (
-                                                                                        error,
-                                                                                        info
-                                                                                    ) => {
-                                                                                        console.log(
-                                                                                            error
-                                                                                        );
-                                                                                        console.log(
-                                                                                            info
-                                                                                        );
-                                                                                        thumbnails.push(
-                                                                                            newThumbnail
-                                                                                        );
-                                                                                        fs.writeFileSync(
-                                                                                            `${thumbnailsPath}${
-                                                                                                process.platform ===
-                                                                                                'win32'
-                                                                                                    ? '\\'
-                                                                                                    : '/'
-                                                                                            }database.json`,
-                                                                                            JSON.stringify(
-                                                                                                thumbnails,
-                                                                                                null,
-                                                                                                4
-                                                                                            )
-                                                                                        );
-                                                                                    }
-                                                                                );
-                                                                        } catch (ex) {
-                                                                            console.log(
-                                                                                'Error parsing byte stream',
-                                                                                ex
-                                                                            );
-                                                                        }
-                                                                    }
-                                                                );
-                                                            // myZip
-                                                            //     .file(
-                                                            //         stack
-                                                            //             .layer[0]
-                                                            //             .$.src
-                                                            //     )
-                                                            //     .async(
-                                                            //         'nodebuffer'
-                                                            //     )
-                                                            //     .then(
-                                                            //         (
-                                                            //             imageData
-                                                            //         ) => {
-                                                            //             sharp(
-                                                            //                 imageData
-                                                            //             )
-                                                            //                 .resize(
-                                                            //                     96,
-                                                            //                     96
-                                                            //                 )
-                                                            //                 .toFile(
-                                                            //                     saveThumbnailPath,
-                                                            //                     (
-                                                            //                         error,
-                                                            //                         info
-                                                            //                     ) => {
-                                                            //                         console.log(
-                                                            //                             error
-                                                            //                         );
-                                                            //                         console.log(
-                                                            //                             info
-                                                            //                         );
-                                                            //                         thumbnails.push(
-                                                            //                             newThumbnail
-                                                            //                         );
-                                                            //                         fs.writeFileSync(
-                                                            //                             `${thumbnailsPath}${
-                                                            //                                 process.platform ===
-                                                            //                                 'win32'
-                                                            //                                     ? '\\'
-                                                            //                                     : '/'
-                                                            //                             }database.json`,
-                                                            //                             JSON.stringify(
-                                                            //                                 thumbnails,
-                                                            //                                 null,
-                                                            //                                 4
-                                                            //                             )
-                                                            //                         );
-                                                            //                     }
-                                                            //                 );
-                                                            //         }
-                                                            //     );
-                                                        }
-                                                    );
-                                                } else console.log(error);
-                                            }
-                                        );
-                                    });
-                            });
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
-            });
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+const startThumbnailThread = async (path) => {
+    createThumbnailsPath(path);
+    const filesToGenerate = await filesNeedingThumbnails(path);
+    if (filesToGenerate.length > 0) {
+        await parseFilesForThumbnail(filesToGenerate);
+        saveThumbnailDatabase();
+    }
 };
 
 const createThumbnailsPath = (path) => {
-    let thumbnailsPath;
     if (process.platform === 'win32') {
-        thumbnailsPath = `${path}\\.thumbnails`;
-        if (!fs.existsSync(thumbnailsPath)) {
-            fs.mkdirSync(thumbnailsPath);
-            fsWin.setAttributesSync(thumbnailsPath, { IS_HIDDEN: true });
+        thumbnailPath = `${path}\\.thumbnails`;
+        if (!fs.existsSync(thumbnailPath)) {
+            fs.mkdirSync(thumbnailPath);
+            fsWin.setAttributesSync(thumbnailPath, { IS_HIDDEN: true });
         }
     } else {
-        thumbnailsPath = `${path}/.thumbnails`;
-        if (!fs.existsSync(thumbnailsPath)) {
-            fs.mkdirSync(thumbnailsPath);
+        thumbnailPath = `${path}/.thumbnails`;
+        if (!fs.existsSync(thumbnailPath)) {
+            fs.mkdirSync(thumbnailPath);
         }
     }
-    return thumbnailsPath;
+};
+
+const filesNeedingThumbnails = async (filePath) => {
+    const result = new Promise((resolve, reject) => {
+        loadThumbnailDatabase();
+        let filesToGenerate = [];
+        readdir(filePath)
+            .then((filesRead) => {
+                filesRead.forEach((fileName) => {
+                    if (validateFileExtension(fileName)) {
+                        let imagePath;
+                        if (process.platform === 'win32') {
+                            imagePath = `${filePath}\\${fileName}`;
+                        } else {
+                            imagePath = `${filePath}/${fileName}`;
+                        }
+                        filesToGenerate.push(imagePath);
+                    }
+                });
+                if (thumbnails.length > 0) {
+                    filesToGenerate = filterMadeThumbnails(filesToGenerate);
+                }
+                resolve(filesToGenerate);
+            })
+            .catch((error) => reject(error));
+    });
+    return result;
+};
+
+const filterMadeThumbnails = (filesToGenerate) => {
+    return filesToGenerate.filter((file) => {
+        const splitPath = file.split(process.platform === 'win32' ? '\\' : '/');
+        const fileName = splitPath[splitPath.length - 1];
+        return !thumbnails.some((thumbnail) => {
+            return fileName === thumbnail.fileName;
+        });
+    });
+};
+
+const parseFilesForThumbnail = async (files) => {
+    const result = new Promise((resolve, reject) => {
+        const listOfPromises = [];
+        files.forEach((file) => {
+            listOfPromises.push(parseThumbnail(file));
+        });
+        const promiseOfList = Promise.all(listOfPromises);
+        promiseOfList.then(() => {
+            console.log('All resolved');
+            resolve();
+        });
+    });
+    return result;
+};
+
+const parseThumbnail = async (filePath) => {
+    const result = new Promise((resolve, reject) => {
+        const splitPath = filePath.split(
+            process.platform === 'win32' ? '\\' : '/'
+        );
+        const fileName = splitPath[splitPath.length - 1];
+        const fileData = fs.readFileSync(filePath);
+        const fileObject = Buffer.from(fileData).toString('base64');
+        const myZip = new JSZip();
+        myZip
+            .loadAsync(fileObject, { base64: true })
+            .then(() => {
+                myZip
+                    .file('stack.xml')
+                    .async('string')
+                    .then((stackFile) => {
+                        parseString(stackFile, (error, result) => {
+                            if (error === null) {
+                                let newThumbnail = [];
+                                let listOfNewThumbnailPromises = [];
+                                result.image.stack.forEach((stack) => {
+                                    let thumbnailSavePath =
+                                        process.platform === 'win32'
+                                            ? `${thumbnailPath}\\${fileName}_thumbnail_${stack.$.view}.png`
+                                            : `${thumbnailPath}/${fileName}_thumbnail_${stack.$.view}.png`;
+                                    const dataType = validateImageExtension(
+                                        stack.layer[0].$.src
+                                    );
+                                    if (
+                                        dataType.result &&
+                                        dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.COCO
+                                    ) {
+                                        listOfNewThumbnailPromises.push(
+                                            myZip
+                                                .file(stack.layer[0].$.src)
+                                                .async('nodebuffer')
+                                                .then((imageData) => {
+                                                    newThumbnail.push({
+                                                        fileName,
+                                                        view: stack.$.view,
+                                                        thumbnailSavePath,
+                                                        dataType,
+                                                        pixelData: imageData,
+                                                    });
+                                                })
+                                        );
+                                    } else if (
+                                        dataType.result &&
+                                        dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.TDR
+                                    ) {
+                                        listOfNewThumbnailPromises.push(
+                                            myZip
+                                                .file(stack.layer[0].$.src)
+                                                .async('arraybuffer')
+                                                .then((imageData) => {
+                                                    const dicosImageData =
+                                                        dcsToPng(imageData);
+                                                    newThumbnail.push({
+                                                        fileName,
+                                                        view: stack.$.view,
+                                                        thumbnailSavePath,
+                                                        dataType,
+                                                        pixelData:
+                                                            dicosImageData.pixelData,
+                                                        width: dicosImageData.width,
+                                                        height: dicosImageData.height,
+                                                    });
+                                                })
+                                        );
+                                    }
+                                });
+                                const promiseOfNewThumbnailsList = Promise.all(
+                                    listOfNewThumbnailPromises
+                                );
+                                promiseOfNewThumbnailsList.then(() => {
+                                    newThumbnail.forEach((thumbnail) => {
+                                        if (
+                                            thumbnail.dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.COCO
+                                        ) {
+                                            sharp(thumbnail.pixelData)
+                                                .resize(96)
+                                                .toFile(
+                                                    thumbnail.thumbnailSavePath
+                                                );
+                                        } else if (
+                                            thumbnail.dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.TDR
+                                        ) {
+                                            sharp(thumbnail.pixelData, {
+                                                raw: {
+                                                    width: thumbnail.width,
+                                                    height: thumbnail.height,
+                                                    channels: 4,
+                                                },
+                                            })
+                                                .resize(96)
+                                                .toFile(
+                                                    thumbnail.thumbnailSavePath
+                                                );
+                                        }
+                                        thumbnails.push({
+                                            fileName,
+                                            thumbnailPath:
+                                                thumbnail.thumbnailSavePath,
+                                        });
+                                    });
+                                    resolve();
+                                });
+                            } else reject(error);
+                        });
+                    });
+            })
+            .catch((error) => reject(error));
+    });
+    return result;
+};
+
+const dcsToPng = (imageData) => {
+    const byteArray = new Uint8Array(imageData);
+    try {
+        // Allow raw files
+        const options = {
+            TransferSyntaxUID: '1.2.840.10008.1.2',
+        };
+        // Parse the byte array to get a DataSet object that has the parsed contents
+        const dataSet = dicomParser.parseDicom(byteArray, options);
+
+        // get the pixel data element (contains the offset and length of the data)
+        const pixelDataElement = dataSet.elements.x7fe00010;
+
+        // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+        const pixelData = new Uint16Array(
+            dataSet.byteArray.buffer,
+            pixelDataElement.dataOffset,
+            pixelDataElement.length / 2
+        );
+        const intervals = Utils.buildIntervals();
+        const height = dataSet.int16('x00280010');
+        const width = dataSet.int16('x00280011');
+        const EightbitPixels = new Uint8ClampedArray(4 * width * height);
+        let z = 0;
+        for (let i = 0; i < pixelData.length; i++) {
+            const greyValue = Utils.findGrayValue(pixelData[i], intervals);
+            EightbitPixels[z] = greyValue;
+            EightbitPixels[z + 1] = greyValue;
+            EightbitPixels[z + 2] = greyValue;
+            EightbitPixels[z + 3] = 255;
+            z += 4;
+        }
+        return { width, height, pixelData: EightbitPixels };
+    } catch (ex) {
+        console.log('Error parsing byte stream', ex);
+    }
+};
+
+const saveThumbnailDatabase = () => {
+    fs.writeFileSync(
+        `${thumbnailPath}${
+            process.platform === 'win32' ? '\\' : '/'
+        }database.json`,
+        JSON.stringify(thumbnails, null, 4)
+    );
+};
+
+const loadThumbnailDatabase = () => {
+    const thumbnailDBPath = `${thumbnailPath}${
+        process.platform === 'win32' ? '\\' : '/'
+    }database.json`;
+    if (fs.existsSync(thumbnailDBPath)) {
+        const rawData = fs.readFileSync(thumbnailDBPath);
+        thumbnails = JSON.parse(rawData);
+    }
 };

@@ -98,7 +98,8 @@ export const PERPENDICULAR_DEGREE_TRANSFORM = 'rotate(90deg)';
 
 export const COOKIE = {
     // In seconds, 10800 = 3 hours
-    TIME: 10800,
+    WEB_TIME: 10800000,
+    DESKTOP_TIME: 2147483647 * 1000,
 };
 
 export const SETTINGS = {
