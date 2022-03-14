@@ -12,6 +12,17 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
+/**
+ * Helper component for SideMenu component that allows user to view and sort detections by algorithm
+ *
+ * @component
+ *
+ * @param {Array<Detection>} detections Array of detection objects
+ * @param {function} resetCornerstoneTools Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu Callback to render specific detection context menus
+ *
+ *
+ */
 const SideMenuAlgorithm = ({
     detections,
     resetCornerstoneTools,

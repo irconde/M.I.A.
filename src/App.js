@@ -197,7 +197,7 @@ class App extends Component {
      * Houses the code to connect to a server and starts listening for connection events. Lastly it
      * is what trigger to ask for a file from the command server.
      *
-     * @param {Boolean} update - Optional variable for when the settings changes the command server
+     * @param {boolean} update - Optional variable for when the settings changes the command server
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -225,7 +225,7 @@ class App extends Component {
      *
      * @param {Object} nextProps
      * @param {Object} nextState
-     * @returns {Boolean} - True, to update. False, to skip the update
+     * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -819,7 +819,7 @@ class App extends Component {
     /**
      * Emits a new message to send a file to the server
      *
-     * @param {Blob} Blob - File sent to the server
+     * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -879,7 +879,13 @@ class App extends Component {
         });
     }
 
-    loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
+    /**
+     * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
+     * @param {Base64} image Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {String} fileName Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {String} [numberOfFiles = 0] Number of files left in queue
+     */
+    loadNextImage(image, fileName, numberOfFiles = 0) {
         // Loading a file initially from a local workspace can call loadNextImage twice
         // Which creates duplicate detections. This ensures that the same file is never loaded twice
         if (fileName === this.props.currentProcessingFile) return;
@@ -956,6 +962,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'PNG IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1062,6 +1075,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'TDR IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
                                         if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
@@ -1636,7 +1656,7 @@ class App extends Component {
     /**
      * Method that parses a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {Array.number} imagesLeft - List of DICOS+TDR data from algorithm
+     * @param  {Array} imagesLeft - List of DICOS+TDR data from algorithm
      * @param  {Array} imagesRight - List of DICOS+TDR data from algorithm
      */
     loadDICOSdata(imagesLeft, imagesRight) {
@@ -1861,6 +1881,7 @@ class App extends Component {
      * @param {DOMElement} target
      */
     renderCrosshair(context, target) {
+        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -2052,7 +2073,7 @@ class App extends Component {
     /**
      * Callback invoked when a touch event is initiated.
      *
-     * @param {type} e - Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchStart(e) {
         let startPosition = e.detail.currentPoints.page;
@@ -2064,7 +2085,7 @@ class App extends Component {
     /**
      * Callback invoked when a touch ends.
      *
-     * @param {type} e - Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchEnd(e) {
         let endPosition = e.detail.currentPoints.page;
@@ -2831,11 +2852,17 @@ class App extends Component {
     }
 
     /**
-     * getContextMenuPos - Get position of context menu based on the associated bounding box.
+     * Get position of context menu based on the associated bounding box.
      *
+<<<<<<< HEAD
      * @param {DOMElement} viewportInfo - Viewport info
      * @param {Array.number} coords - Bounding box' corners' coordinates
      * @returns {{x: number, y: number}}
+=======
+     * @param {DOMElement} viewportInfo viewport info
+     * @param {Array<Number>} coords bounding box corners' coordinates
+     * @returns {Object{Number: x; Number: y}}
+>>>>>>> 4a1c615 (First draft of App.js documentation. Added first draft of documentation for components: ColorPicker, DetectionContextMenu, LabelList, BoundPolyFAB, SettingsModal, NextButton, SaveButton, SideMenu, SideMenuAlgorithm)
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {

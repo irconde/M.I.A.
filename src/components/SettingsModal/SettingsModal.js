@@ -52,6 +52,13 @@ if (isElectron()) {
     ipcRenderer = electron.ipcRenderer;
 }
 
+/**
+ * Component dialog for changing settings of application.
+ *
+ * @component
+ *
+ */
+
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
     const initLocalFileOutput = useSelector(getLocalFileOutput);

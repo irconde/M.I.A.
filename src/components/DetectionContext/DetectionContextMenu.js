@@ -86,6 +86,11 @@ const DeleteWidget = styled.div`
         background: ${detectionContextStyle.HOVER_COLOR};
     }
 `;
+/**
+ * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
+ *
+ * @component
+ */
 const DetectionContextMenu = ({ setSelectedOption }) => {
     const selectedDetectionColor = useSelector(getSelectedDetectionColor);
     const selectedOption = useSelector(getEditionMode);
