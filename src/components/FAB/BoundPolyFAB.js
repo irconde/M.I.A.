@@ -77,7 +77,13 @@ const FABContainer = styled.div`
 `;
 
 /**
- * GUI widget that allows user to create a new detection and its polygon mask.
+ * Component for user to create a new detection and its polygon mask.
+ *
+ * @component
+ *
+ * @param {function} onBoundingSelect Callback for bounding box selection
+ * @param {function} onPolygonSelect Callback for polyogn mask selection
+ *
  *
  */
 const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {

@@ -193,12 +193,12 @@ class App extends Component {
     }
 
     /**
-     * connectToCommandServer - This function houses the code to connect to a server, then it starts
-     *                          listening for connection events. Lastly it is what trigger to ask for a file
-     *                          from the command server.
+     * This function houses the code to connect to a server, then it starts
+     * listening for connection events. Lastly it is what trigger to ask for a file
+     * from the command server.
      *
-     * @param {Boolean} update Optional variable for when the settings changes the command server
-     * @returns {None}
+     * @param {boolean} [update = false] Optional variable for when the settings changes the command server
+     * @returns {None} None
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -220,10 +220,10 @@ class App extends Component {
     }
 
     /**
-     * shouldComponentUpdate - Gets called by an update (in changes to props or state). It is called before render(),
-     *                         returning false means we can skip the update. Where returning true means we need to update the render().
-     *                         Namely, this is an edge case for if a user is connected to a server, then decides to use the
-     *                         local mode option, this handles the disconnect.
+     * Gets called by an update (in changes to props or state). It is called before render(),
+     * returning false means we can skip the update. Where returning true means we need to update the render().
+     * Namely, this is an edge case for if a user is connected to a server, then decides to use the
+     * local mode option, this handles the disconnect.
      *
      * @param {Object} nextProps
      * @param {Object} nextState
@@ -262,7 +262,7 @@ class App extends Component {
     }
 
     /**
-     * componentDidMount - Method invoked after all elements on the page are rendered properly
+     * Method invoked after all elements on the page are rendered properly
      *
      * @return {None} None
      */
@@ -435,9 +435,8 @@ class App extends Component {
     }
 
     /**
-     * monitorConnectionEvent - This function houses the events for connectivity with the command server.
+     * This function houses the events for connectivity with the command server.
      *
-     * @param {None}
      * @returns {None}
      */
     async monitorConnectionEvent() {
@@ -466,7 +465,7 @@ class App extends Component {
     }
 
     /**
-     * startListeningClickEvents - Method that binds a click event listener to the two cornerstonejs viewports
+     * Method that binds a click event listener to the two cornerstonejs viewports
      *
      */
     startListeningClickEvents() {
@@ -497,7 +496,7 @@ class App extends Component {
     }
 
     /**
-     * stopListeningClickEvents - Method that unbinds a click event listener to the two cornerstonejs viewports
+     * Method that unbinds a click event listener to the two cornerstonejs viewports
      *
      */
     stopListeningClickEvents() {
@@ -528,9 +527,9 @@ class App extends Component {
     }
 
     /**
-     * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
+     * Function to update cornerstoneJS viewports' zoom level based on their width
      *
-     * @returns {type} None
+     * @returns {None} None
      */
     recalculateZoomLevel() {
         let canvasElements =
@@ -561,10 +560,10 @@ class App extends Component {
     }
 
     /**
-     * resizeListener - Function event listener for the window resize event. If a detection is selected,
-     *                  we clear the detections and hide the buttons.
+     * Function event listener for the window resize event. If a detection is selected,
+     * we clear the detections and hide the buttons.
      *
-     * @param {Event} e
+     * @param {Event}  e The event object being fired which caused your function to be executed
      * @returns {None} None
      */
     // eslint-disable-next-line no-unused-vars
@@ -616,7 +615,7 @@ class App extends Component {
     }
 
     /**
-     * setupCornerstoneJS - CornerstoneJS Tools are initialized
+     * CornerstoneJS Tools are initialized
      *
      * @param  {DOMElement} imageViewportTop DOM element where the top-view x-ray image is rendered
      * @param  {DOMElement} imageViewportSide DOM element where the side-view x-ray image is rendered
@@ -659,8 +658,7 @@ class App extends Component {
     }
 
     /**
-     * resetCornerstoneTool - Reset Cornerstone Tools to their default state.
-     *                        Invoked when user leaves annotation or edition mode
+     * Reset Cornerstone Tools to their default state. Invoked when user leaves annotation or edition mode.
      * @return {None} None
      */
 
@@ -712,8 +710,9 @@ class App extends Component {
     }
 
     /**
-     * getFileFromCommandServer - Socket Listener to get files from command server and load it once received
+     * Socket Listener to get files from command server and load it once received
      *
+     * @param {boolean} [update=false]
      * @return {Promise} Promise
      */
     async getFileFromCommandServer(update = false) {
@@ -737,10 +736,9 @@ class App extends Component {
     }
 
     /**
-     * getFileFromLocal - Function called from the TopBar Icon OpenFile. Uses the
-     *                    browser-fs-access library to load a file as a blob. Which
-     *                    then needs to be converted to base64 to be loaded into the app.
-     * @param {None}
+     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob.
+     * Which then needs to be converted to base64 to be loaded into the app.
+     *
      * @returns {None}
      */
     getFileFromLocal() {
@@ -760,10 +758,8 @@ class App extends Component {
     }
 
     /**
-     * getFileFromLocalDirectory - Calls the Electron channel to invoke the next file from the selected
-     *                             file system folder.
+     * Calls the Electron channel to invoke the next file from the selected file system folder.
      *
-     * @param {None}
      * @returns {None}
      */
     getFileFromLocalDirectory() {
@@ -790,9 +786,9 @@ class App extends Component {
     }
 
     /**
-     * sendImageToCommandServer - Socket IO to send a file to the server
-     * @param {Blob} Blob - which file we are sending
-     * @return {type} None
+     * Socket IO to send a file to the server
+     * @param {Blob} file - which file we are sending
+     * @returns {None} None
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -804,8 +800,7 @@ class App extends Component {
     }
 
     /**
-     * sendImageToLocalDirectory - Sends the needed information to save the current file in the selected
-     *                             this.props.localFileOutput path via Electron channels.
+     * Sends the needed information to save the current file in the selected this.props.localFileOutput path via Electron channels.
      * @param {Buffer} file
      * @returns {Promise}
      */
@@ -832,7 +827,7 @@ class App extends Component {
     }
 
     /**
-     * onNoImageLeft - Method invoked when there isn't any file in the file queue.
+     * Method invoked when there isn't any file in the file queue.
      * A 'No file' image is displayed instead of the cornerstoneJs canvas
      *
      * @return {None} None
@@ -854,10 +849,11 @@ class App extends Component {
     }
 
     /**
-     * loadNextImage() -
-     * @param {Base64} image
-     * @param {String} fileName
-     * @return {type} None
+     * Method that takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
+     * @param {Base64} image Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {String} fileName Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {String} [numberOfFiles = 0] Number of files left in queue
+     * @return {None} None
      */
     loadNextImage(image, fileName, numberOfFiles = 0) {
         // Loading a file initially from a local workspace can call loadNextImage twice
@@ -936,6 +932,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'PNG IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1042,6 +1045,13 @@ class App extends Component {
                                     .async('base64')
                                     .then((imageData) => {
                                         if (i === 0)
+                                            console.log(
+                                                'TDR IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
+                                        if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
                                                     imageData
@@ -1081,10 +1091,10 @@ class App extends Component {
     }
 
     /**
-     * nextImageClick() - When the operator taps next, we send to the file server to remove the
-     *                  - current image, then when that is complete, we send the image to the command
-     *                  - server. Finally, calling getNextImage to display another image if there is one
-     * @param {Event} Event
+     * When the operator taps next, we send to the file server to remove the
+     * current image, then when that is complete, we send the image to the command
+     * server. Finally, calling getNextImage to display another image if there is one
+     * @param {Event} e The event object being fired which caused your function to be executed
      * @return {None} None
      */
     nextImageClick(e) {
@@ -1362,7 +1372,7 @@ class App extends Component {
     }
 
     /**
-     * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
+     * Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
      * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
      *
      * @return {None} None
@@ -1399,7 +1409,7 @@ class App extends Component {
     }
 
     /**
-     * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
+     * Method that renders the top and side view x-ray images encoded in the MS COCO file
      *
      * @return {None} None
      */
@@ -1464,7 +1474,7 @@ class App extends Component {
     }
 
     /**
-     * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
+     * Method that renders the top and side view x-ray images encoded in the DICOS+TDR file
      *
      * @return {None} None
      */
@@ -1530,10 +1540,8 @@ class App extends Component {
     }
 
     /**
-     * loadCOCOdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * Method that adds detection objects to detection slice after rendering image for the COCO file format
      *
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
      * @return {None} None
      */
     loadCOCOdata() {
@@ -1596,7 +1604,7 @@ class App extends Component {
     }
 
     /**
-     * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * Method that a DICOS+TDR file to pull all the data regarding the threat detections
      *
      * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
      * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
@@ -1752,10 +1760,10 @@ class App extends Component {
     }
 
     /**
-     * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
-     *                   It triggers the rendering of the several annotations associated to the image
+     * Callback method automatically invoked when CornerstoneJS renders a new image.
+     * It triggers the rendering of the several annotations associated to the image
      *
-     * @param  {Event} e Event
+     * @param  {Event} e The event object being fired which caused your function to be executed
      * @return {None} None
      */
     onImageRendered(e) {
@@ -1818,14 +1826,15 @@ class App extends Component {
     }
 
     /**
-     * renderCrosshair - Renders a cross hair element on the target passed in. Which are
-     *                   the imageViewportTop or imageViewportSide
+     * Renders a cross hair element on the target passed in. Which are
+     * the imageViewportTop or imageViewportSide
      *
-     * @param {eventData.canvasContext} context
-     * @param {DOMElement} target
+     * @param {eventData.canvasContext} context Canvas' context, used to render crosshair directly to canvas
+     * @param {DOMElement} target Targeted DOMElement caught via mouse event data
      * @return {None} None
      */
     renderCrosshair(context, target) {
+        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -1867,7 +1876,7 @@ class App extends Component {
     }
 
     /**
-     * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
+     * Simply updates our cornerstone image depending on the number of view-ports.
      *
      * @return {none} None
      */
@@ -1895,9 +1904,9 @@ class App extends Component {
     }
 
     /**
-     * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
+     * Method that renders annotations directly utilizing the canvas' context
      *
-     * @param  {Array<Detection>} data    DICOS+TDR data
+     * @param  {Array<Detection>} data Array of detection data
      * @param  {eventData.canvasContext} context Rendering context
      * @return {None} None
      */
@@ -2005,9 +2014,9 @@ class App extends Component {
     }
 
     /**
-     * renderPolygonMasks - Method that renders the polygon mask associated with a detection
+     * Method that renders the polygon mask associated with a detection
      *
-     * @param  {Array<Number>} coords    polygon mask coordinates
+     * @param  {Array<Number>} coords polygon mask coordinates
      * @param  {Context} context Rendering context
      */
     renderPolygonMasks(coords, context) {
@@ -2018,9 +2027,9 @@ class App extends Component {
     }
 
     /**
-     * onTouchStart - Callback function invoked when a touch event is initiated.
+     * Callback function invoked when a touch event is initiated.
      *
-     * @param {type} e Event data such as touch position and event time stamp.
+     * @param {Event} e Event data such as touch position and event time stamp.
      */
     onTouchStart(e) {
         let startPosition = e.detail.currentPoints.page;
@@ -2030,9 +2039,9 @@ class App extends Component {
     }
 
     /**
-     * onTouchEnd - Callback function invoked when a touch ends.
+     * Callback function invoked when a touch ends.
      *
-     * @param {type} e Event data such as touch position and event time stamp.
+     * @param {Event} e Event data such as touch position and event time stamp.
      */
     onTouchEnd(e) {
         let endPosition = e.detail.currentPoints.page;
@@ -2045,7 +2054,7 @@ class App extends Component {
     }
 
     /**
-     * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
+     * Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
      * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {None} None
@@ -2153,7 +2162,7 @@ class App extends Component {
     }
 
     /**
-     * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
+     * Invoked when user stops dragging mouse or finger on touch device
      *
      * @param {Event} event Mouse drag end event
      * @param {DOMElement}  viewport The Cornerstone Viewport containing the event
@@ -2607,7 +2616,7 @@ class App extends Component {
     }
 
     /**
-     * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
+     * Callback invoked when new polygon mask has been created.
      *
      * @param {Event} event Event triggered when a new polygon is created
      * @param {DOMElement} viewport The Cornerstone Viewport receiving the event
@@ -2727,7 +2736,7 @@ class App extends Component {
     }
 
     /**
-     * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
+     * Unselect the selected detection and hide the context menu.
      *
      * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
      * @return {None}  None
@@ -2748,7 +2757,9 @@ class App extends Component {
     }
 
     /**
-     * hideContextMenu - Hide context menu when mouse is moved.
+     * Hide context menu when mouse is moved.
+     *
+     * @return {None}  None
      */
     hideContextMenu() {
         if (
@@ -2807,10 +2818,10 @@ class App extends Component {
     }
 
     /**
-     * getContextMenuPos - Get position of context menu based on the associated bounding box.
+     * Get position of context menu based on the associated bounding box.
      *
      * @param {DOMElement} viewportInfo viewport info
-     * @param {Array<Number>} coords bounding box' corners' coordinates
+     * @param {Array<Number>} coords bounding box corners' coordinates
      * @returns {Object{Number: x; Number: y}}
      */
     getContextMenuPos(viewportInfo, coords) {
@@ -3317,9 +3328,9 @@ class App extends Component {
     }
 
     /**
-     * onMouseMoved - Captures and saves the {x , y} coordinates of the mouse to the App State
+     * Captures and saves the {x , y} coordinates of the mouse to the App State
      *
-     * @param {Event} event
+     * @param {Event} event The event object being fired which caused your function to be executed
      * @returns {None} None
      */
     onMouseMoved(event) {
@@ -3330,7 +3341,7 @@ class App extends Component {
     }
 
     /**
-     * onMouseWheel - Called when mouse wheel event is fired.
+     * Called when mouse wheel event is fired.
      *
      * @returns {None} None
      */
@@ -3347,9 +3358,8 @@ class App extends Component {
     }
 
     /**
-     * onMouseLeave - Event handler for if the mouse leaves the window. It mainly serves
-     *                as a way to make sure a user does not try to drag a detection out of
-     *                the window.
+     * Event handler for if the mouse leaves the window. It mainly serves as
+     * a way to make sure a user does not try to drag a detection out of the window.
      *
      * @param {Event} event
      * @returns {None} None

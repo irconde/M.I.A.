@@ -74,6 +74,17 @@ const NextButtonContainer = styled.div`
     }
 `;
 
+/**
+ * Component button that allows user to save edited detections and load next files in queue.
+ *
+ * @component
+ *
+ * @param {function} nextImageClick Callback for loading next image
+ * @param {boolean} [collapseBtn=false] Boolean value determining if side menu component is collapsed or not.
+ *
+ *
+ */
+
 const NextButton = ({ nextImageClick, collapseBtn = false }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const selectedDetection = useSelector(getSelectedDetection);
