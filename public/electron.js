@@ -16,6 +16,7 @@ const JSZip = require('jszip');
 const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
+const joinImages = require('join-images');
 
 let mainWindow;
 let files = [];
@@ -338,8 +339,11 @@ const startThumbnailThread = async (path) => {
     createThumbnailsPath(path);
     const filesToGenerate = await filesNeedingThumbnails(path);
     if (filesToGenerate.length > 0) {
-        await parseFilesForThumbnail(filesToGenerate);
-        saveThumbnailDatabase();
+        parseFilesForThumbnail(filesToGenerate)
+            .catch((error) => console.log(error))
+            .finally(() => {
+                saveThumbnailDatabase();
+            });
     }
 };
 
@@ -402,10 +406,15 @@ const parseFilesForThumbnail = async (files) => {
             listOfPromises.push(parseThumbnail(file));
         });
         const promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then(() => {
-            console.log('All resolved');
-            resolve();
-        });
+        promiseOfList
+            .then(() => {
+                resolve();
+            })
+            .catch((error) => {
+                console.log('parse finish error');
+                console.log(error);
+                reject();
+            });
     });
     return result;
 };
@@ -433,8 +442,8 @@ const parseThumbnail = async (filePath) => {
                                 result.image.stack.forEach((stack) => {
                                     let thumbnailSavePath =
                                         process.platform === 'win32'
-                                            ? `${thumbnailPath}\\${fileName}_thumbnail_${stack.$.view}.png`
-                                            : `${thumbnailPath}/${fileName}_thumbnail_${stack.$.view}.png`;
+                                            ? `${thumbnailPath}\\${fileName}_thumbnail.png`
+                                            : `${thumbnailPath}/${fileName}_thumbnail.png`;
                                     const dataType = validateImageExtension(
                                         stack.layer[0].$.src
                                     );
@@ -455,6 +464,9 @@ const parseThumbnail = async (filePath) => {
                                                         dataType,
                                                         pixelData: imageData,
                                                     });
+                                                })
+                                                .catch((error) => {
+                                                    console.log(error);
                                                 })
                                         );
                                     } else if (
@@ -480,52 +492,354 @@ const parseThumbnail = async (filePath) => {
                                                         height: dicosImageData.height,
                                                     });
                                                 })
+                                                .catch((error) => {
+                                                    console.log(error);
+                                                })
                                         );
                                     }
                                 });
                                 const promiseOfNewThumbnailsList = Promise.all(
                                     listOfNewThumbnailPromises
                                 );
-                                promiseOfNewThumbnailsList.then(() => {
-                                    newThumbnail.forEach((thumbnail) => {
-                                        if (
-                                            thumbnail.dataType.type ===
-                                            Constants.Settings.ANNOTATIONS.COCO
-                                        ) {
-                                            sharp(thumbnail.pixelData)
-                                                .resize(96)
-                                                .toFile(
-                                                    thumbnail.thumbnailSavePath
-                                                );
-                                        } else if (
-                                            thumbnail.dataType.type ===
-                                            Constants.Settings.ANNOTATIONS.TDR
-                                        ) {
-                                            sharp(thumbnail.pixelData, {
-                                                raw: {
-                                                    width: thumbnail.width,
-                                                    height: thumbnail.height,
-                                                    channels: 4,
-                                                },
-                                            })
-                                                .resize(96)
-                                                .toFile(
-                                                    thumbnail.thumbnailSavePath
-                                                );
+                                promiseOfNewThumbnailsList
+                                    .then(() => {
+                                        if (newThumbnail.length > 0) {
+                                            let topIndex, sideIndex;
+                                            if (newThumbnail.length === 1) {
+                                                topIndex = 0;
+                                            } else if (
+                                                newThumbnail.length > 1
+                                            ) {
+                                                topIndex =
+                                                    newThumbnail[0].view ===
+                                                    Constants.Viewport.TOP
+                                                        ? 0
+                                                        : 1;
+                                                sideIndex =
+                                                    newThumbnail[1].view ===
+                                                    Constants.Viewport.SIDE
+                                                        ? 1
+                                                        : 0;
+                                            }
+                                            if (
+                                                newThumbnail[0].dataType
+                                                    .type ===
+                                                Constants.Settings.ANNOTATIONS
+                                                    .TDR
+                                            ) {
+                                                //
+
+                                                if (newThumbnail.length > 1) {
+                                                    //
+                                                    sharp(
+                                                        newThumbnail[topIndex]
+                                                            .pixelData,
+                                                        {
+                                                            raw: {
+                                                                width: newThumbnail[
+                                                                    topIndex
+                                                                ].width,
+                                                                height: newThumbnail[
+                                                                    topIndex
+                                                                ].height,
+                                                                channels: 4,
+                                                            },
+                                                        }
+                                                    )
+                                                        .resize(96)
+                                                        .toBuffer()
+                                                        .then((firstData) => {
+                                                            sharp(
+                                                                newThumbnail[
+                                                                    sideIndex
+                                                                ].pixelData,
+                                                                {
+                                                                    raw: {
+                                                                        width: newThumbnail[
+                                                                            sideIndex
+                                                                        ].width,
+                                                                        height: newThumbnail[
+                                                                            sideIndex
+                                                                        ]
+                                                                            .height,
+                                                                        channels: 4,
+                                                                    },
+                                                                }
+                                                            )
+                                                                .resize(96)
+                                                                .toBuffer()
+                                                                .then(
+                                                                    (
+                                                                        secondData
+                                                                    ) => {
+                                                                        joinImages
+                                                                            .joinImages(
+                                                                                [
+                                                                                    firstData,
+                                                                                    secondData,
+                                                                                ],
+                                                                                {
+                                                                                    direction:
+                                                                                        'horizontal',
+                                                                                }
+                                                                            )
+                                                                            .then(
+                                                                                (
+                                                                                    img
+                                                                                ) => {
+                                                                                    img.toFile(
+                                                                                        newThumbnail[0]
+                                                                                            .thumbnailSavePath
+                                                                                    )
+                                                                                        .then(
+                                                                                            () => {
+                                                                                                thumbnails.push(
+                                                                                                    {
+                                                                                                        fileName,
+                                                                                                        thumbnailPath:
+                                                                                                            newThumbnail[0]
+                                                                                                                .thumbnailSavePath,
+                                                                                                    }
+                                                                                                );
+                                                                                                resolve();
+                                                                                            }
+                                                                                        )
+                                                                                        .catch(
+                                                                                            (
+                                                                                                error
+                                                                                            ) => {
+                                                                                                console.log(
+                                                                                                    'Error at saving: '
+                                                                                                );
+                                                                                                console.log(
+                                                                                                    error
+                                                                                                );
+                                                                                                reject(
+                                                                                                    error
+                                                                                                );
+                                                                                            }
+                                                                                        );
+                                                                                }
+                                                                            )
+                                                                            .catch(
+                                                                                (
+                                                                                    error
+                                                                                ) => {
+                                                                                    console.log(
+                                                                                        'Error at joining images'
+                                                                                    );
+                                                                                    console.log(
+                                                                                        error
+                                                                                    );
+                                                                                    reject(
+                                                                                        error
+                                                                                    );
+                                                                                }
+                                                                            );
+                                                                    }
+                                                                )
+                                                                .catch(
+                                                                    (error) => {
+                                                                        console.log(
+                                                                            error
+                                                                        );
+                                                                        reject(
+                                                                            error
+                                                                        );
+                                                                    }
+                                                                );
+                                                        })
+                                                        .catch((error) => {
+                                                            console.log(error);
+                                                            reject(error);
+                                                        });
+                                                } else if (
+                                                    newThumbnail.length === 1
+                                                ) {
+                                                    sharp(
+                                                        newThumbnail[0]
+                                                            .pixelData,
+                                                        {
+                                                            raw: {
+                                                                width: newThumbnail[0]
+                                                                    .width,
+                                                                height: newThumbnail[0]
+                                                                    .height,
+                                                                channels: 4,
+                                                            },
+                                                        }
+                                                    )
+                                                        .resize(96)
+                                                        .toFile(
+                                                            newThumbnail[0]
+                                                                .thumbnailSavePath
+                                                        )
+                                                        .then(() => {
+                                                            console.log('res');
+                                                            thumbnails.push({
+                                                                fileName,
+                                                                thumbnailPath:
+                                                                    newThumbnail[0]
+                                                                        .thumbnailSavePath,
+                                                            });
+                                                            resolve();
+                                                        })
+                                                        .catch((error) => {
+                                                            console.log('rej');
+                                                            console.log(error);
+                                                            reject(error);
+                                                        });
+                                                }
+                                            } else if (
+                                                newThumbnail[0].dataType
+                                                    .type ===
+                                                Constants.Settings.ANNOTATIONS
+                                                    .COCO
+                                            ) {
+                                                if (newThumbnail.length > 1) {
+                                                    sharp(
+                                                        newThumbnail[topIndex]
+                                                            .pixelData
+                                                    )
+                                                        .resize(96)
+                                                        .toBuffer()
+                                                        .then((firstData) => {
+                                                            sharp(
+                                                                newThumbnail[
+                                                                    sideIndex
+                                                                ].pixelData
+                                                            )
+                                                                .resize(96)
+                                                                .toBuffer()
+                                                                .then(
+                                                                    (
+                                                                        secondData
+                                                                    ) => {
+                                                                        joinImages
+                                                                            .joinImages(
+                                                                                [
+                                                                                    firstData,
+                                                                                    secondData,
+                                                                                ],
+                                                                                {
+                                                                                    direction:
+                                                                                        'horizontal',
+                                                                                }
+                                                                            )
+                                                                            .then(
+                                                                                (
+                                                                                    img
+                                                                                ) => {
+                                                                                    img.toFile(
+                                                                                        newThumbnail[0]
+                                                                                            .thumbnailSavePath
+                                                                                    )
+                                                                                        .then(
+                                                                                            () => {
+                                                                                                thumbnails.push(
+                                                                                                    {
+                                                                                                        fileName,
+                                                                                                        thumbnailPath:
+                                                                                                            newThumbnail[0]
+                                                                                                                .thumbnailSavePath,
+                                                                                                    }
+                                                                                                );
+                                                                                                resolve();
+                                                                                            }
+                                                                                        )
+                                                                                        .catch(
+                                                                                            (
+                                                                                                error
+                                                                                            ) => {
+                                                                                                console.log(
+                                                                                                    error
+                                                                                                );
+                                                                                                reject(
+                                                                                                    error
+                                                                                                );
+                                                                                            }
+                                                                                        );
+                                                                                }
+                                                                            )
+                                                                            .catch(
+                                                                                (
+                                                                                    error
+                                                                                ) => {
+                                                                                    console.log(
+                                                                                        error
+                                                                                    );
+                                                                                    reject(
+                                                                                        error
+                                                                                    );
+                                                                                }
+                                                                            );
+                                                                    }
+                                                                )
+                                                                .catch(
+                                                                    (error) => {
+                                                                        console.log(
+                                                                            error
+                                                                        );
+                                                                        reject(
+                                                                            error
+                                                                        );
+                                                                    }
+                                                                );
+                                                        })
+                                                        .catch((error) => {
+                                                            console.log(error);
+                                                            reject(error);
+                                                        });
+                                                } else if (
+                                                    newThumbnail.length === 1
+                                                ) {
+                                                    sharp(
+                                                        newThumbnail[0]
+                                                            .pixelData
+                                                    )
+                                                        .resize(96)
+                                                        .toFile(
+                                                            newThumbnail[0]
+                                                                .thumbnailSavePath
+                                                        )
+                                                        .then(() => {
+                                                            thumbnails.push({
+                                                                fileName,
+                                                                thumbnailPath:
+                                                                    newThumbnail[0]
+                                                                        .thumbnailSavePath,
+                                                            });
+                                                            resolve();
+                                                        })
+                                                        .catch((error) => {
+                                                            console.log(error);
+                                                            reject(error);
+                                                        });
+                                                }
+                                            }
+                                        } else {
+                                            reject();
                                         }
-                                        thumbnails.push({
-                                            fileName,
-                                            thumbnailPath:
-                                                thumbnail.thumbnailSavePath,
-                                        });
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                        reject(error);
                                     });
-                                    resolve();
-                                });
-                            } else reject(error);
+                            } else {
+                                console.log(error);
+                                reject(error);
+                            }
                         });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject(error);
                     });
             })
-            .catch((error) => reject(error));
+            .catch((error) => {
+                console.log(error);
+                reject(error);
+            });
     });
     return result;
 };
