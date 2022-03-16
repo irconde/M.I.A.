@@ -19,6 +19,14 @@ if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
 
+/**
+ * Component for ?.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: thumbnails (Array of thumbnails?), getSpecificFileFromLocalDirectory (?)
+ *
+ */
 function LazyImageMenu(props) {
     const dispatch = useDispatch();
     ipcRenderer.on(constants.Channels.thumbnailStatus, (event, status) => {

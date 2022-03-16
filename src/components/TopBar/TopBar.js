@@ -16,6 +16,14 @@ import OpenIcon from '../../icons/OpenIcon';
 import isElectron from 'is-electron';
 import LazyMenuToggleIcon from '../../icons/LazyMenuToggleIcon';
 
+/**
+ * Component for GUI's top bar display.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: connectToCommandServer (func), cornerstone: (Object), getFileFromLocal: (func)
+ *
+ */
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const remoteOrLocal = useSelector(getRemoteOrLocal);

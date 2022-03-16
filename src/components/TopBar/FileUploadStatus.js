@@ -5,6 +5,16 @@ import { ReactComponent as DownloadUploadIcon } from '../../icons/ic_traffic_dow
 import { ReactComponent as NoTransmissionIcon } from '../../icons/ic_traffic_no_transmission.svg';
 import PropTypes from 'prop-types';
 
+/**
+ * Component for displaying file upload status.
+ *
+ * @component
+ *
+ * @param {boolean} isUpload Boolean value determining if GUI is uploading data
+ * @param {boolean} isDownload Boolean value determining if GUI is downloading data
+ * @param {Object} styles CSS stylization for icons
+ *
+ */
 const FileUploadStatus = ({ isUpload, isDownload, styles }) => {
     const isDownloadUpload = isUpload && isDownload;
     const isNoTransmission = !isUpload && !isDownload;

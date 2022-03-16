@@ -10,7 +10,7 @@ const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
     /**
-     * loadImage - Custom cornerstone image loader; Takes arrayBuffer provided to utilize arrayBufferToImage from
+     * Custom cornerstone image loader; Takes arrayBuffer provided to utilize arrayBufferToImage from
      * CornerstoneJS's web image loader library. Returns a promise that resolves a Cornerstone Image Object.
      *
      * @param {String} imageId
@@ -34,18 +34,18 @@ export default class Utils {
     }
 
     /**
-     * @static decimalToPercentage - Method that converts a decimal value into a percentage
+     * @static Method that converts a decimal value into a percentage
      *
-     * @param  {type} num Float value <= 1.0 with common decimal format
-     * @return {type}     int value that represents the percentage value equivalent to the given input float value
+     * @param  {Float} num Float value <= 1.0 with common decimal format
+     * @return {Integer} represents the percentage value equivalent to the given input float value
      */
     static decimalToPercentage(num) {
         return Math.floor(num * 100);
     }
 
     /**
-     * hexToRgb - Take in a string hex value such as '#F7B500' and will return an object containing
-     *            the red (r), green (g), and blue (b) properties with its correct values.
+     * Take in a string hex value such as '#F7B500' and will return an object containing
+     * the red (r), green (g), and blue (b) properties with its correct values.
      *
      * @param {String} hex
      */
@@ -74,24 +74,26 @@ export default class Utils {
     }
 
     /**
-     * @static formatDetectionLabel - Method that creates a string to be used as
+     * Method that creates a string to be used as
      * detection label, providing information regarding both the type of threat and the associated confidence level
      *
-     * @param  {type} objectClass     string value that indicates the threat type
-     * @param  {type} confidenceLevel int value that indicates the confidence level in the form of a percentage
-     * @return {type}                 resulting string to be used as detection label
+     * @static
+     * @param  {string} objectClass string value that indicates the threat type
+     * @param  {Integer} confidenceLevel int value that indicates the confidence level in the form of a percentage
+     * @return {string}resulting string to be used as detection label
      */
     static formatDetectionLabel(objectClass, confidenceLevel) {
         return objectClass.toUpperCase() + ' · ' + confidenceLevel + '%';
     }
 
     /**
-     * @static getTextLabelSize - Method that provides the size of a label containing the given string
+     * Method that provides the size of a label containing the given string
      *
-     * @param  {type} context   2d canvas context
-     * @param  {type} labelText string value to be displayed inside the label
-     * @param  {type} padding   blank space surrounding the text within the label
-     * @return {type}           dictionary with two components: width and height
+     * @static
+     * @param  {Context} context   2d canvas context
+     * @param  {string} labelText string value to be displayed inside the label
+     * @param  {string} padding   blank space surrounding the text within the label
+     * @returns {Dictionary} dictionary with two components: width and height
      */
     static getTextLabelSize(context, labelText, padding) {
         const textSize = context.measureText(labelText);
@@ -104,9 +106,9 @@ export default class Utils {
     }
 
     /**
-     * getDetectionType - Utility method that determines a detection's type according to constants.detectionType.
+     * Utility method that determines a detection's type according to constants.detectionType.
      *
-     * @param {Object} detection
+     * @param {Object} detection Detection object
      * @return {constants.detectionType} type
      */
     static getDetectionType(detection) {
@@ -126,11 +128,12 @@ export default class Utils {
     }
 
     /**
-     * @static pointInRect - Method that indicates whether a given point is inside a rectangle or not
+     * Method that indicates whether a given point is inside a rectangle or not
      *
-     * @param  {type} point 2D point with two coordinates, x and y
-     * @param  {type} rect  rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
-     * @return {type}       boolean value: true if teh point is inside the rectangle; false otherwise
+     * @static
+     * @param  {Array<Integer>} point 2D point with two coordinates, x and y
+     * @param  {Array<Float>} rect  rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+     * @returns {boolean}       boolean value: true if teh point is inside the rectangle; false otherwise
      */
     static pointInRect(point, rect) {
         return (
@@ -142,11 +145,12 @@ export default class Utils {
     }
 
     /**
-     * @static rectAreEquals - Method that indicates whether the two given rectangles are the equals or not
+     * Method that indicates whether the two given rectangles are the equals or not
      *
+     * @static
      * @return {boolean} boolean value: true if the corner points of the two rectangles have the same coordinates. False, otherwise.
-     * @param {array} rectA rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
-     * @param {array} rectB rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+     * @param {Array<Float>} rectA rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+     * @param {Array<Float>} rectB rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
      */
     static rectAreEquals(rectA, rectB) {
         for (let index = 0; index < rectA.length; index++) {
@@ -158,7 +162,7 @@ export default class Utils {
     }
 
     /**
-     * buildIntervals - Builder function to create the needed ranges to associate a 16 bit value to an 8 bit value given certain ranges
+     * Builder function to create the needed ranges to associate a 16 bit value to an 8 bit value given certain ranges
      *
      * @returns {Array<{min: Number, max: Number}>} Array of objects with key values of min and max
      */
@@ -171,12 +175,12 @@ export default class Utils {
     }
 
     /**
-     * findGrayValue - Takes in a 16 bit gray scale value between 0 - 65535 along with the build intervals from this.buildIntervals()
-     *                 It returns an 8 bit gray scale value between 0 - 255. There is lose of data but the image retains most of it's quality
+     * Takes in a 16 bit gray scale value between 0 - 65535 along with the build intervals from this.buildIntervals()
+     * It returns an 8 bit gray scale value between 0 - 255. There is lose of data but the image retains most of it's quality
      *
-     * @param {Number} greyScale
+     * @param {Integer} greyScale
      * @param {Array<{min: Number, max: Number}>} intervals
-     * @returns {Number} 8 Bit Color in range of 0-255
+     * @returns {Integer} 8 Bit Color in range of 0-255
      */
     static findGrayValue(greyScale, intervals) {
         let result;
@@ -190,11 +194,11 @@ export default class Utils {
     }
 
     /**
-     * b64toBlob - Converts binary64 encoding to a blob to display
+     * Converts binary64 encoding to a blob to display
      *
-     * @param  {type} b64Data Binary string
-     * @param  {type} contentType The MIMI type, image/dcs
-     * @return {type}               blob
+     * @param  {string} b64Data Binary string
+     * @param  {string} contentType The MIMI type, image/dcs
+     * @return {Blob} Blob data
      */
     static b64toBlob = (
         b64Data,
@@ -221,10 +225,10 @@ export default class Utils {
     };
 
     /**
-     * base64ToArrayBuffer - Converts the base 64 to an arraybuffer
+     * Converts the base 64 to an arraybuffer
      *
      * @param {string} base64 Binary 64 string to convert to ArrayBuffer
-     * @return {type} ArrayBuffer
+     * @return {ArrayBuffer} Converted array buffer data
      */
     static base64ToArrayBuffer(base64) {
         const binary_string = window.atob(base64);
@@ -237,8 +241,8 @@ export default class Utils {
     }
 
     /**
-     * blobToBase64 - Converts a blob object to a base 64 string.
-     * @param {Blob} blob
+     * Converts a blob object to a base 64 string.
+     * @param {Blob} blob Blob object
      * @returns {Promise} Promise that resolves once the blob has been converted to base64, or rejects on error.
      */
     static async blobToBase64(blob) {
@@ -256,6 +260,9 @@ export default class Utils {
         });
     }
 
+    /**
+     * Edits DOMElement classes based on single or dual viewport settings (Affects CSS attributes)
+     */
     static changeViewport(singleViewport) {
         let viewportTop = document.getElementById('dicomImageLeft');
         let viewportSide = document.getElementById('dicomImageRight');
@@ -291,14 +298,14 @@ export default class Utils {
     }
 
     /**
-     * calculateViewportDimensions - Performs the calculations for the widths and position of viewports.
-     *                         It will use the cornerstone object to perform the resize on the canvas elements
+     * Performs the calculations for the widths and position of viewports.
+     * It will use the cornerstone object to perform the resize on the canvas elements
      *
-     * @param {Object} cornerstone
-     * @param {Boolean} singleViewport
-     * @param {Boolean} collapsedSideMenu
-     * @param {Boolean} collapsedLazyMenu
-     * @param {Boolean} desktopMode
+     * @param {Object} cornerstone Main cornerstone object
+     * @param {Boolean} singleViewport True if single viewport
+     * @param {Boolean} collapsedSideMenu True if side menu is collapsed
+     * @param {Boolean} collapsedLazyMenu True if lazy menu is collapsed
+     * @param {Boolean} desktopMode True if in desktop mode
      *
      */
     static calculateViewportDimensions(
@@ -429,11 +436,11 @@ export default class Utils {
     }
 
     /**
-     * getDataFromViewport - Get data required for validation buttons' proper rendering
+     * Get data required for validation buttons' proper rendering
      *
-     * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
-     * @param viewportName {string} - Viewport's name
-     * @param DOM {Document} - HTML DOM
+     * @param {string} viewportName Viewport's name
+     * @param {Document} DOM HTML DOM
+     * @returns {Dictionary} viewport name and offset
      */
     static getDataFromViewport(viewportName, DOM) {
         let viewportInfo = {};
@@ -463,10 +470,10 @@ export default class Utils {
     }
 
     /**
-     * eventToViewportInfo - Get data required for validation buttons' proper rendering from mouse event
+     * Get data required for validation buttons' proper rendering from mouse event
      *
-     * @return {dictionary} viewportInfo - viewport-related data: viewport name and offset
-     * @param e {MouseEvent} - Mouse event
+     * @param {Event} e - Mouse event data
+     * @returns {Dictionary} viewport name and offset
      */
     static eventToViewportInfo(e) {
         let viewportInfo = {};
@@ -516,8 +523,7 @@ export default class Utils {
     }
 
     /**
-     * usePrevious - For use in functional components to compare a current value with the next value in a
-     *               useEffect in the functional component.
+     * For use in functional components to compare a current value with the next value in a useEffect in the functional component.
      * @param {Any} value - Any type allowed
      * @returns {Ref.current}
      */
@@ -532,7 +538,7 @@ export default class Utils {
     /**
      * Determines if the given component via useRef() is visible on the users screen or not
      * @param {React.MutableRefObject} ref
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     static useOnScreen = (ref) => {
         const [isIntersecting, setIntersecting] = useState(false);
@@ -550,11 +556,8 @@ export default class Utils {
     };
 
     /**
-     * getScreenSize - Simply retrieves the device's screen size that is accessing the application.
-     *
-     * @param {none} none
-     * @returns {screenSize} screenSize - can be accessed via
-     *                                    const [width, height] = Utils.getUserScreenSize()
+     * Simply retrieves the device's screen size that is accessing the application
+     * @returns {Array<Integer>} screenSize - [width, height] values representing the device's screen size
      */
     static getScreenSize() {
         const [screenSize, setScreenSize] = useState([0, 0]);
@@ -572,8 +575,8 @@ export default class Utils {
     }
 
     /**
-     * deviceType - Determines the device type based on the navigator userAgent
-     * @params {None}
+     * Determines the device type based on the navigator userAgent
+     *
      * @returns {constants.DEVICE_TYPE}
      */
     static deviceType = () => {
@@ -591,21 +594,20 @@ export default class Utils {
     };
 
     /**
-     * inRange - Checks if the current passed in value is inside the specified
-     *           min and max range.
+     * Checks if the current passed in value is inside the specified min and max range.
      *
-     * @param {number} value - Value to check
-     * @param {number} min - Minimum allowed value
-     * @param {number} max - Maximum allowed value
+     * @param {Integer} value Value to check
+     * @param {Integer} min Minimum allowed value
+     * @param {Integer} max Maximum allowed value
      */
     static inRange(value, min, max) {
         return (value - min) * (value - max) <= 0;
     }
 
     /**
-     * calculateZoomLevel - Computes zoom level for CornerstoneJS viewport based on the viewport's width.
+     * Computes zoom level for CornerstoneJS viewport based on the viewport's width.
      *
-     * @param {number} width - Viewport's width
+     * @param {Integer} width Viewport's width
      */
     static calculateZoomLevel(width) {
         return (
@@ -615,10 +617,10 @@ export default class Utils {
     }
 
     /**
-     * truncateString - Truncate a given string.
+     * Truncate a given string.
      *
-     * @param {string} originalString - original string value
-     * @param {number} numberOfChars - target maximum number of chars in string
+     * @param {string} originalString original string value
+     * @param {Integer} numberOfChars target maximum number of chars in string
      */
     static truncateString(originalString, numberOfChars) {
         if (originalString.length <= numberOfChars) return originalString;
@@ -626,9 +628,9 @@ export default class Utils {
     }
 
     /**
-     * recalculateRectangle - Recalculates the four corners of a rectangle based on the coordinates of the corner being moved
+     * Recalculates the four corners of a rectangle based on the coordinates of the corner being moved
      *
-     * @param {dictionary} cornerList - rectangle corners' coordinates
+     * @param {Dictionary} cornerList rectangle corners' coordinates
      */
     static recalculateRectangle(cornerList) {
         const cornerKeys = Object.keys(cornerList);
@@ -664,9 +666,9 @@ export default class Utils {
     }
 
     /**
-     * polygonDataToCoordArray - Convert list of handles into an array of float values
+     * Convert list of handles into an array of float values
      *
-     * @param {Array<Number>} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @param {Array<Integer>} polygonData list of handles, i.e., the vertices, of a polygon
      */
     static polygonDataToCoordArray(polygonData) {
         let points = [];
@@ -678,9 +680,9 @@ export default class Utils {
     }
 
     /**
-     * coordArrayToPolygonData - Convert list of handles into an array of float values
+     * Convert list of handles into an array of float values
      *
-     * @param {Array<Number>} coordArray - list of handles, i.e., the vertices, of a polygon (x_1, y_1, x_2, y_2, ...x_n, y_n )
+     * @param {Array<Integer>} coordArray list of handles, i.e., the vertices, of a polygon (x_1, y_1, x_2, y_2, ...x_n, y_n )
      */
     static coordArrayToPolygonData(coordArray) {
         let data = {};
@@ -695,13 +697,14 @@ export default class Utils {
     }
 
     /**
-     * polygonDataToXYArray - Convert list of handles into an array of objects with x, y float values
-     *                        It will as well, calculate anchor points in percentage values of each point
-     *                        corresponding to each wall of the bounding box(top/bottom/left/right). Which
-     *                        represents its position as a percentage value inside the bounding box.
+     * Convert list of handles into an array of objects with x, y float values
+     * It will as well, calculate anchor points in percentage values of each point
+     * corresponding to each wall of the bounding box(top/bottom/left/right). Which
+     * represents its position as a percentage value inside the bounding box.
      *
-     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
+     * @param {Array<Float>} polygonData list of handles, i.e., the vertices, of a polygon
+     * @param {Array<Integer>} boundingBox list of bounding box coords
+     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -727,9 +730,9 @@ export default class Utils {
     }
 
     /**
-     * calculateBoundingBox - Calculate the coordinates of the bounding box for a given polygon
+     * Calculate the coordinates of the bounding box for a given polygon
      *
-     * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @param {Array<Float>} polygonData list of handles, i.e., the vertices, of a polygon
      */
     static calculateBoundingBox(polygonData) {
         let x_values = [];
@@ -748,9 +751,9 @@ export default class Utils {
     /**
      * calculateMaskAnchorPoints - Will recalculate the anchor points of a polygon mask
      *
-     * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
+     * @param {Array<Integer>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
+     * @param {{x: Float, y: Float, anchor: {top: Float, bottom: Float, left: Float, right: Float}}} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {{x: Float, y: Float, anchor: {top: Float, bottom: Float, left: Float, right: Float}}}
      */
     static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -765,11 +768,11 @@ export default class Utils {
     }
 
     /**
-     * calculatePolygonMask - Calculate the coordinates of the bounding box for a given polygon
+     * Calculate the coordinates of the bounding box for a given polygon
      *
-     * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} - newPolygonData with updated points based on anchor points
+     * @param {Array<Number>} boundingBox Bounding box data formatted as [x_start, y_start, x_end, y_end]
+     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData list of handles, i.e., the vertices, of a polygon
+     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>} newPolygonData with updated points based on anchor points
      */
     static calculatePolygonMask(boundingBox, polygonData) {
         let newPolygonData = cloneDeep(polygonData);
@@ -799,10 +802,10 @@ export default class Utils {
     }
 
     /**
-     * renderPolygonMasks - Will render the polygon mask coordinates for the passed in context
+     * Will render the polygon mask coordinates for the passed in context
      *
-     * @param {eventData.context} context
-     * @param {Array<{x, y}>} polygonCoords
+     * @param {eventData.context} context Canvas' context
+     * @param {Array<{x, y}>} polygonCoords Array of polygon mask coordinates
      */
     static renderPolygonMasks(context, polygonCoords) {
         let index = 0;
@@ -816,9 +819,9 @@ export default class Utils {
     }
 
     /**
-     * renderBinaryMasks - Method that renders the binary mask associated with a detection
+     * Method that renders the binary mask associated with a detection
      *
-     * @param  {Array<Array<Number>>} data DICOS+TDR data
+     * @param  {Array<Array<Integer>>} data DICOS+TDR data
      * @param  {eventData.canvasContext} context Rendering context
      * @return {None} None
      */
@@ -843,11 +846,11 @@ export default class Utils {
     }
 
     /**
-     * getDistanceBetween - calculates the Euclidean distance between two 2D points.
+     * Calculates the Euclidean distance between two 2D points.
      *
-     * @param {dictionary} position1 - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} position2 - a dictionary of the form {x:value, y:value}
-     * @return {number} - the Euclidean distance between position1 and position2
+     * @param {Dictionary} position1 a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} position2 a dictionary of the form {x:value, y:value}
+     * @return {Integer}  Euclidean distance between position1 and position2
      */
     static getDistanceBetween(position1, position2) {
         return Math.sqrt(
@@ -857,12 +860,12 @@ export default class Utils {
     }
 
     /**
-     * onSegment - Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr'
+     * Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr'
      *
-     * @param {dictionary} p - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} q - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} r - a dictionary of the form {x:value, y:value}
-     * @return {boolean} - is point q on line segment 'pr'
+     * @param {Dictionary} p a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} q a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} r a dictionary of the form {x:value, y:value}
+     * @return {boolean} is point q on line segment 'pr'
      */
     static onSegment(p, q, r) {
         if (
@@ -877,12 +880,12 @@ export default class Utils {
     }
 
     /**
-     * orientation - To find orientation of ordered triplet (p, q, r).
+     * Finds orientation of ordered triplet (p, q, r).
      *
-     * @param {dictionary} p - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} q - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} r - a dictionary of the form {x:value, y:value}
-     * @return {number} -  The function returns following values: 0 --> p, q and r are colinear, 1 --> Clockwise, 2 --> Counterclockwise
+     * @param {Dictionary} p a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} q a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} r a dictionary of the form {x:value, y:value}
+     * @return {Integer} returns following values: 0 --> p, q and r are colinear, 1 --> Clockwise, 2 --> Counterclockwise
      */
     static orientation(p, q, r) {
         let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
@@ -894,12 +897,12 @@ export default class Utils {
     }
 
     /**
-     * doIntersect - The function that returns true if line segment 'p1q1' and 'p2q2' intersect.
+     * Returns true if line segment 'p1q1' and 'p2q2' intersect.
      *
-     * @param {dictionary} p1 - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} q1 - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} p2 - a dictionary of the form {x:value, y:value}
-     * @param {dictionary} q2 - a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} p1 - a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} q1 - a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} p2 - a dictionary of the form {x:value, y:value}
+     * @param {Dictionary} q2 - a dictionary of the form {x:value, y:value}
      * @return {boolean} -  returns true if line segment 'p1q1' and 'p2q2' intersect
      */
     static doIntersect(p1, q1, p2, q2) {
@@ -941,11 +944,11 @@ export default class Utils {
     }
 
     /**
-     * isInside - The function that returns true if line segment 'p1q1' and 'p2q2' intersect.
+     * Returns true if line segment 'p1q1' and 'p2q2' intersect.
      *
-     * @param {Array<{x, y}>} polygon - a dictionary of the form {x:value, y:value}
-     * @param {Number} n - number of verticies in polygon array
-     * @param {dictionary} p - a dictionary of the form {x:value, y:value}
+     * @param {Array<{x, y}>} polygon a dictionary of the form {x:value, y:value}
+     * @param {Integer} n number of verticies in polygon array
+     * @param {Dictionary} p a dictionary of the form {x:value, y:value}
      * @return {boolean} -  Returns true if the point p lies inside the polygon[] with n vertices
      */
     static isInside(polygon, n, p) {
@@ -982,9 +985,9 @@ export default class Utils {
     }
 
     /**
-     * polygonToBinaryMask - Method that converts the polygon mask associated with a detection to its binary mask counterpart
+     * Method that converts the polygon mask associated with a detection to its binary mask counterpart
      *
-     * @param  {Array<Number>} coords    polygon mask coordinates
+     * @param  {Array<Integer>} coords polygon mask coordinates
      *
      */
     static polygonToBinaryMask(coords) {
