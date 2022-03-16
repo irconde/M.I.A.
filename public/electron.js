@@ -588,21 +588,47 @@ const parseThumbnail = async (filePath) => {
                                                                                 (
                                                                                     img
                                                                                 ) => {
-                                                                                    img.toFile(
-                                                                                        newThumbnail[0]
-                                                                                            .thumbnailSavePath
-                                                                                    )
+                                                                                    img.png()
+                                                                                        .toBuffer()
                                                                                         .then(
-                                                                                            () => {
-                                                                                                thumbnails.push(
-                                                                                                    {
-                                                                                                        fileName,
-                                                                                                        thumbnailPath:
-                                                                                                            newThumbnail[0]
-                                                                                                                .thumbnailSavePath,
-                                                                                                    }
-                                                                                                );
-                                                                                                resolve();
+                                                                                            (
+                                                                                                data
+                                                                                            ) => {
+                                                                                                sharp(
+                                                                                                    data
+                                                                                                )
+                                                                                                    .resize(
+                                                                                                        96
+                                                                                                    )
+                                                                                                    .toFile(
+                                                                                                        newThumbnail[0]
+                                                                                                            .thumbnailSavePath
+                                                                                                    )
+                                                                                                    .then(
+                                                                                                        () => {
+                                                                                                            thumbnails.push(
+                                                                                                                {
+                                                                                                                    fileName,
+                                                                                                                    thumbnailPath:
+                                                                                                                        newThumbnail[0]
+                                                                                                                            .thumbnailSavePath,
+                                                                                                                }
+                                                                                                            );
+                                                                                                            resolve();
+                                                                                                        }
+                                                                                                    )
+                                                                                                    .catch(
+                                                                                                        (
+                                                                                                            error
+                                                                                                        ) => {
+                                                                                                            console.log(
+                                                                                                                error
+                                                                                                            );
+                                                                                                            reject(
+                                                                                                                error
+                                                                                                            );
+                                                                                                        }
+                                                                                                    );
                                                                                             }
                                                                                         )
                                                                                         .catch(
@@ -723,21 +749,47 @@ const parseThumbnail = async (filePath) => {
                                                                                 (
                                                                                     img
                                                                                 ) => {
-                                                                                    img.toFile(
-                                                                                        newThumbnail[0]
-                                                                                            .thumbnailSavePath
-                                                                                    )
+                                                                                    img.png()
+                                                                                        .toBuffer()
                                                                                         .then(
-                                                                                            () => {
-                                                                                                thumbnails.push(
-                                                                                                    {
-                                                                                                        fileName,
-                                                                                                        thumbnailPath:
-                                                                                                            newThumbnail[0]
-                                                                                                                .thumbnailSavePath,
-                                                                                                    }
-                                                                                                );
-                                                                                                resolve();
+                                                                                            (
+                                                                                                data
+                                                                                            ) => {
+                                                                                                sharp(
+                                                                                                    data
+                                                                                                )
+                                                                                                    .resize(
+                                                                                                        96
+                                                                                                    )
+                                                                                                    .toFile(
+                                                                                                        newThumbnail[0]
+                                                                                                            .thumbnailSavePath
+                                                                                                    )
+                                                                                                    .then(
+                                                                                                        () => {
+                                                                                                            thumbnails.push(
+                                                                                                                {
+                                                                                                                    fileName,
+                                                                                                                    thumbnailPath:
+                                                                                                                        newThumbnail[0]
+                                                                                                                            .thumbnailSavePath,
+                                                                                                                }
+                                                                                                            );
+                                                                                                            resolve();
+                                                                                                        }
+                                                                                                    )
+                                                                                                    .catch(
+                                                                                                        (
+                                                                                                            error
+                                                                                                        ) => {
+                                                                                                            console.log(
+                                                                                                                error
+                                                                                                            );
+                                                                                                            reject(
+                                                                                                                error
+                                                                                                            );
+                                                                                                        }
+                                                                                                    );
                                                                                             }
                                                                                         )
                                                                                         .catch(
