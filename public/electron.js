@@ -67,10 +67,10 @@ app.on('activate', () => {
 });
 
 /**
- * Channels - Select Directory - A channel between the main process (electron) and the renderer process (react).
- *                               This returns an object with a cancelled value and an array containing the file path
- *                               if selected.
- * @returns {{canceled: Boolean; filePaths: Array<String};>}
+ * A channel between the main process (electron) and the renderer process (react).
+ * This returns an object with a cancelled value and an array containing the file path
+ * if selected.
+ * @returns {{canceled: Boolean; filePaths: Array<string};>}
  */
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     const result = await dialog.showOpenDialog({
@@ -80,9 +80,8 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
 });
 
 /**
- * Channels - Load Files - Loads the file from the passed in directory via the args parameter
- *
- * @param {String} - Directory location, i.e. D:\images
+ * Loads the file from the passed in directory via the args parameter
+ * @param {string} args Directory location, i.e. D:\images
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
@@ -95,9 +94,8 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  * Get Next File loads the next file if the path provided exists. This function will
  * ensure that the path exists, if the file names aren't loaded, it will load them. Then,
  * it will return the Base64 binary string of the next file.
- *
- * @param {String} - File directory path sent from react
- * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>;}}
+ * @param {string} args File directory path sent from react
+ * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
@@ -129,12 +127,11 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
 });
 
 /**
- * Channels - Get Specific File - Loads the specified file if the path provided exists. If so it will
- *                                it will load the file and then, it will return the Base64 binary string of the next file.
- *                                Along with other information about the file and other files in the path.
- *
- * @param {String} - File path sent from react
- * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>;}}
+ * Loads the specified file if the path provided exists. If so it will
+ * it will load the file and then, it will return the Base64 binary string of the next file.
+ * Along with other information about the file and other files in the path.
+ * @param {string} args File path sent from react
+ * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
@@ -149,11 +146,10 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
 });
 
 /**
- * Channels - Save Current File - Occurs when the user clicks next in react. It saves the file the returned path
- *                                of the file path passed in. As well, it moves the file queue ahead to the next file.
- *
- * @param {{file: Buffer; fileDirectory: String; fileFormat: String; fileName: String; fileSuffix: String;}}
- * @returns {String} Result
+ * Occurs when the user clicks next in react. It saves the file the returned path
+ * of the file path passed in. As well, it moves the file queue ahead to the next file.
+ * @param {{file: Buffer; fileDirectory: string; fileFormat: string; fileName: string; fileSuffix: string;}} args
+ * @returns {string} Result
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
@@ -194,10 +190,9 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 });
 
 /**
- * findMaxFileSuffix - Finds the maximum number used in the already saved files in the returned path
- *
- * @param {String} fileNameSuffix
- * @param {Array<String>} returnedFiles
+ * Finds the maximum number used in the already saved files in the returned path
+ * @param {string} fileNameSuffix
+ * @param {Array<string>} returnedFiles
  * @returns {Number}
  */
 const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
@@ -221,13 +216,12 @@ const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
 };
 
 /**
- * generateFileName - Uses the passed in arguments to generate a full file path from a file name,
- *                    directory, suffix, and output format.
- *
- * @param {{fileSuffix: String; fileFormat: String}} args
+ * Uses the passed in arguments to generate a full file path from a file name,
+ * directory, suffix, and output format.
+ * @param {{fileSuffix: string; fileFormat: string}} args
  * @param {Number} fileIndex
- * @param {String} returnedFilePath
- * @returns {String}
+ * @param {string} returnedFilePath
+ * @returns {string}
  */
 const generateFileName = (args, fileIndex, returnedFilePath) => {
     let fileName;
@@ -247,9 +241,8 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
 };
 
 /**
- * validateFileExtension - Ensures that the file name being passed is in of type .ora or .dcs
- *
- * @param {String} fileName
+ * Ensures that the file name being passed is in of type .ora or .dcs
+ * @param {string} fileName
  * @returns {Boolean}
  */
 const validateFileExtension = (fileName) => {
@@ -257,9 +250,8 @@ const validateFileExtension = (fileName) => {
     else return false;
 };
 /**
- * validateImageExtension - Ensures that the file name being passed is in of type .ora or .dcs
- *
- * @param {String} fileName
+ * Ensures that the file name being passed is in of type .ora or .dcs
+ * @param {string} fileName
  * @returns {Boolean}
  */
 const validateImageExtension = (fileName) => {
@@ -271,10 +263,9 @@ const validateImageExtension = (fileName) => {
 };
 
 /**
- * loadFilesFromPath - Will load the files from the passed in path directory, and will validate that
- *                     the files in the directory are of correct type. I.E. .png, .jpg etc. won't be loaded.
- *
- * @param {String} path
+ * Will load the files from the passed in path directory, and will validate that
+ * the files in the directory are of correct type. I.E. .png, .jpg etc. won't be loaded.
+ * @param {string} path
  * @returns {Promise}
  */
 const loadFilesFromPath = async (path) => {
@@ -309,11 +300,10 @@ const loadFilesFromPath = async (path) => {
 };
 
 /**
- * loadFile  - Loads the file from the front of the file queue and returns an object with its data
- *             and information about the file name and number of files in the directory.
- *
- * @param {String} filePath Specific location of the file, ie D:\images\1_img.ora
- * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number;}}
+ * Loads the file from the front of the file queue and returns an object with its data
+ * and information about the file name and number of files in the directory.
+ * @param {string} filePath Specific location of the file, ie D:\images\1_img.ora
+ * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number;}}
  */
 const loadFile = (filePath) => {
     const fileData = fs.readFileSync(filePath);
@@ -337,7 +327,6 @@ const loadFile = (filePath) => {
 
 /**
  * Async function to start the process of parsing and generating thumbnails as needed.
- *
  * @param {string} path
  */
 const startThumbnailThread = async (path) => {
@@ -354,7 +343,6 @@ const startThumbnailThread = async (path) => {
 
 /**
  * Creates the thumbnails path if not created and returns that path
- *
  * @param {string} path
  * @returns {string}
  */
@@ -375,7 +363,6 @@ const createThumbnailsPath = (path) => {
 
 /**
  * Finds all files in the specified path that are not in the JSON database that need a thumbnail generated.
- *
  * @param {string} filePath
  * @returns {Promise}
  */
@@ -409,7 +396,6 @@ const filesNeedingThumbnails = async (filePath) => {
 /**
  * Compares the files to possibly generate thumbnails for against the JSON database. Returns the
  * files not in the database that need a thumbnail generated.
- *
  * @param {Array<string>} filesToGenerate
  * @returns {Array<string>}
  */
@@ -425,7 +411,6 @@ const filterMadeThumbnails = (filesToGenerate) => {
 
 /**
  * Function to spin up threads to parse each thumbnail and resolves its promise once all thumbnails have attempted to be parsed
- *
  * @param {Array<string>} files
  * @returns {Promise}
  */
@@ -450,7 +435,6 @@ const parseFilesForThumbnail = async (files) => {
 
 /**
  * Generate a COCO thumbnail
- *
  * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Buffer;}>} newThumbnail Array of Objects
  * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
  * @returns {Promise}
@@ -538,7 +522,6 @@ const generateCocoThumbnail = (newThumbnail, indexes) => {
 
 /**
  * Generate a TDR thumbnail
- *
  * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Uint8ClampedArray; width: Number; height: Number;}>} newThumbnail Array of Objects
  * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
  * @returns {Promise}
@@ -646,7 +629,6 @@ const generateTdrThumbnail = (newThumbnail, indexes) => {
 
 /**
  * Parses the given file path into a thumbnail if possible
- *
  * @param {string} filePath Full path to the file, ie D:\images\1_img.ora
  * @returns {Promise}
  */
@@ -810,7 +792,6 @@ const parseThumbnail = async (filePath) => {
 
 /**
  * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
- *
  * @param {ArrayBuffer} imageData
  * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
  */
