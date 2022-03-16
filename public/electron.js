@@ -411,9 +411,8 @@ const parseFilesForThumbnail = async (files) => {
                 resolve();
             })
             .catch((error) => {
-                console.log('parse finish error');
                 console.log(error);
-                reject();
+                reject(error);
             });
     });
     return result;
@@ -547,6 +546,7 @@ const parseThumbnail = async (filePath) => {
                                                         }
                                                     )
                                                         .resize(96)
+                                                        .png()
                                                         .toBuffer()
                                                         .then((firstData) => {
                                                             sharp(
@@ -567,6 +567,7 @@ const parseThumbnail = async (filePath) => {
                                                                 }
                                                             )
                                                                 .resize(96)
+                                                                .png()
                                                                 .toBuffer()
                                                                 .then(
                                                                     (
@@ -609,9 +610,6 @@ const parseThumbnail = async (filePath) => {
                                                                                                 error
                                                                                             ) => {
                                                                                                 console.log(
-                                                                                                    'Error at saving: '
-                                                                                                );
-                                                                                                console.log(
                                                                                                     error
                                                                                                 );
                                                                                                 reject(
@@ -625,9 +623,6 @@ const parseThumbnail = async (filePath) => {
                                                                                 (
                                                                                     error
                                                                                 ) => {
-                                                                                    console.log(
-                                                                                        'Error at joining images'
-                                                                                    );
                                                                                     console.log(
                                                                                         error
                                                                                     );
@@ -675,7 +670,6 @@ const parseThumbnail = async (filePath) => {
                                                                 .thumbnailSavePath
                                                         )
                                                         .then(() => {
-                                                            console.log('res');
                                                             thumbnails.push({
                                                                 fileName,
                                                                 thumbnailPath:
@@ -685,7 +679,6 @@ const parseThumbnail = async (filePath) => {
                                                             resolve();
                                                         })
                                                         .catch((error) => {
-                                                            console.log('rej');
                                                             console.log(error);
                                                             reject(error);
                                                         });
