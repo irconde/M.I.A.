@@ -5,6 +5,7 @@ import * as constants from './Constants';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
+
 const cloneDeep = require('lodash.clonedeep');
 
 export default class Utils {
@@ -290,16 +291,29 @@ export default class Utils {
     }
 
     /**
-     * setFullScreenViewport - Performs the calculations for the widths and position of viewports.
+     * calculateViewportDimensions - Performs the calculations for the widths and position of viewports.
      *                         It will use the cornerstone object to perform the resize on the canvas elements
      *
      * @param {Object} cornerstone
-     * @param {Boolean} fullscreen
      * @param {Boolean} singleViewport
+     * @param {Boolean} collapsedSideMenu
+     * @param {Boolean} collapsedLazyMenu
+     * @param {Boolean} desktopMode
+     *
      */
-    static setFullScreenViewport(cornerstone, fullscreen, singleViewport) {
+    static calculateViewportDimensions(
+        cornerstone,
+        singleViewport,
+        collapsedSideMenu,
+        collapsedLazyMenu = true,
+        desktopMode = false
+    ) {
         // Array of viewport or viewports to loop through and resize at the end
         let viewports = [];
+        const totalMenuWidth =
+            !collapsedLazyMenu && !collapsedSideMenu && desktopMode
+                ? constants.sideMenuWidth * 2
+                : constants.sideMenuWidth;
         if (singleViewport === false) {
             const viewportTop = document.getElementById('dicomImageLeft');
             const viewportSide = document.getElementById('dicomImageRight');
@@ -309,38 +323,99 @@ export default class Utils {
             viewportSide.style.width = '';
             viewportSide.style.left = '';
             const verticalDivider = document.getElementById('verticalDivider');
-            if (fullscreen === true) {
+            if (collapsedLazyMenu && collapsedSideMenu) {
+                // Both menus are collapsed
                 const width = window.innerWidth / 2 + constants.RESOLUTION_UNIT;
-
                 viewportSide.style.width = width;
                 viewportTop.style.width = width;
+                viewportTop.style.left = 0;
                 verticalDivider.style.left = viewportTop.style.width;
                 viewportSide.style.left =
                     viewportTop.style.width + verticalDivider.style.width;
-            } else {
+            } else if (collapsedLazyMenu && !collapsedSideMenu) {
+                // Only one menu is collapsed, lazy menu is collapsed
                 const width =
                     (window.innerWidth - constants.sideMenuWidth) / 2 +
                     constants.RESOLUTION_UNIT;
-
                 viewportSide.style.width = width;
                 viewportTop.style.width = width;
+                viewportTop.style.left = 0;
                 verticalDivider.style.left = viewportTop.style.width;
                 viewportSide.style.left =
                     viewportTop.style.width + verticalDivider.style.width;
+            } else if (!collapsedLazyMenu && collapsedSideMenu) {
+                const width =
+                    (window.innerWidth - constants.sideMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                if (desktopMode) {
+                    viewportTop.style.left = constants.sideMenuWidth + 'px';
+                    verticalDivider.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                    viewportSide.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                } else {
+                    verticalDivider.style.left = viewportTop.style.width;
+                    viewportSide.style.left =
+                        viewportTop.style.width + verticalDivider.style.width;
+                }
+            } else {
+                // Both menus are visible
+                const width =
+                    (window.innerWidth - totalMenuWidth) / 2 +
+                    constants.RESOLUTION_UNIT;
+                viewportSide.style.width = width;
+                viewportTop.style.width = width;
+                if (desktopMode) {
+                    viewportTop.style.left = constants.sideMenuWidth + 'px';
+                    verticalDivider.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                    viewportSide.style.left =
+                        parseInt(viewportTop.style.width) +
+                        constants.sideMenuWidth +
+                        'px';
+                } else {
+                    verticalDivider.style.left = viewportTop.style.width;
+                    viewportSide.style.left =
+                        viewportTop.style.width + verticalDivider.style.width;
+                }
             }
         } else {
             const singleViewport = document.getElementById('dicomImageLeft');
             viewports.push(singleViewport);
             singleViewport.style.width = '';
-            if (fullscreen === true) {
+            if (collapsedLazyMenu && collapsedSideMenu) {
                 const width = window.innerWidth + constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
-            } else {
+                singleViewport.style.left = 0;
+            } else if (collapsedLazyMenu && !collapsedSideMenu) {
                 const width =
                     window.innerWidth -
                     constants.sideMenuWidth +
                     constants.RESOLUTION_UNIT;
                 singleViewport.style.width = width;
+                singleViewport.style.left = 0;
+            } else if (!collapsedLazyMenu && collapsedSideMenu) {
+                const width =
+                    window.innerWidth -
+                    constants.sideMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+                singleViewport.style.left = constants.sideMenuWidth + 'px';
+            } else {
+                const width =
+                    window.innerWidth -
+                    totalMenuWidth +
+                    constants.RESOLUTION_UNIT;
+                singleViewport.style.width = width;
+                singleViewport.style.left = constants.sideMenuWidth + 'px';
             }
         }
         // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
@@ -606,7 +681,7 @@ export default class Utils {
      *                        represents its position as a percentage value inside the bounding box.
      *
      * @param {array} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>}
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -654,8 +729,8 @@ export default class Utils {
      * calculateMaskAnchorPoints - Will recalculate the anchor points of a polygon mask
      *
      * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns
+     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}}
      */
     static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
         const xDist = boundingBox[2] - boundingBox[0];
@@ -673,8 +748,8 @@ export default class Utils {
      * calculatePolygonMask - Calculate the coordinates of the bounding box for a given polygon
      *
      * @param {Array<Number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {Array<Object{x, y, anchor: {top, bottom, left, right}}>} polygonData - list of handles, i.e., the vertices, of a polygon
-     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>} - newPolygonData with updated points based on anchor points
+     * @param {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} polygonData - list of handles, i.e., the vertices, of a polygon
+     * @returns {{x: Number, y: Number, anchor: {top: Number, bottom: Number, left: Number, right: Number}}} - newPolygonData with updated points based on anchor points
      */
     static calculatePolygonMask(boundingBox, polygonData) {
         let newPolygonData = cloneDeep(polygonData);

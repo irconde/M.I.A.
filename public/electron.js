@@ -13,7 +13,7 @@ const Constants = require('./Constants');
 
 let mainWindow;
 let files = [];
-let filesOutputted = [];
+let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
 
@@ -76,7 +76,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
-    filesOutputted = [];
+    currentFileIndex = 0;
     const result = await loadFilesFromPath(args);
     return result;
 });
@@ -87,20 +87,22 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  *            it will return the Base64 binary string of the next file.
  *
  * @param {String} - File directory path sent from react
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
-        if (files.length > 0) {
-            if (fs.existsSync(files[0])) {
-                resolve(loadFile());
+        if (files.length > 0 && currentFileIndex < files.length) {
+            if (fs.existsSync(files[currentFileIndex])) {
+                resolve(loadFile(files[currentFileIndex]));
             }
+        } else if (files.length !== 0 && currentFileIndex >= files.length) {
+            reject('End of queue');
         } else {
             if (fs.existsSync(args)) {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
-                            resolve(loadFile());
+                            resolve(loadFile(files[currentFileIndex]));
                         } else {
                             reject('No files loaded');
                         }
@@ -108,7 +110,29 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                     .catch((error) => {
                         reject(error);
                     });
+            } else {
+                reject('Path does not exist');
             }
+        }
+    });
+    return result;
+});
+
+/**
+ * Channels - Get Specific File - Loads the specified file if the path provided exists. If so it will
+ *                                it will load the file and then, it will return the Base64 binary string of the next file.
+ *                                Along with other information about the file and other files in the path.
+ *
+ * @param {String} - File path sent from react
+ * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
+ */
+ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        if (fs.existsSync(args)) {
+            currentFileIndex = files.findIndex((filePath) => filePath === args);
+            resolve(loadFile(args));
+        } else {
+            reject('File path does not exist');
         }
     });
     return result;
@@ -135,7 +159,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         readdir(returnedFilePath)
             .then((returnedFiles) => {
                 const fileIndex = findMaxFileSuffix(
-                    args.fileNameSuffix,
+                    args.fileSuffix,
                     returnedFiles
                 );
                 const filePath = generateFileName(
@@ -147,7 +171,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     if (error) {
                         reject(error);
                     } else {
-                        filesOutputted.push(files.shift());
+                        currentFileIndex++;
                         resolve('File saved');
                     }
                 });
@@ -243,10 +267,7 @@ const loadFilesFromPath = async (path) => {
                         } else {
                             filePath = `${path}/${file}`;
                         }
-                        if (
-                            validateFileExtension(file) === true &&
-                            filesOutputted.includes(filePath) === false
-                        ) {
+                        if (validateFileExtension(file) === true) {
                             files.push(filePath);
                         }
                     });
@@ -267,16 +288,17 @@ const loadFilesFromPath = async (path) => {
  * loadFile  - Loads the file from the front of the file queue and returns an object with its data
  *             and information about the file name and number of files in the directory.
  *
+ * @param {String} filePath Specific location of the file, ie D:\images\1_img.ora
  * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
  */
-const loadFile = () => {
-    const fileData = fs.readFileSync(files[0]);
+const loadFile = (filePath) => {
+    const fileData = fs.readFileSync(filePath);
     const file = Buffer.from(fileData).toString('base64');
     let splitPath;
     if (process.platform === 'win32') {
-        splitPath = files[0].split('\\');
+        splitPath = filePath.split('\\');
     } else {
-        splitPath = files[0].split('/');
+        splitPath = filePath.split('/');
     }
 
     const fileName = splitPath[splitPath.length - 1];
@@ -284,6 +306,7 @@ const loadFile = () => {
         file: file,
         fileName: fileName,
         numberOfFiles: files.length,
+        thumbnails: files,
     };
     return result;
 };

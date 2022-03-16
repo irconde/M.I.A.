@@ -123,5 +123,6 @@ export const Channels = {
     selectDirectory: 'select-directory',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
+    getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
 };

@@ -9,8 +9,14 @@ import {
     getIsFabVisible,
     getCornerstoneMode,
     getCollapsedSideMenu,
+    getCollapsedLazyMenu,
 } from '../../redux/slices/ui/uiSlice';
-import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
+import {
+    getDeviceType,
+    getLocalFileOutput,
+    getRemoteOrLocal,
+} from '../../redux/slices/settings/settingsSlice';
+import isElectron from 'is-electron';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -90,6 +96,11 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
     const isVisible = useSelector(getIsFabVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
+    const lazyMenuCollapsed = useSelector(getCollapsedLazyMenu);
+    const localFileOutput = useSelector(getLocalFileOutput);
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const desktopMode =
+        isElectron() && !remoteOrLocal && localFileOutput !== '';
     const deviceType = useSelector(getDeviceType);
     const handleClick = (e, cb) => {
         if (
@@ -100,8 +111,21 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
         }
     };
     // Calculating screen size and setting horizontal value accordingly.
-    let leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
-
+    //let leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
+    let leftPX;
+    if (desktopMode) {
+        if (lazyMenuCollapsed && sideMenuCollapsed) {
+            leftPX = 0;
+        } else if (!lazyMenuCollapsed && sideMenuCollapsed) {
+            leftPX = `${constants.sideMenuWidth}px`;
+        } else if (lazyMenuCollapsed && !sideMenuCollapsed) {
+            leftPX = `-${constants.sideMenuWidth}px`;
+        } else {
+            leftPX = 0;
+        }
+    } else {
+        leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
+    }
     let fabOpacity;
     let show;
     if (

@@ -226,7 +226,7 @@ export const getLocalFileOutput = (state) =>
 /**
  * getRemoteConnectionInfo - Returns the remote connection info: ip, port, autoconnect.
  * @param {Object} state
- * @returns {Object<remoteIp: String; remotePort: String; autoConnect: Boolean>}
+ * @returns {{remoteIp: String, remotePort: String, autoConnect: Boolean}}
  */
 export const getRemoteConnectionInfo = (state) => {
     return {

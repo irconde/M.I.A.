@@ -63,7 +63,7 @@ const initialState = {
     selectedDetection: null,
 
     // As commented above
-    /** @type Interface Detection */
+    /** @type Interface_Detection */
     detectionLabels: [],
     detectionChanged: false,
     missMatchedClassNames,
@@ -427,7 +427,7 @@ export const getSideDetections = (detections) => {
  * @param {Array<Detection>} detections
  * @param {String} uuid
  * @param {Array<Number>} boundingBox
- * @returns
+ * @returns {Boolean}
  */
 export const hasDetectionCoordinatesChanged = (
     detections,
@@ -534,7 +534,7 @@ export const getSelectedDetectionClassName = (state) => {
 /**
  * getSelectedDetectionWidthAndHeight - Will calculate and return the selected detections width and height
  * @param {Object} state
- * @returns {Object<width: Number; height: Number>}
+ * @returns {{width: Number, height: Number}}
  */
 export const getSelectedDetectionWidthAndHeight = (state) => {
     if (state.detections.selectedDetection) {

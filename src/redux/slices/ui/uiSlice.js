@@ -32,6 +32,7 @@ const initialState = {
     isSettingsVisible: false,
     inputLabel: '',
     collapsedSideMenu: false,
+    collapsedLazyMenu: false,
     colorPickerVisible: false,
     numberOfFiles: 0,
     localFileOpen: false,
@@ -50,10 +51,35 @@ const uiSlice = createSlice({
          */
         toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            Utils.setFullScreenViewport(
+            if (state.localFileOpen) {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu,
+                    state.collapsedLazyMenu,
+                    true
+                );
+            } else {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu
+                );
+            }
+        },
+        /**
+         * toggleCollapsedSideMenu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action.payload
+         */
+        toggleCollapsedLazyMenu: (state, action) => {
+            state.collapsedLazyMenu = !state.collapsedLazyMenu;
+            Utils.calculateViewportDimensions(
                 action.payload,
+                state.singleViewport,
                 state.collapsedSideMenu,
-                state.singleViewport
+                state.collapsedLazyMenu,
+                true
             );
         },
         /**
@@ -581,6 +607,7 @@ export const getDetectionContextInfo = (state) => {
 };
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+export const getCollapsedLazyMenu = (state) => state.ui.collapsedLazyMenu;
 export const getReceivedTime = (state) => state.ui.receiveTime;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
@@ -615,6 +642,7 @@ export const {
     toggleSettingsVisibility,
     setInputLabel,
     toggleCollapsedSideMenu,
+    toggleCollapsedLazyMenu,
     setReceiveTime,
     colorPickerToggle,
     setLocalFileOpen,

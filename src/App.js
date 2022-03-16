@@ -1,6 +1,5 @@
 import './App.css';
-import React from 'react';
-import { Component } from 'react';
+import React, { Component } from 'react';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -27,75 +26,76 @@ import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
 import {
-    setUpload,
+    setConnected,
+    setCurrentProcessingFile,
     setDownload,
     setNumFilesInQueue,
     setProcessingHost,
-    setCurrentProcessingFile,
-    setConnected,
+    setUpload,
 } from './redux/slices/server/serverSlice';
 import {
-    resetDetections,
     addDetection,
     addDetections,
     clearAllSelection,
+    deleteDetection,
+    editDetectionLabel,
+    getSideDetections,
+    getTopDetections,
+    hasDetectionCoordinatesChanged,
+    resetDetections,
     selectDetection,
     selectDetectionSet,
-    getTopDetections,
-    getSideDetections,
-    updateDetection,
     updatedDetectionSet,
-    editDetectionLabel,
-    deleteDetection,
-    validateDetections,
+    updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
-    hasDetectionCoordinatesChanged,
     updateMissMatchedClassName,
+    validateDetections,
 } from './redux/slices/detections/detectionsSlice';
 import {
-    updateFABVisibility,
-    updateIsDetectionContextVisible,
-    updateCornerstoneMode,
-    updateEditionMode,
-    emptyAreaClickUpdate,
-    onMouseLeaveNoFilesUpdate,
-    detectionSelectedUpdate,
-    labelSelectedUpdate,
+    colorPickerToggle,
     deleteDetectionUpdate,
+    detectionSelectedUpdate,
+    emptyAreaClickUpdate,
     exitEditionModeUpdate,
-    updateDetectionContextPosition,
-    updateZoomLevels,
-    updateZoomLevelTop,
-    updateZoomLevelSide,
-    selectConfigInfoUpdate,
-    newFileReceivedUpdate,
     hideContextMenuUpdate,
-    resetSelectedDetectionBoxesUpdate,
-    resetSelectedDetectionBoxesElseUpdate,
+    labelSelectedUpdate,
+    newFileReceivedUpdate,
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
-    setInputLabel,
-    setReceiveTime,
-    colorPickerToggle,
-    setLocalFileOpen,
-    updateEditLabelPosition,
-    updateRecentScroll,
+    onMouseLeaveNoFilesUpdate,
+    resetSelectedDetectionBoxesElseUpdate,
+    resetSelectedDetectionBoxesUpdate,
+    selectConfigInfoUpdate,
     setCurrentFileFormat,
+    setInputLabel,
+    setLocalFileOpen,
+    setReceiveTime,
+    updateCornerstoneMode,
+    updateDetectionContextPosition,
+    updateEditionMode,
+    updateEditLabelPosition,
+    updateFABVisibility,
+    updateIsDetectionContextVisible,
+    updateRecentScroll,
+    updateZoomLevels,
+    updateZoomLevelSide,
+    updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
-import { fileSave, fileOpen } from 'browser-fs-access';
+import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
+import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
-import { current } from '@reduxjs/toolkit';
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -125,15 +125,13 @@ cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 class App extends Component {
     /**
-     * constructor - All the related elements of the class are initialized:
-     * Callback methods are bound to the class
-     * The state is initialized
-     * A click listener is bound to the image viewport in order to detect click events
-     * A cornerstoneImageRendered listener is bound to the image viewport to trigger some actions in response to the image rendering
-     * CornerstoneJS Tools are initialized
+     * All the related elements of the class are initialized: the callback methods are bound to the class,
+     * the state is initialized, a click listener is bound to the image viewport in order to detect click events,
+     * a cornerstoneImageRendered listener is bound to the image viewport to trigger some actions in response to the
+     * image rendering, and CornerstoneJS Tools are initialized
      *
-     * @param  {type} props None
-     * @return {type}       None
+     * @contructor
+     * @param  {Object} props
      */
     constructor(props) {
         super(props);
@@ -148,10 +146,13 @@ class App extends Component {
             tapDetector: new TapDetector(),
             commandServer: null,
             timer: null,
+            thumbnails: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.getFileFromLocalDirectory =
             this.getFileFromLocalDirectory.bind(this);
+        this.getSpecificFileFromLocalDirectory =
+            this.getSpecificFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
@@ -193,12 +194,10 @@ class App extends Component {
     }
 
     /**
-     * This function houses the code to connect to a server, then it starts
-     * listening for connection events. Lastly it is what trigger to ask for a file
-     * from the command server.
+     * Houses the code to connect to a server and starts listening for connection events. Lastly it
+     * is what trigger to ask for a file from the command server.
      *
-     * @param {boolean} [update = false] Optional variable for when the settings changes the command server
-     * @returns {None} None
+     * @param {Boolean} [update = false] - Optional variable for when the settings changes the command server
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -227,7 +226,7 @@ class App extends Component {
      *
      * @param {Object} nextProps
      * @param {Object} nextState
-     * @returns {Boolean} True - to update | False - to skip the update
+     * @returns {Boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -258,13 +257,13 @@ class App extends Component {
                 }
                 return true;
             } else return false;
-        } else return false;
+        }
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
+        return false;
     }
 
     /**
-     * Method invoked after all elements on the page are rendered properly
-     *
-     * @return {None} None
+     * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
         // Connect socket servers
@@ -384,6 +383,9 @@ class App extends Component {
         document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
 
+    /**
+     *  Stops listening input events right before the component is unmounted and destroyed
+     */
     componentWillUnmount() {
         this.state.imageViewportTop.removeEventListener(
             'cornerstoneimagerendered',
@@ -435,9 +437,7 @@ class App extends Component {
     }
 
     /**
-     * This function houses the events for connectivity with the command server.
-     *
-     * @returns {None}
+     * Houses the events for connectivity with the command server.
      */
     async monitorConnectionEvent() {
         if (this.state.commandServer !== null) {
@@ -465,8 +465,7 @@ class App extends Component {
     }
 
     /**
-     * Method that binds a click event listener to the two cornerstonejs viewports
-     *
+     * Binds a click event listener to the two cornerstonejs viewports
      */
     startListeningClickEvents() {
         this.state.imageViewportTop.addEventListener(
@@ -496,8 +495,7 @@ class App extends Component {
     }
 
     /**
-     * Method that unbinds a click event listener to the two cornerstonejs viewports
-     *
+     * Unbinds a click event listener to the two cornerstonejs viewport.
      */
     stopListeningClickEvents() {
         this.state.imageViewportTop.removeEventListener(
@@ -527,9 +525,7 @@ class App extends Component {
     }
 
     /**
-     * Function to update cornerstoneJS viewports' zoom level based on their width
-     *
-     * @returns {None} None
+     * Updates the cornerstoneJS viewports' zoom level according to their width
      */
     recalculateZoomLevel() {
         let canvasElements =
@@ -560,19 +556,33 @@ class App extends Component {
     }
 
     /**
-     * Function event listener for the window resize event. If a detection is selected,
-     * we clear the detections and hide the buttons.
+     * Function event listener for the window resize event. If a detection is selected, we clear the detections
+     * and hide the buttons.
      *
-     * @param {Event}  e The event object being fired which caused your function to be executed
-     * @returns {None} None
+     * @param {Event} e
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
+
         if (this.props.selectDetection) {
             this.appUpdateImage();
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
@@ -617,9 +627,8 @@ class App extends Component {
     /**
      * CornerstoneJS Tools are initialized
      *
-     * @param  {DOMElement} imageViewportTop DOM element where the top-view x-ray image is rendered
-     * @param  {DOMElement} imageViewportSide DOM element where the side-view x-ray image is rendered
-     * @return {None} None
+     * @param  {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
+     * @param  {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -658,8 +667,7 @@ class App extends Component {
     }
 
     /**
-     * Reset Cornerstone Tools to their default state. Invoked when user leaves annotation or edition mode.
-     * @return {None} None
+     * Resets Cornerstone Tools to their default state. Invoked when user leaves annotation or edition mode
      */
 
     resetCornerstoneTool() {
@@ -710,10 +718,10 @@ class App extends Component {
     }
 
     /**
-     * Socket Listener to get files from command server and load it once received
+     * Gets files from command server and loads them once received.
      *
-     * @param {boolean} [update=false]
-     * @return {Promise} Promise
+     * @param {boolean} update
+     * @returns {Promise}
      */
     async getFileFromCommandServer(update = false) {
         if (
@@ -736,10 +744,8 @@ class App extends Component {
     }
 
     /**
-     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob.
-     * Which then needs to be converted to base64 to be loaded into the app.
-     *
-     * @returns {None}
+     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
+     * blob then needs to be converted to base64 to be loaded into the app.
      */
     getFileFromLocal() {
         fileOpen()
@@ -759,8 +765,6 @@ class App extends Component {
 
     /**
      * Calls the Electron channel to invoke the next file from the selected file system folder.
-     *
-     * @returns {None}
      */
     getFileFromLocalDirectory() {
         if (isElectron()) {
@@ -774,7 +778,8 @@ class App extends Component {
                     this.loadNextImage(
                         result.file,
                         result.fileName,
-                        result.numberOfFiles
+                        result.numberOfFiles,
+                        result.thumbnails
                     );
                 })
                 .catch((error) => {
@@ -786,9 +791,36 @@ class App extends Component {
     }
 
     /**
-     * Socket IO to send a file to the server
-     * @param {Blob} file - which file we are sending
-     * @returns {None} None
+     * Operates in a similar way to getFileFromLocalDirectory, but it specifies the exact file path instead of a general path.
+     * IE D:\images\1_img.ora.
+     *
+     * @param {string} filePath
+     */
+    getSpecificFileFromLocalDirectory(filePath) {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(constants.Channels.getSpecificFile, filePath)
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles,
+                        result.thumbnails
+                    );
+                })
+                .catch((error) => {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                });
+        }
+    }
+
+    /**
+     * Emits a new message to send a file to the server
+     *
+     * @param {Blob} Blob - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -800,7 +832,9 @@ class App extends Component {
     }
 
     /**
-     * Sends the needed information to save the current file in the selected this.props.localFileOutput path via Electron channels.
+     * Sends the needed information to save the current file in the selected this.props.localFileOutput path via
+     * Electron channels.
+     *
      * @param {Buffer} file
      * @returns {Promise}
      */
@@ -827,10 +861,8 @@ class App extends Component {
     }
 
     /**
-     * Method invoked when there isn't any file in the file queue.
-     * A 'No file' image is displayed instead of the cornerstoneJs canvas
-     *
-     * @return {None} None
+     *  Method invoked when there isn't any file in the file queue. A 'No file' image is displayed instead of the
+     *  cornerstoneJs canvas
      */
     onNoImageLeft() {
         let updateImageViewport = this.state.imageViewportTop;
@@ -855,7 +887,8 @@ class App extends Component {
      * @param {String} [numberOfFiles = 0] Number of files left in queue
      * @return {None} None
      */
-    loadNextImage(image, fileName, numberOfFiles = 0) {
+
+    loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
         // Loading a file initially from a local workspace can call loadNextImage twice
         // Which creates duplicate detections. This ensures that the same file is never loaded twice
         if (fileName === this.props.currentProcessingFile) return;
@@ -989,6 +1022,7 @@ class App extends Component {
                             updateImageViewportTop.style.visibility = 'visible';
                             this.setState({
                                 imageViewportTop: updateImageViewportTop,
+                                thumbnails,
                             });
                             this.state.myOra.stackData = listOfStacks;
                             this.props.newFileReceivedUpdate({
@@ -1071,6 +1105,7 @@ class App extends Component {
                             updateImageViewportTop.style.visibility = 'visible';
                             this.setState({
                                 imageViewportTop: updateImageViewportTop,
+                                thumbnails,
                             });
                             this.state.myOra.stackData = listOfStacks;
                             this.props.newFileReceivedUpdate({
@@ -1095,7 +1130,7 @@ class App extends Component {
      * current image, then when that is complete, we send the image to the command
      * server. Finally, calling getNextImage to display another image if there is one
      * @param {Event} e The event object being fired which caused your function to be executed
-     * @return {None} None
+     *
      */
     nextImageClick(e) {
         this.props.validateDetections();
@@ -1372,10 +1407,8 @@ class App extends Component {
     }
 
     /**
-     * Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
-     * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
-     *
-     * @return {None} None
+     * Loads pixel data from a DICOS+TDR file using CornerstoneJS. It invokes the displayDICOSinfo method in order
+     * to render the image and pull the detection-specific data.
      */
     loadAndViewImage() {
         let dataImagesLeft = [];
@@ -1409,9 +1442,7 @@ class App extends Component {
     }
 
     /**
-     * Method that renders the top and side view x-ray images encoded in the MS COCO file
-     *
-     * @return {None} None
+     * Renders the top and side view x-ray images when annotations are encoded as JSON files with the MS COCO format.
      */
     async displayCOCOimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
@@ -1465,18 +1496,30 @@ class App extends Component {
                 );
             });
         }
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
         this.recalculateZoomLevel();
     }
 
     /**
-     * Method that renders the top and side view x-ray images encoded in the DICOS+TDR file
-     *
-     * @return {None} None
+     * Renders the top and side view x-ray images when encoded in DICOS+TDR files
      */
     displayDICOSimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
@@ -1531,18 +1574,30 @@ class App extends Component {
                 );
             });
         }
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
         this.recalculateZoomLevel();
     }
 
     /**
-     * Method that adds detection objects to detection slice after rendering image for the COCO file format
-     *
-     * @return {None} None
+     * Pulls all the data regarding the threat detections from a file formatted according to the MS COCO standard.
      */
     loadCOCOdata() {
         const self = this;
@@ -1604,11 +1659,10 @@ class App extends Component {
     }
 
     /**
-     * Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * Method that parses a DICOS+TDR file to pull all the data regarding the threat detections
      *
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
-     * @return {None} None
+     * @param  {Array.number} imagesLeft - List of DICOS+TDR data from algorithm
+     * @param  {Array} imagesRight - List of DICOS+TDR data from algorithm
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1760,11 +1814,10 @@ class App extends Component {
     }
 
     /**
-     * Callback method automatically invoked when CornerstoneJS renders a new image.
-     * It triggers the rendering of the several annotations associated to the image
+     * Callback automatically invoked when CornerstoneJS renders a new image. It triggers the rendering of
+     * the several annotations associated to the image
      *
-     * @param  {Event} e The event object being fired which caused your function to be executed
-     * @return {None} None
+     * @param  {Event} e Event
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1831,7 +1884,6 @@ class App extends Component {
      *
      * @param {eventData.canvasContext} context Canvas' context, used to render crosshair directly to canvas
      * @param {DOMElement} target Targeted DOMElement caught via mouse event data
-     * @return {None} None
      */
     renderCrosshair(context, target) {
         console.log(target);
@@ -1876,9 +1928,7 @@ class App extends Component {
     }
 
     /**
-     * Simply updates our cornerstone image depending on the number of view-ports.
-     *
-     * @return {none} None
+     * Updates the image rendered by Cornerstone according to the number of viewports.
      */
     appUpdateImage() {
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1908,7 +1958,6 @@ class App extends Component {
      *
      * @param  {Array<Detection>} data Array of detection data
      * @param  {eventData.canvasContext} context Rendering context
-     * @return {None} None
      */
     renderDetections(data, context) {
         if (!data) {
@@ -2014,10 +2063,10 @@ class App extends Component {
     }
 
     /**
-     * Method that renders the polygon mask associated with a detection
+     * Renders the polygon mask associated with a detection.
      *
-     * @param  {Array<Number>} coords polygon mask coordinates
-     * @param  {Context} context Rendering context
+     * @param  {Array<Number>} coords - Polygon mask coordinates
+     * @param  {Context} context - Rendering context
      */
     renderPolygonMasks(coords, context) {
         if (coords === undefined || coords === null || coords.length === 0) {
@@ -2027,9 +2076,9 @@ class App extends Component {
     }
 
     /**
-     * Callback function invoked when a touch event is initiated.
+     * Callback invoked when a touch event is initiated.
      *
-     * @param {Event} e Event data such as touch position and event time stamp.
+     * @param {type} e - Event data such as touch position and event time stamp.
      */
     onTouchStart(e) {
         let startPosition = e.detail.currentPoints.page;
@@ -2054,10 +2103,9 @@ class App extends Component {
     }
 
     /**
-     * Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
+     * Callback invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {None} None
+     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
@@ -2162,11 +2210,10 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user stops dragging mouse or finger on touch device
+     * Callback invoked when user stops dragging mouse or finger on touch device.
      *
-     * @param {Event} event Mouse drag end event
-     * @param {DOMElement}  viewport The Cornerstone Viewport containing the event
-     * @return {None} None
+     * @param {Event} event - Mouse drag end event
+     * @param {DOMElement} viewport - The Cornerstone Viewport containing the event
      */
     onDragEnd(event, viewport) {
         if (
@@ -2618,9 +2665,8 @@ class App extends Component {
     /**
      * Callback invoked when new polygon mask has been created.
      *
-     * @param {Event} event Event triggered when a new polygon is created
-     * @param {DOMElement} viewport The Cornerstone Viewport receiving the event
-     * @return {None} None
+     * @param {Event} event - Event triggered when a new polygon is created
+     * @param {DOMElement} viewport - The Cornerstone Viewport receiving the event
      */
     onNewPolygonMaskCreated(event, viewport) {
         if (
@@ -2736,10 +2782,9 @@ class App extends Component {
     }
 
     /**
-     * Unselect the selected detection and hide the context menu.
+     * Unselects the currently selected detection and hides the context menu.
      *
-     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {None}  None
+     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     resetSelectedDetectionBoxes(e) {
         if (
@@ -2757,9 +2802,7 @@ class App extends Component {
     }
 
     /**
-     * Hide context menu when mouse is moved.
-     *
-     * @return {None}  None
+     * Hides the context menu.
      */
     hideContextMenu() {
         if (
@@ -2773,9 +2816,7 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects bounding box option from FAB
-     *
-     * @return {none} None
+     * Invoked when the user selects the bounding box option in the FAB
      */
     onBoundingBoxSelected() {
         if (
@@ -2795,9 +2836,7 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects polygon mask option from FAB
-     *
-     * @return {none} None
+     * Invoked when the user selects the polygon mask option in the FAB
      */
     onPolygonMaskSelected() {
         if (
@@ -2820,9 +2859,9 @@ class App extends Component {
     /**
      * Get position of context menu based on the associated bounding box.
      *
-     * @param {DOMElement} viewportInfo viewport info
-     * @param {Array<Number>} coords bounding box corners' coordinates
-     * @returns {Object{Number: x; Number: y}}
+     * @param {DOMElement} viewportInfo Viewport info
+     * @param {Array.number} coords Bounding box' corners' coordinates
+     * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
@@ -2863,12 +2902,12 @@ class App extends Component {
 
     /**
      * Invoked when user selects a detection (callback from onMouseClicked)
-     * @param {Event} event Related mouse click event to position the widget relative to detection
-     * @param {Detection} [draggedData] Optional detection data. In the case that
+     *
+     * @param {Event} event - Related mouse click event to position the widget relative to detection
+     * @param {Detection} [draggedData] - Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      *
-     * @returns {None} None
      */
     renderDetectionContextMenu(
         event,
@@ -2955,10 +2994,9 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects an edition mode from DetectionContextMenu.
+     * Invoked when the user selects an edition mode from DetectionContextMenu.
      *
-     * @param {string} newMode Edition mode selected from menu
-     * @returns {None} None
+     * @param {string} newMode - Edition mode selected from menu
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
@@ -3179,8 +3217,7 @@ class App extends Component {
     /**
      * Invoked when user completes editing a detection's label
      *
-     * @param {string} newLabel Updated label name from user interaction
-     * @returns {None} None
+     * @param {string} newLabel - Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
         const { uuid } = this.props.selectedDetection;
@@ -3205,9 +3242,8 @@ class App extends Component {
     /**
      * Calculates position of the edit label widget
      *
-     * @param {Dictionary} detectionData detection data
-     * @param {Array<Number>} coords bounding box coordinates
-     * @returns {None} None
+     * @param {Object} detectionData - Detection data
+     * @param {Array<Number>} coords - Bounding box coordinates
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {
@@ -3284,9 +3320,7 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects 'delete' option from DetectionContextMenu
-     *
-     * @returns {None} None
+     * Invoked when the user selects 'delete' option from DetectionContextMenu.
      */
     deleteDetection() {
         // Detection is selected
@@ -3328,10 +3362,10 @@ class App extends Component {
     }
 
     /**
-     * Captures and saves the {x , y} coordinates of the mouse to the App State
+     * Callback invoked when the mouse pointer is moves. It captures and saves the {x , y} coordinates of the mouse
+     * to the App State
      *
-     * @param {Event} event The event object being fired which caused your function to be executed
-     * @returns {None} None
+     * @param {Event} event
      */
     onMouseMoved(event) {
         this.setState({
@@ -3341,9 +3375,7 @@ class App extends Component {
     }
 
     /**
-     * Called when mouse wheel event is fired.
-     *
-     * @returns {None} None
+     * Callback invoked when a mouse wheel event happens.
      */
     onMouseWheel() {
         if (this.props.selectedDetection !== null) {
@@ -3358,11 +3390,10 @@ class App extends Component {
     }
 
     /**
-     * Event handler for if the mouse leaves the window. It mainly serves as
-     * a way to make sure a user does not try to drag a detection out of the window.
+     * Mouse leave event handler. It mainly serves as a way to make sure a user does not try to drag a detection out of
+     * the window.
      *
      * @param {Event} event
-     * @returns {None} None
      */
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
@@ -3425,6 +3456,12 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
+                    <LazyImageMenu
+                        getSpecificFileFromLocalDirectory={
+                            this.getSpecificFileFromLocalDirectory
+                        }
+                        thumbnails={this.state.thumbnails}
+                    />
                     <NoFileSign />
                     <MetaData />
                 </div>
@@ -3454,6 +3491,7 @@ const mapStateToProps = (state) => {
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
+        collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
         // Settings

@@ -17,6 +17,7 @@ export default configureStore({
                 'server/setCommandServerConnection',
                 'server/setFileServerConnection',
                 'ui/toggleCollapsedSideMenu',
+                'ui/toggleCollapsedLazyMenu',
             ],
         },
     }),

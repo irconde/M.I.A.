@@ -18,6 +18,7 @@
         "@testing-library/user-event": "^12.6.3",
         "babel-preset-react": "^6.24.1",
         "browser-fs-access": "^0.20.5",
+        "browserify": "^17.0.0",
         "concurrently": "^6.4.0",
         "cornerstone-core": "^2.3.0",
         "cornerstone-math": "^0.1.9",
@@ -62,7 +63,8 @@
         "package-electron": "electron-builder",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "lint": "eslint \"src/**/*.{js,jsx}\" --quiet"
+        "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
+        "docs": "jsdoc -c jsdoc.json -t ./node_modules/better-docs"
     },
     "build": {
         "appId": "edu.ualr.eac.dna.pilot.gui",
@@ -97,6 +99,7 @@
     "devDependencies": {
         "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
         "babel-eslint": "^10.1.0",
+        "better-docs": "^2.7.2",
         "electron": "^15.3.1",
         "electron-builder": "^22.13.1",
         "eslint": "^7.19.0",

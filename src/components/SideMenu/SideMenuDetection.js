@@ -16,6 +16,18 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import { detectionStyle } from '../../utils/Constants';
 
+/**
+ * Helper component for SideMenuAlgorithm component that allows user to display tree view of detections
+ *
+ * @component
+ *
+ * @param {Array<Detection>} detections Array of detection objects
+ * @param {function} resetCornerstoneTools Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu Callback to render specific detection context menus
+ *
+ *
+ */
+
 const SideMenuDetection = ({
     detection,
     resetCornerstoneTools,
