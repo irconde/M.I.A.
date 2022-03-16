@@ -70,7 +70,7 @@ app.on('activate', () => {
  * Channels - Select Directory - A channel between the main process (electron) and the renderer process (react).
  *                               This returns an object with a cancelled value and an array containing the file path
  *                               if selected.
- * @returns {Object<canceled: Boolean; filePaths: Array<String>>}
+ * @returns {{canceled: Boolean; filePaths: Array<String};>}
  */
 ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
     const result = await dialog.showOpenDialog({
@@ -92,12 +92,12 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
 });
 
 /**
- * Channels - Get Next File - Loads the next file if the path provided exists. This function will
- *            ensure that the path exists, if the file names aren't loaded, it will load them. Then,
- *            it will return the Base64 binary string of the next file.
+ * Get Next File loads the next file if the path provided exists. This function will
+ * ensure that the path exists, if the file names aren't loaded, it will load them. Then,
+ * it will return the Base64 binary string of the next file.
  *
  * @param {String} - File directory path sent from react
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
+ * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>;}}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
  *                                Along with other information about the file and other files in the path.
  *
  * @param {String} - File path sent from react
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>>}
+ * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number; thumbnails: Array<String>;}}
  */
 ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
@@ -152,7 +152,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  * Channels - Save Current File - Occurs when the user clicks next in react. It saves the file the returned path
  *                                of the file path passed in. As well, it moves the file queue ahead to the next file.
  *
- * @param {Object<file: Buffer; fileDirectory: String; fileFormat: String; fileName: String; fileSuffix: String>}
+ * @param {{file: Buffer; fileDirectory: String; fileFormat: String; fileName: String; fileSuffix: String;}}
  * @returns {String} Result
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
@@ -224,7 +224,7 @@ const findMaxFileSuffix = (fileNameSuffix, returnedFiles) => {
  * generateFileName - Uses the passed in arguments to generate a full file path from a file name,
  *                    directory, suffix, and output format.
  *
- * @param {Object<fileSuffix: String; fileFormat: String>} args
+ * @param {{fileSuffix: String; fileFormat: String}} args
  * @param {Number} fileIndex
  * @param {String} returnedFilePath
  * @returns {String}
@@ -313,7 +313,7 @@ const loadFilesFromPath = async (path) => {
  *             and information about the file name and number of files in the directory.
  *
  * @param {String} filePath Specific location of the file, ie D:\images\1_img.ora
- * @returns {Object<file: String('base64'); fileName: String; numberOfFiles: Number>}
+ * @returns {{file: String('base64'); fileName: String; numberOfFiles: Number;}}
  */
 const loadFile = (filePath) => {
     const fileData = fs.readFileSync(filePath);
@@ -335,6 +335,11 @@ const loadFile = (filePath) => {
     return result;
 };
 
+/**
+ * Async function to start the process of parsing and generating thumbnails as needed.
+ *
+ * @param {string} path
+ */
 const startThumbnailThread = async (path) => {
     createThumbnailsPath(path);
     const filesToGenerate = await filesNeedingThumbnails(path);
@@ -347,6 +352,12 @@ const startThumbnailThread = async (path) => {
     }
 };
 
+/**
+ * Creates the thumbnails path if not created and returns that path
+ *
+ * @param {string} path
+ * @returns {string}
+ */
 const createThumbnailsPath = (path) => {
     if (process.platform === 'win32') {
         thumbnailPath = `${path}\\.thumbnails`;
@@ -362,6 +373,12 @@ const createThumbnailsPath = (path) => {
     }
 };
 
+/**
+ * Finds all files in the specified path that are not in the JSON database that need a thumbnail generated.
+ *
+ * @param {string} filePath
+ * @returns {Promise}
+ */
 const filesNeedingThumbnails = async (filePath) => {
     const result = new Promise((resolve, reject) => {
         loadThumbnailDatabase();
@@ -389,6 +406,13 @@ const filesNeedingThumbnails = async (filePath) => {
     return result;
 };
 
+/**
+ * Compares the files to possibly generate thumbnails for against the JSON database. Returns the
+ * files not in the database that need a thumbnail generated.
+ *
+ * @param {Array<string>} filesToGenerate
+ * @returns {Array<string>}
+ */
 const filterMadeThumbnails = (filesToGenerate) => {
     return filesToGenerate.filter((file) => {
         const splitPath = file.split(process.platform === 'win32' ? '\\' : '/');
@@ -399,6 +423,12 @@ const filterMadeThumbnails = (filesToGenerate) => {
     });
 };
 
+/**
+ * Function to spin up threads to parse each thumbnail and resolves its promise once all thumbnails have attempted to be parsed
+ *
+ * @param {Array<string>} files
+ * @returns {Promise}
+ */
 const parseFilesForThumbnail = async (files) => {
     const result = new Promise((resolve, reject) => {
         const listOfPromises = [];
@@ -418,6 +448,208 @@ const parseFilesForThumbnail = async (files) => {
     return result;
 };
 
+/**
+ * Generate a COCO thumbnail
+ *
+ * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Buffer;}>} newThumbnail Array of Objects
+ * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
+ * @returns {Promise}
+ */
+const generateCocoThumbnail = (newThumbnail, indexes) => {
+    const result = new Promise((resolve, reject) => {
+        const { topIndex, sideIndex } = indexes;
+        if (newThumbnail.length > 1) {
+            sharp(newThumbnail[topIndex].pixelData)
+                .resize(96)
+                .toBuffer()
+                .then((firstData) => {
+                    sharp(newThumbnail[sideIndex].pixelData)
+                        .resize(96)
+                        .toBuffer()
+                        .then((secondData) => {
+                            joinImages
+                                .joinImages([firstData, secondData], {
+                                    direction: 'horizontal',
+                                })
+                                .then((img) => {
+                                    img.png()
+                                        .toBuffer()
+                                        .then((data) => {
+                                            sharp(data)
+                                                .resize(96)
+                                                .toFile(
+                                                    newThumbnail[0]
+                                                        .thumbnailSavePath
+                                                )
+                                                .then(() => {
+                                                    thumbnails.push({
+                                                        fileName:
+                                                            newThumbnail[0]
+                                                                .fileName,
+                                                        thumbnailPath:
+                                                            newThumbnail[0]
+                                                                .thumbnailSavePath,
+                                                    });
+                                                    resolve();
+                                                })
+                                                .catch((error) => {
+                                                    console.log(error);
+                                                    reject(error);
+                                                });
+                                        })
+                                        .catch((error) => {
+                                            console.log(error);
+                                            reject(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                    reject(error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            reject(error);
+                        });
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        } else if (newThumbnail.length === 1) {
+            sharp(newThumbnail[0].pixelData)
+                .resize(96)
+                .toFile(newThumbnail[0].thumbnailSavePath)
+                .then(() => {
+                    thumbnails.push({
+                        fileName: newThumbnail[0].fileName,
+                        thumbnailPath: newThumbnail[0].thumbnailSavePath,
+                    });
+                    resolve();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        }
+    });
+    return result;
+};
+
+/**
+ * Generate a TDR thumbnail
+ *
+ * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Uint8ClampedArray; width: Number; height: Number;}>} newThumbnail Array of Objects
+ * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
+ * @returns {Promise}
+ */
+const generateTdrThumbnail = (newThumbnail, indexes) => {
+    const result = new Promise((resolve, reject) => {
+        const { topIndex, sideIndex } = indexes;
+        if (newThumbnail.length > 1) {
+            sharp(newThumbnail[topIndex].pixelData, {
+                raw: {
+                    width: newThumbnail[topIndex].width,
+                    height: newThumbnail[topIndex].height,
+                    channels: 4,
+                },
+            })
+                .resize(96)
+                .png()
+                .toBuffer()
+                .then((firstData) => {
+                    sharp(newThumbnail[sideIndex].pixelData, {
+                        raw: {
+                            width: newThumbnail[sideIndex].width,
+                            height: newThumbnail[sideIndex].height,
+                            channels: 4,
+                        },
+                    })
+                        .resize(96)
+                        .png()
+                        .toBuffer()
+                        .then((secondData) => {
+                            joinImages
+                                .joinImages([firstData, secondData], {
+                                    direction: 'horizontal',
+                                })
+                                .then((img) => {
+                                    img.png()
+                                        .toBuffer()
+                                        .then((data) => {
+                                            sharp(data)
+                                                .resize(96)
+                                                .toFile(
+                                                    newThumbnail[0]
+                                                        .thumbnailSavePath
+                                                )
+                                                .then(() => {
+                                                    thumbnails.push({
+                                                        fileName:
+                                                            newThumbnail[0]
+                                                                .fileName,
+                                                        thumbnailPath:
+                                                            newThumbnail[0]
+                                                                .thumbnailSavePath,
+                                                    });
+                                                    resolve();
+                                                })
+                                                .catch((error) => {
+                                                    console.log(error);
+                                                    reject(error);
+                                                });
+                                        })
+                                        .catch((error) => {
+                                            console.log(error);
+                                            reject(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                    reject(error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            reject(error);
+                        });
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        } else if (newThumbnail.length === 1) {
+            sharp(newThumbnail[0].pixelData, {
+                raw: {
+                    width: newThumbnail[0].width,
+                    height: newThumbnail[0].height,
+                    channels: 4,
+                },
+            })
+                .resize(96)
+                .toFile(newThumbnail[0].thumbnailSavePath)
+                .then(() => {
+                    thumbnails.push({
+                        fileName: newThumbnail[0].fileName,
+                        thumbnailPath: newThumbnail[0].thumbnailSavePath,
+                    });
+                    resolve();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        }
+    });
+    return result;
+};
+
+/**
+ * Parses the given file path into a thumbnail if possible
+ *
+ * @param {string} filePath Full path to the file, ie D:\images\1_img.ora
+ * @returns {Promise}
+ */
 const parseThumbnail = async (filePath) => {
     const result = new Promise((resolve, reject) => {
         const splitPath = filePath.split(
@@ -526,341 +758,28 @@ const parseThumbnail = async (filePath) => {
                                                 Constants.Settings.ANNOTATIONS
                                                     .TDR
                                             ) {
-                                                //
-
-                                                if (newThumbnail.length > 1) {
-                                                    //
-                                                    sharp(
-                                                        newThumbnail[topIndex]
-                                                            .pixelData,
-                                                        {
-                                                            raw: {
-                                                                width: newThumbnail[
-                                                                    topIndex
-                                                                ].width,
-                                                                height: newThumbnail[
-                                                                    topIndex
-                                                                ].height,
-                                                                channels: 4,
-                                                            },
-                                                        }
-                                                    )
-                                                        .resize(96)
-                                                        .png()
-                                                        .toBuffer()
-                                                        .then((firstData) => {
-                                                            sharp(
-                                                                newThumbnail[
-                                                                    sideIndex
-                                                                ].pixelData,
-                                                                {
-                                                                    raw: {
-                                                                        width: newThumbnail[
-                                                                            sideIndex
-                                                                        ].width,
-                                                                        height: newThumbnail[
-                                                                            sideIndex
-                                                                        ]
-                                                                            .height,
-                                                                        channels: 4,
-                                                                    },
-                                                                }
-                                                            )
-                                                                .resize(96)
-                                                                .png()
-                                                                .toBuffer()
-                                                                .then(
-                                                                    (
-                                                                        secondData
-                                                                    ) => {
-                                                                        joinImages
-                                                                            .joinImages(
-                                                                                [
-                                                                                    firstData,
-                                                                                    secondData,
-                                                                                ],
-                                                                                {
-                                                                                    direction:
-                                                                                        'horizontal',
-                                                                                }
-                                                                            )
-                                                                            .then(
-                                                                                (
-                                                                                    img
-                                                                                ) => {
-                                                                                    img.png()
-                                                                                        .toBuffer()
-                                                                                        .then(
-                                                                                            (
-                                                                                                data
-                                                                                            ) => {
-                                                                                                sharp(
-                                                                                                    data
-                                                                                                )
-                                                                                                    .resize(
-                                                                                                        96
-                                                                                                    )
-                                                                                                    .toFile(
-                                                                                                        newThumbnail[0]
-                                                                                                            .thumbnailSavePath
-                                                                                                    )
-                                                                                                    .then(
-                                                                                                        () => {
-                                                                                                            thumbnails.push(
-                                                                                                                {
-                                                                                                                    fileName,
-                                                                                                                    thumbnailPath:
-                                                                                                                        newThumbnail[0]
-                                                                                                                            .thumbnailSavePath,
-                                                                                                                }
-                                                                                                            );
-                                                                                                            resolve();
-                                                                                                        }
-                                                                                                    )
-                                                                                                    .catch(
-                                                                                                        (
-                                                                                                            error
-                                                                                                        ) => {
-                                                                                                            console.log(
-                                                                                                                error
-                                                                                                            );
-                                                                                                            reject(
-                                                                                                                error
-                                                                                                            );
-                                                                                                        }
-                                                                                                    );
-                                                                                            }
-                                                                                        )
-                                                                                        .catch(
-                                                                                            (
-                                                                                                error
-                                                                                            ) => {
-                                                                                                console.log(
-                                                                                                    error
-                                                                                                );
-                                                                                                reject(
-                                                                                                    error
-                                                                                                );
-                                                                                            }
-                                                                                        );
-                                                                                }
-                                                                            )
-                                                                            .catch(
-                                                                                (
-                                                                                    error
-                                                                                ) => {
-                                                                                    console.log(
-                                                                                        error
-                                                                                    );
-                                                                                    reject(
-                                                                                        error
-                                                                                    );
-                                                                                }
-                                                                            );
-                                                                    }
-                                                                )
-                                                                .catch(
-                                                                    (error) => {
-                                                                        console.log(
-                                                                            error
-                                                                        );
-                                                                        reject(
-                                                                            error
-                                                                        );
-                                                                    }
-                                                                );
-                                                        })
-                                                        .catch((error) => {
-                                                            console.log(error);
-                                                            reject(error);
-                                                        });
-                                                } else if (
-                                                    newThumbnail.length === 1
-                                                ) {
-                                                    sharp(
-                                                        newThumbnail[0]
-                                                            .pixelData,
-                                                        {
-                                                            raw: {
-                                                                width: newThumbnail[0]
-                                                                    .width,
-                                                                height: newThumbnail[0]
-                                                                    .height,
-                                                                channels: 4,
-                                                            },
-                                                        }
-                                                    )
-                                                        .resize(96)
-                                                        .toFile(
-                                                            newThumbnail[0]
-                                                                .thumbnailSavePath
-                                                        )
-                                                        .then(() => {
-                                                            thumbnails.push({
-                                                                fileName,
-                                                                thumbnailPath:
-                                                                    newThumbnail[0]
-                                                                        .thumbnailSavePath,
-                                                            });
-                                                            resolve();
-                                                        })
-                                                        .catch((error) => {
-                                                            console.log(error);
-                                                            reject(error);
-                                                        });
-                                                }
+                                                generateTdrThumbnail(
+                                                    newThumbnail,
+                                                    { topIndex, sideIndex }
+                                                )
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             } else if (
                                                 newThumbnail[0].dataType
                                                     .type ===
                                                 Constants.Settings.ANNOTATIONS
                                                     .COCO
                                             ) {
-                                                if (newThumbnail.length > 1) {
-                                                    sharp(
-                                                        newThumbnail[topIndex]
-                                                            .pixelData
-                                                    )
-                                                        .resize(96)
-                                                        .toBuffer()
-                                                        .then((firstData) => {
-                                                            sharp(
-                                                                newThumbnail[
-                                                                    sideIndex
-                                                                ].pixelData
-                                                            )
-                                                                .resize(96)
-                                                                .toBuffer()
-                                                                .then(
-                                                                    (
-                                                                        secondData
-                                                                    ) => {
-                                                                        joinImages
-                                                                            .joinImages(
-                                                                                [
-                                                                                    firstData,
-                                                                                    secondData,
-                                                                                ],
-                                                                                {
-                                                                                    direction:
-                                                                                        'horizontal',
-                                                                                }
-                                                                            )
-                                                                            .then(
-                                                                                (
-                                                                                    img
-                                                                                ) => {
-                                                                                    img.png()
-                                                                                        .toBuffer()
-                                                                                        .then(
-                                                                                            (
-                                                                                                data
-                                                                                            ) => {
-                                                                                                sharp(
-                                                                                                    data
-                                                                                                )
-                                                                                                    .resize(
-                                                                                                        96
-                                                                                                    )
-                                                                                                    .toFile(
-                                                                                                        newThumbnail[0]
-                                                                                                            .thumbnailSavePath
-                                                                                                    )
-                                                                                                    .then(
-                                                                                                        () => {
-                                                                                                            thumbnails.push(
-                                                                                                                {
-                                                                                                                    fileName,
-                                                                                                                    thumbnailPath:
-                                                                                                                        newThumbnail[0]
-                                                                                                                            .thumbnailSavePath,
-                                                                                                                }
-                                                                                                            );
-                                                                                                            resolve();
-                                                                                                        }
-                                                                                                    )
-                                                                                                    .catch(
-                                                                                                        (
-                                                                                                            error
-                                                                                                        ) => {
-                                                                                                            console.log(
-                                                                                                                error
-                                                                                                            );
-                                                                                                            reject(
-                                                                                                                error
-                                                                                                            );
-                                                                                                        }
-                                                                                                    );
-                                                                                            }
-                                                                                        )
-                                                                                        .catch(
-                                                                                            (
-                                                                                                error
-                                                                                            ) => {
-                                                                                                console.log(
-                                                                                                    error
-                                                                                                );
-                                                                                                reject(
-                                                                                                    error
-                                                                                                );
-                                                                                            }
-                                                                                        );
-                                                                                }
-                                                                            )
-                                                                            .catch(
-                                                                                (
-                                                                                    error
-                                                                                ) => {
-                                                                                    console.log(
-                                                                                        error
-                                                                                    );
-                                                                                    reject(
-                                                                                        error
-                                                                                    );
-                                                                                }
-                                                                            );
-                                                                    }
-                                                                )
-                                                                .catch(
-                                                                    (error) => {
-                                                                        console.log(
-                                                                            error
-                                                                        );
-                                                                        reject(
-                                                                            error
-                                                                        );
-                                                                    }
-                                                                );
-                                                        })
-                                                        .catch((error) => {
-                                                            console.log(error);
-                                                            reject(error);
-                                                        });
-                                                } else if (
-                                                    newThumbnail.length === 1
-                                                ) {
-                                                    sharp(
-                                                        newThumbnail[0]
-                                                            .pixelData
-                                                    )
-                                                        .resize(96)
-                                                        .toFile(
-                                                            newThumbnail[0]
-                                                                .thumbnailSavePath
-                                                        )
-                                                        .then(() => {
-                                                            thumbnails.push({
-                                                                fileName,
-                                                                thumbnailPath:
-                                                                    newThumbnail[0]
-                                                                        .thumbnailSavePath,
-                                                            });
-                                                            resolve();
-                                                        })
-                                                        .catch((error) => {
-                                                            console.log(error);
-                                                            reject(error);
-                                                        });
-                                                }
+                                                generateCocoThumbnail(
+                                                    newThumbnail,
+                                                    { topIndex, sideIndex }
+                                                )
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             }
                                         } else {
                                             reject();
@@ -889,6 +808,12 @@ const parseThumbnail = async (filePath) => {
     return result;
 };
 
+/**
+ * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
+ *
+ * @param {ArrayBuffer} imageData
+ * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
+ */
 const dcsToPng = (imageData) => {
     const byteArray = new Uint8Array(imageData);
     try {
@@ -927,6 +852,9 @@ const dcsToPng = (imageData) => {
     }
 };
 
+/**
+ * Saves the JSON database, ie D:\images\.thumbnails\database.json
+ */
 const saveThumbnailDatabase = () => {
     fs.writeFileSync(
         `${thumbnailPath}${
@@ -936,6 +864,9 @@ const saveThumbnailDatabase = () => {
     );
 };
 
+/**
+ * Loads the thumbnail database into the thumbnails array
+ */
 const loadThumbnailDatabase = () => {
     const thumbnailDBPath = `${thumbnailPath}${
         process.platform === 'win32' ? '\\' : '/'
