@@ -486,6 +486,7 @@ const parseThumbnail = async (filePath) => {
                                                 })
                                                 .catch((error) => {
                                                     console.log(error);
+                                                    reject(error);
                                                 })
                                         );
                                     } else if (
@@ -515,9 +516,10 @@ const parseThumbnail = async (filePath) => {
                                                 })
                                                 .catch((error) => {
                                                     console.log(error);
+                                                    reject(error);
                                                 })
                                         );
-                                    }
+                                    } else reject('Unsupported format');
                                 });
                                 const promiseOfNewThumbnailsList = Promise.all(
                                     listOfNewThumbnailPromises
@@ -568,9 +570,9 @@ const parseThumbnail = async (filePath) => {
                                                     .catch((error) =>
                                                         reject(error)
                                                     );
-                                            }
+                                            } else reject('Unsupported format');
                                         } else {
-                                            reject();
+                                            reject('No images');
                                         }
                                     })
                                     .catch((error) => {
@@ -741,7 +743,7 @@ const generateTdrThumbnail = (newThumbnail, indexes) => {
                     console.log(error);
                     reject(error);
                 });
-        }
+        } else reject('Incorrect number of views');
     });
     return result;
 };
@@ -828,7 +830,7 @@ const generateCocoThumbnail = (newThumbnail, indexes) => {
                     console.log(error);
                     reject(error);
                 });
-        }
+        } else reject('Incorrect number of views');
     });
     return result;
 };
