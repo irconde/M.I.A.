@@ -13,6 +13,14 @@ import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
 
+/**
+ * Component for ?.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: thumbnails (Array of thumbnails?), getSpecificFileFromLocalDirectory (?)
+ *
+ */
 function LazyImageMenu(props) {
     const enableMenu = useSelector(getLocalFileOpen);
     const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);

@@ -9,8 +9,11 @@ import {
 import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 
 /**
+ * @component
+ *
  * GUI widget that provides the user with information regarding a particular
  * object detection algorithm
+ *
  */
 const MetaData = () => {
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);

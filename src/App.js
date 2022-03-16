@@ -885,7 +885,6 @@ class App extends Component {
      * @param {Base64} image Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
      * @param {String} fileName Name of current file being processed. Used to prevent duplicate annotations.
      * @param {String} [numberOfFiles = 0] Number of files left in queue
-     * @return {None} None
      */
 
     loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {

@@ -13,10 +13,9 @@ export default class ORA {
     }
 
     /**
-     * getFirstImage() - Returns the first image on the first stack if it exists
+     * Returns the first image on the first stack if it exists
      *
-     * @param {type} None
-     * @returns {type} Blob
+     * @returns {Blob} first image on the first stack
      */
     getFirstImage() {
         if (this.stackData.length > 0) {
@@ -26,11 +25,9 @@ export default class ORA {
         }
     }
     /**
-     * getFirstPixelData() - Returns the pixel data as an array buffer
-     *                       From the first stack if it exists
+     * Returns the pixel data as an array buffer from the first stack if it exists
      *
-     * @param {type} None
-     * @returns {type} ArrayBuffer
+     * @returns {ArrayBuffer} Pixel data
      */
     getFirstPixelData() {
         if (this.stackData.length > 0) {
@@ -40,12 +37,11 @@ export default class ORA {
         }
     }
     /**
-     * getImage(stackNum, imageNum) - Given a stack number and image number will return
-     *                                that corresponding image blob if it exists
+     * Given a stack number and image number will return that corresponding image blob if it exists
      *
-     * @param {number} stackNum
-     * @param {number} imageNum
-     * @returns {type} Blob
+     * @param {Integer} stackNum
+     * @param {Integer} imageNum
+     * @returns {Blob} Image blob of given stack/image number
      */
     getImage(stackNum, imageNum) {
         if (this.stackData.length > 0) {
@@ -55,11 +51,10 @@ export default class ORA {
         }
     }
     /**
-     * getPixelData(stackNum) - Given a stack number, if it exists, will return that
-     *                          corresponding stack's pixel data as an array buffer
+     * Given a stack number, if it exists, will return that corresponding stack's pixel data as an array buffer
      *
-     * @param {number} stackNum
-     * @returns {type} ArrayBuffer
+     * @param {Integer} stackNum
+     * @returns {ArrayBuffer} Corresponding stack's pixel data
      */
     getPixelData(stackNum) {
         if (this.stackData.length > 0) {

@@ -17,6 +17,14 @@ const ImageContainer = styled.div`
     cursor: pointer;
 `;
 
+/**
+ * Component for ?.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: file (Name of file), getSpecificFileFromLocalDirectory (?)
+ *
+ */
 function LazyImageContainer(props) {
     const currentFileName = useSelector(getCurrentFile);
     let splitPath;
