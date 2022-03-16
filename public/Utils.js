@@ -1,21 +1,19 @@
 /**
- * inRange - Checks if the current passed in value is inside the specified
- *           min and max range.
- *
- * @param {number} value - Value to check
- * @param {number} min - Minimum allowed value
- * @param {number} max - Maximum allowed value
+ * Checks if the current passed in value is inside the specified
+ * min and max range.
+ * @param {Number} value - Value to check
+ * @param {Number} min - Minimum allowed value
+ * @param {Number} max - Maximum allowed value
  */
 const inRange = (value, min, max) => {
     return (value - min) * (value - max) <= 0;
 };
 
 /**
- * findGrayValue - Takes in a 16 bit gray scale value between 0 - 65535 along with the build intervals from this.buildIntervals()
- *                 It returns an 8 bit gray scale value between 0 - 255. There is lose of data but the image retains most of it's quality
- *
+ * Takes in a 16 bit gray scale value between 0 - 65535 along with the build intervals from this.buildIntervals()
+ * It returns an 8 bit gray scale value between 0 - 255. There is lose of data but the image retains most of it's quality
  * @param {Number} greyScale
- * @param {Array<{min: Number, max: Number}>} intervals
+ * @param {Array<{min: Number; max: Number;}>} intervals
  * @returns {Number} 8 Bit Color in range of 0-255
  */
 const findGrayValue = (greyScale, intervals) => {
@@ -31,8 +29,7 @@ const findGrayValue = (greyScale, intervals) => {
 
 /**
  * buildIntervals - Builder function to create the needed ranges to associate a 16 bit value to an 8 bit value given certain ranges
- *
- * @returns {Array<{min: Number, max: Number}>} Array of objects with key values of min and max
+ * @returns {Array<{min: Number; max: Number;}>} Array of objects with key values of min and max
  */
 const buildIntervals = () => {
     const intervals = [{ min: 0, max: 255 }];

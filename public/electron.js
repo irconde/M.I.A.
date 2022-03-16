@@ -434,95 +434,214 @@ const parseFilesForThumbnail = async (files) => {
 };
 
 /**
- * Generate a COCO thumbnail
- * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Buffer;}>} newThumbnail Array of Objects
- * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
+ * Parses the given file path into a thumbnail if possible
+ * @param {string} filePath Full path to the file, ie D:\images\1_img.ora
  * @returns {Promise}
  */
-const generateCocoThumbnail = (newThumbnail, indexes) => {
+const parseThumbnail = async (filePath) => {
     const result = new Promise((resolve, reject) => {
-        const { topIndex, sideIndex } = indexes;
-        if (newThumbnail.length > 1) {
-            sharp(newThumbnail[topIndex].pixelData)
-                .resize(96)
-                .toBuffer()
-                .then((firstData) => {
-                    sharp(newThumbnail[sideIndex].pixelData)
-                        .resize(96)
-                        .toBuffer()
-                        .then((secondData) => {
-                            joinImages
-                                .joinImages([firstData, secondData], {
-                                    direction: 'horizontal',
-                                })
-                                .then((img) => {
-                                    img.png()
-                                        .toBuffer()
-                                        .then((data) => {
-                                            sharp(data)
-                                                .resize(96)
-                                                .toFile(
-                                                    newThumbnail[0]
-                                                        .thumbnailSavePath
-                                                )
-                                                .then(() => {
-                                                    thumbnails.push({
-                                                        fileName:
-                                                            newThumbnail[0]
-                                                                .fileName,
-                                                        thumbnailPath:
-                                                            newThumbnail[0]
-                                                                .thumbnailSavePath,
+        const splitPath = filePath.split(
+            process.platform === 'win32' ? '\\' : '/'
+        );
+        const fileName = splitPath[splitPath.length - 1];
+        const fileData = fs.readFileSync(filePath);
+        const fileObject = Buffer.from(fileData).toString('base64');
+        const myZip = new JSZip();
+        myZip
+            .loadAsync(fileObject, { base64: true })
+            .then(() => {
+                myZip
+                    .file('stack.xml')
+                    .async('string')
+                    .then((stackFile) => {
+                        parseString(stackFile, (error, result) => {
+                            if (error === null) {
+                                let newThumbnail = [];
+                                let listOfNewThumbnailPromises = [];
+                                result.image.stack.forEach((stack) => {
+                                    let thumbnailSavePath =
+                                        process.platform === 'win32'
+                                            ? `${thumbnailPath}\\${fileName}_thumbnail.png`
+                                            : `${thumbnailPath}/${fileName}_thumbnail.png`;
+                                    const dataType = validateImageExtension(
+                                        stack.layer[0].$.src
+                                    );
+                                    if (
+                                        dataType.result &&
+                                        dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.COCO
+                                    ) {
+                                        listOfNewThumbnailPromises.push(
+                                            myZip
+                                                .file(stack.layer[0].$.src)
+                                                .async('nodebuffer')
+                                                .then((imageData) => {
+                                                    newThumbnail.push({
+                                                        fileName,
+                                                        view: stack.$.view,
+                                                        thumbnailSavePath,
+                                                        type: dataType.type,
+                                                        pixelData: imageData,
                                                     });
-                                                    resolve();
                                                 })
                                                 .catch((error) => {
                                                     console.log(error);
-                                                    reject(error);
-                                                });
-                                        })
-                                        .catch((error) => {
-                                            console.log(error);
-                                            reject(error);
-                                        });
-                                })
-                                .catch((error) => {
-                                    console.log(error);
-                                    reject(error);
+                                                })
+                                        );
+                                    } else if (
+                                        dataType.result &&
+                                        dataType.type ===
+                                            Constants.Settings.ANNOTATIONS.TDR
+                                    ) {
+                                        listOfNewThumbnailPromises.push(
+                                            myZip
+                                                .file(stack.layer[0].$.src)
+                                                .async('arraybuffer')
+                                                .then((imageData) => {
+                                                    const dicosPngData =
+                                                        dicosToPngData(
+                                                            imageData
+                                                        );
+                                                    newThumbnail.push({
+                                                        fileName,
+                                                        view: stack.$.view,
+                                                        thumbnailSavePath,
+                                                        type: dataType.type,
+                                                        pixelData:
+                                                            dicosPngData.pixelData,
+                                                        width: dicosPngData.width,
+                                                        height: dicosPngData.height,
+                                                    });
+                                                })
+                                                .catch((error) => {
+                                                    console.log(error);
+                                                })
+                                        );
+                                    }
                                 });
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                            reject(error);
+                                const promiseOfNewThumbnailsList = Promise.all(
+                                    listOfNewThumbnailPromises
+                                );
+                                promiseOfNewThumbnailsList
+                                    .then(() => {
+                                        if (newThumbnail.length > 0) {
+                                            let topIndex, sideIndex;
+                                            if (newThumbnail.length === 1) {
+                                                topIndex = 0;
+                                            } else if (
+                                                newThumbnail.length > 1
+                                            ) {
+                                                topIndex =
+                                                    newThumbnail[0].view ===
+                                                    Constants.Viewport.TOP
+                                                        ? 0
+                                                        : 1;
+                                                sideIndex =
+                                                    newThumbnail[1].view ===
+                                                    Constants.Viewport.SIDE
+                                                        ? 1
+                                                        : 0;
+                                            }
+                                            if (
+                                                newThumbnail[0].type ===
+                                                Constants.Settings.ANNOTATIONS
+                                                    .TDR
+                                            ) {
+                                                generateTdrThumbnail(
+                                                    newThumbnail,
+                                                    { topIndex, sideIndex }
+                                                )
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
+                                            } else if (
+                                                newThumbnail[0].type ===
+                                                Constants.Settings.ANNOTATIONS
+                                                    .COCO
+                                            ) {
+                                                generateCocoThumbnail(
+                                                    newThumbnail,
+                                                    { topIndex, sideIndex }
+                                                )
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
+                                            }
+                                        } else {
+                                            reject();
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                        reject(error);
+                                    });
+                            } else {
+                                console.log(error);
+                                reject(error);
+                            }
                         });
-                })
-                .catch((error) => {
-                    console.log(error);
-                    reject(error);
-                });
-        } else if (newThumbnail.length === 1) {
-            sharp(newThumbnail[0].pixelData)
-                .resize(96)
-                .toFile(newThumbnail[0].thumbnailSavePath)
-                .then(() => {
-                    thumbnails.push({
-                        fileName: newThumbnail[0].fileName,
-                        thumbnailPath: newThumbnail[0].thumbnailSavePath,
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject(error);
                     });
-                    resolve();
-                })
-                .catch((error) => {
-                    console.log(error);
-                    reject(error);
-                });
-        }
+            })
+            .catch((error) => {
+                console.log(error);
+                reject(error);
+            });
     });
     return result;
 };
 
 /**
+ * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
+ * @param {ArrayBuffer} imageData
+ * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
+ */
+const dicosToPngData = (imageData) => {
+    const byteArray = new Uint8Array(imageData);
+    try {
+        // Allow raw files
+        const options = {
+            TransferSyntaxUID: '1.2.840.10008.1.2',
+        };
+        // Parse the byte array to get a DataSet object that has the parsed contents
+        const dataSet = dicomParser.parseDicom(byteArray, options);
+
+        // get the pixel data element (contains the offset and length of the data)
+        const pixelDataElement = dataSet.elements.x7fe00010;
+
+        // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+        const pixelData = new Uint16Array(
+            dataSet.byteArray.buffer,
+            pixelDataElement.dataOffset,
+            pixelDataElement.length / 2
+        );
+        const intervals = Utils.buildIntervals();
+        const height = dataSet.int16('x00280010');
+        const width = dataSet.int16('x00280011');
+        const EightbitPixels = new Uint8ClampedArray(4 * width * height);
+        let z = 0;
+        for (let i = 0; i < pixelData.length; i++) {
+            const greyValue = Utils.findGrayValue(pixelData[i], intervals);
+            EightbitPixels[z] = greyValue;
+            EightbitPixels[z + 1] = greyValue;
+            EightbitPixels[z + 2] = greyValue;
+            EightbitPixels[z + 3] = 255;
+            z += 4;
+        }
+        return { width, height, pixelData: EightbitPixels };
+    } catch (ex) {
+        console.log('Error parsing byte stream', ex);
+    }
+};
+
+/**
  * Generate a TDR thumbnail
- * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; dataType: { result: Boolean; type: Constants.Settings.ANNOTATIONS }; pixelData: Uint8ClampedArray; width: Number; height: Number;}>} newThumbnail Array of Objects
+ * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; type: Constants.Settings.ANNOTATIONS; pixelData: Uint8ClampedArray; width: Number; height: Number;}>} newThumbnail Array of Objects
  * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
  * @returns {Promise}
  */
@@ -628,209 +747,90 @@ const generateTdrThumbnail = (newThumbnail, indexes) => {
 };
 
 /**
- * Parses the given file path into a thumbnail if possible
- * @param {string} filePath Full path to the file, ie D:\images\1_img.ora
+ * Generate a COCO thumbnail
+ * @param {Array<{fileName: string; view: string; thumbnailSavePath: string; type: Constants.Settings.ANNOTATIONS; pixelData: Buffer;}>} newThumbnail Array of Objects
+ * @param {{topIndex: Number; sideIndex: Number;}} indexes Object containing topIndex & sideIndex as numbers
  * @returns {Promise}
  */
-const parseThumbnail = async (filePath) => {
+const generateCocoThumbnail = (newThumbnail, indexes) => {
     const result = new Promise((resolve, reject) => {
-        const splitPath = filePath.split(
-            process.platform === 'win32' ? '\\' : '/'
-        );
-        const fileName = splitPath[splitPath.length - 1];
-        const fileData = fs.readFileSync(filePath);
-        const fileObject = Buffer.from(fileData).toString('base64');
-        const myZip = new JSZip();
-        myZip
-            .loadAsync(fileObject, { base64: true })
-            .then(() => {
-                myZip
-                    .file('stack.xml')
-                    .async('string')
-                    .then((stackFile) => {
-                        parseString(stackFile, (error, result) => {
-                            if (error === null) {
-                                let newThumbnail = [];
-                                let listOfNewThumbnailPromises = [];
-                                result.image.stack.forEach((stack) => {
-                                    let thumbnailSavePath =
-                                        process.platform === 'win32'
-                                            ? `${thumbnailPath}\\${fileName}_thumbnail.png`
-                                            : `${thumbnailPath}/${fileName}_thumbnail.png`;
-                                    const dataType = validateImageExtension(
-                                        stack.layer[0].$.src
-                                    );
-                                    if (
-                                        dataType.result &&
-                                        dataType.type ===
-                                            Constants.Settings.ANNOTATIONS.COCO
-                                    ) {
-                                        listOfNewThumbnailPromises.push(
-                                            myZip
-                                                .file(stack.layer[0].$.src)
-                                                .async('nodebuffer')
-                                                .then((imageData) => {
-                                                    newThumbnail.push({
-                                                        fileName,
-                                                        view: stack.$.view,
-                                                        thumbnailSavePath,
-                                                        dataType,
-                                                        pixelData: imageData,
+        const { topIndex, sideIndex } = indexes;
+        if (newThumbnail.length > 1) {
+            sharp(newThumbnail[topIndex].pixelData)
+                .resize(96)
+                .toBuffer()
+                .then((firstData) => {
+                    sharp(newThumbnail[sideIndex].pixelData)
+                        .resize(96)
+                        .toBuffer()
+                        .then((secondData) => {
+                            joinImages
+                                .joinImages([firstData, secondData], {
+                                    direction: 'horizontal',
+                                })
+                                .then((img) => {
+                                    img.png()
+                                        .toBuffer()
+                                        .then((data) => {
+                                            sharp(data)
+                                                .resize(96)
+                                                .toFile(
+                                                    newThumbnail[0]
+                                                        .thumbnailSavePath
+                                                )
+                                                .then(() => {
+                                                    thumbnails.push({
+                                                        fileName:
+                                                            newThumbnail[0]
+                                                                .fileName,
+                                                        thumbnailPath:
+                                                            newThumbnail[0]
+                                                                .thumbnailSavePath,
                                                     });
+                                                    resolve();
                                                 })
                                                 .catch((error) => {
                                                     console.log(error);
-                                                })
-                                        );
-                                    } else if (
-                                        dataType.result &&
-                                        dataType.type ===
-                                            Constants.Settings.ANNOTATIONS.TDR
-                                    ) {
-                                        listOfNewThumbnailPromises.push(
-                                            myZip
-                                                .file(stack.layer[0].$.src)
-                                                .async('arraybuffer')
-                                                .then((imageData) => {
-                                                    const dicosImageData =
-                                                        dcsToPng(imageData);
-                                                    newThumbnail.push({
-                                                        fileName,
-                                                        view: stack.$.view,
-                                                        thumbnailSavePath,
-                                                        dataType,
-                                                        pixelData:
-                                                            dicosImageData.pixelData,
-                                                        width: dicosImageData.width,
-                                                        height: dicosImageData.height,
-                                                    });
-                                                })
-                                                .catch((error) => {
-                                                    console.log(error);
-                                                })
-                                        );
-                                    }
+                                                    reject(error);
+                                                });
+                                        })
+                                        .catch((error) => {
+                                            console.log(error);
+                                            reject(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                    reject(error);
                                 });
-                                const promiseOfNewThumbnailsList = Promise.all(
-                                    listOfNewThumbnailPromises
-                                );
-                                promiseOfNewThumbnailsList
-                                    .then(() => {
-                                        if (newThumbnail.length > 0) {
-                                            let topIndex, sideIndex;
-                                            if (newThumbnail.length === 1) {
-                                                topIndex = 0;
-                                            } else if (
-                                                newThumbnail.length > 1
-                                            ) {
-                                                topIndex =
-                                                    newThumbnail[0].view ===
-                                                    Constants.Viewport.TOP
-                                                        ? 0
-                                                        : 1;
-                                                sideIndex =
-                                                    newThumbnail[1].view ===
-                                                    Constants.Viewport.SIDE
-                                                        ? 1
-                                                        : 0;
-                                            }
-                                            if (
-                                                newThumbnail[0].dataType
-                                                    .type ===
-                                                Constants.Settings.ANNOTATIONS
-                                                    .TDR
-                                            ) {
-                                                generateTdrThumbnail(
-                                                    newThumbnail,
-                                                    { topIndex, sideIndex }
-                                                )
-                                                    .then(() => resolve())
-                                                    .catch((error) =>
-                                                        reject(error)
-                                                    );
-                                            } else if (
-                                                newThumbnail[0].dataType
-                                                    .type ===
-                                                Constants.Settings.ANNOTATIONS
-                                                    .COCO
-                                            ) {
-                                                generateCocoThumbnail(
-                                                    newThumbnail,
-                                                    { topIndex, sideIndex }
-                                                )
-                                                    .then(() => resolve())
-                                                    .catch((error) =>
-                                                        reject(error)
-                                                    );
-                                            }
-                                        } else {
-                                            reject();
-                                        }
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                        reject(error);
-                                    });
-                            } else {
-                                console.log(error);
-                                reject(error);
-                            }
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            reject(error);
                         });
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        reject(error);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        } else if (newThumbnail.length === 1) {
+            sharp(newThumbnail[0].pixelData)
+                .resize(96)
+                .toFile(newThumbnail[0].thumbnailSavePath)
+                .then(() => {
+                    thumbnails.push({
+                        fileName: newThumbnail[0].fileName,
+                        thumbnailPath: newThumbnail[0].thumbnailSavePath,
                     });
-            })
-            .catch((error) => {
-                console.log(error);
-                reject(error);
-            });
+                    resolve();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        }
     });
     return result;
-};
-
-/**
- * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
- * @param {ArrayBuffer} imageData
- * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
- */
-const dcsToPng = (imageData) => {
-    const byteArray = new Uint8Array(imageData);
-    try {
-        // Allow raw files
-        const options = {
-            TransferSyntaxUID: '1.2.840.10008.1.2',
-        };
-        // Parse the byte array to get a DataSet object that has the parsed contents
-        const dataSet = dicomParser.parseDicom(byteArray, options);
-
-        // get the pixel data element (contains the offset and length of the data)
-        const pixelDataElement = dataSet.elements.x7fe00010;
-
-        // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
-        const pixelData = new Uint16Array(
-            dataSet.byteArray.buffer,
-            pixelDataElement.dataOffset,
-            pixelDataElement.length / 2
-        );
-        const intervals = Utils.buildIntervals();
-        const height = dataSet.int16('x00280010');
-        const width = dataSet.int16('x00280011');
-        const EightbitPixels = new Uint8ClampedArray(4 * width * height);
-        let z = 0;
-        for (let i = 0; i < pixelData.length; i++) {
-            const greyValue = Utils.findGrayValue(pixelData[i], intervals);
-            EightbitPixels[z] = greyValue;
-            EightbitPixels[z + 1] = greyValue;
-            EightbitPixels[z + 2] = greyValue;
-            EightbitPixels[z + 3] = 255;
-            z += 4;
-        }
-        return { width, height, pixelData: EightbitPixels };
-    } catch (ex) {
-        console.log('Error parsing byte stream', ex);
-    }
 };
 
 /**
