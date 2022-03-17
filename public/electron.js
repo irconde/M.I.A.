@@ -190,6 +190,34 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 });
 
 /**
+ * Loads the specified file if the path provided exists. If so it will
+ * it will load the file and then, it will return the Base64 binary string of the next file.
+ * Along with other information about the file and other files in the path.
+ * @param {string} args File path sent from react
+ * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
+ */
+ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        const splitPath = args.split(process.platform === 'win32' ? '\\' : '/');
+        if (splitPath.length > 0) {
+            const fileName = splitPath[splitPath.length - 1];
+            const foundThumbnail = thumbnails.find(
+                (value) => value.fileName === fileName
+            );
+            if (foundThumbnail === undefined) {
+                reject('Thumbnail does not exist for that file');
+            } else {
+                const fileData = fs.readFileSync(foundThumbnail.thumbnailPath);
+                resolve(Buffer.from(fileData).toString('base64'));
+            }
+        } else {
+            reject('Could not determine file name from that path');
+        }
+    });
+    return result;
+});
+
+/**
  * Finds the maximum number used in the already saved files in the returned path
  * @param {string} fileNameSuffix
  * @param {Array<string>} returnedFiles
