@@ -23,20 +23,24 @@ const ImageContainer = styled.div`
 function LazyImageContainer(props) {
     const containerElement = useRef();
     const isOnScreen = Utils.useOnScreen(containerElement);
-    const [thumbnailData, setThumbnailData] = useState(null);
     const [thumbnailSrc, setThumbnailSrc] = useState(null);
+    /**
+     * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
+     * If no parameter is passed it revokes the blobs object url if it was loaded already.
+     * @param {Blob = null} blobData
+     */
     const thumbnailHandler = (blobData = null) => {
         if (blobData === null) {
-            URL.revokeObjectURL(thumbnailSrc);
-            setThumbnailData(null);
-            setThumbnailSrc(null);
+            if (thumbnailSrc !== null) {
+                URL.revokeObjectURL(thumbnailSrc);
+                setThumbnailSrc(null);
+            }
         } else {
-            setThumbnailData(blobData);
             setThumbnailSrc(URL.createObjectURL(blobData));
         }
     };
     useLayoutEffect(() => {
-        if (isOnScreen && thumbnailData === null) {
+        if (isOnScreen && thumbnailSrc === null) {
             ipcRenderer
                 .invoke(Channels.getThumbnail, props.file)
                 .then((b64Data) => {
@@ -48,7 +52,7 @@ function LazyImageContainer(props) {
                     console.log(error);
                 });
         }
-        if (!isOnScreen && thumbnailData !== null) {
+        if (!isOnScreen && thumbnailSrc !== null) {
             thumbnailHandler();
         }
     });

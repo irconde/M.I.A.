@@ -40,6 +40,7 @@ function LazyImageMenu(props) {
             }
         }
     });
+    // TODO: Scroll to selected thumbnail
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (

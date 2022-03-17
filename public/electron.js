@@ -190,11 +190,10 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 });
 
 /**
- * Loads the specified file if the path provided exists. If so it will
- * it will load the file and then, it will return the Base64 binary string of the next file.
- * Along with other information about the file and other files in the path.
+ * Loads the specified thumbnail if the file name provided exists. If so it will
+ * it will load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
  * @param {string} args File path sent from react
- * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
+ * @returns {string}
  */
 ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
     const result = new Promise((resolve, reject) => {
