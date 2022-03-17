@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { getCurrentFile } from '../../redux/slices/server/serverSlice';
+import Utils from '../../utils/Utils';
 
 const ImageContainer = styled.div`
     display: flex;
@@ -18,6 +19,11 @@ const ImageContainer = styled.div`
 `;
 
 function LazyImageContainer(props) {
+    const containerElement = useRef();
+    const isOnScreen = Utils.useOnScreen(containerElement);
+    useLayoutEffect(() => {
+        console.log(`File: ${props.file} | On Screen: ${isOnScreen}`);
+    });
     const currentFileName = useSelector(getCurrentFile);
     let splitPath;
     if (navigator.platform === 'Win32') {
@@ -29,6 +35,7 @@ function LazyImageContainer(props) {
     const selected = currentFileName === thisFileName;
     return (
         <ImageContainer
+            ref={containerElement}
             selected={selected}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
             title={props.file}></ImageContainer>
