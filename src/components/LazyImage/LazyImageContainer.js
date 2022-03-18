@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 import Utils from '../../utils/Utils';
 import { Channels } from '../../utils/Constants';
+import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 const ImageContainer = styled.div`
@@ -15,12 +16,13 @@ const ImageContainer = styled.div`
     margin: 1.5rem;
     background-color: #1f1f1f;
     justify-content: center;
-    height: 96px;
     width: 96px;
+    height: ${(props) => (props.loading === 'true' ? '96px' : 'auto')};
     cursor: pointer;
 `;
 
 function LazyImageContainer(props) {
+    const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState(null);
@@ -40,20 +42,22 @@ function LazyImageContainer(props) {
         }
     };
     useLayoutEffect(() => {
-        if (isOnScreen && thumbnailSrc === null) {
-            ipcRenderer
-                .invoke(Channels.getThumbnail, props.file)
-                .then((b64Data) => {
-                    const blobData = Utils.b64toBlob(b64Data, 'image/png');
-                    thumbnailHandler(blobData);
-                })
-                .catch((error) => {
-                    // TODO: Better error handling, if file didn't exist, thumbnail not loaded yet
-                    console.log(error);
-                });
-        }
-        if (!isOnScreen && thumbnailSrc !== null) {
-            thumbnailHandler();
+        if (!generatingThumbnails) {
+            if (isOnScreen && thumbnailSrc === null) {
+                ipcRenderer
+                    .invoke(Channels.getThumbnail, props.file)
+                    .then((b64Data) => {
+                        const blobData = Utils.b64toBlob(b64Data, 'image/png');
+                        thumbnailHandler(blobData);
+                    })
+                    .catch((error) => {
+                        // TODO: Better error handling, if file didn't exist, thumbnail not loaded yet
+                        console.log(error);
+                    });
+            }
+            if (!isOnScreen && thumbnailSrc !== null) {
+                thumbnailHandler();
+            }
         }
     });
     const currentFileName = useSelector(getCurrentFile);
@@ -69,6 +73,7 @@ function LazyImageContainer(props) {
         <ImageContainer
             ref={containerElement}
             selected={selected}
+            loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
             title={props.file}>
             {thumbnailSrc !== null ? <img src={thumbnailSrc} /> : null}

@@ -5,6 +5,7 @@ module.exports.Channels = {
     getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
     getThumbnail: 'get-thumbnail',
+    thumbnailStatus: 'thumbnail-status',
 };
 
 module.exports.Settings = {

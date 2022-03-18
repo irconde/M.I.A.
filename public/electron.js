@@ -22,6 +22,7 @@ let mainWindow;
 let files = [];
 let thumbnails = [];
 let thumbnailPath = '';
+let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
@@ -217,6 +218,16 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 });
 
 /**
+ * Sends the current thumbnail status (generating or not) to the React/renderer process
+ */
+const sendThumbnailStatus = () => {
+    mainWindow.webContents.send(
+        Constants.Channels.thumbnailStatus,
+        isGeneratingThumbnails
+    );
+};
+
+/**
  * Finds the maximum number used in the already saved files in the returned path
  * @param {string} fileNameSuffix
  * @param {Array<string>} returnedFiles
@@ -357,6 +368,8 @@ const loadFile = (filePath) => {
  * @param {string} path
  */
 const startThumbnailThread = async (path) => {
+    isGeneratingThumbnails = true;
+    sendThumbnailStatus();
     createThumbnailsPath(path);
     const filesToGenerate = await filesNeedingThumbnails(path);
     if (filesToGenerate.length > 0) {
@@ -365,6 +378,9 @@ const startThumbnailThread = async (path) => {
             .finally(() => {
                 saveThumbnailDatabase();
             });
+    } else {
+        isGeneratingThumbnails = false;
+        sendThumbnailStatus();
     }
 };
 
@@ -872,6 +888,8 @@ const saveThumbnailDatabase = () => {
         }database.json`,
         JSON.stringify(thumbnails, null, 4)
     );
+    isGeneratingThumbnails = false;
+    sendThumbnailStatus();
 };
 
 /**

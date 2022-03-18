@@ -1,6 +1,6 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     getLocalFileOutput,
     getRemoteOrLocal,
@@ -8,12 +8,18 @@ import {
 import {
     getCollapsedLazyMenu,
     getLocalFileOpen,
+    setGeneratingThumbnails,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 function LazyImageMenu(props) {
+    const dispatch = useDispatch();
+    ipcRenderer.on(constants.Channels.thumbnailStatus, (event, status) => {
+        dispatch(setGeneratingThumbnails(status));
+    });
     const enableMenu = useSelector(getLocalFileOpen);
     const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
     const fileOutputPath = useSelector(getLocalFileOutput);

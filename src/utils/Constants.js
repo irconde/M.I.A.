@@ -127,4 +127,5 @@ export const Channels = {
     getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
     getThumbnail: 'get-thumbnail',
+    thumbnailStatus: 'thumbnail-status',
 };
