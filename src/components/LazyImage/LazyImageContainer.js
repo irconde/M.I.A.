@@ -11,10 +11,11 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 const ImageContainer = styled.div`
     display: flex;
     border: ${(props) =>
-        props.selected ? '1px solid blue' : '1px solid white'};
+        props.selected ? '1px solid #367eff' : '1px solid white'};
     overflow-x: hidden;
     margin: 1.5rem;
-    background-color: #1f1f1f;
+    background-color: ${(props) =>
+        props.loading === 'true' ? 'gray' : '#1f1f1f'};
     justify-content: center;
     width: 96px;
     height: ${(props) => (props.loading === 'true' ? '96px' : 'auto')};
@@ -51,7 +52,7 @@ function LazyImageContainer(props) {
                         thumbnailHandler(blobData);
                     })
                     .catch((error) => {
-                        // TODO: Better error handling, if file didn't exist, thumbnail not loaded yet
+                        // TODO: Better error handling
                         console.log(error);
                     });
             }

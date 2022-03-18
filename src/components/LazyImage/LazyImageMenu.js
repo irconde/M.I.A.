@@ -78,13 +78,6 @@ function LazyImageMenu(props) {
                     style={{
                         ...translateStyle,
                     }}>
-                    {/* <div
-                    style={{
-                        height:
-                            constants.sideMenuPaddingTop +
-                            constants.RESOLUTION_UNIT,
-                        width: '100%',
-                    }}></div> */}
                     <div
                         className="lazy-images-container"
                         style={{

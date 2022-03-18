@@ -102,6 +102,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
+                sendThumbnailStatus();
                 resolve(loadFile(files[currentFileIndex]));
             }
         } else if (files.length !== 0 && currentFileIndex >= files.length) {
@@ -111,6 +112,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
+                            sendThumbnailStatus();
                             resolve(loadFile(files[currentFileIndex]));
                         } else {
                             reject('No files loaded');
@@ -138,6 +140,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (fs.existsSync(args)) {
             currentFileIndex = files.findIndex((filePath) => filePath === args);
+            sendThumbnailStatus();
             resolve(loadFile(args));
         } else {
             reject('File path does not exist');
