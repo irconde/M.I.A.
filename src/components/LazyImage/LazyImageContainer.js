@@ -18,13 +18,24 @@ const ImageContainer = styled.div`
         props.loading === 'true' ? 'gray' : '#1f1f1f'};
     justify-content: center;
     width: 96px;
-    height: ${(props) => (props.loading === 'true' ? '96px' : 'auto')};
+    height: ${(props) =>
+        props.loading === 'true' ? '96px' : `${props.thumbnailHeight}px`};
     cursor: pointer;
 `;
 
 function LazyImageContainer(props) {
     const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
+    const [thumbnailHeight, setThumbnailHeight] = useState('auto');
+    /**
+     * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
+     * using this handler. Which sets the thumbnail height passed into the container element of the image.
+     * This is namely so that when an image goes off screen, we keep the container the same size of that image.
+     * @param {Number} height
+     */
+    const thumbnailHeightHandler = (height) => {
+        if (height !== thumbnailHeight) setThumbnailHeight(height);
+    };
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState(null);
     /**
@@ -74,10 +85,20 @@ function LazyImageContainer(props) {
         <ImageContainer
             ref={containerElement}
             selected={selected}
+            thumbnailHeight={thumbnailHeight}
             loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
             title={props.file}>
-            {thumbnailSrc !== null ? <img src={thumbnailSrc} /> : null}
+            {thumbnailSrc !== null ? (
+                <img
+                    onLoad={(event) => {
+                        thumbnailHeightHandler(
+                            containerElement.current.clientHeight
+                        );
+                    }}
+                    src={thumbnailSrc}
+                />
+            ) : null}
         </ImageContainer>
     );
 }
