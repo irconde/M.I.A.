@@ -2,7 +2,7 @@
     "name": "dna-client-ui",
     "productName": "Pilot GUI",
     "main": "public/electron.js",
-    "version": "3.7.0",
+    "version": "4.2.0",
     "private": true,
     "homepage": "./",
     "dependencies": {
@@ -29,8 +29,10 @@
         "dotenv": "^8.2.0",
         "eac-cornerstone-tools": "^1.0.6",
         "electron-is-dev": "^2.0.0",
+        "fswin": "^3.22.106",
         "hammerjs": "^2.0.8",
         "is-electron": "^2.2.1",
+        "join-images": "^1.0.0",
         "jszip": "^3.5.0",
         "lodash.clonedeep": "^4.5.0",
         "lodash.debounce": "4.0.8",
@@ -43,9 +45,11 @@
         "react-dom": "^16.13.1",
         "react-redux": "^7.2.2",
         "react-scripts": "^4.0.1",
+        "sharp": "0.29.0",
         "socket.io-client": "^2.3.0",
         "styled-components": "^5.2.1",
-        "uuid": "^8.3.2"
+        "uuid": "^8.3.2",
+        "xml2js": "^0.4.23"
     },
     "resolutions": {
         "react-dev-utils": "^10.2.1"

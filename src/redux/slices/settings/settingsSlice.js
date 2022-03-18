@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
 import { COOKIE, SETTINGS } from '../../../utils/Constants';
 
@@ -8,7 +9,9 @@ const cookieData = myCookie.get('settings');
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        maxAge: COOKIE.TIME, // Current time is 3 hours
+        expires: isElectron()
+            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
     });
 };
 

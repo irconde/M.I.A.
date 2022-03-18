@@ -17,3 +17,8 @@ module.exports.Settings = {
         ZIP: 'Zip Archive',
     },
 };
+
+module.exports.Viewport = {
+    TOP: 'top',
+    SIDE: 'side',
+};
