@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * File suffix icon in SettingsModal next to file suffix text-field.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const FileSuffixIcon = (props) => {
     return (
         <div style={props.style}>

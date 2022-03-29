@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * File annotation icon in SettingsModal next to file annotation drop-down menu.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const FileAnnotationIcon = (props) => {
     return (
         <div style={props.style}>

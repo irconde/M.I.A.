@@ -49,7 +49,7 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * setSettings - Will set the cookie 'settings' to the passed in object
+         * Will set the cookie 'settings' to the passed in object
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Object} action Object containing key values for settings to be set in the cookie
@@ -62,13 +62,20 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * saveCookieData - Will save the current settings into a cookie
+         * Will save the current settings into a cookie
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         saveCookieData: (state) => {
             storeCookieData(state.settings);
         },
+
+        /**
+         * Will save the settings passed in by action.payload
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action Object containing key values for settings to be set in the settings
+         */
         saveSettings: (state, action) => {
             for (let key in action.payload) {
                 if (action.payload[key] !== '') {
@@ -81,8 +88,9 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
+
         /**
-         * removeCookieData - Will delete the current settings cookie and reset the settings to default
+         * Will delete the current settings cookie and reset the settings to default
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -92,7 +100,7 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = true;
         },
         /**
-         * setRemoteIp - Sets the remote ip to the passed in action
+         * Sets the remote ip to the passed in action payload
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action String with the ip of the remote server
@@ -103,7 +111,7 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setRemotePort - Sets the remote port to the passed in action
+         * Sets the remote port to the passed in action
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action String with the port of the remote server
@@ -114,10 +122,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setAutoConnect - Sets wether the app should automatically connect to the command server
+         * Sets whether the app should automatically connect to the command server
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action True/False to auto connect
+         * @param {Boolean} action True if should auto-connect, false if not.
          */
         setAutoConnect: (state, action) => {
             state.settings.autoConnect = action.payload;
@@ -125,10 +133,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setFileFormat - Sets the file output format, ora/zip
+         * Sets the file output format, ora/zip
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String value determining ora xor zip
+         * @param {String} action String value determining ora or zip
          */
         setFileFormat: (state, action) => {
             state.settings.fileFormat = action.payload;
@@ -136,7 +144,7 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setAnnotationsFormat - Sets the file annotation format
+         * Sets the file annotation format
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action String value containing the annotation format
@@ -147,7 +155,7 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setLocalFileOutput - Sets the local file output path to save files to
+         * Sets the local file output path to save files to
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action String value of the local path
@@ -158,7 +166,7 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setFileSuffix - Sets the file suffix
+         * Sets the file suffix
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {String} action String value of the file suffix
@@ -169,7 +177,7 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setRemoteOrLocal - Determines wether the App is using a local or remote service
+         * Determines wether the App is using a local or remote service
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {Boolean} action Boolean value true = remote and false = local

@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Cloud icon in SettingsModal next to the host IP address text field
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const CloudIcon = (props) => {
     return (
         <div style={props.style}>

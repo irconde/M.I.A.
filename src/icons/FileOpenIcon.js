@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * File open icon in SettingsModal only shown if in desktop app version displaying file open in local directory.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const FileOpenIcon = (props) => {
     return (
         <div style={props.style}>

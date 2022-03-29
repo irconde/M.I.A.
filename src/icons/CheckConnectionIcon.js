@@ -1,6 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * CheckConnection icon in SettingsModal next to the 'Check connection' button
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
+
 const CheckConnectionIcon = (props) => {
     return (
         <div style={props.style}>
