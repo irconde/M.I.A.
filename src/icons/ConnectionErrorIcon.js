@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Connection error icon in SettingsModal if connection to image server is failed.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const ConnectionErrorIcon = (props) => {
     return (
         <div style={props.style}>

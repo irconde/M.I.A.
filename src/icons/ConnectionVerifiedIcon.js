@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Connection verified icon in SettingsModal if connection to image server is successful.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ */
 const ConnectionVerifiedIcon = (props) => {
     return (
         <div style={props.style}>

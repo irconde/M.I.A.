@@ -11,6 +11,8 @@ import { getLocalFileOpen } from '../redux/slices/ui/uiSlice';
 /**
  * GUI widget that provides displays an image in the middle of the screen to
  * provide user with feedback when there are no pending files on the file queue
+ *
+ * @component
  */
 const NoFileSign = () => {
     const numberOfFiles = useSelector(getNumFilesInQueue);

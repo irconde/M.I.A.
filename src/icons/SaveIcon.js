@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Save icon in SaveButton component.
+ *
+ * @component
+ *
+ * @param {PropTypes} props Expected props: style (Container CSS style), title (title of compnent, i.e. what text is displayed when hovering)
+ */
 const SaveIcon = (props) => {
     return (
         <div style={props.style}>

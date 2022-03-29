@@ -704,7 +704,7 @@ export default class Utils {
      *
      * @param {Array<Float>} polygonData list of handles, i.e., the vertices, of a polygon
      * @param {Array<Integer>} boundingBox list of bounding box coords
-     * @returns {Array<Object{x, y, anchor: {top, bottom, left, right}}>}
+     * @returns {Array<{x, y, anchor: {top, bottom, left, right}}>}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
         const xDist = boundingBox[2] - boundingBox[0];
