@@ -22,6 +22,7 @@ let mainWindow;
 let files = [];
 let thumbnails = [];
 let thumbnailPath = '';
+let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
 const oraExp = /\.ora$/;
 const dcsExp = /\.dcs$/;
@@ -101,6 +102,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
+                sendThumbnailStatus();
                 resolve(loadFile(files[currentFileIndex]));
             }
         } else if (files.length !== 0 && currentFileIndex >= files.length) {
@@ -110,6 +112,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
+                            sendThumbnailStatus();
                             resolve(loadFile(files[currentFileIndex]));
                         } else {
                             reject('No files loaded');
@@ -137,6 +140,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
     const result = new Promise((resolve, reject) => {
         if (fs.existsSync(args)) {
             currentFileIndex = files.findIndex((filePath) => filePath === args);
+            sendThumbnailStatus();
             resolve(loadFile(args));
         } else {
             reject('File path does not exist');
@@ -188,6 +192,43 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     });
     return result;
 });
+
+/**
+ * Loads the specified thumbnail if the file name provided exists. If so it will
+ * it will load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
+ * @param {string} args File path sent from react
+ * @returns {string}
+ */
+ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        const splitPath = args.split(process.platform === 'win32' ? '\\' : '/');
+        if (splitPath.length > 0) {
+            const fileName = splitPath[splitPath.length - 1];
+            const foundThumbnail = thumbnails.find(
+                (value) => value.fileName === fileName
+            );
+            if (foundThumbnail === undefined) {
+                reject('Thumbnail does not exist for that file');
+            } else {
+                const fileData = fs.readFileSync(foundThumbnail.thumbnailPath);
+                resolve(Buffer.from(fileData).toString('base64'));
+            }
+        } else {
+            reject('Could not determine file name from that path');
+        }
+    });
+    return result;
+});
+
+/**
+ * Sends the current thumbnail status (generating or not) to the React/renderer process
+ */
+const sendThumbnailStatus = () => {
+    mainWindow.webContents.send(
+        Constants.Channels.thumbnailStatus,
+        isGeneratingThumbnails
+    );
+};
 
 /**
  * Finds the maximum number used in the already saved files in the returned path
@@ -330,6 +371,8 @@ const loadFile = (filePath) => {
  * @param {string} path
  */
 const startThumbnailThread = async (path) => {
+    isGeneratingThumbnails = true;
+    sendThumbnailStatus();
     createThumbnailsPath(path);
     const filesToGenerate = await filesNeedingThumbnails(path);
     if (filesToGenerate.length > 0) {
@@ -338,6 +381,9 @@ const startThumbnailThread = async (path) => {
             .finally(() => {
                 saveThumbnailDatabase();
             });
+    } else {
+        isGeneratingThumbnails = false;
+        sendThumbnailStatus();
     }
 };
 
@@ -845,6 +891,8 @@ const saveThumbnailDatabase = () => {
         }database.json`,
         JSON.stringify(thumbnails, null, 4)
     );
+    isGeneratingThumbnails = false;
+    sendThumbnailStatus();
 };
 
 /**

@@ -38,12 +38,21 @@ const initialState = {
     localFileOpen: false,
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
+    generatingThumbnails: true,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * Sets wether the Electron process is generating thumbnails or not
+         * @param {State} state
+         * @param {{payload: Boolean}} action
+         */
+        setGeneratingThumbnails: (state, action) => {
+            state.generatingThumbnails = action.payload;
+        },
         /**
          * Toggles the visibility of the side menu
          *
@@ -766,6 +775,7 @@ export const getCurrentFileFormat = (state) => state.ui.currentFileFormat;
  * @returns {Boolean} The recentScroll boolean determining if scroll wheel has been fired recently
  */
 export const getRecentScroll = (state) => state.ui.recentScroll;
+export const getGeneratingThumbnails = (state) => state.ui.generatingThumbnails;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -801,6 +811,7 @@ export const {
     setCurrentFileFormat,
     updateEditLabelPosition,
     updateRecentScroll,
+    setGeneratingThumbnails,
 } = uiSlice.actions;
 
 // Export the reducer for the store

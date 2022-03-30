@@ -2,7 +2,7 @@
  * Class that encompasses any secondary method to support the primary features of the client
  */
 import * as constants from './Constants';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
 
@@ -536,8 +536,29 @@ export default class Utils {
     };
 
     /**
+     * Determines if the given component via useRef() is visible on the users screen or not
+     *
+     * @param {React.MutableRefObject} ref
+     * @returns {Boolean}
+     */
+    static useOnScreen = (ref) => {
+        const [isIntersecting, setIntersecting] = useState(false);
+        const observer = new IntersectionObserver(([entry]) =>
+            setIntersecting(entry.isIntersecting)
+        );
+        useEffect(() => {
+            observer.observe(ref.current);
+            // Remove the observer as soon as the component is unmounted
+            return () => {
+                observer.disconnect();
+            };
+        }, []);
+        return isIntersecting;
+    };
+
+    /**
      * Simply retrieves the device's screen size that is accessing the application.
-     
+     *
      * @returns {Array<Integer>} screenSize - [width, height]
      */
     static getScreenSize() {
