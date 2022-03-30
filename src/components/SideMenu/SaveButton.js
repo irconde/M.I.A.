@@ -6,7 +6,7 @@ import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
 import SaveIcon from '../../icons/SaveIcon';
-import { Fab } from '@mui/material';
+import Fab from '@material-ui/core/Fab';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 

@@ -3430,12 +3430,15 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <LazyImageMenu
-                        getSpecificFileFromLocalDirectory={
-                            this.getSpecificFileFromLocalDirectory
-                        }
-                        thumbnails={this.state.thumbnails}
-                    />
+                    {/* {isElectron() ? (
+                        <LazyImageMenu
+                            getSpecificFileFromLocalDirectory={
+                                this.getSpecificFileFromLocalDirectory
+                            }
+                            thumbnails={this.state.thumbnails}
+                        />
+                    ) : null} */}
+
                     <NoFileSign />
                     <MetaData />
                 </div>

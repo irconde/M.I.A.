@@ -13,7 +13,7 @@ import {
     getConnected,
     getNumFilesInQueue,
 } from '../../redux/slices/server/serverSlice';
-import Fab from '@mui/material/Fab';
+import Fab from '@material-ui/core/Fab';
 import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
