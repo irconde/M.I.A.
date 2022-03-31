@@ -494,7 +494,7 @@ class App extends Component {
     }
 
     /**
-     * Unbinds a click event listener to the two cornerstonejs viewport.
+     * Unbinds a click event listener to the two cornerstonejs viewports
      */
     stopListeningClickEvents() {
         this.state.imageViewportTop.removeEventListener(
@@ -881,9 +881,9 @@ class App extends Component {
 
     /**
      * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
-     * @param {Base64} image Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
-     * @param {String} fileName Name of current file being processed. Used to prevent duplicate annotations.
-     * @param {String} [numberOfFiles = 0] Number of files left in queue
+     * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {String} fileName - Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {String} [numberOfFiles = 0] - Number of files left in queue
      */
     loadNextImage(image, fileName, numberOfFiles = 0) {
         // Loading a file initially from a local workspace can call loadNextImage twice
@@ -925,7 +925,6 @@ class App extends Component {
                         this.props.setCurrentFileFormat(
                             constants.SETTINGS.ANNOTATIONS.COCO
                         );
-                        console.log('Current image format: MS COCO');
 
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
@@ -1039,7 +1038,6 @@ class App extends Component {
                         this.props.setCurrentFileFormat(
                             constants.SETTINGS.ANNOTATIONS.TDR
                         );
-                        console.log('Current image format: TDR-DICOS');
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
                         for (let stackData of xmlStack) {
@@ -1654,7 +1652,7 @@ class App extends Component {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull all the data regarding the threat detections
+     * Parses a DICOS+TDR file to pull all the data regarding threat detections
      *
      * @param  {Array} imagesLeft - List of DICOS+TDR data from algorithm
      * @param  {Array} imagesRight - List of DICOS+TDR data from algorithm
@@ -1696,7 +1694,6 @@ class App extends Component {
                 // Threat Sequence information
                 const threatSequence = image.elements.x40101011;
                 if (threatSequence == null) {
-                    // console.log('No Threat Sequence');
                     return;
                 }
                 if (
@@ -1707,7 +1704,6 @@ class App extends Component {
                         Dicos.dictionary['NumberOfAlarmObjects'].tag
                     ) === undefined
                 ) {
-                    // console.log('No Potential Threat Objects detected');
                     return;
                 }
                 // for every threat found, create a new Detection object and store all Detection
@@ -1759,7 +1755,6 @@ class App extends Component {
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
                     if (threatSequence == null) {
-                        // console.log('No Threat Sequence');
                         return;
                     }
                     if (
@@ -1770,7 +1765,6 @@ class App extends Component {
                             Dicos.dictionary['NumberOfAlarmObjects'].tag
                         ) === undefined
                     ) {
-                        // console.log('No Potential Threat Objects detected');
                         return;
                     }
                     // for every threat found, create a new Detection object and store all Detection
@@ -1812,7 +1806,7 @@ class App extends Component {
      * Callback automatically invoked when CornerstoneJS renders a new image. It triggers the rendering of
      * the several annotations associated to the image
      *
-     * @param  {Event} e Event
+     * @param  {Event} e
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1874,14 +1868,13 @@ class App extends Component {
     }
 
     /**
-     * Renders a crosshair element on the target passed in.
+     * Renders a cross-hair element on the target passed in.
      * That target is a DOM element that might be either the imageViewportTop or the imageViewportSide
      *
      * @param {eventData.canvasContext} context
      * @param {DOMElement} target
      */
     renderCrosshair(context, target) {
-        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
