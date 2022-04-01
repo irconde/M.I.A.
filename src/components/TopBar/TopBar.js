@@ -8,20 +8,18 @@ import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import {
-    getRemoteOrLocal,
     getHasFileOutput,
     getLocalFileOutput,
+    getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
-import isElectron from 'is-electron';
-import LazyMenuToggleIcon from '../../icons/LazyMenuToggleIcon';
 
 /**
  * Component for GUI's top bar display.
  *
  * @component
  *
- * @param {PropTypes} props Expected props: connectToCommandServer (func), cornerstone: (Object), getFileFromLocal: (func)
+ * @param {PropTypes} props - Expected props: connectToCommandServer (func), cornerstone: (Object), getFileFromLocal: (func)
  *
  */
 const TopBar = (props) => {

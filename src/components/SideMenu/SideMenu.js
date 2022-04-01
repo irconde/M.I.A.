@@ -22,10 +22,9 @@ import Utils from '../../utils/Utils';
  *
  * @component
  *
- * @param {function} nextImageClick Callback for loading next image
- * @param {function} resetCornerstoneTools Callback to reset cornerstone tools to initial values
- * @param {function} renderDetectionContextMenu Callback to render specific detection context menus
- *
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {function} resetCornerstoneTools - Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu - Callback to render specific detection context menus
  *
  */
 

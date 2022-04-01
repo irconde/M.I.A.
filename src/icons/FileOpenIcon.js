@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
  *
  * @component
  *
- * @param {PropTypes} props Expected props: style (Container CSS style), svgStyle (SVG CSS style)
+ * @param {PropTypes} props - Expected props: style (Container CSS style), svgStyle (SVG CSS style)
  */
 const FileOpenIcon = (props) => {
     return (

@@ -14,9 +14,9 @@ const ArrowWrapper = styled.div`
  *
  * @component
  *
- * @param {string} direction `down` rotates the arrow to point downwards
- * @param {string} color `color` fill color for arrow
- * @param {function} handleClick callback for handling click events
+ * @param {string} direction - `down` rotates the arrow to point downwards
+ * @param {string} color - `color` fill color for arrow
+ * @param {function} handleClick - callback for handling click events
  */
 const ArrowIcon = ({ direction, color, handleClick }) => {
     return (

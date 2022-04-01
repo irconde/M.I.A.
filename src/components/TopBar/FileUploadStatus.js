@@ -10,9 +10,9 @@ import PropTypes from 'prop-types';
  *
  * @component
  *
- * @param {boolean} isUpload Boolean value determining if GUI is uploading data
- * @param {boolean} isDownload Boolean value determining if GUI is downloading data
- * @param {Object} styles CSS stylization for icons
+ * @param {boolean} isUpload - Boolean value determining if GUI is uploading data
+ * @param {boolean} isDownload - Boolean value determining if GUI is downloading data
+ * @param {Object} styles - CSS stylization for icons
  *
  */
 const FileUploadStatus = ({ isUpload, isDownload, styles }) => {

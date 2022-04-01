@@ -7,6 +7,7 @@ import Utils from '../../utils/Utils';
 import { Channels } from '../../utils/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
+
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
@@ -42,7 +43,7 @@ function LazyImageContainer(props) {
     /**
      * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
      * using this handler. Which sets the thumbnail height passed into the container element of the image.
-     * This is namely so that when an image goes off screen, we keep the container the same size of that image.
+     * This is namely so that when an image goes offscreen, we keep the container the same size of that image.
      * @param {Number} height
      */
     const thumbnailHeightHandler = (height) => {

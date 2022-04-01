@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { MAX_LABEL_LENGTH } from '../../utils/Constants';
+import { detectionStyle, MAX_LABEL_LENGTH } from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,7 +14,6 @@ import {
     detectionSelectedUpdate,
     hideContextMenuUpdate,
 } from '../../redux/slices/ui/uiSlice';
-import { detectionStyle } from '../../utils/Constants';
 
 const SideMenuDetection = ({
     detection,
@@ -52,11 +51,7 @@ const SideMenuDetection = ({
     };
 
     /**
-     * setVisible - Is how we control the eye visibility for each detection.
-     *
-     *
-     * @param {type} none
-     * @returns {type} none
+     * Sets each detection's eye-like icon visibility
      */
     const setVisible = (e) => {
         if (
@@ -73,10 +68,7 @@ const SideMenuDetection = ({
     };
 
     /**
-     * setSelected() - Simply tells the redux store to update the selected detection
-     *
-     * @param {type} none
-     * @returns {type} none
+     * Asks the redux store to update the selected detection
      */
     const setSelected = (e) => {
         if (e.target.id !== 'Shape' && e.target.id !== 'eye') {
