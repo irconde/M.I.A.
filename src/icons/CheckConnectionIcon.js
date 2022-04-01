@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
  * CheckConnection icon in SettingsModal next to the 'Check connection' button
  *
  * @component
+ * @param {PropTypes} props - Expected props: style<object>, svgStyle<object>
+ * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
+ * @param {Object} svgStyle - Destructured from props -- CSS object used for stylizing SVG element
  *
- * @param {PropTypes} props - Expected props: style (Container CSS style), svgStyle (SVG CSS style)
  */
-
 const CheckConnectionIcon = (props) => {
     return (
         <div style={props.style}>

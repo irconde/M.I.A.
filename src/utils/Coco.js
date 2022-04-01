@@ -1,17 +1,18 @@
 import JSZip from 'jszip';
 import Utils from './Utils';
 import { SETTINGS } from './Constants';
+import React from 'react';
 
 /**
  * Takes in the pixel data via myOra and blob format, along with
  * the detections via an array and builds the needed JSON format for
  * the MS COCO dataset.
  *
- * @param {Object} myOra - Ora file object
- * @param {Array<Detections>} detections - Collection of detection objects
+ * @param {myOraObject} myOra - Ora file object
+ * @param {Array<Detection>} detections - Collection of detection objects
  * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
- * @param {cornerstone} cornerstone - Main cornerstone object
- * @param {String} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
+ * @param {CornerstoneObject} cornerstone - Main cornerstone object
+ * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
  * @returns {nodebuffer} ?
  */
 export const buildCocoDataZip = async (

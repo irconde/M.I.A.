@@ -493,9 +493,9 @@ export const getSideDetections = (detections) => {
  * Determines if the bounding box coordinates have changed from the passed in values to the stored ones
  *
  * @param {Array<Detection>} detections - Array of detection objects
- * @param {String} uuid - uuid identifier of detection you want to check
- * @param {Array<Number>} boundingBox - Bounding box coordinates of detection object
- * @returns {Boolean} - True if detection coordinates have changed. False otherwise
+ * @param {string} uuid - uuid identifier of detection you want to check
+ * @param {Array<number>} boundingBox - Bounding box coordinates of detection object
+ * @returns {boolean} - True if detection coordinates have changed. False otherwise
  */
 export const hasDetectionCoordinatesChanged = (
     detections,
@@ -573,7 +573,7 @@ export const getSelectedDetection = (state) =>
  * Returns the selected detection's color hex code, if none selected, returns empty string
  *
  * @param {Store} state - Passed in via useSelector/mapDispatchToProps
- * @returns {String} - The hex color of the detection
+ * @returns {string} - The hex color of the detection
  */
 export const getSelectedDetectionColor = (state) => {
     if (state.detections.selectedDetection !== null) {
@@ -599,7 +599,7 @@ export const getSelectedDetectionViewport = (state) => {
  * Returns the selected detection class name label
  *
  * @param {Object} state - Passed in via useSelector/mapDispatchToProps
- * @returns {String} - Classname of selected detection
+ * @returns {string} - Classname of selected detection
  */
 export const getSelectedDetectionClassName = (state) => {
     if (state.detections.selectedDetection) {
@@ -610,7 +610,7 @@ export const getSelectedDetectionClassName = (state) => {
 /**
  * Will calculate and return the selected detection's width and height
  * @param {Object} state - Passed in via useSelector/mapDispatchToProps
- * @returns {{width: Number, height: Number}} - Width and height of selected detection
+ * @returns {{width: number, height: number}} - Width and height of selected detection
  */
 export const getSelectedDetectionWidthAndHeight = (state) => {
     if (state.detections.selectedDetection) {

@@ -62,7 +62,7 @@ export const getConnectionInfo = (state) => {
  * Returns the number of images in the file server queue
  *
  * @param {State} state - Passed in via useSelector
- * @returns {Number} - The number of images in the queue
+ * @returns {number} - The number of images in the queue
  */
 export const getNumFilesInQueue = (state) => state.server.numFilesInQueue;
 
@@ -70,7 +70,7 @@ export const getNumFilesInQueue = (state) => state.server.numFilesInQueue;
  * Returns the connection status to the command server
  *
  * @param {State} state - Passed in via useSelector
- * @returns {Boolean} - The connection status as a boolean where true is connected and false is not connected
+ * @returns {boolean} - The connection status as a boolean where true is connected and false is not connected
  */
 export const getConnected = (state) => state.server.isConnected;
 
@@ -78,7 +78,7 @@ export const getConnected = (state) => state.server.isConnected;
  * Returns the value representing if we are downloading an image from the command server
  *
  * @param {State} state - Passed in via useSelector
- * @returns {Boolean} - The download status as a boolean where true is downloading and false is not downloading
+ * @returns {boolean} - The download status as a boolean where true is downloading and false is not downloading
  */
 export const getIsDownload = (state) => state.server.isDownload;
 
@@ -86,7 +86,7 @@ export const getIsDownload = (state) => state.server.isDownload;
  * Returns the value representing if we are uploading an image to the command server
  *
  * @param {State} state Passed in via useSelector
- * @returns {Boolean} The download status as a boolean where true is uploading and false is not uploading
+ * @returns {boolean} The download status as a boolean where true is uploading and false is not uploading
  */
 export const getIsUpload = (state) => state.server.isUpload;
 
@@ -94,7 +94,7 @@ export const getIsUpload = (state) => state.server.isUpload;
  * Returns the hostname of the file server the App is connected to
  *
  * @param {State} state - Passed in via useSelector
- * @returns {String} - The hostname of the file server the App is connected to
+ * @returns {string} - The hostname of the file server the App is connected to
  */
 export const getProcessingHost = (state) => state.server.processingHost;
 
@@ -102,7 +102,7 @@ export const getProcessingHost = (state) => state.server.processingHost;
  * Returns the file name of the image the App is currently rendering/processing.
  *
  * @param {State} state - Passed in via useSelector
- * @returns {String} - The file name that is being rendered, processed and interacted with.
+ * @returns {string} - The file name that is being rendered, processed and interacted with.
  */
 export const getCurrentFile = (state) => state.server.currentProcessingFile;
 

@@ -5,8 +5,10 @@ import PropTypes from 'prop-types';
  * Connection verified icon in SettingsModal if connection to image server is successful.
  *
  * @component
+ * @param {PropTypes} props - Expected props: style<object>, svgStyle<object>
+ * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
+ * @param {Object} svgStyle - Destructured from props -- CSS object used for stylizing SVG element
  *
- * @param {PropTypes} props - Expected props: style (Container CSS style), svgStyle (SVG CSS style)
  */
 const ConnectionVerifiedIcon = (props) => {
     return (

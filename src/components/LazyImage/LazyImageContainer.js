@@ -29,11 +29,13 @@ const ImageContainer = styled.div`
 `;
 
 /**
- * Component for ?.
+ * Container component for the lazy image thumbnails
  *
  * @component
  *
  * @param {PropTypes} props Expected props: file (Name of file), getSpecificFileFromLocalDirectory (?)
+ * @param {string} file - Destructured from props -- Name of file
+ * @param {function} getSpecificFileFromLocalDirectory - Destructured from props -- Calls the Electron channel to invoke a specific file from the selected file system folder.
  *
  */
 function LazyImageContainer(props) {
@@ -44,7 +46,7 @@ function LazyImageContainer(props) {
      * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
      * using this handler. Which sets the thumbnail height passed into the container element of the image.
      * This is namely so that when an image goes offscreen, we keep the container the same size of that image.
-     * @param {Number} height
+     * @param {number} height
      */
     const thumbnailHeightHandler = (height) => {
         if (height !== thumbnailHeight) setThumbnailHeight(height);
@@ -54,7 +56,7 @@ function LazyImageContainer(props) {
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
-     * @param {Blob = null} blobData
+     * @param {Blob} [blobData=null]
      */
     const thumbnailHandler = (blobData = null) => {
         if (blobData === null) {

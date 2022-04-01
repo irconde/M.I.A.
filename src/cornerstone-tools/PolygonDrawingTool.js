@@ -493,7 +493,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @param {Object} element - The element on which the roi is being drawn.
      * @param {Object} data      Data object associated with the tool.
      * @param {*} coords
-     * @returns {Number|Object|Boolean}
+     * @returns {number|Object|boolean}
      */
     _pointNearHandle(element, data, coords) {
         if (data === undefined) return;
@@ -1231,9 +1231,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
 
     /**
      * Returns the previous handle to the current one.
-     * @param {Number} currentHandle - the current handle index
+     * @param {number} currentHandle - the current handle index
      * @param {Array} points - the handles Array of the freehand data
-     * @returns {Number} - The index of the previous handle
+     * @returns {number} - The index of the previous handle
      */
     _getPrevHandleIndex(currentHandle, points) {
         if (currentHandle === 0) {

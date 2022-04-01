@@ -65,7 +65,7 @@ export default class Dicos {
      * Parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
      *
      * @param  {Blob} image - Blob data
-     * @return {Array<Float>} - Coordinates of the several bounding boxes derived from the DICOS+TDR data. Each
+     * @return {Array<number>} - Coordinates of the several bounding boxes derived from the DICOS+TDR data. Each
      * bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
      */
     static retrieveBoundingBoxData(image) {
@@ -99,9 +99,9 @@ export default class Dicos {
     /**
      * Parses a DICOS+TDR file to pull the bitmap mask data
      *
-     * @param  {type?} image - DICOS+TDR image data
-     * @param  {type?} data - DICOS+TDR pixel data
-     * @returns {Array<Integer>} - Bitmap mask data
+     * @param  {DICOSImageObject} image - DICOS+TDR image data
+     * @param  {DICOSPixelData} data - DICOS+TDR pixel data
+     * @returns {Array<number>} - Bitmap mask data
      *
      */
     static retrieveMaskData(image, data) {
@@ -195,7 +195,7 @@ export default class Dicos {
      * Parses a DICOS+TDR file to retrieve the confidence level of the detection algorithm used
      *
      * @param  {Blob} image - Blob data
-     * @returns {float} - Confidence level
+     * @returns {number} - Confidence level
      */
     static retrieveConfidenceLevel(image) {
         return image.dataSet.elements.x40101038.items[0].dataSet.float(
@@ -207,7 +207,7 @@ export default class Dicos {
      * Provides the unique instance identifier for a given DICOM Image.
      *
      * @param {Blob} image - Blob data
-     * @returns {String} - Unique identifier
+     * @returns {string} - Unique identifier
      */
     static async getInstanceNumber(image) {
         var fileReader = new FileReader();

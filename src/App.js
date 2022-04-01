@@ -883,9 +883,9 @@ class App extends Component {
     /**
      * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
      * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
-     * @param {String} fileName - Name of current file being processed. Used to prevent duplicate annotations.
-     * @param {Number} [numberOfFiles = 0] - Number of files left in queue
-     * @param {String} [thumbnails = null] - Number of files left in queue ***needs fixing****
+     * @param {string} fileName - Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {number} [numberOfFiles = 0] - Number of files left in queue
+     * @param {string} [thumbnails = null] - Number of files left in queue ***needs fixing****
      */
     loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
         // Loading a file initially from a local workspace can call loadNextImage twice
@@ -2058,7 +2058,7 @@ class App extends Component {
     /**
      * Renders the polygon mask associated with a detection.
      *
-     * @param  {Array<Number>} coords - Polygon mask coordinates
+     * @param  {Array<number>} coords - Polygon mask coordinates
      * @param  {Context} context - Rendering context
      */
     renderPolygonMasks(coords, context) {
@@ -2852,20 +2852,9 @@ class App extends Component {
     /**
      * Get position of context menu based on the associated bounding box.
      *
-<<<<<<< HEAD
-     * @param {DOMElement} viewportInfo Viewport info
-     * @param {Array.number} coords Bounding box' corners' coordinates
-=======
-<<<<<<< HEAD
-     * @param {DOMElement} viewportInfo - Viewport info
-     * @param {Array.number} coords - Bounding box' corners' coordinates
->>>>>>> d6928c646b732eb6ba76d3c0efd74133d17a2878
-     * @returns {{x: number, y: number}}
-=======
      * @param {DOMElement} viewportInfo viewport info
-     * @param {Array<Number>} coords bounding box corners' coordinates
-     * @returns {Object{Number: x; Number: y}}
->>>>>>> 4a1c615 (First draft of App.js documentation. Added first draft of documentation for components: ColorPicker, DetectionContextMenu, LabelList, BoundPolyFAB, SettingsModal, NextButton, SaveButton, SideMenu, SideMenuAlgorithm)
+     * @param {Array<number>} coords bounding box corners' coordinates
+     * @returns {Object{number: x; number: y}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
@@ -3246,8 +3235,8 @@ class App extends Component {
     /**
      * Calculates position of the edit label widget
      *
-     * @param {Object} detectionData - Detection data
-     * @param {Array<Number>} coords - Bounding box coordinates
+     * @param {{boundingBox: Array<number>, view: constants.viewport, label: string, confidence: number}} detectionData - Detection data
+     * @param {Array<number>} [coords = undefined] - Bounding box coordinates
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {

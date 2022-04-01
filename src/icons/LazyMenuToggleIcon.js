@@ -10,7 +10,7 @@ import { toggleCollapsedLazyMenu } from '../redux/slices/ui/uiSlice';
  *
  * @param {PropTypes} props - Expected props: cornerstone<object>, style<object>
  * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
- * @param {boolean} style - Destructured from props -- CSS object used for stylizing SVG container
+ * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
  *
  */
 const LazyMenuToggleIcon = (props) => {

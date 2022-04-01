@@ -14,7 +14,7 @@ import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
  *
  * @param {PropTypes} props - Expected props: cornerstone<object>, style<object>
  * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
- * @param {boolean} style - Destructured from props -- CSS object used for stylizing SVG container
+ * @param {CSSObject} style - Destructured from props -- CSS object used for stylizing SVG container
  *
  */
 const MenuToggleIcon = (props) => {

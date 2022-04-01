@@ -39,8 +39,8 @@ export default class ORA {
     /**
      * Given a stack number and image number will return that corresponding image blob if it exists
      *
-     * @param {Integer} stackNum
-     * @param {Integer} imageNum
+     * @param {number} stackNum
+     * @param {number} imageNum
      * @returns {Blob} Image blob of given stack/image number
      */
     getImage(stackNum, imageNum) {
@@ -53,7 +53,7 @@ export default class ORA {
     /**
      * Given a stack number, if it exists, will return that corresponding stack's pixel data as an array buffer
      *
-     * @param {Integer} stackNum
+     * @param {number} stackNum
      * @returns {ArrayBuffer} Corresponding stack's pixel data
      */
     getPixelData(stackNum) {

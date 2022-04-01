@@ -98,7 +98,7 @@ const uiSlice = createSlice({
          * Sets the input label to action.payload
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload - String value of new input label
+         * @param {string} action.payload - String value of new input label
          */
         setInputLabel: (state, action) => {
             state.inputLabel = action.payload;
@@ -181,7 +181,7 @@ const uiSlice = createSlice({
          * Updates visibility of FAB
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
+         * @param {boolean} action.payload - Boolean to determine if we should display the FAB.
          */
         updateFABVisibility: (state, action) => {
             state.isFABVisible = action.payload;
@@ -417,13 +417,13 @@ const uiSlice = createSlice({
             state.isDetectionContextVisible = false;
         },
         /**
-         * selectConfigInfoUpdate
+         * Updates the configuration information for specific detections
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {State} detectorType - Destructured from action.payload -- Detector type of detection
-         * @param {State} detectorConfigType - Destructured from action.payload -- Detector config type of detection
-         * @param {State} seriesType - Destructured from action.payload -- Series type of detection
-         * @param {State} studyType - Destructured from action.payload -- Study type of detection
+         * @param {string} detectorType - Destructured from action.payload -- Detector type of detection
+         * @param {string} detectorConfigType - Destructured from action.payload -- Detector config type of detection
+         * @param {string} seriesType - Destructured from action.payload -- Series type of detection
+         * @param {string} studyType - Destructured from action.payload -- Study type of detection
          */
         selectConfigInfoUpdate: (state, action) => {
             const { detectorType, detectorConfigType, seriesType, studyType } =
@@ -452,10 +452,10 @@ const uiSlice = createSlice({
             state.isSettingsVisible = action.payload;
         },
         /**
-         * For when a color is picked in the color picker
+         * Sets the receive time. Used to set time of recieval of newly obtained files.
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload - String result from Date.now()
+         * @param {string} action.payload - String result from Date.now()
          */
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
@@ -472,16 +472,16 @@ const uiSlice = createSlice({
          * Determines whether the App is working with a local file or remote file
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - True if we have a local file open, false if not, whether remote or not.
+         * @param {boolean} action.payload - True if we have a local file open, false if not, whether remote or not.
          */
         setLocalFileOpen: (state, action) => {
             state.localFileOpen = action.payload;
         },
         /**
-         * Determines whether the App is working with a local file or remote file
+         * Sets the current file format (Supported types: MS COCO, DICOS-TDR)
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload - Format of currently processed file
+         * @param {constants.SETTINGS.ANNOTATIONS} action.payload - Format of currently processed file
          */
         setCurrentFileFormat: (state, action) => {
             state.currentFileFormat = action.payload;
@@ -501,7 +501,7 @@ const uiSlice = createSlice({
  * Provides the current detection label
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Current detection label
+ * @returns {string} - Current detection label
  */
 export const getInputLabel = (state) => state.ui.inputLabel;
 /**
@@ -560,7 +560,7 @@ export const getDetectionLabelEditWidth = (state) =>
  * Indicates the font string used for the text box for editing the detection label
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Font string of the detection label edition
+ * @returns {string} - Font string of the detection label edition
  */
 export const getDetectionLabelEditFont = (state) =>
     state.ui.detectionLabelEditFont;
@@ -568,7 +568,7 @@ export const getDetectionLabelEditFont = (state) =>
  * Provides the viewport of the text box for editing the detection label
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Viewport that holds the text box for editing the detection label
+ * @returns {string} - Viewport that holds the text box for editing the detection label
  */
 export const getDetectionLabelEditViewport = (state) =>
     state.ui.detectionLabelEditViewport;
@@ -576,7 +576,7 @@ export const getDetectionLabelEditViewport = (state) =>
  * Provides the location of the edit label widget.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {Object} - Top and left values for the location of the edit label widget.
+ * @returns {{top: number, left: number}} - Top and left values for the location of the edit label widget.
  */
 export const getDetectionLabelEditPosition = (state) =>
     state.ui.detectionLabelEditPosition;
@@ -613,7 +613,7 @@ export const getZoomLevels = (state) => {
  * Indicates the detector type.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Detector type
+ * @returns {string} - Detector type
  */
 export const getDetectorType = (state) => state.ui.detectorType;
 
@@ -621,7 +621,7 @@ export const getDetectorType = (state) => state.ui.detectorType;
  * Indicates the detector config type.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Detector config type
+ * @returns {string} - Detector config type
  */
 export const getDetectorConfigType = (state) => state.ui.detectorConfigType;
 
@@ -629,7 +629,7 @@ export const getDetectorConfigType = (state) => state.ui.detectorConfigType;
  * Indicates the series type.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Series type
+ * @returns {string} - Series type
  */
 export const getSeriesType = (state) => state.ui.seriesType;
 
@@ -637,7 +637,7 @@ export const getSeriesType = (state) => state.ui.seriesType;
  * Indicates the study type.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - Study type
+ * @returns {string} - Study type
  */
 export const getStudyType = (state) => state.ui.studyType;
 
@@ -645,7 +645,7 @@ export const getStudyType = (state) => state.ui.studyType;
  * Indicates whether settings are visible.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {String} - True when settings are visible; false otherwise
+ * @returns {string} - True when settings are visible; false otherwise
  */
 export const getSettingsVisibility = (state) => state.ui.isSettingsVisible;
 
@@ -717,7 +717,7 @@ export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getCollapsedLazyMenu = (state) => state.ui.collapsedLazyMenu;
 
 /**
- * Returns the receiveTime date object
+ * Returns the receiveTime date object. Ocassionally used to determine if there is file to be processed (returns null if no file).
  *
  * @param {State} state Passed in via useSelector/mapStateToProps
  * @returns {Date} The receiveTime date object
@@ -741,7 +741,7 @@ export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
 
 /**
- * Returns the localFileOpen boolean
+ * Returns the localFileOpen boolean. True if there is currently a local file open, rather than a remote connection file.
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
  * @returns {boolean} - The localFileOpen boolean

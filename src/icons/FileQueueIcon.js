@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * @component
  *
  * @param {string} title - Title shown when hovering queue icon, which is typically "Number of files"
- * @param {Integer} numberOfFiles - Number of files in queue
+ * @param {number} numberOfFiles - Number of files in queue
  * @param {Object} style - CSS object for styling SVG container
  */
 const FileQueueIcon = ({ title, numberOfFiles, style }) => {
