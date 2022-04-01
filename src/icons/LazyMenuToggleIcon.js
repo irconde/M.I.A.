@@ -3,6 +3,16 @@ import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { toggleCollapsedLazyMenu } from '../redux/slices/ui/uiSlice';
 
+/**
+ * Lazy menu toggle icon in TopBar component used to toggle lazy menu component visibility.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: cornerstone<object>, style<object>
+ * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
+ * @param {boolean} style - Destructured from props -- CSS object used for stylizing SVG container
+ *
+ */
 const LazyMenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const toggleClickHandler = () => {

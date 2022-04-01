@@ -1,6 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Settings cog SVG used in SettingsIcon component.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: title<string>, style<object>
+ * @param {String} title - Destructured from props -- String value that is shown when hovering component
+ * @param {boolean} style - Destructured from props -- CSS object used for stylizing SVG element
+ *
+ */
 const SettingsCog = (props) => {
     return (
         <svg

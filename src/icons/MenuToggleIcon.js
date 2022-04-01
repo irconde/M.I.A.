@@ -7,6 +7,16 @@ import {
 } from '../redux/slices/ui/uiSlice';
 import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
 
+/**
+ * Menu toggle icon in TopBar component used to toggle SideMenu component visibility.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: cornerstone<object>, style<object>
+ * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
+ * @param {boolean} style - Destructured from props -- CSS object used for stylizing SVG container
+ *
+ */
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const visible = useSelector(getReceivedTime);
