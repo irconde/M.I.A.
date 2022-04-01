@@ -6,10 +6,10 @@ import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
-    getIsFabVisible,
-    getCornerstoneMode,
-    getCollapsedSideMenu,
     getCollapsedLazyMenu,
+    getCollapsedSideMenu,
+    getCornerstoneMode,
+    getIsFabVisible,
 } from '../../redux/slices/ui/uiSlice';
 import {
     getDeviceType,
@@ -87,8 +87,8 @@ const FABContainer = styled.div`
  *
  * @component
  *
- * @param {function} onBoundingSelect Callback for bounding box selection
- * @param {function} onPolygonSelect Callback for polyogn mask selection
+ * @param {function} onBoundingSelect - Callback for bounding box selection
+ * @param {function} onPolygonSelect - Callback for polygon mask selection
  *
  *
  */

@@ -1,5 +1,6 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getLocalFileOutput,
@@ -13,7 +14,10 @@ import {
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
-const ipcRenderer = window.require('electron').ipcRenderer;
+let ipcRenderer;
+if (isElectron()) {
+    ipcRenderer = window.require('electron').ipcRenderer;
+}
 
 /**
  * Component for ?.
@@ -110,5 +114,10 @@ function LazyImageMenu(props) {
         } else return null;
     } else return null;
 }
+
+LazyImageMenu.propTypes = {
+    thumbnails: PropTypes.array,
+    getSpecificFileFromLocalDirectory: PropTypes.func,
+};
 
 export default LazyImageMenu;

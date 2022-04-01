@@ -17,9 +17,9 @@ import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
  *
  * @component
  *
- * @param {Array<Detection>} detections Array of detection objects
- * @param {function} resetCornerstoneTools Callback to reset cornerstone tools to initial values
- * @param {function} renderDetectionContextMenu Callback to render specific detection context menus
+ * @param {Array<Detection>} detections - Array of detection objects
+ * @param {function} resetCornerstoneTools - Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu - Callback to render specific detection context menus
  *
  *
  */
@@ -75,10 +75,7 @@ const SideMenuAlgorithm = ({
     };
 
     /**
-     * setVisibility - Is the function that controls the eye visibility.
-     *
-     * @param {type} none
-     * @returns {type} none
+     * Updates the eye-like icon's visibility.
      */
     const setVisibility = () => {
         dispatch(
@@ -91,10 +88,8 @@ const SideMenuAlgorithm = ({
     };
 
     /**
-     * setSelected - Uses dispatch to select the algorithm and transforms the expand icon if clicked
-     *
+     * Uses dispatch to select the algorithm and transforms the expand icon if clicked
      * @param {Event} e
-     * @returns {type} none
      */
     const setSelected = (e) => {
         if (

@@ -64,8 +64,8 @@ const LabelListWrapper = styled.div`
  *
  * @component
  *
- * @param {Array<String>} labels Available detection labels
- * @param {function} onLabelSelect Called when label is selected
+ * @param {Array<String>} labels - Available detection labels
+ * @param {function} onLabelSelect - Called when label is selected
  */
 const LabelList = ({ labels, onLabelSelect }) => {
     /**

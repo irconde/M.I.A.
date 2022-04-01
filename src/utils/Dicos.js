@@ -1,7 +1,7 @@
 import * as dcmjs from 'dcmjs';
 
 /**
- * Class that encompasses any secondary method related to DICOS file management
+ * Collection of auxiliary methods for managing DICOS files
  */
 export default class Dicos {
     static get dictionary() {
@@ -62,10 +62,10 @@ export default class Dicos {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
+     * Parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
      *
-     * @param  {Blob} image 'dcs/image' type blob data
-     * @return {Array<Float>} Coordinates of the several bounding boxes derived from the DICOS+TDR data. Each
+     * @param  {Blob} image - Blob data
+     * @return {Array<Float>} - Coordinates of the several bounding boxes derived from the DICOS+TDR data. Each
      * bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
      */
     static retrieveBoundingBoxData(image) {
@@ -97,11 +97,11 @@ export default class Dicos {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull the bitmap mask data
+     * Parses a DICOS+TDR file to pull the bitmap mask data
      *
-     * @param  {type?} image DICOS+TDR image data
-     * @param  {type?} data  DICOS+TDR pixel data
-     * @returns {Array<Integer>} Bitmap mask data.
+     * @param  {type?} image - DICOS+TDR image data
+     * @param  {type?} data - DICOS+TDR pixel data
+     * @returns {Array<Integer>} - Bitmap mask data
      *
      */
     static retrieveMaskData(image, data) {
@@ -180,10 +180,10 @@ export default class Dicos {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull the a string value that indicates the class of the potential threat object
+     * Parses a DICOS+TDR file to retrieve the class of the potential threat object
      *
-     * @param  {Blob} image 'dcs/image' type blob data
-     * @returns {string} String value with the description of the potential threat object
+     * @param  {Blob} image - Blob data
+     * @returns {string} - Description of the potential threat object
      */
     static retrieveObjectClass(image) {
         return image.dataSet.elements.x40101038.items[0].dataSet.string(
@@ -192,10 +192,10 @@ export default class Dicos {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull the a float value that indicates the confidence level of the detection algorithm used
+     * Parses a DICOS+TDR file to retrieve the confidence level of the detection algorithm used
      *
-     * @param  {Blob} image 'dcs/image' type blob data
-     * @returns {float} Float value with the confidence level
+     * @param  {Blob} image - Blob data
+     * @returns {float} - Confidence level
      */
     static retrieveConfidenceLevel(image) {
         return image.dataSet.elements.x40101038.items[0].dataSet.float(
@@ -204,10 +204,10 @@ export default class Dicos {
     }
 
     /**
-     * Returns the unique instance identifier for a given DICOM Image in blob format.
+     * Provides the unique instance identifier for a given DICOM Image.
      *
-     * @param {Blob} image 'dcs/image' type blob data
-     * @returns {String} Instance number for the passed in image
+     * @param {Blob} image - Blob data
+     * @returns {String} - Unique identifier
      */
     static async getInstanceNumber(image) {
         var fileReader = new FileReader();
@@ -229,13 +229,11 @@ export default class Dicos {
     }
 
     /**
-     * Function will take in a detection and its parent image, where the detection was located.
-     * It then generates the needed DICOM fields and uses the dcmjs library to create a blob
-     * based on the naturalized dataset we pass into the DICOM Dictionary.
+     * Converts a detection and its parent image into blob data with DICOM format
      *
-     * @param {Detection} detection Detection object
-     * @param {Blob} data 'dcs/image' type blob data
-     * @returns {Promise} Returns a promise containing the blob on resolve or error on reject
+     * @param {Detection} detection - Detection object
+     * @param {Blob} data - Blob data
+     * @returns {Promise} - Promise containing the blob on resolve or error on reject
      */
     static detectionObjectToBlob(detection, data) {
         const today = new Date();

@@ -4,8 +4,8 @@ import nextIcon from '../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
-    getCornerstoneMode,
     getCollapsedSideMenu,
+    getCornerstoneMode,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
@@ -13,7 +13,7 @@ import {
     getConnected,
     getNumFilesInQueue,
 } from '../../redux/slices/server/serverSlice';
-import Fab from '@mui/material/Fab';
+import Fab from '@material-ui/core/Fab';
 import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
@@ -79,8 +79,8 @@ const NextButtonContainer = styled.div`
  *
  * @component
  *
- * @param {function} nextImageClick Callback for loading next image
- * @param {boolean} [collapseBtn=false] Boolean value determining if side menu component is collapsed or not.
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {boolean} [collapseBtn=false] - Boolean value determining if side menu component is collapsed or not.
  *
  *
  */

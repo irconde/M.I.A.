@@ -3,16 +3,15 @@ import Utils from './Utils';
 import { SETTINGS } from './Constants';
 
 /**
- * Will take in the pixel data via myOra and blob format, along with
- * the detections via an array. It will build the needed JSON format for
- * the MS COCO dataset. It will return a blob of the archive file to send to
- * a server or be stored locally.
+ * Takes in the pixel data via myOra and blob format, along with
+ * the detections via an array and builds the needed JSON format for
+ * the MS COCO dataset.
  *
- * @param {Object} myOra Ora file object
- * @param {Array<Detections>} detections Array of detection objects
- * @param {Array<DOMElement>} viewports Array of viewport DOMElement objects
- * @param {cornerstone} cornerstone Main cornerstone object
- * @param {String} currentFileFormat Current file format string (MS COCO or DICOS-TDR)
+ * @param {Object} myOra - Ora file object
+ * @param {Array<Detections>} detections - Collection of detection objects
+ * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
+ * @param {cornerstone} cornerstone - Main cornerstone object
+ * @param {String} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
  * @returns {nodebuffer} ?
  */
 export const buildCocoDataZip = async (
@@ -253,15 +252,14 @@ export const buildCocoDataZip = async (
 };
 
 /**
- * This function takes in the cornerstone viewport element holder and the cornerstone variable
- * that is created in App.js. It will pull the Pixel data from cornerstone as Uint16Array in 16 Bit
- * grey scale value. It converts the 16 bit grey scale value into a 8 bit value (0-255). This is the
- * grey color produced by setting the R, G, & B Values to this one 8 bIn it value. This produces a Uint8ClampedArray
- * in RGBA format to be loaded onto a canvas element to be finally returned as a Blob of type image/png
+ * Pulls the pixel data from cornerstone as Uint16Array in 16 Bit grey scale value and converts the 16 bit grey
+ * scale value into a 8 bit value (0-255). This is the grey color produced by setting the R, G, & B Values to
+ * this one 8 bit value. This produces a Uint8ClampedArray in RGBA format to be loaded onto a canvas element to
+ * be finally returned as a Blob of type image/png
  *
- * @param {cornerstone} cornerstone Main cornerstone object
- * @param {DOMElement} imageViewport Viewport DOMElement object
- * @returns {Promise} That resolves to a blob of type image/png
+ * @param {cornerstone} cornerstone - Main cornerstone object
+ * @param {DOMElement} imageViewport - Viewport DOMElement object
+ * @returns {Promise} - That resolves to a blob of type image/png
  */
 const dicosPixelDataToPng = async (cornerstone, imageViewport) => {
     return new Promise((resolve, reject) => {

@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
  *
  * @component
  *
- * @param {PropTypes} props Expected props: style (Container CSS style), title (title of compnent, i.e. what text is displayed when hovering)
+ * @param {PropTypes} props - Expected props: style (Container CSS style), title (title of compnent, i.e. what text is displayed when hovering)
  */
 const SaveIcon = (props) => {
     return (

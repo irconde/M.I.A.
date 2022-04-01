@@ -6,7 +6,7 @@ import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
 import SaveIcon from '../../icons/SaveIcon';
-import { Fab } from '@mui/material';
+import Fab from '@material-ui/core/Fab';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
@@ -72,8 +72,8 @@ const SaveButtonContainer = styled.div`
  *
  * @component
  *
- * @param {function} nextImageClick Callback for loading next image
- * @param {boolean} [collapseBtn=false] Boolean value determining if side menu component is collapsed or not.
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {boolean} [collapseBtn = false] - Boolean value determining if side menu component is collapsed or not.
  *
  *
  */
