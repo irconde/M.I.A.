@@ -111,7 +111,7 @@ const uiSlice = createSlice({
          * @param {constants.editionMode} editionMode - Destructured from action.payload -- Constant value for the edition mode.
          * @param {boolean} isEditLabelWidgetVisible - Destructured from action.payload -- Updated visibility for detection edit label.
          * @param {number} detectionLabelEditWidth - Destructured from action.payload -- Updated width for detection edit label.
-         * @param {top: number, left: number} detectionLabelEditPosition - Destructured from action.payload -- Updated position for detection edit label.
+         * @param {{top: number, left: number}} detectionLabelEditPosition - Destructured from action.payload -- Updated position for detection edit label.
          */
         updateEditionMode: (state, action) => {
             const {
@@ -144,7 +144,7 @@ const uiSlice = createSlice({
          * Updates the label position, namely for resize events
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          * @param {number} detectionLabelEditWidth - Destructured from action.payload -- width of detection edit label
-         * @param {top: number, left: number} detectionLabelEditPosition - Destructured from action.payload -- position of detection edit label
+         * @param {{top: number, left: number}} detectionLabelEditPosition - Destructured from action.payload -- position of detection edit label
          */
         updateEditLabelPosition: (state, action) => {
             const { detectionLabelEditWidth, detectionLabelEditPosition } =

@@ -794,7 +794,7 @@ class App extends Component {
      * Operates in a similar way to getFileFromLocalDirectory, but it specifies the exact file path instead of a general path.
      * IE D:\images\1_img.ora.
      *
-     * @param {string} filePath
+     * @param {string} filePath String value of specific file path
      */
     getSpecificFileFromLocalDirectory(filePath) {
         if (isElectron()) {
@@ -885,7 +885,11 @@ class App extends Component {
      * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
      * @param {string} fileName - Name of current file being processed. Used to prevent duplicate annotations.
      * @param {number} [numberOfFiles = 0] - Number of files left in queue
-     * @param {string} [thumbnails = null] - Number of files left in queue ***needs fixing****
+     * @param {Array<string>} [thumbnails = null] - Array with string values to the file path of thumbnails,
+     * IE:
+     * ['D:\images\.thumbnails\1_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\2_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\3_img.ora_thumbnail.png']
      */
     loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
         // Loading a file initially from a local workspace can call loadNextImage twice
@@ -2854,7 +2858,7 @@ class App extends Component {
      *
      * @param {DOMElement} viewportInfo viewport info
      * @param {Array<number>} coords bounding box corners' coordinates
-     * @returns {Object{number: x; number: y}}
+     * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
