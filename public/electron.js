@@ -194,6 +194,29 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 });
 
 /**
+ * For when a user is selecting a single file and saving it. Displays a file dialog and saves
+ * the sent file data
+ * @param {Buffer} args - Binary data to be saved
+ * @returns {Promise}
+ */
+ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
+    const result = new Promise((resolve, reject) => {
+        dialog.showSaveDialog().then((result) => {
+            if (!result.canceled) {
+                fs.writeFile(result.filePath, args, (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+        });
+    });
+    return result;
+});
+
+/**
  * Loads the specified thumbnail if the file name provided exists. If so it will
  * it will load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
  * @param {string} args File path sent from react

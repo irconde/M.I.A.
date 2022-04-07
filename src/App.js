@@ -1160,6 +1160,32 @@ class App extends Component {
                                         console.log(error);
                                     });
                             });
+                    } else if (isElectron()) {
+                        cocoZip
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                ipcRenderer
+                                    .invoke(
+                                        constants.Channels.saveIndFile,
+                                        file
+                                    )
+                                    .then((result) => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setLocalFileOpen(false);
+                                        this.props.setReceiveTime(null);
+                                        this.onNoImageLeft();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            });
                     } else {
                         cocoZip
                             .generateAsync({ type: 'blob' })
@@ -1354,6 +1380,32 @@ class App extends Component {
                                         console.log(error);
                                     });
                             });
+                    } else if (isElectron()) {
+                        newOra
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then(async (file) => {
+                                ipcRenderer
+                                    .invoke(
+                                        constants.Channels.saveIndFile,
+                                        file
+                                    )
+                                    .then((result) => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setLocalFileOpen(false);
+                                        this.props.setReceiveTime(null);
+                                        this.onNoImageLeft();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            });
                     } else {
                         newOra
                             .generateAsync({ type: 'blob' })
@@ -1369,12 +1421,13 @@ class App extends Component {
                                     this.setState({
                                         myOra: new ORA(),
                                     });
-                                    this.onNoImageLeft();
+
                                     this.props.setCurrentProcessingFile(null);
                                     this.resetSelectedDetectionBoxes(e);
                                     this.props.resetDetections();
                                     this.props.setLocalFileOpen(false);
                                     this.props.setReceiveTime(null);
+                                    this.onNoImageLeft();
                                 });
                             });
                     }
@@ -3372,10 +3425,10 @@ class App extends Component {
      * @param {Event} event
      */
     onMouseLeave(event) {
-        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        // else this.props.onMouseLeaveNoFilesUpdate();
-        // if (this.props.selectedDetection !== null)
-        //     this.resetSelectedDetectionBoxes(event);
+        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        else this.props.onMouseLeaveNoFilesUpdate();
+        if (this.props.selectedDetection !== null)
+            this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
