@@ -210,6 +210,8 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
                         resolve();
                     }
                 });
+            } else {
+                reject('Save cancelled');
             }
         });
     });
