@@ -1,4 +1,5 @@
 import * as dcmjs from 'dcmjs';
+import Utils from './Utils';
 
 /**
  * Collection of auxiliary methods for managing DICOS files
@@ -479,4 +480,47 @@ export default class Dicos {
             }
         });
     }
+
+    /**
+     * dicosPixelDataToPng - This function takes in the cornerstone viewport element holder and the cornerstone variable
+     *                       that is created in App.js. It will pull the Pixel data from cornerstone as Uint16Array in 16 Bit
+     *                       grey scale value. It converts the 16 bit grey scale value into a 8 bit value (0-255). This is the
+     *                       grey color produced by setting the R, G, & B Values to this one 8 bit value. This produces a Uint8ClampedArray
+     *                       in RGBA format to be loaded onto a canvas element to be finally returned as a Blob of type image/png
+     *
+     * @param {cornerstone} cornerstone
+     * @param {DOMElement} imageViewport
+     * @returns {Promise} That resolves to a blob of type image/png
+     */
+    static pngToDicosPixelData = async (cornerstone, imageViewport) => {
+        return new Promise((resolve, reject) => {
+            const image = cornerstone.getImage(imageViewport);
+            const pixelData = image.getPixelData();
+            const SixteenbitPixels = new Uint16Array(
+                image.width * image.height
+            );
+            let z = 0;
+            const intervals = Utils.buildIntervals();
+            for (let i = 0; i < pixelData.length; i += 4) {
+                // R, G, and B values should all be the same, so just pull the R value.
+                const interval = intervals[pixelData[i]];
+                const avgValue = Math.floor(interval.min + interval.max) / 2;
+                SixteenbitPixels[z] = avgValue;
+                z++;
+            }
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.canvas.width = image.width;
+            ctx.canvas.height = image.height;
+            const imageData = new ImageData(
+                SixteenbitPixels,
+                image.width,
+                image.height
+            );
+            ctx.putImageData(imageData, 0, 0);
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/dcs');
+        });
+    };
 }
