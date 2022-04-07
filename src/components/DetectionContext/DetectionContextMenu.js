@@ -90,6 +90,8 @@ const DeleteWidget = styled.div`
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
  *
  * @component
+ *
+ * @param {function} setSelectedOption - Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
  */
 const DetectionContextMenu = ({ setSelectedOption }) => {
     const selectedDetectionColor = useSelector(getSelectedDetectionColor);
@@ -172,6 +174,9 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
 };
 
 DetectionContextMenu.propTypes = {
+    /**
+     * Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
+     */
     setSelectedOption: PropTypes.func.isRequired,
 };
 

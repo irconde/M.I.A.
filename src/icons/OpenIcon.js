@@ -58,7 +58,13 @@ const OpenIcon = (props) => {
 };
 
 OpenIcon.propTypes = {
+    /**
+     * Title shown when hovering icon, which is typically "Open File"
+     */
     title: PropTypes.string,
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
 };
 

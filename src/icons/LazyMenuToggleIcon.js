@@ -69,7 +69,13 @@ const LazyMenuToggleIcon = (props) => {
 };
 
 LazyMenuToggleIcon.propTypes = {
+    /**
+     * Main cornerstone object, used to resize viewports if needed.
+     */
     cornerstone: PropTypes.object,
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
 };
 

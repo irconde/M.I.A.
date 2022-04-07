@@ -36,8 +36,17 @@ const FileUploadStatus = ({ isUpload, isDownload, styles }) => {
 };
 
 FileUploadStatus.propTypes = {
+    /**
+     * Boolean value determining if GUI is uploading data
+     */
     isUpload: PropTypes.bool.isRequired,
+    /**
+     * Boolean value determining if GUI is downloading data
+     */
     isDownload: PropTypes.bool.isRequired,
+    /**
+     * CSS stylization for icons
+     */
     styles: PropTypes.object,
 };
 

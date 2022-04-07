@@ -37,8 +37,17 @@ const ArrowIcon = ({ direction, color, handleClick }) => {
 };
 
 ArrowIcon.propTypes = {
+    /**
+     * callback for handling click events
+     */
     handleClick: PropTypes.func.isRequired,
+    /**
+     * `down` rotates the arrow to point downwards
+     */
     direction: PropTypes.string,
+    /**
+     * `color` fill color for arrow
+     */
     color: PropTypes.string.isRequired,
 };
 export default ArrowIcon;

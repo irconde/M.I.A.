@@ -20,7 +20,7 @@ const IconStyle = styled.div`
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: title<string>, style<object>
+ * @param {PropTypes} props - Expected props: title<string>, connectToCommandServer<function>, style<object>
  * @param {String} title - Destructured from props -- String value that is shown when hovering component
  * @param {function} connectToCommandServer - Destructured from props -- Function passed in from App.js for connecting to command server (used in testing connection in SettingsModal.)
  * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG element
@@ -57,8 +57,17 @@ const SettingsIcon = (props) => {
 };
 
 SettingsIcon.propTypes = {
+    /**
+     * String value that is shown when hovering component
+     */
     title: PropTypes.string,
+    /**
+     * Function passed in from App.js for connecting to command server (used in testing connection in SettingsModal.)
+     */
     connectToCommandServer: PropTypes.func,
+    /**
+     * CSS object used for stylizing SVG element
+     */
     style: PropTypes.object,
 };
 

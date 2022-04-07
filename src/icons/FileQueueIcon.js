@@ -55,8 +55,17 @@ const FileQueueIcon = ({ title, numberOfFiles, style }) => {
 };
 
 FileQueueIcon.propTypes = {
+    /**
+     * Title shown when hovering queue icon, which is typically "Number of files"
+     */
     title: PropTypes.string,
+    /**
+     * Number of files in queue
+     */
     numberOfFiles: PropTypes.number,
+    /**
+     * CSS object for styling SVG container
+     */
     style: PropTypes.object,
 };
 

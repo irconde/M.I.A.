@@ -180,7 +180,13 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
 };
 
 BoundPolyFAB.propTypes = {
+    /**
+     * Callback for bounding box selection
+     */
     onBoundingSelect: PropTypes.func.isRequired,
+    /**
+     * Callback for polygon mask selection
+     */
     onPolygonSelect: PropTypes.func.isRequired,
 };
 

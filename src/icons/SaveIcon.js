@@ -34,7 +34,13 @@ const SaveIcon = (props) => {
 };
 
 SaveIcon.propTypes = {
+    /**
+     * Title shown when hovering icon, which is typically "Save File"
+     */
     title: PropTypes.string,
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
 };
 

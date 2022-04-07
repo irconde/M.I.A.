@@ -21,7 +21,13 @@ const ConnectionStatus = ({ isConnected, style }) => {
 };
 
 ConnectionStatus.propTypes = {
+    /**
+     * Boolean value determining if connection is successful
+     */
     isConnected: PropTypes.bool.isRequired,
+    /**
+     * CSS stylization for icons
+     */
     style: PropTypes.object,
 };
 

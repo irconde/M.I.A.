@@ -198,8 +198,17 @@ const SideMenuAlgorithm = ({
 };
 
 SideMenuAlgorithm.propTypes = {
+    /**
+     * Array of detection objects
+     */
     detections: PropTypes.array.isRequired,
+    /**
+     * Callback to reset cornerstone tools to initial values
+     */
     resetCornerstoneTools: PropTypes.func.isRequired,
+    /**
+     * Callback to render specific detection context menus
+     */
     renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 

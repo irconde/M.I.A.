@@ -69,7 +69,13 @@ const ConnectionResult = (props) => {
 };
 
 ConnectionResult.propTypes = {
+    /**
+     * True if icon should be visible.
+     */
     display: PropTypes.bool,
+    /**
+     * True if connection to server was successful.
+     */
     connected: PropTypes.bool,
 };
 

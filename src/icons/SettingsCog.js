@@ -49,7 +49,13 @@ const SettingsCog = (props) => {
 };
 
 SettingsCog.propTypes = {
+    /**
+     * String value that is shown when hovering component
+     */
     title: PropTypes.string,
+    /**
+     * CSS object used for stylizing SVG element
+     */
     style: PropTypes.object,
 };
 

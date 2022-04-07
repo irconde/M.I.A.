@@ -29,7 +29,13 @@ const FileSuffixIcon = (props) => {
 };
 
 FileSuffixIcon.propTypes = {
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
+    /**
+     * CSS object used for stylizing SVG element
+     */
     svgStyle: PropTypes.object,
 };
 

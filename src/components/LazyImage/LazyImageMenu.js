@@ -24,7 +24,9 @@ if (isElectron()) {
  *
  * @component
  *
- * @param {PropTypes} props Expected props: thumbnails (Array of thumbnails?), getSpecificFileFromLocalDirectory (?)
+ * @param {PropTypes} props Expected props: thumbnails<Array<string>>, getSpecificFileFromLocalDirectory<function>
+ * @param {Array<string>} thumbnails - Destructured from props -- Array with string values to the file path of thumbnails, IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png',...]
+ * @param {function} getSpecificFileFromLocalDirectory - Destructured from props -- Calls the Electron channel to invoke a specific file from the selected file system folder.
  *
  */
 function LazyImageMenu(props) {
@@ -116,7 +118,14 @@ function LazyImageMenu(props) {
 }
 
 LazyImageMenu.propTypes = {
+    /**
+     * Array with string values to the file path of thumbnails,
+     * IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png', ...]
+     */
     thumbnails: PropTypes.array,
+    /**
+     * Calls the Electron channel to invoke a specific file from the selected file system folder.
+     */
     getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 

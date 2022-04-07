@@ -133,7 +133,13 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
 };
 
 NextButton.propTypes = {
+    /**
+     * Callback for loading next image
+     */
     nextImageClick: PropTypes.func.isRequired,
+    /**
+     * Boolean value determining if side menu component is collapsed or not.
+     */
     collapseBtn: PropTypes.bool,
 };
 

@@ -64,7 +64,7 @@ const LabelListWrapper = styled.div`
  *
  * @component
  *
- * @param {Array<String>} labels - Available detection labels
+ * @param {Array<string>} labels - Available detection labels
  * @param {function} onLabelSelect - Called when label is selected
  */
 const LabelList = ({ labels, onLabelSelect }) => {
@@ -95,7 +95,13 @@ const LabelList = ({ labels, onLabelSelect }) => {
 };
 
 LabelList.propTypes = {
+    /**
+     * Available detection labels
+     */
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
+    /**
+     * Called when label is selected
+     */
     onLabelSelect: PropTypes.func.isRequired,
 };
 
