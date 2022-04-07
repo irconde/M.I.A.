@@ -1180,6 +1180,7 @@ class App extends Component {
                                     this.resetSelectedDetectionBoxes(e);
                                     this.props.resetDetections();
                                     this.props.setReceiveTime(null);
+                                    this.props.setLocalFileOpen(false);
                                     this.onNoImageLeft();
                                 });
                             });
@@ -1372,6 +1373,7 @@ class App extends Component {
                                     this.props.setCurrentProcessingFile(null);
                                     this.resetSelectedDetectionBoxes(e);
                                     this.props.resetDetections();
+                                    this.props.setLocalFileOpen(false);
                                     this.props.setReceiveTime(null);
                                 });
                             });
@@ -3370,10 +3372,10 @@ class App extends Component {
      * @param {Event} event
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);
+        // if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        // else this.props.onMouseLeaveNoFilesUpdate();
+        // if (this.props.selectedDetection !== null)
+        //     this.resetSelectedDetectionBoxes(event);
     }
 
     render() {

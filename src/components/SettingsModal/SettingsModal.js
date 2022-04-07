@@ -474,25 +474,20 @@ const SettingsModal = (props) => {
                                 <p className={classes.optionText}>
                                     Work connected to a remote service
                                 </p>
-                                {isElectron() ? (
-                                    <div className={classes.switchContainer}>
-                                        <Switch
-                                            checked={remoteOrLocal}
-                                            size="small"
-                                            onChange={() =>
-                                                setRemoteOrLocal(!remoteOrLocal)
-                                            }
-                                            color="primary"
-                                            name="remoteOrLocal"
-                                            inputProps={{
-                                                'aria-label':
-                                                    'secondary checkbox',
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div></div>
-                                )}
+                                <div className={classes.switchContainer}>
+                                    <Switch
+                                        checked={remoteOrLocal}
+                                        size="small"
+                                        onChange={() =>
+                                            setRemoteOrLocal(!remoteOrLocal)
+                                        }
+                                        color="primary"
+                                        name="remoteOrLocal"
+                                        inputProps={{
+                                            'aria-label': 'secondary checkbox',
+                                        }}
+                                    />
+                                </div>
                             </div>
                             {isElectron() ? (
                                 <p className={classes.greyText}>
