@@ -131,7 +131,7 @@ class App extends Component {
      * image rendering, and CornerstoneJS Tools are initialized
      *
      * @contructor
-     * @param  {Object} props
+     * @param {Object} props
      */
     constructor(props) {
         super(props);
@@ -627,8 +627,8 @@ class App extends Component {
     /**
      * CornerstoneJS Tools are initialized
      *
-     * @param  {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
-     * @param  {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
+     * @param {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
+     * @param {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -1662,8 +1662,8 @@ class App extends Component {
     /**
      * Parses a DICOS+TDR file to pull all the data regarding threat detections
      *
-     * @param  {Array} imagesLeft - List of DICOS+TDR data from algorithm
-     * @param  {Array} imagesRight - List of DICOS+TDR data from algorithm
+     * @param {Array} imagesLeft - List of DICOS+TDR data from algorithm
+     * @param {Array} imagesRight - List of DICOS+TDR data from algorithm
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1814,7 +1814,7 @@ class App extends Component {
      * Callback automatically invoked when CornerstoneJS renders a new image. It triggers the rendering of
      * the several annotations associated to the image
      *
-     * @param  {Event} e
+     * @param {Event} e
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1953,8 +1953,8 @@ class App extends Component {
     /**
      * Method that renders annotations directly utilizing the canvas' context
      *
-     * @param  {Array<Detection>} data Array of detection data
-     * @param  {eventData.canvasContext} context Rendering context
+     * @param {Array<Detection>} data Array of detection data
+     * @param {eventData.canvasContext} context Rendering context
      */
     renderDetections(data, context) {
         if (!data) {
@@ -2062,8 +2062,8 @@ class App extends Component {
     /**
      * Renders the polygon mask associated with a detection.
      *
-     * @param  {Array<number>} coords - Polygon mask coordinates
-     * @param  {Context} context - Rendering context
+     * @param {Array<number>} coords - Polygon mask coordinates
+     * @param {Context} context - Rendering context
      */
     renderPolygonMasks(coords, context) {
         if (coords === undefined || coords === null || coords.length === 0) {
@@ -2102,7 +2102,7 @@ class App extends Component {
     /**
      * Callback invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
@@ -2781,7 +2781,7 @@ class App extends Component {
     /**
      * Unselects the currently selected detection and hides the context menu.
      *
-     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     resetSelectedDetectionBoxes(e) {
         if (

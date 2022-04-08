@@ -64,7 +64,7 @@ export default class Dicos {
     /**
      * Parses a DICOS+TDR file to pull the coordinates of the bounding boxes to be rendered
      *
-     * @param  {Blob} image - Blob data
+     * @param {Blob} image - Blob data
      * @return {Array<number>} - Coordinates of the several bounding boxes derived from the DICOS+TDR data. Each
      * bounding box is defined by the two end points of the diagonal, and each point is defined by its coordinates x and y.
      */
@@ -99,8 +99,8 @@ export default class Dicos {
     /**
      * Parses a DICOS+TDR file to pull the bitmap mask data
      *
-     * @param  {DICOSImageObject} image - DICOS+TDR image data
-     * @param  {DICOSPixelData} data - DICOS+TDR pixel data
+     * @param {DICOSImageObject} image - DICOS+TDR image data
+     * @param {DICOSPixelData} data - DICOS+TDR pixel data
      * @returns {Array<number>} - Bitmap mask data
      *
      */
@@ -182,7 +182,7 @@ export default class Dicos {
     /**
      * Parses a DICOS+TDR file to retrieve the class of the potential threat object
      *
-     * @param  {Blob} image - Blob data
+     * @param {Blob} image - Blob data
      * @returns {string} - Description of the potential threat object
      */
     static retrieveObjectClass(image) {
@@ -194,7 +194,7 @@ export default class Dicos {
     /**
      * Parses a DICOS+TDR file to retrieve the confidence level of the detection algorithm used
      *
-     * @param  {Blob} image - Blob data
+     * @param {Blob} image - Blob data
      * @returns {number} - Confidence level
      */
     static retrieveConfidenceLevel(image) {

@@ -1021,11 +1021,11 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Compares the distance between two points to this.configuration.spacing.
      *
      * @private
-     * @param  {Object} element     The element on which the roi is being drawn.
-     * @param  {Object} p1          The first point, in pixel space.
-     * @param  {Object} p2          The second point, in pixel space.
-     * @param  {string} comparison  The comparison to make.
-     * @param  {number} spacing     The allowed canvas spacing
+     * @param {Object} element     The element on which the roi is being drawn.
+     * @param {Object} p1          The first point, in pixel space.
+     * @param {Object} p2          The second point, in pixel space.
+     * @param {string} comparison  The comparison to make.
+     * @param {number} spacing     The allowed canvas spacing
      * @returns {boolean}           True if the distance is smaller than the
      *                              allowed canvas spacing.
      */
@@ -1121,9 +1121,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * Returns true if two points are closer than this.configuration.spacing.
      *
      * @private
-     * @param  {Object} element     The element on which the roi is being drawn.
-     * @param  {Object} p1          The first point, in pixel space.
-     * @param  {Object} p2          The second point, in pixel space.
+     * @param {Object} element     The element on which the roi is being drawn.
+     * @param {Object} p1          The first point, in pixel space.
+     * @param {Object} p2          The second point, in pixel space.
      * @returns {boolean}            True if the distance is smaller than the
      *                              allowed canvas spacing.
      */

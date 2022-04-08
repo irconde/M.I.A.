@@ -37,7 +37,7 @@ export default class Utils {
     /**
      * @static Converts a decimal value into a percentage
      *
-     * @param  {number} num - Float value <= 1.0 with common decimal format
+     * @param {number} num - Float value <= 1.0 with common decimal format
      * @returns {number} - Percentage equivalent to the given input float value
      */
     static decimalToPercentage(num) {
@@ -79,8 +79,8 @@ export default class Utils {
      * Formats detection label
      *
      * @static
-     * @param  {string} objectClass - Threat type (object class)
-     * @param  {number} confidenceLevel - Confidence level in the form of a percentage
+     * @param {string} objectClass - Threat type (object class)
+     * @param {number} confidenceLevel - Confidence level in the form of a percentage
      * @return {string} - Formatted label with information about a detection
      */
     static formatDetectionLabel(objectClass, confidenceLevel) {
@@ -91,9 +91,9 @@ export default class Utils {
      * Calculates the dimensions (width and height) of a given text label
      *
      * @static
-     * @param  {Context} context - 2d canvas context
-     * @param  {string} labelText - Text content of the label
-     * @param  {string} padding - Blank space surrounding the text within the label
+     * @param {Context} context - 2d canvas context
+     * @param {string} labelText - Text content of the label
+     * @param {string} padding - Blank space surrounding the text within the label
      * @returns {{width: number, height: number}} - Label's dimensions
      */
     static getTextLabelSize(context, labelText, padding) {
@@ -132,8 +132,8 @@ export default class Utils {
      * Indicates whether a given point is inside a rectangle or not
      *
      * @static
-     * @param  {Array<number>} point - 2D point defined as a pair of coordinates (x,y)
-     * @param  {Array<number>} rect - Array that hold four float values representing the two end-points of a rectangle's diagonal
+     * @param {Array<number>} point - 2D point defined as a pair of coordinates (x,y)
+     * @param {Array<number>} rect - Array that hold four float values representing the two end-points of a rectangle's diagonal
      * @returns {boolean} - True if the point is inside the rectangle; false otherwise
      */
     static pointInRect(point, rect) {
@@ -196,8 +196,8 @@ export default class Utils {
     /**
      * Converts base 64 data to Blob data ready to be displayed
      *
-     * @param  {string} b64Data - Base 64 data
-     * @param  {string} contentType - Data MIME type
+     * @param {string} b64Data - Base 64 data
+     * @param {string} contentType - Data MIME type
      * @return {Blob} - Blob data
      */
     static b64toBlob = (
@@ -831,8 +831,8 @@ export default class Utils {
     /**
      * Renders the binary mask associated with a detection
      *
-     * @param  {Array<Array<number>>} data - DICOS+TDR data
-     * @param  {Context} context - Rendering context
+     * @param {Array<Array<number>>} data - DICOS+TDR data
+     * @param {Context} context - Rendering context
      */
     static renderBinaryMasks(data, context, zoom = 1) {
         if (data === undefined || data === null || data.length === 0) {
@@ -996,7 +996,7 @@ export default class Utils {
     /**
      * Converts the polygon mask associated with a detection to its binary mask counterpart
      *
-     * @param  {Array<number>} coords - Polygon mask's coordinates
+     * @param {Array<number>} coords - Polygon mask's coordinates
      * @returns {Array<Array<number>>} - Converted binary mask
      *
      */
