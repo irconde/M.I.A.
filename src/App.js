@@ -794,7 +794,7 @@ class App extends Component {
      * Operates in a similar way to getFileFromLocalDirectory, but it specifies the exact file path instead of a general path.
      * IE D:\images\1_img.ora.
      *
-     * @param {string} filePath String value of specific file path
+     * @param {string} filePath - String value of specific file path
      */
     getSpecificFileFromLocalDirectory(filePath) {
         if (isElectron()) {

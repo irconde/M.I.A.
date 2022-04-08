@@ -99,7 +99,7 @@ const SettingsModal = (props) => {
      * Event handler for when the snackbar closes
      *
      * @param {Event} event
-     * @param {String} reason
+     * @param {string} reason
      */
     const handleSnackBarClose = (event, reason) => {
         if (reason === 'clickaway') {

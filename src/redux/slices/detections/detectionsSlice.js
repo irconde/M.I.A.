@@ -633,7 +633,7 @@ export const getSelectedDetectionWidthAndHeight = (state) => {
  * Returns selected algorithm
  *
  * @param {Store} state - Passed in via useSelector/mapDispatchToProps
- * @returns {String} - The currently selected algorithm
+ * @returns {string} - The currently selected algorithm
  */
 export const getSelectedAlgorithm = (state) =>
     state.detections.selectedAlgorithm;
@@ -644,7 +644,7 @@ export const getSelectedAlgorithm = (state) =>
  * Get color of detection for bounding box rendering
  *
  * @param {Detection} detection - Detection object
- * @param {String} uuid - unique id of detection object
+ * @param {string} uuid - unique id of detection object
  * @returns {string} - color in string form
  */
 const getDetectionColor = (detection, uuid) => {

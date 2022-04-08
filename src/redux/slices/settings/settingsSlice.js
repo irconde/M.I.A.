@@ -103,7 +103,7 @@ const settingsSlice = createSlice({
          * Sets the remote ip to the passed in action payload
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String with the ip of the remote server
+         * @param {string} action - String with the ip of the remote server
          */
         setRemoteIp: (state, action) => {
             state.settings.remoteIp = action.payload;
@@ -114,7 +114,7 @@ const settingsSlice = createSlice({
          * Sets the remote port to the passed in action
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String with the port of the remote server
+         * @param {string} action - String with the port of the remote server
          */
         setRemotePort: (state, action) => {
             state.settings.remotePort = action.payload;
@@ -136,7 +136,7 @@ const settingsSlice = createSlice({
          * Sets the file output format, ora/zip
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String value determining ora or zip
+         * @param {string} action - String value determining ora or zip
          */
         setFileFormat: (state, action) => {
             state.settings.fileFormat = action.payload;
@@ -147,7 +147,7 @@ const settingsSlice = createSlice({
          * Sets the file annotation format
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String value containing the annotation format
+         * @param {string} action - String value containing the annotation format
          */
         setAnnotationsFormat: (state, action) => {
             state.settings.annotationsFormat = action.payload;
@@ -158,7 +158,7 @@ const settingsSlice = createSlice({
          * Sets the local file output path to save files to
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String value of the local path
+         * @param {string} action - String value of the local path
          */
         setLocalFileOutput: (state, action) => {
             state.settings.localFileOutput = action.payload;
@@ -169,7 +169,7 @@ const settingsSlice = createSlice({
          * Sets the file suffix
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action - String value of the file suffix
+         * @param {string} action - String value of the file suffix
          */
         setFileSuffix: (state, action) => {
             state.settings.fileSuffix = action.payload;
@@ -230,14 +230,14 @@ export const getHasFileOutput = (state) =>
 /**
  * Provides the file output
  * @param {Object} state
- * @returns {String}
+ * @returns {string}
  */
 export const getLocalFileOutput = (state) =>
     state.settings.settings.localFileOutput;
 /**
  * Provides the remote connection info: ip, port, autoconnect.
  * @param {Object} state
- * @returns {{remoteIp: String, remotePort: String, autoConnect: Boolean}}
+ * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
  */
 export const getRemoteConnectionInfo = (state) => {
     return {
