@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+
 const serverSlice = createSlice({
     name: 'server',
     initialState: {
@@ -45,67 +46,76 @@ export const {
 
 // Selectors
 /**
- * getConnectionInfo - Returns an object with the connection info for if
- *                     the App is downloading, uploading, and connection status
+ * Returns an object with the connection info for if the App is downloading, uploading, and connection status
  *
- * @param {State} state Passed in via useSelector
- * @returns {Object} An object containing these values from the serverSlice;
- *                   isConnected, isUpload, and isDownload
+ * @param {State} state - Passed in via useSelector
+ * @returns {boolean} isConnected - True if server is connected. False otherwise
+ * @returns {boolean} isUpload - True if server is uploading. False otherwise
+ * @returns {boolean} isDownload - True if server is downloading. False otherwise
  */
 export const getConnectionInfo = (state) => {
     const { isConnected, isUpload, isDownload } = state.server;
-
     return { isConnected, isUpload, isDownload };
 };
+
 /**
- * getNumFilesInQueue - Returns an the number of images in the file server queue
+ * Returns the number of images in the file server queue
  *
- * @param {State} state Passed in via useSelector
- * @returns {Number} The number of images in the queue
+ * @param {State} state - Passed in via useSelector
+ * @returns {number} - The number of images in the queue
  */
 export const getNumFilesInQueue = (state) => state.server.numFilesInQueue;
+
 /**
- * getConnected - The connection status to the command server
+ * Returns the connection status to the command server
  *
- * @param {State} state Passed in via useSelector
- * @returns {Boolean} The connection status as a boolean where true is connected and false is not connected
+ * @param {State} state - Passed in via useSelector
+ * @returns {boolean} - The connection status as a boolean where true is connected and false is not connected
  */
 export const getConnected = (state) => state.server.isConnected;
+
 /**
- * getIsDownload - Returns the value representing if we are downloading an image from the command server
+ * Returns the value representing if we are downloading an image from the command server
  *
- * @param {State} state Passed in via useSelector
- * @returns {Boolean} The download status as a boolean where true is downloading and false is not downloading
+ * @param {State} state - Passed in via useSelector
+ * @returns {boolean} - The download status as a boolean where true is downloading and false is not downloading
  */
 export const getIsDownload = (state) => state.server.isDownload;
+
 /**
- * getIsUpload - Returns the value representing if we are uploading an image to the command server
+ * Returns the value representing if we are uploading an image to the command server
  *
  * @param {State} state Passed in via useSelector
- * @returns {Boolean} The download status as a boolean where true is uploading and false is not uploading
+ * @returns {boolean} The download status as a boolean where true is uploading and false is not uploading
  */
 export const getIsUpload = (state) => state.server.isUpload;
+
 /**
- * getProcessingHost - This returns the hostname of the file server the App is connected to
+ * Returns the hostname of the file server the App is connected to
  *
- * @param {State} state Passed in via useSelector
- * @returns {String} The hostname of the file server the App is connected to
+ * @param {State} state - Passed in via useSelector
+ * @returns {string} - The hostname of the file server the App is connected to
  */
 export const getProcessingHost = (state) => state.server.processingHost;
+
 /**
- * getCurrentFile - This returns the file name of the image the App is currently rendering/processing.
+ * Returns the file name of the image the App is currently rendering/processing.
  *
- * @param {State} state Passed in via useSelector
- * @returns {String} The file name that is being rendered, processed and interacted etc with.
+ * @param {State} state - Passed in via useSelector
+ * @returns {string} - The file name that is being rendered, processed and interacted with.
  */
 export const getCurrentFile = (state) => state.server.currentProcessingFile;
+
 /**
- * getTopBarInfo - Returns the needed information for the TopBar widget in one call
+ * Returns the needed information for the TopBar widget in one call
  *
- * @param {State} state Passed in via useSelector
- * @returns {Object} An object containing these values from the serverSlice;
- *                   processingFile, connectedServer, numberOfFiles, isDownload,
- *                   isUpload, and isConnected
+ * @param {State} state - Passed in via useSelector
+ * @returns {string} processingFile - Name of currently processed file
+ * @returns {string} connectedServer - Name of server host
+ * @returns {number} numberOfFiles - Number of files in queue
+ * @returns {boolean} isDownload - True if server is downloading
+ * @returns {boolean} isUpload - True if server is uploading
+ * @returns {boolean} isConnected - True if server is connected
  */
 export const getTopBarInfo = (state) => {
     return {

@@ -1,6 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * File open icon in SettingsModal only shown if in desktop app version displaying file open in local directory.
+ *
+ * @component
+ * @param {PropTypes} props - Expected props: style<object>, svgStyle<object>
+ * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
+ * @param {Object} svgStyle - Destructured from props -- CSS object used for stylizing SVG element
+ *
+ */
 const FileOpenIcon = (props) => {
     return (
         <div style={props.style}>
@@ -20,7 +29,13 @@ const FileOpenIcon = (props) => {
 };
 
 FileOpenIcon.propTypes = {
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
+    /**
+     * CSS object used for stylizing SVG element
+     */
     svgStyle: PropTypes.object,
 };
 

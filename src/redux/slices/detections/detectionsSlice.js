@@ -73,14 +73,31 @@ const detectionsSlice = createSlice({
     name: 'detections',
     initialState,
     reducers: {
-        // Reset store to default values
+        /**
+         * Reset detection store to default values
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         resetDetections: (state) => {
             state.selectedAlgorithm = '';
             state.selectedDetection = null;
             state.detections = [];
             state.detectionChanged = false;
         },
-        // Adds detection
+
+        /**
+         * Adds detection object to store
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} algorithm - Destructured from action.payload -- algorithm's name
+         * @param {string} className - Destructured from action.payload -- name of detection's class
+         * @param {number} confidence - Destructured from action.payload -- confidence of detection
+         * @param {constants.viewport} view - Destructured from action.payload -- Viewport of selected detection
+         * @param {Array<number>} binaryMask - Destructured from action.payload -- Array of binary mask map
+         * @param {Array<number>} polygonMask - Destructured from action.payload -- Array of polygon mask coordinates
+         * @param {Array<number>} boundingBox - Destructured from action.payload -- Array of bounding box coordinates
+         * @param {string} uuid - Destructured from action.payload -- String of uuid for detection
+         */
         addDetection: (state, action) => {
             const {
                 algorithm,
@@ -136,7 +153,13 @@ const detectionsSlice = createSlice({
                 state.detectionChanged = true;
             }
         },
-        // Adds detections
+
+        /**
+         * Adds multiple detection objects to store
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Array<{algorithm: string, className: string, confidence: number, view: string, binaryMask: Array<number>, polygonMask: Array<number>, boundingBox: Array<number>, uuid: number}>} action Array of objects in action.payload containing detection object params.
+         */
         addDetections: (state, action) => {
             action.payload.forEach((det) => {
                 state.detections.push({
@@ -162,8 +185,12 @@ const detectionsSlice = createSlice({
                 }
             });
         },
-        // Clears selection data for all detections
-        // No action payload used
+
+        /**
+         * Clears selection data for all detections
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         clearAllSelection: (state) => {
             state.detections.forEach((det) => {
                 det.selected = false;
@@ -175,9 +202,13 @@ const detectionsSlice = createSlice({
             state.selectedDetection = null;
             state.selectedAlgorithm = '';
         },
-        // Select a DetectionSet
-        // Action payload should contain:
-        // {string} algorithm - algorithm name
+
+        /**
+         * Select a DetectionSet object
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} algorithm - Destructured from action.payload -- algorithm's name
+         */
         selectDetectionSet: (state, action) => {
             state.selectedDetection = null;
             state.selectedAlgorithm = action.payload;
@@ -195,13 +226,22 @@ const detectionsSlice = createSlice({
                 }
             });
         },
-        // Resets the selected algorithm
+
+        /**
+         * Resets the selected algorithm
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         clearSelectedAlgorithm: (state) => {
             state.selectedAlgorithm = '';
         },
-        // Selects a detection
-        // Action payload should contain:
-        // {string} uuid - unique identifier for detection
+
+        /**
+         * Selects a detection
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} uuid - Destructured from action.payload -- unique identifier for detection
+         */
         selectDetection: (state, action) => {
             state.selectedAlgorithm = '';
             state.detections.forEach((det) => {
@@ -215,11 +255,15 @@ const detectionsSlice = createSlice({
                     det.displayColor = getDetectionColor(det, action.payload);
             });
         },
-        // Update properties on a detection
-        // Used for any action that is not selecting or deleting a detection
-        // Action payload should contain:
-        // {object} uuid of detection to update
-        // {object} update: contains any properties to update on the Detection
+
+        /**
+         * Update properties on a detection
+         * Used for any action that is not selecting or deleting a detection
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} uuid - Destructured from action.payload -- uuid of detection to update
+         * @param {Detection} update - Destructured from action.payload -- contains any properties to update on the Detection
+         */
         updateDetection: (state, action) => {
             const { uuid, update } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
@@ -234,10 +278,13 @@ const detectionsSlice = createSlice({
             }
         },
 
-        // Updates a Detection's class label.
-        // Action payload should contain:
-        // {string} uuid - uuid for detection being updated
-        // {string} className - new label className for detection being updated
+        /**
+         * Updates a Detection's class label.
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} uuid - Destructured from action.payload -- uuid for detection being updated
+         * @param {string} className - Destructured from action.payload -- new label className for detection being updated
+         */
         editDetectionLabel: (state, action) => {
             const { uuid, className } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
@@ -264,16 +311,25 @@ const detectionsSlice = createSlice({
                 });
             }
         },
-        // Deletes a detection.
-        // Action payload should contain:
-        // {string} uuid - uuid for detection being deleted
+
+        /**
+         * Deletes a detection.
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} uuid - Destructured from action.payload -- uuid for detection being deleted
+         */
         deleteDetection: (state, action) => {
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
             });
             state.detectionChanged = true;
         },
-        // Marks all DetectionSets as validated by the user
+
+        /**
+         * Marks all DetectionSets as validated by the user
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
         validateDetections: (state) => {
             state.detections.forEach((det) => {
                 det.validation = true;
@@ -281,10 +337,13 @@ const detectionsSlice = createSlice({
             });
         },
 
-        // Update visibility on a DetectionSet
-        // action payload should contain:
-        // {string} algorithm - Name of algorithm for DetectionSet
-        // {boolean} isVisible - whether the DetectionSet is visible or not
+        /**
+         * Update visibility on a DetectionSet
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} algorithm - Destructured from action.payload -- Name of algorithm for DetectionSet
+         * @param {boolean} isVisible - Destructured from action.payload -- whether the DetectionSet is visible or not
+         */
         updateDetectionSetVisibility: (state, action) => {
             const { algorithm, isVisible } = action.payload;
             state.detections.forEach((det) => {
@@ -306,10 +365,14 @@ const detectionsSlice = createSlice({
                 }
             });
         },
-        // Update visibility on a Detection
-        // action payload should contain:
-        // {string} uuid - id of detection
-        // {boolean} isVisible - whether the DetectionSet is visible or not
+
+        /**
+         * Update visibility on a Detection
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {string} uuid - Destructured from action.payload -- uuid of detection
+         * @param {boolean} isVisible - Destructured from action.payload -- whether the DetectionSet is visible or not
+         */
         updateDetectionVisibility: (state, action) => {
             state.detections.forEach((det) => {
                 if (det.uuid === action.payload) {
@@ -325,11 +388,13 @@ const detectionsSlice = createSlice({
                 }
             });
         },
+
         /**
-         * addMissMatchedClassName - For when a color is picked, it tests if that color is in the array
-         *                           of miss matched class names. If it isn't, its name and corresponding color are added.
+         * For when a color is picked, it tests if that color is in the array of miss matched class names. If it isn't, its name and corresponding color are added.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object<className, color>} action Object containing the name of the detection and it's new color
+         * @param {string} className - Destructured from action.payload -- class name of the detection
+         * @param {string} color - Destructured from action.payload -- new color
          */
         addMissMatchedClassName: (state, action) => {
             const { className, color } = action.payload;
@@ -358,8 +423,8 @@ const detectionsSlice = createSlice({
             }
         },
         /**
-         * updateMissMatchedClassName - For when the color picker is closed, it will update all existing detections
-         *                              with the same name as the color selected from the color picker
+         * For when the color picker is closed, it will update all existing detections with the same name as the color selected from the color picker
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         updateMissMatchedClassName: (state) => {
@@ -383,15 +448,16 @@ const detectionsSlice = createSlice({
 /**
  * Gets all unique class names from each Detection in each DetectionSet.
  * Used to populate the label list component for editing Detection labels
- * @param {Object.<string, DetectionSet>} state Redux Detections state
- * @returns {Array<string>} array of all unique detection class names
+ * @param {Object.<string, DetectionSet>} state - Redux Detections state
+ * @returns {Array<string>} - array of all unique detection class names
  */
 export const getDetectionLabels = (state) => state.detections.detectionLabels;
 
 /**
- * Get all Detections for the top view
- * @param {Object.<string, DetectionSet>} data Redux Detections state
- * @returns {Array<Detection>}
+ * Get all Detections for the top view, given a set of detections
+ *
+ * @param {Object.<string, DetectionSet>} state - Redux Detections state
+ * @returns {Array<Detection>} - Detection objects found in the top viewport
  */
 export const getTopDetections = (detections) => {
     const topDetections = [];
@@ -406,9 +472,10 @@ export const getTopDetections = (detections) => {
 };
 
 /**
- * Get all Detections for the side view
- * @param {Object.<string, DetectionSet>} data Redux Detections state
- * @returns {Array<Detection>}
+ * Get all Detections for the side view, given a set of detections
+ *
+ * @param {Object.<string, DetectionSet>} state - Redux Detections state
+ * @returns {Array<Detection>} - Detection objects found in the side viewport
  */
 export const getSideDetections = (detections) => {
     const sideDetections = [];
@@ -423,11 +490,12 @@ export const getSideDetections = (detections) => {
 };
 
 /**
- * hasDetectionCoordinatesChanged - Determines if the bounding box coordinates have changed from the passed in values to the stored ones
- * @param {Array<Detection>} detections
- * @param {String} uuid
- * @param {Array<Number>} boundingBox
- * @returns {Boolean}
+ * Determines if the bounding box coordinates have changed from the passed in values to the stored ones
+ *
+ * @param {Array<Detection>} detections - Array of detection objects
+ * @param {string} uuid - uuid identifier of detection you want to check
+ * @param {Array<number>} boundingBox - Bounding box coordinates of detection object
+ * @returns {boolean} - True if detection coordinates have changed. False otherwise
  */
 export const hasDetectionCoordinatesChanged = (
     detections,
@@ -458,9 +526,10 @@ export const hasDetectionCoordinatesChanged = (
 };
 
 /**
- * getDetectionsByAlgorithm - Sorts and organizes the detections into arrays based on algorithm name
- *                            Returns the array of detections by algorithm in an array.
- * @param {Store} state Passed in via useSelector/mapDispatchToProps
+ * Sorts and organizes the detections into arrays based on algorithm name
+ * Returns the array of detections by algorithm in an array.
+ *
+ * @param {Store} state - Passed in via useSelector/mapDispatchToProps
  * @returns {Array<Array<Detection>>} - Array containing arrays of each algorithm
  */
 export const getDetectionsByAlgorithm = (state) => {
@@ -492,17 +561,19 @@ export const getDetectionsByAlgorithm = (state) => {
 };
 
 /**
- * getSelectedDetection
- * @param {Store} state Passed in via useSelector/mapDispatchToProps
- * @returns {Detection} The currently selected detection
+ * Returns the currently selected detection
+ *
+ * @param {Store} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {Detection} - The currently selected detection
  */
 export const getSelectedDetection = (state) =>
     state.detections.selectedDetection;
 
 /**
- * getSelectedDetectionColor
- * @param {Store} state Passed in via useSelector/mapDispatchToProps
- * @returns {String} The hex color of the detection
+ * Returns the selected detection's color hex code, if none selected, returns empty string
+ *
+ * @param {Store} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {string} - The hex color of the detection
  */
 export const getSelectedDetectionColor = (state) => {
     if (state.detections.selectedDetection !== null) {
@@ -511,30 +582,35 @@ export const getSelectedDetectionColor = (state) => {
         return '';
     }
 };
+
 /**
- * getSelectedDetectionViewport - Returns the viewport for the current detection
- * @param {Object} state
- * @returns {constants.viewport}
+ * Returns the viewport for the current detection
+ *
+ * @param {Object} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {constants.viewport} - Viewport of selected detection
  */
 export const getSelectedDetectionViewport = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.view;
     }
 };
+
 /**
- * getSelectedDetectionClassName - Returns the selected detection class name label
- * @param {Object} state
- * @returns {String}
+ * Returns the selected detection class name label
+ *
+ * @param {Object} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {string} - Classname of selected detection
  */
 export const getSelectedDetectionClassName = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.className;
     }
 };
+
 /**
- * getSelectedDetectionWidthAndHeight - Will calculate and return the selected detections width and height
- * @param {Object} state
- * @returns {{width: Number, height: Number}}
+ * Will calculate and return the selected detection's width and height
+ * @param {Object} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {{width: number, height: number}} - Width and height of selected detection
  */
 export const getSelectedDetectionWidthAndHeight = (state) => {
     if (state.detections.selectedDetection) {
@@ -552,10 +628,12 @@ export const getSelectedDetectionWidthAndHeight = (state) => {
         };
     } else return null;
 };
+
 /**
- * getSelectedAlgorithm
- * @param {Store} state Passed in via useSelector/mapDispatchToProps
- * @returns {String} The currently selected algorithm
+ * Returns selected algorithm
+ *
+ * @param {Store} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {string} - The currently selected algorithm
  */
 export const getSelectedAlgorithm = (state) =>
     state.detections.selectedAlgorithm;
@@ -564,8 +642,10 @@ export const getSelectedAlgorithm = (state) =>
 
 /**
  * Get color of detection for bounding box rendering
- * @param {Detection} detection
- * @returns {string} color in string form
+ *
+ * @param {Detection} detection - Detection object
+ * @param {string} uuid - unique id of detection object
+ * @returns {string} - color in string form
  */
 const getDetectionColor = (detection, uuid) => {
     if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
@@ -583,16 +663,18 @@ const getDetectionColor = (detection, uuid) => {
 };
 
 /**
- * getDetectionChanged - Returns if any of the detections has changed
- * @param {Object} state
- * @returns {Boolean}
+ * Returns if any of the detections has changed
+ *
+ * @param {Object} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {Boolean} - True if any detections have changed. False otherwise
  */
 export const getDetectionChanged = (state) => state.detections.detectionChanged;
 
 /**
- * getSelectedDetectionType - Returns the detection type for the currently selected detection
- * @param {Object} state
- * @returns {constants.detectionType}
+ * Returns the detection type for the currently selected detection
+ *
+ * @param {Object} state - Passed in via useSelector/mapDispatchToProps
+ * @returns {constants.detectionType} - Detection type of selected detection
  */
 export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {

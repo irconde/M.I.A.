@@ -16,6 +16,12 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 
+/**
+ * Component within DetectionContextMenu component for editing colors of detection bounding box.
+ *
+ * @component
+ */
+
 const ColorPicker = () => {
     const isVisible = useSelector(getColorPickerVisible);
     const detectionContextPosition = useSelector(getDetectionContextPosition);

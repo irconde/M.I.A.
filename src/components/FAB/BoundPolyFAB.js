@@ -6,10 +6,10 @@ import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
-    getIsFabVisible,
-    getCornerstoneMode,
-    getCollapsedSideMenu,
     getCollapsedLazyMenu,
+    getCollapsedSideMenu,
+    getCornerstoneMode,
+    getIsFabVisible,
 } from '../../redux/slices/ui/uiSlice';
 import {
     getDeviceType,
@@ -83,7 +83,13 @@ const FABContainer = styled.div`
 `;
 
 /**
- * GUI widget that allows user to create a new detection and its polygon mask.
+ * Component for user to create a new detection and its polygon mask.
+ *
+ * @component
+ *
+ * @param {function} onBoundingSelect - Callback for bounding box selection
+ * @param {function} onPolygonSelect - Callback for polygon mask selection
+ *
  *
  */
 const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
@@ -174,7 +180,13 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
 };
 
 BoundPolyFAB.propTypes = {
+    /**
+     * Callback for bounding box selection
+     */
     onBoundingSelect: PropTypes.func.isRequired,
+    /**
+     * Callback for polygon mask selection
+     */
     onPolygonSelect: PropTypes.func.isRequired,
 };
 

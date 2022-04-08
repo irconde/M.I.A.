@@ -52,6 +52,13 @@ if (isElectron()) {
     ipcRenderer = electron.ipcRenderer;
 }
 
+/**
+ * Component dialog for changing settings of application.
+ *
+ * @component
+ *
+ */
+
 const SettingsModal = (props) => {
     const settings = useSelector(getSettings);
     const initLocalFileOutput = useSelector(getLocalFileOutput);
@@ -89,10 +96,10 @@ const SettingsModal = (props) => {
     };
 
     /**
-     * handleSnackBarClose - Event handler for when the snackbar closes
+     * Event handler for when the snackbar closes
      *
      * @param {Event} event
-     * @param {String} reason
+     * @param {string} reason
      */
     const handleSnackBarClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -102,7 +109,7 @@ const SettingsModal = (props) => {
     };
 
     /**
-     * getModalStyle - Returns the main modal body style
+     * Returns the main modal body style
      *
      * @returns {Object} Containing styles for the modal
      */
@@ -120,11 +127,8 @@ const SettingsModal = (props) => {
     }
 
     /**
-     * testConnection - Will a test connection with the typed input fields. This does some simulation
-     *                  by using setTimeout to provide useful user interaction and feedback.
-     *
-     * @param {None}
-     * @returns {None}
+     * Tests the connection with the typed input fields. This does some simulation
+     * by using setTimeout to provide useful user interaction and feedback.
      */
     const testConnection = () => {
         const testConnection = socketIOClient(
@@ -164,18 +168,15 @@ const SettingsModal = (props) => {
     };
 
     /**
-     * handleClose - For when the user taps the Close X Icon or outside the modal window. Does not save settings.
-     *
-     * @param {None}
-     * @returns {None}
+     * Handles when the user taps the Close X Icon or outside the modal window. Does not save settings.
      */
     const handleClose = () => {
         dispatch(toggleSettingsVisibility(false));
     };
 
     /**
-     * saveSettingsEvent - For when the save settings button is tapped. Will send all data to the settings slice.
-     *                     If the user entered connection information it will change the command server to the new one.
+     * Action triggered when the save settings button is tapped. It sends all data to the settings slice.
+     * If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
         if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {

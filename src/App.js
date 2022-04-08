@@ -131,7 +131,7 @@ class App extends Component {
      * image rendering, and CornerstoneJS Tools are initialized
      *
      * @contructor
-     * @param  {Object} props
+     * @param {Object} props
      */
     constructor(props) {
         super(props);
@@ -197,7 +197,7 @@ class App extends Component {
      * Houses the code to connect to a server and starts listening for connection events. Lastly it
      * is what trigger to ask for a file from the command server.
      *
-     * @param {Boolean} update - Optional variable for when the settings changes the command server
+     * @param {boolean} update - Optional variable for when the settings changes the command server
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -219,13 +219,14 @@ class App extends Component {
     }
 
     /**
-     * Gets called by an update (in changes to props or state). It is called before render(), returning false means we
-     * can skip the update. Where returning true means we need to update the render(). Namely, this is an edge case for
-     * if a user is connected to a server, then decides to use the local mode option, this handles the disconnect.
+     * Gets called by an update (in changes to props or state). It is called before render(),
+     * returning false means we can skip the update. Where returning true means we need to update the render().
+     * Namely, this is an edge case for if a user is connected to a server, then decides to use the
+     * local mode option, this handles the disconnect.
      *
      * @param {Object} nextProps
      * @param {Object} nextState
-     * @returns {Boolean} - True, to update. False, to skip the update
+     * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -494,7 +495,7 @@ class App extends Component {
     }
 
     /**
-     * Unbinds a click event listener to the two cornerstonejs viewport.
+     * Unbinds a click event listener to the two cornerstonejs viewports
      */
     stopListeningClickEvents() {
         this.state.imageViewportTop.removeEventListener(
@@ -626,8 +627,8 @@ class App extends Component {
     /**
      * CornerstoneJS Tools are initialized
      *
-     * @param  {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
-     * @param  {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
+     * @param {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
+     * @param {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -793,7 +794,7 @@ class App extends Component {
      * Operates in a similar way to getFileFromLocalDirectory, but it specifies the exact file path instead of a general path.
      * IE D:\images\1_img.ora.
      *
-     * @param {string} filePath
+     * @param {string} filePath - String value of specific file path
      */
     getSpecificFileFromLocalDirectory(filePath) {
         if (isElectron()) {
@@ -819,7 +820,7 @@ class App extends Component {
     /**
      * Emits a new message to send a file to the server
      *
-     * @param {Blob} Blob - File sent to the server
+     * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -879,6 +880,17 @@ class App extends Component {
         });
     }
 
+    /**
+     * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
+     * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {string} fileName - Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {number} [numberOfFiles = 0] - Number of files left in queue
+     * @param {Array<string>} [thumbnails = null] - Array with string values to the file path of thumbnails,
+     * IE:
+     * ['D:\images\.thumbnails\1_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\2_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\3_img.ora_thumbnail.png']
+     */
     loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
         // Loading a file initially from a local workspace can call loadNextImage twice
         // Which creates duplicate detections. This ensures that the same file is never loaded twice
@@ -919,7 +931,6 @@ class App extends Component {
                         this.props.setCurrentFileFormat(
                             constants.SETTINGS.ANNOTATIONS.COCO
                         );
-                        console.log('Current image format: MS COCO');
 
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
@@ -956,6 +967,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'PNG IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1026,7 +1044,6 @@ class App extends Component {
                         this.props.setCurrentFileFormat(
                             constants.SETTINGS.ANNOTATIONS.TDR
                         );
-                        console.log('Current image format: TDR-DICOS');
                         // We loop through each stack. Creating a new stack object to store our info
                         // for now, we are just grabbing the location of the dicos file in the ora file
                         for (let stackData of xmlStack) {
@@ -1062,6 +1079,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'TDR IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
                                         if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
@@ -1103,9 +1127,11 @@ class App extends Component {
     }
 
     /**
-     * Sends the current ORA image loaded to the server
+     * When the operator taps next, we send to the file server to remove the
+     * current image, then when that is complete, we send the image to the command
+     * server. Finally, calling getNextImage to display another image if there is one
+     * @param {Event} e The event object being fired which caused your function to be executed
      *
-     * @param {Event} e
      */
     nextImageClick(e) {
         this.props.validateDetections();
@@ -1689,10 +1715,10 @@ class App extends Component {
     }
 
     /**
-     * Method that parses a DICOS+TDR file to pull all the data regarding the threat detections
+     * Parses a DICOS+TDR file to pull all the data regarding threat detections
      *
-     * @param  {Array.number} imagesLeft - List of DICOS+TDR data from algorithm
-     * @param  {Array} imagesRight - List of DICOS+TDR data from algorithm
+     * @param {Array} imagesLeft - List of DICOS+TDR data from algorithm
+     * @param {Array} imagesRight - List of DICOS+TDR data from algorithm
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1731,7 +1757,6 @@ class App extends Component {
                 // Threat Sequence information
                 const threatSequence = image.elements.x40101011;
                 if (threatSequence == null) {
-                    // console.log('No Threat Sequence');
                     return;
                 }
                 if (
@@ -1742,7 +1767,6 @@ class App extends Component {
                         Dicos.dictionary['NumberOfAlarmObjects'].tag
                     ) === undefined
                 ) {
-                    // console.log('No Potential Threat Objects detected');
                     return;
                 }
                 // for every threat found, create a new Detection object and store all Detection
@@ -1794,7 +1818,6 @@ class App extends Component {
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
                     if (threatSequence == null) {
-                        // console.log('No Threat Sequence');
                         return;
                     }
                     if (
@@ -1805,7 +1828,6 @@ class App extends Component {
                             Dicos.dictionary['NumberOfAlarmObjects'].tag
                         ) === undefined
                     ) {
-                        // console.log('No Potential Threat Objects detected');
                         return;
                     }
                     // for every threat found, create a new Detection object and store all Detection
@@ -1847,7 +1869,7 @@ class App extends Component {
      * Callback automatically invoked when CornerstoneJS renders a new image. It triggers the rendering of
      * the several annotations associated to the image
      *
-     * @param  {Event} e Event
+     * @param {Event} e
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1909,13 +1931,14 @@ class App extends Component {
     }
 
     /**
-     * Renders a crosshair element on the target passed in.
+     * Renders a cross-hair element on the target passed in.
      * That target is a DOM element that might be either the imageViewportTop or the imageViewportSide
      *
-     * @param {eventData.canvasContext} context
-     * @param {DOMElement} target
+     * @param {eventData.canvasContext} context Canvas' context, used to render crosshair directly to canvas
+     * @param {DOMElement} target Targeted DOMElement caught via mouse event data
      */
     renderCrosshair(context, target) {
+        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -1983,10 +2006,10 @@ class App extends Component {
     }
 
     /**
-     * Renders the annotations encoded in a DICOS+TDR file.
+     * Method that renders annotations directly utilizing the canvas' context
      *
-     * @param  {Array<Detection>} data - DICOS+TDR data
-     * @param  {eventData.canvasContext} context - Rendering context
+     * @param {Array<Detection>} data Array of detection data
+     * @param {eventData.canvasContext} context Rendering context
      */
     renderDetections(data, context) {
         if (!data) {
@@ -2094,8 +2117,8 @@ class App extends Component {
     /**
      * Renders the polygon mask associated with a detection.
      *
-     * @param  {Array<Number>} coords - Polygon mask coordinates
-     * @param  {Context} context - Rendering context
+     * @param {Array<number>} coords - Polygon mask coordinates
+     * @param {Context} context - Rendering context
      */
     renderPolygonMasks(coords, context) {
         if (coords === undefined || coords === null || coords.length === 0) {
@@ -2107,7 +2130,7 @@ class App extends Component {
     /**
      * Callback invoked when a touch event is initiated.
      *
-     * @param {type} e - Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchStart(e) {
         let startPosition = e.detail.currentPoints.page;
@@ -2117,9 +2140,9 @@ class App extends Component {
     }
 
     /**
-     * Callback invoked when a touch ends.
+     * Callback function invoked when a touch ends.
      *
-     * @param {type} e - Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchEnd(e) {
         let endPosition = e.detail.currentPoints.page;
@@ -2134,7 +2157,7 @@ class App extends Component {
     /**
      * Callback invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
@@ -2813,7 +2836,7 @@ class App extends Component {
     /**
      * Unselects the currently selected detection and hides the context menu.
      *
-     * @param  {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     resetSelectedDetectionBoxes(e) {
         if (
@@ -2886,10 +2909,10 @@ class App extends Component {
     }
 
     /**
-     * getContextMenuPos - Get position of context menu based on the associated bounding box.
+     * Get position of context menu based on the associated bounding box.
      *
-     * @param {DOMElement} viewportInfo - Viewport info
-     * @param {Array.number} coords - Bounding box' corners' coordinates
+     * @param {DOMElement} viewportInfo viewport info
+     * @param {Array<number>} coords bounding box corners' coordinates
      * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
@@ -3271,8 +3294,8 @@ class App extends Component {
     /**
      * Calculates position of the edit label widget
      *
-     * @param {Object} detectionData - Detection data
-     * @param {Array<Number>} coords - Bounding box coordinates
+     * @param {{boundingBox: Array<number>, view: constants.viewport, label: string, confidence: number}} detectionData - Detection data
+     * @param {Array<number>} [coords = undefined] - Bounding box coordinates
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {

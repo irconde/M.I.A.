@@ -13,9 +13,9 @@ export default class TapDetector {
     }
 
     /**
-     * touchStart - Public method called to record event data from a cornerstonetoolstouchstart event.
-     * @param {dictionary}  position - the x and y position of the touch event, in a dictionary of the form {x:value, y:value}.
-     * @param {number}      time     - the time stamp of the event.
+     * Records data from a cornerstonetoolstouchstart event.
+     * @param {{x:number, y:number}} position - Touch event location
+     * @param {number} time - Touch event time stamp
      */
     touchStart(position, time) {
         this.startPosition = position;
@@ -23,12 +23,11 @@ export default class TapDetector {
     }
 
     /**
-     * checkTouchEnd - Public method called to check if a cornerstonetoolstouchend event corresponds to a tap given the
-     *                 distance from and time since the last touch start event.
+     * Checks whether a cornerstonetoolstouchend event corresponds to a tap event based on the distance from and time since the last touch start event.
      *
-     * @param {dictionary}  endPosition - the x and y position of the touch event, in a dictionary of the form {x:value, y:value}.
-     * @param {number}      endTime     - the time stamp of the event.
-     * @returns {boolean}               - true if the touch event corresponds to a tap; false otherwise.
+     * @param {{x:number, y:number}} endPosition - Touch event location
+     * @param {number} endTime - Touch event time stamp
+     * @returns {boolean} - True if the touch event corresponds to a tap; false otherwise.
      */
     checkTouchEnd(endPosition, endTime) {
         let distance = Utils.getDistanceBetween(

@@ -317,7 +317,7 @@ function _createTextBoxContent(context, { className, score }, options = {}) {
  *
  * @param {*} startHandle
  * @param {*} endHandle
- * @returns {Array.<{x: number, y: number}>}
+ * @returns {Array<{x: number, y: number}>}
  */
 
 // eslint-disable-next-line no-unused-vars

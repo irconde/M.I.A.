@@ -17,6 +17,17 @@ import {
 import SaveButton from './SaveButton';
 import Utils from '../../utils/Utils';
 
+/**
+ * Component menu that displays all detection objects, seperated by algorithm.
+ *
+ * @component
+ *
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {function} resetCornerstoneTools - Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu - Callback to render specific detection context menus
+ *
+ */
+
 const SideMenu = ({
     nextImageClick,
     resetCornerstoneTools,
@@ -153,8 +164,17 @@ const SideMenu = ({
 };
 
 SideMenu.propTypes = {
+    /**
+     * Callback for loading next image
+     */
     nextImageClick: PropTypes.func.isRequired,
+    /**
+     * Callback to reset cornerstone tools to initial values
+     */
     resetCornerstoneTools: PropTypes.func.isRequired,
+    /**
+     * Callback to render specific detection context menus
+     */
     renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 

@@ -4,8 +4,8 @@ import nextIcon from '../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
-    getCornerstoneMode,
     getCollapsedSideMenu,
+    getCornerstoneMode,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
@@ -74,6 +74,17 @@ const NextButtonContainer = styled.div`
     }
 `;
 
+/**
+ * Component button that allows user to save edited detections and load next files in queue.
+ *
+ * @component
+ *
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {boolean} [collapseBtn=false] - Boolean value determining if side menu component is collapsed or not.
+ *
+ *
+ */
+
 const NextButton = ({ nextImageClick, collapseBtn = false }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const selectedDetection = useSelector(getSelectedDetection);
@@ -122,7 +133,13 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
 };
 
 NextButton.propTypes = {
+    /**
+     * Callback for loading next image
+     */
     nextImageClick: PropTypes.func.isRequired,
+    /**
+     * Boolean value determining if side menu component is collapsed or not.
+     */
     collapseBtn: PropTypes.bool,
 };
 

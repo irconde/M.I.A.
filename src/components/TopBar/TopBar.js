@@ -8,14 +8,23 @@ import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import {
-    getRemoteOrLocal,
     getHasFileOutput,
     getLocalFileOutput,
+    getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
-import isElectron from 'is-electron';
-import LazyMenuToggleIcon from '../../icons/LazyMenuToggleIcon';
 
+/**
+ * Component for GUI's top bar display.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: connectToCommandServer<function>, cornerstone<Object>, getFileFromLocal<function>
+ * @param {function} connectToCommandServer - Destructured from props -- Function passed into the SettingsIcon component to check connection to command server
+ * @param {function} getFileFromLocal - Destructured from props -- Getter function for getting local file if remote connection is off.
+ * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
+ *
+ */
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
@@ -253,8 +262,17 @@ const TopBar = (props) => {
 };
 
 TopBar.propTypes = {
+    /**
+     * Function passed into the SettingsIcon component to check connection to command server
+     */
     connectToCommandServer: PropTypes.func,
+    /**
+     * Main cornerstone object, used to resize viewports if needed.
+     */
     cornerstone: PropTypes.object,
+    /**
+     * Getter function for getting local file if remote connection is off.
+     */
     getFileFromLocal: PropTypes.func,
 };
 

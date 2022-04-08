@@ -1,6 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Save icon in SaveButton component.
+ *
+ * @component
+ * @param {PropTypes} props - Expected props: title<string>, style<object>
+ * @param {string} title - Destructured from props -- Title shown when hovering icon, which is typically "Save File"
+ * @param {CSSObject} style - Destructured from props -- CSS object used for stylizing SVG container
+ *
+ */
+
 const SaveIcon = (props) => {
     return (
         <div style={props.style}>
@@ -24,7 +34,13 @@ const SaveIcon = (props) => {
 };
 
 SaveIcon.propTypes = {
+    /**
+     * Title shown when hovering icon, which is typically "Save File"
+     */
     title: PropTypes.string,
+    /**
+     * CSS object used for stylizing SVG container
+     */
     style: PropTypes.object,
 };
 

@@ -3,6 +3,15 @@ import { ReactComponent as ConnectionIcon } from '../../icons/ic_connection.svg'
 import { ReactComponent as NoConnectionIcon } from '../../icons/ic_no_connection.svg';
 import PropTypes from 'prop-types';
 
+/**
+ * Component for displaying connection status.
+ *
+ * @component
+ *
+ * @param {boolean} isConnected - Boolean value determining if connection is successful
+ * @param {Object} style - CSS stylization for icons
+ *
+ */
 const ConnectionStatus = ({ isConnected, style }) => {
     return isConnected ? (
         <ConnectionIcon title="Connected" style={style} />
@@ -12,7 +21,13 @@ const ConnectionStatus = ({ isConnected, style }) => {
 };
 
 ConnectionStatus.propTypes = {
+    /**
+     * Boolean value determining if connection is successful
+     */
     isConnected: PropTypes.bool.isRequired,
+    /**
+     * CSS stylization for icons
+     */
     style: PropTypes.object,
 };
 
