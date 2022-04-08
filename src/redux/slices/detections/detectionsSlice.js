@@ -108,6 +108,7 @@ const detectionsSlice = createSlice({
                 polygonMask,
                 boundingBox,
                 uuid,
+                detectionFromFile,
             } = action.payload;
             state.detections.push({
                 algorithm,
@@ -149,7 +150,7 @@ const detectionsSlice = createSlice({
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
             }
-            if (className === constants.commonDetections.UNKNOWN) {
+            if (!detectionFromFile) {
                 state.detectionChanged = true;
             }
         },

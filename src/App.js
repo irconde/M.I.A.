@@ -1681,6 +1681,7 @@ class App extends Component {
                           )
                         : [],
                 uuid: imagesLeft[i].id,
+                detectionFromFile: true,
             });
         }
 
@@ -1709,6 +1710,7 @@ class App extends Component {
                               )
                             : [],
                     uuid: imagesRight[j].id,
+                    detectionFromFile: true,
                 });
             }
         }
@@ -1794,6 +1796,7 @@ class App extends Component {
                         binaryMask: maskData,
                         polygonMask: [],
                         uuid: imagesLeft[i].uuid,
+                        detectionFromFile: true,
                     });
                 }
             });
@@ -1857,6 +1860,7 @@ class App extends Component {
                             binaryMask: maskData,
                             polygonMask: [],
                             uuid: currentRightImage.uuid,
+                            detectionFromFile: true,
                         });
                     }
                 });
@@ -2469,6 +2473,7 @@ class App extends Component {
                                 ],
                                 polygonMask: [],
                                 uuid,
+                                detectionFromFile: false,
                             });
                             self.appUpdateImage();
                         } else {
@@ -2611,6 +2616,7 @@ class App extends Component {
                             ],
                             polygonMask: [],
                             uuid: maxId + 1,
+                            detectionFromFile: false,
                         });
                         self.appUpdateImage();
                     } else {
@@ -2783,6 +2789,7 @@ class App extends Component {
                         binaryMask: binaryData,
                         polygonMask: polygonCoords,
                         uuid,
+                        detectionFromFile: false,
                     });
 
                     this.resetCornerstoneTool();
@@ -2820,6 +2827,7 @@ class App extends Component {
                     binaryMask: binaryData,
                     polygonMask: polygonCoords,
                     uuid: maxId + 1,
+                    detectionFromFile: false,
                 });
 
                 this.resetCornerstoneTool();
