@@ -1153,22 +1153,27 @@ class App extends Component {
                     cocoZip
                         .generateAsync({ type: 'nodebuffer' })
                         .then((file) => {
-                            this.sendImageToCommandServer(file).then(
-                                // eslint-disable-next-line no-unused-vars
-                                (res) => {
-                                    this.props.setCurrentProcessingFile(null);
-                                    this.props.resetDetections();
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.setUpload(false);
-                                    this.getFileFromCommandServer();
-                                }
-                            );
-                        });
+                            this.sendImageToCommandServer(file)
+                                .then(
+                                    // eslint-disable-next-line no-unused-vars
+                                    (res) => {
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.props.resetDetections();
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.setUpload(false);
+                                        this.getFileFromCommandServer();
+                                    }
+                                )
+                                .catch((error) => console.log(error));
+                        })
+                        .catch((error) => console.log(error));
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
-                            .then(async (file) => {
+                            .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
@@ -1185,11 +1190,12 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            });
+                            })
+                            .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
-                            .then(async (file) => {
+                            .then((file) => {
                                 ipcRenderer
                                     .invoke(
                                         constants.Channels.saveIndFile,
@@ -1211,19 +1217,19 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            });
+                            })
+                            .catch((error) => console.log(error));
                     } else {
-                        cocoZip
-                            .generateAsync({ type: 'blob' })
-                            .then(async (file) => {
-                                fileSave(file, {
-                                    fileName: `1${this.props.fileSuffix}.${
-                                        this.props.fileFormat ===
-                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                            ? 'ora'
-                                            : 'zip'
-                                    }`,
-                                }).then(() => {
+                        cocoZip.generateAsync({ type: 'blob' }).then((file) => {
+                            fileSave(file, {
+                                fileName: `1${this.props.fileSuffix}.${
+                                    this.props.fileFormat ===
+                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                        ? 'ora'
+                                        : 'zip'
+                                }`,
+                            })
+                                .then(() => {
                                     this.setState({
                                         myOra: new ORA(),
                                     });
@@ -1234,8 +1240,9 @@ class App extends Component {
                                     this.props.setReceiveTime(null);
                                     this.props.setLocalFileOpen(false);
                                     this.onNoImageLeft();
-                                });
-                            });
+                                })
+                                .catch((error) => console.log(error));
+                        });
                     }
                 }
             });
@@ -1374,21 +1381,24 @@ class App extends Component {
                                 },
                                 () => this.props.resetDetections()
                             );
-                            this.sendImageToCommandServer(file).then(
-                                // eslint-disable-next-line no-unused-vars
-                                (res) => {
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.setUpload(false);
-                                    this.getFileFromCommandServer();
-                                    this.props.setReceiveTime(null);
-                                }
-                            );
-                        });
+                            this.sendImageToCommandServer(file)
+                                .then(
+                                    // eslint-disable-next-line no-unused-vars
+                                    (res) => {
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.setUpload(false);
+                                        this.getFileFromCommandServer();
+                                        this.props.setReceiveTime(null);
+                                    }
+                                )
+                                .catch((error) => console.log(error));
+                        })
+                        .catch((error) => console.log(error));
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
                             .generateAsync({ type: 'nodebuffer' })
-                            .then(async (file) => {
+                            .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
@@ -1405,11 +1415,12 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            });
+                            })
+                            .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         newOra
                             .generateAsync({ type: 'nodebuffer' })
-                            .then(async (file) => {
+                            .then((file) => {
                                 ipcRenderer
                                     .invoke(
                                         constants.Channels.saveIndFile,
@@ -1431,19 +1442,19 @@ class App extends Component {
                                     .catch((error) => {
                                         console.log(error);
                                     });
-                            });
+                            })
+                            .catch((error) => console.log(error));
                     } else {
-                        newOra
-                            .generateAsync({ type: 'blob' })
-                            .then(async (file) => {
-                                fileSave(file, {
-                                    fileName: `1${this.props.fileSuffix}.${
-                                        this.props.fileFormat ===
-                                        constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                            ? 'ora'
-                                            : 'zip'
-                                    }`,
-                                }).then(() => {
+                        newOra.generateAsync({ type: 'blob' }).then((file) => {
+                            fileSave(file, {
+                                fileName: `1${this.props.fileSuffix}.${
+                                    this.props.fileFormat ===
+                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
+                                        ? 'ora'
+                                        : 'zip'
+                                }`,
+                            })
+                                .then(() => {
                                     this.setState({
                                         myOra: new ORA(),
                                     });
@@ -1454,8 +1465,9 @@ class App extends Component {
                                     this.props.setLocalFileOpen(false);
                                     this.props.setReceiveTime(null);
                                     this.onNoImageLeft();
-                                });
-                            });
+                                })
+                                .catch((error) => console.log(error));
+                        });
                     }
                 }
             });
