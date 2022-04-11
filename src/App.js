@@ -966,13 +966,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
-                                        if (i === 0)
-                                            console.log(
-                                                'PNG IMAGE DATA:',
-                                                myZip.file(
-                                                    listOfStacks[j].rawData[i]
-                                                )
-                                            );
+                                        // if (i === 0)
+                                        //     console.log(
+                                        //         'PNG IMAGE DATA:',
+                                        //         myZip.file(
+                                        //             listOfStacks[j].rawData[i]
+                                        //         )
+                                        //     );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1014,6 +1014,8 @@ class App extends Component {
                                 }
                             }
                         }
+
+                        console.log(listOfStacks);
 
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
@@ -1078,13 +1080,13 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
-                                        if (i === 0)
-                                            console.log(
-                                                'TDR IMAGE DATA:',
-                                                myZip.file(
-                                                    listOfStacks[j].rawData[i]
-                                                )
-                                            );
+                                        // if (i === 0)
+                                        //     console.log(
+                                        //         'TDR IMAGE DATA:',
+                                        //         myZip.file(
+                                        //             listOfStacks[j].rawData[i]
+                                        //         )
+                                        //     );
                                         if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
@@ -1097,6 +1099,8 @@ class App extends Component {
                                     });
                             }
                         }
+
+                        console.log(listOfStacks);
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -1272,6 +1276,10 @@ class App extends Component {
             let stackCounter = 1;
             let annotationID = 1;
             const listOfPromises = [];
+
+            const viewports = [this.state.imageViewportTop];
+            if (this.props.singleViewport === false)
+                viewports.push(this.state.imageViewportSide);
             // Loop through each stack, being either top or side currently
             this.state.myOra.stackData.forEach((stack) => {
                 const stackElem = stackXML.createElement('stack');
@@ -1286,10 +1294,28 @@ class App extends Component {
                     'src',
                     `data/${stack.view}_pixel_data.dcs`
                 );
-                newOra.file(
-                    `data/${stack.view}_pixel_data.dcs`,
-                    stack.blobData[0].blob
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                ) {
+                    newOra.file(
+                        `data/${stack.view}_pixel_data.dcs`,
+                        stack.blobData[0].blob // inject png to dcs here
+                    );
+                } else if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                ) {
+                    const tdrPromise = Dicos.pngToDicosPixelData(
+                        cornerstone,
+                        stack.view === constants.viewport.TOP
+                            ? viewports[0]
+                            : viewports[1]
+                    ).then((blob) => {
+                        newOra.file(`data/${stack.view}_pixel_data.dcs`, blob);
+                    });
+                    listOfPromises.push(tdrPromise);
+                }
                 const topStackIndex = this.state.myOra.stackData.findIndex(
                     (stack) => {
                         return constants.viewport.TOP === stack.view;
@@ -1310,7 +1336,8 @@ class App extends Component {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             topDetections[j],
                             this.state.myOra.stackData[topStackIndex]
-                                .blobData[0].blob
+                                .blobData[0].blob,
+                            this.props.currentFileFormat
                         ).then((threatBlob) => {
                             newOra.file(
                                 `data/top_threat_detection_${annotationID}.dcs`,
@@ -1335,7 +1362,8 @@ class App extends Component {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             sideDetections[i],
                             this.state.myOra.stackData[sideStackIndex]
-                                .blobData[0].blob
+                                .blobData[0].blob,
+                            this.props.currentFileFormat
                         ).then((threatBlob) => {
                             newOra.file(
                                 `data/side_threat_detection_${annotationID}.dcs`,
@@ -2445,7 +2473,8 @@ class App extends Component {
             ) {
                 Dicos.detectionObjectToBlob(
                     newDetection,
-                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob,
+                    this.props.currentFileFormat
                 ).then((newBlob) => {
                     const uuid = uuidv4();
                     self.state.myOra.stackData[stackIndex].blobData.push({
@@ -2776,7 +2805,8 @@ class App extends Component {
             ) {
                 Dicos.detectionObjectToBlob(
                     newDetection,
-                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob,
+                    this.props.currentFileFormat
                 ).then((newBlob) => {
                     const uuid = uuidv4();
                     self.state.myOra.stackData[stackIndex].blobData.push({

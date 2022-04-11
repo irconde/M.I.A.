@@ -1,4 +1,5 @@
 import * as dcmjs from 'dcmjs';
+import { SETTINGS } from './Constants';
 import Utils from './Utils';
 
 /**
@@ -208,25 +209,34 @@ export default class Dicos {
      * Provides the unique instance identifier for a given DICOM Image.
      *
      * @param {Blob} image - Blob data
+     * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
+     *
      * @returns {string} - Unique identifier
      */
-    static async getInstanceNumber(image) {
+    static async getInstanceNumber(image, currentFileFormat) {
         var fileReader = new FileReader();
-        return new Promise((resolve, reject) => {
-            fileReader.onerror = () => {
-                fileReader.abort();
-                reject('Unable to load file');
-            };
-            fileReader.onload = function (event) {
-                image = event.target.result;
-                var dicomDict = dcmjs.data.DicomMessage.readFile(image);
-                var dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
-                    dicomDict.dict
-                );
-                resolve(dataset.InstanceNumber);
-            };
-            fileReader.readAsArrayBuffer(image);
-        });
+        if (currentFileFormat === SETTINGS.ANNOTATIONS.TDR) {
+            return new Promise((resolve, reject) => {
+                fileReader.onerror = () => {
+                    fileReader.abort();
+                    reject('Unable to load file');
+                };
+                fileReader.onload = function (event) {
+                    image = event.target.result;
+                    var dicomDict = dcmjs.data.DicomMessage.readFile(image);
+                    var dataset =
+                        dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+                            dicomDict.dict
+                        );
+                    resolve(dataset.InstanceNumber);
+                };
+                fileReader.readAsArrayBuffer(image);
+            });
+        } else if (currentFileFormat === SETTINGS.ANNOTATIONS.COCO) {
+            return new Promise((resolve) => {
+                resolve(3.2825547455);
+            });
+        }
     }
 
     /**
@@ -234,247 +244,263 @@ export default class Dicos {
      *
      * @param {Detection} detection - Detection object
      * @param {Blob} data - Blob data
+     * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR), to be passed into getInstanceNumber
      * @returns {Promise} - Promise containing the blob on resolve or error on reject
      */
-    static detectionObjectToBlob(detection, data) {
+    static detectionObjectToBlob(detection, data, currentFileFormat) {
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
         const yyyy = today.getFullYear();
         // Create the new dataset with fields required
         let dataset = {};
+
         return new Promise((resolve, reject) => {
             try {
-                this.getInstanceNumber(data).then((instanceNumber) => {
-                    dataset.ImageType = [
-                        'ORIGINAL',
-                        'PRIMARY',
-                        'VOLUME',
-                        'NONE',
-                    ];
-                    dataset.InstanceCreationDate = mm + '-' + dd + '-' + yyyy;
-                    dataset.InstanceCreationTime =
-                        today.getHours() +
-                        ':' +
-                        today.getMinutes() +
-                        ':' +
-                        today.getSeconds();
-                    dataset.SOPClassUID = '1.2.840.10008.5.1.4.1.1.501.2.1';
-                    dataset.SOPInstanceUID =
-                        '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161';
-                    dataset.StudyDate = '19700101';
-                    dataset.SeriesDate = '19700101';
-                    dataset.AcquisitionDate = '19700101';
-                    dataset.ContentDate = '19700101';
-                    dataset.AcquisitionDateTime = '19700101000000';
-                    dataset.StudyTime = '000000';
-                    dataset.SeriesTime = '000000';
-                    dataset.AcquisitionTime = '000000';
-                    dataset.ContentTime = '000000';
-                    dataset.Modality = 'DX';
-                    dataset.PresentationIntentType = 'FOR PROCESSING';
-                    dataset.Manufacturer = 'Rapiscan Systems';
-                    dataset.InstitutionName = 'Rapiscan Systems';
-                    dataset.InstitutionAddress =
-                        '2805 Columbia St, Torrance, CA 90503 U.S.A.';
-                    dataset.StationName = 'unknown';
-                    dataset.StudyDescription = 'Malibu v1.0';
-                    dataset.SeriesDescription = 'unknown';
-                    dataset.ManufacturerModelName = 'unknown';
-                    dataset.PatientName = 'unknown';
-                    dataset.PatientID = 'unknown';
-                    dataset.IssuerOfPatientID = 'Rapiscan Systems';
-                    dataset.TypeOfPatientID = 'TEXT';
-                    dataset.PatientBirthDate = 'unknown';
-                    dataset.PatientSex = 'U';
-                    dataset.KVP = '0';
-                    dataset.DeviceSerialNumber = '0000';
-                    dataset.SoftwareVersions = '0000';
-                    dataset.DistanceSourceToDetector = '0';
-                    dataset.DateOfLastCalibration = '19700101';
-                    dataset.TimeOfLastCalibration = '000000';
-                    dataset.DetectorType = 'DIRECT';
-                    dataset.DetectorConfiguration = 'SLOT';
-                    dataset.DetectorDescription = 'DetectorDesc';
-                    dataset.XRayTubeCurrentInuA = '0';
-                    dataset.TableSpeed = 1;
-                    dataset.StudyInstanceUID =
-                        '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771162';
-                    dataset.SeriesInstanceUID =
-                        '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771163';
-                    dataset.StudyID = 'Malibu v1.0';
-                    dataset.AcquisitionNumber = '0';
-                    dataset.InstanceNumber = instanceNumber;
-                    dataset.ImagePositionPatient = [1, 1, 1];
-                    dataset.ImageOrientationPatient = [1, 0, 0, 0, 1, 0];
-                    dataset.SamplesPerPixel = 1;
-                    dataset.PhotometricInterpretation = 'MONOCHROME2';
-                    dataset.PlanarConfiguration = 0;
-                    dataset.NumberOfFrames = '1';
-                    dataset.Rows = 580;
-                    dataset.Columns = 508;
-                    dataset.BitsAllocated = 16;
-                    dataset.BitsStored = 16;
-                    dataset.HighBit = 15;
-                    dataset.PixelRepresentation = 0;
-                    dataset.BurnedInAnnotation = 'NO';
-                    dataset.PixelIntensityRelationship = 'LIN';
-                    dataset.PixelIntensityRelationshipSign = 1;
-                    dataset.RescaleIntercept = '0';
-                    dataset.RescaleSlope = '1';
-                    dataset.RescaleType = 'HU';
-                    dataset.LossyImageCompression = '00';
-                    if (
-                        detection.binaryMask !== undefined &&
-                        detection.binaryMask.length > 0 &&
-                        detection.binaryMask[0].length > 0
-                    ) {
-                        let maskPixelData = new Uint8Array(
-                            detection.binaryMask[0]
-                        ).buffer;
-                        dataset.ThreatSequence = {
-                            PotentialThreatObjectID: 0,
-                            PTORepresentationSequence: {
-                                ReferencedInstanceSequence: [
-                                    {
-                                        ReferencedSOPClassUID:
-                                            '1.2.840.10008.5.1.4.1.1.501.2.1',
-                                        ReferencedSOPInstanceUID:
-                                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
-                                    },
-                                ],
-                                ThreatROIVoxelSequence: [
-                                    {
-                                        ThreatROIBase: [
-                                            detection.binaryMask[1][0],
-                                            detection.binaryMask[1][1],
-                                            0,
-                                        ],
-                                        ThreatROIExtents: [
-                                            detection.binaryMask[2][0],
-                                            detection.binaryMask[2][1],
-                                            0,
-                                        ],
-                                        ThreatROIBitmap: maskPixelData,
-                                    },
-                                ],
-                                // [x0, y0, z0, xf, yf, zf]
-                                BoundingPolygon: [
-                                    detection.boundingBox[0],
-                                    detection.boundingBox[1],
-                                    0,
-                                    detection.boundingBox[2],
-                                    detection.boundingBox[3],
-                                    0,
-                                ],
-                            },
-                            ATDAssessmentSequence: {
-                                ThreatCategory: 'ANOMALY',
-                                ThreatCategoryDescription: detection.className,
-                                ATDAbilityAssessment: 'SHIELD',
-                                ATDAssessmentFlag: 'THREAT',
-                                ATDAssessmentProbability:
-                                    detection.confidence / 100,
+                this.getInstanceNumber(data, currentFileFormat).then(
+                    (instanceNumber) => {
+                        dataset.ImageType = [
+                            'ORIGINAL',
+                            'PRIMARY',
+                            'VOLUME',
+                            'NONE',
+                        ];
+                        dataset.InstanceCreationDate =
+                            mm + '-' + dd + '-' + yyyy;
+                        dataset.InstanceCreationTime =
+                            today.getHours() +
+                            ':' +
+                            today.getMinutes() +
+                            ':' +
+                            today.getSeconds();
+                        dataset.SOPClassUID = '1.2.840.10008.5.1.4.1.1.501.2.1';
+                        dataset.SOPInstanceUID =
+                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161';
+                        dataset.StudyDate = '19700101';
+                        dataset.SeriesDate = '19700101';
+                        dataset.AcquisitionDate = '19700101';
+                        dataset.ContentDate = '19700101';
+                        dataset.AcquisitionDateTime = '19700101000000';
+                        dataset.StudyTime = '000000';
+                        dataset.SeriesTime = '000000';
+                        dataset.AcquisitionTime = '000000';
+                        dataset.ContentTime = '000000';
+                        dataset.Modality = 'DX';
+                        dataset.PresentationIntentType = 'FOR PROCESSING';
+                        dataset.Manufacturer = 'Rapiscan Systems';
+                        dataset.InstitutionName = 'Rapiscan Systems';
+                        dataset.InstitutionAddress =
+                            '2805 Columbia St, Torrance, CA 90503 U.S.A.';
+                        dataset.StationName = 'unknown';
+                        dataset.StudyDescription = 'Malibu v1.0';
+                        dataset.SeriesDescription = 'unknown';
+                        dataset.ManufacturerModelName = 'unknown';
+                        dataset.PatientName = 'unknown';
+                        dataset.PatientID = 'unknown';
+                        dataset.IssuerOfPatientID = 'Rapiscan Systems';
+                        dataset.TypeOfPatientID = 'TEXT';
+                        dataset.PatientBirthDate = 'unknown';
+                        dataset.PatientSex = 'U';
+                        dataset.KVP = '0';
+                        dataset.DeviceSerialNumber = '0000';
+                        dataset.SoftwareVersions = '0000';
+                        dataset.DistanceSourceToDetector = '0';
+                        dataset.DateOfLastCalibration = '19700101';
+                        dataset.TimeOfLastCalibration = '000000';
+                        dataset.DetectorType = 'DIRECT';
+                        dataset.DetectorConfiguration = 'SLOT';
+                        dataset.DetectorDescription = 'DetectorDesc';
+                        dataset.XRayTubeCurrentInuA = '0';
+                        dataset.TableSpeed = 1;
+                        dataset.StudyInstanceUID =
+                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771162';
+                        dataset.SeriesInstanceUID =
+                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771163';
+                        dataset.StudyID = 'Malibu v1.0';
+                        dataset.AcquisitionNumber = '0';
+                        dataset.InstanceNumber = instanceNumber;
+                        dataset.ImagePositionPatient = [1, 1, 1];
+                        dataset.ImageOrientationPatient = [1, 0, 0, 0, 1, 0];
+                        dataset.SamplesPerPixel = 1;
+                        dataset.PhotometricInterpretation = 'MONOCHROME2';
+                        dataset.PlanarConfiguration = 0;
+                        dataset.NumberOfFrames = '1';
+                        dataset.Rows = 580;
+                        dataset.Columns = 508;
+                        dataset.BitsAllocated = 16;
+                        dataset.BitsStored = 16;
+                        dataset.HighBit = 15;
+                        dataset.PixelRepresentation = 0;
+                        dataset.BurnedInAnnotation = 'NO';
+                        dataset.PixelIntensityRelationship = 'LIN';
+                        dataset.PixelIntensityRelationshipSign = 1;
+                        dataset.RescaleIntercept = '0';
+                        dataset.RescaleSlope = '1';
+                        dataset.RescaleType = 'HU';
+                        dataset.LossyImageCompression = '00';
+                        if (
+                            detection.binaryMask !== undefined &&
+                            detection.binaryMask.length > 0 &&
+                            detection.binaryMask[0].length > 0
+                        ) {
+                            let maskPixelData = new Uint8Array(
+                                detection.binaryMask[0]
+                            ).buffer;
+                            dataset.ThreatSequence = {
+                                PotentialThreatObjectID: 0,
+                                PTORepresentationSequence: {
+                                    ReferencedInstanceSequence: [
+                                        {
+                                            ReferencedSOPClassUID:
+                                                '1.2.840.10008.5.1.4.1.1.501.2.1',
+                                            ReferencedSOPInstanceUID:
+                                                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                                        },
+                                    ],
+                                    ThreatROIVoxelSequence: [
+                                        {
+                                            ThreatROIBase: [
+                                                detection.binaryMask[1][0],
+                                                detection.binaryMask[1][1],
+                                                0,
+                                            ],
+                                            ThreatROIExtents: [
+                                                detection.binaryMask[2][0],
+                                                detection.binaryMask[2][1],
+                                                0,
+                                            ],
+                                            ThreatROIBitmap: maskPixelData,
+                                        },
+                                    ],
+                                    // [x0, y0, z0, xf, yf, zf]
+                                    BoundingPolygon: [
+                                        detection.boundingBox[0],
+                                        detection.boundingBox[1],
+                                        0,
+                                        detection.boundingBox[2],
+                                        detection.boundingBox[3],
+                                        0,
+                                    ],
+                                },
+                                ATDAssessmentSequence: {
+                                    ThreatCategory: 'ANOMALY',
+                                    ThreatCategoryDescription:
+                                        detection.className,
+                                    ATDAbilityAssessment: 'SHIELD',
+                                    ATDAssessmentFlag: 'THREAT',
+                                    ATDAssessmentProbability:
+                                        detection.confidence / 100,
+                                },
+                            };
+                        } else {
+                            dataset.ThreatSequence = {
+                                PotentialThreatObjectID: 0,
+                                PTORepresentationSequence: {
+                                    ReferencedInstanceSequence: [
+                                        {
+                                            ReferencedSOPClassUID:
+                                                '1.2.840.10008.5.1.4.1.1.501.2.1',
+                                            ReferencedSOPInstanceUID:
+                                                '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
+                                        },
+                                    ],
+                                    ThreatROIVoxelSequence: [
+                                        {
+                                            ThreatROIBase: [
+                                                detection.binaryMask !==
+                                                    undefined &&
+                                                detection.binaryMask.length > 0
+                                                    ? detection.binaryMask[1][0]
+                                                    : 0,
+                                                detection.binaryMask !==
+                                                    undefined &&
+                                                detection.binaryMask.length > 0
+                                                    ? detection.binaryMask[1][1]
+                                                    : 0,
+                                                0,
+                                            ],
+                                            ThreatROIExtents: [
+                                                detection.binaryMask !==
+                                                    undefined &&
+                                                detection.binaryMask.length > 0
+                                                    ? detection.binaryMask[2][0]
+                                                    : 0,
+                                                detection.binaryMask !==
+                                                    undefined &&
+                                                detection.binaryMask.length > 0
+                                                    ? detection.binaryMask[2][1]
+                                                    : 0,
+                                                0,
+                                            ],
+                                        },
+                                    ],
+                                    // [x0, y0, z0, xf, yf, zf]
+                                    BoundingPolygon: [
+                                        detection.boundingBox[0],
+                                        detection.boundingBox[1],
+                                        0,
+                                        detection.boundingBox[2],
+                                        detection.boundingBox[3],
+                                        0,
+                                    ],
+                                },
+                                ATDAssessmentSequence: {
+                                    ThreatCategory: 'ANOMALY',
+                                    ThreatCategoryDescription:
+                                        detection.className,
+                                    ATDAbilityAssessment: 'SHIELD',
+                                    ATDAssessmentFlag: 'THREAT',
+                                    ATDAssessmentProbability:
+                                        detection.confidence / 100,
+                                },
+                            };
+                        }
+                        dataset.AcquisitionContextSequence = {
+                            ConceptNameCodeSequence: {
+                                CodeMeaning: 0,
+                                CodeValue: 0,
+                                CodingSchemeDesignator: 0,
                             },
                         };
-                    } else {
-                        dataset.ThreatSequence = {
-                            PotentialThreatObjectID: 0,
-                            PTORepresentationSequence: {
-                                ReferencedInstanceSequence: [
-                                    {
-                                        ReferencedSOPClassUID:
-                                            '1.2.840.10008.5.1.4.1.1.501.2.1',
-                                        ReferencedSOPInstanceUID:
-                                            '1.2.276.0.7230010.3.1.4.8323329.1130.1596485298.771161',
-                                    },
-                                ],
-                                ThreatROIVoxelSequence: [
-                                    {
-                                        ThreatROIBase: [
-                                            detection.binaryMask !== undefined
-                                                ? detection.binaryMask[1][0]
-                                                : 0,
-                                            detection.binaryMask !== undefined
-                                                ? detection.binaryMask[1][1]
-                                                : 0,
-                                            0,
-                                        ],
-                                        ThreatROIExtents: [
-                                            detection.binaryMask !== undefined
-                                                ? detection.binaryMask[2][0]
-                                                : 0,
-                                            detection.binaryMask !== undefined
-                                                ? detection.binaryMask[2][1]
-                                                : 0,
-                                            0,
-                                        ],
-                                    },
-                                ],
-                                // [x0, y0, z0, xf, yf, zf]
-                                BoundingPolygon: [
-                                    detection.boundingBox[0],
-                                    detection.boundingBox[1],
-                                    0,
-                                    detection.boundingBox[2],
-                                    detection.boundingBox[3],
-                                    0,
-                                ],
-                            },
-                            ATDAssessmentSequence: {
-                                ThreatCategory: 'ANOMALY',
-                                ThreatCategoryDescription: detection.className,
-                                ATDAbilityAssessment: 'SHIELD',
-                                ATDAssessmentFlag: 'THREAT',
-                                ATDAssessmentProbability:
-                                    detection.confidence / 100,
-                            },
+                        dataset.AlgorithmRoutingCodeSequence = [];
+                        dataset.DetectorGeometrySequence = {
+                            DistanceSourceToDetector: 0.0,
+                            SourceOrientation: [1, 1, 1],
+                            SourcePosition: [1, 1, 1],
                         };
+                        dataset.PresentationLUTShape = 'IDENTITY';
+                        dataset.OOIOwnerType = 'OwnerType';
+                        dataset.TDRType = 'OPERATOR';
+                        dataset.ThreatDetectionAlgorithmandVersion =
+                            detection.algorithm;
+                        dataset.AlarmDecisionTime =
+                            dataset.InstanceCreationTime;
+                        dataset.AlarmDecision = 'ALARM';
+                        dataset.NumberOfTotalObjects = 1;
+                        dataset.NumberOfAlarmObjects = 1;
+                        dataset.DICOSVersion = 'V02A';
+                        dataset.OOIType = 'BAGGAGE';
+                        dataset.OOISize = [1, 1, 1];
+                        dataset.AcquisitionStatus = 'SUCCESSFUL';
+                        dataset.ScanType = 'OPERATIONAL';
+                        dataset.BeltHeight = 0;
+                        dataset.NumberOfAlarmObjects = 1;
+                        dataset.NumberOfTotalObjects = 1;
+                        // Create the Dicom Dictionary file
+                        let dicomDict = new dcmjs.data.DicomDict({});
+                        dicomDict.dict =
+                            dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
+                                dataset
+                            );
+                        // Create the buffer from the denaturalized data set populated above
+                        let new_file_WriterBuffer = dicomDict.write();
+                        // Create a blob with this buffer
+                        var file = new Blob([new_file_WriterBuffer], {
+                            type: 'image/dcs',
+                        });
+                        resolve(file);
                     }
-                    dataset.AcquisitionContextSequence = {
-                        ConceptNameCodeSequence: {
-                            CodeMeaning: 0,
-                            CodeValue: 0,
-                            CodingSchemeDesignator: 0,
-                        },
-                    };
-                    dataset.AlgorithmRoutingCodeSequence = [];
-                    dataset.DetectorGeometrySequence = {
-                        DistanceSourceToDetector: 0.0,
-                        SourceOrientation: [1, 1, 1],
-                        SourcePosition: [1, 1, 1],
-                    };
-                    dataset.PresentationLUTShape = 'IDENTITY';
-                    dataset.OOIOwnerType = 'OwnerType';
-                    dataset.TDRType = 'OPERATOR';
-                    dataset.ThreatDetectionAlgorithmandVersion =
-                        detection.algorithm;
-                    dataset.AlarmDecisionTime = dataset.InstanceCreationTime;
-                    dataset.AlarmDecision = 'ALARM';
-                    dataset.NumberOfTotalObjects = 1;
-                    dataset.NumberOfAlarmObjects = 1;
-                    dataset.DICOSVersion = 'V02A';
-                    dataset.OOIType = 'BAGGAGE';
-                    dataset.OOISize = [1, 1, 1];
-                    dataset.AcquisitionStatus = 'SUCCESSFUL';
-                    dataset.ScanType = 'OPERATIONAL';
-                    dataset.BeltHeight = 0;
-                    dataset.NumberOfAlarmObjects = 1;
-                    dataset.NumberOfTotalObjects = 1;
-                    // Create the Dicom Dictionary file
-                    let dicomDict = new dcmjs.data.DicomDict({});
-                    dicomDict.dict =
-                        dcmjs.data.DicomMetaDictionary.denaturalizeDataset(
-                            dataset
-                        );
-                    // Create the buffer from the denaturalized data set populated above
-                    let new_file_WriterBuffer = dicomDict.write();
-                    // Create a blob with this buffer
-                    var file = new Blob([new_file_WriterBuffer], {
-                        type: 'image/dcs',
-                    });
-                    resolve(file);
-                });
+                );
             } catch (error) {
                 reject(error);
             }
@@ -482,15 +508,13 @@ export default class Dicos {
     }
 
     /**
-     * dicosPixelDataToPng - This function takes in the cornerstone viewport element holder and the cornerstone variable
-     *                       that is created in App.js. It will pull the Pixel data from cornerstone as Uint16Array in 16 Bit
-     *                       grey scale value. It converts the 16 bit grey scale value into a 8 bit value (0-255). This is the
-     *                       grey color produced by setting the R, G, & B Values to this one 8 bit value. This produces a Uint8ClampedArray
-     *                       in RGBA format to be loaded onto a canvas element to be finally returned as a Blob of type image/png
+     * Pulls the pixel data from cornerstone as Uint8ClampedArray in 4 8 Bit RGBA values and converts the 8 bit values
+     * into a single 16 bit value (0-65536). This produces a Uint16Array in greyscale format to be loaded onto a canvas
+     * element to be finally returned as a Blob of type image/dcs
      *
-     * @param {cornerstone} cornerstone
-     * @param {DOMElement} imageViewport
-     * @returns {Promise} That resolves to a blob of type image/png
+     * @param {cornerstone} cornerstone - Main cornerstone object
+     * @param {DOMElement} imageViewport - Viewport DOMElement object
+     * @returns {Promise} - That resolves to a blob of type image/dcs
      */
     static pngToDicosPixelData = async (cornerstone, imageViewport) => {
         return new Promise((resolve, reject) => {
@@ -504,10 +528,11 @@ export default class Dicos {
             for (let i = 0; i < pixelData.length; i += 4) {
                 // R, G, and B values should all be the same, so just pull the R value.
                 const interval = intervals[pixelData[i]];
-                const avgValue = Math.floor(interval.min + interval.max) / 2;
+                const avgValue = Math.floor((interval.min + interval.max) / 2);
                 SixteenbitPixels[z] = avgValue;
                 z++;
             }
+            console.log(SixteenbitPixels);
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             ctx.canvas.width = image.width;
