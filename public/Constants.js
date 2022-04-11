@@ -25,3 +25,7 @@ module.exports.Viewport = {
     TOP: 'top',
     SIDE: 'side',
 };
+
+module.exports.Thumbnail = {
+    width: 145,
+};

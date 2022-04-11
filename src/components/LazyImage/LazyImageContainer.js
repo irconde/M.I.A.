@@ -22,9 +22,9 @@ const ImageContainer = styled.div`
     background-color: ${(props) =>
         props.loading === 'true' ? 'gray' : '#1f1f1f'};
     justify-content: center;
-    width: 96px;
+    width: 145px;
     height: ${(props) =>
-        props.loading === 'true' ? '96px' : `${props.thumbnailHeight}px`};
+        props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
     cursor: pointer;
 `;
 
