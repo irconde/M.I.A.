@@ -115,12 +115,14 @@ body {
     height: 100%;
     overflow-x: hidden;
     overflow-y: visible;
-    background-color: #1f1f1f;
+    background-color: #292929;
     -webkit-transition: all 0.3s ease-in;
     -moz-transition: all 0.3s ease-in;
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
     transition: all 0.3s ease-in;
+    z-index: 2;
+    width: 256px;
 }
 
 .lazy-images-container {
@@ -128,7 +130,20 @@ body {
     flex-flow: row wrap;
     justify-content: center;
     align-items: center;
-    padding: 3rem 0;
+}
+
+.images-in-workspace {
+    width: 126px;
+    height: 20px;
+    margin: 22px 52px 29px 11px;
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: -0.58px;
+    text-align: center;
+    color: #e3e3e3;
 }
 
 /* width */

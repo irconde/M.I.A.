@@ -14,6 +14,7 @@ import {
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
+import FileOpenIcon from '../../icons/FileOpenIcon';
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
@@ -40,18 +41,24 @@ function LazyImageMenu(props) {
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const desktopMode =
         isElectron() && fileOutputPath !== '' && remoteOrLocal === false;
-    const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
+    const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
+    const svgContainerStyle = {
+        float: 'left',
+    };
+    const svgStyle = {
+        height: '24px',
+        width: '24px',
+        color: '#ffffff',
+    };
     const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
     useEffect(() => {
         if (prevIsMenuCollapsed !== collapsedLazyMenu) {
             if (collapsedLazyMenu === true) {
                 setTranslateStyle({
-                    transform: `translate(${-Math.abs(
-                        constants.sideMenuWidth + 10
-                    )}px)`,
+                    transform: `translate(${-Math.abs(256 + 10)}px)`,
                 });
             } else {
                 setTranslateStyle({
@@ -97,6 +104,16 @@ function LazyImageMenu(props) {
                         style={{
                             width: sideMenuWidth,
                         }}>
+                        <p className="images-in-workspace">
+                            <FileOpenIcon
+                                style={svgContainerStyle}
+                                svgStyle={{
+                                    ...svgStyle,
+                                    color: '#ffffff',
+                                }}
+                            />
+                            Images in Workspace
+                        </p>
                         {props.thumbnails !== null
                             ? props.thumbnails.map((file, index) => {
                                   return (

@@ -16,11 +16,11 @@ if (isElectron()) {
 const ImageContainer = styled.div`
     display: flex;
     border: ${(props) =>
-        props.selected ? '1px solid #367eff' : '1px solid white'};
+        props.selected ? '1px solid #367eff' : '1px solid fff'};
     overflow-x: hidden;
-    margin: 1.5rem;
-    background-color: ${(props) =>
-        props.loading === 'true' ? 'gray' : '#1f1f1f'};
+    margin: 0px 16px 60px 0;
+    border-radius: 6px;
+    background-color: #242424;
     justify-content: center;
     width: 145px;
     height: ${(props) =>
