@@ -47,6 +47,9 @@ function LazyImageMenu(props) {
     });
     const svgContainerStyle = {
         float: 'left',
+        display: 'flex',
+        alignItems: 'center',
+        marginRight: '5px',
     };
     const svgStyle = {
         height: '24px',

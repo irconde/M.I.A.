@@ -16,9 +16,7 @@ const FileOpenIcon = (props) => {
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height={props.svgStyle.height}
-                viewBox={`0 0 ${parseInt(props.svgStyle.width)} ${parseInt(
-                    props.svgStyle.height
-                )}`}
+                viewBox={`0 0 24 24`}
                 width={props.svgStyle.width}
                 fill={props.svgStyle.color}>
                 <path d="M0 0h24v24H0V0z" fill="none" />

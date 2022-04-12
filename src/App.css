@@ -112,6 +112,7 @@ body {
 .lazy-image-menu-container {
     position: fixed;
     left: 0;
+    top: 0;
     height: 100%;
     overflow-x: hidden;
     overflow-y: visible;
@@ -133,9 +134,9 @@ body {
 }
 
 .images-in-workspace {
-    width: 126px;
+    width: 155px;
     height: 20px;
-    margin: 22px 52px 29px 11px;
+    margin: 22px 26px 29px 11px;
     font-size: 14px;
     font-weight: normal;
     font-stretch: normal;
@@ -144,21 +145,25 @@ body {
     letter-spacing: -0.58px;
     text-align: center;
     color: #e3e3e3;
+    display: flex;
+    justify-content: center;
 }
 
 /* width */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 9px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-    background: #d6d5d5;
+    background: #292929;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #5e5d5d;
+    background: #555;
+    border-radius: 6px;
+    border: solid 1px #4e4e4e;
 }
 
 /* Handle on hover */
