@@ -257,7 +257,7 @@ const detectionsSlice = createSlice({
          * @param {Detection} update - Destructured from action.payload -- contains any properties to update on the Detection
          */
         updateDetection: (state, action) => {
-            const {uuid, update} = action.payload;
+            const { uuid, update } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection !== undefined) {
                 for (let key in update) detection[key] = update[key];
@@ -278,7 +278,7 @@ const detectionsSlice = createSlice({
          * @param {string} className - Destructured from action.payload -- new label className for detection being updated
          */
         editDetectionLabel: (state, action) => {
-            const {uuid, className} = action.payload;
+            const { uuid, className } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection) {
                 detection.className = className;
@@ -337,7 +337,7 @@ const detectionsSlice = createSlice({
          * @param {boolean} isVisible - Destructured from action.payload -- whether the DetectionSet is visible or not
          */
         updateDetectionSetVisibility: (state, action) => {
-            const {algorithm, isVisible} = action.payload;
+            const { algorithm, isVisible } = action.payload;
             state.detections.forEach((det) => {
                 if (det.algorithm === algorithm) {
                     det.visible = isVisible;
@@ -389,12 +389,12 @@ const detectionsSlice = createSlice({
          * @param {string} color - Destructured from action.payload -- new color
          */
         addMissMatchedClassName: (state, action) => {
-            const {className, color} = action.payload;
+            const { className, color } = action.payload;
             const foundIndex = state.missMatchedClassNames.findIndex(
                 (el) => el.className === className
             );
             if (foundIndex === -1) {
-                state.missMatchedClassNames.push({className, color});
+                state.missMatchedClassNames.push({ className, color });
             } else {
                 state.missMatchedClassNames[foundIndex].color = color;
             }
@@ -608,11 +608,11 @@ export const getSelectedDetectionWidthAndHeight = (state) => {
     if (state.detections.selectedDetection) {
         const width = Math.abs(
             state.detections.selectedDetection.boundingBox[2] -
-            state.detections.selectedDetection.boundingBox[0]
+                state.detections.selectedDetection.boundingBox[0]
         );
         const height = Math.abs(
             state.detections.selectedDetection.boundingBox[3] -
-            state.detections.selectedDetection.boundingBox[1]
+                state.detections.selectedDetection.boundingBox[1]
         );
         return {
             width,
