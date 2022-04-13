@@ -1300,7 +1300,7 @@ class App extends Component {
                 ) {
                     newOra.file(
                         `data/${stack.view}_pixel_data.dcs`,
-                        stack.blobData[0].blob // inject png to dcs here
+                        stack.blobData[0].blob
                     );
                 } else if (
                     this.props.currentFileFormat ===
