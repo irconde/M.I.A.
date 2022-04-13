@@ -4,6 +4,16 @@ import PropTypes from 'prop-types';
 import ConnectionErrorIcon from '../../icons/ConnectionErrorIcon.js';
 import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
 
+/**
+ * Connection result icon in SettingsModal displaying ConnectionVerifiedIcon.js component on success and ConnectionErrorIcon.js on failure.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: display<boolean>, connected<boolean>
+ * @param {boolean} display - Destructured from props -- True if icon should be visible.
+ * @param {boolean} connected - Destructured from props -- True if connection to server was successful.
+ *
+ */
 const ConnectionResult = (props) => {
     const containerStyle = {
         display: 'inline-flex',
@@ -59,7 +69,13 @@ const ConnectionResult = (props) => {
 };
 
 ConnectionResult.propTypes = {
+    /**
+     * True if icon should be visible.
+     */
     display: PropTypes.bool,
+    /**
+     * True if connection to server was successful.
+     */
     connected: PropTypes.bool,
 };
 

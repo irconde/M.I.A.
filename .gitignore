@@ -13,6 +13,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -31,3 +32,6 @@ yarn-error.log*
 
 # VSCode Settings
 /.vscode
+
+# Docs
+/docs

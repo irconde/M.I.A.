@@ -1,12 +1,12 @@
 import './App.css';
-import React from 'react';
-import { Component } from 'react';
+import React, { Component } from 'react';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
 import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
+import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import ORA from './utils/ORA.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
@@ -26,68 +26,76 @@ import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
 import {
-    setUpload,
+    setConnected,
+    setCurrentProcessingFile,
     setDownload,
     setNumFilesInQueue,
     setProcessingHost,
-    setCurrentProcessingFile,
-    setConnected,
+    setUpload,
 } from './redux/slices/server/serverSlice';
 import {
-    resetDetections,
     addDetection,
     addDetections,
     clearAllSelection,
+    deleteDetection,
+    editDetectionLabel,
+    getSideDetections,
+    getTopDetections,
+    hasDetectionCoordinatesChanged,
+    resetDetections,
     selectDetection,
     selectDetectionSet,
-    getTopDetections,
-    getSideDetections,
-    updateDetection,
     updatedDetectionSet,
-    editDetectionLabel,
-    deleteDetection,
-    validateDetections,
+    updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
-    hasDetectionCoordinatesChanged,
     updateMissMatchedClassName,
+    validateDetections,
 } from './redux/slices/detections/detectionsSlice';
 import {
-    updateFABVisibility,
-    updateIsDetectionContextVisible,
-    updateCornerstoneMode,
-    updateEditionMode,
-    emptyAreaClickUpdate,
-    onMouseLeaveNoFilesUpdate,
-    detectionSelectedUpdate,
-    labelSelectedUpdate,
+    colorPickerToggle,
     deleteDetectionUpdate,
+    detectionSelectedUpdate,
+    emptyAreaClickUpdate,
     exitEditionModeUpdate,
-    updateDetectionContextPosition,
-    updateZoomLevels,
-    updateZoomLevelTop,
-    updateZoomLevelSide,
-    selectConfigInfoUpdate,
-    newFileReceivedUpdate,
     hideContextMenuUpdate,
-    resetSelectedDetectionBoxesUpdate,
-    resetSelectedDetectionBoxesElseUpdate,
+    labelSelectedUpdate,
+    newFileReceivedUpdate,
     onDragEndWidgetUpdate,
     onLabelEditionEnd,
+    onMouseLeaveNoFilesUpdate,
+    resetSelectedDetectionBoxesElseUpdate,
+    resetSelectedDetectionBoxesUpdate,
+    selectConfigInfoUpdate,
+    setCurrentFileFormat,
     setInputLabel,
-    setReceiveTime,
-    colorPickerToggle,
-    setNumberOfFiles,
     setLocalFileOpen,
+    setReceiveTime,
+    updateCornerstoneMode,
+    updateDetectionContextPosition,
+    updateEditionMode,
     updateEditLabelPosition,
+    updateFABVisibility,
+    updateIsDetectionContextVisible,
     updateRecentScroll,
+    updateZoomLevels,
+    updateZoomLevelSide,
+    updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
-import { fileSave, fileOpen } from 'browser-fs-access';
+import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
+import isElectron from 'is-electron';
+import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+
+let ipcRenderer;
+if (isElectron()) {
+    const electron = window.require('electron');
+    ipcRenderer = electron.ipcRenderer;
+}
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -109,21 +117,21 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
         },
     },
 });
+cornerstoneWebImageLoader.external.cornerstone = cornerstone;
+cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
 
 class App extends Component {
     /**
-     * constructor - All the related elements of the class are initialized:
-     * Callback methods are bound to the class
-     * The state is initialized
-     * A click listener is bound to the image viewport in order to detect click events
-     * A cornerstoneImageRendered listener is bound to the image viewport to trigger some actions in response to the image rendering
-     * CornerstoneJS Tools are initialized
+     * All the related elements of the class are initialized: the callback methods are bound to the class,
+     * the state is initialized, a click listener is bound to the image viewport in order to detect click events,
+     * a cornerstoneImageRendered listener is bound to the image viewport to trigger some actions in response to the
+     * image rendering, and CornerstoneJS Tools are initialized
      *
-     * @param  {type} props None
-     * @return {type}       None
+     * @contructor
+     * @param {Object} props
      */
     constructor(props) {
         super(props);
@@ -138,12 +146,19 @@ class App extends Component {
             tapDetector: new TapDetector(),
             commandServer: null,
             timer: null,
+            thumbnails: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
+        this.getFileFromLocalDirectory =
+            this.getFileFromLocalDirectory.bind(this);
+        this.getSpecificFileFromLocalDirectory =
+            this.getSpecificFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
         this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
+        this.sendImageToLocalDirectory =
+            this.sendImageToLocalDirectory.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
@@ -179,12 +194,10 @@ class App extends Component {
     }
 
     /**
-     * connectToCommandServer - This function houses the code to connect to a server, then it starts
-     *                          listening for connection events. Lastly it is what trigger to ask for a file
-     *                          from the command server.
+     * Houses the code to connect to a server and starts listening for connection events. Lastly it
+     * is what trigger to ask for a file from the command server.
      *
-     * @param {Boolean} update Optional variable for when the settings changes the command server
-     * @returns {None}
+     * @param {boolean} update - Optional variable for when the settings changes the command server
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -206,14 +219,14 @@ class App extends Component {
     }
 
     /**
-     * shouldComponentUpdate - Gets called by an update (in changes to props or state). It is called before render(),
-     *                         returning false means we can skip the update. Where returning true means we need to update the render().
-     *                         Namely, this is an edge case for if a user is connected to a server, then decides to use the
-     *                         local mode option, this handles the disconnect.
+     * Gets called by an update (in changes to props or state). It is called before render(),
+     * returning false means we can skip the update. Where returning true means we need to update the render().
+     * Namely, this is an edge case for if a user is connected to a server, then decides to use the
+     * local mode option, this handles the disconnect.
      *
      * @param {Object} nextProps
      * @param {Object} nextState
-     * @returns {Boolean} True - to update | False - to skip the update
+     * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -235,25 +248,30 @@ class App extends Component {
         }
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
             if (nextProps.remoteOrLocal === false) {
+                if (isElectron() && nextProps.localFileOutput !== '') {
+                    this.getFileFromLocalDirectory();
+                }
                 if (this.state.commandServer !== null) {
                     this.state.commandServer.disconnect();
                     this.props.setConnected(false);
                 }
                 return true;
             } else return false;
-        } else return false;
+        }
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
+        return false;
     }
 
     /**
-     * componentDidMount - Method invoked after all elements on the page are rendered properly
-     *
-     * @return {None} None
+     * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
         // Connect socket servers
         if (this.props.firstDisplaySettings === false) {
             if (this.props.remoteOrLocal === true) {
                 this.connectToCommandServer();
+            } else if (isElectron() && this.props.localFileOutput !== '') {
+                this.getFileFromLocalDirectory();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -365,6 +383,9 @@ class App extends Component {
         document.body.addEventListener('mouseleave', this.onMouseLeave);
     }
 
+    /**
+     *  Stops listening input events right before the component is unmounted and destroyed
+     */
     componentWillUnmount() {
         this.state.imageViewportTop.removeEventListener(
             'cornerstoneimagerendered',
@@ -416,10 +437,7 @@ class App extends Component {
     }
 
     /**
-     * monitorConnectionEvent - This function houses the events for connectivity with the command server.
-     *
-     * @param {None}
-     * @returns {None}
+     * Houses the events for connectivity with the command server.
      */
     async monitorConnectionEvent() {
         if (this.state.commandServer !== null) {
@@ -447,8 +465,7 @@ class App extends Component {
     }
 
     /**
-     * startListeningClickEvents - Method that binds a click event listener to the two cornerstonejs viewports
-     *
+     * Binds a click event listener to the two cornerstonejs viewports
      */
     startListeningClickEvents() {
         this.state.imageViewportTop.addEventListener(
@@ -478,8 +495,7 @@ class App extends Component {
     }
 
     /**
-     * stopListeningClickEvents - Method that unbinds a click event listener to the two cornerstonejs viewports
-     *
+     * Unbinds a click event listener to the two cornerstonejs viewports
      */
     stopListeningClickEvents() {
         this.state.imageViewportTop.removeEventListener(
@@ -509,9 +525,7 @@ class App extends Component {
     }
 
     /**
-     * recalculateZoomLevel - Function to update cornerstoneJS viewports' zoom level based on their width
-     *
-     * @returns {type} None
+     * Updates the cornerstoneJS viewports' zoom level according to their width
      */
     recalculateZoomLevel() {
         let canvasElements =
@@ -542,19 +556,33 @@ class App extends Component {
     }
 
     /**
-     * resizeListener - Function event listener for the window resize event. If a detection is selected,
-     *                  we clear the detections and hide the buttons.
+     * Function event listener for the window resize event. If a detection is selected, we clear the detections
+     * and hide the buttons.
      *
      * @param {Event} e
-     * @returns {None} None
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
+
         if (this.props.selectDetection) {
             this.appUpdateImage();
             if (this.props.deviceType === constants.DEVICE_TYPE.DESKTOP) {
@@ -597,11 +625,10 @@ class App extends Component {
     }
 
     /**
-     * setupCornerstoneJS - CornerstoneJS Tools are initialized
+     * CornerstoneJS Tools are initialized
      *
-     * @param  {DOMElement} imageViewportTop DOM element where the top-view x-ray image is rendered
-     * @param  {DOMElement} imageViewportSide DOM element where the side-view x-ray image is rendered
-     * @return {None} None
+     * @param {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
+     * @param {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -640,9 +667,7 @@ class App extends Component {
     }
 
     /**
-     * resetCornerstoneTool - Reset Cornerstone Tools to their default state.
-     *                        Invoked when user leaves annotation or edition mode
-     * @return {None} None
+     * Resets Cornerstone Tools to their default state. Invoked when user leaves annotation or edition mode
      */
 
     resetCornerstoneTool() {
@@ -693,9 +718,10 @@ class App extends Component {
     }
 
     /**
-     * getFileFromCommandServer - Socket Listener to get files from command server and load it once received
+     * Gets files from command server and loads them once received.
      *
-     * @return {Promise} Promise
+     * @param {boolean} update
+     * @returns {Promise}
      */
     async getFileFromCommandServer(update = false) {
         if (
@@ -705,14 +731,12 @@ class App extends Component {
         ) {
             this.state.commandServer.emit('currentFile', (response) => {
                 if (response.status === 'Ok') {
-                    this.props.setNumberOfFiles(response.numberOfFiles);
                     this.loadNextImage(
                         response.file,
                         response.fileName,
                         response.numberOfFiles
                     );
                 } else {
-                    this.props.setNumberOfFiles(0);
                     this.onNoImageLeft();
                 }
             });
@@ -720,11 +744,8 @@ class App extends Component {
     }
 
     /**
-     * getFileFromLocal - Function called from the TopBar Icon OpenFile. Uses the
-     *                    browser-fs-access library to load a file as a blob. Which
-     *                    then needs to be converted to base64 to be loaded into the app.
-     * @param {None}
-     * @returns {None}
+     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
+     * blob then needs to be converted to base64 to be loaded into the app.
      */
     getFileFromLocal() {
         fileOpen()
@@ -743,9 +764,63 @@ class App extends Component {
     }
 
     /**
-     * sendImageToCommandServer - Socket IO to send a file to the server
-     * @param {Blob} Blob - which file we are sending
-     * @return {type} None
+     * Calls the Electron channel to invoke the next file from the selected file system folder.
+     */
+    getFileFromLocalDirectory() {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(
+                    constants.Channels.getNextFile,
+                    this.props.localFileOutput
+                )
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles,
+                        result.thumbnails
+                    );
+                })
+                .catch((error) => {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                });
+        }
+    }
+
+    /**
+     * Operates in a similar way to getFileFromLocalDirectory, but it specifies the exact file path instead of a general path.
+     * IE D:\images\1_img.ora.
+     *
+     * @param {string} filePath - String value of specific file path
+     */
+    getSpecificFileFromLocalDirectory(filePath) {
+        if (isElectron()) {
+            ipcRenderer
+                .invoke(constants.Channels.getSpecificFile, filePath)
+                .then((result) => {
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        result.file,
+                        result.fileName,
+                        result.numberOfFiles,
+                        result.thumbnails
+                    );
+                })
+                .catch((error) => {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                });
+        }
+    }
+
+    /**
+     * Emits a new message to send a file to the server
+     *
+     * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
@@ -757,10 +832,37 @@ class App extends Component {
     }
 
     /**
-     * onNoImageLeft - Method invoked when there isn't any file in the file queue.
-     * A 'No file' image is displayed instead of the cornerstoneJs canvas
+     * Sends the needed information to save the current file in the selected this.props.localFileOutput path via
+     * Electron channels.
      *
-     * @return {None} None
+     * @param {Buffer} file
+     * @returns {Promise}
+     */
+    async sendImageToLocalDirectory(file) {
+        const result = new Promise((resolve, reject) => {
+            if (isElectron() && this.props.localFileOutput !== '') {
+                ipcRenderer
+                    .invoke(constants.Channels.saveCurrentFile, {
+                        file,
+                        fileDirectory: this.props.localFileOutput,
+                        fileFormat: this.props.fileFormat,
+                        fileName: this.props.currentProcessingFile,
+                        fileSuffix: this.props.fileSuffix,
+                    })
+                    .then((result) => {
+                        resolve(result);
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            }
+        });
+        return result;
+    }
+
+    /**
+     *  Method invoked when there isn't any file in the file queue. A 'No file' image is displayed instead of the
+     *  cornerstoneJs canvas
      */
     onNoImageLeft() {
         let updateImageViewport = this.state.imageViewportTop;
@@ -779,20 +881,30 @@ class App extends Component {
     }
 
     /**
-     * loadNextImage() -
-     * @param {Base64} image
-     * @param {String} fileName
-     * @return {type} None
+     * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
+     * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {string} fileName - Name of current file being processed. Used to prevent duplicate annotations.
+     * @param {number} [numberOfFiles = 0] - Number of files left in queue
+     * @param {Array<string>} [thumbnails = null] - Array with string values to the file path of thumbnails,
+     * IE:
+     * ['D:\images\.thumbnails\1_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\2_img.ora_thumbnail.png',
+     * 'D:\images\.thumbnails\3_img.ora_thumbnail.png']
      */
-    loadNextImage(image, fileName, numberOfFiles = 0) {
+    loadNextImage(image, fileName, numberOfFiles = 0, thumbnails = null) {
+        // Loading a file initially from a local workspace can call loadNextImage twice
+        // Which creates duplicate detections. This ensures that the same file is never loaded twice
+        if (fileName === this.props.currentProcessingFile) return;
         this.props.setCurrentProcessingFile(fileName);
         const myZip = new JSZip();
         let listOfPromises = [];
         // This is our list of stacks we will append to the myOra object in our promise all
         let listOfStacks = [];
+
+        let contentType;
         // Lets load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
-            // First, after loading, we need to check our stack.xml
+            //First, after loading, we need to check our stack.xml
             myZip
                 .file('stack.xml')
                 .async('string')
@@ -803,85 +915,226 @@ class App extends Component {
                         'text/xml'
                     );
                     const xmlStack = xmlDoc.getElementsByTagName('stack');
-                    // We loop through each stack. Creating a new stack object to store our info
-                    // for now, we are just grabbing the location of the dicos file in the ora file
-                    for (let stackData of xmlStack) {
-                        let currentStack = {
-                            name: stackData.getAttribute('name'),
-                            view: stackData.getAttribute('view'),
-                            rawData: [],
-                            blobData: [],
-                            pixelData: null,
-                        };
-                        let layerData = stackData.getElementsByTagName('layer');
-                        for (let imageSrc of layerData) {
-                            currentStack.rawData.push(
-                                imageSrc.getAttribute('src')
-                            );
+                    const xmlImage = xmlDoc.getElementsByTagName('image');
+                    const xmlLayer = xmlDoc.getElementsByTagName('layer');
+
+                    const tempFile = xmlLayer[0].getAttribute('src');
+                    var fileExtension = tempFile.split('.').pop();
+
+                    const currentFileFormat =
+                        xmlImage[0].getAttribute('format');
+
+                    if (
+                        currentFileFormat ===
+                        constants.SETTINGS.ANNOTATIONS.COCO
+                    ) {
+                        this.props.setCurrentFileFormat(
+                            constants.SETTINGS.ANNOTATIONS.COCO
+                        );
+
+                        // We loop through each stack. Creating a new stack object to store our info
+                        // for now, we are just grabbing the location of the dicos file in the ora file
+                        for (let stackData of xmlStack) {
+                            let currentStack = {
+                                name: stackData.getAttribute('name'),
+                                view: stackData.getAttribute('view'),
+                                rawData: [],
+                                formattedData: [],
+                                blobData: [],
+                                arrayBuf: null,
+                            };
+                            let layerData =
+                                stackData.getElementsByTagName('layer');
+                            for (let imageSrc of layerData) {
+                                currentStack.rawData.push(
+                                    imageSrc.getAttribute('src')
+                                );
+                            }
+                            // We have finished creating the current stack's object
+                            // add it onto our holder variable for now
+                            listOfStacks.push(currentStack);
                         }
-                        // We have finished creating the current stack's object
-                        // add it onto our holder variable for now
-                        listOfStacks.push(currentStack);
-                    }
-                    // Now we loop through the data we have collected
-                    // We know the first layer of each stack is pixel data, which we need as an array buffer
-                    // Which we got from i===0.
-                    // No matter what however, every layer gets converted a blob and added to the data set
-                    for (let j = 0; j < listOfStacks.length; j++) {
-                        for (
-                            let i = 0;
-                            i < listOfStacks[j].rawData.length;
-                            i++
-                        ) {
-                            await myZip
-                                .file(listOfStacks[j].rawData[i])
-                                .async('base64')
-                                .then((imageData) => {
-                                    if (i === 0)
-                                        listOfStacks[j].pixelData =
-                                            Utils.base64ToArrayBuffer(
-                                                imageData
+                        // Now we loop through the data we have collected
+                        // We know the first layer of each stack is pixel data, which we need as an array buffer
+                        // Which we got from i===0.
+                        for (let j = 0; j < listOfStacks.length; j++) {
+                            for (
+                                let i = 0;
+                                i < listOfStacks[j].rawData.length;
+                                i++
+                            ) {
+                                await myZip
+                                    .file(listOfStacks[j].rawData[i])
+                                    .async('base64')
+                                    .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'PNG IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
                                             );
-                                    listOfStacks[j].blobData.push({
-                                        blob: Utils.b64toBlob(imageData),
-                                        uuid: uuidv4(),
+                                        i === 0
+                                            ? (contentType = 'image/png')
+                                            : (contentType =
+                                                  'application/json');
+                                        listOfStacks[j].blobData.push({
+                                            blob: Utils.b64toBlob(
+                                                imageData,
+                                                contentType
+                                            ),
+                                            uuid: uuidv4(),
+                                        });
                                     });
-                                });
+                                if (i === 0) {
+                                    await myZip
+                                        .file(listOfStacks[j].rawData[i])
+                                        .async('base64')
+                                        .then((imageData) => {
+                                            listOfStacks[j].arrayBuf =
+                                                Utils.base64ToArrayBuffer(
+                                                    imageData
+                                                );
+                                        });
+                                } else {
+                                    await myZip
+                                        .file(listOfStacks[j].rawData[i])
+                                        .async('string')
+                                        .then((jsonData) => {
+                                            const data = JSON.parse(jsonData);
+                                            var combinedData = {};
+                                            combinedData = {
+                                                algorithm:
+                                                    data['info']['algorithm'],
+                                                ...data['annotations'][0],
+                                            };
+                                            listOfStacks[j].formattedData.push(
+                                                combinedData
+                                            );
+                                        });
+                                }
+                            }
                         }
+
+                        const promiseOfList = Promise.all(listOfPromises);
+                        // Once we have all the layers...
+                        promiseOfList.then(() => {
+                            const updateImageViewportTop =
+                                this.state.imageViewportTop;
+                            updateImageViewportTop.style.visibility = 'visible';
+                            this.setState({
+                                imageViewportTop: updateImageViewportTop,
+                                thumbnails,
+                            });
+                            this.state.myOra.stackData = listOfStacks;
+                            this.props.newFileReceivedUpdate({
+                                singleViewport: listOfStacks.length < 2,
+                                receiveTime: Date.now(),
+                            });
+                            this.props.setNumFilesInQueue(numberOfFiles);
+                            Utils.changeViewport(this.props.singleViewport);
+                            this.props.resetDetections();
+                            this.loadAndViewImage();
+                        });
+                    } else if (
+                        currentFileFormat ===
+                            constants.SETTINGS.ANNOTATIONS.TDR ||
+                        fileExtension === 'dcs'
+                    ) {
+                        this.props.setCurrentFileFormat(
+                            constants.SETTINGS.ANNOTATIONS.TDR
+                        );
+                        // We loop through each stack. Creating a new stack object to store our info
+                        // for now, we are just grabbing the location of the dicos file in the ora file
+                        for (let stackData of xmlStack) {
+                            let currentStack = {
+                                name: stackData.getAttribute('name'),
+                                view: stackData.getAttribute('view'),
+                                rawData: [],
+                                blobData: [],
+                                pixelData: null,
+                            };
+                            let layerData =
+                                stackData.getElementsByTagName('layer');
+                            for (let imageSrc of layerData) {
+                                currentStack.rawData.push(
+                                    imageSrc.getAttribute('src')
+                                );
+                            }
+                            // We have finished creating the current stack's object
+                            // add it onto our holder variable for now
+                            listOfStacks.push(currentStack);
+                        }
+                        // Now we loop through the data we have collected
+                        // We know the first layer of each stack is pixel data, which we need as an array buffer
+                        // Which we got from i===0.
+                        // No matter what however, every layer gets converted a blob and added to the data set
+                        for (let j = 0; j < listOfStacks.length; j++) {
+                            for (
+                                let i = 0;
+                                i < listOfStacks[j].rawData.length;
+                                i++
+                            ) {
+                                await myZip
+                                    .file(listOfStacks[j].rawData[i])
+                                    .async('base64')
+                                    .then((imageData) => {
+                                        if (i === 0)
+                                            console.log(
+                                                'TDR IMAGE DATA:',
+                                                myZip.file(
+                                                    listOfStacks[j].rawData[i]
+                                                )
+                                            );
+                                        if (i === 0)
+                                            listOfStacks[j].pixelData =
+                                                Utils.base64ToArrayBuffer(
+                                                    imageData
+                                                );
+                                        listOfStacks[j].blobData.push({
+                                            blob: Utils.b64toBlob(imageData),
+                                            uuid: uuidv4(),
+                                        });
+                                    });
+                            }
+                        }
+                        const promiseOfList = Promise.all(listOfPromises);
+                        // Once we have all the layers...
+                        promiseOfList.then(() => {
+                            const updateImageViewportTop =
+                                this.state.imageViewportTop;
+                            updateImageViewportTop.style.visibility = 'visible';
+                            this.setState({
+                                imageViewportTop: updateImageViewportTop,
+                                thumbnails,
+                            });
+                            this.state.myOra.stackData = listOfStacks;
+                            this.props.newFileReceivedUpdate({
+                                singleViewport: listOfStacks.length < 2,
+                                receiveTime: Date.now(),
+                            });
+                            this.props.setNumFilesInQueue(numberOfFiles);
+                            Utils.changeViewport(this.props.singleViewport);
+                            this.props.resetDetections();
+                            this.loadAndViewImage();
+                        });
+                    } else {
+                        console.log('File format not supported.');
+                        return null;
                     }
-                    const promiseOfList = Promise.all(listOfPromises);
-                    // Once we have all the layers...
-                    promiseOfList.then(() => {
-                        const updateImageViewportTop =
-                            this.state.imageViewportTop;
-                        updateImageViewportTop.style.visibility = 'visible';
-                        this.setState({
-                            imageViewportTop: updateImageViewportTop,
-                        });
-                        this.state.myOra.stackData = listOfStacks;
-                        this.props.newFileReceivedUpdate({
-                            singleViewport: listOfStacks.length < 2,
-                            receiveTime: Date.now(),
-                        });
-                        this.props.setNumFilesInQueue(numberOfFiles);
-                        Utils.changeViewport(this.props.singleViewport);
-                        this.props.resetDetections();
-                        this.loadAndViewImage();
-                    });
                 });
         });
     }
 
     /**
-     * nextImageClick() - When the operator taps next, we send to the file server to remove the
-     *                  - current image, then when that is complete, we send the image to the command
-     *                  - server. Finally, calling getNextImage to display another image if there is one
-     * @param {Event} Event
-     * @return {None} None
+     * When the operator taps next, we send to the file server to remove the
+     * current image, then when that is complete, we send the image to the command
+     * server. Finally, calling getNextImage to display another image if there is one
+     * @param {Event} e The event object being fired which caused your function to be executed
+     *
      */
     nextImageClick(e) {
         this.props.validateDetections();
-        this.props.setLocalFileOpen(false);
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
@@ -893,27 +1146,81 @@ class App extends Component {
                 this.state.myOra,
                 this.props.detections,
                 viewports,
-                cornerstone
+                cornerstone,
+                this.props.currentFileFormat
             ).then((cocoZip) => {
                 if (this.props.remoteOrLocal === true) {
                     cocoZip
                         .generateAsync({ type: 'nodebuffer' })
                         .then((file) => {
-                            this.sendImageToCommandServer(file).then(
-                                // eslint-disable-next-line no-unused-vars
-                                (res) => {
-                                    this.props.setCurrentProcessingFile(null);
-                                    this.props.resetDetections();
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.setUpload(false);
-                                    this.getFileFromCommandServer();
-                                }
-                            );
-                        });
+                            this.sendImageToCommandServer(file)
+                                .then(
+                                    // eslint-disable-next-line no-unused-vars
+                                    (res) => {
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.props.resetDetections();
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.setUpload(false);
+                                        this.getFileFromCommandServer();
+                                    }
+                                )
+                                .catch((error) => console.log(error));
+                        })
+                        .catch((error) => console.log(error));
                 } else {
-                    cocoZip
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
+                    if (isElectron() && this.props.localFileOutput !== '') {
+                        cocoZip
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then((file) => {
+                                this.sendImageToLocalDirectory(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch((error) => console.log(error));
+                    } else if (isElectron()) {
+                        cocoZip
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then((file) => {
+                                ipcRenderer
+                                    .invoke(
+                                        constants.Channels.saveIndFile,
+                                        file
+                                    )
+                                    .then((result) => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setLocalFileOpen(false);
+                                        this.props.setReceiveTime(null);
+                                        this.onNoImageLeft();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch((error) => console.log(error));
+                    } else {
+                        cocoZip.generateAsync({ type: 'blob' }).then((file) => {
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
@@ -921,17 +1228,22 @@ class App extends Component {
                                         ? 'ora'
                                         : 'zip'
                                 }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
-                                });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
-                            });
+                            })
+                                .then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
+                                    this.props.setLocalFileOpen(false);
+                                    this.onNoImageLeft();
+                                })
+                                .catch((error) => console.log(error));
                         });
+                    }
                 }
             });
         } else if (
@@ -949,12 +1261,17 @@ class App extends Component {
             );
             const prolog = '<?xml version="1.0" encoding="utf-8"?>';
             const imageElem = stackXML.createElement('image');
+            imageElem.setAttribute(
+                'format',
+                constants.SETTINGS.ANNOTATIONS.TDR
+            );
             const mimeType = new Blob(['image/openraster'], {
                 type: 'text/plain;charset=utf-8',
             });
             const newOra = new JSZip();
             newOra.file('mimetype', mimeType, { compression: null });
             let stackCounter = 1;
+            let annotationID = 1;
             const listOfPromises = [];
             // Loop through each stack, being either top or side currently
             this.state.myOra.stackData.forEach((stack) => {
@@ -997,23 +1314,16 @@ class App extends Component {
                                 .blobData[0].blob
                         ).then((threatBlob) => {
                             newOra.file(
-                                `data/top_threat_detection_${j + 1}_${
-                                    topDetections[j].algorithm
-                                }.dcs`,
+                                `data/top_threat_detection_${annotationID}.dcs`,
                                 threatBlob
                             );
                             let newLayer = stackXML.createElement('layer');
                             newLayer.setAttribute(
                                 'src',
-                                `data/top_threat_detection_${j + 1}_${
-                                    topDetections[j].algorithm
-                                }.dcs`
-                            );
-                            newLayer.setAttribute(
-                                'UUID',
-                                `${topDetections[j].uuid}`
+                                `data/top_threat_detection_${annotationID}.dcs`
                             );
                             stackElem.appendChild(newLayer);
+                            annotationID++;
                         });
                         listOfPromises.push(threatPromise);
                     }
@@ -1029,23 +1339,16 @@ class App extends Component {
                                 .blobData[0].blob
                         ).then((threatBlob) => {
                             newOra.file(
-                                `data/side_threat_detection_${i + 1}_${
-                                    sideDetections[i].algorithm
-                                }.dcs`,
+                                `data/side_threat_detection_${annotationID}.dcs`,
                                 threatBlob
                             );
                             let newLayer = stackXML.createElement('layer');
                             newLayer.setAttribute(
                                 'src',
-                                `data/side_threat_detection_${i + 1}_${
-                                    sideDetections[i].algorithm
-                                }.dcs`
-                            );
-                            newLayer.setAttribute(
-                                'UUID',
-                                `${sideDetections[i].uuid}`
+                                `data/side_threat_detection_${annotationID}.dcs`
                             );
                             stackElem.appendChild(newLayer);
+                            annotationID++;
                         });
                         listOfPromises.push(threatPromise);
                     }
@@ -1078,20 +1381,71 @@ class App extends Component {
                                 },
                                 () => this.props.resetDetections()
                             );
-                            this.sendImageToCommandServer(file).then(
-                                // eslint-disable-next-line no-unused-vars
-                                (res) => {
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.setUpload(false);
-                                    this.getFileFromCommandServer();
-                                    this.props.setReceiveTime(null);
-                                }
-                            );
-                        });
+                            this.sendImageToCommandServer(file)
+                                .then(
+                                    // eslint-disable-next-line no-unused-vars
+                                    (res) => {
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.setUpload(false);
+                                        this.getFileFromCommandServer();
+                                        this.props.setReceiveTime(null);
+                                    }
+                                )
+                                .catch((error) => console.log(error));
+                        })
+                        .catch((error) => console.log(error));
                 } else {
-                    newOra
-                        .generateAsync({ type: 'blob' })
-                        .then(async (file) => {
+                    if (isElectron() && this.props.localFileOutput !== '') {
+                        newOra
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then((file) => {
+                                this.sendImageToLocalDirectory(file)
+                                    .then(() => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setReceiveTime(null);
+                                        this.getFileFromLocalDirectory();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch((error) => console.log(error));
+                    } else if (isElectron()) {
+                        newOra
+                            .generateAsync({ type: 'nodebuffer' })
+                            .then((file) => {
+                                ipcRenderer
+                                    .invoke(
+                                        constants.Channels.saveIndFile,
+                                        file
+                                    )
+                                    .then((result) => {
+                                        this.setState({
+                                            myOra: new ORA(),
+                                        });
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.resetSelectedDetectionBoxes(e);
+                                        this.props.resetDetections();
+                                        this.props.setLocalFileOpen(false);
+                                        this.props.setReceiveTime(null);
+                                        this.onNoImageLeft();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                    });
+                            })
+                            .catch((error) => console.log(error));
+                    } else {
+                        newOra.generateAsync({ type: 'blob' }).then((file) => {
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
@@ -1099,53 +1453,141 @@ class App extends Component {
                                         ? 'ora'
                                         : 'zip'
                                 }`,
-                            }).then(() => {
-                                this.setState({
-                                    myOra: new ORA(),
-                                });
-                                this.onNoImageLeft();
-                                this.props.setCurrentProcessingFile(null);
-                                this.resetSelectedDetectionBoxes(e);
-                                this.props.resetDetections();
-                                this.props.setReceiveTime(null);
-                            });
+                            })
+                                .then(() => {
+                                    this.setState({
+                                        myOra: new ORA(),
+                                    });
+
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setLocalFileOpen(false);
+                                    this.props.setReceiveTime(null);
+                                    this.onNoImageLeft();
+                                })
+                                .catch((error) => console.log(error));
                         });
+                    }
                 }
             });
         }
     }
 
     /**
-     * loadAndViewImage - Method that loads the image data from the DICOS+TDR file using CornerstoneJS.
-     * The method invokes the displayDICOSinfo method in order to render the image and pull the detection-specific data.
-     *
-     * @return {None} None
+     * Loads pixel data from a DICOS+TDR file using CornerstoneJS. It invokes the displayDICOSinfo method in order
+     * to render the image and pull the detection-specific data.
      */
     loadAndViewImage() {
         let dataImagesLeft = [];
         let dataImagesRight = [];
-        this.displayDICOSimage();
-        // all other images do not have pixel data -- cornerstoneJS will fail and send an error
-        // if pixel data is missing in the dicom/dicos file. To parse out only the data,
-        // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
-        // the file data and call loadDICOSdata() to store the data in a DetectionSet
-        if (this.state.myOra.stackData[0].blobData.length === 1) {
-            dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
-        } else {
-            dataImagesLeft = this.state.myOra.stackData[0].blobData;
-        }
-        if (this.props.singleViewport === false) {
-            if (this.state.myOra.stackData[1] !== undefined) {
-                dataImagesRight = this.state.myOra.stackData[1].blobData;
+        if (
+            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.TDR
+        ) {
+            this.displayDICOSimage();
+
+            // all other images do not have pixel data -- cornerstoneJS will fail and send an error
+            // if pixel data is missing in the dicom/dicos file. To parse out only the data,
+            // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
+            // the file data and call loadDICOSdata() to store the data in a DetectionSet
+            if (this.state.myOra.stackData[0].blobData.length === 1) {
+                dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
+            } else {
+                dataImagesLeft = this.state.myOra.stackData[0].blobData;
             }
+            if (this.props.singleViewport === false) {
+                if (this.state.myOra.stackData[1] !== undefined) {
+                    dataImagesRight = this.state.myOra.stackData[1].blobData;
+                }
+            }
+            this.loadDICOSdata(dataImagesLeft, dataImagesRight);
+        } else if (
+            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.COCO
+        ) {
+            this.displayCOCOimage();
+            this.loadCOCOdata();
         }
-        this.loadDICOSdata(dataImagesLeft, dataImagesRight);
     }
 
     /**
-     * displayDICOSinfo - Method that renders the  top and side view x-ray images encoded in the DICOS+TDR file and
-     *
-     * @return {None} None
+     * Renders the top and side view x-ray images when annotations are encoded as JSON files with the MS COCO format.
+     */
+    async displayCOCOimage() {
+        // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
+        const self = this;
+
+        let imageId = 'coco:0';
+        Utils.loadImage(imageId, self.state.myOra.stackData[0].arrayBuf).then(
+            function (image) {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    self.state.imageViewportTop,
+                    image
+                );
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = self.props.zoomLevelTop;
+                // eslint-disable-next-line react/no-direct-mutation-state
+                if (viewport.displayedArea !== undefined)
+                    self.state.myOra.stackData[0].dimensions =
+                        viewport.displayedArea.brhc;
+                self.setState({ viewport: viewport });
+                cornerstone.displayImage(
+                    self.state.imageViewportTop,
+                    image,
+                    viewport
+                );
+            }
+        );
+        imageId = 'coco:1';
+        if (this.props.singleViewport === false) {
+            const updatedImageViewportSide = this.state.imageViewportSide;
+            updatedImageViewportSide.style.visibility = 'visible';
+            this.setState({ imageViewportSide: updatedImageViewportSide });
+            Utils.loadImage(
+                imageId,
+                self.state.myOra.stackData[1].arrayBuf
+            ).then(function (image) {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    self.state.imageViewportSide,
+                    image
+                );
+                // eslint-disable-next-line react/no-direct-mutation-state
+                if (viewport.displayedArea !== undefined)
+                    self.state.myOra.stackData[1].dimensions =
+                        viewport.displayedArea.brhc;
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = self.props.zoomLevelSide;
+                self.setState({ viewport: viewport });
+                cornerstone.displayImage(
+                    self.state.imageViewportSide,
+                    image,
+                    viewport
+                );
+            });
+        }
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
+        this.recalculateZoomLevel();
+    }
+
+    /**
+     * Renders the top and side view x-ray images when encoded in DICOS+TDR files
      */
     displayDICOSimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
@@ -1200,20 +1642,97 @@ class App extends Component {
                 );
             });
         }
-        Utils.setFullScreenViewport(
-            cornerstone,
-            this.props.collapsedSideMenu,
-            this.props.singleViewport
-        );
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            this.props.localFileOutput !== ''
+        ) {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu,
+                this.props.collapsedLazyMenu,
+                true
+            );
+        } else {
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                this.props.singleViewport,
+                this.props.collapsedSideMenu
+            );
+        }
         this.recalculateZoomLevel();
     }
 
     /**
-     * loadDICOSdata - Method that a DICOS+TDR file to pull all the data regarding the threat detections
+     * Pulls all the data regarding the threat detections from a file formatted according to the MS COCO standard.
+     */
+    loadCOCOdata() {
+        const self = this;
+        const imagesLeft = self.state.myOra.stackData[0].formattedData;
+
+        for (let i = 0; i < imagesLeft.length; i++) {
+            imagesLeft[i].bbox[2] =
+                imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
+            imagesLeft[i].bbox[3] =
+                imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
+            self.props.addDetection({
+                algorithm: imagesLeft[i].algorithm,
+                className: imagesLeft[i].className,
+                confidence: imagesLeft[i].confidence,
+                view: constants.viewport.TOP,
+                boundingBox: imagesLeft[i].bbox,
+                binaryMask: [],
+                polygonMask:
+                    imagesLeft[i].segmentation.length > 0
+                        ? Utils.polygonDataToXYArray(
+                              Utils.coordArrayToPolygonData(
+                                  imagesLeft[i].segmentation[0]
+                              ),
+                              imagesLeft[i].bbox
+                          )
+                        : [],
+                uuid: imagesLeft[i].id,
+                detectionFromFile: true,
+            });
+        }
+
+        if (this.props.singleViewport === false) {
+            const imagesRight = self.state.myOra.stackData[1].formattedData;
+
+            for (var j = 0; j < imagesRight.length; j++) {
+                imagesRight[j].bbox[2] =
+                    imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
+                imagesRight[j].bbox[3] =
+                    imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
+                self.props.addDetection({
+                    algorithm: imagesRight[j].algorithm,
+                    className: imagesRight[j].className,
+                    confidence: imagesRight[j].confidence,
+                    view: constants.viewport.SIDE,
+                    boundingBox: imagesRight[j].bbox,
+                    binaryMask: [],
+                    polygonMask:
+                        imagesRight[j].segmentation.length > 0
+                            ? Utils.polygonDataToXYArray(
+                                  Utils.coordArrayToPolygonData(
+                                      imagesRight[j].segmentation[0]
+                                  ),
+                                  imagesRight[j].bbox
+                              )
+                            : [],
+                    uuid: imagesRight[j].id,
+                    detectionFromFile: true,
+                });
+            }
+        }
+    }
+
+    /**
+     * Parses a DICOS+TDR file to pull all the data regarding threat detections
      *
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesLeft list of DICOS+TDR data from  algorithm
-     * @param  {Array<{String: uuid; Blob: blobData}>} imagesRight list of DICOS+TDR data from  algorithm
-     * @return {None} None
+     * @param {Array} imagesLeft - List of DICOS+TDR data from algorithm
+     * @param {Array} imagesRight - List of DICOS+TDR data from algorithm
      */
     loadDICOSdata(imagesLeft, imagesRight) {
         const self = this;
@@ -1252,7 +1771,6 @@ class App extends Component {
                 // Threat Sequence information
                 const threatSequence = image.elements.x40101011;
                 if (threatSequence == null) {
-                    // console.log('No Threat Sequence');
                     return;
                 }
                 if (
@@ -1263,7 +1781,6 @@ class App extends Component {
                         Dicos.dictionary['NumberOfAlarmObjects'].tag
                     ) === undefined
                 ) {
-                    // console.log('No Potential Threat Objects detected');
                     return;
                 }
                 // for every threat found, create a new Detection object and store all Detection
@@ -1291,6 +1808,7 @@ class App extends Component {
                         binaryMask: maskData,
                         polygonMask: [],
                         uuid: imagesLeft[i].uuid,
+                        detectionFromFile: true,
                     });
                 }
             });
@@ -1315,7 +1833,6 @@ class App extends Component {
                     // Threat Sequence information
                     const threatSequence = image.elements.x40101011;
                     if (threatSequence == null) {
-                        // console.log('No Threat Sequence');
                         return;
                     }
                     if (
@@ -1326,7 +1843,6 @@ class App extends Component {
                             Dicos.dictionary['NumberOfAlarmObjects'].tag
                         ) === undefined
                     ) {
-                        // console.log('No Potential Threat Objects detected');
                         return;
                     }
                     // for every threat found, create a new Detection object and store all Detection
@@ -1356,6 +1872,7 @@ class App extends Component {
                             binaryMask: maskData,
                             polygonMask: [],
                             uuid: currentRightImage.uuid,
+                            detectionFromFile: true,
                         });
                     }
                 });
@@ -1365,11 +1882,10 @@ class App extends Component {
     }
 
     /**
-     * onImageRendered - Callback method automatically invoked when CornerstoneJS renders a new image.
-     *                   It triggers the rendering of the several annotations associated to the image
+     * Callback automatically invoked when CornerstoneJS renders a new image. It triggers the rendering of
+     * the several annotations associated to the image
      *
-     * @param  {Event} e Event
-     * @return {None} None
+     * @param {Event} e
      */
     onImageRendered(e) {
         const eventData = e.detail;
@@ -1431,14 +1947,14 @@ class App extends Component {
     }
 
     /**
-     * renderCrosshair - Renders a cross hair element on the target passed in. Which are
-     *                   the imageViewportTop or imageViewportSide
+     * Renders a cross-hair element on the target passed in.
+     * That target is a DOM element that might be either the imageViewportTop or the imageViewportSide
      *
-     * @param {eventData.canvasContext} context
-     * @param {DOMElement} target
-     * @return {None} None
+     * @param {eventData.canvasContext} context Canvas' context, used to render crosshair directly to canvas
+     * @param {DOMElement} target Targeted DOMElement caught via mouse event data
      */
     renderCrosshair(context, target) {
+        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -1480,9 +1996,7 @@ class App extends Component {
     }
 
     /**
-     * appUpdateImage - Simply updates our cornerstone image depending on the number of view-ports.
-     *
-     * @return {none} None
+     * Updates the image rendered by Cornerstone according to the number of viewports.
      */
     appUpdateImage() {
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1508,11 +2022,10 @@ class App extends Component {
     }
 
     /**
-     * renderDetections - Method that renders the several annotations in a given DICOS+TDR file
+     * Method that renders annotations directly utilizing the canvas' context
      *
-     * @param  {Array<Detection>} data    DICOS+TDR data
-     * @param  {eventData.canvasContext} context Rendering context
-     * @return {None} None
+     * @param {Array<Detection>} data Array of detection data
+     * @param {eventData.canvasContext} context Rendering context
      */
     renderDetections(data, context) {
         if (!data) {
@@ -1581,7 +2094,11 @@ class App extends Component {
                 this.renderPolygonMasks(data[j].polygonMask, context);
             } else {
                 // Binary mask rendering
-                Utils.renderBinaryMasks(data[j].binaryMask, context);
+                if (
+                    this.props.currentFileFormat !==
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                )
+                    Utils.renderBinaryMasks(data[j].binaryMask, context);
             }
 
             context.globalAlpha = 1.0;
@@ -1614,10 +2131,10 @@ class App extends Component {
     }
 
     /**
-     * renderPolygonMasks - Method that renders the polygon mask associated with a detection
+     * Renders the polygon mask associated with a detection.
      *
-     * @param  {Array<Number>} coords    polygon mask coordinates
-     * @param  {Context} context Rendering context
+     * @param {Array<number>} coords - Polygon mask coordinates
+     * @param {Context} context - Rendering context
      */
     renderPolygonMasks(coords, context) {
         if (coords === undefined || coords === null || coords.length === 0) {
@@ -1627,9 +2144,9 @@ class App extends Component {
     }
 
     /**
-     * onTouchStart - Callback function invoked when a touch event is initiated.
+     * Callback invoked when a touch event is initiated.
      *
-     * @param {type} e Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchStart(e) {
         let startPosition = e.detail.currentPoints.page;
@@ -1639,9 +2156,9 @@ class App extends Component {
     }
 
     /**
-     * onTouchEnd - Callback function invoked when a touch ends.
+     * Callback function invoked when a touch ends.
      *
-     * @param {type} e Event data such as touch position and event time stamp.
+     * @param {Event} e - Event data such as touch position and event time stamp.
      */
     onTouchEnd(e) {
         let endPosition = e.detail.currentPoints.page;
@@ -1654,10 +2171,9 @@ class App extends Component {
     }
 
     /**
-     * onMouseClicked - Callback function invoked on mouse clicked in image viewport. We handle the selection of detections.
+     * Callback invoked on mouse clicked in image viewport. We handle the selection of detections.
      *
-     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {None} None
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
@@ -1762,11 +2278,10 @@ class App extends Component {
     }
 
     /**
-     * onDragEnd - Invoked when user stops dragging mouse or finger on touch device
+     * Callback invoked when user stops dragging mouse or finger on touch device.
      *
-     * @param {Event} event Mouse drag end event
-     * @param {DOMElement}  viewport The Cornerstone Viewport containing the event
-     * @return {None} None
+     * @param {Event} event - Mouse drag end event
+     * @param {DOMElement} viewport - The Cornerstone Viewport containing the event
      */
     onDragEnd(event, viewport) {
         if (
@@ -1924,15 +2439,161 @@ class App extends Component {
                 return newDetection.view === stack.view;
             });
             const self = this;
-            Dicos.detectionObjectToBlob(
-                newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0].blob
-            ).then((newBlob) => {
-                const uuid = uuidv4();
-                self.state.myOra.stackData[stackIndex].blobData.push({
-                    blob: newBlob,
-                    uuid,
+
+            if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.TDR
+            ) {
+                Dicos.detectionObjectToBlob(
+                    newDetection,
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                ).then((newBlob) => {
+                    const uuid = uuidv4();
+                    self.state.myOra.stackData[stackIndex].blobData.push({
+                        blob: newBlob,
+                        uuid,
+                    });
+                    if (data[0] === undefined) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetSelectedDetectionBoxes(event);
+                        return;
+                    }
+                    // When the updating detection is false, this means we are creating a new detection
+                    if (data[0].updatingDetection === false) {
+                        const operator = constants.OPERATOR;
+                        if (
+                            boundingBoxArea >
+                            constants.BOUNDING_BOX_AREA_THRESHOLD
+                        ) {
+                            self.props.addDetection({
+                                algorithm: operator,
+                                boundingBox: coords,
+                                className: data[0].class,
+                                confidence: data[0].confidence,
+                                view:
+                                    viewport === self.state.imageViewportTop
+                                        ? constants.viewport.TOP
+                                        : constants.viewport.SIDE,
+
+                                binaryMask: [
+                                    [],
+                                    [coords[0], coords[1]],
+                                    [
+                                        coords[2] - coords[0],
+                                        coords[3] - coords[1],
+                                    ],
+                                ],
+                                polygonMask: [],
+                                uuid,
+                                detectionFromFile: false,
+                            });
+                            self.appUpdateImage();
+                        } else {
+                            self.props.updateCornerstoneMode({
+                                cornerstoneMode:
+                                    constants.cornerstoneMode.SELECTION,
+                            });
+                            self.resetCornerstoneTool();
+                        }
+                    } else {
+                        // Updating existing Detection's bounding box
+                        const { uuid } = data[0];
+
+                        // Only update the Detection if the boundingBox actually changes
+                        if (
+                            hasDetectionCoordinatesChanged(
+                                self.props.detections,
+                                uuid,
+                                coords,
+                                polygonMask
+                            )
+                        ) {
+                            if (
+                                this.props.selectedDetection &&
+                                this.props.editionMode !==
+                                    constants.editionMode.POLYGON
+                            ) {
+                                if (
+                                    this.props.selectedDetection.polygonMask
+                                        .length > 0
+                                ) {
+                                    polygonMask = Utils.calculatePolygonMask(
+                                        coords,
+                                        this.props.selectedDetection.polygonMask
+                                    );
+                                    binaryMask =
+                                        Utils.polygonToBinaryMask(polygonMask);
+                                } else if (
+                                    this.props.selectedDetection.binaryMask
+                                        .length > 0 &&
+                                    this.props.selectedDetection.binaryMask[0]
+                                        .length > 0
+                                ) {
+                                    binaryMask = cloneDeep(
+                                        this.props.selectedDetection.binaryMask
+                                    );
+                                    binaryMask[1][0] = coords[0];
+                                    binaryMask[1][1] = coords[1];
+                                }
+                            }
+                            self.props.updateDetection({
+                                uuid: data[0].uuid,
+                                update: {
+                                    boundingBox: coords,
+                                    polygonMask: polygonMask,
+                                    binaryMask,
+                                },
+                            });
+                            const viewportInfo =
+                                Utils.eventToViewportInfo(event);
+                            const contextMenuPos = self.getContextMenuPos(
+                                viewportInfo,
+                                coords
+                            );
+                            const detectionData = self.props.detections.find(
+                                (det) => det.uuid === data[0].uuid
+                            );
+                            const editLabelWidgetPosInfo =
+                                self.getEditLabelWidgetPos(
+                                    detectionData,
+                                    coords
+                                );
+                            let widgetPosition = {
+                                top: editLabelWidgetPosInfo.y,
+                                left: editLabelWidgetPosInfo.x,
+                            };
+                            self.props.onDragEndWidgetUpdate({
+                                detectionLabelEditWidth:
+                                    editLabelWidgetPosInfo.boundingWidth,
+                                detectionLabelEditPosition: widgetPosition,
+                                contextMenuPos,
+                            });
+                            // Detection coordinates changed and we need to re-render the detection context widget
+                            if (this.props.selectedDetection) {
+                                this.renderDetectionContextMenu(event);
+                            }
+                        }
+                    }
+                    if (
+                        self.props.cornerstoneMode ===
+                        constants.cornerstoneMode.ANNOTATION
+                    ) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetCornerstoneTool();
+                        self.props.clearAllSelection();
+                        self.appUpdateImage();
+                    } else if (
+                        self.props.cornerstoneMode ===
+                        constants.cornerstoneMode.EDITION
+                    ) {
+                        self.props.updateIsDetectionContextVisible(true);
+                        self.appUpdateImage();
+                    }
                 });
+            } else if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.COCO
+            ) {
                 if (data[0] === undefined) {
                     self.props.emptyAreaClickUpdate();
                     self.resetSelectedDetectionBoxes(event);
@@ -1944,6 +2605,12 @@ class App extends Component {
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
+                        var maxId = 0;
+
+                        this.props.detections.forEach((detection) => {
+                            if (detection.uuid > maxId) maxId = detection.uuid;
+                        });
+
                         self.props.addDetection({
                             algorithm: operator,
                             boundingBox: coords,
@@ -1953,13 +2620,15 @@ class App extends Component {
                                 viewport === self.state.imageViewportTop
                                     ? constants.viewport.TOP
                                     : constants.viewport.SIDE,
+
                             binaryMask: [
                                 [],
                                 [coords[0], coords[1]],
                                 [coords[2] - coords[0], coords[3] - coords[1]],
                             ],
                             polygonMask: [],
-                            uuid,
+                            uuid: maxId + 1,
+                            detectionFromFile: false,
                         });
                         self.appUpdateImage();
                     } else {
@@ -2014,8 +2683,8 @@ class App extends Component {
                             uuid: data[0].uuid,
                             update: {
                                 boundingBox: coords,
-                                polygonMask: polygonMask,
-                                binaryMask,
+                                polygonMask: polygonMask ? polygonMask : null,
+                                binaryMask: binaryMask ? binaryMask : null,
                             },
                         });
                         const viewportInfo = Utils.eventToViewportInfo(event);
@@ -2059,16 +2728,15 @@ class App extends Component {
                     self.props.updateIsDetectionContextVisible(true);
                     self.appUpdateImage();
                 }
-            });
+            }
         }
     }
 
     /**
-     * onNewPolygonMaskCreated - Callback invoked when new polygon mask has been created.
+     * Callback invoked when new polygon mask has been created.
      *
-     * @param {Event} event Event triggered when a new polygon is created
-     * @param {DOMElement} viewport The Cornerstone Viewport receiving the event
-     * @return {None} None
+     * @param {Event} event - Event triggered when a new polygon is created
+     * @param {DOMElement} viewport - The Cornerstone Viewport receiving the event
      */
     onNewPolygonMaskCreated(event, viewport) {
         if (
@@ -2103,20 +2771,62 @@ class App extends Component {
                 return newDetection.view === stack.view;
             });
             let self = this;
-            Dicos.detectionObjectToBlob(
-                newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0].blob
-            ).then((newBlob) => {
-                const uuid = uuidv4();
-                self.state.myOra.stackData[stackIndex].blobData.push({
-                    blob: newBlob,
-                    uuid,
+            if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.TDR
+            ) {
+                Dicos.detectionObjectToBlob(
+                    newDetection,
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                ).then((newBlob) => {
+                    const uuid = uuidv4();
+                    self.state.myOra.stackData[stackIndex].blobData.push({
+                        blob: newBlob,
+                        uuid,
+                    });
+                    if (polygonData === undefined) {
+                        self.props.emptyAreaClickUpdate();
+                        self.resetSelectedDetectionBoxes(event);
+                        return;
+                    }
+                    self.props.addDetection({
+                        algorithm: constants.OPERATOR,
+                        boundingBox: boundingBoxCoords,
+                        className: polygonData.class,
+                        confidence: polygonData.confidence,
+                        view:
+                            viewport === self.state.imageViewportTop
+                                ? constants.viewport.TOP
+                                : constants.viewport.SIDE,
+                        binaryMask: binaryData,
+                        polygonMask: polygonCoords,
+                        uuid,
+                        detectionFromFile: false,
+                    });
+
+                    this.resetCornerstoneTool();
+                    this.props.clearAllSelection();
+                    this.appUpdateImage();
+                    this.props.emptyAreaClickUpdate();
+                    setTimeout(() => {
+                        this.startListeningClickEvents();
+                    }, 500);
                 });
+            } else if (
+                this.props.currentFileFormat ===
+                constants.SETTINGS.ANNOTATIONS.COCO
+            ) {
                 if (polygonData === undefined) {
                     self.props.emptyAreaClickUpdate();
                     self.resetSelectedDetectionBoxes(event);
                     return;
                 }
+                var maxId = 0;
+
+                this.props.detections.forEach((detection) => {
+                    if (detection.uuid > maxId) maxId = detection.uuid;
+                });
+
                 self.props.addDetection({
                     algorithm: constants.OPERATOR,
                     boundingBox: boundingBoxCoords,
@@ -2128,7 +2838,8 @@ class App extends Component {
                             : constants.viewport.SIDE,
                     binaryMask: binaryData,
                     polygonMask: polygonCoords,
-                    uuid,
+                    uuid: maxId + 1,
+                    detectionFromFile: false,
                 });
 
                 this.resetCornerstoneTool();
@@ -2138,15 +2849,14 @@ class App extends Component {
                 setTimeout(() => {
                     this.startListeningClickEvents();
                 }, 500);
-            });
+            }
         }
     }
 
     /**
-     * resetSelectedDetectionBoxes - Unselect the selected detection and hide the context menu.
+     * Unselects the currently selected detection and hides the context menu.
      *
-     * @param  {Event} e Event data such as the mouse cursor position, mouse button clicked, etc.
-     * @return {None}  None
+     * @param {Event} e - Event data such as the mouse cursor position, mouse button clicked, etc.
      */
     resetSelectedDetectionBoxes(e) {
         if (
@@ -2164,7 +2874,7 @@ class App extends Component {
     }
 
     /**
-     * hideContextMenu - Hide context menu when mouse is moved.
+     * Hides the context menu.
      */
     hideContextMenu() {
         if (
@@ -2178,9 +2888,7 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects bounding box option from FAB
-     *
-     * @return {none} None
+     * Invoked when the user selects the bounding box option in the FAB
      */
     onBoundingBoxSelected() {
         if (
@@ -2200,9 +2908,7 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects polygon mask option from FAB
-     *
-     * @return {none} None
+     * Invoked when the user selects the polygon mask option in the FAB
      */
     onPolygonMaskSelected() {
         if (
@@ -2223,11 +2929,11 @@ class App extends Component {
     }
 
     /**
-     * getContextMenuPos - Get position of context menu based on the associated bounding box.
+     * Get position of context menu based on the associated bounding box.
      *
      * @param {DOMElement} viewportInfo viewport info
-     * @param {Array<Number>} coords bounding box' corners' coordinates
-     * @returns {Object{Number: x; Number: y}}
+     * @param {Array<number>} coords bounding box corners' coordinates
+     * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
         if (viewportInfo.viewport !== null) {
@@ -2268,12 +2974,12 @@ class App extends Component {
 
     /**
      * Invoked when user selects a detection (callback from onMouseClicked)
-     * @param {Event} event Related mouse click event to position the widget relative to detection
-     * @param {Detection} [draggedData] Optional detection data. In the case that
+     *
+     * @param {Event} event - Related mouse click event to position the widget relative to detection
+     * @param {Detection} [draggedData] - Optional detection data. In the case that
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      *
-     * @returns {None} None
      */
     renderDetectionContextMenu(
         event,
@@ -2360,10 +3066,9 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects an edition mode from DetectionContextMenu.
+     * Invoked when the user selects an edition mode from DetectionContextMenu.
      *
-     * @param {string} newMode Edition mode selected from menu
-     * @returns {None} None
+     * @param {string} newMode - Edition mode selected from menu
      */
     selectEditionMode(newMode) {
         if ([...Object.values(constants.editionMode)].includes(newMode)) {
@@ -2584,8 +3289,7 @@ class App extends Component {
     /**
      * Invoked when user completes editing a detection's label
      *
-     * @param {string} newLabel Updated label name from user interaction
-     * @returns {None} None
+     * @param {string} newLabel - Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
         const { uuid } = this.props.selectedDetection;
@@ -2610,9 +3314,8 @@ class App extends Component {
     /**
      * Calculates position of the edit label widget
      *
-     * @param {Dictionary} detectionData detection data
-     * @param {Array<Number>} coords bounding box coordinates
-     * @returns {None} None
+     * @param {{boundingBox: Array<number>, view: constants.viewport, label: string, confidence: number}} detectionData - Detection data
+     * @param {Array<number>} [coords = undefined] - Bounding box coordinates
      */
     getEditLabelWidgetPos(detectionData, coords = undefined) {
         if (detectionData) {
@@ -2689,32 +3392,38 @@ class App extends Component {
     }
 
     /**
-     * Invoked when user selects 'delete' option from DetectionContextMenu
-     *
-     * @returns {None} None
+     * Invoked when the user selects 'delete' option from DetectionContextMenu.
      */
     deleteDetection() {
         // Detection is selected
         if (this.props.selectedDetection) {
             this.props.deleteDetection(this.props.selectedDetection.uuid);
             if (this.props.selectedDetection.view === constants.viewport.TOP) {
-                this.state.myOra.setStackBlobData(
-                    0,
-                    this.state.myOra.stackData[0].blobData.filter(
-                        (blob) =>
-                            blob.uuid !== this.props.selectedDetection.uuid
-                    )
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                )
+                    this.state.myOra.setStackBlobData(
+                        0,
+                        this.state.myOra.stackData[0].blobData.filter(
+                            (blob) =>
+                                blob.uuid !== this.props.selectedDetection.uuid
+                        )
+                    );
             } else if (
                 this.props.selectedDetection.view === constants.viewport.SIDE
             ) {
-                this.state.myOra.setStackBlobData(
-                    1,
-                    this.state.myOra.stackData[1].blobData.filter(
-                        (blob) =>
-                            blob.uuid !== this.props.selectedDetection.uuid
-                    )
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                )
+                    this.state.myOra.setStackBlobData(
+                        1,
+                        this.state.myOra.stackData[1].blobData.filter(
+                            (blob) =>
+                                blob.uuid !== this.props.selectedDetection.uuid
+                        )
+                    );
             }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
@@ -2725,10 +3434,10 @@ class App extends Component {
     }
 
     /**
-     * onMouseMoved - Captures and saves the {x , y} coordinates of the mouse to the App State
+     * Callback invoked when the mouse pointer is moves. It captures and saves the {x , y} coordinates of the mouse
+     * to the App State
      *
      * @param {Event} event
-     * @returns {None} None
      */
     onMouseMoved(event) {
         this.setState({
@@ -2738,9 +3447,7 @@ class App extends Component {
     }
 
     /**
-     * onMouseWheel - Called when mouse wheel event is fired.
-     *
-     * @returns {None} None
+     * Callback invoked when a mouse wheel event happens.
      */
     onMouseWheel() {
         if (this.props.selectedDetection !== null) {
@@ -2755,12 +3462,10 @@ class App extends Component {
     }
 
     /**
-     * onMouseLeave - Event handler for if the mouse leaves the window. It mainly serves
-     *                as a way to make sure a user does not try to drag a detection out of
-     *                the window.
+     * Mouse leave event handler. It mainly serves as a way to make sure a user does not try to drag a detection out of
+     * the window.
      *
      * @param {Event} event
-     * @returns {None} None
      */
     onMouseLeave(event) {
         if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
@@ -2801,7 +3506,8 @@ class App extends Component {
                             this.renderDetectionContextMenu
                         }
                     />
-                    {this.props.remoteOrLocal === true ? (
+                    {this.props.remoteOrLocal === true ||
+                    (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
                         <NextButton
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
@@ -2822,6 +3528,15 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
+                    {isElectron() ? (
+                        <LazyImageMenu
+                            getSpecificFileFromLocalDirectory={
+                                this.getSpecificFileFromLocalDirectory
+                            }
+                            thumbnails={this.state.thumbnails}
+                        />
+                    ) : null}
+
                     <NoFileSign />
                     <MetaData />
                 </div>
@@ -2851,7 +3566,9 @@ const mapStateToProps = (state) => {
         editionMode: ui.editionMode,
         inputLabel: ui.inputLabel,
         collapsedSideMenu: ui.collapsedSideMenu,
+        collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
+        currentFileFormat: ui.currentFileFormat,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -2861,7 +3578,9 @@ const mapStateToProps = (state) => {
         firstDisplaySettings: settings.settings.firstDisplaySettings,
         annotationsFormat: settings.settings.annotationsFormat,
         remoteOrLocal: settings.settings.remoteOrLocal,
+        hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
+        localFileOutput: settings.settings.localFileOutput,
     };
 };
 
@@ -2910,10 +3629,10 @@ const mapDispatchToProps = {
     setReceiveTime,
     colorPickerToggle,
     updateMissMatchedClassName,
-    setNumberOfFiles,
     setLocalFileOpen,
     updateEditLabelPosition,
     updateRecentScroll,
+    setCurrentFileFormat,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
@@ -86,6 +86,13 @@ const DeleteWidget = styled.div`
         background: ${detectionContextStyle.HOVER_COLOR};
     }
 `;
+/**
+ * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
+ *
+ * @component
+ *
+ * @param {function} setSelectedOption - Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
+ */
 const DetectionContextMenu = ({ setSelectedOption }) => {
     const selectedDetectionColor = useSelector(getSelectedDetectionColor);
     const selectedOption = useSelector(getEditionMode);
@@ -167,6 +174,9 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
 };
 
 DetectionContextMenu.propTypes = {
+    /**
+     * Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
+     */
     setSelectedOption: PropTypes.func.isRequired,
 };
 

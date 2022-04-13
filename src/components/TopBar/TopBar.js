@@ -7,12 +7,29 @@ import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
-import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
+import {
+    getHasFileOutput,
+    getLocalFileOutput,
+    getRemoteOrLocal,
+} from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
 
+/**
+ * Component for GUI's top bar display.
+ *
+ * @component
+ *
+ * @param {PropTypes} props - Expected props: connectToCommandServer<function>, cornerstone<Object>, getFileFromLocal<function>
+ * @param {function} connectToCommandServer - Destructured from props -- Function passed into the SettingsIcon component to check connection to command server
+ * @param {function} getFileFromLocal - Destructured from props -- Getter function for getting local file if remote connection is off.
+ * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
+ *
+ */
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const hasFileOutput = useSelector(getHasFileOutput);
+    const localFileOutput = useSelector(getLocalFileOutput);
 
     const {
         processingFile,
@@ -32,11 +49,15 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '100%',
-            zIndex: '999',
+            zIndex: '1',
             alignItems: 'center',
             justifyContent: 'flex-end',
             color: 'white',
             boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
+        },
+        lazyMenuToggleContainer: {
+            position: 'absolute',
+            zIndex: '2',
         },
         titleLabelContainer: {
             position: 'absolute',
@@ -46,7 +67,7 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '100%',
-            zIndex: '999',
+            zIndex: '1',
             alignItems: 'center',
             color: 'white',
             justifyContent: 'center',
@@ -61,7 +82,7 @@ const TopBar = (props) => {
             left: '0',
             top: '0',
             width: '35%',
-            zIndex: '999',
+            zIndex: '1',
             marginLeft: '65%',
             alignItems: 'center',
             justifyContent: 'flex-end',
@@ -69,10 +90,9 @@ const TopBar = (props) => {
         },
         icon: {
             margin: '0.75rem',
-            marginLeft: '1.25rem',
         },
         lastIcon: {
-            margin: '0.5rem 1.5rem 0.5rem 0rem',
+            margin: '0.5rem 1.5rem 0.5rem -0.5rem',
         },
         typeInfo: {
             color: '#C3C3C3',
@@ -99,16 +119,19 @@ const TopBar = (props) => {
             fontSize: 'medium',
         },
     };
-
     return processingFile ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer} &nbsp;
+                        {connectedServer !== null
+                            ? connectedServer
+                            : localFileOutput}{' '}
+                        &nbsp;
                         <span style={styles.divider}>/</span>&nbsp;
                         <span style={styles.typeInfo}>Processing</span>
                         &nbsp;&nbsp;
@@ -132,22 +155,27 @@ const TopBar = (props) => {
                 {processingFile} &nbsp;
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <FileQueueIcon
                             title="Number of Files"
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        <FileUploadStatus
-                            isDownload={isDownload}
-                            isUpload={isUpload}
-                            styles={styles.icon}
-                        />
-                        <ConnectionStatus
-                            isConnected={isConnected}
-                            style={styles.icon}
-                        />
+                        {remoteOrLocal === true ? (
+                            <React.Fragment>
+                                <FileUploadStatus
+                                    isDownload={isDownload}
+                                    isUpload={isUpload}
+                                    styles={styles.icon}
+                                />
+                                <ConnectionStatus
+                                    isConnected={isConnected}
+                                    style={styles.icon}
+                                />
+                            </React.Fragment>
+                        ) : null}
                     </React.Fragment>
                 ) : null}
                 <div style={styles.verticalDivider}></div>
@@ -165,12 +193,16 @@ const TopBar = (props) => {
     ) : (
         <div>
             <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
                         <span style={styles.typeInfo}>Connected to </span>
                         &nbsp;&nbsp;
-                        {connectedServer} &nbsp; &nbsp;&nbsp;
+                        {connectedServer !== null
+                            ? connectedServer
+                            : localFileOutput}{' '}
+                        &nbsp; &nbsp;&nbsp;
                     </React.Fragment>
                 ) : (
                     <div
@@ -191,22 +223,27 @@ const TopBar = (props) => {
                 {processingFile} &nbsp;
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ? (
+                {remoteOrLocal === true ||
+                (remoteOrLocal === false && hasFileOutput === true) ? (
                     <React.Fragment>
                         <FileQueueIcon
                             title="Number of Files"
                             numberOfFiles={numberOfFiles}
                             style={styles.icon}
                         />
-                        <FileUploadStatus
-                            isDownload={isDownload}
-                            isUpload={isUpload}
-                            styles={styles.icon}
-                        />
-                        <ConnectionStatus
-                            isConnected={isConnected}
-                            style={styles.icon}
-                        />
+                        {remoteOrLocal === true ? (
+                            <React.Fragment>
+                                <FileUploadStatus
+                                    isDownload={isDownload}
+                                    isUpload={isUpload}
+                                    styles={styles.icon}
+                                />
+                                <ConnectionStatus
+                                    isConnected={isConnected}
+                                    style={styles.icon}
+                                />
+                            </React.Fragment>
+                        ) : null}
                     </React.Fragment>
                 ) : null}
                 <div style={styles.verticalDivider}></div>
@@ -225,8 +262,17 @@ const TopBar = (props) => {
 };
 
 TopBar.propTypes = {
+    /**
+     * Function passed into the SettingsIcon component to check connection to command server
+     */
     connectToCommandServer: PropTypes.func,
+    /**
+     * Main cornerstone object, used to resize viewports if needed.
+     */
     cornerstone: PropTypes.object,
+    /**
+     * Getter function for getting local file if remote connection is off.
+     */
     getFileFromLocal: PropTypes.func,
 };
 

@@ -59,10 +59,13 @@ const LabelListWrapper = styled.div`
 `;
 
 /**
- * Displays list of available detection labels.
+ * Component for displaying list of available detection labels.
  * Visible after selecting a detection and selecting `label` from context menu.
- * @param {Array<String>} labels Available detection labels
- * @param {function} onLabelSelect Called when label is selected
+ *
+ * @component
+ *
+ * @param {Array<string>} labels - Available detection labels
+ * @param {function} onLabelSelect - Called when label is selected
  */
 const LabelList = ({ labels, onLabelSelect }) => {
     /**
@@ -92,7 +95,13 @@ const LabelList = ({ labels, onLabelSelect }) => {
 };
 
 LabelList.propTypes = {
+    /**
+     * Available detection labels
+     */
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
+    /**
+     * Called when label is selected
+     */
     onLabelSelect: PropTypes.func.isRequired,
 };
 

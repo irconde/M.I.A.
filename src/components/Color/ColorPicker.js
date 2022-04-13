@@ -15,7 +15,12 @@ import {
     getZoomLevels,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
-import Utils from '../../utils/Utils';
+
+/**
+ * Component within DetectionContextMenu component for editing colors of detection bounding box.
+ *
+ * @component
+ */
 
 const ColorPicker = () => {
     const isVisible = useSelector(getColorPickerVisible);

@@ -11,8 +11,12 @@ const ArrowWrapper = styled.div`
 
 /**
  * Arrow icon (up by default) for toggling label list when editing detection label
- * @param {string} `down` rotates the arrow to point downwards
- * @param {string} `color` fill color for arrow
+ *
+ * @component
+ *
+ * @param {string} direction - `down` rotates the arrow to point downwards
+ * @param {string} color - `color` fill color for arrow
+ * @param {function} handleClick - callback for handling click events
  */
 const ArrowIcon = ({ direction, color, handleClick }) => {
     return (
@@ -33,8 +37,17 @@ const ArrowIcon = ({ direction, color, handleClick }) => {
 };
 
 ArrowIcon.propTypes = {
+    /**
+     * callback for handling click events
+     */
     handleClick: PropTypes.func.isRequired,
+    /**
+     * `down` rotates the arrow to point downwards
+     */
     direction: PropTypes.string,
+    /**
+     * `color` fill color for arrow
+     */
     color: PropTypes.string.isRequired,
 };
 export default ArrowIcon;

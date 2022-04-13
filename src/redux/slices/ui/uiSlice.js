@@ -32,10 +32,13 @@ const initialState = {
     isSettingsVisible: false,
     inputLabel: '',
     collapsedSideMenu: false,
+    collapsedLazyMenu: false,
     colorPickerVisible: false,
     numberOfFiles: 0,
     localFileOpen: false,
     recentScroll: false,
+    currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
+    generatingThumbnails: true,
 };
 
 const uiSlice = createSlice({
@@ -43,30 +46,72 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * toggleCollapsedSideMenu
+         * Sets whether the Electron process is generating thumbnails or not
+         * @param {State} state
+         * @param {{payload: Boolean}} action
+         */
+        setGeneratingThumbnails: (state, action) => {
+            state.generatingThumbnails = action.payload;
+        },
+        /**
+         * Toggles the visibility of the side menu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload
+         * @param {CornerstoneObject?} action.payload - Can contain cornerstone object if local file is currently open
          */
         toggleCollapsedSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            Utils.setFullScreenViewport(
+            if (state.localFileOpen) {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu,
+                    state.collapsedLazyMenu,
+                    true
+                );
+            } else {
+                Utils.calculateViewportDimensions(
+                    action.payload,
+                    state.singleViewport,
+                    state.collapsedSideMenu
+                );
+            }
+        },
+
+        /**
+         * Toggles the visibility of the lazy menu
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {CornerstoneObject} action.payload - Cornerstone object
+         */
+        toggleCollapsedLazyMenu: (state, action) => {
+            state.collapsedLazyMenu = !state.collapsedLazyMenu;
+            Utils.calculateViewportDimensions(
                 action.payload,
+                state.singleViewport,
                 state.collapsedSideMenu,
-                state.singleViewport
+                state.collapsedLazyMenu,
+                true
             );
         },
+
         /**
-         * setInputLabel
+         * Sets the input label to action.payload
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload
+         * @param {string} action.payload - String value of new input label
          */
         setInputLabel: (state, action) => {
             state.inputLabel = action.payload;
         },
+
         /**
-         * updateEditionMode
+         * Updates edition mode to new mode
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {constants.editionMode} action.payload - Constant value for the edition mode.
+         * @param {constants.editionMode} editionMode - Destructured from action.payload -- Constant value for the edition mode.
+         * @param {boolean} isEditLabelWidgetVisible - Destructured from action.payload -- Updated visibility for detection edit label.
+         * @param {number} detectionLabelEditWidth - Destructured from action.payload -- Updated width for detection edit label.
+         * @param {{top: number, left: number}} detectionLabelEditPosition - Destructured from action.payload -- Updated position for detection edit label.
          */
         updateEditionMode: (state, action) => {
             const {
@@ -96,9 +141,10 @@ const uiSlice = createSlice({
             }
         },
         /**
-         * updateEditLabelPosition - Simply updates the label position, namely for resize events
+         * Updates the label position, namely for resize events
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing detectionLabelEditWidth & detectionLabelEditPosition.
+         * @param {number} detectionLabelEditWidth - Destructured from action.payload -- width of detection edit label
+         * @param {{top: number, left: number}} detectionLabelEditPosition - Destructured from action.payload -- position of detection edit label
          */
         updateEditLabelPosition: (state, action) => {
             const { detectionLabelEditWidth, detectionLabelEditPosition } =
@@ -106,9 +152,10 @@ const uiSlice = createSlice({
             state.detectionLabelEditWidth = detectionLabelEditWidth;
             state.detectionLabelEditPosition = detectionLabelEditPosition;
         },
+
         /**
-         * exitEditionModeUpdate - For when a user exits edition mode. Sets the UI elements for edition mode to null and
-         *                         to not display the detection context widget.
+         * Sets the UI elements for edition mode to null and to not display the detection context widget.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         exitEditionModeUpdate: (state) => {
@@ -116,28 +163,36 @@ const uiSlice = createSlice({
             state.isEditLabelWidgetVisible = false;
             state.colorPickerVisible = false;
         },
+
         /**
-         * updateCornerstoneMode
+         * Updates cornerstone/annotation mode
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {constants.cornerstoneMode} action.payload - Constant value for the cornerstone mode.
+         * @param {constants.cornerstoneMode} cornerstoneMode - Constant value for the cornerstone mode.
+         * @param {constants.annotationMode} annotationMode - Constant value for the annotation mode.
          */
         updateCornerstoneMode: (state, action) => {
             const { cornerstoneMode, annotationMode } = action.payload;
             state.cornerstoneMode = cornerstoneMode;
             state.annotationMode = annotationMode;
         },
+
         /**
-         * updateFABVisibility
+         * Updates visibility of FAB
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean to determine if we should display the FAB.
+         * @param {boolean} action.payload - Boolean to determine if we should display the FAB.
          */
         updateFABVisibility: (state, action) => {
             state.isFABVisible = action.payload;
         },
+
         /**
-         * onLabelEditionEnd
+         * Updates the state of the Label edition widget
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Object containing values to update the state of the Label edition widget
+         * @param {constants.editionMode} editionMode - Destructured from action.payload -- Constant value for the edition mode.
+         * @param {number} detectionLabelEditWidth - Destructured from action.payload -- width of detection edit label
+         * @param {boolean} isEditLabelWidgetVisible - Destructured from action.payload -- Boolean determining the visibility of the Label edition widget
          */
         onLabelEditionEnd: (state, action) => {
             const {
@@ -149,11 +204,15 @@ const uiSlice = createSlice({
             state.detectionLabelEditWidth = detectionLabelEditWidth;
             state.isEditLabelWidgetVisible = isEditLabelWidgetVisible;
         },
+
         /**
-         * labelSelectedUpdate - For when a user selects an label from the detection context widget. Will set the UI elements
-         *                       edition mode to be Label, the detection context to not be visible, the edit label width, and its position.
+         * Sets the UI elements edition mode to be Label, the detection context to not be visible, the edit label width, and its position.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing the width of the label, and an top & left values for the position.
+         * @param {number} width - Destructured from action.payload -- Width of label
+         * @param {{x: number, y: number}} position - Destructured from action.payload -- position of detection label
+         * @param {string} font - Destructured from action.payload -- string containing value of label
+         * @param {constants.viewport} viewport - Destructured from action.payload -- Constant value for the which viewport.
          */
         labelSelectedUpdate: (state, action) => {
             const { width, position, font, viewport } = action.payload;
@@ -163,8 +222,10 @@ const uiSlice = createSlice({
             state.detectionLabelEditPosition.top = position.top;
             state.detectionLabelEditPosition.left = position.left;
         },
+
         /**
-         * resetSelectedDetectionBoxesUpdate
+         * Resets selected detection boxes, cornerstone mode, and edition mode.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         resetSelectedDetectionBoxesUpdate: (state) => {
@@ -176,8 +237,10 @@ const uiSlice = createSlice({
                     left: 0,
                 });
         },
+
         /**
-         * resetSelectedDetectionBoxesElseUpdate
+         * Resets selected detection boxes and edition mode.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         resetSelectedDetectionBoxesElseUpdate: (state) => {
@@ -188,28 +251,34 @@ const uiSlice = createSlice({
                     left: 0,
                 });
         },
+
         /**
-         * updateIsDetectionContextVisible
+         * Updates detection context widget based on passed in boolean
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
+         * @param {boolean} action.payload - Boolean value for if we should display the detection context widget, for a selected detection.
          */
         updateIsDetectionContextVisible: (state, action) => {
             state.isDetectionContextVisible = action.payload;
         },
         /**
-         * updateDetectionContextPosition
+         * Updates detection context widget position based on passed in position object
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing values for top and left position for the detection context position.
+         * @param {{top: number, left: number}} action.payload - Object containing values for top and left position for the detection context position.
          */
         updateDetectionContextPosition: (state, action) => {
             const { top, left } = action.payload;
             state.detectionContextPosition.top = top;
             state.detectionContextPosition.left = left;
         },
+
         /**
-         * updateZoomLevels - For when the UI recalculates the zoom level for the cornerstone viewports.
+         * Updates the zoom level for the cornerstone viewports.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing the zoom levels for both top and side.
+         * @param {number} zoomLevelTop - Destructured from action.payload -- Zoom level of top viewport
+         * @param {number} zoomLevelSide - Destructured from action.payload -- Zoom level of side viewport
          */
         updateZoomLevels: (state, action) => {
             const { zoomLevelTop, zoomLevelSide } = action.payload;
@@ -217,24 +286,30 @@ const uiSlice = createSlice({
             state.zoomLevelSide = zoomLevelSide;
         },
         /**
-         * updateZoomLevelTop - Updates the top level zoom to the passed in number
+         * Updates the top level zoom to the passed in number
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action - Number containing the zoom level
+         * @param {number} action - Number containing the zoom level
          */
         updateZoomLevelTop: (state, action) => {
             state.zoomLevelTop = action.payload;
         },
         /**
-         * updateZoomLevelSide - Updates the side level zoom to the passed in number
+         * Updates the side level zoom to the passed in number
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action - Number containing the zoom level
+         * @param {number} action - Number containing the zoom level
          */
         updateZoomLevelSide: (state, action) => {
             state.zoomLevelSide = action.payload;
         },
         /**
-         * onDragEndUpdate
+         * Updates new detection edit label width/position and new context menu position in response to onDragEnd event
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {number} detectionLabelEditWidth - Destructured from action.payload -- Width of detection edit label
+         * @param {{top: number, left: number}} detectionLabelEditPosition - Destructured from action.payload -- Postion object of detetion edit label position
+         * @param {{x: number, y: number}} contextMenuPos - Destructured from action.payload -- Position object determining position of context menu
          */
         onDragEndWidgetUpdate: (state, action) => {
             const {
@@ -252,19 +327,23 @@ const uiSlice = createSlice({
                     left: contextMenuPos.x,
                 });
         },
+
         /**
-         * hideContextMenuUpdate
+         * Updates cornerstone mode to default and makes context menu invisible
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         hideContextMenuUpdate: (state) => {
             (state.isDetectionContextVisible = false),
                 (state.cornerstoneMode = constants.cornerstoneMode.SELECTION);
         },
+
         /**
-         * newFileReceivedUpdate - Occurs when the UI receives a new Ora DICOS file from the file server. Sets the UI elements
-         *                         for single viewport, the received time, and that we have received a file flag.
+         * Updates the UI when the UI receives a new Ora DICOS file from the file server
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing a boolean value for single viewport and the Date for the received time.
+         * @param {boolean} singleViewport - Destructured from action.payload -- boolean value for single viewport, true if single viewport
+         * @param {Date} receiveTime - Destructured from action.payload -- the Date for the received time
          */
         newFileReceivedUpdate: (state, action) => {
             const { singleViewport, receiveTime } = action.payload;
@@ -272,11 +351,10 @@ const uiSlice = createSlice({
             state.receiveTime = receiveTime;
             state.isFABVisible = true;
         },
+
         /**
-         * emptyAreaClickUpdate - This resets UI elements related to selecting a detection.
-         *                        It will set the FAB to be visible, reset the cornerstone mode to selection,
-         *                        set display selected bounding box to false, the edition mode to null, the
-         *                        detection context to not be visible and reset its position.
+         * Resets UI elements involved in selecting a detection.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         emptyAreaClickUpdate: (state) => {
@@ -290,10 +368,8 @@ const uiSlice = createSlice({
             state.detectionContextPosition.left = 0;
         },
         /**
-         * onMouseLeaveNoFilesUpdate - This resets UI elements related to when the user mouse leaves the window and there are now files in the queue
-         *                             It will set the FAB to NOT be visible, reset the cornerstone mode to selection,
-         *                             set display selected bounding box to false, the edition mode to null, the
-         *                             detection context to not be visible and reset its position.
+         * Resets UI elements when the user mouse leaves the window and there are no files in the queue.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         onMouseLeaveNoFilesUpdate: (state) => {
@@ -305,10 +381,8 @@ const uiSlice = createSlice({
             state.detectionContextPosition.left = 0;
         },
         /**
-         * detectionSelectedUpdate - This sets UI elements related to selecting a detection. It will set the
-         *                           FAB to not be visible, the cornerstone mode to edition, display the selected
-         *                           bounding box to true, the edition mode to null and the detection context widget
-         *                           to display.
+         * Updates the UI when a detection is updated.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         detectionSelectedUpdate: (state) => {
@@ -318,7 +392,8 @@ const uiSlice = createSlice({
             state.editionMode = constants.editionMode.NO_TOOL;
         },
         /**
-         * menuDetectionSelectedUpdate
+         * Resets detection menu value.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         menuDetectionSelectedUpdate: (state) => {
@@ -332,9 +407,8 @@ const uiSlice = createSlice({
             state.isFABVisible = true;
         },
         /**
-         * deleteDetectionUpdate - For when a user deletes a detection. Will set the UI elements for FAB to be visible,
-         *                         the cornerstone mode to selection, to not display the selected bounding box, the
-         *                         detection context to not be visible and drawing bounding box to false.
+         * Updates the UI when a detection is deleted.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         deleteDetectionUpdate: (state) => {
@@ -343,9 +417,13 @@ const uiSlice = createSlice({
             state.isDetectionContextVisible = false;
         },
         /**
-         * selectConfigInfoUpdate
+         * Updates the configuration information for specific detections
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action.payload - Object containing values to update the visibility, position, and width of the detection label widget
+         * @param {string} detectorType - Destructured from action.payload -- Detector type of detection
+         * @param {string} detectorConfigType - Destructured from action.payload -- Detector config type of detection
+         * @param {string} seriesType - Destructured from action.payload -- Series type of detection
+         * @param {string} studyType - Destructured from action.payload -- Study type of detection
          */
         selectConfigInfoUpdate: (state, action) => {
             const { detectorType, detectorConfigType, seriesType, studyType } =
@@ -356,54 +434,61 @@ const uiSlice = createSlice({
             state.studyType = studyType;
         },
         /**
-         * setDisplaySettings
+         * Sets boolean value determining whether display the settings component.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value determining wether or not to display the settings component.
+         * @param {boolean} action.payload - Boolean value determining whether display the settings component.
          */
         setDisplaySettings: (state, action) => {
             state.displaySettings = action.payload;
         },
         /**
-         * toggleSettingsVisibility
+         * Set boolean value determining whether display the settings modal window.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - Boolean value determining whether or not to display the settings modal window.
+         * @param {boolean} action.payload - Boolean value determining whether display the settings modal window.
          */
         toggleSettingsVisibility: (state, action) => {
             state.isSettingsVisible = action.payload;
         },
         /**
-         * setReceiveTime - For when a color is picked in the color picker
+         * Sets the receive time. Used to set time of recieval of newly obtained files.
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action.payload - String result from Date.now()
+         * @param {string} action.payload - String result from Date.now()
          */
         setReceiveTime: (state, action) => {
             state.receiveTime = action.payload;
         },
         /**
-         * colorPickerToggle - Toggles the color picker visible boolean
+         * Toggles the color picker's visibility
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         colorPickerToggle: (state) => {
             state.colorPickerVisible = !state.colorPickerVisible;
         },
         /**
-         * setNumberOfFiles - Sets the number of files in the command server left to be sent
+         * Determines whether the App is working with a local file or remote file
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Number} action.payload - Number of files left to be served
-         */
-        setNumberOfFiles: (state, action) => {
-            state.numberOfFiles = action.payload;
-        },
-        /**
-         * setLocalFileOpen - Determines wether the App is working with a local file or remote file
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action.payload - True if we have a local file open, false if not, wether remote or not.
+         * @param {boolean} action.payload - True if we have a local file open, false if not, whether remote or not.
          */
         setLocalFileOpen: (state, action) => {
             state.localFileOpen = action.payload;
         },
         /**
-         * updateRecentScroll - Update scroll flag to reset to true before waiting 1000ms and resetting to false
+         * Sets the current file format (Supported types: MS COCO, DICOS-TDR)
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {constants.SETTINGS.ANNOTATIONS} action.payload - Format of currently processed file
+         */
+        setCurrentFileFormat: (state, action) => {
+            state.currentFileFormat = action.payload;
+        },
+        /**
+         * Enables scrolling temporarily (1000ms)
+         *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         updateRecentScroll: (state, action) => {
@@ -413,129 +498,162 @@ const uiSlice = createSlice({
 });
 
 /**
- * getInputLabel
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} Returns the current input value
+ * Provides the current detection label
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Current detection label
  */
 export const getInputLabel = (state) => state.ui.inputLabel;
 /**
- * getIsFabVisible
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the FAB is visible
+ * Indicated whether the FAB is visible
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when FAB is visible; False otherwise
  */
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
 /**
- * getDisplaySettings
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the display settings component is visible
+ * Indicates whether the display settings component is visible
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when the display settings component is visible; false otherwise
  */
 export const getDisplaySettings = (state) => state.ui.displaySettings;
 /**
- * getCornerstoneMode
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {constants.cornerstoneMode} Returns the current cornerstone mode
+ * Provides the current cornerstone mode
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {constants.cornerstoneMode} - Current cornerstone mode
  */
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
 /**
- * getEditionMode
- * @param {State} state Passed in via useSelector
- * @returns {constants.editionMode} The constant for the current edition mode.
+ * Indicates the current edition mode.
+ *
+ * @param {State} state - Passed in via useSelector
+ * @returns {constants.editionMode} - Current edition mode.
  */
 export const getEditionMode = (state) => state.ui.editionMode;
 /**
- * getIsDetectionContextVisible
- * @param {State} state Passed in via useSelector
- * @returns {Boolean} Returns if we are displaying the detection context widget, if a detection is selected
+ * Indicates whether the detection context widget when a detection is selected is being displayed
+ *
+ * @param {State} state - Passed in via useSelector
+ * @returns {boolean} - Value displaying the detection context widget, if a detection is selected
  */
 export const getIsDetectionContextVisible = (state) =>
     state.ui.isDetectionContextVisible;
 /**
- * getDetectionContextPosition
- * @param {State} state Passed in via useSelector
- * @returns {Object} Object containing the position in terms of top, and left values
+ * Provides the location of detection context menu
+ *
+ * @param {State} state - Passed in via useSelector
+ * @returns {{top: number, left: number}} - Object containing the position in terms of top, and left values
  */
 export const getDetectionContextPosition = (state) =>
     state.ui.detectionContextPosition;
 /**
- * getDetectionLabelEditWidth
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Number} Returns how large the detection label edition should be in width
+ * Provides the length of the text box for editing the detection label
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {number} - Number of characters in the text box for editing the detection label
  */
 export const getDetectionLabelEditWidth = (state) =>
     state.ui.detectionLabelEditWidth;
 /**
- * getDetectionLabelEditFont
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} Returns the font string of the detection label edition
+ * Indicates the font string used for the text box for editing the detection label
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Font string of the detection label edition
  */
 export const getDetectionLabelEditFont = (state) =>
     state.ui.detectionLabelEditFont;
 /**
- * getDetectionLabelEditViewport
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} Returns the viewport of the detection label edition
+ * Provides the viewport of the text box for editing the detection label
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Viewport that holds the text box for editing the detection label
  */
 export const getDetectionLabelEditViewport = (state) =>
     state.ui.detectionLabelEditViewport;
 /**
- * getDetectionLabelEditPosition
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Object} Returns an object with top and left values for the position of the edit label widget.
+ * Provides the location of the edit label widget.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {{top: number, left: number}} - Top and left values for the location of the edit label widget.
  */
 export const getDetectionLabelEditPosition = (state) =>
     state.ui.detectionLabelEditPosition;
 /**
- * getZoomLevelTop
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Number} The calculated zoom for cornerstone for the top(or left) view.
+ * Provides the calculated zoom for the top view.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {number} - The calculated zoom for the top view.
  */
 export const getZoomLevelTop = (state) => state.ui.zoomLevelTop;
+
 /**
- * getZoomLevelSide
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Number} The calculated zoom for cornerstone for the side(or right) view.
+ * Provides the calculated zoom for the side view.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {number} - The calculated zoom for the side view.
  */
 export const getZoomLevelSide = (state) => state.ui.zoomLevelSide;
+
+/**
+ * Provides the calculated zoom for the top and the side views.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {{zoomLevelTop: number, zoomLevelSide: number}} - The calculated zoom for cornerstone for the top and side views.
+ */
 export const getZoomLevels = (state) => {
     return {
         zoomLevelTop: state.ui.zoomLevelTop,
         zoomLevelSide: state.ui.zoomLevelSide,
     };
 };
+
 /**
- * getDetectorType
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} The detector type string.
+ * Indicates the detector type.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Detector type
  */
 export const getDetectorType = (state) => state.ui.detectorType;
+
 /**
- * getDetectorConfigType
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} The detector config type string.
+ * Indicates the detector config type.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Detector config type
  */
 export const getDetectorConfigType = (state) => state.ui.detectorConfigType;
+
 /**
- * getSeriesType
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} The series type string.
+ * Indicates the series type.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Series type
  */
 export const getSeriesType = (state) => state.ui.seriesType;
+
 /**
- * getStudyType
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} The study type string.
+ * Indicates the study type.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - Study type
  */
 export const getStudyType = (state) => state.ui.studyType;
+
 /**
- * getSettingsVisibility
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {String} The boolean whether settings is visible.
+ * Indicates whether settings are visible.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - True when settings are visible; false otherwise
  */
 export const getSettingsVisibility = (state) => state.ui.isSettingsVisible;
+
 /**
- * getConfigInfo
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Object} An object containing the configuration info.
+ * Provides the configuration info.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {{detectorType: string, detectorConfigType: string, seriesType: string, studyType: string}} - Configuration info
  */
 export const getConfigInfo = (state) => {
     const configInfo = {
@@ -546,26 +664,29 @@ export const getConfigInfo = (state) => {
     };
     return configInfo;
 };
+
 /**
- * getSingleViewport
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the UI should display a single viewport or multiple viewports
+ * Indicates whether the UI should display a single viewport
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if the UI should display a single viewport; false otherwise
  */
 export const getSingleViewport = (state) => state.ui.singleViewport;
+
 /**
- * getIsEditLabelWidgetVisible
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Boolean} Returns whether the UI should display the edit label widget
+ * Indicates whether the UI should display the edit label widget
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if the UI should display the edit label widget; false otherwise
  */
 export const getIsEditLabelWidgetVisible = (state) =>
     state.ui.isEditLabelWidgetVisible;
 
 /**
- * getDetectionContextInfo
- * @param {State} state Passed in via useSelector/mapStateToProps
- * @returns {Object} Returns several items from the uiSlice in an object that are
- *                   zoomSide, zoomTop, detectionLabelEditViewport, detectionLabelEditPosition
- *                   detectionLabelEditWidth, detectionLabelEditFont, and isEditLabelWidgetVisible
+ * Provides detection context info
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {{zoomSide: number, zoomTop: number, viewport: constants.viewport, position: {x: number, y: number}, width: number, font: string, isVisible: boolean}} -  Context info - Items from the uiSlice in an object
  */
 export const getDetectionContextInfo = (state) => {
     return {
@@ -579,12 +700,70 @@ export const getDetectionContextInfo = (state) => {
     };
 };
 
+/**
+ * Indicates whether the right side menu is collapsed
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if the right side menu is collapsed; false otherwise
+ */
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+
+/**
+ * Indicates whether the left side menu is collapsed
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if the left side menu is collapsed; false otherwise
+ */
+export const getCollapsedLazyMenu = (state) => state.ui.collapsedLazyMenu;
+
+/**
+ * Returns the receiveTime date object. Ocassionally used to determine if there is file to be processed (returns null if no file).
+ *
+ * @param {State} state Passed in via useSelector/mapStateToProps
+ * @returns {Date} The receiveTime date object
+ */
 export const getReceivedTime = (state) => state.ui.receiveTime;
+
+/**
+ * Indicates whether the color picker is visible
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if the color picker is visible; false otherwise
+ */
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
+
+/**
+ * Provides the number of files in queue
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {number} - Number of files in queue
+ */
 export const getNumberOfFiles = (state) => state.ui.numberOfFiles;
+
+/**
+ * Returns the localFileOpen boolean. True if there is currently a local file open, rather than a remote connection file.
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - The localFileOpen boolean
+ */
 export const getLocalFileOpen = (state) => state.ui.localFileOpen;
+
+/**
+ * Indicates the current file format
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {string} - The current file format
+ */
+export const getCurrentFileFormat = (state) => state.ui.currentFileFormat;
+
+/**
+ * Indicates whether the scroll wheel has been fired recently
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True if scroll wheel has been fired recently; false otherwise
+ */
 export const getRecentScroll = (state) => state.ui.recentScroll;
+export const getGeneratingThumbnails = (state) => state.ui.generatingThumbnails;
 
 // Exporting the Actions for the Reducers
 export const {
@@ -613,12 +792,14 @@ export const {
     toggleSettingsVisibility,
     setInputLabel,
     toggleCollapsedSideMenu,
+    toggleCollapsedLazyMenu,
     setReceiveTime,
     colorPickerToggle,
-    setNumberOfFiles,
     setLocalFileOpen,
+    setCurrentFileFormat,
     updateEditLabelPosition,
     updateRecentScroll,
+    setGeneratingThumbnails,
 } = uiSlice.actions;
 
 // Export the reducer for the store

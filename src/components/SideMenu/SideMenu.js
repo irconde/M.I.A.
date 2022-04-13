@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import '../../App.css';
 import NextButton from './NextButton';
@@ -10,9 +10,23 @@ import {
     getCollapsedSideMenu,
     getReceivedTime,
 } from '../../redux/slices/ui/uiSlice';
-import { getRemoteOrLocal } from '../../redux/slices/settings/settingsSlice';
+import {
+    getHasFileOutput,
+    getRemoteOrLocal,
+} from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './SaveButton';
 import Utils from '../../utils/Utils';
+
+/**
+ * Component menu that displays all detection objects, seperated by algorithm.
+ *
+ * @component
+ *
+ * @param {function} nextImageClick - Callback for loading next image
+ * @param {function} resetCornerstoneTools - Callback to reset cornerstone tools to initial values
+ * @param {function} renderDetectionContextMenu - Callback to render specific detection context menus
+ *
+ */
 
 const SideMenu = ({
     nextImageClick,
@@ -23,6 +37,7 @@ const SideMenu = ({
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const hasFileOutput = useSelector(getHasFileOutput);
     const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(${sideMenuWidth})`,
@@ -51,7 +66,6 @@ const SideMenu = ({
             }
         }
     });
-
     // Checking to see if the app has a file received via local or remote using the received time from the uiSlice
     if (enableMenu !== null) {
         // iif already collapsed, render the sidemenu, but inverted
@@ -91,7 +105,8 @@ const SideMenu = ({
                                   })
                                 : null}
                         </div>
-                        {remoteOrLocal === true ? (
+                        {remoteOrLocal === true ||
+                        (!remoteOrLocal && hasFileOutput) ? (
                             <NextButton nextImageClick={nextImageClick} />
                         ) : (
                             <SaveButton nextImageClick={nextImageClick} />
@@ -133,7 +148,8 @@ const SideMenu = ({
                                   })
                                 : null}
                         </div>
-                        {remoteOrLocal === true ? (
+                        {remoteOrLocal === true ||
+                        (!remoteOrLocal && hasFileOutput) ? (
                             <NextButton nextImageClick={nextImageClick} />
                         ) : (
                             <SaveButton nextImageClick={nextImageClick} />
@@ -148,8 +164,17 @@ const SideMenu = ({
 };
 
 SideMenu.propTypes = {
+    /**
+     * Callback for loading next image
+     */
     nextImageClick: PropTypes.func.isRequired,
+    /**
+     * Callback to reset cornerstone tools to initial values
+     */
     resetCornerstoneTools: PropTypes.func.isRequired,
+    /**
+     * Callback to render specific detection context menus
+     */
     renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 

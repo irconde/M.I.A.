@@ -1,38 +1,42 @@
 import JSZip from 'jszip';
 import Utils from './Utils';
+import { SETTINGS } from './Constants';
+import React from 'react';
 
 /**
- * buildCocoDataZip - Will take in the pixel data via myOra and blob format, along with
- *                    the detections via an array. It will build the needed JSON format for
- *                    the MS COCO dataset. It will return a blob of the archive file to send to
- *                    a server or be stored locally.
+ * Takes in the pixel data via myOra and blob format, along with
+ * the detections via an array and builds the needed JSON format for
+ * the MS COCO dataset.
  *
- * @param {Object} myOra
- * @param {Array<Detections>} detections
- * @param {Array<DOMElement>} viewports
- * @param {cornerstone} cornerstone
- * @returns {nodebuffer}
+ * @param {myOraObject} myOra - Ora file object
+ * @param {Array<Detection>} detections - Collection of detection objects
+ * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
+ * @param {CornerstoneObject} cornerstone - Main cornerstone object
+ * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
+ * @returns {nodebuffer} ?
  */
 export const buildCocoDataZip = async (
     myOra,
     detections,
     viewports,
-    cornerstone
+    cornerstone,
+    currentFileFormat
 ) => {
     return new Promise((resolve, reject) => {
+        const cocoZip = new JSZip();
+        const stackXML = document.implementation.createDocument('', '', null);
+        const prolog = '<?xml version="1.0" encoding="utf-8"?>';
+        const imageElem = stackXML.createElement('image');
+        imageElem.setAttribute('format', SETTINGS.ANNOTATIONS.COCO);
+        const mimeType = new Blob(['image/openraster'], {
+            type: 'text/plain;charset=utf-8',
+        });
+        cocoZip.file('mimetype', mimeType, { compression: null });
         const currentDate = new Date();
         const dd = String(currentDate.getDate()).padStart(2, '0');
         const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
         const yyyy = currentDate.getFullYear();
-        const cocoZip = new JSZip();
-        const info = {
-            description: 'Annotated file from Pilot GUI',
-            contributor: 'Pilot GUI',
-            url: '',
-            version: '1.0',
-            year: currentDate.getFullYear(),
-            data_created: `${yyyy}/${mm}/${dd}`,
-        };
+
         // TODO: DICOS files do not have a license encoded, determine what license we need to use.
         const licenses = [
             {
@@ -48,12 +52,16 @@ export const buildCocoDataZip = async (
                 name: 'orange',
             },
         ];
-        const images = [];
-        const annotations = [];
+
         let imageID = 1;
         let annotationID = 1;
         const listOfPromises = [];
         myOra.stackData.forEach((stack, index) => {
+            const stackElem = stackXML.createElement('stack');
+            stackElem.setAttribute('name', `SOP Instance UID #${index + 1}`);
+            stackElem.setAttribute('view', stack.view);
+            const pixelLayer = stackXML.createElement('layer');
+            const images = [];
             images.push({
                 id: imageID,
                 license: licenses[0].id,
@@ -64,83 +72,195 @@ export const buildCocoDataZip = async (
                 coco_url: '',
                 flickr_url: '',
             });
+            pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.png`);
+            stackElem.appendChild(pixelLayer);
+            if (currentFileFormat === SETTINGS.ANNOTATIONS.TDR) {
+                const pngPromise = dicosPixelDataToPng(
+                    cornerstone,
+                    viewports[index]
+                ).then((blob) => {
+                    cocoZip.file(`data/${stack.view}_pixel_data.png`, blob);
+                });
+                listOfPromises.push(pngPromise);
 
-            const pngPromise = dicosPixelDataToPng(
-                cornerstone,
-                viewports[index]
-            ).then((blob) => {
-                cocoZip.file(`${stack.view}_pixel_data.png`, blob);
-            });
-            listOfPromises.push(pngPromise);
-
-            for (let i = 1; i < stack.blobData.length; i++) {
-                //
-                const detection = detections.find(
-                    (det) => det.uuid === stack.blobData[i].uuid
-                );
-                if (detection !== undefined) {
-                    // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
-                    //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
-                    annotations.push({
-                        id: annotationID,
-                        image_id: imageID,
-                        iscrowd: 0,
-                        // TODO: Implement better category selection for annotations
-                        category_id: 55,
-                        // TODO: Area for polygon masks is not the polygon mask but the bbox
-                        //       For accuracy, need to find area of a polygon mask if it exists
-                        area: Math.abs(
-                            (detection.boundingBox[0] -
-                                detection.boundingBox[2]) *
-                                (detection.boundingBox[1] -
-                                    detection.boundingBox[3])
-                        ),
-                        bbox: [
-                            detection.boundingBox[0],
-                            detection.boundingBox[1],
-                            detection.binaryMask[2][0],
-                            detection.binaryMask[2][1],
-                        ],
-                        segmentation:
-                            detection.polygonMask.length > 0
-                                ? [
-                                      Utils.polygonDataToCoordArray(
-                                          detection.polygonMask
-                                      ),
-                                  ]
-                                : [],
-                    });
-                    annotationID++;
+                for (let i = 1; i < stack.blobData.length; i++) {
+                    //
+                    const detection = detections.find(
+                        (det) => det.uuid === stack.blobData[i].uuid
+                    );
+                    if (detection !== undefined) {
+                        let annotations = [];
+                        // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
+                        //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
+                        annotations.push({
+                            id: annotationID,
+                            image_id: imageID,
+                            className: detection.className,
+                            confidence: detection.confidence,
+                            iscrowd: 0,
+                            // TODO: Implement better category selection for annotations
+                            category_id: 55,
+                            // TODO: Area for polygon masks is not the polygon mask but the bbox
+                            //       For accuracy, need to find area of a polygon mask if it exists
+                            area: Math.abs(
+                                (detection.boundingBox[0] -
+                                    detection.boundingBox[2]) *
+                                    (detection.boundingBox[1] -
+                                        detection.boundingBox[3])
+                            ),
+                            bbox: [
+                                detection.boundingBox[0],
+                                detection.boundingBox[1],
+                                detection.binaryMask[2][0],
+                                detection.binaryMask[2][1],
+                            ],
+                            segmentation:
+                                detection.polygonMask.length > 0
+                                    ? [
+                                          Utils.polygonDataToCoordArray(
+                                              detection.polygonMask
+                                          ),
+                                      ]
+                                    : [],
+                        });
+                        const info = {
+                            description: 'Annotated file from Pilot GUI',
+                            contributor: 'Pilot GUI',
+                            url: '',
+                            version: '1.0',
+                            year: currentDate.getFullYear(),
+                            data_created: `${yyyy}/${mm}/${dd}`,
+                            algorithm: detection.algorithm,
+                        };
+                        const cocoDataset = {
+                            info,
+                            licenses,
+                            images,
+                            annotations,
+                            categories,
+                        };
+                        cocoZip.file(
+                            `data/${stack.view}_annotation_${annotationID}.json`,
+                            JSON.stringify(cocoDataset, null, 4)
+                        );
+                        const newLayer = stackXML.createElement('layer');
+                        newLayer.setAttribute(
+                            'src',
+                            `data/${stack.view}_annotation_${annotationID}.json`
+                        );
+                        stackElem.appendChild(newLayer);
+                        annotationID++;
+                    }
                 }
+            } else if (currentFileFormat === SETTINGS.ANNOTATIONS.COCO) {
+                cocoZip.file(
+                    `data/${stack.view}_pixel_data.png`,
+                    stack.blobData[0].blob
+                );
+
+                for (let i = 0; i < stack.formattedData.length; i++) {
+                    //
+                    const detection = detections.find(
+                        (det) => det.uuid === stack.formattedData[i].id
+                    );
+                    if (detection !== undefined) {
+                        let annotations = [];
+                        // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
+                        //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
+                        annotations.push({
+                            id: annotationID,
+                            image_id: imageID,
+                            className: detection.className,
+                            confidence: detection.confidence,
+                            iscrowd: 0,
+                            // TODO: Implement better category selection for annotations
+                            category_id: 55,
+                            // TODO: Area for polygon masks is not the polygon mask but the bbox
+                            //       For accuracy, need to find area of a polygon mask if it exists
+                            area: Math.abs(
+                                (detection.boundingBox[0] -
+                                    detection.boundingBox[2]) *
+                                    (detection.boundingBox[1] -
+                                        detection.boundingBox[3])
+                            ),
+                            bbox: [
+                                detection.boundingBox[0],
+                                detection.boundingBox[1],
+                                detection.boundingBox[2] -
+                                    detection.boundingBox[0],
+                                detection.boundingBox[3] -
+                                    detection.boundingBox[1],
+                            ],
+                            segmentation:
+                                detection.polygonMask.length > 0
+                                    ? [
+                                          Utils.polygonDataToCoordArray(
+                                              detection.polygonMask
+                                          ),
+                                      ]
+                                    : [],
+                        });
+                        const info = {
+                            description: 'Annotated file from Pilot GUI',
+                            contributor: 'Pilot GUI',
+                            url: '',
+                            version: '1.0',
+                            year: currentDate.getFullYear(),
+                            data_created: `${yyyy}/${mm}/${dd}`,
+                            algorithm: detection.algorithm,
+                        };
+                        const cocoDataset = {
+                            info,
+                            licenses,
+                            images,
+                            annotations,
+                            categories,
+                        };
+                        cocoZip.file(
+                            `data/${stack.view}_annotation_${annotationID}.json`,
+                            JSON.stringify(cocoDataset, null, 4)
+                        );
+                        const newLayer = stackXML.createElement('layer');
+                        newLayer.setAttribute(
+                            'src',
+                            `data/${stack.view}_annotation_${annotationID}.json`
+                        );
+                        stackElem.appendChild(newLayer);
+                        annotationID++;
+                    }
+                }
+            } else {
+                console.log('Format provided cannot be exported.');
+                return null;
             }
             imageID++;
+            imageElem.appendChild(stackElem);
         });
-        const cocoDataset = {
-            info,
-            licenses,
-            images,
-            annotations,
-            categories,
-        };
-        cocoZip.file('annotations.json', JSON.stringify(cocoDataset));
 
         const promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then(() => {
+            stackXML.appendChild(imageElem);
+            cocoZip.file(
+                'stack.xml',
+                new Blob(
+                    [prolog + new XMLSerializer().serializeToString(stackXML)],
+                    { type: 'application/xml ' }
+                )
+            );
             resolve(cocoZip);
         });
     });
 };
 
 /**
- * dicosPixelDataToPng - This function takes in the cornerstone viewport element holder and the cornerstone variable
- *                       that is created in App.js. It will pull the Pixel data from cornerstone as Uint16Array in 16 Bit
- *                       grey scale value. It converts the 16 bit grey scale value into a 8 bit value (0-255). This is the
- *                       grey color produced by setting the R, G, & B Values to this one 8 bit value. This produces a Uint8ClampedArray
- *                       in RGBA format to be loaded onto a canvas element to be finally returned as a Blob of type image/png
+ * Pulls the pixel data from cornerstone as Uint16Array in 16 Bit grey scale value and converts the 16 bit grey
+ * scale value into a 8 bit value (0-255). This is the grey color produced by setting the R, G, & B Values to
+ * this one 8 bit value. This produces a Uint8ClampedArray in RGBA format to be loaded onto a canvas element to
+ * be finally returned as a Blob of type image/png
  *
- * @param {cornerstone} cornerstone
- * @param {DOMElement} imageViewport
- * @returns {Promise} That resolves to a blob of type image/png
+ * @param {cornerstone} cornerstone - Main cornerstone object
+ * @param {DOMElement} imageViewport - Viewport DOMElement object
+ * @returns {Promise} - That resolves to a blob of type image/png
  */
 const dicosPixelDataToPng = async (cornerstone, imageViewport) => {
     return new Promise((resolve, reject) => {

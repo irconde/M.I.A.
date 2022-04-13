@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
 import { COOKIE, SETTINGS } from '../../../utils/Constants';
 
@@ -8,7 +9,9 @@ const cookieData = myCookie.get('settings');
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        maxAge: COOKIE.TIME, // Current time is 3 hours
+        expires: isElectron()
+            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
     });
 };
 
@@ -24,7 +27,9 @@ const defaultSettings = {
     remoteOrLocal: true,
     firstDisplaySettings: true,
     deviceType: '',
+    hasFileOutput: false,
 };
+
 if (cookieData !== undefined) {
     settings = cookieData;
 } else {
@@ -44,24 +49,33 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * setSettings - Will set the cookie 'settings' to the passed in object
+         * Sets the cookie 'settings' to the passed in object
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action Object containing key values for settings to be set in the cookie
+         * @param {Object} action - Object containing key values for settings to be set in the cookie
          */
         setSettings: (state, action) => {
             state.settings = action.payload;
+            state.settings.hasFileOutput =
+                action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
         /**
-         * saveCookieData - Will save the current settings into a cookie
+         * Saves the current settings into a cookie
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
         saveCookieData: (state) => {
             storeCookieData(state.settings);
         },
+
+        /**
+         * Saves the settings passed in by action.payload
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {Object} action Object containing key values for settings to be set in the settings
+         */
         saveSettings: (state, action) => {
             for (let key in action.payload) {
                 if (action.payload[key] !== '') {
@@ -69,11 +83,14 @@ const settingsSlice = createSlice({
                 }
                 // detection[key] = update[key];
             }
+            state.settings.hasFileOutput =
+                action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
+
         /**
-         * removeCookieData - Will delete the current settings cookie and reset the settings to default
+         * Deletes the current settings cookie and reset the settings to default
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
@@ -83,10 +100,10 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = true;
         },
         /**
-         * setRemoteIp - Sets the remote ip to the passed in action
+         * Sets the remote ip to the passed in action payload
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String with the ip of the remote server
+         * @param {string} action - String with the ip of the remote server
          */
         setRemoteIp: (state, action) => {
             state.settings.remoteIp = action.payload;
@@ -94,10 +111,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setRemotePort - Sets the remote port to the passed in action
+         * Sets the remote port to the passed in action
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String with the port of the remote server
+         * @param {string} action - String with the port of the remote server
          */
         setRemotePort: (state, action) => {
             state.settings.remotePort = action.payload;
@@ -105,10 +122,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setAutoConnect - Sets wether the app should automatically connect to the command server
+         * Sets whether the app should automatically connect to the command server
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action True/False to auto connect
+         * @param {Boolean} action - True if should auto-connect, false if not.
          */
         setAutoConnect: (state, action) => {
             state.settings.autoConnect = action.payload;
@@ -116,10 +133,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setFileFormat - Sets the file output format, ora/zip
+         * Sets the file output format, ora/zip
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String value determining ora xor zip
+         * @param {string} action - String value determining ora or zip
          */
         setFileFormat: (state, action) => {
             state.settings.fileFormat = action.payload;
@@ -127,10 +144,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setAnnotationsFormat - Sets the file annotation format
+         * Sets the file annotation format
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String value containing the annotation format
+         * @param {string} action - String value containing the annotation format
          */
         setAnnotationsFormat: (state, action) => {
             state.settings.annotationsFormat = action.payload;
@@ -138,10 +155,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setLocalFileOutput - Sets the local file output path to save files to
+         * Sets the local file output path to save files to
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String value of the local path
+         * @param {string} action - String value of the local path
          */
         setLocalFileOutput: (state, action) => {
             state.settings.localFileOutput = action.payload;
@@ -149,10 +166,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setFileSuffix - Sets the file suffix
+         * Sets the file suffix
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {String} action String value of the file suffix
+         * @param {string} action - String value of the file suffix
          */
         setFileSuffix: (state, action) => {
             state.settings.fileSuffix = action.payload;
@@ -160,10 +177,10 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
         /**
-         * setRemoteOrLocal - Determines wether the App is using a local or remote service
+         * Determines whether the App is using a local or remote service
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action Boolean value true = remote and false = local
+         * @param {Boolean} action - Boolean value true = remote and false = local
          */
         setRemoteOrLocal: (state, action) => {
             state.settings.remoteOrLocal = action.payload;
@@ -191,22 +208,36 @@ export const {
 
 // Selectors
 /**
- * getSettings - Returns the settings object
+ * Provides the settings object
  * @param {Object} state
  * @returns {Object<Settings>}
  */
 export const getSettings = (state) => state.settings.settings;
 /**
- * getRemoteOrLocal - Boolean value for wether the connection is remote === true, or local === false
+ * Indicates whether the connection is remote (True) or local (False)
  * @param {Object} state
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export const getRemoteOrLocal = (state) =>
     state.settings.settings.remoteOrLocal;
 /**
- * getRemoteConnectionInfo - Returns the remote connection info: ip, port, autoconnect.
+ * Indicates whether file output is clear or not
  * @param {Object} state
- * @returns {Object<remoteIp: String; remotePort: String; autoConnect: Boolean>}
+ * @returns {boolean}
+ */
+export const getHasFileOutput = (state) =>
+    state.settings.settings.hasFileOutput;
+/**
+ * Provides the file output
+ * @param {Object} state
+ * @returns {string}
+ */
+export const getLocalFileOutput = (state) =>
+    state.settings.settings.localFileOutput;
+/**
+ * Provides the remote connection info: ip, port, autoconnect.
+ * @param {Object} state
+ * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
  */
 export const getRemoteConnectionInfo = (state) => {
     return {
@@ -217,7 +248,7 @@ export const getRemoteConnectionInfo = (state) => {
 };
 
 /**
- * getFirstDisplaySettings - Determines if the settings should be displayed on first load or not
+ * Determines if the settings should be displayed on first load or not
  * @param {Object} state
  * @returns {Boolean}
  */
@@ -225,7 +256,7 @@ export const getFirstDisplaySettings = (state) =>
     state.settings.settings.firstDisplaySettings;
 
 /**
- * getDeviceType - Returns the type of device, desktop, mobile, tablet
+ * Provides information regarding the type of device, desktop, mobile, tablet
  * @param {Object} state
  * @returns {constants.DEVICE_TYPE}
  */
