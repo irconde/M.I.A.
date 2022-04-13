@@ -49,7 +49,7 @@ function LazyImageMenu(props) {
         float: 'left',
         display: 'flex',
         alignItems: 'center',
-        marginRight: '5px',
+        marginRight: '10px',
     };
     const svgStyle = {
         height: '24px',

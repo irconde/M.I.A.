@@ -27,5 +27,5 @@ module.exports.Viewport = {
 };
 
 module.exports.Thumbnail = {
-    width: 145,
+    width: 197,
 };

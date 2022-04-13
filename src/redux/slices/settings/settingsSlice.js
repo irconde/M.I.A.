@@ -49,19 +49,6 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * Sets the cookie 'settings' to the passed in object
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action - Object containing key values for settings to be set in the cookie
-         */
-        setSettings: (state, action) => {
-            state.settings = action.payload;
-            state.settings.hasFileOutput =
-                action.payload.localFileOutput !== '' ? true : false;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
          * Saves the current settings into a cookie
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
@@ -89,121 +76,12 @@ const settingsSlice = createSlice({
             storeCookieData(state.settings);
         },
 
-        /**
-         * Deletes the current settings cookie and reset the settings to default
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        removeCookieData: (state) => {
-            myCookie.remove('settings');
-            state.settings = defaultSettings;
-            state.settings.firstDisplaySettings = true;
-        },
-        /**
-         * Sets the remote ip to the passed in action payload
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String with the ip of the remote server
-         */
-        setRemoteIp: (state, action) => {
-            state.settings.remoteIp = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the remote port to the passed in action
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String with the port of the remote server
-         */
-        setRemotePort: (state, action) => {
-            state.settings.remotePort = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets whether the app should automatically connect to the command server
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action - True if should auto-connect, false if not.
-         */
-        setAutoConnect: (state, action) => {
-            state.settings.autoConnect = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file output format, ora/zip
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value determining ora or zip
-         */
-        setFileFormat: (state, action) => {
-            state.settings.fileFormat = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file annotation format
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value containing the annotation format
-         */
-        setAnnotationsFormat: (state, action) => {
-            state.settings.annotationsFormat = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the local file output path to save files to
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value of the local path
-         */
-        setLocalFileOutput: (state, action) => {
-            state.settings.localFileOutput = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file suffix
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value of the file suffix
-         */
-        setFileSuffix: (state, action) => {
-            state.settings.fileSuffix = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Determines whether the App is using a local or remote service
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action - Boolean value true = remote and false = local
-         */
-        setRemoteOrLocal: (state, action) => {
-            state.settings.remoteOrLocal = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
     },
 });
 
 // Actions
 export const {
-    setSettings,
     saveSettings,
-    saveCookieData,
-    removeCookieData,
-    setRemoteIp,
-    setRemotePort,
-    setAutoConnect,
-    setFileFormat,
-    setAnnotationsFormat,
-    setLocalFileOutput,
-    setFileSuffix,
-    setRemoteOrLocal,
 } = settingsSlice.actions;
 
 // Selectors

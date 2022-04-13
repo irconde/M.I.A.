@@ -45,7 +45,6 @@ import {
     resetDetections,
     selectDetection,
     selectDetectionSet,
-    updatedDetectionSet,
     updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
@@ -3539,17 +3538,6 @@ class App extends Component {
 
                     <NoFileSign />
                     <MetaData />
-                    {/* <button
-                        onClick={() => {
-                            console.log(
-                                cornerstone
-                                    .getImage(this.state.imageViewportTop)
-                                    .getPixelData()
-                            );
-                        }}
-                        style={{ backgroundColor: 'white', zIndex: 5 }}>
-                        Test
-                    </button> */}
                 </div>
             </div>
         );
@@ -3603,7 +3591,6 @@ const mapDispatchToProps = {
     setCurrentProcessingFile,
     resetDetections,
     updateDetection,
-    updatedDetectionSet,
     addDetection,
     addDetections,
     clearAllSelection,
