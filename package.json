@@ -60,8 +60,8 @@
     "start-electron:darwin:linux": "export BROWSER=none && concurrently \"npm run start\" \"npm run load-electron\"",
     "load-electron": "electron .",
     "load-env": "node -r dotenv/config",
-    "react": "react-scripts start",
-    "build": "react-scripts build",
+    "react": "if-node-version \">= 17\" && react-scripts --openssl-legacy-provider start || react-scripts start",
+    "build": "if-node-version \">= 17\" && react-scripts --openssl-legacy-provider build || react-scripts build",
     "build-electron": "npm run build && npm run package-electron",
     "package-electron": "electron-builder",
     "test": "react-scripts test",
@@ -110,6 +110,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react": "^7.22.0",
+    "if-node-version": "^1.1.1",
     "jsdoc": "^3.6.7",
     "prettier": "^2.2.1",
     "run-script-os": "^1.1.6"
