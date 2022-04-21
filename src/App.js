@@ -1709,7 +1709,14 @@ class App extends Component {
                 confidence: imagesLeft[i].confidence,
                 view: constants.viewport.TOP,
                 boundingBox: imagesLeft[i].bbox,
-                binaryMask: [],
+                binaryMask: [
+                    [],
+                    [imagesLeft[i].bbox[0], imagesLeft[i].bbox[1]],
+                    [
+                        imagesLeft[i].bbox[2] - imagesLeft[i].bbox[0],
+                        imagesLeft[i].bbox[3] - imagesLeft[i].bbox[1],
+                    ],
+                ],
                 polygonMask:
                     imagesLeft[i].segmentation.length > 0
                         ? Utils.polygonDataToXYArray(
@@ -1738,7 +1745,14 @@ class App extends Component {
                     confidence: imagesRight[j].confidence,
                     view: constants.viewport.SIDE,
                     boundingBox: imagesRight[j].bbox,
-                    binaryMask: [],
+                    binaryMask: [
+                        [],
+                        [imagesRight[j].bbox[0], imagesRight[j].bbox[1]],
+                        [
+                            imagesRight[j].bbox[2] - imagesRight[j].bbox[0],
+                            imagesRight[j].bbox[3] - imagesRight[j].bbox[1],
+                        ],
+                    ],
                     polygonMask:
                         imagesRight[j].segmentation.length > 0
                             ? Utils.polygonDataToXYArray(
