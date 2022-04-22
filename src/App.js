@@ -2846,13 +2846,8 @@ class App extends Component {
                     self.resetSelectedDetectionBoxes(event);
                     return;
                 }
-                var maxId = 0;
-
-                this.props.detections.forEach((detection) => {
-                    if (detection.uuid > maxId) maxId = detection.uuid;
-                });
-
-                self.props.addDetection({
+                let detUuid = uuidv4();
+                const newDetection = {
                     algorithm: constants.OPERATOR,
                     boundingBox: boundingBoxCoords,
                     className: polygonData.class,
@@ -2863,10 +2858,14 @@ class App extends Component {
                             : constants.viewport.SIDE,
                     binaryMask: binaryData,
                     polygonMask: polygonCoords,
-                    uuid: maxId + 1,
+                    uuid: detUuid,
+                    id: detUuid,
                     detectionFromFile: false,
-                });
-
+                };
+                self.props.addDetection(newDetection);
+                self.state.myOra.stackData[stackIndex].formattedData.push(
+                    newDetection
+                );
                 this.resetCornerstoneTool();
                 this.props.clearAllSelection();
                 this.appUpdateImage();
