@@ -140,7 +140,7 @@ class App extends Component {
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
-            mousePosition: {x: 0, y: 0},
+            mousePosition: { x: 0, y: 0 },
             activeViewport: 'dicomImageLeft',
             tapDetector: new TapDetector(),
             commandServer: null,
@@ -206,7 +206,7 @@ class App extends Component {
             {
                 commandServer: socketIOClient(
                     `http://${this.props.remoteIp}:${this.props.remotePort}`,
-                    {autoConnect: this.props.autoConnect}
+                    { autoConnect: this.props.autoConnect }
                 ),
             },
             () => {
@@ -237,7 +237,7 @@ class App extends Component {
                     Utils.mockCornerstoneEvent(
                         {},
                         this.props.selectedDetection.view ===
-                        constants.viewport.TOP
+                            constants.viewport.TOP
                             ? this.state.imageViewportTop
                             : this.state.imageViewportSide
                     )
@@ -615,7 +615,7 @@ class App extends Component {
                     }
                     this.props.updateEditLabelPosition({
                         detectionLabelEditWidth:
-                        editLabelWidgetPosInfo.boundingWidth,
+                            editLabelWidgetPosInfo.boundingWidth,
                         detectionLabelEditPosition: widgetPosition,
                     });
                 }
@@ -634,7 +634,7 @@ class App extends Component {
         cornerstone.enable(imageViewportSide);
         const PanTool = cornerstoneTools.PanTool;
         cornerstoneTools.addTool(PanTool);
-        cornerstoneTools.setToolActive('Pan', {mouseButtonMask: 1});
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         const Zoom = cornerstoneTools.ZoomMouseWheelTool;
         cornerstoneTools.addTool(Zoom);
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
@@ -711,7 +711,7 @@ class App extends Component {
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolDisabled('DetectionMovementTool');
         cornerstoneTools.setToolDisabled('PolygonDrawingTool');
-        cornerstoneTools.setToolActive('Pan', {mouseButtonMask: 1});
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     }
@@ -902,7 +902,7 @@ class App extends Component {
 
         let contentType;
         // Lets load the compressed ORA file as base64
-        myZip.loadAsync(image, {base64: true}).then(() => {
+        myZip.loadAsync(image, { base64: true }).then(() => {
             //First, after loading, we need to check our stack.xml
             myZip
                 .file('stack.xml')
@@ -969,7 +969,7 @@ class App extends Component {
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
-                                                'application/json');
+                                                  'application/json');
                                         listOfStacks[j].blobData.push({
                                             blob: Utils.b64toBlob(
                                                 imageData,
@@ -1029,7 +1029,7 @@ class App extends Component {
                         });
                     } else if (
                         currentFileFormat ===
-                        constants.SETTINGS.ANNOTATIONS.TDR ||
+                            constants.SETTINGS.ANNOTATIONS.TDR ||
                         fileExtension === 'dcs'
                     ) {
                         this.props.setCurrentFileFormat(
@@ -1134,7 +1134,7 @@ class App extends Component {
             ).then((cocoZip) => {
                 if (this.props.remoteOrLocal === true) {
                     cocoZip
-                        .generateAsync({type: 'nodebuffer'})
+                        .generateAsync({ type: 'nodebuffer' })
                         .then((file) => {
                             this.sendImageToCommandServer(file)
                                 .then(
@@ -1155,7 +1155,7 @@ class App extends Component {
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         cocoZip
-                            .generateAsync({type: 'nodebuffer'})
+                            .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
@@ -1177,7 +1177,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         cocoZip
-                            .generateAsync({type: 'nodebuffer'})
+                            .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
@@ -1203,7 +1203,7 @@ class App extends Component {
                             })
                             .catch((error) => console.log(error));
                     } else {
-                        cocoZip.generateAsync({type: 'blob'}).then((file) => {
+                        cocoZip.generateAsync({ type: 'blob' }).then((file) => {
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
@@ -1252,7 +1252,7 @@ class App extends Component {
                 type: 'text/plain;charset=utf-8',
             });
             const newOra = new JSZip();
-            newOra.file('mimetype', mimeType, {compression: null});
+            newOra.file('mimetype', mimeType, { compression: null });
             let stackCounter = 1;
             let annotationID = 1;
             const listOfPromises = [];
@@ -1372,14 +1372,14 @@ class App extends Component {
                     new Blob(
                         [
                             prolog +
-                            new XMLSerializer().serializeToString(stackXML),
+                                new XMLSerializer().serializeToString(stackXML),
                         ],
-                        {type: 'application/xml '}
+                        { type: 'application/xml ' }
                     )
                 );
                 if (this.props.remoteOrLocal === true) {
                     newOra
-                        .generateAsync({type: 'nodebuffer'})
+                        .generateAsync({ type: 'nodebuffer' })
                         .then((file) => {
                             this.props.setCurrentProcessingFile(null);
                             this.setState(
@@ -1404,7 +1404,7 @@ class App extends Component {
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
-                            .generateAsync({type: 'nodebuffer'})
+                            .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
@@ -1426,7 +1426,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         newOra
-                            .generateAsync({type: 'nodebuffer'})
+                            .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
@@ -1452,7 +1452,7 @@ class App extends Component {
                             })
                             .catch((error) => console.log(error));
                     } else {
-                        newOra.generateAsync({type: 'blob'}).then((file) => {
+                        newOra.generateAsync({ type: 'blob' }).then((file) => {
                             fileSave(file, {
                                 fileName: `1${this.props.fileSuffix}.${
                                     this.props.fileFormat ===
@@ -1536,7 +1536,7 @@ class App extends Component {
                 if (viewport.displayedArea !== undefined)
                     self.state.myOra.stackData[0].dimensions =
                         viewport.displayedArea.brhc;
-                self.setState({viewport: viewport});
+                self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportTop,
                     image,
@@ -1548,7 +1548,7 @@ class App extends Component {
         if (this.props.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
-            this.setState({imageViewportSide: updatedImageViewportSide});
+            this.setState({ imageViewportSide: updatedImageViewportSide });
             Utils.loadImage(
                 imageId,
                 self.state.myOra.stackData[1].arrayBuf
@@ -1563,7 +1563,7 @@ class App extends Component {
                         viewport.displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
-                self.setState({viewport: viewport});
+                self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportSide,
                     image,
@@ -1614,7 +1614,7 @@ class App extends Component {
             if (viewport.displayedArea !== undefined)
                 self.state.myOra.stackData[0].dimensions =
                     viewport.displayedArea.brhc;
-            self.setState({viewport: viewport});
+            self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
                 image,
@@ -1624,7 +1624,7 @@ class App extends Component {
         if (this.props.singleViewport === false) {
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
-            this.setState({imageViewportSide: updatedImageViewportSide});
+            this.setState({ imageViewportSide: updatedImageViewportSide });
 
             const pixelDataSide =
                 cornerstoneWADOImageLoader.wadouri.fileManager.add(
@@ -1641,7 +1641,7 @@ class App extends Component {
                         viewport.displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
-                self.setState({viewport: viewport});
+                self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportSide,
                     image,
@@ -1701,11 +1701,11 @@ class App extends Component {
                 polygonMask:
                     imagesLeft[i].segmentation.length > 0
                         ? Utils.polygonDataToXYArray(
-                            Utils.coordArrayToPolygonData(
-                                imagesLeft[i].segmentation[0]
-                            ),
-                            imagesLeft[i].bbox
-                        )
+                              Utils.coordArrayToPolygonData(
+                                  imagesLeft[i].segmentation[0]
+                              ),
+                              imagesLeft[i].bbox
+                          )
                         : [],
                 uuid: detUuid,
                 detectionFromFile: true,
@@ -1739,11 +1739,11 @@ class App extends Component {
                     polygonMask:
                         imagesRight[j].segmentation.length > 0
                             ? Utils.polygonDataToXYArray(
-                                Utils.coordArrayToPolygonData(
-                                    imagesRight[j].segmentation[0]
-                                ),
-                                imagesRight[j].bbox
-                            )
+                                  Utils.coordArrayToPolygonData(
+                                      imagesRight[j].segmentation[0]
+                                  ),
+                                  imagesRight[j].bbox
+                              )
                             : [],
                     uuid: detUuid,
                     detectionFromFile: true,
@@ -1931,7 +1931,7 @@ class App extends Component {
             });
             if (
                 this.props.cornerstoneMode ===
-                constants.cornerstoneMode.ANNOTATION &&
+                    constants.cornerstoneMode.ANNOTATION &&
                 this.state.activeViewport === 'dicomImageLeft'
             ) {
                 this.renderCrosshair(context, e.currentTarget);
@@ -1957,7 +1957,7 @@ class App extends Component {
             this.renderDetections(detections, context);
             if (
                 this.props.cornerstoneMode ===
-                constants.cornerstoneMode.ANNOTATION &&
+                    constants.cornerstoneMode.ANNOTATION &&
                 this.state.activeViewport === 'dicomImageRight'
             ) {
                 this.renderCrosshair(context, e.currentTarget);
@@ -2081,15 +2081,15 @@ class App extends Component {
                 data[j].selected
                     ? data[j].color
                     : data[j].selected
-                        ? constants.detectionStyle.SELECTED_COLOR
-                        : data[j].displayColor;
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
             context.fillStyle =
                 this.props.editionMode === constants.editionMode.COLOR &&
                 data[j].selected
                     ? data[j].color
                     : data[j].selected
-                        ? constants.detectionStyle.SELECTED_COLOR
-                        : data[j].displayColor;
+                    ? constants.detectionStyle.SELECTED_COLOR
+                    : data[j].displayColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -2265,10 +2265,10 @@ class App extends Component {
                 if (
                     (combinedDetections[clickedPos].visible !== false &&
                         this.props.cornerstoneMode ===
-                        constants.cornerstoneMode.SELECTION) ||
+                            constants.cornerstoneMode.SELECTION) ||
                     (combinedDetections[clickedPos].visible !== false &&
                         this.props.cornerstoneMode ===
-                        constants.cornerstoneMode.EDITION &&
+                            constants.cornerstoneMode.EDITION &&
                         !combinedDetections[clickedPos].selected)
                 ) {
                     this.props.selectDetection(
@@ -2280,7 +2280,7 @@ class App extends Component {
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
                     this.props.cornerstoneMode ===
-                    constants.cornerstoneMode.EDITION &&
+                        constants.cornerstoneMode.EDITION &&
                     combinedDetections[clickedPos].selected
                 ) {
                     // We are in edition mode and clicked the same detection that is in edition mode
@@ -2312,7 +2312,7 @@ class App extends Component {
             (this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION &&
                 this.props.annotationMode ===
-                constants.annotationMode.BOUNDING) ||
+                    constants.annotationMode.BOUNDING) ||
             this.props.cornerstoneMode === constants.cornerstoneMode.EDITION
         ) {
             let toolState;
@@ -2320,7 +2320,7 @@ class App extends Component {
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
                     this.props.annotationMode ===
-                    constants.annotationMode.BOUNDING) ||
+                        constants.annotationMode.BOUNDING) ||
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.EDITION &&
                     this.props.editionMode === constants.editionMode.BOUNDING)
@@ -2372,7 +2372,7 @@ class App extends Component {
                 }
                 return;
             }
-            const {data} = toolState;
+            const { data } = toolState;
             // Destructure data needed from event
             if (
                 data === undefined ||
@@ -2386,15 +2386,15 @@ class App extends Component {
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
                     this.props.annotationMode ===
-                    constants.annotationMode.BOUNDING) ||
+                        constants.annotationMode.BOUNDING) ||
                 (this.props.cornerstoneMode ===
                     constants.cornerstoneMode.EDITION &&
                     this.props.editionMode ===
-                    constants.editionMode.BOUNDING) ||
+                        constants.editionMode.BOUNDING) ||
                 this.props.editionMode === constants.editionMode.MOVE
             ) {
-                const {handles} = data[0];
-                const {start, end} = handles;
+                const { handles } = data[0];
+                const { start, end } = handles;
                 // Fix flipped rectangle issues
                 if (start.x > end.x && start.y > end.y) {
                     coords = [end.x, end.y, start.x, start.y];
@@ -2516,13 +2516,13 @@ class App extends Component {
                         } else {
                             self.props.updateCornerstoneMode({
                                 cornerstoneMode:
-                                constants.cornerstoneMode.SELECTION,
+                                    constants.cornerstoneMode.SELECTION,
                             });
                             self.resetCornerstoneTool();
                         }
                     } else {
                         // Updating existing Detection's bounding box
-                        const {uuid} = data[0];
+                        const { uuid } = data[0];
 
                         // Only update the Detection if the boundingBox actually changes
                         if (
@@ -2536,7 +2536,7 @@ class App extends Component {
                             if (
                                 this.props.selectedDetection &&
                                 this.props.editionMode !==
-                                constants.editionMode.POLYGON
+                                    constants.editionMode.POLYGON
                             ) {
                                 if (
                                     this.props.selectedDetection.polygonMask
@@ -2589,7 +2589,7 @@ class App extends Component {
                             };
                             self.props.onDragEndWidgetUpdate({
                                 detectionLabelEditWidth:
-                                editLabelWidgetPosInfo.boundingWidth,
+                                    editLabelWidgetPosInfo.boundingWidth,
                                 detectionLabelEditPosition: widgetPosition,
                                 contextMenuPos,
                             });
@@ -2652,19 +2652,19 @@ class App extends Component {
                         };
                         this.state.myOra.stackData[
                             stackIndex
-                            ].formattedData.push(newDetection);
+                        ].formattedData.push(newDetection);
                         self.props.addDetection(newDetection);
                         self.appUpdateImage();
                     } else {
                         self.props.updateCornerstoneMode({
                             cornerstoneMode:
-                            constants.cornerstoneMode.SELECTION,
+                                constants.cornerstoneMode.SELECTION,
                         });
                         self.resetCornerstoneTool();
                     }
                 } else {
                     // Updating existing Detection's bounding box
-                    const {uuid} = data[0];
+                    const { uuid } = data[0];
 
                     // Only update the Detection if the boundingBox actually changes
                     if (
@@ -2678,7 +2678,7 @@ class App extends Component {
                         if (
                             this.props.selectedDetection &&
                             this.props.editionMode !==
-                            constants.editionMode.POLYGON
+                                constants.editionMode.POLYGON
                         ) {
                             if (
                                 this.props.selectedDetection.polygonMask
@@ -2692,7 +2692,7 @@ class App extends Component {
                                     Utils.polygonToBinaryMask(polygonMask);
                             } else if (
                                 this.props.selectedDetection.binaryMask.length >
-                                0 &&
+                                    0 &&
                                 this.props.selectedDetection.binaryMask[0]
                                     .length > 0
                             ) {
@@ -2727,7 +2727,7 @@ class App extends Component {
                         };
                         self.props.onDragEndWidgetUpdate({
                             detectionLabelEditWidth:
-                            editLabelWidgetPosInfo.boundingWidth,
+                                editLabelWidgetPosInfo.boundingWidth,
                             detectionLabelEditPosition: widgetPosition,
                             contextMenuPos,
                         });
@@ -2765,7 +2765,7 @@ class App extends Component {
     onNewPolygonMaskCreated(event, viewport) {
         if (
             this.props.cornerstoneMode ===
-            constants.cornerstoneMode.ANNOTATION &&
+                constants.cornerstoneMode.ANNOTATION &&
             this.props.annotationMode === constants.annotationMode.POLYGON
         ) {
             const polygonData = event.detail.measurementData;
@@ -2941,7 +2941,7 @@ class App extends Component {
                         boundingHeight / boundingWidth;
                     viewport = this.state.imageViewportSide;
                 }
-                const {x, y} = cornerstone.pixelToCanvas(viewport, {
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: boundingBoxCoords[originCoordX] + detectionContextGap,
                     y: boundingBoxCoords[1] + boundingHeight + 4,
                 });
@@ -2971,8 +2971,8 @@ class App extends Component {
             this.props.selectedDetection !== null
                 ? this.props.selectedDetection
                 : sideMenuDetection !== null
-                    ? sideMenuDetection
-                    : null;
+                ? sideMenuDetection
+                : null;
 
         selectedDetection = sideMenuDetection
             ? sideMenuDetection
@@ -2983,18 +2983,18 @@ class App extends Component {
                 sideMenuDetection === null
                     ? Utils.eventToViewportInfo(event)
                     : selectedDetection.view === 'top'
-                        ? Utils.eventToViewportInfo(
-                            Utils.mockCornerstoneEvent(
-                                event,
-                                this.state.imageViewportTop
-                            )
-                        )
-                        : Utils.eventToViewportInfo(
-                            Utils.mockCornerstoneEvent(
-                                event,
-                                this.state.imageViewportSide
-                            )
-                        );
+                    ? Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportTop
+                          )
+                      )
+                    : Utils.eventToViewportInfo(
+                          Utils.mockCornerstoneEvent(
+                              event,
+                              this.state.imageViewportSide
+                          )
+                      );
             const detectionData = draggedData ? draggedData : selectedDetection;
 
             const contextMenuPos = this.getContextMenuPos(
@@ -3030,7 +3030,7 @@ class App extends Component {
                             boundingHeight / boundingWidth;
                         viewport = this.state.imageViewportSide;
                     }
-                    const {x, y} = cornerstone.pixelToCanvas(viewport, {
+                    const { x, y } = cornerstone.pixelToCanvas(viewport, {
                         x:
                             boundingBoxCoords[originCoordX] +
                             detectionContextGap,
@@ -3079,7 +3079,7 @@ class App extends Component {
                 payload = {
                     ...payload,
                     detectionLabelEditWidth:
-                    editLabelWidgetPosInfo.boundingWidth,
+                        editLabelWidgetPosInfo.boundingWidth,
                     detectionLabelEditPosition: widgetPosition,
                 };
             } else if (
@@ -3273,7 +3273,7 @@ class App extends Component {
      * @param {string} newLabel - Updated label name from user interaction
      */
     editDetectionLabel(newLabel) {
-        const {uuid} = this.props.selectedDetection;
+        const { uuid } = this.props.selectedDetection;
         if (uuid) {
             this.props.editDetectionLabel({
                 className: newLabel,
@@ -3339,7 +3339,7 @@ class App extends Component {
                     detectionLabel,
                     constants.detectionStyle.LABEL_PADDING
                 );
-                const {offsetLeft} = currentViewport;
+                const { offsetLeft } = currentViewport;
                 gap = offsetLeft / zoomLevel;
                 viewport =
                     currentViewport.id === 'dicomImageRight'
@@ -3350,13 +3350,13 @@ class App extends Component {
                     currentViewport.id === 'dicomImageRight'
                         ? constants.viewport.SIDE
                         : constants.viewport.TOP;
-                const {x, y} = cornerstone.pixelToCanvas(viewport, {
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
                     y: bbox[1] - labelHeight,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
-                    position: {x, y},
+                    position: { x, y },
                     font: newFont,
                     viewport: newViewport,
                 });
@@ -3422,7 +3422,7 @@ class App extends Component {
      */
     onMouseMoved(event) {
         this.setState({
-            mousePosition: {x: event.x, y: event.y},
+            mousePosition: { x: event.x, y: event.y },
             activeViewport: event.target.parentElement.id,
         });
     }
@@ -3471,9 +3471,9 @@ class App extends Component {
                     unselectable="off"
                     ref={(el) => {
                         el &&
-                        el.addEventListener('selectstart', (e) => {
-                            e.preventDefault();
-                        });
+                            el.addEventListener('selectstart', (e) => {
+                                e.preventDefault();
+                            });
                     }}>
                     <TopBar
                         connectToCommandServer={this.connectToCommandServer}
@@ -3503,8 +3503,8 @@ class App extends Component {
                     <DetectionContextMenu
                         setSelectedOption={this.selectEditionMode}
                     />
-                    <ColorPicker/>
-                    <EditLabel onLabelChange={this.editDetectionLabel}/>
+                    <ColorPicker />
+                    <EditLabel onLabelChange={this.editDetectionLabel} />
                     <BoundPolyFAB
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
@@ -3518,8 +3518,8 @@ class App extends Component {
                         />
                     ) : null}
 
-                    <NoFileSign/>
-                    <MetaData/>
+                    <NoFileSign />
+                    <MetaData />
                 </div>
             </div>
         );
@@ -3527,7 +3527,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const {server, detections, ui, settings} = state;
+    const { server, detections, ui, settings } = state;
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
