@@ -1679,6 +1679,7 @@ class App extends Component {
         const imagesLeft = self.state.myOra.stackData[0].formattedData;
 
         for (let i = 0; i < imagesLeft.length; i++) {
+            let detUuid = uuidv4();
             imagesLeft[i].bbox[2] =
                 imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
             imagesLeft[i].bbox[3] =
@@ -1706,15 +1707,17 @@ class App extends Component {
                               imagesLeft[i].bbox
                           )
                         : [],
-                uuid: imagesLeft[i].id,
+                uuid: detUuid,
                 detectionFromFile: true,
             });
+            imagesLeft[i].id = detUuid;
         }
 
         if (this.props.singleViewport === false) {
             const imagesRight = self.state.myOra.stackData[1].formattedData;
 
             for (var j = 0; j < imagesRight.length; j++) {
+                let detUuid = uuidv4();
                 imagesRight[j].bbox[2] =
                     imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
                 imagesRight[j].bbox[3] =
@@ -1742,9 +1745,10 @@ class App extends Component {
                                   imagesRight[j].bbox
                               )
                             : [],
-                    uuid: imagesRight[j].id,
+                    uuid: detUuid,
                     detectionFromFile: true,
                 });
+                imagesRight[j].id = detUuid;
             }
         }
     }
@@ -2626,18 +2630,7 @@ class App extends Component {
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
                         // TODO
-                        let maxId = 0;
-                        console.log(stackIndex);
-                        self.state.myOra.stackData[
-                            stackIndex
-                        ].formattedData.forEach((data) => {
-                            if (data.id > maxId) maxId = data.id;
-                        });
-                        /*let maxId = 0;
-                        console.log(detection.view);
-                        this.props.detections.forEach((detection) => {
-                            if (detection.uuid > maxId) maxId = detection.uuid;
-                        });*/
+                        let detUuid = uuidv4();
                         const newDetection = {
                             algorithm: constants.OPERATOR,
                             boundingBox: coords,
@@ -2654,7 +2647,8 @@ class App extends Component {
                                 [coords[2] - coords[0], coords[3] - coords[1]],
                             ],
                             polygonMask: [],
-                            uuid: maxId + 1,
+                            uuid: detUuid,
+                            id: detUuid,
                             detectionFromFile: false,
                         };
                         this.state.myOra.stackData[

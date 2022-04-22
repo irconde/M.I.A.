@@ -23,7 +23,6 @@ export const buildCocoDataZip = async (
     currentFileFormat
 ) => {
     return new Promise((resolve) => {
-        console.log(myOra.stackData);
         const cocoZip = new JSZip();
         const stackXML = document.implementation.createDocument('', '', null);
         const prolog = '<?xml version="1.0" encoding="utf-8"?>';
@@ -150,7 +149,7 @@ export const buildCocoDataZip = async (
                         );
                         stackElem.appendChild(newLayer);
                         annotationID++;
-                    } else console.log('det undefined');
+                    }
                 }
             } else if (currentFileFormat === SETTINGS.ANNOTATIONS.COCO) {
                 cocoZip.file(
@@ -159,9 +158,6 @@ export const buildCocoDataZip = async (
                 );
                 for (let i = 0; i < stack.formattedData.length; i++) {
                     const detection = detections.find((det) => {
-                        console.log(
-                            `Det UUID: ${det.uuid} | i: ${i} | formatted data: ${stack.formattedData[i].id}`
-                        );
                         if (det.uuid === stack.formattedData[i].id) return true;
                         else return false;
                     });
@@ -227,10 +223,9 @@ export const buildCocoDataZip = async (
                         );
                         stackElem.appendChild(newLayer);
                         annotationID++;
-                    } else console.log('det undefined');
+                    }
                 }
             } else {
-                console.log('Format provided cannot be exported.');
                 return null;
             }
             imageID++;
