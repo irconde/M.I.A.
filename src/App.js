@@ -2629,7 +2629,6 @@ class App extends Component {
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
-                        // TODO
                         let detUuid = uuidv4();
                         const newDetection = {
                             algorithm: constants.OPERATOR,
