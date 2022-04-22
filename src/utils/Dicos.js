@@ -1,5 +1,5 @@
 import * as dcmjs from 'dcmjs';
-import { SETTINGS } from './Constants';
+import {SETTINGS} from './Constants';
 import Utils from './Utils';
 
 /**
@@ -702,8 +702,6 @@ export default class Dicos {
                 SixteenbitPixels[z] = avgValue;
                 z++;
             }
-            console.log(SixteenbitPixels);
-
             this.pixelDataToBlob(
                 SixteenbitPixels,
                 image.width,

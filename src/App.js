@@ -966,13 +966,6 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
-                                        // if (i === 0)
-                                        //     console.log(
-                                        //         'PNG IMAGE DATA:',
-                                        //         myZip.file(
-                                        //             listOfStacks[j].rawData[i]
-                                        //         )
-                                        //     );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1014,9 +1007,6 @@ class App extends Component {
                                 }
                             }
                         }
-
-                        console.log(listOfStacks);
-
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -1080,13 +1070,6 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
-                                        // if (i === 0)
-                                        //     console.log(
-                                        //         'TDR IMAGE DATA:',
-                                        //         myZip.file(
-                                        //             listOfStacks[j].rawData[i]
-                                        //         )
-                                        //     );
                                         if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
@@ -1099,8 +1082,6 @@ class App extends Component {
                                     });
                             }
                         }
-
-                        console.log(listOfStacks);
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -1122,7 +1103,6 @@ class App extends Component {
                             this.loadAndViewImage();
                         });
                     } else {
-                        console.log('File format not supported.');
                         return null;
                     }
                 });
@@ -1995,7 +1975,6 @@ class App extends Component {
      * @param {DOMElement} target Targeted DOMElement caught via mouse event data
      */
     renderCrosshair(context, target) {
-        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -2643,18 +2622,24 @@ class App extends Component {
                 }
                 // When the updating detection is false, this means we are creating a new detection
                 if (data[0].updatingDetection === false) {
-                    const operator = constants.OPERATOR;
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
-                        var maxId = 0;
-
+                        // TODO
+                        let maxId = 0;
+                        console.log(stackIndex);
+                        self.state.myOra.stackData[
+                            stackIndex
+                        ].formattedData.forEach((data) => {
+                            if (data.id > maxId) maxId = data.id;
+                        });
+                        /*let maxId = 0;
+                        console.log(detection.view);
                         this.props.detections.forEach((detection) => {
                             if (detection.uuid > maxId) maxId = detection.uuid;
-                        });
-
-                        self.props.addDetection({
-                            algorithm: operator,
+                        });*/
+                        const newDetection = {
+                            algorithm: constants.OPERATOR,
                             boundingBox: coords,
                             className: data[0].class,
                             confidence: data[0].confidence,
@@ -2671,7 +2656,11 @@ class App extends Component {
                             polygonMask: [],
                             uuid: maxId + 1,
                             detectionFromFile: false,
-                        });
+                        };
+                        this.state.myOra.stackData[
+                            stackIndex
+                        ].formattedData.push(newDetection);
+                        self.props.addDetection(newDetection);
                         self.appUpdateImage();
                     } else {
                         self.props.updateCornerstoneMode({

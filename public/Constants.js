@@ -12,7 +12,6 @@ module.exports.Channels = {
 module.exports.Settings = {
     ANNOTATIONS: {
         COCO: 'MS COCO',
-        PASCAL: 'Pascal VOC',
         TDR: 'DICOS TDR',
     },
     OUTPUT_FORMATS: {
