@@ -1679,34 +1679,39 @@ class App extends Component {
         const imagesLeft = self.state.myOra.stackData[0].formattedData;
 
         for (let i = 0; i < imagesLeft.length; i++) {
-            let detUuid = uuidv4();
+            let polygonMask = [];
             imagesLeft[i].bbox[2] =
                 imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
             imagesLeft[i].bbox[3] =
                 imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
+            let boundingBox = imagesLeft[i].bbox;
+            let binaryMask = [
+                [],
+                [boundingBox[0], boundingBox[1]],
+                [
+                    boundingBox[2] - boundingBox[0],
+                    boundingBox[3] - boundingBox[1],
+                ],
+            ];
+            if (imagesLeft[i].segmentation.length > 0) {
+                const polygonXY = Utils.coordArrayToPolygonData(
+                    imagesLeft[i].segmentation[0]
+                );
+                polygonMask = Utils.polygonDataToXYArray(
+                    polygonXY,
+                    boundingBox
+                );
+                binaryMask = Utils.polygonToBinaryMask(polygonMask);
+            }
+            let detUuid = uuidv4();
             self.props.addDetection({
                 algorithm: imagesLeft[i].algorithm,
                 className: imagesLeft[i].className,
                 confidence: imagesLeft[i].confidence,
                 view: constants.viewport.TOP,
-                boundingBox: imagesLeft[i].bbox,
-                binaryMask: [
-                    [],
-                    [imagesLeft[i].bbox[0], imagesLeft[i].bbox[1]],
-                    [
-                        imagesLeft[i].bbox[2] - imagesLeft[i].bbox[0],
-                        imagesLeft[i].bbox[3] - imagesLeft[i].bbox[1],
-                    ],
-                ],
-                polygonMask:
-                    imagesLeft[i].segmentation.length > 0
-                        ? Utils.polygonDataToXYArray(
-                              Utils.coordArrayToPolygonData(
-                                  imagesLeft[i].segmentation[0]
-                              ),
-                              imagesLeft[i].bbox
-                          )
-                        : [],
+                boundingBox,
+                binaryMask,
+                polygonMask,
                 uuid: detUuid,
                 detectionFromFile: true,
             });
@@ -1717,34 +1722,40 @@ class App extends Component {
             const imagesRight = self.state.myOra.stackData[1].formattedData;
 
             for (var j = 0; j < imagesRight.length; j++) {
-                let detUuid = uuidv4();
+                let polygonMask = [];
                 imagesRight[j].bbox[2] =
                     imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
                 imagesRight[j].bbox[3] =
                     imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
+                let boundingBox = imagesLeft[j].bbox;
+                let binaryMask = [
+                    [],
+                    [boundingBox[0], boundingBox[1]],
+                    [
+                        boundingBox[2] - boundingBox[0],
+                        boundingBox[3] - boundingBox[1],
+                    ],
+                ];
+                if (imagesLeft[j].segmentation.length > 0) {
+                    const polygonXY = Utils.coordArrayToPolygonData(
+                        imagesLeft[j].segmentation[0]
+                    );
+                    polygonMask = Utils.polygonDataToXYArray(
+                        polygonXY,
+                        boundingBox
+                    );
+                    binaryMask = Utils.polygonToBinaryMask(polygonMask);
+                }
+                let detUuid = uuidv4();
+
                 self.props.addDetection({
                     algorithm: imagesRight[j].algorithm,
                     className: imagesRight[j].className,
                     confidence: imagesRight[j].confidence,
                     view: constants.viewport.SIDE,
-                    boundingBox: imagesRight[j].bbox,
-                    binaryMask: [
-                        [],
-                        [imagesRight[j].bbox[0], imagesRight[j].bbox[1]],
-                        [
-                            imagesRight[j].bbox[2] - imagesRight[j].bbox[0],
-                            imagesRight[j].bbox[3] - imagesRight[j].bbox[1],
-                        ],
-                    ],
-                    polygonMask:
-                        imagesRight[j].segmentation.length > 0
-                            ? Utils.polygonDataToXYArray(
-                                  Utils.coordArrayToPolygonData(
-                                      imagesRight[j].segmentation[0]
-                                  ),
-                                  imagesRight[j].bbox
-                              )
-                            : [],
+                    boundingBox,
+                    binaryMask,
+                    polygonMask,
                     uuid: detUuid,
                     detectionFromFile: true,
                 });
