@@ -53,21 +53,31 @@ function LazyImageContainer(props) {
     };
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState(null);
+    const [numOfViews, SetNumOfViews] = useState();
+    const [isDetections, SetIsDetections] = useState();
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
      * @param {Blob} [blobData=null]
+     * @param {Number} views
+     * @param {Boolean} detections
      */
-    const thumbnailHandler = (blobData = null) => {
-        if (blobData === null) {
-            if (thumbnailSrc !== null) {
-                URL.revokeObjectURL(thumbnailSrc);
-                setThumbnailSrc(null);
-            }
-        } else {
-            setThumbnailSrc(URL.createObjectURL(blobData));
+    const thumbnailHandler = (blobData = null, views, detections) => {
+        setThumbnailSrc(URL.createObjectURL(blobData));
+        if (numOfViews !== views) SetNumOfViews(views);
+        if (isDetections !== detections) SetIsDetections(detections);
+    };
+
+    /**
+     * Clears/revokes the current display thumbnail blob to free up memory
+     */
+    const clearThumbnail = () => {
+        if (thumbnailSrc !== null) {
+            URL.revokeObjectURL(thumbnailSrc);
+            setThumbnailSrc(null);
         }
     };
+
     useLayoutEffect(() => {
         if (!generatingThumbnails) {
             if (isOnScreen && thumbnailSrc === null) {
@@ -78,7 +88,11 @@ function LazyImageContainer(props) {
                             result.fileData,
                             'image/png'
                         );
-                        thumbnailHandler(blobData);
+                        thumbnailHandler(
+                            blobData,
+                            result.numOfViews,
+                            result.isDetections
+                        );
                     })
                     .catch((error) => {
                         // TODO: Better error handling
@@ -86,7 +100,7 @@ function LazyImageContainer(props) {
                     });
             }
             if (!isOnScreen && thumbnailSrc !== null) {
-                thumbnailHandler();
+                clearThumbnail();
             }
         }
     });
@@ -118,7 +132,10 @@ function LazyImageContainer(props) {
                     alt={thisFileName}
                 />
             ) : null}
-            <span className="lazy-image-text">{thisFileName}</span>
+            <span className="lazy-image-text">
+                {thisFileName} - {numOfViews} -{' '}
+                {isDetections ? 'detections' : 'no detections'}
+            </span>
         </ImageContainer>
     );
 }

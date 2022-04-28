@@ -199,7 +199,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         dialog.showSaveDialog().then((result) => {
             if (!result.canceled) {
                 fs.writeFile(result.filePath, args, (error) => {
@@ -214,7 +214,6 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
             }
         });
     });
-    return result;
 });
 
 /**
@@ -224,7 +223,7 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
  * @returns {string}
  */
 ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const splitPath = args.split(process.platform === 'win32' ? '\\' : '/');
         if (splitPath.length > 0) {
             const fileName = splitPath[splitPath.length - 1];
@@ -236,16 +235,16 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
             } else {
                 const fileData = fs.readFileSync(foundThumbnail.thumbnailPath);
                 resolve({
+                    fileName,
                     fileData: Buffer.from(fileData).toString('base64'),
-                    views: 2,
-                    detections: 4,
+                    numOfViews: foundThumbnail.numOfViews,
+                    isDetections: foundThumbnail.isDetections,
                 });
             }
         } else {
             reject('Could not determine file name from that path');
         }
     });
-    return result;
 });
 
 /**
@@ -549,7 +548,13 @@ const parseThumbnail = async (filePath) => {
                                     result.image.stack[topIndex].layer[0].$.src
                                 );
                                 if (dataType.result) {
-                                    // TODO: Get the number of views and detections for file and add that data to the database
+                                    let isDetections = false;
+                                    result.image.stack.forEach((stack) => {
+                                        if (stack.layer.length > 1)
+                                            isDetections = true;
+                                    });
+                                    const numOfViews =
+                                        result.image.stack.length;
                                     if (
                                         dataType.type ===
                                         Constants.Settings.ANNOTATIONS.COCO
@@ -565,6 +570,8 @@ const parseThumbnail = async (filePath) => {
                                                     fileName,
                                                     thumbnailSavePath,
                                                     pixelData: imageData,
+                                                    numOfViews,
+                                                    isDetections,
                                                 })
                                                     .then(() => resolve())
                                                     .catch((error) =>
@@ -595,6 +602,8 @@ const parseThumbnail = async (filePath) => {
                                                         dicosPngData.pixelData,
                                                     width: dicosPngData.width,
                                                     height: dicosPngData.height,
+                                                    numOfViews,
+                                                    isDetections,
                                                 })
                                                     .then(() => resolve())
                                                     .catch((error) =>
@@ -671,7 +680,7 @@ const dicosToPngData = (imageData) => {
 
 /**
  * Generate a TDR thumbnail
- * @param {{fileName: string; thumbnailSavePath: string; pixelData: Uint8ClampedArray; width: Number; height: Number;}} newThumbnail
+ * @param {{fileName: string; thumbnailSavePath: string; pixelData: Uint8ClampedArray; width: Number; height: Number; numOfViews: Number; isDetections: Boolean;}} newThumbnail
  * @returns {Promise}
  */
 const generateTdrThumbnail = (newThumbnail) => {
@@ -691,6 +700,8 @@ const generateTdrThumbnail = (newThumbnail) => {
                     thumbnails.push({
                         fileName: newThumbnail.fileName,
                         thumbnailPath: newThumbnail.thumbnailSavePath,
+                        numOfViews: newThumbnail.numOfViews,
+                        isDetections: newThumbnail.isDetections,
                     });
                     resolve();
                 })
@@ -705,7 +716,7 @@ const generateTdrThumbnail = (newThumbnail) => {
 
 /**
  * Generate a COCO thumbnail
- * @param {{fileName: string; thumbnailSavePath: string; pixelData: Buffer;}} newThumbnail
+ * @param {{fileName: string; thumbnailSavePath: string; pixelData: Buffer; numOfViews: Number; isDetections: Boolean;}} newThumbnail
  * @returns {Promise}
  */
 const generateCocoThumbnail = (newThumbnail) => {
@@ -718,6 +729,8 @@ const generateCocoThumbnail = (newThumbnail) => {
                     thumbnails.push({
                         fileName: newThumbnail.fileName,
                         thumbnailPath: newThumbnail.thumbnailSavePath,
+                        numOfViews: newThumbnail.numOfViews,
+                        isDetections: newThumbnail.isDetections,
                     });
                     resolve();
                 })
