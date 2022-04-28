@@ -137,6 +137,7 @@ body {
 
 .lazy-image-text {
     position: absolute;
+    display: flex;
     margin-top: 93%;
     margin-right: 56%;
     opacity: 0.6;

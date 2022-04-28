@@ -7,6 +7,9 @@ import Utils from '../../utils/Utils';
 import { Channels } from '../../utils/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
+import TwoViewIcon from '../../icons/TwoViewIcon';
+import SingleViewIcon from '../../icons/SingleViewIcon';
+import AnnotationsIcon from '../../icons/AnnotationsIcon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -113,6 +116,12 @@ function LazyImageContainer(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
+    const svgContainerStyle = {
+        display: 'flex',
+        marginRight: '3%',
+        marginLeft: '3%',
+    };
+    const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
             ref={containerElement}
@@ -133,8 +142,24 @@ function LazyImageContainer(props) {
                 />
             ) : null}
             <span className="lazy-image-text">
-                {thisFileName} - {numOfViews} -{' '}
-                {isDetections ? 'detections' : 'no detections'}
+                {thisFileName}
+                {numOfViews > 1 ? (
+                    <TwoViewIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
+                ) : (
+                    <SingleViewIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
+                )}
+                {isDetections === true ? (
+                    <AnnotationsIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
+                ) : null}
             </span>
         </ImageContainer>
     );
