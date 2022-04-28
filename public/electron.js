@@ -235,7 +235,11 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
                 reject('Thumbnail does not exist for that file');
             } else {
                 const fileData = fs.readFileSync(foundThumbnail.thumbnailPath);
-                resolve(Buffer.from(fileData).toString('base64'));
+                resolve({
+                    fileData: Buffer.from(fileData).toString('base64'),
+                    views: 2,
+                    detections: 4,
+                });
             }
         } else {
             reject('Could not determine file name from that path');
@@ -544,64 +548,65 @@ const parseThumbnail = async (filePath) => {
                                 const dataType = validateImageExtension(
                                     result.image.stack[topIndex].layer[0].$.src
                                 );
-                                if (
-                                    dataType.result &&
-                                    dataType.type ===
+                                if (dataType.result) {
+                                    // TODO: Get the number of views and detections for file and add that data to the database
+                                    if (
+                                        dataType.type ===
                                         Constants.Settings.ANNOTATIONS.COCO
-                                ) {
-                                    myZip
-                                        .file(
-                                            result.image.stack[topIndex]
-                                                .layer[0].$.src
-                                        )
-                                        .async('nodebuffer')
-                                        .then((imageData) => {
-                                            generateCocoThumbnail({
-                                                fileName,
-                                                thumbnailSavePath,
-                                                pixelData: imageData,
+                                    ) {
+                                        myZip
+                                            .file(
+                                                result.image.stack[topIndex]
+                                                    .layer[0].$.src
+                                            )
+                                            .async('nodebuffer')
+                                            .then((imageData) => {
+                                                generateCocoThumbnail({
+                                                    fileName,
+                                                    thumbnailSavePath,
+                                                    pixelData: imageData,
+                                                })
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             })
-                                                .then(() => resolve())
-                                                .catch((error) =>
-                                                    reject(error)
-                                                );
-                                        })
-                                        .catch((error) => {
-                                            console.log(error);
-                                            reject(error);
-                                        });
-                                } else if (
-                                    dataType.result &&
-                                    dataType.type ===
+                                            .catch((error) => {
+                                                console.log(error);
+                                                reject(error);
+                                            });
+                                    } else if (
+                                        dataType.type ===
                                         Constants.Settings.ANNOTATIONS.TDR
-                                ) {
-                                    myZip
-                                        .file(
-                                            result.image.stack[topIndex]
-                                                .layer[0].$.src
-                                        )
-                                        .async('arraybuffer')
-                                        .then((imageData) => {
-                                            const dicosPngData =
-                                                dicosToPngData(imageData);
-                                            generateTdrThumbnail({
-                                                fileName,
-                                                thumbnailSavePath,
-                                                pixelData:
-                                                    dicosPngData.pixelData,
-                                                width: dicosPngData.width,
-                                                height: dicosPngData.height,
+                                    ) {
+                                        myZip
+                                            .file(
+                                                result.image.stack[topIndex]
+                                                    .layer[0].$.src
+                                            )
+                                            .async('arraybuffer')
+                                            .then((imageData) => {
+                                                const dicosPngData =
+                                                    dicosToPngData(imageData);
+                                                generateTdrThumbnail({
+                                                    fileName,
+                                                    thumbnailSavePath,
+                                                    pixelData:
+                                                        dicosPngData.pixelData,
+                                                    width: dicosPngData.width,
+                                                    height: dicosPngData.height,
+                                                })
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             })
-                                                .then(() => resolve())
-                                                .catch((error) =>
-                                                    reject(error)
-                                                );
-                                        })
-                                        .catch((error) => {
-                                            console.log(error);
-                                            reject(error);
-                                        });
-                                } else reject('Incorrect data type');
+                                            .catch((error) => {
+                                                console.log(error);
+                                                reject(error);
+                                            });
+                                    } else reject('Incorrect data type');
+                                } else reject('Invalid file');
                             } else {
                                 console.log(error);
                                 reject(error);

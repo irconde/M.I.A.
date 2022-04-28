@@ -73,8 +73,11 @@ function LazyImageContainer(props) {
             if (isOnScreen && thumbnailSrc === null) {
                 ipcRenderer
                     .invoke(Channels.getThumbnail, props.file)
-                    .then((b64Data) => {
-                        const blobData = Utils.b64toBlob(b64Data, 'image/png');
+                    .then((result) => {
+                        const blobData = Utils.b64toBlob(
+                            result.fileData,
+                            'image/png'
+                        );
                         thumbnailHandler(blobData);
                     })
                     .catch((error) => {
