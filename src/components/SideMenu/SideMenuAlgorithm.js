@@ -17,10 +17,6 @@ import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
  *
  * @component
  *
- * @param {Array<Detection>} detections - Array of detection objects
- * @param {function} resetCornerstoneTools - Callback to reset cornerstone tools to initial values
- * @param {function} renderDetectionContextMenu - Callback to render specific detection context menus
- *
  *
  */
 const SideMenuAlgorithm = ({

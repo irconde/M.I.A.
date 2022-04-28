@@ -5,9 +5,6 @@ import PropTypes from 'prop-types';
  * Open file icon in TopBar component only in local mode of desktop app.
  *
  * @component
- * @param {PropTypes} props - Expected props: title<string>, style<object>
- * @param {string} title - Destructured from props -- Title shown when hovering icon, which is typically "Open File"
- * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
  *
  */
 

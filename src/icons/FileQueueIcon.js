@@ -5,10 +5,6 @@ import PropTypes from 'prop-types';
  * File queue icon in TopBar component next to file annotation drop-down menu.
  *
  * @component
- *
- * @param {string} title - Title shown when hovering queue icon, which is typically "Number of files"
- * @param {number} numberOfFiles - Number of files in queue
- * @param {Object} style - CSS object for styling SVG container
  */
 const FileQueueIcon = ({ title, numberOfFiles, style }) => {
     return (

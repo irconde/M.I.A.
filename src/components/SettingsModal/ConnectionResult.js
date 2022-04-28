@@ -9,10 +9,6 @@ import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: display<boolean>, connected<boolean>
- * @param {boolean} display - Destructured from props -- True if icon should be visible.
- * @param {boolean} connected - Destructured from props -- True if connection to server was successful.
- *
  */
 const ConnectionResult = (props) => {
     const containerStyle = {
