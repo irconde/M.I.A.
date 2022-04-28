@@ -103,17 +103,19 @@ function LazyImageContainer(props) {
             thumbnailHeight={thumbnailHeight}
             loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
-            title={props.file}>
+            title={thisFileName}>
             {thumbnailSrc !== null ? (
                 <img
-                    onLoad={(event) => {
+                    onLoad={() => {
                         thumbnailHeightHandler(
                             containerElement.current.clientHeight
                         );
                     }}
                     src={thumbnailSrc}
+                    alt={thisFileName}
                 />
             ) : null}
+            <span className="lazy-image-text">{thisFileName}</span>
         </ImageContainer>
     );
 }
