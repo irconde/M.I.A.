@@ -966,13 +966,6 @@ class App extends Component {
                                     .file(listOfStacks[j].rawData[i])
                                     .async('base64')
                                     .then((imageData) => {
-                                        if (i === 0)
-                                            console.log(
-                                                'PNG IMAGE DATA:',
-                                                myZip.file(
-                                                    listOfStacks[j].rawData[i]
-                                                )
-                                            );
                                         i === 0
                                             ? (contentType = 'image/png')
                                             : (contentType =
@@ -1014,7 +1007,6 @@ class App extends Component {
                                 }
                             }
                         }
-
                         const promiseOfList = Promise.all(listOfPromises);
                         // Once we have all the layers...
                         promiseOfList.then(() => {
@@ -1079,13 +1071,6 @@ class App extends Component {
                                     .async('base64')
                                     .then((imageData) => {
                                         if (i === 0)
-                                            console.log(
-                                                'TDR IMAGE DATA:',
-                                                myZip.file(
-                                                    listOfStacks[j].rawData[i]
-                                                )
-                                            );
-                                        if (i === 0)
                                             listOfStacks[j].pixelData =
                                                 Utils.base64ToArrayBuffer(
                                                     imageData
@@ -1118,7 +1103,6 @@ class App extends Component {
                             this.loadAndViewImage();
                         });
                     } else {
-                        console.log('File format not supported.');
                         return null;
                     }
                 });
@@ -1272,6 +1256,10 @@ class App extends Component {
             let stackCounter = 1;
             let annotationID = 1;
             const listOfPromises = [];
+
+            const viewports = [this.state.imageViewportTop];
+            if (this.props.singleViewport === false)
+                viewports.push(this.state.imageViewportSide);
             // Loop through each stack, being either top or side currently
             this.state.myOra.stackData.forEach((stack) => {
                 const stackElem = stackXML.createElement('stack');
@@ -1286,10 +1274,28 @@ class App extends Component {
                     'src',
                     `data/${stack.view}_pixel_data.dcs`
                 );
-                newOra.file(
-                    `data/${stack.view}_pixel_data.dcs`,
-                    stack.blobData[0].blob
-                );
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.TDR
+                ) {
+                    newOra.file(
+                        `data/${stack.view}_pixel_data.dcs`,
+                        stack.blobData[0].blob
+                    );
+                } else if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                ) {
+                    const tdrPromise = Dicos.pngToDicosPixelData(
+                        cornerstone,
+                        stack.view === constants.viewport.TOP
+                            ? viewports[0]
+                            : viewports[1]
+                    ).then((blob) => {
+                        newOra.file(`data/${stack.view}_pixel_data.dcs`, blob);
+                    });
+                    listOfPromises.push(tdrPromise);
+                }
                 const topStackIndex = this.state.myOra.stackData.findIndex(
                     (stack) => {
                         return constants.viewport.TOP === stack.view;
@@ -1310,7 +1316,8 @@ class App extends Component {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             topDetections[j],
                             this.state.myOra.stackData[topStackIndex]
-                                .blobData[0].blob
+                                .blobData[0].blob,
+                            this.props.currentFileFormat
                         ).then((threatBlob) => {
                             newOra.file(
                                 `data/top_threat_detection_${annotationID}.dcs`,
@@ -1335,7 +1342,8 @@ class App extends Component {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             sideDetections[i],
                             this.state.myOra.stackData[sideStackIndex]
-                                .blobData[0].blob
+                                .blobData[0].blob,
+                            this.props.currentFileFormat
                         ).then((threatBlob) => {
                             newOra.file(
                                 `data/side_threat_detection_${annotationID}.dcs`,
@@ -1671,58 +1679,87 @@ class App extends Component {
         const imagesLeft = self.state.myOra.stackData[0].formattedData;
 
         for (let i = 0; i < imagesLeft.length; i++) {
+            let polygonMask = [];
             imagesLeft[i].bbox[2] =
                 imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
             imagesLeft[i].bbox[3] =
                 imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
+            let boundingBox = imagesLeft[i].bbox;
+            let binaryMask = [
+                [],
+                [boundingBox[0], boundingBox[1]],
+                [
+                    boundingBox[2] - boundingBox[0],
+                    boundingBox[3] - boundingBox[1],
+                ],
+            ];
+            if (imagesLeft[i].segmentation.length > 0) {
+                const polygonXY = Utils.coordArrayToPolygonData(
+                    imagesLeft[i].segmentation[0]
+                );
+                polygonMask = Utils.polygonDataToXYArray(
+                    polygonXY,
+                    boundingBox
+                );
+                binaryMask = Utils.polygonToBinaryMask(polygonMask);
+            }
+            let detUuid = uuidv4();
             self.props.addDetection({
                 algorithm: imagesLeft[i].algorithm,
                 className: imagesLeft[i].className,
                 confidence: imagesLeft[i].confidence,
                 view: constants.viewport.TOP,
-                boundingBox: imagesLeft[i].bbox,
-                binaryMask: [],
-                polygonMask:
-                    imagesLeft[i].segmentation.length > 0
-                        ? Utils.polygonDataToXYArray(
-                              Utils.coordArrayToPolygonData(
-                                  imagesLeft[i].segmentation[0]
-                              ),
-                              imagesLeft[i].bbox
-                          )
-                        : [],
-                uuid: imagesLeft[i].id,
+                boundingBox,
+                binaryMask,
+                polygonMask,
+                uuid: detUuid,
                 detectionFromFile: true,
             });
+            imagesLeft[i].id = detUuid;
         }
 
         if (this.props.singleViewport === false) {
             const imagesRight = self.state.myOra.stackData[1].formattedData;
 
             for (var j = 0; j < imagesRight.length; j++) {
+                let polygonMask = [];
                 imagesRight[j].bbox[2] =
                     imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
                 imagesRight[j].bbox[3] =
                     imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
+                let boundingBox = imagesLeft[j].bbox;
+                let binaryMask = [
+                    [],
+                    [boundingBox[0], boundingBox[1]],
+                    [
+                        boundingBox[2] - boundingBox[0],
+                        boundingBox[3] - boundingBox[1],
+                    ],
+                ];
+                if (imagesLeft[j].segmentation.length > 0) {
+                    const polygonXY = Utils.coordArrayToPolygonData(
+                        imagesLeft[j].segmentation[0]
+                    );
+                    polygonMask = Utils.polygonDataToXYArray(
+                        polygonXY,
+                        boundingBox
+                    );
+                    binaryMask = Utils.polygonToBinaryMask(polygonMask);
+                }
+                let detUuid = uuidv4();
+
                 self.props.addDetection({
                     algorithm: imagesRight[j].algorithm,
                     className: imagesRight[j].className,
                     confidence: imagesRight[j].confidence,
                     view: constants.viewport.SIDE,
-                    boundingBox: imagesRight[j].bbox,
-                    binaryMask: [],
-                    polygonMask:
-                        imagesRight[j].segmentation.length > 0
-                            ? Utils.polygonDataToXYArray(
-                                  Utils.coordArrayToPolygonData(
-                                      imagesRight[j].segmentation[0]
-                                  ),
-                                  imagesRight[j].bbox
-                              )
-                            : [],
-                    uuid: imagesRight[j].id,
+                    boundingBox,
+                    binaryMask,
+                    polygonMask,
+                    uuid: detUuid,
                     detectionFromFile: true,
                 });
+                imagesRight[j].id = detUuid;
             }
         }
     }
@@ -1953,7 +1990,6 @@ class App extends Component {
      * @param {DOMElement} target Targeted DOMElement caught via mouse event data
      */
     renderCrosshair(context, target) {
-        console.log(target);
         const crosshairLength = 8;
         const mousePos = cornerstone.pageToPixel(
             target,
@@ -2445,7 +2481,8 @@ class App extends Component {
             ) {
                 Dicos.detectionObjectToBlob(
                     newDetection,
-                    self.state.myOra.stackData[stackIndex].blobData[0].blob
+                    self.state.myOra.stackData[stackIndex].blobData[0].blob,
+                    this.props.currentFileFormat
                 ).then((newBlob) => {
                     const uuid = uuidv4();
                     self.state.myOra.stackData[stackIndex].blobData.push({
@@ -2600,18 +2637,12 @@ class App extends Component {
                 }
                 // When the updating detection is false, this means we are creating a new detection
                 if (data[0].updatingDetection === false) {
-                    const operator = constants.OPERATOR;
                     if (
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
-                        var maxId = 0;
-
-                        this.props.detections.forEach((detection) => {
-                            if (detection.uuid > maxId) maxId = detection.uuid;
-                        });
-
-                        self.props.addDetection({
-                            algorithm: operator,
+                        let detUuid = uuidv4();
+                        const newDetection = {
+                            algorithm: constants.OPERATOR,
                             boundingBox: coords,
                             className: data[0].class,
                             confidence: data[0].confidence,
@@ -2626,9 +2657,14 @@ class App extends Component {
                                 [coords[2] - coords[0], coords[3] - coords[1]],
                             ],
                             polygonMask: [],
-                            uuid: maxId + 1,
+                            uuid: detUuid,
+                            id: detUuid,
                             detectionFromFile: false,
-                        });
+                        };
+                        this.state.myOra.stackData[
+                            stackIndex
+                        ].formattedData.push(newDetection);
+                        self.props.addDetection(newDetection);
                         self.appUpdateImage();
                     } else {
                         self.props.updateCornerstoneMode({
@@ -2744,6 +2780,11 @@ class App extends Component {
             this.props.annotationMode === constants.annotationMode.POLYGON
         ) {
             const polygonData = event.detail.measurementData;
+            if (polygonData === undefined) {
+                self.props.emptyAreaClickUpdate();
+                self.resetSelectedDetectionBoxes(event);
+                return;
+            }
             const boundingBoxCoords = Utils.calculateBoundingBox(
                 polygonData.handles.points
             );
@@ -2752,8 +2793,12 @@ class App extends Component {
                 boundingBoxCoords
             );
             const binaryData = Utils.polygonToBinaryMask(polygonCoords);
-            let newDetection = {
-                uuid: polygonData.uuid,
+
+            const uuid = uuidv4();
+
+            const newDetection = {
+                uuid,
+                id: uuid,
                 boundingBox: boundingBoxCoords,
                 algorithm: polygonData.algorithm,
                 className: polygonData.class,
@@ -2765,82 +2810,30 @@ class App extends Component {
                 validation: true,
                 binaryMask: binaryData,
                 polygonMask: polygonCoords,
+                detectionFromFile: false,
             };
             const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
                 return newDetection.view === stack.view;
             });
             let self = this;
-            if (
-                this.props.currentFileFormat ===
-                constants.SETTINGS.ANNOTATIONS.TDR
-            ) {
-                Dicos.detectionObjectToBlob(
-                    newDetection,
-                    self.state.myOra.stackData[stackIndex].blobData[0].blob
-                ).then((newBlob) => {
-                    const uuid = uuidv4();
-                    self.state.myOra.stackData[stackIndex].blobData.push({
-                        blob: newBlob,
-                        uuid,
-                    });
-                    if (polygonData === undefined) {
-                        self.props.emptyAreaClickUpdate();
-                        self.resetSelectedDetectionBoxes(event);
-                        return;
-                    }
-                    self.props.addDetection({
-                        algorithm: constants.OPERATOR,
-                        boundingBox: boundingBoxCoords,
-                        className: polygonData.class,
-                        confidence: polygonData.confidence,
-                        view:
-                            viewport === self.state.imageViewportTop
-                                ? constants.viewport.TOP
-                                : constants.viewport.SIDE,
-                        binaryMask: binaryData,
-                        polygonMask: polygonCoords,
-                        uuid,
-                        detectionFromFile: false,
-                    });
-
-                    this.resetCornerstoneTool();
-                    this.props.clearAllSelection();
-                    this.appUpdateImage();
-                    this.props.emptyAreaClickUpdate();
-                    setTimeout(() => {
-                        this.startListeningClickEvents();
-                    }, 500);
+            Dicos.detectionObjectToBlob(
+                newDetection,
+                self.state.myOra.stackData[stackIndex].blobData[0].blob,
+                this.props.currentFileFormat
+            ).then((newBlob) => {
+                self.state.myOra.stackData[stackIndex].blobData.push({
+                    blob: newBlob,
+                    uuid,
                 });
-            } else if (
-                this.props.currentFileFormat ===
-                constants.SETTINGS.ANNOTATIONS.COCO
-            ) {
-                if (polygonData === undefined) {
-                    self.props.emptyAreaClickUpdate();
-                    self.resetSelectedDetectionBoxes(event);
-                    return;
+                if (
+                    this.props.currentFileFormat ===
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                ) {
+                    self.state.myOra.stackData[stackIndex].formattedData.push(
+                        newDetection
+                    );
                 }
-                var maxId = 0;
-
-                this.props.detections.forEach((detection) => {
-                    if (detection.uuid > maxId) maxId = detection.uuid;
-                });
-
-                self.props.addDetection({
-                    algorithm: constants.OPERATOR,
-                    boundingBox: boundingBoxCoords,
-                    className: polygonData.class,
-                    confidence: polygonData.confidence,
-                    view:
-                        viewport === self.state.imageViewportTop
-                            ? constants.viewport.TOP
-                            : constants.viewport.SIDE,
-                    binaryMask: binaryData,
-                    polygonMask: polygonCoords,
-                    uuid: maxId + 1,
-                    detectionFromFile: false,
-                });
-
+                self.props.addDetection(newDetection);
                 this.resetCornerstoneTool();
                 this.props.clearAllSelection();
                 this.appUpdateImage();
@@ -2848,7 +2841,7 @@ class App extends Component {
                 setTimeout(() => {
                     this.startListeningClickEvents();
                 }, 500);
-            }
+            });
         }
     }
 

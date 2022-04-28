@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import Utils from './Utils';
-import { SETTINGS } from './Constants';
+import {SETTINGS} from './Constants';
 import React from 'react';
 
 /**
@@ -11,7 +11,7 @@ import React from 'react';
  * @param {myOraObject} myOra - Ora file object
  * @param {Array<Detection>} detections - Collection of detection objects
  * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
- * @param {CornerstoneObject} cornerstone - Main cornerstone object
+ * @param {{"cornerstone-core"?: *, __esModule?: *}} cornerstone - Main cornerstone object
  * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
  * @returns {nodebuffer} ?
  */
@@ -22,7 +22,7 @@ export const buildCocoDataZip = async (
     cornerstone,
     currentFileFormat
 ) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const cocoZip = new JSZip();
         const stackXML = document.implementation.createDocument('', '', null);
         const prolog = '<?xml version="1.0" encoding="utf-8"?>';
@@ -84,7 +84,6 @@ export const buildCocoDataZip = async (
                 listOfPromises.push(pngPromise);
 
                 for (let i = 1; i < stack.blobData.length; i++) {
-                    //
                     const detection = detections.find(
                         (det) => det.uuid === stack.blobData[i].uuid
                     );
@@ -157,12 +156,11 @@ export const buildCocoDataZip = async (
                     `data/${stack.view}_pixel_data.png`,
                     stack.blobData[0].blob
                 );
-
                 for (let i = 0; i < stack.formattedData.length; i++) {
-                    //
-                    const detection = detections.find(
-                        (det) => det.uuid === stack.formattedData[i].id
-                    );
+                    const detection = detections.find((det) => {
+                        if (det.uuid === stack.formattedData[i].id) return true;
+                        else return false;
+                    });
                     if (detection !== undefined) {
                         let annotations = [];
                         // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
@@ -186,10 +184,8 @@ export const buildCocoDataZip = async (
                             bbox: [
                                 detection.boundingBox[0],
                                 detection.boundingBox[1],
-                                detection.boundingBox[2] -
-                                    detection.boundingBox[0],
-                                detection.boundingBox[3] -
-                                    detection.boundingBox[1],
+                                detection.binaryMask[2][0],
+                                detection.binaryMask[2][1],
                             ],
                             segmentation:
                                 detection.polygonMask.length > 0
@@ -230,7 +226,6 @@ export const buildCocoDataZip = async (
                     }
                 }
             } else {
-                console.log('Format provided cannot be exported.');
                 return null;
             }
             imageID++;
