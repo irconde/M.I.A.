@@ -373,9 +373,7 @@ class App extends Component {
         this.startListeningClickEvents();
         window.addEventListener('resize', this.resizeListener);
 
-        this.props.updateFABVisibility(
-            this.props.numberOfFilesInQueue > 0 ? true : false
-        );
+        this.props.updateFABVisibility(this.props.numberOfFilesInQueue > 0);
         this.setupCornerstoneJS(
             this.state.imageViewportTop,
             this.state.imageViewportSide
@@ -2776,7 +2774,6 @@ class App extends Component {
      * @param {DOMElement} viewport - The Cornerstone Viewport receiving the event
      */
     onNewPolygonMaskCreated(event, viewport) {
-        console.log('onNewPolygonMaskCreated');
         if (
             this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION &&

@@ -119,6 +119,7 @@ const SettingsModal = (props) => {
             outline: 'none',
             fontFamily: 'Noto Sans JP',
             minWidth: '30vw',
+            padding: '2rem',
         };
     }
 
@@ -255,7 +256,7 @@ const SettingsModal = (props) => {
         },
     });
 
-    /*const classes = {
+    const classes = {
         pathButton: {
             color: '#367eff',
             textTransform: 'none',
@@ -291,22 +292,22 @@ const SettingsModal = (props) => {
             alignSelf: 'flex-end',
         },
         modal: {
-            /!*boxShadow: theme.shadows[5],*!/
+            /*boxShadow: theme.shadows[5],*/
             padding: theme.spacing(2, 4, 4),
         },
         paper: {
             padding: theme.spacing(1),
             textAlign: 'center',
-            /!*color: theme.palette.text.primary,*!/
+            /*color: theme.palette.text.primary,*/
         },
         selector: {},
         links: {
-            /!*fontSize: theme.typography.fontSize,*!/
+            /*fontSize: theme.typography.fontSize,*/
             color: theme.palette.primary,
             cursor: 'pointer',
         },
         linkSelected: {
-            /!*fontSize: theme.typography.fontSize,*!/
+            /*fontSize: theme.typography.fontSize,*/
             color: theme.palette.primary,
             background: '#515151',
             cursor: 'pointer',
@@ -460,27 +461,31 @@ const SettingsModal = (props) => {
         displayListSectionInput: {
             width: '70%',
         },
-    };*/
+    };
 
     let body = (
         <Paper style={modalStyle} elevation={3}>
-            <div>
-                <di>
-                    <div>
+            <div style={classes.root}>
+                <div style={classes.settingsContainer}>
+                    <div style={classes.settingsCogwheel}>
                         <SettingsCog title={props.title} />
                     </div>
-                    <div>Settings</div>
-                    <div onClick={() => handleClose()}>
+                    <div style={classes.settingsText}>Settings</div>
+                    <div
+                        onClick={() => handleClose()}
+                        style={classes.closeIconStyle}>
                         <IcCloseIcon />
                     </div>
-                </di>
+                </div>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
-                <FormGroup>
-                    <div>
+                <FormGroup style={classes.formControl}>
+                    <div style={classes.optionsContainer}>
                         <div>
-                            <div>
-                                <p>Work connected to a remote service</p>
-                                <div>
+                            <div style={classes.remoteWorkContainer}>
+                                <p style={classes.optionText}>
+                                    Work connected to a remote service
+                                </p>
+                                <div style={classes.switchContainer}>
                                     <Switch
                                         checked={remoteOrLocal}
                                         size="small"
@@ -496,17 +501,15 @@ const SettingsModal = (props) => {
                                 </div>
                             </div>
                             {isElectron() ? (
-                                <p>
+                                <p style={classes.greyText}>
                                     Choose the option if you want to
                                     receive/send images from/to a server
                                 </p>
-                            ) : (
-                                <></>
-                            )}
+                            ) : null}
 
-                            <div>
-                                <div>
-                                    <div>
+                            <div style={classes.remoteWorkRow}>
+                                <div style={classes.remoteInputContainer}>
+                                    <div style={classes.cloudIconContainer}>
                                         <CloudIcon
                                             style={svgContainerStyle}
                                             svgStyle={{
@@ -517,7 +520,7 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                     </div>
-                                    <FormControl>
+                                    <FormControl style={classes.flexAuto}>
                                         <TextField
                                             required
                                             id="remoteIp"
@@ -530,12 +533,15 @@ const SettingsModal = (props) => {
                                             onChange={(e) => {
                                                 setRemoteIp(e.target.value);
                                             }}
-                                            style={{
+                                            style={classes.textField}
+                                            /*style={{
                                                 marginRight: '0.75rem',
-                                            }}
+                                            }}*/
                                         />
                                     </FormControl>
-                                    <span>:</span>
+                                    <span style={classes.cloudIconContainer}>
+                                        :
+                                    </span>
                                     <FormControl>
                                         <TextField
                                             required
@@ -552,13 +558,14 @@ const SettingsModal = (props) => {
                                                 inputMode: 'numeric',
                                                 pattern: '[0-9]*',
                                             }}
-                                            style={{
+                                            style={classes.textField}
+                                            /*style={{
                                                 marginLeft: '0.75rem',
-                                            }}
+                                            }}*/
                                         />
                                     </FormControl>
                                 </div>
-                                <div>
+                                <div style={classes.autoConnectContainer}>
                                     <FormControlLabel
                                         control={
                                             <Checkbox
@@ -577,11 +584,12 @@ const SettingsModal = (props) => {
                                     />
                                 </div>
                             </div>
-                            <div>
+                            <div style={classes.connectionSection}>
                                 <Button
                                     variant="outlined"
                                     size="small"
                                     disabled={!remoteOrLocal}
+                                    style={classes.checkConnectionButton}
                                     onClick={() => {
                                         testConnection();
                                     }}>
@@ -615,14 +623,17 @@ const SettingsModal = (props) => {
                                 variant="middle"
                             />
                             <div>
-                                <p>File management</p>
-                                <p>
+                                <p style={classes.optionText}>
+                                    File management
+                                </p>
+                                <p style={classes.greyText}>
                                     Default file management options to
                                     streamline file input and output
                                 </p>
                                 {isElectron() ? (
-                                    <div>
-                                        <FormControl>
+                                    <div style={classes.workingDirectory}>
+                                        <FormControl
+                                            style={classes.longTextField}>
                                             <FileOpenIcon
                                                 style={svgContainerStyle}
                                                 svgStyle={{
@@ -658,6 +669,7 @@ const SettingsModal = (props) => {
                                             variant="outlined"
                                             size="medium"
                                             id="btnFolder"
+                                            style={classes.pathButton}
                                             onClick={() => {
                                                 if (isElectron()) {
                                                     ipcRenderer
@@ -688,14 +700,22 @@ const SettingsModal = (props) => {
                                 ) : (
                                     <></>
                                 )}
-                                <div>
-                                    <div>
+                                <div style={classes.displayListSection}>
+                                    <div style={classes.displayListSectionItem}>
                                         <FileFormatIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl>
+                                        <FormControl
+                                            style={
+                                                classes.displayListSectionInput
+                                            }>
                                             <Select
+                                                style={
+                                                    fileFormat === ''
+                                                        ? classes.disabledText
+                                                        : null
+                                                }
                                                 displayEmpty={true}
                                                 open={openFileFormat}
                                                 defaultValue="Open Raster"
@@ -723,13 +743,21 @@ const SettingsModal = (props) => {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div>
+                                    <div style={classes.displayListSectionItem}>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl>
+                                        <FormControl
+                                            style={
+                                                classes.displayListSectionInput
+                                            }>
                                             <Select
+                                                style={
+                                                    annotationsFormat === ''
+                                                        ? classes.disabledText
+                                                        : null
+                                                }
                                                 displayEmpty={true}
                                                 open={openAnnotationsFormat}
                                                 onClose={() => {
@@ -775,13 +803,17 @@ const SettingsModal = (props) => {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div>
+                                    <div style={classes.displayListSectionItem}>
                                         <FileSuffixIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl>
+                                        <FormControl
+                                            style={
+                                                classes.displayListSectionInput
+                                            }>
                                             <TextField
+                                                style={classes.textField}
                                                 required
                                                 id="outputSuffix"
                                                 placeholder="Filename suffix"
