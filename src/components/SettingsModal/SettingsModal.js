@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
     Button,
     Checkbox,
@@ -10,13 +11,23 @@ import {
     FormControlLabel,
     FormGroup,
     MenuItem,
-    Modal,
     Paper,
     Select,
+    Snackbar,
+    SnackbarContent,
     Switch,
     TextField,
 } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/system';
+import Modal from '@mui/material/Modal';
+import ConnectionResult from './ConnectionResult';
+import SettingsCog from '../../icons/SettingsCog';
+import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
+import CloudIcon from '../../icons/CloudIcon.js';
+import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
+import FileOpenIcon from '../../icons/FileOpenIcon.js';
+import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
+import FileFormatIcon from '../../icons/FileFormatIcon.js';
+import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import {
     getSettingsVisibility,
     toggleSettingsVisibility,
@@ -26,15 +37,6 @@ import {
     getSettings,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
-import SettingsCog from '../../icons/SettingsCog';
-import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
-import CloudIcon from '../../icons/CloudIcon.js';
-import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
-import FileOpenIcon from '../../icons/FileOpenIcon.js';
-import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
-import FileFormatIcon from '../../icons/FileFormatIcon.js';
-import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
-import ConnectionResult from './ConnectionResult';
 import socketIOClient from 'socket.io-client';
 import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
@@ -234,9 +236,26 @@ const SettingsModal = (props) => {
                 contrastText: '#9d9d9d',
             },
         },
+        zIndex: {
+            modal: 3,
+        },
+        transitions: {
+            duration: {
+                shortest: 150,
+                shorter: 200,
+                // most basic recommended timing
+                standard: 300,
+                // this is to be used in complex animations
+                complex: 375,
+                // recommended when something is entering screen
+                enteringScreen: 225,
+                // recommended when something is leaving screen
+                leavingScreen: 195,
+            },
+        },
     });
 
-    const classes = {
+    /*const classes = {
         pathButton: {
             color: '#367eff',
             textTransform: 'none',
@@ -272,22 +291,22 @@ const SettingsModal = (props) => {
             alignSelf: 'flex-end',
         },
         modal: {
-            /*boxShadow: theme.shadows[5],*/
+            /!*boxShadow: theme.shadows[5],*!/
             padding: theme.spacing(2, 4, 4),
         },
         paper: {
             padding: theme.spacing(1),
             textAlign: 'center',
-            /*color: theme.palette.text.primary,*/
+            /!*color: theme.palette.text.primary,*!/
         },
         selector: {},
         links: {
-            /*fontSize: theme.typography.fontSize,*/
+            /!*fontSize: theme.typography.fontSize,*!/
             color: theme.palette.primary,
             cursor: 'pointer',
         },
         linkSelected: {
-            /*fontSize: theme.typography.fontSize,*/
+            /!*fontSize: theme.typography.fontSize,*!/
             color: theme.palette.primary,
             background: '#515151',
             cursor: 'pointer',
@@ -441,7 +460,7 @@ const SettingsModal = (props) => {
         displayListSectionInput: {
             width: '70%',
         },
-    };
+    };*/
 
     let body = (
         <Paper style={modalStyle} elevation={3}>
@@ -797,10 +816,10 @@ const SettingsModal = (props) => {
         <ThemeProvider theme={theme}>
             <Modal
                 open={settingsVisibility}
-                onClose={() => handleClose()}
+                onClose={handleClose}
                 aria-labelledby="settings-window"
                 aria-describedby="control the apps remote and local settings">
-                {body}
+                <div>{body}</div>
             </Modal>
         </ThemeProvider>
     );
