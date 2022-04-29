@@ -12,7 +12,7 @@ const IconStyle = styled.div`
     width: 32px;
     height: 32px;
     display: flex;
-    justify-contents: center;
+    justify-content: center;
 `;
 
 /**

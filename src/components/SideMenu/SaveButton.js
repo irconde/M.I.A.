@@ -6,38 +6,34 @@ import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
 import SaveIcon from '../../icons/SaveIcon';
-import Fab from '@material-ui/core/Fab';
+import { Fab } from '@mui/material';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
 const CollapsedSaveButtonContainer = styled.div`
-    width: 75px;
-    margin: 50px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    transform: translate(${sideMenuWidth})
-    transition: all 0.3s ease-in;
-    display: flex;
-    justify-content: center;
+  width: 75px;
+  margin: 50px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(${sideMenuWidth})
+  transition: all 0.3s ease-in;
+  display: flex;
+  justify-content: center;
 
-    opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
-        height: 2em;
-        width: auto;
-        margin-right: 0.5em;
-    }
-
-    img {
-        height: 2em;
-        width: auto;
-        margin-top: auto;
-        margin-bottom: auto;
-        transition: all 0.1s ease-in;
-    }
-
-    &:hover {
-        cursor: pointer;
-    }
+  opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
+    height: 2em;
+    width: auto;
+    margin-right: 0.5em;
+  } img {
+    height: 2em;
+    width: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    transition: all 0.1s ease-in;
+  } &: hover {
+    cursor: pointer;
+  }
 `;
 
 const SaveButtonContainer = styled.div`
@@ -53,6 +49,7 @@ const SaveButtonContainer = styled.div`
     cursor: ${(props) => (props.enabled ? 'pointer' : 'normal')};
 
     opacity: ${(props) => (props.enabled ? '100%' : '38%')};
+
     p {
         flex: 1;
         text-transform: uppercase;

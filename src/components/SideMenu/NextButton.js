@@ -13,39 +13,35 @@ import {
     getConnected,
     getNumFilesInQueue,
 } from '../../redux/slices/server/serverSlice';
-import Fab from '@material-ui/core/Fab';
+import { Fab } from '@mui/material';
 import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
 const CollapsedNextButtonContainer = styled.div`
-    width: 75px;
-    margin: 50px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    transform: translate(${sideMenuWidth})
-    transition: all 0.3s ease-in;
-    display: flex;
-    justify-content: center;
+  width: 75px;
+  margin: 50px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(${sideMenuWidth})
+  transition: all 0.3s ease-in;
+  display: flex;
+  justify-content: center;
 
-    opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
-        height: 2em;
-        width: auto;
-        margin-right: 0.5em;
-    }
-
-    img {
-        height: 2em;
-        width: auto;
-        margin-top: auto;
-        margin-bottom: auto;
-        transition: all 0.1s ease-in;
-    }
-
-    &:hover {
-        cursor: pointer;
-    }
+  opacity: ${(props) => (props.enabled ? '100%' : '38%')} img {
+    height: 2em;
+    width: auto;
+    margin-right: 0.5em;
+  } img {
+    height: 2em;
+    width: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    transition: all 0.1s ease-in;
+  } &: hover {
+    cursor: pointer;
+  }
 `;
 
 const NextButtonContainer = styled.div`
@@ -60,6 +56,7 @@ const NextButtonContainer = styled.div`
     height: 75px;
 
     opacity: ${(props) => (props.enabled ? '100%' : '38%')};
+
     p {
         flex: 1;
         text-transform: uppercase;

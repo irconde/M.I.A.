@@ -10,19 +10,13 @@ import {
     FormControlLabel,
     FormGroup,
     MenuItem,
+    Modal,
     Paper,
     Select,
-    Snackbar,
-    SnackbarContent,
     Switch,
     TextField,
-} from '@material-ui/core';
-import {
-    createTheme,
-    makeStyles,
-    ThemeProvider,
-} from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
+} from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/system';
 import {
     getSettingsVisibility,
     toggleSettingsVisibility,
@@ -242,240 +236,232 @@ const SettingsModal = (props) => {
         },
     });
 
-    const useStyles = makeStyles((theme) => {
-        return {
-            pathButton: {
-                color: '#367eff',
-                textTransform: 'none',
-                paddingLeft: theme.spacing(3),
-                paddingRight: theme.spacing(3),
-            },
-            snackBarClass: {
-                backgroundColor: '#1f1f1f',
-                color: '#ffffff',
-            },
-            workingDirectory: {
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-            },
-            checkIcon: {
-                margin: '0.3rem',
-                display: 'flex',
-            },
-            checkConnectionButton: {
-                color: '#367eff',
-                textTransform: 'none',
-                paddingLeft: theme.spacing(3),
-                paddingRight: theme.spacing(3),
-            },
-            remoteWorkContainer: {
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-            },
-            switchContainer: {
-                alignSelf: 'flex-end',
-            },
-            modal: {
-                boxShadow: theme.shadows[5],
-                padding: theme.spacing(2, 4, 4),
-            },
-            paper: {
-                padding: theme.spacing(1),
-                textAlign: 'center',
-                color: theme.palette.text.primary,
-            },
-            selector: {},
-            links: {
-                fontSize: theme.typography.fontSize,
-                color: theme.palette.primary,
-                cursor: 'pointer',
-            },
-            linkSelected: {
-                fontSize: theme.typography.fontSize,
-                color: theme.palette.primary,
-                background: '#515151',
-                cursor: 'pointer',
-            },
-            root: {
-                flexGrow: 1,
-            },
-            optionsContainer: {},
-            form: {
-                margin: theme.spacing(1),
-            },
-            formControl: {},
-            textField: {},
-            longTextField: {
-                // width: '-webkit-fill-available',
-                display: 'flex',
-                flexDirection: 'row',
-                width: '70%',
-            },
-            saveButton: {
-                marginTop: theme.spacing(2),
-                float: 'right',
-                backgroundColor: '#367eff',
-                display: 'flex',
-                alignSelf: 'flex-end',
+    const classes = {
+        pathButton: {
+            color: '#367eff',
+            textTransform: 'none',
+            paddingLeft: theme.spacing(3),
+            paddingRight: theme.spacing(3),
+        },
+        snackBarClass: {
+            backgroundColor: '#1f1f1f',
+            color: '#ffffff',
+        },
+        workingDirectory: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+        },
+        checkIcon: {
+            margin: '0.3rem',
+            display: 'flex',
+        },
+        checkConnectionButton: {
+            color: '#367eff',
+            textTransform: 'none',
+            paddingLeft: theme.spacing(3),
+            paddingRight: theme.spacing(3),
+        },
+        remoteWorkContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        switchContainer: {
+            alignSelf: 'flex-end',
+        },
+        modal: {
+            /*boxShadow: theme.shadows[5],*/
+            padding: theme.spacing(2, 4, 4),
+        },
+        paper: {
+            padding: theme.spacing(1),
+            textAlign: 'center',
+            /*color: theme.palette.text.primary,*/
+        },
+        selector: {},
+        links: {
+            /*fontSize: theme.typography.fontSize,*/
+            color: theme.palette.primary,
+            cursor: 'pointer',
+        },
+        linkSelected: {
+            /*fontSize: theme.typography.fontSize,*/
+            color: theme.palette.primary,
+            background: '#515151',
+            cursor: 'pointer',
+        },
+        root: {
+            flexGrow: 1,
+        },
+        optionsContainer: {},
+        form: {
+            margin: theme.spacing(1),
+        },
+        formControl: {},
+        textField: {},
+        longTextField: {
+            // width: '-webkit-fill-available',
+            display: 'flex',
+            flexDirection: 'row',
+            width: '70%',
+        },
+        saveButton: {
+            marginTop: theme.spacing(2),
+            float: 'right',
+            backgroundColor: '#367eff',
+            display: 'flex',
+            alignSelf: 'flex-end',
+            outline: 'none',
+            '&:hover': {
+                backgroundColor: '#5e97ff',
                 outline: 'none',
-                '&:hover': {
-                    backgroundColor: '#5e97ff',
-                    outline: 'none',
-                },
             },
-            connectionLabel: {
-                margin: 'auto',
-            },
-            connectionSection: {
-                display: 'flex',
-                flexShrink: '0',
-                flexDirection: 'row',
-                marginTop: theme.spacing(2),
-                marginBottom: theme.spacing(2),
-                justifyContent: 'flex-start',
-                alignContent: 'center',
-                alignItems: 'center',
-            },
-            circularProgress: {
-                marginRight: theme.spacing(2),
-                display: connecting ? 'none' : 'initial',
-            },
-            displayListSection: {
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                // alignItems: 'center',
-                marginBottom: theme.spacing(2),
-                marginTop: theme.spacing(4),
-            },
-            sectionLabel: {
-                marginRight: theme.spacing(2),
-            },
-            outputFolderSection: {
-                display: 'flex',
-                flexDirection: 'column',
-            },
-            container: {
-                display: 'flex',
-            },
-            greyText: {
-                color: '#9d9d9d',
-                fontSize: '12px',
-                margin: '0',
-                marginBottom: '2rem',
-            },
-            disabledText: {
-                color: '#9d9d9d',
-            },
-            settingsContainer: {
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                margin: '1rem 0',
-            },
-            settingsCogwheel: {
-                marginRight: '1rem',
-                marginLeft: '0',
-                width: '20px',
-                height: '20px',
-                alignSelf: 'center',
-            },
-            closeIconStyle: {
-                alignSelf: 'center',
-                width: '24px',
-                height: '24px',
-                cursor: 'pointer',
-            },
-            settingsText: {
-                objectFit: 'contain',
-                fontFamily: 'Noto Sans JP',
-                fontSize: '22px',
-                fontWeight: '500',
-                fontStretch: 'normal',
-                fontStyle: 'normal',
-                lineHeight: 'normal',
-                letterSpacing: 'normal',
-                color: '#fff',
-                flex: 'auto',
-                alignSelf: 'center',
-            },
-            optionText: {
-                fontFamily: 'Noto Sans JP',
-                fontSize: '1rem',
-                fontWeight: 'normal',
-                fontStretch: 'normal',
-                fontStyle: 'normal',
-                lineHeight: 'normal',
-                letterSpacing: 'normal',
-                color: '#fff',
-                marginBottom: '0.25rem',
-                marginTop: '0.75rem',
-            },
-            remoteInputContainer: {
-                display: 'inline-flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '70%',
-            },
-            cloudIconContainer: {
-                alignSelf: 'center',
-            },
-            autoConnectContainer: {
-                display: 'inline-block',
-                float: 'right',
-                color: '#9d9d9d',
-                marginTop: 'auto',
-            },
-            flexAuto: {
-                flex: 'auto',
-            },
-            remoteWorkRow: {
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '2rem',
-            },
-            displayListSectionItem: {
-                display: 'flex',
-                justifyContent: 'flex-start',
-                flexDirection: 'row',
-                flexGrow: '1',
-                width: '33%',
-            },
-            displayListSectionInput: {
-                width: '70%',
-            },
-        };
-    });
-
-    const classes = useStyles();
+        },
+        connectionLabel: {
+            margin: 'auto',
+        },
+        connectionSection: {
+            display: 'flex',
+            flexShrink: '0',
+            flexDirection: 'row',
+            marginTop: theme.spacing(2),
+            marginBottom: theme.spacing(2),
+            justifyContent: 'flex-start',
+            alignContent: 'center',
+            alignItems: 'center',
+        },
+        circularProgress: {
+            marginRight: theme.spacing(2),
+            display: connecting ? 'none' : 'initial',
+        },
+        displayListSection: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            // alignItems: 'center',
+            marginBottom: theme.spacing(2),
+            marginTop: theme.spacing(4),
+        },
+        sectionLabel: {
+            marginRight: theme.spacing(2),
+        },
+        outputFolderSection: {
+            display: 'flex',
+            flexDirection: 'column',
+        },
+        container: {
+            display: 'flex',
+        },
+        greyText: {
+            color: '#9d9d9d',
+            fontSize: '12px',
+            margin: '0',
+            marginBottom: '2rem',
+        },
+        disabledText: {
+            color: '#9d9d9d',
+        },
+        settingsContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            margin: '1rem 0',
+        },
+        settingsCogwheel: {
+            marginRight: '1rem',
+            marginLeft: '0',
+            width: '20px',
+            height: '20px',
+            alignSelf: 'center',
+        },
+        closeIconStyle: {
+            alignSelf: 'center',
+            width: '24px',
+            height: '24px',
+            cursor: 'pointer',
+        },
+        settingsText: {
+            objectFit: 'contain',
+            fontFamily: 'Noto Sans JP',
+            fontSize: '22px',
+            fontWeight: '500',
+            fontStretch: 'normal',
+            fontStyle: 'normal',
+            lineHeight: 'normal',
+            letterSpacing: 'normal',
+            color: '#fff',
+            flex: 'auto',
+            alignSelf: 'center',
+        },
+        optionText: {
+            fontFamily: 'Noto Sans JP',
+            fontSize: '1rem',
+            fontWeight: 'normal',
+            fontStretch: 'normal',
+            fontStyle: 'normal',
+            lineHeight: 'normal',
+            letterSpacing: 'normal',
+            color: '#fff',
+            marginBottom: '0.25rem',
+            marginTop: '0.75rem',
+        },
+        remoteInputContainer: {
+            display: 'inline-flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            width: '70%',
+        },
+        cloudIconContainer: {
+            alignSelf: 'center',
+        },
+        autoConnectContainer: {
+            display: 'inline-block',
+            float: 'right',
+            color: '#9d9d9d',
+            marginTop: 'auto',
+        },
+        flexAuto: {
+            flex: 'auto',
+        },
+        remoteWorkRow: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '2rem',
+        },
+        displayListSectionItem: {
+            display: 'flex',
+            justifyContent: 'flex-start',
+            flexDirection: 'row',
+            flexGrow: '1',
+            width: '33%',
+        },
+        displayListSectionInput: {
+            width: '70%',
+        },
+    };
 
     let body = (
-        <Paper style={modalStyle} elevation={3} className={classes.modal}>
-            <div className={classes.root}>
-                <div className={classes.settingsContainer}>
-                    <div className={classes.settingsCogwheel}>
+        <Paper style={modalStyle} elevation={3}>
+            <div>
+                <di>
+                    <div>
                         <SettingsCog title={props.title} />
                     </div>
-                    <div className={classes.settingsText}>Settings</div>
-                    <div
-                        onClick={() => handleClose()}
-                        className={classes.closeIconStyle}>
+                    <div>Settings</div>
+                    <div onClick={() => handleClose()}>
                         <IcCloseIcon />
                     </div>
-                </div>
+                </di>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
-                <FormGroup className={classes.formControl}>
-                    <div className={classes.optionsContainer}>
+                <FormGroup>
+                    <div>
                         <div>
-                            <div className={classes.remoteWorkContainer}>
-                                <p className={classes.optionText}>
-                                    Work connected to a remote service
-                                </p>
-                                <div className={classes.switchContainer}>
+                            <div>
+                                <p>Work connected to a remote service</p>
+                                <div>
                                     <Switch
                                         checked={remoteOrLocal}
                                         size="small"
@@ -491,7 +477,7 @@ const SettingsModal = (props) => {
                                 </div>
                             </div>
                             {isElectron() ? (
-                                <p className={classes.greyText}>
+                                <p>
                                     Choose the option if you want to
                                     receive/send images from/to a server
                                 </p>
@@ -499,9 +485,9 @@ const SettingsModal = (props) => {
                                 <></>
                             )}
 
-                            <div className={classes.remoteWorkRow}>
-                                <div className={classes.remoteInputContainer}>
-                                    <div className={classes.cloudIconContainer}>
+                            <div>
+                                <div>
+                                    <div>
                                         <CloudIcon
                                             style={svgContainerStyle}
                                             svgStyle={{
@@ -512,10 +498,9 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                     </div>
-                                    <FormControl className={classes.flexAuto}>
+                                    <FormControl>
                                         <TextField
                                             required
-                                            className={classes.textField}
                                             id="remoteIp"
                                             placeholder="Host"
                                             value={remoteIp}
@@ -531,15 +516,11 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                     </FormControl>
-                                    <span
-                                        className={classes.cloudIconContainer}>
-                                        :
-                                    </span>
+                                    <span>:</span>
                                     <FormControl>
                                         <TextField
                                             required
                                             id="remotePort"
-                                            className={classes.textField}
                                             placeholder="Port"
                                             value={remotePort}
                                             onChange={(e) => {
@@ -558,7 +539,7 @@ const SettingsModal = (props) => {
                                         />
                                     </FormControl>
                                 </div>
-                                <div className={classes.autoConnectContainer}>
+                                <div>
                                     <FormControlLabel
                                         control={
                                             <Checkbox
@@ -577,17 +558,16 @@ const SettingsModal = (props) => {
                                     />
                                 </div>
                             </div>
-                            <div className={classes.connectionSection}>
+                            <div>
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    className={classes.checkConnectionButton}
                                     disabled={!remoteOrLocal}
                                     onClick={() => {
                                         testConnection();
                                     }}>
                                     {connecting ? (
-                                        <div className={classes.checkIcon}>
+                                        <div>
                                             <CircularProgress size={'24px'} />
                                         </div>
                                     ) : (
@@ -616,17 +596,14 @@ const SettingsModal = (props) => {
                                 variant="middle"
                             />
                             <div>
-                                <p className={classes.optionText}>
-                                    File management
-                                </p>
-                                <p className={classes.greyText}>
+                                <p>File management</p>
+                                <p>
                                     Default file management options to
                                     streamline file input and output
                                 </p>
                                 {isElectron() ? (
-                                    <div className={classes.workingDirectory}>
-                                        <FormControl
-                                            className={classes.longTextField}>
+                                    <div>
+                                        <FormControl>
                                             <FileOpenIcon
                                                 style={svgContainerStyle}
                                                 svgStyle={{
@@ -658,7 +635,6 @@ const SettingsModal = (props) => {
                                             />
                                         </FormControl>
                                         <Button
-                                            className={classes.pathButton}
                                             disabled={remoteOrLocal}
                                             variant="outlined"
                                             size="medium"
@@ -693,28 +669,17 @@ const SettingsModal = (props) => {
                                 ) : (
                                     <></>
                                 )}
-                                <div className={classes.displayListSection}>
-                                    <div
-                                        className={
-                                            classes.displayListSectionItem
-                                        }>
+                                <div>
+                                    <div>
                                         <FileFormatIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            className={
-                                                classes.displayListSectionInput
-                                            }>
+                                        <FormControl>
                                             <Select
                                                 displayEmpty={true}
                                                 open={openFileFormat}
                                                 defaultValue="Open Raster"
-                                                className={
-                                                    fileFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
                                                 onClose={() => {
                                                     setOpenFileFormat(false);
                                                 }}
@@ -739,26 +704,15 @@ const SettingsModal = (props) => {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div
-                                        className={
-                                            classes.displayListSectionItem
-                                        }>
+                                    <div>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            className={
-                                                classes.displayListSectionInput
-                                            }>
+                                        <FormControl>
                                             <Select
                                                 displayEmpty={true}
                                                 open={openAnnotationsFormat}
-                                                className={
-                                                    annotationsFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
                                                 onClose={() => {
                                                     setOpenAnnotationsFormat(
                                                         false
@@ -802,21 +756,14 @@ const SettingsModal = (props) => {
                                             </Select>
                                         </FormControl>
                                     </div>
-                                    <div
-                                        className={
-                                            classes.displayListSectionItem
-                                        }>
+                                    <div>
                                         <FileSuffixIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            className={
-                                                classes.displayListSectionInput
-                                            }>
+                                        <FormControl>
                                             <TextField
                                                 required
-                                                className={classes.textField}
                                                 id="outputSuffix"
                                                 placeholder="Filename suffix"
                                                 value={fileSuffix}
@@ -837,7 +784,6 @@ const SettingsModal = (props) => {
                     </div>
 
                     <Button
-                        className={classes.saveButton}
                         variant="outlined"
                         onClick={() => saveSettingsEvent()}>
                         Save Settings
@@ -856,19 +802,6 @@ const SettingsModal = (props) => {
                 aria-describedby="control the apps remote and local settings">
                 {body}
             </Modal>
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                }}
-                open={snackBarOpen}
-                autoHideDuration={3000}
-                onClose={handleSnackBarClose}>
-                <SnackbarContent
-                    message="Settings Saved"
-                    className={classes.snackBarClass}
-                />
-            </Snackbar>
         </ThemeProvider>
     );
 };
