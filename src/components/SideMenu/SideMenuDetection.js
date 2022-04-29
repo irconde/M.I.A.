@@ -54,8 +54,8 @@ const SideMenuDetection = ({
         paddingBottom: '0.45rem',
     };
     const eyeStyle = {
-        height: '1.5rem',
-        width: '1.5rem',
+        height: '20px',
+        width: '20px',
         display: 'inline-block',
         float: 'right',
         marginRight: '1.0rem',
