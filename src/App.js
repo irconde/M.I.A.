@@ -315,6 +315,7 @@ class App extends Component {
         this.state.imageViewportTop.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
+                event.stopImmediatePropagation();
                 this.onNewPolygonMaskCreated(
                     event,
                     this.state.imageViewportTop
@@ -362,6 +363,7 @@ class App extends Component {
         this.state.imageViewportSide.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
+                event.stopImmediatePropagation();
                 this.onNewPolygonMaskCreated(
                     event,
                     this.state.imageViewportSide
@@ -2774,6 +2776,7 @@ class App extends Component {
      * @param {DOMElement} viewport - The Cornerstone Viewport receiving the event
      */
     onNewPolygonMaskCreated(event, viewport) {
+        console.log('onNewPolygonMaskCreated');
         if (
             this.props.cornerstoneMode ===
                 constants.cornerstoneMode.ANNOTATION &&
