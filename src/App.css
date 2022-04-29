@@ -132,14 +132,22 @@ body {
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+}
+
+.lazy-image-text-container {
+    display: flex;
+    position: absolute;
+    margin-top: 93%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    width: 80%;
 }
 
 .lazy-image-text {
-    position: absolute;
-    display: flex;
-    margin-top: 93%;
-    margin-right: 56%;
+    display: inline-block;
     opacity: 0.6;
     font-size: 12px;
     font-weight: normal;
@@ -147,8 +155,12 @@ body {
     font-style: normal;
     line-height: normal;
     letter-spacing: -0.5px;
-    text-align: center;
     color: #e3e3e3;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 117px;
+    margin-right: 4px;
 }
 
 .images-in-workspace {

@@ -116,11 +116,7 @@ function LazyImageContainer(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
-    const svgContainerStyle = {
-        display: 'flex',
-        marginRight: '3%',
-        marginLeft: '3%',
-    };
+    const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
     const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
@@ -141,8 +137,8 @@ function LazyImageContainer(props) {
                     alt={thisFileName}
                 />
             ) : null}
-            <span className="lazy-image-text">
-                {thisFileName}
+            <div className="lazy-image-text-container">
+                <span className="lazy-image-text">{thisFileName}</span>
                 {numOfViews > 1 ? (
                     <TwoViewIcon
                         style={svgContainerStyle}
@@ -160,7 +156,7 @@ function LazyImageContainer(props) {
                         svgStyle={svgImageStyle}
                     />
                 ) : null}
-            </span>
+            </div>
         </ImageContainer>
     );
 }
