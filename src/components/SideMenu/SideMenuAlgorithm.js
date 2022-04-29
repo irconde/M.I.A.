@@ -62,7 +62,6 @@ const SideMenuAlgorithm = ({
         marginRight: '1.0rem',
     };
     const typeStyles = {
-        fontSize: 14,
         verticalAlign: 'super',
         fontFamily: 'Noto Sans JP',
         display: 'inline-block',
