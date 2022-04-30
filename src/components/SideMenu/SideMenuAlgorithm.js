@@ -11,6 +11,7 @@ import {
     updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+import { findByLabelText } from '@testing-library/react';
 
 /**
  * Helper component for SideMenu component that allows user to view and sort detections by algorithm
@@ -60,13 +61,15 @@ const SideMenuAlgorithm = ({
         display: 'inline-block',
         float: 'right',
         marginRight: '1.0rem',
+        paddingTop: '0.2rem',
     };
     const typeStyles = {
-        verticalAlign: 'super',
+        verticalAlign: 'top', //top is a good possibility for this if I don't change others
         fontFamily: 'Noto Sans JP',
         display: 'inline-block',
         margin: 'auto',
         cursor: 'default',
+        paddingTop: '0.2rem',
     };
     const containerStyle = {
         paddingBottom: '0.75rem',
