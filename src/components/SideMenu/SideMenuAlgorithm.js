@@ -4,6 +4,7 @@ import TreeDetection from './SideMenuDetection';
 import * as Icons from './Icons';
 import * as constants from '../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
+import Utils from '../../utils/Utils';
 import {
     clearAllSelection,
     getSelectedAlgorithm,
@@ -64,7 +65,7 @@ const SideMenuAlgorithm = ({
         paddingTop: '0.2rem',
     };
     const typeStyles = {
-        verticalAlign: 'top', //top is a good possibility for this if I don't change others
+        verticalAlign: 'top',
         fontFamily: 'Noto Sans JP',
         display: 'inline-block',
         margin: 'auto',
@@ -125,6 +126,14 @@ const SideMenuAlgorithm = ({
             }
         }
     };
+
+    let algorithmDisplay =
+        algorithm === constants.OPERATOR
+                        ? algorithm
+                        : constants.ALGORITHM + ' - ' + algorithm;
+
+    algorithmDisplay = Utils.truncateString(algorithmDisplay, 20);
+
     return (
         <div>
             <div
@@ -158,9 +167,7 @@ const SideMenuAlgorithm = ({
                             ? typeStyles
                             : { ...typeStyles, color: 'gray' }
                     }>
-                    {algorithm === constants.OPERATOR
-                        ? algorithm
-                        : constants.ALGORITHM + ' - ' + algorithm}
+                    {algorithmDisplay}
                 </div>
                 {anyVisible ? (
                     <Icons.EyeO
