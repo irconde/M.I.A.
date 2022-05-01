@@ -199,7 +199,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  * @returns {Promise}
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         dialog.showSaveDialog().then((result) => {
             if (!result.canceled) {
                 fs.writeFile(result.filePath, args, (error) => {
@@ -214,7 +214,6 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
             }
         });
     });
-    return result;
 });
 
 /**
@@ -224,7 +223,7 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
  * @returns {string}
  */
 ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const splitPath = args.split(process.platform === 'win32' ? '\\' : '/');
         if (splitPath.length > 0) {
             const fileName = splitPath[splitPath.length - 1];
@@ -235,13 +234,17 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
                 reject('Thumbnail does not exist for that file');
             } else {
                 const fileData = fs.readFileSync(foundThumbnail.thumbnailPath);
-                resolve(Buffer.from(fileData).toString('base64'));
+                resolve({
+                    fileName,
+                    fileData: Buffer.from(fileData).toString('base64'),
+                    numOfViews: foundThumbnail.numOfViews,
+                    isDetections: foundThumbnail.isDetections,
+                });
             }
         } else {
             reject('Could not determine file name from that path');
         }
     });
-    return result;
 });
 
 /**
@@ -544,64 +547,75 @@ const parseThumbnail = async (filePath) => {
                                 const dataType = validateImageExtension(
                                     result.image.stack[topIndex].layer[0].$.src
                                 );
-                                if (
-                                    dataType.result &&
-                                    dataType.type ===
+                                if (dataType.result) {
+                                    let isDetections = false;
+                                    result.image.stack.forEach((stack) => {
+                                        if (stack.layer.length > 1)
+                                            isDetections = true;
+                                    });
+                                    const numOfViews =
+                                        result.image.stack.length;
+                                    if (
+                                        dataType.type ===
                                         Constants.Settings.ANNOTATIONS.COCO
-                                ) {
-                                    myZip
-                                        .file(
-                                            result.image.stack[topIndex]
-                                                .layer[0].$.src
-                                        )
-                                        .async('nodebuffer')
-                                        .then((imageData) => {
-                                            generateCocoThumbnail({
-                                                fileName,
-                                                thumbnailSavePath,
-                                                pixelData: imageData,
+                                    ) {
+                                        myZip
+                                            .file(
+                                                result.image.stack[topIndex]
+                                                    .layer[0].$.src
+                                            )
+                                            .async('nodebuffer')
+                                            .then((imageData) => {
+                                                generateCocoThumbnail({
+                                                    fileName,
+                                                    thumbnailSavePath,
+                                                    pixelData: imageData,
+                                                    numOfViews,
+                                                    isDetections,
+                                                })
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             })
-                                                .then(() => resolve())
-                                                .catch((error) =>
-                                                    reject(error)
-                                                );
-                                        })
-                                        .catch((error) => {
-                                            console.log(error);
-                                            reject(error);
-                                        });
-                                } else if (
-                                    dataType.result &&
-                                    dataType.type ===
+                                            .catch((error) => {
+                                                console.log(error);
+                                                reject(error);
+                                            });
+                                    } else if (
+                                        dataType.type ===
                                         Constants.Settings.ANNOTATIONS.TDR
-                                ) {
-                                    myZip
-                                        .file(
-                                            result.image.stack[topIndex]
-                                                .layer[0].$.src
-                                        )
-                                        .async('arraybuffer')
-                                        .then((imageData) => {
-                                            const dicosPngData =
-                                                dicosToPngData(imageData);
-                                            generateTdrThumbnail({
-                                                fileName,
-                                                thumbnailSavePath,
-                                                pixelData:
-                                                    dicosPngData.pixelData,
-                                                width: dicosPngData.width,
-                                                height: dicosPngData.height,
+                                    ) {
+                                        myZip
+                                            .file(
+                                                result.image.stack[topIndex]
+                                                    .layer[0].$.src
+                                            )
+                                            .async('arraybuffer')
+                                            .then((imageData) => {
+                                                const dicosPngData =
+                                                    dicosToPngData(imageData);
+                                                generateTdrThumbnail({
+                                                    fileName,
+                                                    thumbnailSavePath,
+                                                    pixelData:
+                                                        dicosPngData.pixelData,
+                                                    width: dicosPngData.width,
+                                                    height: dicosPngData.height,
+                                                    numOfViews,
+                                                    isDetections,
+                                                })
+                                                    .then(() => resolve())
+                                                    .catch((error) =>
+                                                        reject(error)
+                                                    );
                                             })
-                                                .then(() => resolve())
-                                                .catch((error) =>
-                                                    reject(error)
-                                                );
-                                        })
-                                        .catch((error) => {
-                                            console.log(error);
-                                            reject(error);
-                                        });
-                                } else reject('Incorrect data type');
+                                            .catch((error) => {
+                                                console.log(error);
+                                                reject(error);
+                                            });
+                                    } else reject('Incorrect data type');
+                                } else reject('Invalid file');
                             } else {
                                 console.log(error);
                                 reject(error);
@@ -666,7 +680,7 @@ const dicosToPngData = (imageData) => {
 
 /**
  * Generate a TDR thumbnail
- * @param {{fileName: string; thumbnailSavePath: string; pixelData: Uint8ClampedArray; width: Number; height: Number;}} newThumbnail
+ * @param {{fileName: string; thumbnailSavePath: string; pixelData: Uint8ClampedArray; width: Number; height: Number; numOfViews: Number; isDetections: Boolean;}} newThumbnail
  * @returns {Promise}
  */
 const generateTdrThumbnail = (newThumbnail) => {
@@ -686,6 +700,8 @@ const generateTdrThumbnail = (newThumbnail) => {
                     thumbnails.push({
                         fileName: newThumbnail.fileName,
                         thumbnailPath: newThumbnail.thumbnailSavePath,
+                        numOfViews: newThumbnail.numOfViews,
+                        isDetections: newThumbnail.isDetections,
                     });
                     resolve();
                 })
@@ -700,7 +716,7 @@ const generateTdrThumbnail = (newThumbnail) => {
 
 /**
  * Generate a COCO thumbnail
- * @param {{fileName: string; thumbnailSavePath: string; pixelData: Buffer;}} newThumbnail
+ * @param {{fileName: string; thumbnailSavePath: string; pixelData: Buffer; numOfViews: Number; isDetections: Boolean;}} newThumbnail
  * @returns {Promise}
  */
 const generateCocoThumbnail = (newThumbnail) => {
@@ -713,6 +729,8 @@ const generateCocoThumbnail = (newThumbnail) => {
                     thumbnails.push({
                         fileName: newThumbnail.fileName,
                         thumbnailPath: newThumbnail.thumbnailSavePath,
+                        numOfViews: newThumbnail.numOfViews,
+                        isDetections: newThumbnail.isDetections,
                     });
                     resolve();
                 })
