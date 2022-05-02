@@ -29,9 +29,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         super(props, defaultProps);
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked on mouse move to know whether the mouse pointer is
-    // over (or close to) the rectangle's border
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked on mouse move to know whether the mouse pointer is over (or close to) the rectangle's border
+     *
+     * @param {HTMLElement} element HTML Element where mouse is over
+     * @param {{handles: {start: number, end: number}}} data HTML Element where mouse is over
+     * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
+     * @returns {boolean}
+     */
     pointNearTool(element, data, coords, interactionType) {
         const hasStartAndEndHandles =
             data && data.handles && data.handles.start && data.handles.end;
