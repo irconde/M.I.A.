@@ -199,10 +199,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     *
-     *
-     * @param {*} evt
-     * @returns {undefined}
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked to render all the widgets that comprise a detection
+     * @param {*} evt Event object containing necessary event/canvas data
      */
     renderToolData(evt) {
         const eventData = evt.detail;

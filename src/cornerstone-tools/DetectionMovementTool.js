@@ -63,8 +63,11 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
         }
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked to render all the widgets that comprise a detection
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked to render all the widgets that comprise a detection
+     * @param {*} evt Event object containing necessary event/canvas data
+     */
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {

@@ -35,10 +35,10 @@ export default class Utils {
     }
 
     /**
-     * @static Converts a decimal value into a percentage
+     * Converts a decimal value into a percentage
      *
-     * @param {number} num - Float value <= 1.0 with common decimal format
-     * @returns {number} - Percentage equivalent to the given input float value
+     * @param {number} num Float value <= 1.0 with common decimal format
+     * @returns {number} Percentage equivalent to the given input float value
      */
     static decimalToPercentage(num) {
         return Math.floor(num * 100);
