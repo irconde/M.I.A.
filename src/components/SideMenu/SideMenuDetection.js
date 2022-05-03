@@ -31,8 +31,8 @@ const SideMenuDetection = ({
     const dispatch = useDispatch();
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
     const detectionBGStyle = {
-        width: '0.75rem',
-        height: '0.75rem',
+        width: '10px',
+        height: '10px',
         display: 'inline-block',
         border: '0.0625rem solid rgba(220,220,220,0.4)',
         marginLeft: '2.4rem',
@@ -50,8 +50,8 @@ const SideMenuDetection = ({
         paddingBottom: '0.45rem',
     };
     const eyeStyle = {
-        height: '1.5rem',
-        width: '1.5rem',
+        height: '20px',
+        width: '20px',
         display: 'inline-block',
         float: 'right',
         marginRight: '1.0rem',

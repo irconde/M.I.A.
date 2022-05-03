@@ -4,6 +4,7 @@ import TreeDetection from './SideMenuDetection';
 import * as Icons from './Icons';
 import * as constants from '../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
+import Utils from '../../utils/Utils';
 import {
     clearAllSelection,
     getSelectedAlgorithm,
@@ -11,6 +12,7 @@ import {
     updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+import { findByLabelText } from '@testing-library/react';
 
 /**
  * Helper component for SideMenu component that allows user to view and sort detections by algorithm
@@ -51,19 +53,20 @@ const SideMenuAlgorithm = ({
             : constants.ZERO_DEGREE_TRANSFORM,
     };
     const eyeStyle = {
-        height: '1.5rem',
-        width: '1.5rem',
+        height: '20px',
+        width: '20px',
         display: 'inline-block',
         float: 'right',
         marginRight: '1.0rem',
+        paddingTop: '0.2rem',
     };
     const typeStyles = {
-        fontSize: 14,
-        verticalAlign: 'super',
+        verticalAlign: 'top',
         fontFamily: 'Noto Sans JP',
         display: 'inline-block',
         margin: 'auto',
         cursor: 'default',
+        paddingTop: '0.2rem',
     };
     const containerStyle = {
         paddingBottom: '0.75rem',
@@ -119,6 +122,14 @@ const SideMenuAlgorithm = ({
             }
         }
     };
+
+    let algorithmDisplay =
+        algorithm === constants.OPERATOR
+                        ? algorithm
+                        : constants.ALGORITHM + ' - ' + algorithm;
+
+    algorithmDisplay = Utils.truncateString(algorithmDisplay, 20);
+
     return (
         <div>
             <div
@@ -152,9 +163,7 @@ const SideMenuAlgorithm = ({
                             ? typeStyles
                             : { ...typeStyles, color: 'gray' }
                     }>
-                    {algorithm === constants.OPERATOR
-                        ? algorithm
-                        : constants.ALGORITHM + ' - ' + algorithm}
+                    {algorithmDisplay}
                 </div>
                 {anyVisible ? (
                     <Icons.EyeO
