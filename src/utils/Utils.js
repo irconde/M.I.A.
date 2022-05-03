@@ -692,7 +692,7 @@ export default class Utils {
      * Converts a list of handles into an array of float values representing the coordinates of a polygon
      *
      * @param {Array<number>} coordArray - The coordinates of a rectangle's diagonals (x_1, y_1, x_2, y_2, ...x_n, y_n )
-     * @returns {Array<{x: number; y: number;}>} - List of handles, i.e., the vertices, of a polygon
+     * @returns {Array<{x: number, y: number}>} - List of handles, i.e., the vertices, of a polygon
      */
     static coordArrayToPolygonData(coordArray) {
         let data = {};

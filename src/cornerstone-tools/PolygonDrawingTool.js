@@ -118,7 +118,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * @param {{handles: points: Array<number>}} data HTML Element where mouse is over
+     * @param {{handles: {points: Array<number>}}} data HTML Element where mouse is over
      * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
      * @returns {number} the distance in px from the provided coordinates to the
      * closest rendered portion of the annotation. -1 if the distance cannot be
