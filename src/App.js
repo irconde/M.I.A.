@@ -89,6 +89,9 @@ import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+import Ensemble from './utils/Ensemble';
+
+let testLoaded = false;
 
 let ipcRenderer;
 if (isElectron()) {
@@ -1924,9 +1927,18 @@ class App extends Component {
      * @param {Event} e
      */
     onImageRendered(e) {
+        if (!testLoaded && this.props.detections.length > 0) {
+            const enesmblingAlgorithm = new Ensemble(this.props.detections);
+            enesmblingAlgorithm.toString();
+            testLoaded = true;
+        }
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.TOP) detections.push(det);
+            });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1936,10 +1948,6 @@ class App extends Component {
                     zoomLevelTop: eventData.viewport.scale,
                 });
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.TOP) detections.push(det);
-            });
             if (
                 this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
@@ -1952,6 +1960,10 @@ class App extends Component {
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
+            let detections = [];
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.SIDE) detections.push(det);
+            });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1961,10 +1973,6 @@ class App extends Component {
                     zoomLevelSide: eventData.viewport.scale,
                 });
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.SIDE) detections.push(det);
-            });
             this.renderDetections(detections, context);
             if (
                 this.props.cornerstoneMode ===
