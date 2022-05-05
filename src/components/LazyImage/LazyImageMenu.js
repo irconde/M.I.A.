@@ -98,11 +98,6 @@ function LazyImageMenu(props) {
                     style={{
                         ...translateStyle,
                     }}>
-                    <div
-                        className="lazy-images-container"
-                        style={{
-                            width: sideMenuWidth,
-                        }}>
                         <p className="images-in-workspace">
                             <FileOpenIcon
                                 style={svgContainerStyle}
@@ -113,6 +108,11 @@ function LazyImageMenu(props) {
                             />
                             Images in Workspace
                         </p>
+                    <div
+                        className="lazy-images-container"
+                        style={{
+                            width: sideMenuWidth,
+                        }}>
                         {props.thumbnails !== null
                             ? props.thumbnails.map((file, index) => {
                                   return (
