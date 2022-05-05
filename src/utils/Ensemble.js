@@ -1,20 +1,19 @@
 export default class Ensemble {
     _bLists = new BListManager();
-    _initialDetections = [];
 
     constructor(detections) {
-        this._initialDetections = detections;
-        this._sortDetections();
+        this._sortDetections(detections);
     }
 
-    _sortDetections = () => {
-        for (let i = 0; i < this._initialDetections.length; i++) {
-            this._bLists.addDetection(this._initialDetections[i]);
+    _sortDetections = (detections) => {
+        for (let i = 0; i < detections.length; i++) {
+            this._bLists.addDetection(detections[i]);
         }
-        /*this._initialDetections.forEach((det) =>
-this._bLists.addDetection(det)
-);*/
     };
+
+    addDetection = (detection) => {
+        this._bLists.addDetection(detection)
+    }
 
     toString = () => {
         // TODO: Testing method to print out the data
@@ -30,15 +29,15 @@ class BListManager {
             this._lists[0].addItem(detection);
         } else {
             const index = this._lists.findIndex(
-                (value) =>
-                    value.view === detection.view &&
-                    value.className === detection.className
+              (value) =>
+                value.view === detection.view &&
+                value.className === detection.className
             );
             if (index !== -1) {
                 this._lists[index].addItem(detection);
             } else {
                 this._lists.push(
-                    new BList(detection.view, detection.className)
+                  new BList(detection.view, detection.className)
                 );
                 this._lists[this._lists.length - 1].addItem(detection);
             }
@@ -59,9 +58,7 @@ class BList {
     addItem = (detection) => {
         this.items.push(detection);
         if (this.items.length > 1) {
-            this.items = this.items
-                .slice()
-                .sort((a, b) => this._compareConfidence(a, b));
+            this.items = this.items.slice().sort(this._compareConfidence);
         }
     };
 
