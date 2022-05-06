@@ -1,3 +1,5 @@
+// TODO: Convert this into the detections slice. Sort the BLists anytime a detection is added or deleted but now
+//       simply keep the uuid reference in the BLists rather than the entire detection
 export default class Ensemble {
     _bLists = new BListManager();
 
@@ -12,8 +14,8 @@ export default class Ensemble {
     };
 
     addDetection = (detection) => {
-        this._bLists.addDetection(detection)
-    }
+        this._bLists.addDetection(detection);
+    };
 
     toString = () => {
         // TODO: Testing method to print out the data
@@ -29,15 +31,15 @@ class BListManager {
             this._lists[0].addItem(detection);
         } else {
             const index = this._lists.findIndex(
-              (value) =>
-                value.view === detection.view &&
-                value.className === detection.className
+                (value) =>
+                    value.view === detection.view &&
+                    value.className === detection.className
             );
             if (index !== -1) {
                 this._lists[index].addItem(detection);
             } else {
                 this._lists.push(
-                  new BList(detection.view, detection.className)
+                    new BList(detection.view, detection.className)
                 );
                 this._lists[this._lists.length - 1].addItem(detection);
             }
