@@ -89,9 +89,6 @@ import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
-import Ensemble from './utils/Ensemble';
-
-let testLoaded = false;
 
 let ipcRenderer;
 if (isElectron()) {
@@ -1927,11 +1924,6 @@ class App extends Component {
      * @param {Event} e
      */
     onImageRendered(e) {
-        if (!testLoaded && this.props.detections.length > 0) {
-            const enesmblingAlgorithm = new Ensemble(this.props.detections);
-            enesmblingAlgorithm.toString();
-            testLoaded = true;
-        }
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
@@ -3546,92 +3538,92 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections, ui, settings } = state;
-    return {
-        // Socket connection state
-        numFilesInQueue: server.numFilesInQueue,
-        currentProcessingFile: server.currentProcessingFile,
-        // Detections and Selection state
-        detections: detections.detections,
-        selectedDetection: detections.selectedDetection,
-        // UI
-        cornerstoneMode: ui.cornerstoneMode,
-        annotationMode: ui.annotationMode,
-        zoomLevelTop: ui.zoomLevelTop,
-        zoomLevelSide: ui.zoomLevelSide,
-        imageViewportTop: ui.imageViewportTop,
-        imageViewportSide: ui.imageViewportSide,
-        singleViewport: ui.singleViewport,
-        isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
-        editionMode: ui.editionMode,
-        inputLabel: ui.inputLabel,
-        collapsedSideMenu: ui.collapsedSideMenu,
-        collapsedLazyMenu: ui.collapsedLazyMenu,
-        colorPickerVisible: ui.colorPickerVisible,
-        currentFileFormat: ui.currentFileFormat,
-        // Settings
-        remoteIp: settings.settings.remoteIp,
-        remotePort: settings.settings.remotePort,
-        autoConnect: settings.settings.autoConnect,
-        fileFormat: settings.settings.fileFormat,
-        fileSuffix: settings.settings.fileSuffix,
-        firstDisplaySettings: settings.settings.firstDisplaySettings,
-        annotationsFormat: settings.settings.annotationsFormat,
-        remoteOrLocal: settings.settings.remoteOrLocal,
-        hasFileOutput: settings.settings.hasFileOutput,
-        deviceType: settings.settings.deviceType,
-        localFileOutput: settings.settings.localFileOutput,
-    };
+  const { server, detections, ui, settings } = state;
+  return {
+    // Socket connection state
+    numFilesInQueue: server.numFilesInQueue,
+    currentProcessingFile: server.currentProcessingFile,
+    // Detections and Selection state
+    detections: detections.detections,
+    selectedDetection: detections.selectedDetection,
+    // UI
+    cornerstoneMode: ui.cornerstoneMode,
+    annotationMode: ui.annotationMode,
+    zoomLevelTop: ui.zoomLevelTop,
+    zoomLevelSide: ui.zoomLevelSide,
+    imageViewportTop: ui.imageViewportTop,
+    imageViewportSide: ui.imageViewportSide,
+    singleViewport: ui.singleViewport,
+    isEditLabelWidgetVisible: ui.isEditLabelWidgetVisible,
+    editionMode: ui.editionMode,
+    inputLabel: ui.inputLabel,
+    collapsedSideMenu: ui.collapsedSideMenu,
+    collapsedLazyMenu: ui.collapsedLazyMenu,
+    colorPickerVisible: ui.colorPickerVisible,
+    currentFileFormat: ui.currentFileFormat,
+    // Settings
+    remoteIp: settings.settings.remoteIp,
+    remotePort: settings.settings.remotePort,
+    autoConnect: settings.settings.autoConnect,
+    fileFormat: settings.settings.fileFormat,
+    fileSuffix: settings.settings.fileSuffix,
+    firstDisplaySettings: settings.settings.firstDisplaySettings,
+    annotationsFormat: settings.settings.annotationsFormat,
+    remoteOrLocal: settings.settings.remoteOrLocal,
+    hasFileOutput: settings.settings.hasFileOutput,
+    deviceType: settings.settings.deviceType,
+    localFileOutput: settings.settings.localFileOutput
+  };
 };
 
 const mapDispatchToProps = {
-    setDownload,
-    setUpload,
-    setNumFilesInQueue,
-    setProcessingHost,
-    setCurrentProcessingFile,
-    resetDetections,
-    updateDetection,
-    addDetection,
-    addDetections,
-    clearAllSelection,
-    selectDetection,
-    selectDetectionSet,
-    editDetectionLabel,
-    deleteDetection,
-    validateDetections,
-    updateDetectionSetVisibility,
-    updateFABVisibility,
-    updateIsDetectionContextVisible,
-    updateCornerstoneMode,
-    updateEditionMode,
-    emptyAreaClickUpdate,
-    onMouseLeaveNoFilesUpdate,
-    detectionSelectedUpdate,
-    labelSelectedUpdate,
-    deleteDetectionUpdate,
-    exitEditionModeUpdate,
-    updateDetectionContextPosition,
-    updateZoomLevels,
-    updateZoomLevelTop,
-    updateZoomLevelSide,
-    selectConfigInfoUpdate,
-    newFileReceivedUpdate,
-    hideContextMenuUpdate,
-    resetSelectedDetectionBoxesUpdate,
-    resetSelectedDetectionBoxesElseUpdate,
-    onDragEndWidgetUpdate,
-    onLabelEditionEnd,
-    updateDetectionVisibility,
-    setInputLabel,
-    setConnected,
-    setReceiveTime,
-    colorPickerToggle,
-    updateMissMatchedClassName,
-    setLocalFileOpen,
-    updateEditLabelPosition,
-    updateRecentScroll,
-    setCurrentFileFormat,
+  setDownload,
+  setUpload,
+  setNumFilesInQueue,
+  setProcessingHost,
+  setCurrentProcessingFile,
+  resetDetections,
+  updateDetection,
+  addDetection,
+  addDetections,
+  clearAllSelection,
+  selectDetection,
+  selectDetectionSet,
+  editDetectionLabel,
+  deleteDetection,
+  validateDetections,
+  updateDetectionSetVisibility,
+  updateFABVisibility,
+  updateIsDetectionContextVisible,
+  updateCornerstoneMode,
+  updateEditionMode,
+  emptyAreaClickUpdate,
+  onMouseLeaveNoFilesUpdate,
+  detectionSelectedUpdate,
+  labelSelectedUpdate,
+  deleteDetectionUpdate,
+  exitEditionModeUpdate,
+  updateDetectionContextPosition,
+  updateZoomLevels,
+  updateZoomLevelTop,
+  updateZoomLevelSide,
+  selectConfigInfoUpdate,
+  newFileReceivedUpdate,
+  hideContextMenuUpdate,
+  resetSelectedDetectionBoxesUpdate,
+  resetSelectedDetectionBoxesElseUpdate,
+  onDragEndWidgetUpdate,
+  onLabelEditionEnd,
+  updateDetectionVisibility,
+  setInputLabel,
+  setConnected,
+  setReceiveTime,
+  colorPickerToggle,
+  updateMissMatchedClassName,
+  setLocalFileOpen,
+  updateEditLabelPosition,
+  updateRecentScroll,
+  setCurrentFileFormat
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

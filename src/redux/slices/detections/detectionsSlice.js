@@ -1,9 +1,9 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import Utils from '../../../utils/Utils';
-import {Cookies} from 'react-cookie';
+import { Cookies } from 'react-cookie';
 
 // interface Detection {
 //     // Unique Identifier
@@ -56,6 +56,7 @@ if (cookieData !== undefined) {
 
 const initialState = {
     detections: [],
+    summarizedDetections: [],
     // Selection data
     /** @type string */
     selectedAlgorithm: '',
@@ -67,6 +68,7 @@ const initialState = {
     detectionLabels: [],
     detectionChanged: false,
     missMatchedClassNames,
+    bLists: [],
 };
 
 const detectionsSlice = createSlice({
@@ -152,6 +154,37 @@ const detectionsSlice = createSlice({
             }
             if (!detectionFromFile) {
                 state.detectionChanged = true;
+            }
+            // bList sorting
+            const bListRef = {
+                uuid: state.detections[state.detections.length - 1].uuid,
+                confidence:
+                    state.detections[state.detections.length - 1].confidence,
+            };
+            if (state.bLists.length === 0) {
+                state.bLists[0] = {
+                    view,
+                    className,
+                    items: [bListRef],
+                };
+            } else {
+                const index = state.bLists.findIndex(
+                    (value) =>
+                        value.view === view && value.className === className
+                );
+                if (index !== -1) {
+                    state.bLists[index].items.push(bListRef);
+                    state.bLists[index].items.sort((a, b) => {
+                        if (a.confidence > b.confidence) return 1;
+                        else return -1;
+                    });
+                } else {
+                    state.bLists.push({
+                        view,
+                        className,
+                        items: [bListRef],
+                    });
+                }
             }
         },
 
@@ -313,6 +346,11 @@ const detectionsSlice = createSlice({
         deleteDetection: (state, action) => {
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
+            });
+            state.bLists.forEach((bList) => {
+                bList.items = bList.items.filter((det) => {
+                    return det.uuid !== action.payload;
+                });
             });
             state.detectionChanged = true;
         },
