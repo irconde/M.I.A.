@@ -175,7 +175,7 @@ const detectionsSlice = createSlice({
                 if (index !== -1) {
                     state.bLists[index].items.push(bListRef);
                     state.bLists[index].items.sort((a, b) => {
-                        if (a.confidence > b.confidence) return 1;
+                        if (a.confidence < b.confidence) return 1;
                         else return -1;
                     });
                 } else {
