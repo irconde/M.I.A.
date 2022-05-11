@@ -1,9 +1,9 @@
 import { createSlice, current } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
-import { v4 as uuidv4 } from 'uuid';
 import Utils from '../../../utils/Utils';
 import { Cookies } from 'react-cookie';
+import { calculateIoU } from '../../../utils/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier
@@ -450,37 +450,41 @@ const detectionsSlice = createSlice({
                         console.log(e);
                     }
                 });
-                const xA = Math.max(
-                    detTest[0].boundingBox[0],
-                    detTest[1].boundingBox[0]
+                const lList = [],
+                    fList = [];
+                const firstDet = detTest.shift();
+                lList.push([firstDet]);
+                fList.push(firstDet);
+                for (let i = 0; i < detTest.length; i++) {
+                    for (let j = 0; j < fList.length; j++) {
+                        const IoU = calculateIoU(detTest[i], fList[j]);
+                        console.log(IoU);
+                        if (IoU > 0.55) {
+                            lList[j].push(detTest[i]);
+                        } else {
+                            lList.push([detTest[i]]);
+                            fList.push(detTest[i]);
+                        }
+                    }
+                }
+                console.log(
+                    '-------------------- Start lList items --------------------'
                 );
-                const xB = Math.max(
-                    detTest[0].boundingBox[2],
-                    detTest[1].boundingBox[2]
+                lList.forEach((subList, index) => {
+                    console.log(`Index: ${index}`);
+                    subList.forEach((item) => console.log(current(item)));
+                });
+                console.log(
+                    '-------------------- End lList items --------------------'
                 );
-                const yA = Math.max(
-                    detTest[0].boundingBox[1],
-                    detTest[1].boundingBox[1]
+                console.log(
+                    '-------------------- Start fList items --------------------'
                 );
-                const yB = Math.max(
-                    detTest[0].boundingBox[3],
-                    detTest[1].boundingBox[3]
+                fList.forEach((item) => console.log(current(item)));
+                console.log(
+                    '-------------------- End fList items --------------------'
                 );
-
-                const interArea = Math.max(xB - xA, 0) * Math.max(yB - yA, 0);
-                console.log(`interArea: ${interArea}`);
-                const areaA = Math.abs(
-                    (detTest[0].boundingBox[2] - detTest[0].boundingBox[0]) *
-                        (detTest[0].boundingBox[3] - detTest[0].boundingBox[1])
-                );
-                const areaB = Math.abs(
-                    (detTest[1].boundingBox[2] - detTest[1].boundingBox[0]) *
-                        (detTest[1].boundingBox[3] - detTest[1].boundingBox[1])
-                );
-                console.log(`area a: ${areaA}`);
-                console.log(`area b: ${areaB}`);
-                const iou = interArea / (areaA + areaB - interArea);
-                console.log(`iou: ${iou}`);
+                // TODO: Recalculate fList boxes based on lLists boxes at same pos
             });
         },
     },
