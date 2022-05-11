@@ -35,7 +35,6 @@ import {
 } from './redux/slices/server/serverSlice';
 import {
     addDetection,
-    addDetections,
     clearAllSelection,
     deleteDetection,
     editDetectionLabel,
@@ -44,7 +43,7 @@ import {
     hasDetectionCoordinatesChanged,
     resetDetections,
     selectDetection,
-    selectDetectionSet,
+    selectDetectionSet, testEnsemble,
     updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
@@ -3531,6 +3530,9 @@ class App extends Component {
 
                     <NoFileSign />
                     <MetaData />
+                    <button style={{zIndex: 5}} onClick={() => {
+                        this.props.testEnsemble();
+                    }}>IoU Test</button>
                 </div>
             </div>
         );
@@ -3585,7 +3587,6 @@ const mapDispatchToProps = {
   resetDetections,
   updateDetection,
   addDetection,
-  addDetections,
   clearAllSelection,
   selectDetection,
   selectDetectionSet,
@@ -3623,7 +3624,8 @@ const mapDispatchToProps = {
   setLocalFileOpen,
   updateEditLabelPosition,
   updateRecentScroll,
-  setCurrentFileFormat
+  setCurrentFileFormat,
+  testEnsemble
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

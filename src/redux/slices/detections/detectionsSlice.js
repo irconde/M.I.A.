@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, current } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
 import { v4 as uuidv4 } from 'uuid';
@@ -187,39 +187,6 @@ const detectionsSlice = createSlice({
                 }
             }
         },
-
-        /**
-         * Adds multiple detection objects to store
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Array<{algorithm: string, className: string, confidence: number, view: string, binaryMask: Array<number>, polygonMask: Array<number>, boundingBox: Array<number>, uuid: number}>} action Array of objects in action.payload containing detection object params.
-         */
-        addDetections: (state, action) => {
-            action.payload.forEach((det) => {
-                state.detections.push({
-                    algorithm: det.algorithm,
-                    className: det.className,
-                    confidence: det.confidence,
-                    view: det.view,
-                    binaryMask: det.binaryMask,
-                    polygonMask: det.polygonMask,
-                    boundingBox: det.boundingBox,
-                    selected: false,
-                    visible: true,
-                    uuid: uuidv4(),
-                    color: randomColor({
-                        seed: det.className,
-                        hue: 'random',
-                        luminosity: 'bright',
-                    }),
-                    validation: null,
-                });
-                if (state.detectionLabels.indexOf(det.className) === -1) {
-                    state.detectionLabels.push(det.className);
-                }
-            });
-        },
-
         /**
          * Clears selection data for all detections
          *
@@ -469,6 +436,53 @@ const detectionsSlice = createSlice({
                 });
             });
         },
+        testEnsemble: (state) => {
+            state.bLists.forEach((list) => {
+                console.log(`List: ${list.view} - ${list.className}`);
+                const detTest = [];
+                list.items.forEach((item) => {
+                    const detection = state.detections.find(
+                        (det) => det.uuid === item.uuid
+                    );
+                    try {
+                        detTest.push(detection);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+                const xA = Math.max(
+                    detTest[0].boundingBox[0],
+                    detTest[1].boundingBox[0]
+                );
+                const xB = Math.max(
+                    detTest[0].boundingBox[2],
+                    detTest[1].boundingBox[2]
+                );
+                const yA = Math.max(
+                    detTest[0].boundingBox[1],
+                    detTest[1].boundingBox[1]
+                );
+                const yB = Math.max(
+                    detTest[0].boundingBox[3],
+                    detTest[1].boundingBox[3]
+                );
+
+                const interArea = Math.max(xB - xA, 0) * Math.max(yB - yA, 0);
+                console.log(`interArea: ${interArea}`);
+                const areaA = Math.abs(
+                    (detTest[0].boundingBox[2] - detTest[0].boundingBox[0]) *
+                        (detTest[0].boundingBox[3] - detTest[0].boundingBox[1])
+                );
+                const areaB = Math.abs(
+                    (detTest[1].boundingBox[2] - detTest[1].boundingBox[0]) *
+                        (detTest[1].boundingBox[3] - detTest[1].boundingBox[1])
+                );
+                console.log(`area a: ${areaA}`);
+                console.log(`area b: ${areaB}`);
+                const iou = interArea / (areaA + areaB - interArea);
+                console.log(`iou: ${iou}`);
+            });
+        },
     },
 });
 
@@ -715,7 +729,6 @@ export const getSelectedDetectionType = (state) => {
 export const {
     resetDetections,
     addDetection,
-    addDetections,
     clearAllSelection,
     selectDetection,
     selectDetectionSet,
@@ -727,6 +740,7 @@ export const {
     updateDetectionVisibility,
     addMissMatchedClassName,
     updateMissMatchedClassName,
+    testEnsemble,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;
