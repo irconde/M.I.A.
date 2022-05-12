@@ -41,6 +41,7 @@ import socketIOClient from 'socket.io-client';
 import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
+import Tooltip from '@mui/material/Tooltip';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -566,50 +567,56 @@ const SettingsModal = (props) => {
                                     </FormControl>
                                 </div>
                                 <div style={classes.autoConnectContainer}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                disabled={!remoteOrLocal}
-                                                color={'primary'}
-                                                checked={autoConnect}
-                                                onChange={() => {
-                                                    setAutoConnect(
-                                                        !autoConnect
-                                                    );
-                                                }}
-                                                name="autoConnect"
-                                            />
-                                        }
-                                        label="Autoconnect"
-                                    />
+                                    <Tooltip title="Autoconnect to Server">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    disabled={!remoteOrLocal}
+                                                    color={'primary'}
+                                                    checked={autoConnect}
+                                                    onChange={() => {
+                                                        setAutoConnect(
+                                                            !autoConnect
+                                                        );
+                                                    }}
+                                                    name="autoConnect"
+                                                />
+                                            }
+                                            label="Autoconnect"
+                                        />
+                                    </Tooltip>
                                 </div>
                             </div>
                             <div style={classes.connectionSection}>
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    disabled={!remoteOrLocal}
-                                    style={classes.checkConnectionButton}
-                                    onClick={() => {
-                                        testConnection();
-                                    }}>
-                                    {connecting ? (
-                                        <div>
-                                            <CircularProgress size={'24px'} />
-                                        </div>
-                                    ) : (
-                                        <CheckConnectionIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={{
-                                                ...svgStyle,
-                                                color: remoteOrLocal
-                                                    ? '#367eff'
-                                                    : '#9d9d9d',
-                                            }}
-                                        />
-                                    )}
-                                    Check connection
-                                </Button>
+                                <Tooltip title="Check Server Connection">
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={!remoteOrLocal}
+                                        style={classes.checkConnectionButton}
+                                        onClick={() => {
+                                            testConnection();
+                                        }}>
+                                        {connecting ? (
+                                            <div>
+                                                <CircularProgress
+                                                    size={'24px'}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <CheckConnectionIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={{
+                                                    ...svgStyle,
+                                                    color: remoteOrLocal
+                                                        ? '#367eff'
+                                                        : '#9d9d9d',
+                                                }}
+                                            />
+                                        )}
+                                        Check connection
+                                    </Button>
+                                </Tooltip>
 
                                 <ConnectionResult
                                     display={connectionDisplay}
@@ -664,90 +671,108 @@ const SettingsModal = (props) => {
                                                 }}
                                             />
                                         </FormControl>
-                                        <Button
-                                            disabled={remoteOrLocal}
-                                            variant="outlined"
-                                            size="medium"
-                                            id="btnFolder"
-                                            style={classes.pathButton}
-                                            onClick={() => {
-                                                if (isElectron()) {
-                                                    ipcRenderer
-                                                        .invoke(
-                                                            Channels.selectDirectory
-                                                        )
-                                                        .then((result) => {
-                                                            if (
-                                                                result.canceled ===
-                                                                    false &&
-                                                                result.filePaths
-                                                                    .length > 0
-                                                            ) {
-                                                                setLocalFileOutput(
+                                        <Tooltip title="Select Image Folder">
+                                            <Button
+                                                disabled={remoteOrLocal}
+                                                variant="outlined"
+                                                size="medium"
+                                                id="btnFolder"
+                                                style={classes.pathButton}
+                                                onClick={() => {
+                                                    if (isElectron()) {
+                                                        ipcRenderer
+                                                            .invoke(
+                                                                Channels.selectDirectory
+                                                            )
+                                                            .then((result) => {
+                                                                if (
+                                                                    result.canceled ===
+                                                                        false &&
                                                                     result
-                                                                        .filePaths[0]
+                                                                        .filePaths
+                                                                        .length >
+                                                                        0
+                                                                ) {
+                                                                    setLocalFileOutput(
+                                                                        result
+                                                                            .filePaths[0]
+                                                                    );
+                                                                }
+                                                            })
+                                                            .catch((err) => {
+                                                                console.log(
+                                                                    err
                                                                 );
-                                                            }
-                                                        })
-                                                        .catch((err) => {
-                                                            console.log(err);
-                                                        });
-                                                }
-                                            }}>
-                                            Select Folder
-                                        </Button>
+                                                            });
+                                                    }
+                                                }}>
+                                                Select Folder
+                                            </Button>
+                                        </Tooltip>
                                     </div>
                                 ) : (
                                     <></>
                                 )}
                                 <div style={classes.displayListSection}>
-                                    <div style={classes.displayListSectionItem}>
-                                        <FileFormatIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
-                                        <FormControl
+                                        <div
                                             style={
-                                                classes.displayListSectionInput
+                                                classes.displayListSectionItem
                                             }>
-                                            <Select
+                                            <FileFormatIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={svgStyle}
+                                            />
+                                            <FormControl
                                                 style={
-                                                    fileFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
-                                                displayEmpty={true}
-                                                open={openFileFormat}
-                                                defaultValue="Open Raster"
-                                                onClose={() => {
-                                                    setOpenFileFormat(false);
-                                                }}
-                                                onOpen={() => {
-                                                    setOpenFileFormat(true);
-                                                }}
-                                                value={fileFormat}
-                                                onChange={(e) => {
-                                                    setFileFormat(
-                                                        e.target.value
-                                                    );
-                                                }}>
-                                                <MenuItem value={''} disabled>
-                                                    Output file format
-                                                </MenuItem>
-                                                <MenuItem value={'Open Raster'}>
-                                                    Open Raster
-                                                </MenuItem>
-                                                <MenuItem value={'Zip Archive'}>
-                                                    Zip Archive
-                                                </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </div>
+                                                    classes.displayListSectionInput
+                                                }>
+                                                <Select
+                                                    style={
+                                                        fileFormat === ''
+                                                            ? classes.disabledText
+                                                            : null
+                                                    }
+                                                    displayEmpty={true}
+                                                    open={openFileFormat}
+                                                    defaultValue="Open Raster"
+                                                    onClose={() => {
+                                                        setOpenFileFormat(
+                                                            false
+                                                        );
+                                                    }}
+                                                    onOpen={() => {
+                                                        setOpenFileFormat(true);
+                                                    }}
+                                                    value={fileFormat}
+                                                    onChange={(e) => {
+                                                        setFileFormat(
+                                                            e.target.value
+                                                        );
+                                                    }}>
+                                                    <MenuItem
+                                                        value={''}
+                                                        disabled>
+                                                        Output file format
+                                                    </MenuItem>
+
+                                                    <MenuItem
+                                                        value={'Open Raster'}>
+                                                        Open Raster
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        value={'Zip Archive'}>
+                                                        Zip Archive
+                                                    </MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+
                                     <div style={classes.displayListSectionItem}>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
+
                                         <FormControl
                                             style={
                                                 classes.displayListSectionInput
@@ -803,6 +828,7 @@ const SettingsModal = (props) => {
                                             </Select>
                                         </FormControl>
                                     </div>
+
                                     <div style={classes.displayListSectionItem}>
                                         <FileSuffixIcon
                                             style={svgContainerStyle}
