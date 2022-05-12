@@ -1,4 +1,4 @@
-import { createSlice, current } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
 import Utils from '../../../utils/Utils';
@@ -445,7 +445,15 @@ const detectionsSlice = createSlice({
                         (det) => det.uuid === item.uuid
                     );
                     try {
-                        detTest.push(detection);
+                        detTest.push({
+                            view: detection.view,
+                            className: detection.className,
+                            algorithm: detection.algorithm,
+                            boundingBox: JSON.parse(
+                                JSON.stringify(detection.boundingBox)
+                            ),
+                            confidence: detection.confidence,
+                        });
                     } catch (e) {
                         console.log(e);
                     }
@@ -472,7 +480,7 @@ const detectionsSlice = createSlice({
                 );
                 lList.forEach((subList, index) => {
                     console.log(`Index: ${index}`);
-                    subList.forEach((item) => console.log(current(item)));
+                    subList.forEach((item) => console.log(item));
                 });
                 console.log(
                     '-------------------- End lList items --------------------'
@@ -480,11 +488,19 @@ const detectionsSlice = createSlice({
                 console.log(
                     '-------------------- Start fList items --------------------'
                 );
-                fList.forEach((item) => console.log(current(item)));
+                fList.forEach((item) => console.log(item));
                 console.log(
                     '-------------------- End fList items --------------------'
                 );
                 // TODO: Recalculate fList boxes based on lLists boxes at same pos
+                // Fused detection:
+                // x1: (summation(confidence_i * x1_i)) / (summation(confidences))
+                // x2: (summation(confidence_i * x2_i)) / (summation(confidences))
+                // y1: (summation(confidence_i * y1_i)) / (summation(confidences))
+                // y2: (summation(confidence_i * y2_i)) / (summation(confidences))
+                // confidence: summation(confidences) * min(numBoxes, numModels) / numModels
+                // or
+                // confidence: summation(confidences) numBoxes / numModels
             });
         },
     },
