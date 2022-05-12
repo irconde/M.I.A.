@@ -110,7 +110,6 @@ const SaveButton = ({ nextImageClick, collapseBtn = false }) => {
                 onClick={() => nextImageClick()}
                 id="saveButton">
                 <SaveIcon
-                    title="Save File"
                     style={{ marginRight: '4%', display: 'inherit' }}
                 />
                 <p style={{ display: 'contents' }}>Save File</p>

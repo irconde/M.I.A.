@@ -14,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
  */
 const SettingsCog = (props) => {
     return (
-        <Tooltip title="Settings" placement="bottom-end">
+        <Tooltip title="Settings" placement="bottom">
             <svg
                 style={props.style}
                 width="24px"
