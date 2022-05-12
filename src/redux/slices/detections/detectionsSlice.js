@@ -155,7 +155,8 @@ const detectionsSlice = createSlice({
             if (!detectionFromFile) {
                 state.detectionChanged = true;
             }
-            // bList sorting
+            /*                  Begin Ensemble                    */
+            /*                  bList sorting                    */
             const bListRef = {
                 uuid: state.detections[state.detections.length - 1].uuid,
                 confidence:
@@ -186,7 +187,7 @@ const detectionsSlice = createSlice({
                     });
                 }
             }
-            // Ensemble Calculation
+            /*                  WBF Calculation                    */
             state.summarizedDetections = [];
             state.bLists.forEach((list) => {
                 const detTest = [];
@@ -228,7 +229,6 @@ const detectionsSlice = createSlice({
                         }
                     }
                 }
-                // TODO: Recalculate fList boxes based on lLists boxes at same pos
                 // Fused detection:
                 // x1: (summation(confidence_i * x1_i)) / (summation(confidences))
                 // x2: (summation(confidence_i * x2_i)) / (summation(confidences))
@@ -355,6 +355,7 @@ const detectionsSlice = createSlice({
          * @param {Detection} update - Destructured from action.payload -- contains any properties to update on the Detection
          */
         updateDetection: (state, action) => {
+            // TODO: Ensemble again if it was a coordinate update
             const { uuid, update } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection !== undefined) {
@@ -409,6 +410,7 @@ const detectionsSlice = createSlice({
          * @param {string} uuid - Destructured from action.payload -- uuid for detection being deleted
          */
         deleteDetection: (state, action) => {
+            // TODO: Ensemble
             state.detections = state.detections.filter((det) => {
                 return det.uuid !== action.payload;
             });

@@ -46,6 +46,10 @@ const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
+         * @param {State} state
+         */
         toggleDisplaySummarizedDetections: (state) => {
             state.displaySummarizedDetections =
                 !state.displaySummarizedDetections;
