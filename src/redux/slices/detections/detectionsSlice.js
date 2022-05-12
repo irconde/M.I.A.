@@ -186,6 +186,104 @@ const detectionsSlice = createSlice({
                     });
                 }
             }
+            // Ensemble Calculation
+            state.summarizedDetections = [];
+            state.bLists.forEach((list) => {
+                const detTest = [];
+                list.items.forEach((item) => {
+                    const detection = state.detections.find(
+                        (det) => det.uuid === item.uuid
+                    );
+                    try {
+                        detTest.push({
+                            view: detection.view,
+                            className: detection.className,
+                            algorithm: detection.algorithm,
+                            boundingBox: JSON.parse(
+                                JSON.stringify(detection.boundingBox)
+                            ),
+                            confidence: detection.confidence,
+                            color: detection.color,
+                            displayColor: detection.displayColor,
+                            visible: true,
+                            selected: false,
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+                const lList = [],
+                    fList = [];
+                const firstDet = detTest.shift();
+                lList.push([firstDet]);
+                fList.push(firstDet);
+                for (let i = 0; i < detTest.length; i++) {
+                    for (let j = 0; j < fList.length; j++) {
+                        const IoU = calculateIoU(detTest[i], fList[j]);
+                        if (IoU > 0.55) {
+                            lList[j].push(detTest[i]);
+                        } else {
+                            lList.push([detTest[i]]);
+                            fList.push(detTest[i]);
+                        }
+                    }
+                }
+                // TODO: Recalculate fList boxes based on lLists boxes at same pos
+                // Fused detection:
+                // x1: (summation(confidence_i * x1_i)) / (summation(confidences))
+                // x2: (summation(confidence_i * x2_i)) / (summation(confidences))
+                // y1: (summation(confidence_i * y1_i)) / (summation(confidences))
+                // y2: (summation(confidence_i * y2_i)) / (summation(confidences))
+                // confidence: summation(confidences) * min(numBoxes, numModels) / numModels
+                // or
+                // confidence: summation(confidences) * numBoxes / numModels
+                for (let i = 0; i < fList.length; i++) {
+                    // fusedBox = [x1, y1, x2, y2]
+                    let x1 = 0,
+                        y1 = 0,
+                        x2 = 0,
+                        y2 = 0,
+                        confidence = 0,
+                        confidenceSum = 0,
+                        numAlgorithms = 0,
+                        numBoxes = lList[i].length,
+                        seenAlgorithms = [];
+                    for (let z = 0; z < lList[i].length; z++) {
+                        const foundAlgorithmIndex = seenAlgorithms.findIndex(
+                            (algorithm) => algorithm === lList[i][z].algorithm
+                        );
+                        if (foundAlgorithmIndex === -1)
+                            seenAlgorithms.push(lList[i][z].algorithm);
+                        numAlgorithms = seenAlgorithms.length;
+                        confidenceSum += lList[i][z].confidence;
+                        x1 +=
+                            lList[i][z].confidence * lList[i][z].boundingBox[0];
+                        x2 +=
+                            lList[i][z].confidence * lList[i][z].boundingBox[2];
+                        y1 +=
+                            lList[i][z].confidence * lList[i][z].boundingBox[1];
+                        y2 +=
+                            lList[i][z].confidence * lList[i][z].boundingBox[3];
+                    }
+                    try {
+                        x1 = x1 / confidenceSum;
+                        x2 = x2 / confidenceSum;
+                        y1 = y1 / confidenceSum;
+                        y2 = y2 / confidenceSum;
+                        confidence =
+                            confidenceSum *
+                            (Math.min(numBoxes, numAlgorithms) / numAlgorithms);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                    fList[i].algorithm = 'Summarized - WBF';
+                    fList[i].boundingBox = [x1, y1, x2, y2];
+                    fList[i].confidence = confidence >= 100 ? 100 : confidence;
+                    fList[i].polygonMask = [];
+                    fList[i].binaryMask = [[], [], []];
+                    state.summarizedDetections.push(fList[i]);
+                }
+            });
         },
         /**
          * Clears selection data for all detections
@@ -434,105 +532,6 @@ const detectionsSlice = createSlice({
                         }
                     }
                 });
-            });
-        },
-        testEnsemble: (state) => {
-            state.bLists.forEach((list) => {
-                console.log(`List: ${list.view} - ${list.className}`);
-                const detTest = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        detTest.push({
-                            view: detection.view,
-                            className: detection.className,
-                            algorithm: detection.algorithm,
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            displayColor: detection.displayColor,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-                const lList = [],
-                    fList = [];
-                const firstDet = detTest.shift();
-                lList.push([firstDet]);
-                fList.push(firstDet);
-                for (let i = 0; i < detTest.length; i++) {
-                    for (let j = 0; j < fList.length; j++) {
-                        const IoU = calculateIoU(detTest[i], fList[j]);
-                        if (IoU > 0.55) {
-                            lList[j].push(detTest[i]);
-                        } else {
-                            lList.push([detTest[i]]);
-                            fList.push(detTest[i]);
-                        }
-                    }
-                }
-                // TODO: Recalculate fList boxes based on lLists boxes at same pos
-                // Fused detection:
-                // x1: (summation(confidence_i * x1_i)) / (summation(confidences))
-                // x2: (summation(confidence_i * x2_i)) / (summation(confidences))
-                // y1: (summation(confidence_i * y1_i)) / (summation(confidences))
-                // y2: (summation(confidence_i * y2_i)) / (summation(confidences))
-                // confidence: summation(confidences) * min(numBoxes, numModels) / numModels
-                // or
-                // confidence: summation(confidences) * numBoxes / numModels
-                for (let i = 0; i < fList.length; i++) {
-                    // fusedBox = [x1, y1, x2, y2]
-                    let x1 = 0,
-                        y1 = 0,
-                        x2 = 0,
-                        y2 = 0,
-                        confidence = 0,
-                        confidenceSum = 0,
-                        numAlgorithms = 0,
-                        numBoxes = lList[i].length,
-                        seenAlgorithms = [];
-                    for (let z = 0; z < lList[i].length; z++) {
-                        const foundAlgorithmIndex = seenAlgorithms.findIndex(
-                            (algorithm) => algorithm === lList[i][z].algorithm
-                        );
-                        if (foundAlgorithmIndex === -1)
-                            seenAlgorithms.push(lList[i][z].algorithm);
-                        numAlgorithms = seenAlgorithms.length;
-                        confidenceSum += lList[i][z].confidence;
-                        x1 +=
-                            lList[i][z].confidence * lList[i][z].boundingBox[0];
-                        x2 +=
-                            lList[i][z].confidence * lList[i][z].boundingBox[2];
-                        y1 +=
-                            lList[i][z].confidence * lList[i][z].boundingBox[1];
-                        y2 +=
-                            lList[i][z].confidence * lList[i][z].boundingBox[3];
-                    }
-                    try {
-                        x1 = x1 / confidenceSum;
-                        x2 = x2 / confidenceSum;
-                        y1 = y1 / confidenceSum;
-                        y2 = y2 / confidenceSum;
-                        confidence =
-                            confidenceSum *
-                            (Math.min(numBoxes, numAlgorithms) / numAlgorithms);
-                    } catch (e) {
-                        console.log(e);
-                    }
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence = confidence >= 100 ? 100 : confidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
             });
         },
     },
@@ -792,7 +791,6 @@ export const {
     updateDetectionVisibility,
     addMissMatchedClassName,
     updateMissMatchedClassName,
-    testEnsemble,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

@@ -44,7 +44,6 @@ import {
     resetDetections,
     selectDetection,
     selectDetectionSet,
-    testEnsemble,
     updateDetection,
     updateDetectionSetVisibility,
     updateDetectionVisibility,
@@ -1962,9 +1961,17 @@ class App extends Component {
             this.props.singleViewport === false
         ) {
             let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.SIDE) detections.push(det);
-            });
+            if (!this.props.displaySummarizedDetections) {
+                this.props.detections.forEach((det) => {
+                    if (det.view === constants.viewport.SIDE)
+                        detections.push(det);
+                });
+            } else {
+                this.props.summarizedDetections.forEach((det) => {
+                    if (det.view === constants.viewport.SIDE)
+                        detections.push(det);
+                });
+            }
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -3543,18 +3550,6 @@ class App extends Component {
                     <button
                         style={{
                             zIndex: 5,
-                            width: '10%',
-                            height: '25%',
-                            right: '0',
-                        }}
-                        onClick={() => {
-                            this.props.testEnsemble();
-                        }}>
-                        Perform Ensemble Test
-                    </button>
-                    <button
-                        style={{
-                            zIndex: 5,
                             position: 'absolute',
                             width: '10%',
                             height: '25%',
@@ -3660,7 +3655,6 @@ const mapDispatchToProps = {
     updateEditLabelPosition,
     updateRecentScroll,
     setCurrentFileFormat,
-    testEnsemble,
     toggleDisplaySummarizedDetections,
 };
 
