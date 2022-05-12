@@ -10,6 +10,7 @@ import isElectron from 'is-electron';
 import TwoViewIcon from '../../icons/TwoViewIcon';
 import SingleViewIcon from '../../icons/SingleViewIcon';
 import AnnotationsIcon from '../../icons/AnnotationsIcon';
+import Tooltip from '@mui/material/Tooltip';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -124,21 +125,24 @@ function LazyImageContainer(props) {
             selected={selected}
             thumbnailHeight={thumbnailHeight}
             loading={generatingThumbnails.toString()}
-            onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}
-            title={thisFileName}>
+            onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
             {thumbnailSrc !== null ? (
-                <img
-                    onLoad={() => {
-                        thumbnailHeightHandler(
-                            containerElement.current.clientHeight
-                        );
-                    }}
-                    src={thumbnailSrc}
-                    alt={thisFileName}
-                />
+                <Tooltip title={thisFileName} followCursor>
+                    <img
+                        onLoad={() => {
+                            thumbnailHeightHandler(
+                                containerElement.current.clientHeight
+                            );
+                        }}
+                        src={thumbnailSrc}
+                        alt={thisFileName}
+                    />
+                </Tooltip>
             ) : null}
             <div className="lazy-image-text-container">
-                <span className="lazy-image-text">{thisFileName}</span>
+                <Tooltip title={thisFileName}>
+                    <span className="lazy-image-text">{thisFileName}</span>
+                </Tooltip>
                 {numOfViews > 1 ? (
                     <TwoViewIcon
                         style={svgContainerStyle}

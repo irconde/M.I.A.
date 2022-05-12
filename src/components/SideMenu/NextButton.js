@@ -15,6 +15,7 @@ import {
 } from '../../redux/slices/server/serverSlice';
 import { Fab } from '@mui/material';
 import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
+import Tooltip from '@mui/material/Tooltip';
 
 const sideMenuWidth = constants.sideMenuWidth + constants.RESOLUTION_UNIT;
 
@@ -101,31 +102,35 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
 
     if (collapseBtn)
         return (
-            <CollapsedNextButtonContainer
-                isCollapsed={isCollapsed}
-                style={{
-                    transition: 'all 0.3s ease-in',
-                    transform: isCollapsed
-                        ? 'translateY(0)'
-                        : `translateY(${sideMenuWidth})`,
-                }}>
-                <Fab
-                    onClick={handleClick}
-                    disabled={!enableNextButton}
-                    color="primary">
-                    {!enableNextButton ? <></> : <img src={nextIcon} />}
-                </Fab>
-            </CollapsedNextButtonContainer>
+            <Tooltip title="Next Image">
+                <CollapsedNextButtonContainer
+                    isCollapsed={isCollapsed}
+                    style={{
+                        transition: 'all 0.3s ease-in',
+                        transform: isCollapsed
+                            ? 'translateY(0)'
+                            : `translateY(${sideMenuWidth})`,
+                    }}>
+                    <Fab
+                        onClick={handleClick}
+                        disabled={!enableNextButton}
+                        color="primary">
+                        {!enableNextButton ? <></> : <img src={nextIcon} />}
+                    </Fab>
+                </CollapsedNextButtonContainer>
+            </Tooltip>
         );
     else
         return (
-            <NextButtonContainer
-                enabled={enableNextButton}
-                onClick={handleClick}
-                id="nextButton">
-                <p>Next</p>
-                <img src={nextIcon} />
-            </NextButtonContainer>
+            <Tooltip title="Next Image">
+                <NextButtonContainer
+                    enabled={enableNextButton}
+                    onClick={handleClick}
+                    id="nextButton">
+                    <p>Next</p>
+                    <img src={nextIcon} />
+                </NextButtonContainer>
+            </Tooltip>
         );
 };
 
