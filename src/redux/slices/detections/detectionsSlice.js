@@ -453,6 +453,10 @@ const detectionsSlice = createSlice({
                                 JSON.stringify(detection.boundingBox)
                             ),
                             confidence: detection.confidence,
+                            color: detection.color,
+                            displayColor: detection.displayColor,
+                            visible: true,
+                            selected: false,
                         });
                     } catch (e) {
                         console.log(e);
@@ -474,23 +478,6 @@ const detectionsSlice = createSlice({
                         }
                     }
                 }
-                /*console.log(
-                    '-------------------- Start lList items --------------------'
-                );
-                lList.forEach((subList, index) => {
-                    console.log(`Index: ${index}`);
-                    subList.forEach((item) => console.log(item));
-                });
-                console.log(
-                    '-------------------- End lList items --------------------'
-                );
-                console.log(
-                    '-------------------- Start fList items --------------------'
-                );
-                fList.forEach((item) => console.log(item));
-                console.log(
-                    '-------------------- End fList items --------------------'
-                );*/
                 // TODO: Recalculate fList boxes based on lLists boxes at same pos
                 // Fused detection:
                 // x1: (summation(confidence_i * x1_i)) / (summation(confidences))
@@ -519,7 +506,6 @@ const detectionsSlice = createSlice({
                             seenAlgorithms.push(lList[i][z].algorithm);
                         numAlgorithms = seenAlgorithms.length;
                         confidenceSum += lList[i][z].confidence;
-
                         x1 +=
                             lList[i][z].confidence * lList[i][z].boundingBox[0];
                         x2 +=
@@ -534,14 +520,18 @@ const detectionsSlice = createSlice({
                         x2 = x2 / confidenceSum;
                         y1 = y1 / confidenceSum;
                         y2 = y2 / confidenceSum;
-                        confidence = (confidenceSum * numBoxes) / numAlgorithms;
+                        confidence =
+                            confidenceSum *
+                            (Math.min(numBoxes, numAlgorithms) / numAlgorithms);
                     } catch (e) {
                         console.log(e);
                     }
+                    fList[i].algorithm = 'Summarized - WBF';
                     fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence = confidence;
-                    console.log(fList[i].boundingBox);
-                    console.log(fList[i].confidence);
+                    fList[i].confidence = confidence >= 100 ? 100 : confidence;
+                    fList[i].polygonMask = [];
+                    fList[i].binaryMask = [[], [], []];
+                    state.summarizedDetections.push(fList[i]);
                 }
             });
         },

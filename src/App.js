@@ -70,6 +70,7 @@ import {
     setInputLabel,
     setLocalFileOpen,
     setReceiveTime,
+    toggleDisplaySummarizedDetections,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -1928,9 +1929,17 @@ class App extends Component {
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
             let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.TOP) detections.push(det);
-            });
+            if (!this.props.displaySummarizedDetections) {
+                this.props.detections.forEach((det) => {
+                    if (det.view === constants.viewport.TOP)
+                        detections.push(det);
+                });
+            } else {
+                this.props.summarizedDetections.forEach((det) => {
+                    if (det.view === constants.viewport.TOP)
+                        detections.push(det);
+                });
+            }
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -3532,11 +3541,30 @@ class App extends Component {
                     <NoFileSign />
                     <MetaData />
                     <button
-                        style={{ zIndex: 5 }}
+                        style={{
+                            zIndex: 5,
+                            width: '10%',
+                            height: '25%',
+                            right: '0',
+                        }}
                         onClick={() => {
                             this.props.testEnsemble();
                         }}>
-                        IoU Test
+                        Perform Ensemble Test
+                    </button>
+                    <button
+                        style={{
+                            zIndex: 5,
+                            position: 'absolute',
+                            width: '10%',
+                            height: '25%',
+                            right: '0',
+                            top: '30%',
+                        }}
+                        onClick={() => {
+                            this.props.toggleDisplaySummarizedDetections();
+                        }}>
+                        Toggle Ensemble Detections
                     </button>
                 </div>
             </div>
@@ -3553,6 +3581,7 @@ const mapStateToProps = (state) => {
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
+        summarizedDetections: detections.summarizedDetections,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
         annotationMode: ui.annotationMode,
@@ -3568,6 +3597,7 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
+        displaySummarizedDetections: ui.displaySummarizedDetections,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -3631,6 +3661,7 @@ const mapDispatchToProps = {
     updateRecentScroll,
     setCurrentFileFormat,
     testEnsemble,
+    toggleDisplaySummarizedDetections,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

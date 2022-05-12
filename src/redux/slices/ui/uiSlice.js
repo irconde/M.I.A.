@@ -39,12 +39,17 @@ const initialState = {
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
     generatingThumbnails: true,
+    displaySummarizedDetections: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        toggleDisplaySummarizedDetections: (state) => {
+            state.displaySummarizedDetections =
+                !state.displaySummarizedDetections;
+        },
         /**
          * Sets whether the Electron process is generating thumbnails or not
          * @param {State} state
@@ -800,6 +805,7 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
+    toggleDisplaySummarizedDetections,
 } = uiSlice.actions;
 
 // Export the reducer for the store
