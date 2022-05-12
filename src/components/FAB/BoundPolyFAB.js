@@ -17,6 +17,7 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import isElectron from 'is-electron';
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * FABContainer - Styled div for the FAB Button. Takes in props to control the look
@@ -160,21 +161,25 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
             fabOpacity={fabOpacity}
             show={show}
             deviceType={deviceType}>
-            <div
-                className="fabOption"
-                onClick={(e) => handleClick(e, onBoundingSelect)}>
-                <RectangleIcon className="icon" />
-                <span>Bounding box</span>
-            </div>
+            <Tooltip title="Bounding Box" placement="bottom">
+                <div
+                    className="fabOption"
+                    onClick={(e) => handleClick(e, onBoundingSelect)}>
+                    <RectangleIcon className="icon" />
+                    <span>Bounding box</span>
+                </div>
+            </Tooltip>
             <div className="divider"></div>
-            <div
-                className="fabOption"
-                onClick={(e) => {
-                    handleClick(e, onPolygonSelect);
-                }}>
-                <PolygonIcon className="icon" />
-                <span>Polygon mask</span>
-            </div>
+            <Tooltip title="Polygon Mask" placement="bottom">
+                <div
+                    className="fabOption"
+                    onClick={(e) => {
+                        handleClick(e, onPolygonSelect);
+                    }}>
+                    <PolygonIcon className="icon" />
+                    <span>Polygon mask</span>
+                </div>
+            </Tooltip>
         </FABContainer>
     );
 };
