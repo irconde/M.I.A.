@@ -19,6 +19,7 @@ import {
     getSelectedDetectionColor,
     getSelectedDetectionType,
 } from '../../redux/slices/detections/detectionsSlice';
+import Tooltip from '@mui/material/Tooltip';
 
 const Positioner = styled.div`
     position: absolute;
@@ -115,55 +116,79 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
             <Positioner position={position}>
                 <FlexContainer>
                     <MainWidget>
-                        <IconContainer
-                            id="firstIcon"
-                            onClick={() => handleClick(editionMode.LABEL)}
-                            selected={selectedOption === editionMode.LABEL}>
-                            <TextIcon />
-                        </IconContainer>
-                        <IconContainer
-                            onClick={() => handleClick(editionMode.COLOR)}
-                            selected={selectedOption === editionMode.COLOR}>
-                            <div
-                                style={{
-                                    width: '16px',
-                                    height: '16px',
-                                    border: 'solid 2px #464646',
-                                    backgroundColor: selectedDetectionColor,
-                                }}
-                            />
-                        </IconContainer>
-                        {detectionType !== constants.detectionType.BINARY && (
+                        <Tooltip
+                            title="Edit Detection Label"
+                            placement="bottom">
                             <IconContainer
-                                onClick={() =>
-                                    handleClick(editionMode.BOUNDING)
-                                }
-                                selected={
-                                    selectedOption === editionMode.BOUNDING
-                                }>
-                                <RectangleIcon />
+                                id="firstIcon"
+                                onClick={() => handleClick(editionMode.LABEL)}
+                                selected={selectedOption === editionMode.LABEL}>
+                                <TextIcon />
                             </IconContainer>
+                        </Tooltip>
+                        <Tooltip
+                            title="Edit Detection Color"
+                            placement="bottom">
+                            <IconContainer
+                                onClick={() => handleClick(editionMode.COLOR)}
+                                selected={selectedOption === editionMode.COLOR}>
+                                <div
+                                    style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        border: 'solid 2px #464646',
+                                        backgroundColor: selectedDetectionColor,
+                                    }}
+                                />
+                            </IconContainer>
+                        </Tooltip>
+                        {detectionType !== constants.detectionType.BINARY && (
+                            <Tooltip
+                                title="Edit Bounding Box"
+                                placement="bottom">
+                                <IconContainer
+                                    onClick={() =>
+                                        handleClick(editionMode.BOUNDING)
+                                    }
+                                    selected={
+                                        selectedOption === editionMode.BOUNDING
+                                    }>
+                                    <RectangleIcon />
+                                </IconContainer>
+                            </Tooltip>
                         )}
                         {detectionType === constants.detectionType.POLYGON && (
-                            <IconContainer
-                                onClick={() => handleClick(editionMode.POLYGON)}
-                                selected={
-                                    selectedOption === editionMode.POLYGON
-                                }>
-                                <PolygonIcon />
-                            </IconContainer>
+                            <Tooltip
+                                title="Edit Polygon Mask"
+                                placement="bottom">
+                                <IconContainer
+                                    onClick={() =>
+                                        handleClick(editionMode.POLYGON)
+                                    }
+                                    selected={
+                                        selectedOption === editionMode.POLYGON
+                                    }>
+                                    <PolygonIcon />
+                                </IconContainer>
+                            </Tooltip>
                         )}
-                        <IconContainer
-                            onClick={() => handleClick(editionMode.MOVE)}
-                            id="lastIcon"
-                            selected={selectedOption === editionMode.MOVE}>
-                            <MovementIcon />
-                        </IconContainer>
+                        <Tooltip
+                            title="Move Detection"
+                            placement="bottom">
+                            <IconContainer
+                                onClick={() => handleClick(editionMode.MOVE)}
+                                id="lastIcon"
+                                selected={selectedOption === editionMode.MOVE}>
+                                <MovementIcon />
+                            </IconContainer>
+                        </Tooltip>
                     </MainWidget>
                     <DeleteWidget>
-                        <DeleteIcon
-                            onClick={() => handleClick(editionMode.DELETE)}
-                        />
+                        <Tooltip title="Delete Detection" placement="bottom">
+                            <DeleteIcon
+                                onClick={() => handleClick(editionMode.DELETE)}
+                            />
+                        </Tooltip>
                     </DeleteWidget>
                 </FlexContainer>
             </Positioner>
