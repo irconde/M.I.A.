@@ -69,6 +69,7 @@ function LazyImageMenu(props) {
         }
     });
 
+    // change piece of state when the user scrolls. Used for adding box-shadow to header
     const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
 
     function handleMenuContainerScroll(event) {
