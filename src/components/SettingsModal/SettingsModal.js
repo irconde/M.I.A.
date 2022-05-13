@@ -472,11 +472,13 @@ const SettingsModal = (props) => {
                         <SettingsCog title={props.title} />
                     </div>
                     <div style={classes.settingsText}>Settings</div>
-                    <div
-                        onClick={() => handleClose()}
-                        style={classes.closeIconStyle}>
-                        <IcCloseIcon />
-                    </div>
+                    <Tooltip title="Close Settings">
+                        <div
+                            onClick={() => handleClose()}
+                            style={classes.closeIconStyle}>
+                            <IcCloseIcon />
+                        </div>
+                    </Tooltip>
                 </div>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
                 <FormGroup style={classes.formControl}>
@@ -713,60 +715,51 @@ const SettingsModal = (props) => {
                                 ) : (
                                     <></>
                                 )}
+
                                 <div style={classes.displayListSection}>
-                                        <div
+                                    <div style={classes.displayListSectionItem}>
+                                        <FileFormatIcon
+                                            style={svgContainerStyle}
+                                            svgStyle={svgStyle}
+                                        />
+                                        <FormControl
                                             style={
-                                                classes.displayListSectionItem
+                                                classes.displayListSectionInput
                                             }>
-                                            <FileFormatIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={svgStyle}
-                                            />
-                                            <FormControl
+                                            <Select
                                                 style={
-                                                    classes.displayListSectionInput
-                                                }>
-                                                <Select
-                                                    style={
-                                                        fileFormat === ''
-                                                            ? classes.disabledText
-                                                            : null
-                                                    }
-                                                    displayEmpty={true}
-                                                    open={openFileFormat}
-                                                    defaultValue="Open Raster"
-                                                    onClose={() => {
-                                                        setOpenFileFormat(
-                                                            false
-                                                        );
-                                                    }}
-                                                    onOpen={() => {
-                                                        setOpenFileFormat(true);
-                                                    }}
-                                                    value={fileFormat}
-                                                    onChange={(e) => {
-                                                        setFileFormat(
-                                                            e.target.value
-                                                        );
-                                                    }}>
-                                                    <MenuItem
-                                                        value={''}
-                                                        disabled>
-                                                        Output file format
-                                                    </MenuItem>
+                                                    fileFormat === ''
+                                                        ? classes.disabledText
+                                                        : null
+                                                }
+                                                displayEmpty={true}
+                                                open={openFileFormat}
+                                                defaultValue="Open Raster"
+                                                onClose={() => {
+                                                    setOpenFileFormat(false);
+                                                }}
+                                                onOpen={() => {
+                                                    setOpenFileFormat(true);
+                                                }}
+                                                value={fileFormat}
+                                                onChange={(e) => {
+                                                    setFileFormat(
+                                                        e.target.value
+                                                    );
+                                                }}>
+                                                <MenuItem value={''} disabled>
+                                                    Output file format
+                                                </MenuItem>
 
-                                                    <MenuItem
-                                                        value={'Open Raster'}>
-                                                        Open Raster
-                                                    </MenuItem>
-                                                    <MenuItem
-                                                        value={'Zip Archive'}>
-                                                        Zip Archive
-                                                    </MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </div>
-
+                                                <MenuItem value={'Open Raster'}>
+                                                    Open Raster
+                                                </MenuItem>
+                                                <MenuItem value={'Zip Archive'}>
+                                                    Zip Archive
+                                                </MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
                                     <div style={classes.displayListSectionItem}>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}

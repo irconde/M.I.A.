@@ -127,7 +127,6 @@ function LazyImageContainer(props) {
             loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
             {thumbnailSrc !== null ? (
-                <Tooltip title={thisFileName} followCursor>
                     <img
                         onLoad={() => {
                             thumbnailHeightHandler(
@@ -137,7 +136,6 @@ function LazyImageContainer(props) {
                         src={thumbnailSrc}
                         alt={thisFileName}
                     />
-                </Tooltip>
             ) : null}
             <div className="lazy-image-text-container">
                 <Tooltip title={thisFileName}>
