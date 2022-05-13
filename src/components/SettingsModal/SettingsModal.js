@@ -434,9 +434,11 @@ const SettingsModal = (props) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             width: '70%',
+            alignSelf: 'center',
         },
         cloudIconContainer: {
             alignSelf: 'center',
+            padding: '0 0.25rem',
         },
         fileIconContainer: {
             alignSelf: 'center',
@@ -513,6 +515,10 @@ const SettingsModal = (props) => {
                                 </p>
                             ) : null}
 
+
+
+
+
                             <div style={classes.remoteWorkRow}>
                                 <div style={classes.remoteInputContainer}>
                                     <Tooltip title="Server Address">
@@ -537,19 +543,29 @@ const SettingsModal = (props) => {
                                             disabled={!remoteOrLocal}
                                             inputProps={{
                                                 size: 30,
+                                                padding: 10,
                                             }}
                                             onChange={(e) => {
                                                 setRemoteIp(e.target.value);
                                             }}
-                                            style={classes.textField}
+                                            style={classes.cloudIconContainer}
+                                            variant="standard"
                                             /*style={{
                                                 marginRight: '0.75rem',
                                             }}*/
                                         />
                                     </FormControl>
+
+
+
+
                                     <span style={classes.cloudIconContainer}>
                                         :
                                     </span>
+
+
+
+
                                     <FormControl>
                                         <TextField
                                             required
@@ -566,13 +582,21 @@ const SettingsModal = (props) => {
                                                 inputMode: 'numeric',
                                                 pattern: '[0-9]*',
                                             }}
-                                            style={classes.textField}
+                                            style={classes.cloudIconContainer}
+                                            variant="standard"
                                             /*style={{
                                                 marginLeft: '0.75rem',
                                             }}*/
                                         />
                                     </FormControl>
                                 </div>
+
+
+
+
+
+
+
                                 <div style={classes.autoConnectContainer}>
                                     <Tooltip title="Autoconnect to Server">
                                         <FormControlLabel
