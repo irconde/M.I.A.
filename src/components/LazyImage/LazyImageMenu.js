@@ -20,6 +20,8 @@ if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
 
+
+
 /**
  * Component for displaying the lazy image menu.
  *
@@ -66,12 +68,25 @@ function LazyImageMenu(props) {
             }
         }
     });
+
+    const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
+
+    function handleMenuContainerScroll(event) {
+        const element = event.target;
+        if(element.scrollTop > 0){
+            setShouldAddBoxShadow(true);
+        }else{
+            setShouldAddBoxShadow(false);
+    }
+}
+
     // TODO: Scroll to selected thumbnail
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                         transition: 'none',
@@ -95,10 +110,12 @@ function LazyImageMenu(props) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                     }}>
-                        <p className="images-in-workspace">
+                        <p className="images-in-workspace"
+                            style={{boxShadow: shouldAddBoxShadow && "0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)"}}>
                             <FileOpenIcon
                                 style={svgContainerStyle}
                                 svgStyle={{
