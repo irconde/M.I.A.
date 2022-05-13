@@ -365,6 +365,7 @@ const detectionsSlice = createSlice({
          * @param {string} className - Destructured from action.payload -- new label className for detection being updated
          */
         editDetectionLabel: (state, action) => {
+            // TODO: Ensemble
             const { uuid, className } = action.payload;
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection) {
