@@ -1,3 +1,8 @@
+/**
+ * Will calculate a list of boxes to be fused (fList) with corresponding lList items
+ * @param {Array<{algorithm: string; className: string; confidence: number; view: string; binaryMask: []; polygonMask: []; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation: boolean | null; textColor: string; detectionType: string; displayColor: string;}>} bListDetections
+ * @returns {{fList: *[], lList: *[]}}
+ */
 export const calculateLFLists = (bListDetections) => {
     let lList = [],
         fList = [];
@@ -22,6 +27,12 @@ export const calculateLFLists = (bListDetections) => {
     return { lList, fList };
 };
 
+/**
+ * Calculates the fused box for the past in list of detections
+ * @param {Array<Array<{algorithm: string; className: string; confidence: number; view: string; binaryMask: []; polygonMask: []; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation: boolean | null; textColor: string; detectionType: string; displayColor: string;}>>} lList
+ * @param {number} i
+ * @returns {{y1: number, x1: number, y2: number, x2: number, fusedConfidence: number}}
+ */
 export const calculateFusedBox = (lList, i) => {
     let x1 = 0,
         y1 = 0,
@@ -58,6 +69,12 @@ export const calculateFusedBox = (lList, i) => {
     return { x1, x2, y1, y2, fusedConfidence };
 };
 
+/**
+ * Calculates the Intersection over Union for the 2 given detections
+ * @param {{algorithm: string; className: string; confidence: number; view: string; binaryMask: []; polygonMask: []; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation: boolean | null; textColor: string; detectionType: string; displayColor: string;}} detA
+ * @param {{algorithm: string; className: string; confidence: number; view: string; binaryMask: []; polygonMask: []; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation: boolean | null; textColor: string; detectionType: string; displayColor: string;}} detB
+ * @returns {number}
+ */
 export const calculateIoU = (detA, detB) => {
     const detAArea = Math.abs(
         (detA.boundingBox[2] - detA.boundingBox[0]) *
