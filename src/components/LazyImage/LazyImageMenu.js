@@ -20,6 +20,8 @@ if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
 
+
+
 /**
  * Component for displaying the lazy image menu.
  *
@@ -66,12 +68,26 @@ function LazyImageMenu(props) {
             }
         }
     });
+
+    // change piece of state when the user scrolls. Used for adding box-shadow to header
+    const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
+
+    function handleMenuContainerScroll(event) {
+        const element = event.target;
+        if(element.scrollTop > 0){
+            setShouldAddBoxShadow(true);
+        }else{
+            setShouldAddBoxShadow(false);
+    }
+}
+
     // TODO: Scroll to selected thumbnail
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                         transition: 'none',
@@ -95,15 +111,12 @@ function LazyImageMenu(props) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                     }}>
-                    <div
-                        className="lazy-images-container"
-                        style={{
-                            width: sideMenuWidth,
-                        }}>
-                        <p className="images-in-workspace">
+                        <p className="images-in-workspace"
+                            style={{boxShadow: shouldAddBoxShadow && "0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)"}}>
                             <FileOpenIcon
                                 style={svgContainerStyle}
                                 svgStyle={{
@@ -113,6 +126,11 @@ function LazyImageMenu(props) {
                             />
                             Images in Workspace
                         </p>
+                    <div
+                        className="lazy-images-container"
+                        style={{
+                            width: sideMenuWidth,
+                        }}>
                         {props.thumbnails !== null
                             ? props.thumbnails.map((file, index) => {
                                   return (
