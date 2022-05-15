@@ -199,8 +199,8 @@ const detectionsSlice = createSlice({
                     try {
                         bListDetections.push({
                             view: detection.view,
-                            className: detection.className,
-                            algorithm: detection.algorithm,
+                            className: detection.className.toLowerCase(),
+                            algorithm: detection.algorithm.toLowerCase(),
                             boundingBox: JSON.parse(
                                 JSON.stringify(detection.boundingBox)
                             ),
@@ -324,8 +324,8 @@ const detectionsSlice = createSlice({
                     try {
                         bListDetections.push({
                             view: detection.view,
-                            className: detection.className,
-                            algorithm: detection.algorithm,
+                            className: detection.className.toLowerCase(),
+                            algorithm: detection.algorithm.toLowerCase(),
                             boundingBox: JSON.parse(
                                 JSON.stringify(detection.boundingBox)
                             ),
@@ -450,8 +450,8 @@ const detectionsSlice = createSlice({
                         try {
                             bListDetections.push({
                                 view: detection.view,
-                                className: detection.className,
-                                algorithm: detection.algorithm,
+                                className: detection.className.toLowerCase(),
+                                algorithm: detection.algorithm.toLowerCase(),
                                 boundingBox: JSON.parse(
                                     JSON.stringify(detection.boundingBox)
                                 ),
@@ -525,8 +525,8 @@ const detectionsSlice = createSlice({
                         try {
                             bListDetections.push({
                                 view: detection.view,
-                                className: detection.className,
-                                algorithm: detection.algorithm,
+                                className: detection.className.toLowerCase(),
+                                algorithm: detection.algorithm.toLowerCase(),
                                 boundingBox: JSON.parse(
                                     JSON.stringify(detection.boundingBox)
                                 ),
