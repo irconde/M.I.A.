@@ -1,18 +1,22 @@
 export const calculateLFLists = (bListDetections) => {
-    const lList = [],
+    let lList = [],
         fList = [];
     const firstDet = bListDetections.shift();
     lList.push([firstDet]);
     fList.push(firstDet);
     for (let i = 0; i < bListDetections.length; i++) {
-        for (let j = 0; j < fList.length; j++) {
-            const IoU = calculateIoU(bListDetections[i], fList[j]);
-            if (IoU > 0.55) {
-                lList[j].push(bListDetections[i]);
+        let foundIoUIndex = fList.findIndex((det, index) => {
+            if (calculateIoU(bListDetections[i], det) > 0.55) {
+                return -1;
             } else {
-                lList.push([bListDetections[i]]);
-                fList.push(bListDetections[i]);
+                return index;
             }
+        });
+        if (foundIoUIndex === -1) {
+            lList.push([bListDetections[i]]);
+            fList.push(bListDetections[i]);
+        } else {
+            lList[foundIoUIndex].push(bListDetections[i]);
         }
     }
     return { lList, fList };
