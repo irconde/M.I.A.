@@ -432,7 +432,7 @@ const detectionsSlice = createSlice({
                     });
                     newIndex = state.bLists.length - 1;
                 }
-                if (state.bLists[newIndex].length > 1) {
+                if (state.bLists[newIndex].items.length > 1) {
                     state.bLists[newIndex].items.sort((a, b) => {
                         if (a.confidence < b.confidence) return 1;
                         else return -1;
