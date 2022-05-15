@@ -114,7 +114,7 @@ const detectionsSlice = createSlice({
             } = action.payload;
             state.detections.push({
                 algorithm,
-                className,
+                className: className.toLowerCase(),
                 confidence,
                 view,
                 binaryMask,
@@ -365,11 +365,13 @@ const detectionsSlice = createSlice({
          * @param {string} className - Destructured from action.payload -- new label className for detection being updated
          */
         editDetectionLabel: (state, action) => {
-            // TODO: Ensemble
             const { uuid, className } = action.payload;
+            const newClassName = className.toLowerCase();
+            let oldClassName = '';
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection) {
-                detection.className = className;
+                oldClassName = detection.className.toLowerCase();
+                detection.className = newClassName;
                 detection.color = randomColor({
                     seed: className,
                     hue: 'random',
@@ -381,7 +383,10 @@ const detectionsSlice = createSlice({
                 }
                 state.missMatchedClassNames.forEach((missMatched) => {
                     state.detections.forEach((det) => {
-                        if (missMatched.className === det.className) {
+                        if (
+                            missMatched.className.toLowerCase() ===
+                            det.className
+                        ) {
                             det.color = missMatched.color;
                             if (det.uuid === state.selectedDetection.uuid) {
                                 det.displayColor = missMatched.color;
@@ -389,6 +394,93 @@ const detectionsSlice = createSlice({
                         }
                     });
                 });
+                /*                  Begin Ensemble                    */
+                /*                  bList sorting                    */
+                const oldIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detection.view &&
+                        list.className.toLowerCase() === oldClassName
+                );
+                if (oldIndex !== -1) {
+                    state.bLists[oldIndex].items = state.bLists[
+                        oldIndex
+                    ].items.filter((det) => det.uuid !== uuid);
+                    if (state.bLists[oldIndex].items.length === 0) {
+                        state.bLists.splice(oldIndex, 1);
+                    }
+                }
+                let newIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detection.view &&
+                        list.className.toLowerCase() === newClassName
+                );
+                if (newIndex !== -1) {
+                    state.bLists[newIndex].items.push({
+                        uuid,
+                        confidence: detection.confidence,
+                    });
+                } else {
+                    state.bLists.push({
+                        view: detection.view,
+                        className: newClassName,
+                        items: [
+                            {
+                                uuid,
+                                confidence: detection.confidence,
+                            },
+                        ],
+                    });
+                    newIndex = state.bLists.length - 1;
+                }
+                if (state.bLists[newIndex].length > 1) {
+                    state.bLists[newIndex].items.sort((a, b) => {
+                        if (a.confidence < b.confidence) return 1;
+                        else return -1;
+                    });
+                }
+                /*                  End bList sorting                    */
+                /*                  WBF Calculation                    */
+                state.summarizedDetections = [];
+                state.bLists.forEach((list) => {
+                    const bListDetections = [];
+                    list.items.forEach((item) => {
+                        const detection = state.detections.find(
+                            (det) => det.uuid === item.uuid
+                        );
+                        try {
+                            bListDetections.push({
+                                view: detection.view,
+                                className: detection.className,
+                                algorithm: detection.algorithm,
+                                boundingBox: JSON.parse(
+                                    JSON.stringify(detection.boundingBox)
+                                ),
+                                confidence: detection.confidence,
+                                color: detection.color,
+                                displayColor: detection.color,
+                                visible: true,
+                                selected: false,
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    });
+                    const { lList, fList } =
+                        Ensemble.calculateLFLists(bListDetections);
+                    for (let i = 0; i < fList.length; i++) {
+                        const { x1, x2, y1, y2, fusedConfidence } =
+                            Ensemble.calculateFusedBox(lList, i);
+                        fList[i].algorithm = 'Summarized - WBF';
+                        fList[i].boundingBox = [x1, y1, x2, y2];
+                        fList[i].confidence =
+                            fusedConfidence >= 100 ? 100 : fusedConfidence;
+                        fList[i].polygonMask = [];
+                        fList[i].binaryMask = [[], [], []];
+                        state.summarizedDetections.push(fList[i]);
+                    }
+                });
+                /*                  End WBF Calculation                    */
+                /*                  End Ensemble                    */
             }
         },
 
@@ -399,60 +491,72 @@ const detectionsSlice = createSlice({
          * @param {string} uuid - Destructured from action.payload -- uuid for detection being deleted
          */
         deleteDetection: (state, action) => {
-            state.detections = state.detections.filter((det) => {
-                return det.uuid !== action.payload;
-            });
-            state.detectionChanged = true;
-            /*                  Begin Ensemble                    */
-            /*                  bList sorting                    */
-            state.bLists.forEach((bList) => {
-                bList.items = bList.items.filter((det) => {
-                    return det.uuid !== action.payload;
-                });
-            });
-            /*                  End bList sorting                    */
-            /*                  WBF Calculation                    */
-            state.summarizedDetections = [];
-            state.bLists.forEach((list) => {
-                const bListDetections = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        bListDetections.push({
-                            view: detection.view,
-                            className: detection.className,
-                            algorithm: detection.algorithm,
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            displayColor: detection.color,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
+            const foundDetIndex = state.detections.findIndex(
+                (det) => det.uuid === action.payload
+            );
+            if (foundDetIndex !== -1) {
+                const detectionToDelete = state.detections[foundDetIndex];
+                state.detections.splice(foundDetIndex, 1);
+                state.detectionChanged = true;
+                /*                  Begin Ensemble                    */
+                /*                  bList sorting                    */
+                const bListIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detectionToDelete.view &&
+                        list.className === detectionToDelete.className
+                );
+                if (bListIndex !== -1) {
+                    state.bLists[bListIndex].items = state.bLists[
+                        bListIndex
+                    ].items.filter((det) => det.uuid !== action.payload);
+                    if (state.bLists[bListIndex].items.length === 0) {
+                        state.bLists.splice(bListIndex, 1);
+                    }
+                }
+                /*                  End bList sorting                    */
+                /*                  WBF Calculation                    */
+                state.summarizedDetections = [];
+                state.bLists.forEach((list) => {
+                    const bListDetections = [];
+                    list.items.forEach((item) => {
+                        const detection = state.detections.find(
+                            (det) => det.uuid === item.uuid
+                        );
+                        try {
+                            bListDetections.push({
+                                view: detection.view,
+                                className: detection.className,
+                                algorithm: detection.algorithm,
+                                boundingBox: JSON.parse(
+                                    JSON.stringify(detection.boundingBox)
+                                ),
+                                confidence: detection.confidence,
+                                color: detection.color,
+                                displayColor: detection.color,
+                                visible: true,
+                                selected: false,
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    });
+                    const { lList, fList } =
+                        Ensemble.calculateLFLists(bListDetections);
+                    for (let i = 0; i < fList.length; i++) {
+                        const { x1, x2, y1, y2, fusedConfidence } =
+                            Ensemble.calculateFusedBox(lList, i);
+                        fList[i].algorithm = 'Summarized - WBF';
+                        fList[i].boundingBox = [x1, y1, x2, y2];
+                        fList[i].confidence =
+                            fusedConfidence >= 100 ? 100 : fusedConfidence;
+                        fList[i].polygonMask = [];
+                        fList[i].binaryMask = [[], [], []];
+                        state.summarizedDetections.push(fList[i]);
                     }
                 });
-                const { lList, fList } =
-                    Ensemble.calculateLFLists(bListDetections);
-                for (let i = 0; i < fList.length; i++) {
-                    const { x1, x2, y1, y2, fusedConfidence } =
-                        Ensemble.calculateFusedBox(lList, i);
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence =
-                        fusedConfidence >= 100 ? 100 : fusedConfidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
-            });
-            /*                  End WBF Calculation                    */
-            /*                  End Ensemble                    */
+                /*                  End WBF Calculation                    */
+                /*                  End Ensemble                    */
+            }
         },
 
         /**
