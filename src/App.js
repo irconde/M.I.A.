@@ -3547,6 +3547,7 @@ class App extends Component {
 
                     <NoFileSign />
                     <MetaData />
+                    <!-- TODO: To be deleted -->
                     <button
                         style={{
                             zIndex: 5,
