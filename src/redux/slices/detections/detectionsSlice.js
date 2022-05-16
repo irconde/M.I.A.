@@ -85,6 +85,8 @@ const detectionsSlice = createSlice({
             state.selectedDetection = null;
             state.detections = [];
             state.detectionChanged = false;
+            state.bLists = [];
+            state.summarizedDetections = [];
         },
 
         /**

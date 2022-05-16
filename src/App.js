@@ -3547,6 +3547,20 @@ class App extends Component {
 
                     <NoFileSign />
                     <MetaData />
+                    <button
+                        style={{
+                            zIndex: 5,
+                            position: 'absolute',
+                            width: '10%',
+                            height: '25%',
+                            right: '0',
+                            top: '30%',
+                        }}
+                        onClick={() => {
+                            this.props.toggleDisplaySummarizedDetections();
+                        }}>
+                        Toggle Ensemble Detections
+                    </button>
                 </div>
             </div>
         );
