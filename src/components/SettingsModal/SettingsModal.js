@@ -515,10 +515,6 @@ const SettingsModal = (props) => {
                                 </p>
                             ) : null}
 
-
-
-
-
                             <div style={classes.remoteWorkRow}>
                                 <div style={classes.remoteInputContainer}>
                                     <Tooltip title="Server Address">
@@ -556,15 +552,9 @@ const SettingsModal = (props) => {
                                         />
                                     </FormControl>
 
-
-
-
                                     <span style={classes.cloudIconContainer}>
                                         :
                                     </span>
-
-
-
 
                                     <FormControl>
                                         <TextField
@@ -590,12 +580,6 @@ const SettingsModal = (props) => {
                                         />
                                     </FormControl>
                                 </div>
-
-
-
-
-
-
 
                                 <div style={classes.autoConnectContainer}>
                                     <Tooltip title="Autoconnect to Server">
@@ -759,7 +743,8 @@ const SettingsModal = (props) => {
                                         <FormControl
                                             style={
                                                 classes.displayListSectionInput
-                                            }>
+                                            }
+                                            variant="standard">
                                             <Select
                                                 style={
                                                     fileFormat === ''
@@ -803,7 +788,8 @@ const SettingsModal = (props) => {
                                         <FormControl
                                             style={
                                                 classes.displayListSectionInput
-                                            }>
+                                            }
+                                            variant="standard">
                                             <Select
                                                 style={
                                                     annotationsFormat === ''
@@ -879,6 +865,7 @@ const SettingsModal = (props) => {
                                                         e.target.value
                                                     );
                                                 }}
+                                                variant="standard"
                                             />
                                         </FormControl>
                                     </div>
