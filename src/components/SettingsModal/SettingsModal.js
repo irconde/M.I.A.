@@ -546,9 +546,6 @@ const SettingsModal = (props) => {
                                             }}
                                             style={classes.cloudIconContainer}
                                             variant="standard"
-                                            /*style={{
-                                                marginRight: '0.75rem',
-                                            }}*/
                                         />
                                     </FormControl>
 
@@ -689,6 +686,7 @@ const SettingsModal = (props) => {
                                                         e.target.value
                                                     );
                                                 }}
+                                                variant="standard"
                                             />
                                         </FormControl>
                                         <Tooltip title="Select Image Folder">
