@@ -138,7 +138,7 @@ function LazyImageContainer(props) {
                     />
             ) : null}
             <div className="lazy-image-text-container">
-                <Tooltip title={thisFileName}>
+                <Tooltip title={props.file}>
                     <span className="lazy-image-text">{thisFileName}</span>
                 </Tooltip>
                 {numOfViews > 1 ? (
