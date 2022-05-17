@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tooltip from '@mui/material/Tooltip';
 
 /**
  * Settings cog SVG used in SettingsIcon component.
@@ -14,7 +13,6 @@ import Tooltip from '@mui/material/Tooltip';
  */
 const SettingsCog = (props) => {
     return (
-        <Tooltip title="Settings" placement="bottom">
             <svg
                 style={props.style}
                 width="24px"
@@ -46,7 +44,6 @@ const SettingsCog = (props) => {
                     </g>
                 </g>
             </svg>
-        </Tooltip>
     );
 };
 

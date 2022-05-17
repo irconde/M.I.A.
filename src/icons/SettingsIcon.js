@@ -6,6 +6,7 @@ import SettingsModal from '../components/SettingsModal/SettingsModal';
 import { toggleSettingsVisibility } from '../redux/slices/ui/uiSlice';
 import SettingsCog from './SettingsCog';
 import { getFirstDisplaySettings } from '../redux/slices/settings/settingsSlice';
+import Tooltip from '@mui/material/Tooltip';
 
 const IconStyle = styled.div`
     margin: 1rem 2.5rem 0.5rem 0rem;
@@ -41,12 +42,14 @@ const SettingsIcon = (props) => {
     };
     return (
         <>
-            <IconStyle style={style} onClick={() => handleOpen()}>
-                <SettingsCog
-                    style={{ marginTop: 'auto', marginBottom: 'auto' }}
-                    title={props.title}
-                />
-            </IconStyle>
+            <Tooltip title="Settings">
+                <IconStyle style={style} onClick={() => handleOpen()}>
+                    <SettingsCog
+                        style={{ marginTop: 'auto', marginBottom: 'auto' }}
+                        title={props.title}
+                    />
+                </IconStyle>
+            </Tooltip>
 
             <SettingsModal
                 connectToCommandServer={
