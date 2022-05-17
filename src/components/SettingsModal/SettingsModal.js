@@ -438,6 +438,9 @@ const SettingsModal = (props) => {
         cloudIconContainer: {
             alignSelf: 'center',
         },
+        fileIconContainer: {
+            alignSelf: 'center',
+        },
         autoConnectContainer: {
             display: 'inline-block',
             float: 'right',
@@ -645,16 +648,21 @@ const SettingsModal = (props) => {
                                     <div style={classes.workingDirectory}>
                                         <FormControl
                                             style={classes.longTextField}>
-                                            <FileOpenIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={{
-                                                    ...svgStyle,
-                                                    color:
-                                                        remoteOrLocal === true
-                                                            ? '#9d9d9d'
-                                                            : '#ffffff',
-                                                }}
-                                            />
+                                            <Tooltip title="Local File Path">
+                                                <div style={classes.fileIconContainer}>
+                                                    <FileOpenIcon
+                                                        style={svgContainerStyle}
+                                                        svgStyle={{
+                                                            ...svgStyle,
+                                                            color:
+                                                                remoteOrLocal ===
+                                                                true
+                                                                    ? '#9d9d9d'
+                                                                    : '#ffffff',
+                                                        }}
+                                                    />
+                                                </div>
+                                            </Tooltip>
                                             {/* TODO: For a user typing a directory, verify it exists when finished typing */}
                                             <TextField
                                                 required
