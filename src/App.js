@@ -3544,10 +3544,9 @@ class App extends Component {
                             thumbnails={this.state.thumbnails}
                         />
                     ) : null}
-
                     <NoFileSign />
                     <MetaData />
-                    <!-- TODO: To be deleted -->
+                    {/* TODO: Button to be deleted */}
                     <button
                         style={{
                             zIndex: 5,
