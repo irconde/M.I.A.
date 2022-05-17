@@ -512,17 +512,19 @@ const SettingsModal = (props) => {
 
                             <div style={classes.remoteWorkRow}>
                                 <div style={classes.remoteInputContainer}>
-                                    <div style={classes.cloudIconContainer}>
-                                        <CloudIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={{
-                                                ...svgStyle,
-                                                color: remoteOrLocal
-                                                    ? '#ffffff'
-                                                    : '#9d9d9d',
-                                            }}
-                                        />
-                                    </div>
+                                    <Tooltip title="Server Address">
+                                        <div style={classes.cloudIconContainer}>
+                                            <CloudIcon
+                                                style={svgContainerStyle}
+                                                svgStyle={{
+                                                    ...svgStyle,
+                                                    color: remoteOrLocal
+                                                        ? '#ffffff'
+                                                        : '#9d9d9d',
+                                                }}
+                                            />
+                                        </div>
+                                    </Tooltip>
                                     <FormControl style={classes.flexAuto}>
                                         <TextField
                                             required
@@ -852,12 +854,13 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
-
-                    <Button
-                        variant="outlined"
-                        onClick={() => saveSettingsEvent()}>
-                        Save Settings
-                    </Button>
+                    <Tooltip title="Save Settings">
+                        <Button
+                            variant="outlined"
+                            onClick={() => saveSettingsEvent()}>
+                            Save Settings
+                        </Button>
+                    </Tooltip>
                 </FormGroup>
             </div>
         </Paper>
