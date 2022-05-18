@@ -69,13 +69,35 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
-    console.log("dirPath", dirPath);
+    const handleFileAddition = path =>{
+        console.log(`File ${path} has been added`);
+        
+        files.push(path);
+    }
+    const handleFileRemoval = path =>{
+        console.log(`File ${path} has been removed`);
+
+        files = files.filter(file => file !== path);
+    }
+
+    const handleFileChange = path =>{
+        console.log(`File ${path} has been changed`);
+        
+        
+    }
+
+    // TODO: make sure to pull the constants out
     // create a directory watcher
     const watcher = chokidar.watch(dirPath);
     watcher
-        .on('add', path => console.log(`File ${path} has been added`))
-        .on('change', path => console.log(`File ${path} has been changed`))
-        .on('unlink', path => console.log(`File ${path} has been removed`));
+        .on('add', handleFileAddition)
+        .on('change', handleFileChange)
+        .on('unlink', handleFileRemoval);
+    
+    
+
+
+    
 }
 
 
