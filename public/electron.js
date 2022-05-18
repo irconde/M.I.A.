@@ -16,6 +16,7 @@ const JSZip = require('jszip');
 const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
+const chokidar = require('chokidar');
 
 let mainWindow;
 let files = [];
@@ -66,6 +67,18 @@ app.on('activate', () => {
     }
 });
 
+function handleExternalFileChanges(dirPath){
+
+    console.log("dirPath", dirPath);
+    // create a directory watcher
+    const watcher = chokidar.watch(dirPath);
+    watcher
+        .on('add', path => console.log(`File ${path} has been added`))
+        .on('change', path => console.log(`File ${path} has been changed`))
+        .on('unlink', path => console.log(`File ${path} has been removed`));
+}
+
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * This returns an object with a cancelled value and an array containing the file path
@@ -111,6 +124,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
+                            handleExternalFileChanges(args);
                             sendThumbnailStatus();
                             resolve(loadFile(files[currentFileIndex]));
                         } else {
