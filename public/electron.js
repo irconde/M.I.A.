@@ -69,26 +69,40 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
+    
     const handleFileAddition = path =>{
         console.log(`File ${path} has been added`);
         
         files.push(path);
+        sendNewFiles();
     }
     const handleFileRemoval = path =>{
         console.log(`File ${path} has been removed`);
-
+        
         files = files.filter(file => file !== path);
+        sendNewFiles();
     }
-
+    
     const handleFileChange = path =>{
         console.log(`File ${path} has been changed`);
         
-        
+    }
+
+    // let react process know of any file changes happening
+    const sendNewFiles = () =>{
+        mainWindow.webContents.send(
+            Constants.Channels.updateFiles,
+            files
+        );
     }
 
     // TODO: make sure to pull the constants out
     // create a directory watcher
-    const watcher = chokidar.watch(dirPath);
+    const watcher = chokidar.watch(dirPath, {
+        ignored: '*.json',
+        ignoreInitial: true
+    });
+
     watcher
         .on('add', handleFileAddition)
         .on('change', handleFileChange)
@@ -146,7 +160,6 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                 loadFilesFromPath(args)
                     .then(() => {
                         if (files.length > 0) {
-                            handleExternalFileChanges(args);
                             sendThumbnailStatus();
                             resolve(loadFile(files[currentFileIndex]));
                         } else {
@@ -391,6 +404,8 @@ const loadFilesFromPath = async (path) => {
                     });
                     startThumbnailThread(path);
                     resolve('files loaded');
+                    // ! handle changes done to the local directory outside of the appliation
+                    handleExternalFileChanges(path);
                 })
                 .catch((error) => {
                     console.log(error);

@@ -7,6 +7,7 @@ module.exports.Channels = {
     saveIndFile: 'save-individual-file',
     getThumbnail: 'get-thumbnail',
     thumbnailStatus: 'thumbnail-status',
+    updateFiles: 'update-files',
 };
 
 module.exports.Settings = {
