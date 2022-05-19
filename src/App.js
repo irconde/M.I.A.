@@ -2104,13 +2104,12 @@ class App extends Component {
                 return;
             }
             let boundingBoxColor = data[j].color;
-            if (data[j].selected) {
-                boundingBoxColor = constants.detectionStyle.SELECTED_COLOR;
-            }
             if (this.props.selectedDetection) {
                 if (this.props.selectedDetection.uuid !== data[j].uuid) {
                     const rgb = Utils.hexToRgb(data[j].color);
                     boundingBoxColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                } else {
+                    boundingBoxColor = constants.detectionStyle.SELECTED_COLOR;
                 }
             }
             context.strokeStyle = boundingBoxColor;
