@@ -69,25 +69,6 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
-    
-    const handleFileAddition = path =>{
-        console.log(`File ${path} has been added`);
-        
-        files.push(path);
-        sendNewFiles();
-    }
-    const handleFileRemoval = path =>{
-        console.log(`File ${path} has been removed`);
-        
-        files = files.filter(file => file !== path);
-        sendNewFiles();
-    }
-    
-    const handleFileChange = path =>{
-        console.log(`File ${path} has been changed`);
-        
-    }
-
     // let react process know of any file changes happening
     const sendNewFiles = () =>{
         mainWindow.webContents.send(
@@ -96,17 +77,31 @@ function handleExternalFileChanges(dirPath){
         );
     }
 
-    // TODO: make sure to pull the constants out
-    // create a directory watcher
+    // create a directory watcher, making sure it ignores json files
+    // it also doesn't fire the first time to avoid additional rerenders
     const watcher = chokidar.watch(dirPath, {
-        ignored: '*.json',
+        ignored: Constants.FileWatcher.all_json_files,
         ignoreInitial: true
     });
 
+    // wire the directory modification event handlers
     watcher
-        .on('add', handleFileAddition)
-        .on('change', handleFileChange)
-        .on('unlink', handleFileRemoval);
+        .on(Constants.FileWatcher.add, path =>{
+            console.log(`File ${path} has been added`);
+            
+            files.push(path);
+            sendNewFiles();
+        })
+        .on(Constants.FileWatcher.change, path =>{
+            console.log(`File ${path} has been changed`);
+            
+        })
+        .on(Constants.FileWatcher.unlink, path =>{
+            console.log(`File ${path} has been removed`);
+            
+            files = files.filter(file => file !== path);
+            sendNewFiles();
+        });
     
     
 

@@ -383,12 +383,10 @@ class App extends Component {
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
 
-        // handle a request to rerender when the user modifies the dir content
-        // in the file system
+        // handle a request to update the thumbnails state when the user modifies 
+        // the dir content in the file system
         ipcRenderer.on(constants.Channels.updateFiles, (event, data)=>{
-            this.setState({thumbnails: data}, ()=>{
-                console.log("State update");
-            })
+            this.setState({thumbnails: data});
         })
     }
 

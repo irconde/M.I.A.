@@ -10,6 +10,13 @@ module.exports.Channels = {
     updateFiles: 'update-files',
 };
 
+module.exports.FileWatcher = {
+    add: 'add',
+    change: 'change',
+    unlink: 'unlink',
+    all_json_files: '*.json'
+}
+
 module.exports.Settings = {
     ANNOTATIONS: {
         COCO: 'MS COCO',
