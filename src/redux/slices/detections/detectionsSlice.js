@@ -32,8 +32,6 @@ import * as Ensemble from '../../../utils/Ensemble';
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending
 //     // the file back to the image/command server, then is is considered to be validated.
 //     validation: boolean;
-//     // Decides what color should be displayed when rendering a detection
-//     displayColor: string;
 //     // Will be white if the detection is visible and gray if not visible
 //     textColor: string;
 // }
@@ -141,15 +139,8 @@ const detectionsSlice = createSlice({
                 (el) => el.className === className
             );
             if (foundIndex !== -1) {
-                state.detections[state.detections.length - 1].displayColor =
-                    state.missMatchedClassNames[foundIndex].color;
                 state.detections[state.detections.length - 1].color =
                     state.missMatchedClassNames[foundIndex].color;
-            } else {
-                state.detections[state.detections.length - 1].displayColor =
-                    getDetectionColor(
-                        state.detections[state.detections.length - 1]
-                    );
             }
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
@@ -208,7 +199,6 @@ const detectionsSlice = createSlice({
                             ),
                             confidence: detection.confidence,
                             color: detection.color,
-                            displayColor: detection.color,
                             visible: true,
                             selected: false,
                         });
@@ -242,7 +232,6 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 det.selected = false;
                 if (det.visible) {
-                    det.displayColor = det.color;
                     det.textColor = 'white';
                 }
             });
@@ -262,14 +251,8 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.algorithm === action.payload) {
                     det.selected = true;
-                    const rgb = Utils.hexToRgb(
-                        constants.detectionStyle.SELECTED_COLOR
-                    );
-                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 } else {
                     det.selected = false;
-                    const rgb = Utils.hexToRgb(det.color);
-                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 }
             });
         },
@@ -289,8 +272,6 @@ const detectionsSlice = createSlice({
                 } else {
                     det.selected = false;
                 }
-                if (det.visible)
-                    det.displayColor = getDetectionColor(det, action.payload);
             });
         },
 
@@ -333,7 +314,6 @@ const detectionsSlice = createSlice({
                             ),
                             confidence: detection.confidence,
                             color: detection.color,
-                            displayColor: detection.color,
                             visible: true,
                             selected: false,
                         });
@@ -390,9 +370,6 @@ const detectionsSlice = createSlice({
                             det.className
                         ) {
                             det.color = missMatched.color;
-                            if (det.uuid === state.selectedDetection.uuid) {
-                                det.displayColor = missMatched.color;
-                            }
                         }
                     });
                 });
@@ -459,7 +436,6 @@ const detectionsSlice = createSlice({
                                 ),
                                 confidence: detection.confidence,
                                 color: detection.color,
-                                displayColor: detection.color,
                                 visible: true,
                                 selected: false,
                             });
@@ -534,7 +510,6 @@ const detectionsSlice = createSlice({
                                 ),
                                 confidence: detection.confidence,
                                 color: detection.color,
-                                displayColor: detection.color,
                                 visible: true,
                                 selected: false,
                             });
@@ -594,10 +569,8 @@ const detectionsSlice = createSlice({
                 }
                 if (det.visible) {
                     det.textColor = 'white';
-                    det.displayColor = det.color;
                 } else {
                     det.textColor = 'gray';
-                    det.displayColor = 'black';
                 }
             });
         },
@@ -616,10 +589,8 @@ const detectionsSlice = createSlice({
                     if (det.visible === false) {
                         det.selected = false;
                         det.textColor = 'gray';
-                        det.displayColor = 'black';
                     } else {
                         det.textColor = 'white';
-                        det.displayColor = det.color;
                     }
                 }
             });
@@ -647,15 +618,11 @@ const detectionsSlice = createSlice({
                 state.detections.forEach((det) => {
                     if (missMatched.className === det.className) {
                         det.color = missMatched.color;
-                        if (det.uuid === state.selectedDetection.uuid) {
-                            det.displayColor = missMatched.color;
-                        }
                     }
                 });
             });
             if (state.selectedDetection.className === className) {
                 state.selectedDetection.color = color;
-                state.selectedDetection.displayColor = color;
             }
         },
         /**
@@ -668,9 +635,6 @@ const detectionsSlice = createSlice({
                 state.detections.forEach((det) => {
                     if (missMatched.className === det.className) {
                         det.color = missMatched.color;
-                        if (det.uuid !== state.selectedDetection.uuid) {
-                            det.displayColor = missMatched.color;
-                        }
                     }
                 });
             });

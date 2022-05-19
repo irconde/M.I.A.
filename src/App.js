@@ -2103,20 +2103,18 @@ class App extends Component {
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            context.strokeStyle =
-                this.props.editionMode === constants.editionMode.COLOR &&
-                data[j].selected
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
-            context.fillStyle =
-                this.props.editionMode === constants.editionMode.COLOR &&
-                data[j].selected
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
+            let boundingBoxColor = data[j].color;
+            if (data[j].selected) {
+                boundingBoxColor = constants.detectionStyle.SELECTED_COLOR;
+            }
+            if (this.props.selectedDetection) {
+                if (this.props.selectedDetection.uuid !== data[j].uuid) {
+                    const rgb = Utils.hexToRgb(data[j].color);
+                    boundingBoxColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                }
+            }
+            context.strokeStyle = boundingBoxColor;
+            context.fillStyle = boundingBoxColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );

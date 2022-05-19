@@ -1,7 +1,7 @@
 /**
  * Will calculate a list of boxes to be fused (fList) with corresponding lList items
- * @param {Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}>} bListDetections
- * @returns {{fList: Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}>, lList: Array<Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}>>}}
+ * @param {Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}>} bListDetections
+ * @returns {{fList: Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}>, lList: Array<Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}>>}}
  */
 export const calculateLFLists = (bListDetections) => {
     let lList = [],
@@ -29,7 +29,7 @@ export const calculateLFLists = (bListDetections) => {
 
 /**
  * Calculates the fused box for the past in list of detections
- * @param {Array<Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}>>} lList
+ * @param {Array<Array<{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}>>} lList
  * @param {number} i
  * @returns {{y1: number, x1: number, y2: number, x2: number, fusedConfidence: number}}
  */
@@ -71,8 +71,8 @@ export const calculateFusedBox = (lList, i) => {
 
 /**
  * Calculates the Intersection over Union for the 2 given detections
- * @param {{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}} detA
- * @param {{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; displayColor: string; visible: boolean; selected: boolean}} detB
+ * @param {{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}} detA
+ * @param {{view: string; className: string; algorithm: string; boundingBox: Array<number>; confidence: number; color: string; visible: boolean; selected: boolean}} detB
  * @returns {number}
  */
 export const calculateIoU = (detA, detB) => {

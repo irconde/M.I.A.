@@ -134,7 +134,7 @@ const SideMenuDetection = ({
                 <div
                     style={{
                         ...detectionBGStyle,
-                        backgroundColor: detection.displayColor,
+                        backgroundColor: 'black',
                     }}></div>
                 <span
                     id={`${detection.view}-hidden-span`}
