@@ -230,7 +230,7 @@ const SettingsModal = (props) => {
 
     const theme = createTheme({
         palette: {
-            type: 'dark',
+            mode: 'dark',
             primary: {
                 light: '#5e97ff',
                 main: '#367eff',
@@ -293,22 +293,22 @@ const SettingsModal = (props) => {
             alignSelf: 'flex-end',
         },
         modal: {
-            /*boxShadow: theme.shadows[5],*/
+            boxShadow: theme.shadows[5],
             padding: theme.spacing(2, 4, 4),
         },
         paper: {
             padding: theme.spacing(1),
             textAlign: 'center',
-            /*color: theme.palette.text.primary,*/
+            color: theme.palette.text.primary,
         },
         selector: {},
         links: {
-            /*fontSize: theme.typography.fontSize,*/
+            fontSize: theme.typography.fontSize,
             color: theme.palette.primary,
             cursor: 'pointer',
         },
         linkSelected: {
-            /*fontSize: theme.typography.fontSize,*/
+            fontSize: theme.typography.fontSize,
             color: theme.palette.primary,
             background: '#515151',
             cursor: 'pointer',
@@ -470,7 +470,7 @@ const SettingsModal = (props) => {
     };
 
     let body = (
-        <Paper style={modalStyle} elevation={3}>
+        <Paper sx={modalStyle} elevation={3}>
             <div style={classes.root}>
                 <div style={classes.settingsContainer}>
                     <div style={classes.settingsCogwheel}>
@@ -544,7 +544,6 @@ const SettingsModal = (props) => {
                                             onChange={(e) => {
                                                 setRemoteIp(e.target.value);
                                             }}
-                                            style={classes.cloudIconContainer}
                                             variant="standard"
                                         />
                                     </FormControl>
