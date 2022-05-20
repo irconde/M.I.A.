@@ -91,6 +91,11 @@ function handleExternalFileChanges(dirPath){
             
             files.push(path);
             sendNewFiles();
+            parseThumbnail(path).then(()=>{
+                saveThumbnailDatabase();
+            }).catch(error=>{
+                console.log(`Error in filewatcher: ${error}`);
+            })
         })
         .on(Constants.FileWatcher.change, path =>{
             console.log(`File ${path} has been changed`);
