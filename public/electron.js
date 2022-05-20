@@ -69,12 +69,22 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
-    // let react process know of any file changes happening
+    // notifies react process about the updated files
     const sendNewFiles = () =>{
         mainWindow.webContents.send(
             Constants.Channels.updateFiles,
             files
         );
+    }
+
+    // returns the name of the file including the extension from a given path
+    const getFileNameFromPath = (path)=>{
+        return path.split('\\').pop().split('/').pop();
+    }
+
+    // accepts a file name, and returns the file name excluding the file extension
+    const removeFileExtension = (filename)=>{
+        return filename.replace(/\.[^/.]+$/, "");
     }
 
     // create a directory watcher, making sure it ignores json files
@@ -89,6 +99,7 @@ function handleExternalFileChanges(dirPath){
         .on(Constants.FileWatcher.add, path =>{
             console.log(`File ${path} has been added`);
             
+            // ! make sure you only care for .ora files
             files.push(path);
             sendNewFiles();
             parseThumbnail(path).then(()=>{
@@ -105,7 +116,13 @@ function handleExternalFileChanges(dirPath){
             console.log(`File ${path} has been removed`);
             
             files = files.filter(file => file !== path);
+            // console.log(thumbnails);
+            const filename = getFileNameFromPath(path);
+            console.log(filename);
+
+            // console.log(thumbnails);
             sendNewFiles();
+            saveThumbnailDatabase();
         });
     
     
