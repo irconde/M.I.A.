@@ -140,26 +140,39 @@ function handleExternalFileChanges(dirPath){
             // ! distinguish the difference between deleting a thumbnail, and ora file
             
             const removedFilename = getFileNameFromPath(path);
+            const removedFileExtension = getFileExtension(removedFilename);
 
             // handle ora file removal
-            if(getFileExtension(removedFilename) === 'ora'){
-                const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
-                const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+            switch(removedFileExtension){
+                case 'ora':
+                    // find the thumbnail that needs to be deleted
+                    const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
+                    const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+                    // delete the thumbnail png file
+                    deleteFileAtPath(thumbnailPath)
+                        .then(()=>{
+                            // remove the thumbnail from the database
+                            thumbnails.splice(thumbnailIndex, 1);
+                            saveThumbnailDatabase();
+                            // update the files for the react process
+                            files = files.filter(file => file !== path);
+                            sendNewFiles();
+                        })
+                        .catch((error)=>{
+                            console.log(error);
+                        })
+                    break;
+                case 'png':
 
-                deleteFileAtPath(thumbnailPath)
-                    .then(()=>{
-                        thumbnails.splice(thumbnailIndex, 1);
-                        saveThumbnailDatabase();
-                        files = files.filter(file => file !== path);
-                        sendNewFiles();
-                    })
-                    .catch((error)=>{
-                        console.log(error);
-                    })
-
-            } else {
-                // handle thumbnails file removal here
+                    break;
+                case 'json':
+                    saveThumbnailDatabase();
+                    break;
+                default:
+                    console.log(`File removed of unhandled type ${removedFileExtension}`);
             }
+            
+            
 
             
             
