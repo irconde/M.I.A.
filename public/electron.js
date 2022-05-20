@@ -87,6 +87,9 @@ function handleExternalFileChanges(dirPath){
         return filename.replace(/\.[^/.]+$/, "");
     }
 
+    // accepts a file name, and returns the file extension
+    const getFileExtension = (filename) => filename.split('.').pop();
+
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional rerenders
     const watcher = chokidar.watch(dirPath, {
@@ -94,19 +97,38 @@ function handleExternalFileChanges(dirPath){
         ignoreInitial: true
     });
 
+    const deleteFileAtPath = async (path) => {
+        if (fs.existsSync(path)) {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    throw `An error ocurred deleting the file ${err.message}`;
+                }
+                console.log("File succesfully deleted");
+                return;
+            });
+        } else {
+            throw "This file doesn't exist, cannot delete";
+        }
+    }
+
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, path =>{
             console.log(`File ${path} has been added`);
             
-            // ! make sure you only care for .ora files
-            files.push(path);
-            sendNewFiles();
-            parseThumbnail(path).then(()=>{
-                saveThumbnailDatabase();
-            }).catch(error=>{
-                console.log(`Error in filewatcher: ${error}`);
-            })
+            const addedFilename = getFileNameFromPath(path);
+
+            // handle ora file addition
+            if(getFileExtension(addedFilename) === 'ora'){
+                files.push(path);
+                sendNewFiles();
+                parseThumbnail(path).then(()=>{
+                    saveThumbnailDatabase();
+                }).catch(error=>{
+                    console.log(`Error in filewatcher: ${error}`);
+                })
+            }
+            
         })
         .on(Constants.FileWatcher.change, path =>{
             console.log(`File ${path} has been changed`);
@@ -114,15 +136,33 @@ function handleExternalFileChanges(dirPath){
         })
         .on(Constants.FileWatcher.unlink, path =>{
             console.log(`File ${path} has been removed`);
-            
-            files = files.filter(file => file !== path);
-            // console.log(thumbnails);
-            const filename = getFileNameFromPath(path);
-            console.log(filename);
 
-            // console.log(thumbnails);
-            sendNewFiles();
-            saveThumbnailDatabase();
+            // ! distinguish the difference between deleting a thumbnail, and ora file
+            
+            const removedFilename = getFileNameFromPath(path);
+
+            // handle ora file removal
+            if(getFileExtension(removedFilename) === 'ora'){
+                const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
+                const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+
+                deleteFileAtPath(thumbnailPath)
+                    .then(()=>{
+                        thumbnails.splice(thumbnailIndex, 1);
+                        saveThumbnailDatabase();
+                        files = files.filter(file => file !== path);
+                        sendNewFiles();
+                    })
+                    .catch((error)=>{
+                        console.log(error);
+                    })
+
+            } else {
+                // handle thumbnails file removal here
+            }
+
+            
+            
         });
     
     
