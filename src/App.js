@@ -386,7 +386,29 @@ class App extends Component {
         // handle a request to update the thumbnails state when the user modifies 
         // the dir content in the file system
         ipcRenderer.on(constants.Channels.updateFiles, (event, data)=>{
-            this.setState({thumbnails: data});
+            this.setState({thumbnails: data, myOra: new ORA()});
+
+            if (isElectron()) {
+                ipcRenderer
+                    .invoke(
+                        constants.Channels.getNextFile,
+                        this.props.localFileOutput
+                    )
+                    .then((result) => {
+                        this.props.setLocalFileOpen(true);
+                        this.loadNextImage(
+                            result.file,
+                            result.fileName,
+                            result.numberOfFiles,
+                            result.thumbnails
+                        );
+                    })
+                    .catch((error) => {
+                        this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
+                        this.onNoImageLeft();
+                    });
+            }
         })
     }
 

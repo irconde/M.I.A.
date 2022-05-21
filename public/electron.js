@@ -121,9 +121,9 @@ function handleExternalFileChanges(dirPath){
             if(getFileExtension(addedFilename) === 'ora'){
                 
                 files.push(path);
-                sendNewFiles();
                 parseThumbnail(path).then(()=>{
                     saveThumbnailDatabase();
+                    sendNewFiles();
                 }).catch(error=>{
                     console.log(`Error in filewatcher: ${error}`);
                 })
