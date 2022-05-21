@@ -103,11 +103,10 @@ function handleExternalFileChanges(dirPath){
                 if (err) {
                     throw `An error ocurred deleting the file ${err.message}`;
                 }
-                console.log("File succesfully deleted");
                 return;
             });
         } else {
-            throw "This file doesn't exist, cannot delete";
+            throw `File ${path} doesn't exist, cannot delete!`;
         }
     }
 
@@ -136,8 +135,6 @@ function handleExternalFileChanges(dirPath){
         })
         .on(Constants.FileWatcher.unlink, path =>{
             console.log(`File ${path} has been removed`);
-
-            // ! distinguish the difference between deleting a thumbnail, and ora file
             
             const removedFilename = getFileNameFromPath(path);
             const removedFileExtension = getFileExtension(removedFilename);
@@ -151,11 +148,37 @@ function handleExternalFileChanges(dirPath){
                     // delete the thumbnail png file
                     deleteFileAtPath(thumbnailPath)
                         .then(()=>{
+// //if the file to delete's index is greater than the selected index, don't need to do anything.
+// If the file to delete's index is less than the selected index, before you adjust the files array, 
+//    figure out the currently selected file name via the current index. 
+//    Then do a findIndex with that current file name and set the current index to that found index if there is one. Otherwise reset it to 0
+// If the file to delete's index is the currently selected index. I would select the prior file if there was one, 
+//    and have the App load that image now since the current one is deleted
+// Also one edge case to handle if the deletion causes the file array to be empty
+
+                            // remove the ora file path from the files array
+                            const removedFileIndex = files.findIndex(filepath => filepath === path);
+                            files.splice(removedFileIndex, 1);
+
+                            if(removedFileIndex < currentFileIndex){
+                                // update the currentFileIndex
+                                const currentFilePath = files.at(currentFileIndex);
+                                const mostCurrentFileIndex = files.findIndex(filepath => filepath === currentFilePath);
+                                if(mostCurrentFileIndex !== -1){
+                                    currentFileIndex = mostCurrentFileIndex;
+                                } else {
+                                    currentFileIndex = 0;
+                                }
+                            } else if(removedFileIndex === currentFileIndex){
+                                // decrement the index if possible, or set it to 0
+                                (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
+                            }
+
                             // remove the thumbnail from the database
                             thumbnails.splice(thumbnailIndex, 1);
                             saveThumbnailDatabase();
-                            // update the files for the react process
-                            files = files.filter(file => file !== path);
+                            
+                            // send the files for the react process
                             sendNewFiles();
                         })
                         .catch((error)=>{
@@ -163,7 +186,7 @@ function handleExternalFileChanges(dirPath){
                         })
                     break;
                 case 'png':
-
+                        // TODO: handle thumbnail png removal here
                     break;
                 case 'json':
                     saveThumbnailDatabase();
