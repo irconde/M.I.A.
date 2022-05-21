@@ -119,6 +119,7 @@ function handleExternalFileChanges(dirPath){
 
             // handle ora file addition
             if(getFileExtension(addedFilename) === 'ora'){
+                
                 files.push(path);
                 sendNewFiles();
                 parseThumbnail(path).then(()=>{
@@ -156,13 +157,16 @@ function handleExternalFileChanges(dirPath){
 //    and have the App load that image now since the current one is deleted
 // Also one edge case to handle if the deletion causes the file array to be empty
 
+                            
+
                             // remove the ora file path from the files array
                             const removedFileIndex = files.findIndex(filepath => filepath === path);
+                            const currentFilePath = files.at(currentFileIndex);
                             files.splice(removedFileIndex, 1);
 
                             if(removedFileIndex < currentFileIndex){
+                                console.log("File removed is less than file selected!");
                                 // update the currentFileIndex
-                                const currentFilePath = files.at(currentFileIndex);
                                 const mostCurrentFileIndex = files.findIndex(filepath => filepath === currentFilePath);
                                 if(mostCurrentFileIndex !== -1){
                                     currentFileIndex = mostCurrentFileIndex;
@@ -170,6 +174,7 @@ function handleExternalFileChanges(dirPath){
                                     currentFileIndex = 0;
                                 }
                             } else if(removedFileIndex === currentFileIndex){
+                                console.log("File removed is equal to file selected!");
                                 // decrement the index if possible, or set it to 0
                                 (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
                             }
