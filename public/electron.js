@@ -149,7 +149,7 @@ function handleExternalFileChanges(dirPath){
                     // delete the thumbnail png file
                     deleteFileAtPath(thumbnailPath)
                         .then(()=>{
-// //if the file to delete's index is greater than the selected index, don't need to do anything.
+// if the file to delete's index is greater than the selected index, don't need to do anything.
 // If the file to delete's index is less than the selected index, before you adjust the files array, 
 //    figure out the currently selected file name via the current index. 
 //    Then do a findIndex with that current file name and set the current index to that found index if there is one. Otherwise reset it to 0

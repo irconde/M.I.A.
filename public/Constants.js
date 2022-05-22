@@ -8,6 +8,7 @@ module.exports.Channels = {
     getThumbnail: 'get-thumbnail',
     thumbnailStatus: 'thumbnail-status',
     updateFiles: 'update-files',
+    updateCurrentFile: 'update-current-file',
 };
 
 module.exports.FileWatcher = {
