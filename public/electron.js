@@ -67,7 +67,7 @@ app.on('activate', () => {
     }
 });
 
-function handleExternalFileChanges(dirPath) {
+async function handleExternalFileChanges(dirPath) {
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional rerenders
     const watcher = chokidar.watch(dirPath, {
@@ -79,6 +79,7 @@ function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, async (path) => {
+            console.log(`FILE ADDED: ${path}`);
             const addedFilename = getFileNameFromPath(path);
 
             // handle ora file addition
@@ -93,16 +94,19 @@ function handleExternalFileChanges(dirPath) {
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
+                                    console.log('End point 1');
                                 })
                                 .catch((error) => {
                                     notifyCurrentFileUpdate(null);
                                     console.log(
                                         `Error getting the current file: ${error}`
                                     );
+                                    console.log('End point 2');
                                 });
                         } else {
                             // if the files array already contained a file
                             sendNewFiles();
+                            console.log('End point 3');
                         }
                     })
                     .catch((error) => {

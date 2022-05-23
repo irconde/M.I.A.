@@ -401,6 +401,7 @@ class App extends Component {
                     // no files left
                     if (!data) {
                         this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
                         this.onNoImageLeft();
                         return;
                     }
