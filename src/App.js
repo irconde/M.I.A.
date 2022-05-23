@@ -391,27 +391,28 @@ class App extends Component {
             })
 
             ipcRenderer.on(constants.Channels.updateCurrentFile, (event, data) => {
-                this.setState({ thumbnails: data, myOra: new ORA() });
+                
+                this.props.setCurrentProcessingFile(null);
+                this.resetSelectedDetectionBoxes();
+                this.props.resetDetections();
+                this.props.setReceiveTime(null);
 
-                // ipcRenderer
-                //         .invoke(
-                //             constants.Channels.getNextFile,
-                //             this.props.localFileOutput
-                //         )
-                //         .then((result) => {
-                //             this.props.setLocalFileOpen(true);
-                //             this.loadNextImage(
-                //                 result.file,
-                //                 result.fileName,
-                //                 result.numberOfFiles,
-                //                 result.thumbnails
-                //             );
-                //         })
-                //         .catch((error) => {
-                //             this.props.setLocalFileOpen(false);
-                //             this.props.setReceiveTime(null);
-                //             this.onNoImageLeft();
-                //         });
+                // no files left
+                if(!data){
+                    this.props.setLocalFileOpen(false);
+                    this.onNoImageLeft();
+                    return;
+                }
+
+                // load the next image
+                this.props.setLocalFileOpen(true);
+                this.loadNextImage(
+                    data.file,
+                    data.fileName,
+                    data.numberOfFiles,
+                    data.thumbnails
+                );
+                
             })
         }
         

@@ -77,6 +77,14 @@ function handleExternalFileChanges(dirPath){
         );
     }
 
+    // notifies react process about the selected file update
+    const notifyCurrentFileUpdate = (file) =>{
+        mainWindow.webContents.send(
+            Constants.Channels.updateCurrentFile,
+            file
+        );
+    }
+
     // returns the name of the file including the extension from a given path
     const getFileNameFromPath = (path)=>{
         return path.split('\\').pop().split('/').pop();
@@ -149,20 +157,14 @@ function handleExternalFileChanges(dirPath){
                     // delete the thumbnail png file
                     deleteFileAtPath(thumbnailPath)
                         .then(()=>{
-// if the file to delete's index is greater than the selected index, don't need to do anything.
-// If the file to delete's index is less than the selected index, before you adjust the files array, 
-//    figure out the currently selected file name via the current index. 
-//    Then do a findIndex with that current file name and set the current index to that found index if there is one. Otherwise reset it to 0
-// If the file to delete's index is the currently selected index. I would select the prior file if there was one, 
-//    and have the App load that image now since the current one is deleted
-// Also one edge case to handle if the deletion causes the file array to be empty
-
-                            
-
                             // remove the ora file path from the files array
                             const removedFileIndex = files.findIndex(filepath => filepath === path);
                             const currentFilePath = files.at(currentFileIndex);
                             files.splice(removedFileIndex, 1);
+
+                            // remove the thumbnail from the database
+                            thumbnails.splice(thumbnailIndex, 1);
+                            saveThumbnailDatabase();
 
                             if(removedFileIndex < currentFileIndex){
                                 console.log("File removed is less than file selected!");
@@ -177,14 +179,21 @@ function handleExternalFileChanges(dirPath){
                                 console.log("File removed is equal to file selected!");
                                 // decrement the index if possible, or set it to 0
                                 (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
+                                // notify react process about current file update and exit function
+                                getCurrentFile()
+                                    .then(response => {
+                                        notifyCurrentFileUpdate(response);
+                                    })
+                                    .catch(error => {
+                                        notifyCurrentFileUpdate(null);
+                                        console.log(`Error getting the current file: ${error}`);
+                                    });
+                                return;
                             }
 
-                            // remove the thumbnail from the database
-                            thumbnails.splice(thumbnailIndex, 1);
-                            saveThumbnailDatabase();
-                            
                             // send the files for the react process
                             sendNewFiles();
+                            
                         })
                         .catch((error)=>{
                             console.log(error);
@@ -206,7 +215,18 @@ function handleExternalFileChanges(dirPath){
             
         });
     
-    
+    const getCurrentFile = async () => {
+        if (files.length > 0 && currentFileIndex < files.length) {
+            if (fs.existsSync(files[currentFileIndex])) {
+                // sendThumbnailStatus();
+                return loadFile(files[currentFileIndex]);
+            }
+        } else if (files.length > 0 && currentFileIndex >= files.length) {
+            throw "Given currentFileIndex is too high";
+        } else {
+            throw "No more files to load";
+        }
+    }
 
 
     
