@@ -72,6 +72,7 @@ function handleExternalFileChanges(dirPath) {
     // it also doesn't fire the first time to avoid additional rerenders
     const watcher = chokidar.watch(dirPath, {
         ignored: Constants.FileWatcher.all_json_files,
+        depth: 0,
         ignoreInitial: true,
     });
 
@@ -88,6 +89,7 @@ function handleExternalFileChanges(dirPath) {
                         saveThumbnailDatabase();
                         // if the files array was empty before adding this file
                         if (files.length === 1) {
+                            currentFileIndex = 0;
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
