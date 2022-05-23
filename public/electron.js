@@ -80,14 +80,13 @@ function handleExternalFileChanges(dirPath){
 
     // wire the directory modification event handlers
     watcher
-        .on(Constants.FileWatcher.add, path =>{
+        .on(Constants.FileWatcher.add, async path =>{
             console.log(`File ${path} has been added`);
             
             const addedFilename = getFileNameFromPath(path);
 
             // handle ora file addition
             if(getFileExtension(addedFilename) === 'ora'){
-                // TODO: if the files array is empty, make sure you send the file to react via the notify method
                 
                 parseThumbnail(path).then(()=>{
                     files.push(path);
@@ -112,12 +111,12 @@ function handleExternalFileChanges(dirPath){
             }
             
         })
-        .on(Constants.FileWatcher.change, path =>{
+        .on(Constants.FileWatcher.change, async path =>{
             console.log(`File ${path} has been changed`);
             // TODO: make sure the json file is only getting modified by the application
             
         })
-        .on(Constants.FileWatcher.unlink, path =>{
+        .on(Constants.FileWatcher.unlink, async path =>{
             console.log(`File ${path} has been removed`);
             
             const removedFilename = getFileNameFromPath(path);
@@ -129,6 +128,11 @@ function handleExternalFileChanges(dirPath){
                     // find the thumbnail that needs to be deleted
                     const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
                     const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+
+                    // remove the thumbnail from the database
+                    thumbnails.splice(thumbnailIndex, 1);
+                    saveThumbnailDatabase();
+
                     // delete the thumbnail png file
                     deleteFileAtPath(thumbnailPath)
                         .then(()=>{
@@ -136,10 +140,6 @@ function handleExternalFileChanges(dirPath){
                             const removedFileIndex = files.findIndex(filepath => filepath === path);
                             const currentFilePath = files.at(currentFileIndex);
                             files.splice(removedFileIndex, 1);
-
-                            // remove the thumbnail from the database
-                            thumbnails.splice(thumbnailIndex, 1);
-                            saveThumbnailDatabase();
 
                             if(removedFileIndex < currentFileIndex){
                                 // update the currentFileIndex
