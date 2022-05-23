@@ -383,39 +383,39 @@ class App extends Component {
         document.body.addEventListener('mousemove', this.onMouseMoved);
         document.body.addEventListener('mouseleave', this.onMouseLeave);
 
-        // handle a request to update the thumbnails state when the user modifies 
+        // handle a request to update the thumbnails state when the user modifies
         // the dir content in the file system
         if (isElectron()) {
             ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
-                this.setState({ thumbnails: data });   
-            })
+                this.setState({ thumbnails: data });
+            });
 
-            ipcRenderer.on(constants.Channels.updateCurrentFile, (event, data) => {
-                
-                this.props.setCurrentProcessingFile(null);
-                this.resetSelectedDetectionBoxes();
-                this.props.resetDetections();
-                this.props.setReceiveTime(null);
+            ipcRenderer.on(
+                constants.Channels.updateCurrentFile,
+                (event, data) => {
+                    this.props.setCurrentProcessingFile(null);
+                    this.resetSelectedDetectionBoxes();
+                    this.props.resetDetections();
+                    this.props.setReceiveTime(null);
 
-                // no files left
-                if(!data){
-                    this.props.setLocalFileOpen(false);
-                    this.onNoImageLeft();
-                    return;
+                    // no files left
+                    if (!data) {
+                        this.props.setLocalFileOpen(false);
+                        this.onNoImageLeft();
+                        return;
+                    }
+
+                    // load the next image
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        data.file,
+                        data.fileName,
+                        data.numberOfFiles,
+                        data.thumbnails
+                    );
                 }
-
-                // load the next image
-                this.props.setLocalFileOpen(true);
-                this.loadNextImage(
-                    data.file,
-                    data.fileName,
-                    data.numberOfFiles,
-                    data.thumbnails
-                );
-                
-            })
+            );
         }
-        
     }
 
     /**
