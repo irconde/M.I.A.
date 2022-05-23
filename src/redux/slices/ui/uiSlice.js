@@ -73,9 +73,7 @@ const uiSlice = createSlice({
                 Utils.calculateViewportDimensions(
                     action.payload,
                     state.singleViewport,
-                    state.collapsedSideMenu,
-                    state.collapsedLazyMenu,
-                    true
+                    state.collapsedSideMenu
                 );
             } else {
                 Utils.calculateViewportDimensions(
@@ -527,6 +525,14 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  * @returns {boolean} - True when the display settings component is visible; false otherwise
  */
 export const getDisplaySettings = (state) => state.ui.displaySettings;
+/**
+ * Indicates whether the display of summarized detections is enabled
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when displaying summarized detections - false renders original detections
+ */
+export const getDisplaySummarizedDetections = (state) =>
+    state.ui.displaySummarizedDetections;
 /**
  * Provides the current cornerstone mode
  *

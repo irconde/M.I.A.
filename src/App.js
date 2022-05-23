@@ -69,6 +69,7 @@ import {
     setInputLabel,
     setLocalFileOpen,
     setReceiveTime,
+    toggleCollapsedSideMenu,
     toggleDisplaySummarizedDetections,
     updateCornerstoneMode,
     updateDetectionContextPosition,
@@ -230,7 +231,8 @@ class App extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (
             this.props.selectedDetection &&
-            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu
+            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu &&
+            !nextProps.displaySummarizedDetections
         ) {
             setTimeout(() => {
                 this.renderDetectionContextMenu(
@@ -2227,6 +2229,9 @@ class App extends Component {
         if (!this.props.detections) {
             return;
         }
+        if (this.props.displaySummarizedDetections) {
+            return;
+        }
         let combinedDetections;
         if (e.detail.element.id === 'dicomImageLeft') {
             // top
@@ -3554,7 +3559,14 @@ class App extends Component {
                             top: '30%',
                         }}
                         onClick={() => {
+                            if (this.props.selectedDetection) {
+                                this.props.clearAllSelection();
+                                this.props.resetSelectedDetectionBoxesUpdate();
+                                this.resetCornerstoneTool();
+                                this.appUpdateImage();
+                            }
                             this.props.toggleDisplaySummarizedDetections();
+                            this.props.toggleCollapsedSideMenu(cornerstone);
                         }}>
                         Toggle Ensemble Detections
                     </button>
@@ -3653,6 +3665,7 @@ const mapDispatchToProps = {
     updateRecentScroll,
     setCurrentFileFormat,
     toggleDisplaySummarizedDetections,
+    toggleCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
