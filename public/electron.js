@@ -69,34 +69,7 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
-    // notifies react process about the updated files
-    const sendNewFiles = () =>{
-        mainWindow.webContents.send(
-            Constants.Channels.updateFiles,
-            files
-        );
-    }
-
-    // notifies react process about the selected file update
-    const notifyCurrentFileUpdate = (file) =>{
-        mainWindow.webContents.send(
-            Constants.Channels.updateCurrentFile,
-            file
-        );
-    }
-
-    // returns the name of the file including the extension from a given path
-    const getFileNameFromPath = (path)=>{
-        return path.split('\\').pop().split('/').pop();
-    }
-
-    // accepts a file name, and returns the file name excluding the file extension
-    const removeFileExtension = (filename)=>{
-        return filename.replace(/\.[^/.]+$/, "");
-    }
-
-    // accepts a file name, and returns the file extension
-    const getFileExtension = (filename) => filename.split('.').pop();
+    
 
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional rerenders
@@ -104,19 +77,6 @@ function handleExternalFileChanges(dirPath){
         ignored: Constants.FileWatcher.all_json_files,
         ignoreInitial: true
     });
-
-    const deleteFileAtPath = async (path) => {
-        if (fs.existsSync(path)) {
-            fs.unlink(path, (err) => {
-                if (err) {
-                    throw `An error ocurred deleting the file ${err.message}`;
-                }
-                return;
-            });
-        } else {
-            throw `File ${path} doesn't exist, cannot delete!`;
-        }
-    }
 
     // wire the directory modification event handlers
     watcher
@@ -127,11 +87,25 @@ function handleExternalFileChanges(dirPath){
 
             // handle ora file addition
             if(getFileExtension(addedFilename) === 'ora'){
+                // TODO: if the files array is empty, make sure you send the file to react via the notify method
                 
-                files.push(path);
                 parseThumbnail(path).then(()=>{
+                    files.push(path);
                     saveThumbnailDatabase();
-                    sendNewFiles();
+                    // if the files array was empty before adding this file
+                    if(files.length === 1) {
+                        getCurrentFile()
+                                    .then(response => {
+                                        notifyCurrentFileUpdate(response);
+                                    })
+                                    .catch(error => {
+                                        notifyCurrentFileUpdate(null);
+                                        console.log(`Error getting the current file: ${error}`);
+                                    });
+                    } else {
+                        // if the files array already contained a file
+                        sendNewFiles();
+                    }
                 }).catch(error=>{
                     console.log(`Error in filewatcher: ${error}`);
                 })
@@ -140,6 +114,7 @@ function handleExternalFileChanges(dirPath){
         })
         .on(Constants.FileWatcher.change, path =>{
             console.log(`File ${path} has been changed`);
+            // TODO: make sure the json file is only getting modified by the application
             
         })
         .on(Constants.FileWatcher.unlink, path =>{
@@ -167,7 +142,6 @@ function handleExternalFileChanges(dirPath){
                             saveThumbnailDatabase();
 
                             if(removedFileIndex < currentFileIndex){
-                                console.log("File removed is less than file selected!");
                                 // update the currentFileIndex
                                 const mostCurrentFileIndex = files.findIndex(filepath => filepath === currentFilePath);
                                 if(mostCurrentFileIndex !== -1){
@@ -176,7 +150,6 @@ function handleExternalFileChanges(dirPath){
                                     currentFileIndex = 0;
                                 }
                             } else if(removedFileIndex === currentFileIndex){
-                                console.log("File removed is equal to file selected!");
                                 // decrement the index if possible, or set it to 0
                                 (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
                                 // notify react process about current file update and exit function
@@ -195,9 +168,7 @@ function handleExternalFileChanges(dirPath){
                             sendNewFiles();
                             
                         })
-                        .catch((error)=>{
-                            console.log(error);
-                        })
+                        .catch((error)=>{ console.log(error); })
                     break;
                 case 'png':
                         // TODO: handle thumbnail png removal here
@@ -227,6 +198,48 @@ function handleExternalFileChanges(dirPath){
             throw "No more files to load";
         }
     }
+
+    const deleteFileAtPath = async (path) => {
+        if (fs.existsSync(path)) {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    throw `An error ocurred deleting the file ${err.message}`;
+                }
+                return;
+            });
+        } else {
+            throw `File ${path} doesn't exist, cannot delete!`;
+        }
+    }
+
+    // notifies react process about the updated files
+    const sendNewFiles = () => {
+        mainWindow.webContents.send(
+            Constants.Channels.updateFiles,
+            files
+        );
+    }
+
+    // notifies react process about the selected file update
+    const notifyCurrentFileUpdate = (file) => {
+        mainWindow.webContents.send(
+            Constants.Channels.updateCurrentFile,
+            file
+        );
+    }
+
+    // returns the name of the file including the extension from a given path
+    const getFileNameFromPath = (path)=> {
+        return path.split('\\').pop().split('/').pop();
+    }
+
+    // accepts a file name, and returns the file name excluding the file extension
+    const removeFileExtension = (filename)=> {
+        return filename.replace(/\.[^/.]+$/, "");
+    }
+
+    // accepts a file name, and returns the file extension
+    const getFileExtension = (filename) => filename.split('.').pop();
 
 
     
