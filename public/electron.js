@@ -69,8 +69,6 @@ app.on('activate', () => {
 
 function handleExternalFileChanges(dirPath){
 
-    
-
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional rerenders
     const watcher = chokidar.watch(dirPath, {
@@ -81,7 +79,6 @@ function handleExternalFileChanges(dirPath){
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, async path =>{
-            console.log(`File ${path} has been added`);
             
             const addedFilename = getFileNameFromPath(path);
 
@@ -111,85 +108,65 @@ function handleExternalFileChanges(dirPath){
             }
             
         })
-        .on(Constants.FileWatcher.change, async path =>{
-            console.log(`File ${path} has been changed`);
-            // TODO: make sure the json file is only getting modified by the application
-            
-        })
         .on(Constants.FileWatcher.unlink, async path =>{
-            console.log(`File ${path} has been removed`);
             
             const removedFilename = getFileNameFromPath(path);
-            const removedFileExtension = getFileExtension(removedFilename);
 
-            // handle ora file removal
-            switch(removedFileExtension){
-                case 'ora':
-                    // find the thumbnail that needs to be deleted
-                    const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
-                    const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+            // exit the function if the file isn't of type .ora
+            if (getFileExtension(removedFilename) !== 'ora'){ return; }
 
-                    // remove the thumbnail from the database
-                    thumbnails.splice(thumbnailIndex, 1);
-                    saveThumbnailDatabase();
+            // find the thumbnail that needs to be deleted
+            const thumbnailIndex = thumbnails.findIndex(thumbnail => thumbnail.fileName === removedFilename);
+            const { thumbnailPath } = thumbnails.at(thumbnailIndex);
 
-                    // delete the thumbnail png file
-                    deleteFileAtPath(thumbnailPath)
-                        .then(()=>{
-                            // remove the ora file path from the files array
-                            const removedFileIndex = files.findIndex(filepath => filepath === path);
-                            const currentFilePath = files.at(currentFileIndex);
-                            files.splice(removedFileIndex, 1);
+            // remove the thumbnail from the database
+            thumbnails.splice(thumbnailIndex, 1);
+            saveThumbnailDatabase();
 
-                            if(removedFileIndex < currentFileIndex){
-                                // update the currentFileIndex
-                                const mostCurrentFileIndex = files.findIndex(filepath => filepath === currentFilePath);
-                                if(mostCurrentFileIndex !== -1){
-                                    currentFileIndex = mostCurrentFileIndex;
-                                } else {
-                                    currentFileIndex = 0;
-                                }
-                            } else if(removedFileIndex === currentFileIndex){
-                                // decrement the index if possible, or set it to 0
-                                (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
-                                // notify react process about current file update and exit function
-                                getCurrentFile()
-                                    .then(response => {
-                                        notifyCurrentFileUpdate(response);
-                                    })
-                                    .catch(error => {
-                                        notifyCurrentFileUpdate(null);
-                                        console.log(`Error getting the current file: ${error}`);
-                                    });
-                                return;
-                            }
+            // delete the thumbnail png file
+            deleteFileAtPath(thumbnailPath)
+                .then(()=>{
+                    // remove the ora file path from the files array
+                    const removedFileIndex = files.findIndex(filepath => filepath === path);
+                    const currentFilePath = files.at(currentFileIndex);
+                    files.splice(removedFileIndex, 1);
 
-                            // send the files for the react process
-                            sendNewFiles();
-                            
-                        })
-                        .catch((error)=>{ console.log(error); })
-                    break;
-                case 'png':
-                        // TODO: handle thumbnail png removal here
-                    break;
-                case 'json':
-                    saveThumbnailDatabase();
-                    break;
-                default:
-                    console.log(`File removed of unhandled type ${removedFileExtension}`);
-            }
-            
-            
+                    // if the file deleted is before the selected file
+                    if(removedFileIndex < currentFileIndex){
+                        // update the currentFileIndex
+                        const mostCurrentFileIndex = files.findIndex(filepath => filepath === currentFilePath);
+                        if(mostCurrentFileIndex !== -1){
+                            currentFileIndex = mostCurrentFileIndex;
+                        } else {
+                            currentFileIndex = 0;
+                        }
+                    } 
+                    // if the file deleted is the selected file
+                    else if(removedFileIndex === currentFileIndex){
+                        // decrement the index if possible, or set it to 0
+                        (currentFileIndex > 0) ? --currentFileIndex : currentFileIndex = 0;
+                        // notify react process about current file update and exit function
+                        getCurrentFile()
+                            .then(response => {
+                                notifyCurrentFileUpdate(response);
+                            })
+                            .catch(error => {
+                                notifyCurrentFileUpdate(null);
+                                console.log(`Error getting the current file: ${error}`);
+                            });
+                        return;
+                    }
 
-            
-            
+                    // send the files for the react process
+                    sendNewFiles();
+                    
+                })
+                .catch((error)=>{ console.log(error); })   
         });
     
     const getCurrentFile = async () => {
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
-                // sendThumbnailStatus();
                 return loadFile(files[currentFileIndex]);
             }
         } else if (files.length > 0 && currentFileIndex >= files.length) {
@@ -233,15 +210,8 @@ function handleExternalFileChanges(dirPath){
         return path.split('\\').pop().split('/').pop();
     }
 
-    // accepts a file name, and returns the file name excluding the file extension
-    const removeFileExtension = (filename)=> {
-        return filename.replace(/\.[^/.]+$/, "");
-    }
-
     // accepts a file name, and returns the file extension
     const getFileExtension = (filename) => filename.split('.').pop();
-
-
     
 }
 
@@ -535,7 +505,7 @@ const loadFilesFromPath = async (path) => {
                     });
                     startThumbnailThread(path);
                     resolve('files loaded');
-                    // ! handle changes done to the local directory outside of the appliation
+                    // watch the directory for any external file changes
                     handleExternalFileChanges(path);
                 })
                 .catch((error) => {
