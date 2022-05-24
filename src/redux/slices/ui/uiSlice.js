@@ -65,23 +65,18 @@ const uiSlice = createSlice({
         /**
          * Toggles the visibility of the side menu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {CornerstoneObject?} action.payload - Can contain cornerstone object if local file is currently open
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean;}} action.payload - Contains cornerstone object and whether in desktop mode
          */
         toggleCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode } = action.payload;
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            if (state.localFileOpen) {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu
-                );
-            } else {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu
-                );
-            }
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
         },
 
         /**

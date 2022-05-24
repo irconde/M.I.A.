@@ -3566,7 +3566,21 @@ class App extends Component {
                                 this.appUpdateImage();
                             }
                             this.props.toggleDisplaySummarizedDetections();
-                            this.props.toggleCollapsedSideMenu(cornerstone);
+                            if (
+                                isElectron() &&
+                                !this.props.remoteOrLocal &&
+                                this.props.localFileOutput !== ''
+                            ) {
+                                this.props.toggleCollapsedSideMenu({
+                                    cornerstone,
+                                    desktopMode: true,
+                                });
+                            } else {
+                                this.props.toggleCollapsedSideMenu({
+                                    cornerstone,
+                                    desktopMode: false,
+                                });
+                            }
                         }}>
                         Toggle Ensemble Detections
                     </button>
