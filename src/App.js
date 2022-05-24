@@ -3554,9 +3554,9 @@ class App extends Component {
                             zIndex: 5,
                             position: 'absolute',
                             width: '10%',
-                            height: '25%',
+                            height: '10%',
                             right: '0',
-                            top: '30%',
+                            top: '45%',
                         }}
                         onClick={() => {
                             if (this.props.selectedDetection) {
