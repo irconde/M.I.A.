@@ -486,10 +486,7 @@ const SettingsModal = (props) => {
                     </Tooltip>
                 </div>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
-                <FormGroup style={classes.formControl}
-                sx={{
-                    alignItems: 'flex-end',
-                }}>
+                <FormGroup style={classes.formControl}>
                     <div style={classes.optionsContainer}>
                         <div>
                             <div style={classes.remoteWorkContainer}>
@@ -876,7 +873,15 @@ const SettingsModal = (props) => {
                     <Tooltip title="Save Settings">
                         <Button
                             variant="outlined"
-                            onClick={() => saveSettingsEvent()}>
+                            onClick={() => saveSettingsEvent()}
+                            sx={{
+                                bgcolor: 'primary.main',
+                                color: '#ffffff',
+                                width: '30%',
+                                marginTop: 5,
+                                padding: 1,
+                                alignSelf: 'flex-end',
+                            }}>
                             Save Settings
                         </Button>
                     </Tooltip>
