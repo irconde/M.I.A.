@@ -393,11 +393,6 @@ class App extends Component {
             ipcRenderer.on(
                 constants.Channels.updateCurrentFile,
                 (event, data) => {
-                    this.props.setCurrentProcessingFile(null);
-                    this.resetSelectedDetectionBoxes();
-                    this.props.resetDetections();
-                    this.props.setReceiveTime(null);
-
                     // no files left
                     if (!data) {
                         this.props.setLocalFileOpen(false);
@@ -405,7 +400,8 @@ class App extends Component {
                         this.onNoImageLeft();
                         return;
                     }
-
+                    this.resetSelectedDetectionBoxes();
+                    this.props.resetDetections();
                     // load the next image
                     this.props.setLocalFileOpen(true);
                     this.loadNextImage(

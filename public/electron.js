@@ -79,7 +79,6 @@ async function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, async (path) => {
-            console.log(`FILE ADDED: ${path}`);
             const addedFilename = getFileNameFromPath(path);
 
             // handle ora file addition
@@ -87,26 +86,23 @@ async function handleExternalFileChanges(dirPath) {
                 parseThumbnail(path)
                     .then(() => {
                         files.push(path);
-                        saveThumbnailDatabase();
+                        saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
                         if (files.length === 1) {
                             currentFileIndex = 0;
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
-                                    console.log('End point 1');
                                 })
                                 .catch((error) => {
                                     notifyCurrentFileUpdate(null);
                                     console.log(
                                         `Error getting the current file: ${error}`
                                     );
-                                    console.log('End point 2');
                                 });
                         } else {
                             // if the files array already contained a file
                             sendNewFiles();
-                            console.log('End point 3');
                         }
                     })
                     .catch((error) => {
@@ -130,7 +126,7 @@ async function handleExternalFileChanges(dirPath) {
 
             // remove the thumbnail from the database
             thumbnails.splice(thumbnailIndex, 1);
-            saveThumbnailDatabase();
+            saveThumbnailDatabase(false);
 
             // delete the thumbnail png file
             deleteFileAtPath(thumbnailPath)
@@ -183,27 +179,36 @@ async function handleExternalFileChanges(dirPath) {
         });
 
     const getCurrentFile = async () => {
-        if (files.length > 0 && currentFileIndex < files.length) {
-            if (fs.existsSync(files[currentFileIndex])) {
-                return loadFile(files[currentFileIndex]);
+        return new Promise((resolve, reject) => {
+            if (files.length > 0 && currentFileIndex < files.length) {
+                if (fs.existsSync(files[currentFileIndex])) {
+                    resolve(loadFile(files[currentFileIndex]));
+                } else {
+                    reject('File not found in range');
+                }
+            } else if (files.length > 0 && currentFileIndex >= files.length) {
+                reject('Given currentFileIndex is too high');
+            } else {
+                reject('No more files to load');
             }
-        } else if (files.length > 0 && currentFileIndex >= files.length) {
-            throw 'Given currentFileIndex is too high';
-        } else {
-            throw 'No more files to load';
-        }
+        });
     };
 
     const deleteFileAtPath = async (path) => {
-        if (fs.existsSync(path)) {
-            fs.unlink(path, (err) => {
-                if (err) {
-                    throw `An error ocurred deleting the file ${err.message}`;
-                }
-            });
-        } else {
-            throw `File ${path} doesn't exist, cannot delete!`;
-        }
+        return new Promise((resolve, reject) => {
+            if (fs.existsSync(path)) {
+                fs.unlink(path, (err) => {
+                    if (err) {
+                        reject(
+                            `An error ocurred deleting the file ${err.message}`
+                        );
+                    }
+                    resolve();
+                });
+            } else {
+                reject(`File ${path} doesn't exist, cannot delete!`);
+            }
+        });
     };
 
     // notifies react process about the updated files
@@ -907,7 +912,7 @@ const generateCocoThumbnail = (newThumbnail) => {
 /**
  * Saves the JSON database, ie D:\images\.thumbnails\database.json
  */
-const saveThumbnailDatabase = () => {
+const saveThumbnailDatabase = (sendThumbnail = true) => {
     fs.writeFileSync(
         `${thumbnailPath}${
             process.platform === 'win32' ? '\\' : '/'
@@ -915,7 +920,9 @@ const saveThumbnailDatabase = () => {
         JSON.stringify(thumbnails, null, 4)
     );
     isGeneratingThumbnails = false;
-    sendThumbnailStatus();
+    if (sendThumbnail) {
+        sendThumbnailStatus();
+    }
 };
 
 /**
