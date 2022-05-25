@@ -310,15 +310,14 @@ const SettingsModal = (props) => {
             },
             optionsContainer: {
                 overflowY: 'scroll',
-                outline: '1px dashed red',
                 height: '80%',
+                padding: '0rem 0.25rem',
             },
             form: {
                 margin: theme.spacing(1),
             },
             formControl: {
                 height: '85%',
-                outline: '.5px dashed yellow',
             },
             textField: {},
             longTextField: {
@@ -328,7 +327,8 @@ const SettingsModal = (props) => {
                 width: '70%',
             },
             saveButton: {
-                marginTop: '1.5rem',
+                marginTop: 'auto',
+                marginRight: '1rem',
                 float: 'right',
                 backgroundColor: '#367eff',
                 display: 'flex',
@@ -467,9 +467,16 @@ const SettingsModal = (props) => {
                 gap: '3.5rem',
                 marginBottom: '1rem',
             },
-            visualizationModeOption: {
-                outline: '.5px dashed yellow',
+            visualizationModeOption: {},
+            visualizationModeIcon: {
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '.7rem',
+            },
+            visualizationModeText: {
+                margin: '0.2rem 0',
+                textAlign: 'center',
+                color: '#9d9d9d',
+                fontSize: '.7rem',
             },
         };
     });
@@ -506,20 +513,42 @@ const SettingsModal = (props) => {
                                     className={
                                         classes.visualizationModeContainer
                                     }>
-                                    <img
-                                        src={DetailedModeIconSrc}
+                                    <div
                                         className={
                                             classes.visualizationModeOption
-                                        }
-                                        alt="Detailed mode"
-                                    />
-                                    <img
-                                        src={SummarizedModeIconSrc}
+                                        }>
+                                        <img
+                                            src={DetailedModeIconSrc}
+                                            className={
+                                                classes.visualizationModeIcon
+                                            }
+                                            alt="Detailed mode"
+                                        />
+                                        <p
+                                            className={
+                                                classes.visualizationModeText
+                                            }>
+                                            Detailed
+                                        </p>
+                                    </div>
+                                    <div
                                         className={
                                             classes.visualizationModeOption
-                                        }
-                                        alt="Summarized mode"
-                                    />
+                                        }>
+                                        <img
+                                            src={SummarizedModeIconSrc}
+                                            className={
+                                                classes.visualizationModeIcon
+                                            }
+                                            alt="Summarized mode"
+                                        />
+                                        <p
+                                            className={
+                                                classes.visualizationModeText
+                                            }>
+                                            Summarized
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                             <Divider
