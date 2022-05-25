@@ -90,6 +90,7 @@ import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+import SettingsModal from './components/SettingsModal/SettingsModal';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -3585,6 +3586,10 @@ class App extends Component {
                         Toggle Ensemble Detections
                     </button>
                 </div>
+                <SettingsModal
+                    connectToCommandServer={
+                        this.connectToCommandServer
+                    }></SettingsModal>
             </div>
         );
     }

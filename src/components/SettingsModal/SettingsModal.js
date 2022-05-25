@@ -49,6 +49,7 @@ import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode.svg';
+import * as cornerstone from 'cornerstone-core';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -176,6 +177,36 @@ const SettingsModal = (props) => {
      */
     const handleClose = () => {
         dispatch(toggleSettingsVisibility(false));
+    };
+
+    /**
+     * Handles when the user taps one of the images in the modal window. It toggles between the display
+     * mode between detailed, or summarized
+     */
+    const visualizationModeToggle = () => {
+        console.log('Clicked!!');
+        // if (this.props.selectedDetection) {
+        //     this.props.clearAllSelection();
+        //     this.props.resetSelectedDetectionBoxesUpdate();
+        //     this.resetCornerstoneTool();
+        //     this.appUpdateImage();
+        // }
+        // this.props.toggleDisplaySummarizedDetections();
+        // if (
+        //     isElectron() &&
+        //     !this.props.remoteOrLocal &&
+        //     this.props.localFileOutput !== ''
+        // ) {
+        //     this.props.toggleCollapsedSideMenu({
+        //         cornerstone,
+        //         desktopMode: true,
+        //     });
+        // } else {
+        //     this.props.toggleCollapsedSideMenu({
+        //         cornerstone,
+        //         desktopMode: false,
+        //     });
+        // }
     };
 
     /**
@@ -522,7 +553,11 @@ const SettingsModal = (props) => {
                                             className={
                                                 classes.visualizationModeIcon
                                             }
-                                            alt="Detailed mode"
+                                            alt={'Detailed mode'}
+                                            value={'detailed mode'}
+                                            onClick={() => {
+                                                visualizationModeToggle();
+                                            }}
                                         />
                                         <p
                                             className={
@@ -540,7 +575,11 @@ const SettingsModal = (props) => {
                                             className={
                                                 classes.visualizationModeIcon
                                             }
-                                            alt="Summarized mode"
+                                            alt={'Summarized mode'}
+                                            value={'summarized mode'}
+                                            onClick={() => {
+                                                visualizationModeToggle();
+                                            }}
                                         />
                                         <p
                                             className={
