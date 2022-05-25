@@ -281,6 +281,7 @@ const SettingsModal = (props) => {
             modal: {
                 boxShadow: theme.shadows[5],
                 padding: theme.spacing(2, 4, 4),
+                maxHeight: '70vh',
             },
             paper: {
                 padding: theme.spacing(1),
@@ -301,12 +302,20 @@ const SettingsModal = (props) => {
             },
             root: {
                 flexGrow: 1,
+                height: '70vh',
             },
-            optionsContainer: {},
+            optionsContainer: {
+                overflowY: 'scroll',
+                outline: '1px solid red',
+                height: '80%',
+            },
             form: {
                 margin: theme.spacing(1),
             },
-            formControl: {},
+            formControl: {
+                height: '85%',
+                outline: '2px solid yellow',
+            },
             textField: {},
             longTextField: {
                 // width: '-webkit-fill-available',
@@ -315,7 +324,7 @@ const SettingsModal = (props) => {
                 width: '70%',
             },
             saveButton: {
-                marginTop: theme.spacing(2),
+                marginTop: '1.5rem',
                 float: 'right',
                 backgroundColor: '#367eff',
                 display: 'flex',
@@ -471,6 +480,22 @@ const SettingsModal = (props) => {
                 <FormGroup className={classes.formControl}>
                     <div className={classes.optionsContainer}>
                         <div>
+                            <div className="visualizationModeContainer">
+                                <p className={classes.optionText}>
+                                    Visualization Mode
+                                </p>
+                                <p className={classes.greyText}>
+                                    Pick the visual granularity to use when
+                                    displaying multi-algorithm results.
+                                </p>
+                                <div className="visualizationModeOptions">
+                                    <div>Thing</div>
+                                    <div>Thing</div>
+                                    <div>Thing</div>
+                                    <div>Thing</div>
+                                    <div>Thing</div>
+                                </div>
+                            </div>
                             <div className={classes.remoteWorkContainer}>
                                 <p className={classes.optionText}>
                                     Work connected to a remote service
@@ -835,7 +860,6 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
-
                     <Button
                         className={classes.saveButton}
                         variant="outlined"
