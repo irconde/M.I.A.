@@ -67,180 +67,16 @@ app.on('activate', () => {
     }
 });
 
-async function handleExternalFileChanges(dirPath) {
-    // create a directory watcher, making sure it ignores json files
-    // it also doesn't fire the first time to avoid additional rerenders
-    const watcher = chokidar.watch(dirPath, {
-        ignored: Constants.FileWatcher.all_json_files,
-        depth: 0,
-        ignoreInitial: true,
-    });
-
-    // wire the directory modification event handlers
-    watcher
-        .on(Constants.FileWatcher.add, async (path) => {
-            const addedFilename = getFileNameFromPath(path);
-
-            // handle ora file addition
-            if (getFileExtension(addedFilename) === 'ora') {
-                parseThumbnail(path)
-                    .then(() => {
-                        files.push(path);
-                        saveThumbnailDatabase(false);
-                        // if the files array was empty before adding this file
-                        if (files.length === 1) {
-                            currentFileIndex = 0;
-                            getCurrentFile()
-                                .then((response) => {
-                                    notifyCurrentFileUpdate(response);
-                                })
-                                .catch((error) => {
-                                    notifyCurrentFileUpdate(null);
-                                    console.log(
-                                        `Error getting the current file: ${error}`
-                                    );
-                                });
-                        } else {
-                            // if the files array already contained a file
-                            sendNewFiles();
-                        }
-                    })
-                    .catch((error) => {
-                        console.log(`Error in filewatcher: ${error}`);
-                    });
-            }
-        })
-        .on(Constants.FileWatcher.unlink, async (path) => {
-            const removedFilename = getFileNameFromPath(path);
-
-            // exit the function if the file isn't of type .ora
-            if (getFileExtension(removedFilename) !== 'ora') {
-                return;
-            }
-
-            // find the thumbnail that needs to be deleted
-            const thumbnailIndex = thumbnails.findIndex(
-                (thumbnail) => thumbnail.fileName === removedFilename
-            );
-            const { thumbnailPath } = thumbnails.at(thumbnailIndex);
-
-            // remove the thumbnail from the database
-            thumbnails.splice(thumbnailIndex, 1);
-            saveThumbnailDatabase(false);
-
-            // delete the thumbnail png file
-            deleteFileAtPath(thumbnailPath)
-                .then(() => {
-                    // remove the ora file path from the files array
-                    const removedFileIndex = files.findIndex(
-                        (filepath) => filepath === path
-                    );
-                    const currentFilePath = files.at(currentFileIndex);
-                    files.splice(removedFileIndex, 1);
-
-                    // if the file deleted is before the selected file
-                    if (removedFileIndex < currentFileIndex) {
-                        // update the currentFileIndex
-                        const mostCurrentFileIndex = files.findIndex(
-                            (filepath) => filepath === currentFilePath
-                        );
-                        if (mostCurrentFileIndex !== -1) {
-                            currentFileIndex = mostCurrentFileIndex;
-                        } else {
-                            currentFileIndex = 0;
-                        }
-                    }
-                    // if the file deleted is the selected file
-                    else if (removedFileIndex === currentFileIndex) {
-                        // decrement the index if possible, or set it to 0
-                        currentFileIndex > 0
-                            ? --currentFileIndex
-                            : (currentFileIndex = 0);
-                        // notify react process about current file update and exit function
-                        getCurrentFile()
-                            .then((response) => {
-                                notifyCurrentFileUpdate(response);
-                            })
-                            .catch((error) => {
-                                notifyCurrentFileUpdate(null);
-                                console.log(
-                                    `Error getting the current file: ${error}`
-                                );
-                            });
-                        return;
-                    }
-
-                    // send the files for the react process
-                    sendNewFiles();
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        });
-
-    const getCurrentFile = async () => {
-        return new Promise((resolve, reject) => {
-            if (files.length > 0 && currentFileIndex < files.length) {
-                if (fs.existsSync(files[currentFileIndex])) {
-                    resolve(loadFile(files[currentFileIndex]));
-                } else {
-                    reject('File not found in range');
-                }
-            } else if (files.length > 0 && currentFileIndex >= files.length) {
-                reject('Given currentFileIndex is too high');
-            } else {
-                reject('No more files to load');
-            }
-        });
-    };
-
-    const deleteFileAtPath = async (path) => {
-        return new Promise((resolve, reject) => {
-            if (fs.existsSync(path)) {
-                fs.unlink(path, (err) => {
-                    if (err) {
-                        reject(
-                            `An error ocurred deleting the file ${err.message}`
-                        );
-                    }
-                    resolve();
-                });
-            } else {
-                reject(`File ${path} doesn't exist, cannot delete!`);
-            }
-        });
-    };
-
-    // notifies react process about the updated files
-    const sendNewFiles = () => {
-        mainWindow.webContents.send(Constants.Channels.updateFiles, files);
-    };
-
-    // notifies react process about the selected file update
-    const notifyCurrentFileUpdate = (file) => {
-        mainWindow.webContents.send(Constants.Channels.updateCurrentFile, file);
-    };
-
-    // returns the name of the file including the extension from a given path
-    const getFileNameFromPath = (path) => {
-        return path.split('\\').pop().split('/').pop();
-    };
-
-    // accepts a file name, and returns the file extension
-    const getFileExtension = (filename) => filename.split('.').pop();
-}
-
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * This returns an object with a cancelled value and an array containing the file path
  * if selected.
- * @returns {{canceled: Boolean; filePaths: Array<string};>}
+ * @returns {{canceled: Boolean; filePaths: Array<string>;}}
  */
-ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
-    const result = await dialog.showOpenDialog({
+ipcMain.handle(Constants.Channels.selectDirectory, async () => {
+    return await dialog.showOpenDialog({
         properties: ['openDirectory'],
     });
-    return result;
 });
 
 /**
@@ -250,8 +86,7 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
     currentFileIndex = 0;
-    const result = await loadFilesFromPath(args);
-    return result;
+    return await loadFilesFromPath(args);
 });
 
 /**
@@ -259,10 +94,10 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  * ensure that the path exists, if the file names aren't loaded, it will load them. Then,
  * it will return the Base64 binary string of the next file.
  * @param {string} args File directory path sent from react
- * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
+ * @returns {{file: string; fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
                 sendThumbnailStatus();
@@ -289,7 +124,6 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
             }
         }
     });
-    return result;
 });
 
 /**
@@ -297,10 +131,10 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
  * it will load the file and then, it will return the Base64 binary string of the next file.
  * Along with other information about the file and other files in the path.
  * @param {string} args File path sent from react
- * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
+ * @returns {{file: string; fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (fs.existsSync(args)) {
             currentFileIndex = files.findIndex((filePath) => filePath === args);
             sendThumbnailStatus();
@@ -309,7 +143,6 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
             reject('File path does not exist');
         }
     });
-    return result;
 });
 
 /**
@@ -319,7 +152,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  * @returns {string} Result
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let returnedFilePath;
         if (process.platform === 'win32') {
             returnedFilePath = `${args.fileDirectory}\\returned`;
@@ -353,7 +186,6 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                 reject(error);
             });
     });
-    return result;
 });
 
 /**
@@ -364,9 +196,9 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        dialog.showSaveDialog().then((result) => {
-            if (!result.canceled) {
-                fs.writeFile(result.filePath, args, (error) => {
+        dialog.showSaveDialog({}).then((cancelled, filePath) => {
+            if (!cancelled) {
+                fs.writeFile(filePath, args, (error) => {
                     if (error) {
                         reject(error);
                     } else {
@@ -478,13 +310,12 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
  * @returns {Boolean}
  */
 const validateFileExtension = (fileName) => {
-    if (oraExp.test(fileName)) return true;
-    else return false;
+    return oraExp.test(fileName);
 };
 /**
  * Ensures that the file name being passed is in of type .ora or .dcs
  * @param {string} fileName
- * @returns {Boolean}
+ * @returns {{result: boolean, type?: string}}
  */
 const validateImageExtension = (fileName) => {
     if (dcsExp.test(fileName))
@@ -501,7 +332,7 @@ const validateImageExtension = (fileName) => {
  * @returns {Promise}
  */
 const loadFilesFromPath = async (path) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (fs.existsSync(path)) {
             readdir(path)
                 .then((filesResult) => {
@@ -530,14 +361,13 @@ const loadFilesFromPath = async (path) => {
             reject('directory does not exist');
         }
     });
-    return result;
 };
 
 /**
  * Loads the file from the front of the file queue and returns an object with its data
  * and information about the file name and number of files in the directory.
  * @param {string} filePath Specific location of the file, ie D:\images\1_img.ora
- * @returns {{file: string('base64'); fileName: string; numberOfFiles: Number;}}
+ * @returns {{file: string; fileName: string; numberOfFiles: Number;}}
  */
 const loadFile = (filePath) => {
     const fileData = fs.readFileSync(filePath);
@@ -550,13 +380,12 @@ const loadFile = (filePath) => {
     }
 
     const fileName = splitPath[splitPath.length - 1];
-    const result = {
+    return {
         file: file,
         fileName: fileName,
         numberOfFiles: files.length,
         thumbnails: files,
     };
-    return result;
 };
 
 /**
@@ -606,7 +435,7 @@ const createThumbnailsPath = (path) => {
  * @returns {Promise}
  */
 const filesNeedingThumbnails = async (filePath) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         loadThumbnailDatabase();
         let filesToGenerate = [];
         readdir(filePath)
@@ -629,7 +458,6 @@ const filesNeedingThumbnails = async (filePath) => {
             })
             .catch((error) => reject(error));
     });
-    return result;
 };
 
 /**
@@ -654,7 +482,7 @@ const filterMadeThumbnails = (filesToGenerate) => {
  * @returns {Promise}
  */
 const parseFilesForThumbnail = async (files) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const listOfPromises = [];
         files.forEach((file) => {
             listOfPromises.push(parseThumbnail(file));
@@ -669,7 +497,6 @@ const parseFilesForThumbnail = async (files) => {
                 reject(error);
             });
     });
-    return result;
 };
 
 /**
@@ -678,7 +505,7 @@ const parseFilesForThumbnail = async (files) => {
  * @returns {Promise}
  */
 const parseThumbnail = async (filePath) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const splitPath = filePath.split(
             process.platform === 'win32' ? '\\' : '/'
         );
@@ -798,7 +625,6 @@ const parseThumbnail = async (filePath) => {
                 reject(error);
             });
     });
-    return result;
 };
 
 /**
@@ -850,7 +676,7 @@ const dicosToPngData = (imageData) => {
  * @returns {Promise}
  */
 const generateTdrThumbnail = (newThumbnail) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (newThumbnail !== null) {
             sharp(newThumbnail.pixelData, {
                 raw: {
@@ -877,7 +703,6 @@ const generateTdrThumbnail = (newThumbnail) => {
                 });
         } else reject('Image was null');
     });
-    return result;
 };
 
 /**
@@ -886,7 +711,7 @@ const generateTdrThumbnail = (newThumbnail) => {
  * @returns {Promise}
  */
 const generateCocoThumbnail = (newThumbnail) => {
-    const result = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (newThumbnail !== null) {
             sharp(newThumbnail.pixelData)
                 .resize(Constants.Thumbnail.width)
@@ -906,13 +731,16 @@ const generateCocoThumbnail = (newThumbnail) => {
                 });
         } else reject('Image was null');
     });
-    return result;
 };
 
 /**
  * Saves the JSON database, ie D:\images\.thumbnails\database.json
  */
 const saveThumbnailDatabase = (sendThumbnail = true) => {
+    if (!fs.existsSync(thumbnailPath)) {
+        fs.mkdirSync(thumbnailPath);
+        fsWin.setAttributesSync(thumbnailPath, { IS_HIDDEN: true });
+    }
     fs.writeFileSync(
         `${thumbnailPath}${
             process.platform === 'win32' ? '\\' : '/'
@@ -936,4 +764,184 @@ const loadThumbnailDatabase = () => {
         const rawData = fs.readFileSync(thumbnailDBPath);
         thumbnails = JSON.parse(rawData);
     }
+};
+
+async function handleExternalFileChanges(dirPath) {
+    // create a directory watcher, making sure it ignores json files
+    // it also doesn't fire the first time to avoid additional re-renders
+    const watcher = chokidar.watch(dirPath, {
+        ignored: Constants.FileWatcher.all_json_files,
+        depth: 0,
+        ignoreInitial: true,
+    });
+
+    // wire the directory modification event handlers
+    watcher
+        .on(Constants.FileWatcher.add, (path) => {
+            const addedFilename = getFileNameFromPath(path);
+            if (validateFileExtension(addedFilename)) {
+                parseThumbnail(path)
+                    .then(() => {
+                        files.push(path);
+                        saveThumbnailDatabase(false);
+                        // if the files array was empty before adding this file
+                        if (files.length === 1) {
+                            currentFileIndex = 0;
+                            getCurrentFile()
+                                .then((response) => {
+                                    notifyCurrentFileUpdate(response);
+                                })
+                                .catch((error) => {
+                                    notifyCurrentFileUpdate(null);
+                                    console.log(
+                                        `Error getting the current file: ${error}`
+                                    );
+                                });
+                        } else {
+                            // if the files array already contained a file
+                            sendNewFiles();
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(`Error in filewatcher: ${error}`);
+                    });
+            }
+        })
+        .on(Constants.FileWatcher.unlink, (path) => {
+            const removedFilename = getFileNameFromPath(path);
+
+            // exit the function if the file isn't of type .ora
+            if (!validateFileExtension(removedFilename)) {
+                return;
+            }
+
+            // find the thumbnail that needs to be deleted
+            const thumbnailIndex = thumbnails.findIndex(
+                (thumbnail) => thumbnail.fileName === removedFilename
+            );
+            const { thumbnailPath } = thumbnails.at(thumbnailIndex);
+
+            if (thumbnailPath === undefined) return;
+
+            // remove the thumbnail from the database
+            thumbnails.splice(thumbnailIndex, 1);
+            saveThumbnailDatabase(false);
+
+            // delete the thumbnail png file
+            deleteFileAtPath(thumbnailPath)
+                .then(() => {
+                    // remove the ora file path from the files array
+                    const removedFileIndex = files.findIndex(
+                        (filepath) => filepath === path
+                    );
+                    const currentFilePath = files.at(currentFileIndex);
+                    if (currentFilePath === undefined) return;
+                    files.splice(removedFileIndex, 1);
+
+                    // if the file deleted is before the selected file
+                    if (removedFileIndex < currentFileIndex) {
+                        // update the currentFileIndex
+                        const mostCurrentFileIndex = files.findIndex(
+                            (filepath) => filepath === currentFilePath
+                        );
+                        if (mostCurrentFileIndex !== -1) {
+                            currentFileIndex = mostCurrentFileIndex;
+                        } else {
+                            currentFileIndex = 0;
+                        }
+                    }
+                    // if the file deleted is the selected file
+                    else if (removedFileIndex === currentFileIndex) {
+                        // decrement the index if possible, or set it to 0
+                        currentFileIndex > 0
+                            ? --currentFileIndex
+                            : (currentFileIndex = 0);
+                        // notify react process about current file update and exit function
+                        getCurrentFile()
+                            .then((response) => {
+                                notifyCurrentFileUpdate(response);
+                            })
+                            .catch((error) => {
+                                notifyCurrentFileUpdate(null);
+                                console.log(
+                                    `Error getting the current file: ${error}`
+                                );
+                            });
+                        return;
+                    }
+
+                    // send the files for the react process
+                    sendNewFiles();
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        });
+}
+
+/**
+ * Notifies react process about the selected file update
+ * @param {{file: string, fileName: string, numberOfFiles: Number}} file
+ */
+const notifyCurrentFileUpdate = (file) => {
+    mainWindow.webContents.send(Constants.Channels.updateCurrentFile, file);
+};
+
+/**
+ * Returns the current file if it is in the file system
+ * @returns {Promise}
+ */
+const getCurrentFile = async () => {
+    return new Promise((resolve, reject) => {
+        if (files.length > 0 && currentFileIndex < files.length) {
+            if (fs.existsSync(files[currentFileIndex])) {
+                resolve(loadFile(files[currentFileIndex]));
+            } else {
+                reject('File not found in range');
+            }
+        } else if (files.length > 0 && currentFileIndex >= files.length) {
+            reject('Given currentFileIndex is too high');
+        } else {
+            reject('No more files to load');
+        }
+    });
+};
+
+/**
+ * Returns the name of the file including the extension from a given path
+ * @param {string} path
+ * @returns {string}
+ */
+const getFileNameFromPath = (path) => {
+    return path.split('\\').pop().split('/').pop();
+};
+
+/**
+ * Deletes the file at the specified path
+ * @param {string} path
+ * @returns {Promise}
+ */
+const deleteFileAtPath = async (path) => {
+    return new Promise((resolve, reject) => {
+        if (fs.existsSync(path)) {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    reject(`An error ocurred deleting the file ${err.message}`);
+                }
+                resolve();
+            });
+        } else {
+            reject(`File ${path} doesn't exist, cannot delete!`);
+        }
+    });
+};
+
+/**
+ * Notifies react process about the updated files
+ */
+const sendNewFiles = () => {
+    mainWindow.webContents.send(Constants.Channels.updateFiles, {
+        thumbnails: files,
+        numberOfFiles: files.length,
+    });
 };
