@@ -45,6 +45,10 @@ import socketIOClient from 'socket.io-client';
 import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
+import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
+import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
+import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode.svg';
+import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode.svg';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -489,11 +493,14 @@ const SettingsModal = (props) => {
                                     displaying multi-algorithm results.
                                 </p>
                                 <div className="visualizationModeOptions">
-                                    <div>Thing</div>
-                                    <div>Thing</div>
-                                    <div>Thing</div>
-                                    <div>Thing</div>
-                                    <div>Thing</div>
+                                    <img
+                                        src={DetailedModeIconSrc}
+                                        alt="Detailed mode"
+                                    />
+                                    <img
+                                        src={SummarizedModeIconSrc}
+                                        alt="Detailed mode"
+                                    />
                                 </div>
                             </div>
                             <div className={classes.remoteWorkContainer}>
