@@ -50,6 +50,7 @@ import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode.svg';
 import * as cornerstone from 'cornerstone-core';
+import { prototype } from 'jszip';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -185,28 +186,28 @@ const SettingsModal = (props) => {
      */
     const visualizationModeToggle = () => {
         console.log('Clicked!!');
-        // if (this.props.selectedDetection) {
-        //     this.props.clearAllSelection();
-        //     this.props.resetSelectedDetectionBoxesUpdate();
-        //     this.resetCornerstoneTool();
-        //     this.appUpdateImage();
-        // }
-        // this.props.toggleDisplaySummarizedDetections();
-        // if (
-        //     isElectron() &&
-        //     !this.props.remoteOrLocal &&
-        //     this.props.localFileOutput !== ''
-        // ) {
-        //     this.props.toggleCollapsedSideMenu({
-        //         cornerstone,
-        //         desktopMode: true,
-        //     });
-        // } else {
-        //     this.props.toggleCollapsedSideMenu({
-        //         cornerstone,
-        //         desktopMode: false,
-        //     });
-        // }
+        if (props.selectedDetection) {
+            props.clearAllSelection();
+            props.resetSelectedDetectionBoxesUpdate();
+            props.resetCornerstoneTool();
+            props.appUpdateImage();
+        }
+        props.toggleDisplaySummarizedDetections();
+        if (
+            isElectron() &&
+            !props.remoteOrLocal &&
+            props.localFileOutput !== ''
+        ) {
+            props.toggleCollapsedSideMenu({
+                cornerstone,
+                desktopMode: true,
+            });
+        } else {
+            props.toggleCollapsedSideMenu({
+                cornerstone,
+                desktopMode: false,
+            });
+        }
     };
 
     /**
@@ -998,6 +999,17 @@ const SettingsModal = (props) => {
 SettingsModal.propTypes = {
     title: PropTypes.string,
     connectToCommandServer: PropTypes.func,
+    selectedDetection: PropTypes.any,
+    clearAllSelection: PropTypes.func,
+    resetSelectedDetectionBoxesUpdate: PropTypes.func,
+    resetCornerstoneTool: PropTypes.func,
+    appUpdateImage: PropTypes.func,
+    toggleDisplaySummarizedDetections: PropTypes.func,
+    remoteOrLocal: PropTypes.any,
+    localFileOutput: PropTypes.string,
+    toggleCollapsedSideMenu: PropTypes.func,
+    cornerstone: PropTypes.any,
+    desktopMode: PropTypes.bool,
 };
 
 export default SettingsModal;

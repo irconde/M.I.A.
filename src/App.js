@@ -3587,9 +3587,22 @@ class App extends Component {
                     </button>
                 </div>
                 <SettingsModal
-                    connectToCommandServer={
-                        this.connectToCommandServer
-                    }></SettingsModal>
+                    connectToCommandServer={this.connectToCommandServer}
+                    selectedDetection={this.props.selectDetection}
+                    clearAllSelection={this.props.clearAllSelection}
+                    resetSelectedDetectionBoxesUpdate={
+                        this.props.resetSelectedDetectionBoxesUpdate
+                    }
+                    resetCornerstoneTool={this.resetCornerstoneTool}
+                    appUpdateImage={this.appUpdateImage}
+                    toggleDisplaySummarizedDetections={
+                        this.props.toggleDisplaySummarizedDetections
+                    }
+                    remoteOrLocal={this.props.remoteOrLocal}
+                    localFileOutput={this.props.localFileOutput}
+                    toggleCollapsedSideMenu={this.props.toggleCollapsedSideMenu}
+                    cornerstone
+                    desktopMode></SettingsModal>
             </div>
         );
     }
