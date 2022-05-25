@@ -486,7 +486,10 @@ const SettingsModal = (props) => {
                     </Tooltip>
                 </div>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
-                <FormGroup style={classes.formControl}>
+                <FormGroup style={classes.formControl}
+                sx={{
+                    alignItems: 'flex-end',
+                }}>
                     <div style={classes.optionsContainer}>
                         <div>
                             <div style={classes.remoteWorkContainer}>
