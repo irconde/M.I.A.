@@ -310,7 +310,7 @@ const SettingsModal = (props) => {
             },
             optionsContainer: {
                 overflowY: 'scroll',
-                outline: '1px solid red',
+                outline: '1px dashed red',
                 height: '80%',
             },
             form: {
@@ -318,7 +318,7 @@ const SettingsModal = (props) => {
             },
             formControl: {
                 height: '85%',
-                outline: '2px solid yellow',
+                outline: '.5px dashed yellow',
             },
             textField: {},
             longTextField: {
@@ -461,6 +461,16 @@ const SettingsModal = (props) => {
             displayListSectionInput: {
                 width: '70%',
             },
+            visualizationModeContainer: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '3.5rem',
+                marginBottom: '1rem',
+            },
+            visualizationModeOption: {
+                outline: '.5px dashed yellow',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            },
         };
     });
 
@@ -492,17 +502,30 @@ const SettingsModal = (props) => {
                                     Pick the visual granularity to use when
                                     displaying multi-algorithm results.
                                 </p>
-                                <div className="visualizationModeOptions">
+                                <div
+                                    className={
+                                        classes.visualizationModeContainer
+                                    }>
                                     <img
                                         src={DetailedModeIconSrc}
+                                        className={
+                                            classes.visualizationModeOption
+                                        }
                                         alt="Detailed mode"
                                     />
                                     <img
                                         src={SummarizedModeIconSrc}
-                                        alt="Detailed mode"
+                                        className={
+                                            classes.visualizationModeOption
+                                        }
+                                        alt="Summarized mode"
                                     />
                                 </div>
                             </div>
+                            <Divider
+                                style={{ margin: 'auto' }}
+                                variant="middle"
+                            />
                             <div className={classes.remoteWorkContainer}>
                                 <p className={classes.optionText}>
                                     Work connected to a remote service
