@@ -506,8 +506,8 @@ const SettingsModal = (props) => {
             },
             visualizationModeOption: {},
             visualizationModeIcon: {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '.7rem',
+                backgroundColor: '#464646',
+                borderRadius: '10px',
             },
             visualizationModeText: {
                 margin: '0.2rem 0',
@@ -515,8 +515,11 @@ const SettingsModal = (props) => {
                 color: '#9d9d9d',
                 fontSize: '.7rem',
             },
+            visualizationModeTextSelected: {
+                color: '#fff',
+            },
             visualizationModeSelected: {
-                outline: '2px solid blue',
+                outline: '2px solid #367fff',
             },
         };
     });
@@ -576,9 +579,12 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                         <p
-                                            className={
+                                            className={`${
                                                 classes.visualizationModeText
-                                            }>
+                                            } ${
+                                                !displaySummarizedDetections &&
+                                                classes.visualizationModeTextSelected
+                                            }`}>
                                             Detailed
                                         </p>
                                     </div>
@@ -605,9 +611,12 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                         <p
-                                            className={
+                                            className={`${
                                                 classes.visualizationModeText
-                                            }>
+                                            } ${
+                                                displaySummarizedDetections &&
+                                                classes.visualizationModeTextSelected
+                                            }`}>
                                             Summarized
                                         </p>
                                     </div>
