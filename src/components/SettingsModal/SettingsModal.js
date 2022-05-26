@@ -98,6 +98,7 @@ const SettingsModal = (props) => {
     const settingsVisibility = useSelector(getSettingsVisibility);
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
         useState(settings.displaySummarizedDetections);
+    const selectedDetection = useSelector(getSelectedDetection);
     const dispatch = useDispatch();
     const svgContainerStyle = {
         margin: '0.3rem',
@@ -195,26 +196,32 @@ const SettingsModal = (props) => {
      * mode between detailed, or summarized
      */
     const visualizationModeToggle = () => {
-        if (getSelectedDetection()) {
-            clearAllSelection();
-            resetSelectedDetectionBoxesUpdate();
+        setDisplaySummarizedDetections(!displaySummarizedDetections);
+    };
+
+    const changeVisualizationMode = () => {
+        if (selectedDetection) {
+            dispatch(clearAllSelection());
+            dispatch(resetSelectedDetectionBoxesUpdate());
             props.resetCornerstoneTool();
             props.appUpdateImage();
         }
-        toggleDisplaySummarizedDetections();
-        if (isElectron() && !getRemoteOrLocal && getLocalFileOutput !== '') {
-            toggleCollapsedSideMenu({
-                cornerstone,
-                desktopMode: true,
-            });
+
+        if (isElectron() && remoteOrLocal && localFileOutput !== '') {
+            dispatch(
+                toggleCollapsedSideMenu({
+                    cornerstone: props.cornerstone,
+                    desktopMode: true,
+                })
+            );
         } else {
-            toggleCollapsedSideMenu({
-                cornerstone,
-                desktopMode: false,
-            });
+            dispatch(
+                toggleCollapsedSideMenu({
+                    cornerstone: props.cornerstone,
+                    desktopMode: false,
+                })
+            );
         }
-        setDisplaySummarizedDetections(!displaySummarizedDetections);
-        console.log(displaySummarizedDetections);
     };
 
     /**
@@ -222,6 +229,7 @@ const SettingsModal = (props) => {
      * If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
+        changeVisualizationMode();
         if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {
             ipcRenderer
                 .invoke(Channels.loadFiles, localFileOutput)
