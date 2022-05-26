@@ -26,11 +26,19 @@ import Modal from '@material-ui/core/Modal';
 import {
     getSettingsVisibility,
     toggleSettingsVisibility,
+    resetSelectedDetectionBoxesUpdate,
+    toggleCollapsedSideMenu,
 } from '../../redux/slices/ui/uiSlice';
+import {
+    getSelectedDetection,
+    clearAllSelection,
+} from '../../redux/slices/detections/detectionsSlice';
 import {
     getLocalFileOutput,
     getSettings,
     saveSettings,
+    getRemoteOrLocal,
+    toggleDisplaySummarizedDetections,
 } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
@@ -187,30 +195,26 @@ const SettingsModal = (props) => {
      * mode between detailed, or summarized
      */
     const visualizationModeToggle = () => {
-        console.log(displaySummarizedDetections);
-        // if (props.selectedDetection) {
-        //     props.clearAllSelection();
-        //     props.resetSelectedDetectionBoxesUpdate();
-        //     props.resetCornerstoneTool();
-        //     props.appUpdateImage();
-        // }
-        // props.toggleDisplaySummarizedDetections();
-        // if (
-        //     isElectron() &&
-        //     !props.remoteOrLocal &&
-        //     props.localFileOutput !== ''
-        // ) {
-        //     props.toggleCollapsedSideMenu({
-        //         cornerstone,
-        //         desktopMode: true,
-        //     });
-        // } else {
-        //     props.toggleCollapsedSideMenu({
-        //         cornerstone,
-        //         desktopMode: false,
-        //     });
-        // }
+        if (getSelectedDetection()) {
+            clearAllSelection();
+            resetSelectedDetectionBoxesUpdate();
+            props.resetCornerstoneTool();
+            props.appUpdateImage();
+        }
+        toggleDisplaySummarizedDetections();
+        if (isElectron() && !getRemoteOrLocal && getLocalFileOutput !== '') {
+            toggleCollapsedSideMenu({
+                cornerstone,
+                desktopMode: true,
+            });
+        } else {
+            toggleCollapsedSideMenu({
+                cornerstone,
+                desktopMode: false,
+            });
+        }
         setDisplaySummarizedDetections(!displaySummarizedDetections);
+        console.log(displaySummarizedDetections);
     };
 
     /**

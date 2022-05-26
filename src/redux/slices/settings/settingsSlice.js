@@ -88,7 +88,8 @@ const settingsSlice = createSlice({
 });
 
 // Actions
-export const { saveSettings } = settingsSlice.actions;
+export const { saveSettings, toggleDisplaySummarizedDetections } =
+    settingsSlice.actions;
 
 // Selectors
 /**

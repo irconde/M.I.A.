@@ -793,7 +793,6 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
-    toggleDisplaySummarizedDetections,
 } = uiSlice.actions;
 
 // Export the reducer for the store

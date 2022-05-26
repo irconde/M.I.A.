@@ -70,7 +70,6 @@ import {
     setLocalFileOpen,
     setReceiveTime,
     toggleCollapsedSideMenu,
-    toggleDisplaySummarizedDetections,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -82,6 +81,7 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
+import { toggleDisplaySummarizedDetections } from './redux/slices/settings/settingsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
@@ -3621,7 +3621,8 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
-        displaySummarizedDetections: ui.displaySummarizedDetections,
+        displaySummarizedDetections:
+            settings.settings.displaySummarizedDetections,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
