@@ -91,12 +91,13 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked on mouse move to know whether the mouse pointer is over (or close to) the rectangle's border
      *
-     *
-     * @param {*} element element
-     * @param {*} data data
-     * @param {*} coords coords
-     * @returns {Boolean}
+     * @param {HTMLElement} element HTML Element where mouse is over
+     * @param {{handles: {start: number, end: number}}} data HTML Element where mouse is over
+     * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
+     * @returns {boolean}
      */
     pointNearTool(element, data, coords) {
         const validParameters = data && data.handles && data.handles.points;
@@ -117,9 +118,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * @param {*} element
-     * @param {*} data
-     * @param {*} coords
+     * @param {{handles: {points: Array<number>}}} data HTML Element where mouse is over
+     * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
      * @returns {number} the distance in px from the provided coordinates to the
      * closest rendered portion of the annotation. -1 if the distance cannot be
      * calculated.
@@ -142,14 +142,8 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     *
-     *
-     *
      * @param {Object} image image
-     * @param {Object} element element
      * @param {Object} data data
-     *
-     * @returns {void}  void
      */
     updateCachedStats(image, element, data) {
         const points = data.handles.points;
@@ -199,10 +193,9 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     *
-     *
-     * @param {*} evt
-     * @returns {undefined}
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked to render all the widgets that comprise a detection
+     * @param {*} evt Event object containing necessary event/canvas data
      */
     renderToolData(evt) {
         const eventData = evt.detail;

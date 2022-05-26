@@ -20,14 +20,12 @@ if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
 
+
+
 /**
- * Component for ?.
+ * Component for displaying the lazy image menu.
  *
  * @component
- *
- * @param {PropTypes} props Expected props: thumbnails<Array<string>>, getSpecificFileFromLocalDirectory<function>
- * @param {Array<string>} thumbnails - Destructured from props -- Array with string values to the file path of thumbnails, IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png',...]
- * @param {function} getSpecificFileFromLocalDirectory - Destructured from props -- Calls the Electron channel to invoke a specific file from the selected file system folder.
  *
  */
 function LazyImageMenu(props) {
@@ -70,12 +68,26 @@ function LazyImageMenu(props) {
             }
         }
     });
+
+    // change piece of state when the user scrolls. Used for adding box-shadow to header
+    const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
+
+    function handleMenuContainerScroll(event) {
+        const element = event.target;
+        if(element.scrollTop > 0){
+            setShouldAddBoxShadow(true);
+        }else{
+            setShouldAddBoxShadow(false);
+    }
+}
+
     // TODO: Scroll to selected thumbnail
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                         transition: 'none',
@@ -99,15 +111,12 @@ function LazyImageMenu(props) {
             return (
                 <div
                     className="lazy-image-menu-container"
+                    onScroll={handleMenuContainerScroll}
                     style={{
                         ...translateStyle,
                     }}>
-                    <div
-                        className="lazy-images-container"
-                        style={{
-                            width: sideMenuWidth,
-                        }}>
-                        <p className="images-in-workspace">
+                        <p className="images-in-workspace"
+                            style={{boxShadow: shouldAddBoxShadow && "0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)"}}>
                             <FileOpenIcon
                                 style={svgContainerStyle}
                                 svgStyle={{
@@ -117,6 +126,11 @@ function LazyImageMenu(props) {
                             />
                             Images in Workspace
                         </p>
+                    <div
+                        className="lazy-images-container"
+                        style={{
+                            width: sideMenuWidth,
+                        }}>
                         {props.thumbnails !== null
                             ? props.thumbnails.map((file, index) => {
                                   return (

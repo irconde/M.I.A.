@@ -1,9 +1,9 @@
-import {createSlice} from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../../utils/Constants';
 import randomColor from 'randomcolor';
-import {v4 as uuidv4} from 'uuid';
 import Utils from '../../../utils/Utils';
-import {Cookies} from 'react-cookie';
+import { Cookies } from 'react-cookie';
+import * as Ensemble from '../../../utils/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier
@@ -32,8 +32,6 @@ import {Cookies} from 'react-cookie';
 //     // Wether the detection is considered to valid. If a detection is not deleted before sending
 //     // the file back to the image/command server, then is is considered to be validated.
 //     validation: boolean;
-//     // Decides what color should be displayed when rendering a detection
-//     displayColor: string;
 //     // Will be white if the detection is visible and gray if not visible
 //     textColor: string;
 // }
@@ -56,6 +54,7 @@ if (cookieData !== undefined) {
 
 const initialState = {
     detections: [],
+    summarizedDetections: [],
     // Selection data
     /** @type string */
     selectedAlgorithm: '',
@@ -67,6 +66,7 @@ const initialState = {
     detectionLabels: [],
     detectionChanged: false,
     missMatchedClassNames,
+    bLists: [],
 };
 
 const detectionsSlice = createSlice({
@@ -83,6 +83,8 @@ const detectionsSlice = createSlice({
             state.selectedDetection = null;
             state.detections = [];
             state.detectionChanged = false;
+            state.bLists = [];
+            state.summarizedDetections = [];
         },
 
         /**
@@ -112,7 +114,7 @@ const detectionsSlice = createSlice({
             } = action.payload;
             state.detections.push({
                 algorithm,
-                className,
+                className: className.toLowerCase(),
                 confidence,
                 view,
                 binaryMask,
@@ -137,15 +139,8 @@ const detectionsSlice = createSlice({
                 (el) => el.className === className
             );
             if (foundIndex !== -1) {
-                state.detections[state.detections.length - 1].displayColor =
-                    state.missMatchedClassNames[foundIndex].color;
                 state.detections[state.detections.length - 1].color =
                     state.missMatchedClassNames[foundIndex].color;
-            } else {
-                state.detections[state.detections.length - 1].displayColor =
-                    getDetectionColor(
-                        state.detections[state.detections.length - 1]
-                    );
             }
             if (state.detectionLabels.indexOf(className) === -1) {
                 state.detectionLabels.push(className);
@@ -153,40 +148,81 @@ const detectionsSlice = createSlice({
             if (!detectionFromFile) {
                 state.detectionChanged = true;
             }
-        },
-
-        /**
-         * Adds multiple detection objects to store
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Array<{algorithm: string, className: string, confidence: number, view: string, binaryMask: Array<number>, polygonMask: Array<number>, boundingBox: Array<number>, uuid: number}>} action Array of objects in action.payload containing detection object params.
-         */
-        addDetections: (state, action) => {
-            action.payload.forEach((det) => {
-                state.detections.push({
-                    algorithm: det.algorithm,
-                    className: det.className,
-                    confidence: det.confidence,
-                    view: det.view,
-                    binaryMask: det.binaryMask,
-                    polygonMask: det.polygonMask,
-                    boundingBox: det.boundingBox,
-                    selected: false,
-                    visible: true,
-                    uuid: uuidv4(),
-                    color: randomColor({
-                        seed: det.className,
-                        hue: 'random',
-                        luminosity: 'bright',
-                    }),
-                    validation: null,
+            /*                  Begin Ensemble                    */
+            /*                  bList sorting                    */
+            const bListRef = {
+                uuid: state.detections[state.detections.length - 1].uuid,
+                confidence:
+                    state.detections[state.detections.length - 1].confidence,
+            };
+            if (state.bLists.length === 0) {
+                state.bLists[0] = {
+                    view,
+                    className,
+                    items: [bListRef],
+                };
+            } else {
+                const index = state.bLists.findIndex(
+                    (value) =>
+                        value.view === view && value.className === className
+                );
+                if (index !== -1) {
+                    state.bLists[index].items.push(bListRef);
+                    state.bLists[index].items.sort((a, b) => {
+                        if (a.confidence < b.confidence) return 1;
+                        else return -1;
+                    });
+                } else {
+                    state.bLists.push({
+                        view,
+                        className,
+                        items: [bListRef],
+                    });
+                }
+            }
+            /*                  End bList sorting                    */
+            /*                  WBF Calculation                    */
+            state.summarizedDetections = [];
+            state.bLists.forEach((list) => {
+                const bListDetections = [];
+                list.items.forEach((item) => {
+                    const detection = state.detections.find(
+                        (det) => det.uuid === item.uuid
+                    );
+                    try {
+                        bListDetections.push({
+                            view: detection.view,
+                            className: detection.className.toLowerCase(),
+                            algorithm: detection.algorithm.toLowerCase(),
+                            boundingBox: JSON.parse(
+                                JSON.stringify(detection.boundingBox)
+                            ),
+                            confidence: detection.confidence,
+                            color: detection.color,
+                            visible: true,
+                            selected: false,
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
                 });
-                if (state.detectionLabels.indexOf(det.className) === -1) {
-                    state.detectionLabels.push(det.className);
+                const { lList, fList } =
+                    Ensemble.calculateLFLists(bListDetections);
+                for (let i = 0; i < fList.length; i++) {
+                    const { x1, x2, y1, y2, fusedConfidence } =
+                        Ensemble.calculateFusedBox(lList, i);
+                    fList[i].algorithm = 'Summarized - WBF';
+                    fList[i].boundingBox = [x1, y1, x2, y2];
+                    fList[i].confidence =
+                        fusedConfidence >= 100 ? 100 : fusedConfidence;
+                    fList[i].polygonMask = [];
+                    fList[i].binaryMask = [[], [], []];
+                    state.summarizedDetections.push(fList[i]);
                 }
             });
+            /*                  End WBF Calculation                    */
+            /*                  End Ensemble                    */
         },
-
         /**
          * Clears selection data for all detections
          *
@@ -196,7 +232,6 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 det.selected = false;
                 if (det.visible) {
-                    det.displayColor = det.color;
                     det.textColor = 'white';
                 }
             });
@@ -216,14 +251,8 @@ const detectionsSlice = createSlice({
             state.detections.forEach((det) => {
                 if (det.algorithm === action.payload) {
                     det.selected = true;
-                    const rgb = Utils.hexToRgb(
-                        constants.detectionStyle.SELECTED_COLOR
-                    );
-                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 } else {
                     det.selected = false;
-                    const rgb = Utils.hexToRgb(det.color);
-                    det.displayColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 }
             });
         },
@@ -243,8 +272,6 @@ const detectionsSlice = createSlice({
                 } else {
                     det.selected = false;
                 }
-                if (det.visible)
-                    det.displayColor = getDetectionColor(det, action.payload);
             });
         },
 
@@ -268,6 +295,48 @@ const detectionsSlice = createSlice({
                     }
                 }
             }
+            /*                  Begin Ensemble                    */
+            /*                  WBF Calculation                    */
+            state.summarizedDetections = [];
+            state.bLists.forEach((list) => {
+                const bListDetections = [];
+                list.items.forEach((item) => {
+                    const detection = state.detections.find(
+                        (det) => det.uuid === item.uuid
+                    );
+                    try {
+                        bListDetections.push({
+                            view: detection.view,
+                            className: detection.className.toLowerCase(),
+                            algorithm: detection.algorithm.toLowerCase(),
+                            boundingBox: JSON.parse(
+                                JSON.stringify(detection.boundingBox)
+                            ),
+                            confidence: detection.confidence,
+                            color: detection.color,
+                            visible: true,
+                            selected: false,
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+                const { lList, fList } =
+                    Ensemble.calculateLFLists(bListDetections);
+                for (let i = 0; i < fList.length; i++) {
+                    const { x1, x2, y1, y2, fusedConfidence } =
+                        Ensemble.calculateFusedBox(lList, i);
+                    fList[i].algorithm = 'Summarized - WBF';
+                    fList[i].boundingBox = [x1, y1, x2, y2];
+                    fList[i].confidence =
+                        fusedConfidence >= 100 ? 100 : fusedConfidence;
+                    fList[i].polygonMask = [];
+                    fList[i].binaryMask = [[], [], []];
+                    state.summarizedDetections.push(fList[i]);
+                }
+            });
+            /*                  End WBF Calculation                    */
+            /*                  End Ensemble                    */
         },
 
         /**
@@ -279,9 +348,12 @@ const detectionsSlice = createSlice({
          */
         editDetectionLabel: (state, action) => {
             const { uuid, className } = action.payload;
+            const newClassName = className.toLowerCase();
+            let oldClassName = '';
             let detection = state.detections.find((det) => det.uuid === uuid);
             if (detection) {
-                detection.className = className;
+                oldClassName = detection.className.toLowerCase();
+                detection.className = newClassName;
                 detection.color = randomColor({
                     seed: className,
                     hue: 'random',
@@ -293,14 +365,100 @@ const detectionsSlice = createSlice({
                 }
                 state.missMatchedClassNames.forEach((missMatched) => {
                     state.detections.forEach((det) => {
-                        if (missMatched.className === det.className) {
+                        if (
+                            missMatched.className.toLowerCase() ===
+                            det.className
+                        ) {
                             det.color = missMatched.color;
-                            if (det.uuid === state.selectedDetection.uuid) {
-                                det.displayColor = missMatched.color;
-                            }
                         }
                     });
                 });
+                /*                  Begin Ensemble                    */
+                /*                  bList sorting                    */
+                const oldIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detection.view &&
+                        list.className.toLowerCase() === oldClassName
+                );
+                if (oldIndex !== -1) {
+                    state.bLists[oldIndex].items = state.bLists[
+                        oldIndex
+                    ].items.filter((det) => det.uuid !== uuid);
+                    if (state.bLists[oldIndex].items.length === 0) {
+                        state.bLists.splice(oldIndex, 1);
+                    }
+                }
+                let newIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detection.view &&
+                        list.className.toLowerCase() === newClassName
+                );
+                if (newIndex !== -1) {
+                    state.bLists[newIndex].items.push({
+                        uuid,
+                        confidence: detection.confidence,
+                    });
+                } else {
+                    state.bLists.push({
+                        view: detection.view,
+                        className: newClassName,
+                        items: [
+                            {
+                                uuid,
+                                confidence: detection.confidence,
+                            },
+                        ],
+                    });
+                    newIndex = state.bLists.length - 1;
+                }
+                if (state.bLists[newIndex].items.length > 1) {
+                    state.bLists[newIndex].items.sort((a, b) => {
+                        if (a.confidence < b.confidence) return 1;
+                        else return -1;
+                    });
+                }
+                /*                  End bList sorting                    */
+                /*                  WBF Calculation                    */
+                state.summarizedDetections = [];
+                state.bLists.forEach((list) => {
+                    const bListDetections = [];
+                    list.items.forEach((item) => {
+                        const detection = state.detections.find(
+                            (det) => det.uuid === item.uuid
+                        );
+                        try {
+                            bListDetections.push({
+                                view: detection.view,
+                                className: detection.className.toLowerCase(),
+                                algorithm: detection.algorithm.toLowerCase(),
+                                boundingBox: JSON.parse(
+                                    JSON.stringify(detection.boundingBox)
+                                ),
+                                confidence: detection.confidence,
+                                color: detection.color,
+                                visible: true,
+                                selected: false,
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    });
+                    const { lList, fList } =
+                        Ensemble.calculateLFLists(bListDetections);
+                    for (let i = 0; i < fList.length; i++) {
+                        const { x1, x2, y1, y2, fusedConfidence } =
+                            Ensemble.calculateFusedBox(lList, i);
+                        fList[i].algorithm = 'Summarized - WBF';
+                        fList[i].boundingBox = [x1, y1, x2, y2];
+                        fList[i].confidence =
+                            fusedConfidence >= 100 ? 100 : fusedConfidence;
+                        fList[i].polygonMask = [];
+                        fList[i].binaryMask = [[], [], []];
+                        state.summarizedDetections.push(fList[i]);
+                    }
+                });
+                /*                  End WBF Calculation                    */
+                /*                  End Ensemble                    */
             }
         },
 
@@ -311,10 +469,71 @@ const detectionsSlice = createSlice({
          * @param {string} uuid - Destructured from action.payload -- uuid for detection being deleted
          */
         deleteDetection: (state, action) => {
-            state.detections = state.detections.filter((det) => {
-                return det.uuid !== action.payload;
-            });
-            state.detectionChanged = true;
+            const foundDetIndex = state.detections.findIndex(
+                (det) => det.uuid === action.payload
+            );
+            if (foundDetIndex !== -1) {
+                const detectionToDelete = state.detections[foundDetIndex];
+                state.detections.splice(foundDetIndex, 1);
+                state.detectionChanged = true;
+                /*                  Begin Ensemble                    */
+                /*                  bList sorting                    */
+                const bListIndex = state.bLists.findIndex(
+                    (list) =>
+                        list.view === detectionToDelete.view &&
+                        list.className === detectionToDelete.className
+                );
+                if (bListIndex !== -1) {
+                    state.bLists[bListIndex].items = state.bLists[
+                        bListIndex
+                    ].items.filter((det) => det.uuid !== action.payload);
+                    if (state.bLists[bListIndex].items.length === 0) {
+                        state.bLists.splice(bListIndex, 1);
+                    }
+                }
+                /*                  End bList sorting                    */
+                /*                  WBF Calculation                    */
+                state.summarizedDetections = [];
+                state.bLists.forEach((list) => {
+                    const bListDetections = [];
+                    list.items.forEach((item) => {
+                        const detection = state.detections.find(
+                            (det) => det.uuid === item.uuid
+                        );
+                        try {
+                            bListDetections.push({
+                                view: detection.view,
+                                className: detection.className.toLowerCase(),
+                                algorithm: detection.algorithm.toLowerCase(),
+                                boundingBox: JSON.parse(
+                                    JSON.stringify(detection.boundingBox)
+                                ),
+                                confidence: detection.confidence,
+                                color: detection.color,
+                                visible: true,
+                                selected: false,
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    });
+                    const { lList, fList } =
+                        Ensemble.calculateLFLists(bListDetections);
+                    for (let i = 0; i < fList.length; i++) {
+                        const { x1, x2, y1, y2, fusedConfidence } =
+                            Ensemble.calculateFusedBox(lList, i);
+                        fList[i].algorithm = 'Summarized - WBF';
+                        fList[i].boundingBox = [x1, y1, x2, y2];
+                        fList[i].confidence =
+                            fusedConfidence >= 100 ? 100 : fusedConfidence;
+                        fList[i].polygonMask = [];
+                        fList[i].binaryMask = [[], [], []];
+                        state.summarizedDetections.push(fList[i]);
+                    }
+                });
+                /*                  End WBF Calculation                    */
+                /*                  End Ensemble                    */
+            }
         },
 
         /**
@@ -350,10 +569,8 @@ const detectionsSlice = createSlice({
                 }
                 if (det.visible) {
                     det.textColor = 'white';
-                    det.displayColor = det.color;
                 } else {
                     det.textColor = 'gray';
-                    det.displayColor = 'black';
                 }
             });
         },
@@ -372,10 +589,8 @@ const detectionsSlice = createSlice({
                     if (det.visible === false) {
                         det.selected = false;
                         det.textColor = 'gray';
-                        det.displayColor = 'black';
                     } else {
                         det.textColor = 'white';
-                        det.displayColor = det.color;
                     }
                 }
             });
@@ -403,15 +618,11 @@ const detectionsSlice = createSlice({
                 state.detections.forEach((det) => {
                     if (missMatched.className === det.className) {
                         det.color = missMatched.color;
-                        if (det.uuid === state.selectedDetection.uuid) {
-                            det.displayColor = missMatched.color;
-                        }
                     }
                 });
             });
             if (state.selectedDetection.className === className) {
                 state.selectedDetection.color = color;
-                state.selectedDetection.displayColor = color;
             }
         },
         /**
@@ -424,9 +635,6 @@ const detectionsSlice = createSlice({
                 state.detections.forEach((det) => {
                     if (missMatched.className === det.className) {
                         det.color = missMatched.color;
-                        if (det.uuid !== state.selectedDetection.uuid) {
-                            det.displayColor = missMatched.color;
-                        }
                     }
                 });
             });
@@ -677,7 +885,6 @@ export const getSelectedDetectionType = (state) => {
 export const {
     resetDetections,
     addDetection,
-    addDetections,
     clearAllSelection,
     selectDetection,
     selectDetectionSet,

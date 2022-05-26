@@ -37,10 +37,6 @@ const ImageContainer = styled.div`
  *
  * @component
  *
- * @param {PropTypes} props Expected props: file<string>, getSpecificFileFromLocalDirectory<function>
- * @param {string} file - Destructured from props -- Name of file
- * @param {function} getSpecificFileFromLocalDirectory - Destructured from props -- Calls the Electron channel to invoke a specific file from the selected file system folder.
- *
  */
 function LazyImageContainer(props) {
     const generatingThumbnails = useSelector(getGeneratingThumbnails);

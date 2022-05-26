@@ -20,8 +20,7 @@ import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
 
 /**
- * FABContainer - Styled div for the FAB Button. Takes in props to control the look
- *                depending on certain properties.
+ * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
  *
  * @property {leftPX} - Prop to control the horizontal alignment dynamically
  * @property {fabOpacity} - Prop to control opacity based on the current cornerstoneMode
@@ -87,9 +86,6 @@ const FABContainer = styled.div`
  * Component for user to create a new detection and its polygon mask.
  *
  * @component
- *
- * @param {function} onBoundingSelect - Callback for bounding box selection
- * @param {function} onPolygonSelect - Callback for polygon mask selection
  *
  *
  */

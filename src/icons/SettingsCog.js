@@ -6,10 +6,6 @@ import PropTypes from 'prop-types';
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: title<string>, style<object>
- * @param {string} title - Destructured from props -- String value that is shown when hovering component
- * @param {CSSObject} style - Destructured from props -- CSS object used for stylizing SVG element
- *
  */
 const SettingsCog = (props) => {
     return (

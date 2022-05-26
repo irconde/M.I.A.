@@ -1,5 +1,5 @@
 import * as dcmjs from 'dcmjs';
-import {SETTINGS} from './Constants';
+import { SETTINGS } from './Constants';
 import Utils from './Utils';
 
 /**
@@ -240,7 +240,7 @@ export default class Dicos {
     }
 
     /**
-     * Converts a detection and its parent image into blob data with DICOM format
+     * Converts a Uint16Array of 16-bit unsigned greyscale pixel data into a standard P10 DICOM object to be returned as a blob.
      *
      * @param {Uint16Array} pixelData - Uint16Array object with 16 bit greyscale pixel values for dcs blob object
      * @param {number} width - image width
@@ -248,11 +248,6 @@ export default class Dicos {
      * @returns {Promise} - Promise containing the blob on resolve or error on reject
      */
     static pixelDataToBlob(pixelData, width, height) {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        const yyyy = today.getFullYear();
-
         return new Promise((resolve, reject) => {
             try {
                 const jsonDataset = `{
@@ -393,12 +388,10 @@ export default class Dicos {
 
                 // Create the Dicom Dictionary file
                 const dicomDict = dcmjs.data.datasetToDict(dataset);
-                //const buffer = Buffer.from(dicomDict.write());
-                //let dicomDict = new dcmjs.data.DicomDict({});
-                //dicomDict.dict =
-                //    dcmjs.data.DicomMetaDictionary.denaturalizeDataset(dataset);
+
                 // Create the buffer from the denaturalized data set populated above
                 let new_file_WriterBuffer = dicomDict.write();
+
                 // Create a blob with this buffer
                 var file = new Blob([new_file_WriterBuffer], {
                     type: 'image/dcs',

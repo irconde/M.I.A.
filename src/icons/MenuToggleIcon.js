@@ -7,6 +7,12 @@ import {
 } from '../redux/slices/ui/uiSlice';
 import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
+import {
+    getHasFileOutput,
+    getLocalFileOutput,
+    getRemoteOrLocal,
+} from '../redux/slices/settings/settingsSlice';
+import isElectron from 'is-electron';
 
 /**
  * Menu toggle icon in TopBar component used to toggle SideMenu component visibility.
@@ -22,8 +28,17 @@ const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const visible = useSelector(getReceivedTime);
     const hasFileOutput = useSelector(getHasFileOutput);
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const localFileOutput = useSelector(getLocalFileOutput);
+    const desktopMode =
+        isElectron() && !remoteOrLocal && localFileOutput !== '';
     const toggleClickHandler = () => {
-        dispatch(toggleCollapsedSideMenu(props.cornerstone));
+        dispatch(
+            toggleCollapsedSideMenu({
+                cornerstone: props.cornerstone,
+                desktopMode,
+            })
+        );
     };
     const divStyle = {
         ...props.style,

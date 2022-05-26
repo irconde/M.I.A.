@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import Utils from './Utils';
-import {SETTINGS} from './Constants';
+import { SETTINGS } from './Constants';
 import React from 'react';
 
 /**
@@ -11,7 +11,7 @@ import React from 'react';
  * @param {myOraObject} myOra - Ora file object
  * @param {Array<Detection>} detections - Collection of detection objects
  * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
- * @param {{"cornerstone-core"?: *, __esModule?: *}} cornerstone - Main cornerstone object
+ * @param {{"cornerstone-core": *, __esModule: *}} cornerstone - Main cornerstone object
  * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
  * @returns {nodebuffer} ?
  */

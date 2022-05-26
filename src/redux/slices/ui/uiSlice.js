@@ -39,12 +39,21 @@ const initialState = {
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
     generatingThumbnails: true,
+    displaySummarizedDetections: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
+        /**
+         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
+         * @param {State} state
+         */
+        toggleDisplaySummarizedDetections: (state) => {
+            state.displaySummarizedDetections =
+                !state.displaySummarizedDetections;
+        },
         /**
          * Sets whether the Electron process is generating thumbnails or not
          * @param {State} state
@@ -56,25 +65,18 @@ const uiSlice = createSlice({
         /**
          * Toggles the visibility of the side menu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {CornerstoneObject?} action.payload - Can contain cornerstone object if local file is currently open
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean;}} action.payload - Contains cornerstone object and whether in desktop mode
          */
         toggleCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode } = action.payload;
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            if (state.localFileOpen) {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu,
-                    state.collapsedLazyMenu,
-                    true
-                );
-            } else {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu
-                );
-            }
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
         },
 
         /**
@@ -519,6 +521,14 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  */
 export const getDisplaySettings = (state) => state.ui.displaySettings;
 /**
+ * Indicates whether the display of summarized detections is enabled
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when displaying summarized detections - false renders original detections
+ */
+export const getDisplaySummarizedDetections = (state) =>
+    state.ui.displaySummarizedDetections;
+/**
  * Provides the current cornerstone mode
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
@@ -800,6 +810,7 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
+    toggleDisplaySummarizedDetections,
 } = uiSlice.actions;
 
 // Export the reducer for the store

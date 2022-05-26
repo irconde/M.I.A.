@@ -8,9 +8,6 @@ import PropTypes from 'prop-types';
  *
  * @component
  *
- * @param {boolean} isConnected - Boolean value determining if connection is successful
- * @param {Object} style - CSS stylization for icons
- *
  */
 const ConnectionStatus = ({ isConnected, style }) => {
     return isConnected ? (

@@ -19,11 +19,6 @@ import OpenIcon from '../../icons/OpenIcon';
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: connectToCommandServer<function>, cornerstone<Object>, getFileFromLocal<function>
- * @param {function} connectToCommandServer - Destructured from props -- Function passed into the SettingsIcon component to check connection to command server
- * @param {function} getFileFromLocal - Destructured from props -- Getter function for getting local file if remote connection is off.
- * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
- *
  */
 const TopBar = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);

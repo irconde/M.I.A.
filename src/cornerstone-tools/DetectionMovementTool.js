@@ -27,9 +27,15 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
         super(props, defaultProps);
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked on mouse move to know whether the mouse pointer is
-    // over (or close to) the rectangle's border
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked on mouse move to know whether the mouse pointer is over (or close to) the rectangle's border
+     *
+     * @param {HTMLElement} element HTML Element where mouse is over
+     * @param {{handles: {start: number, end: number}}} data HTML Element where mouse is over
+     * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
+     * @returns {boolean}
+     */
     pointNearTool(element, data, coords, interactionType) {
         const hasStartAndEndHandles =
             data && data.handles && data.handles.start && data.handles.end;
@@ -63,8 +69,11 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
         }
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked to render all the widgets that comprise a detection
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked to render all the widgets that comprise a detection
+     * @param {*} evt Event object containing necessary event/canvas data
+     */
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {

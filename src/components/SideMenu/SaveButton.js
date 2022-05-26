@@ -69,9 +69,6 @@ const SaveButtonContainer = styled.div`
  *
  * @component
  *
- * @param {function} nextImageClick - Callback for loading next image
- * @param {boolean} [collapseBtn = false] - Boolean value determining if side menu component is collapsed or not.
- *
  *
  */
 

@@ -35,7 +35,6 @@ import {
 } from './redux/slices/server/serverSlice';
 import {
     addDetection,
-    addDetections,
     clearAllSelection,
     deleteDetection,
     editDetectionLabel,
@@ -70,6 +69,8 @@ import {
     setInputLabel,
     setLocalFileOpen,
     setReceiveTime,
+    toggleCollapsedSideMenu,
+    toggleDisplaySummarizedDetections,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -148,6 +149,8 @@ class App extends Component {
             thumbnails: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
+        this.localDirectoryChangeHandler =
+            this.localDirectoryChangeHandler.bind(this);
         this.getFileFromLocalDirectory =
             this.getFileFromLocalDirectory.bind(this);
         this.getSpecificFileFromLocalDirectory =
@@ -230,7 +233,8 @@ class App extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (
             this.props.selectedDetection &&
-            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu
+            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu &&
+            !nextProps.displaySummarizedDetections
         ) {
             setTimeout(() => {
                 this.renderDetectionContextMenu(
@@ -271,6 +275,7 @@ class App extends Component {
                 this.connectToCommandServer();
             } else if (isElectron() && this.props.localFileOutput !== '') {
                 this.getFileFromLocalDirectory();
+                this.localDirectoryChangeHandler();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -786,6 +791,43 @@ class App extends Component {
                     this.props.setReceiveTime(null);
                     this.onNoImageLeft();
                 });
+        }
+    }
+
+    /**
+     * Handles changes from a local directory if working with a local workspace
+     */
+    localDirectoryChangeHandler() {
+        // handle a request to update the thumbnails state when the user modifies
+        // the dir content in the file system
+        if (isElectron()) {
+            ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
+                this.setState({ thumbnails: data.thumbnails });
+                this.props.setNumFilesInQueue(data.numberOfFiles);
+            });
+
+            ipcRenderer.on(
+                constants.Channels.updateCurrentFile,
+                (event, data) => {
+                    // no files left
+                    if (!data) {
+                        this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
+                        this.onNoImageLeft();
+                        return;
+                    }
+                    this.resetSelectedDetectionBoxes();
+                    this.props.resetDetections();
+                    // load the next image
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        data.file,
+                        data.fileName,
+                        data.numberOfFiles,
+                        data.thumbnails
+                    );
+                }
+            );
         }
     }
 
@@ -1927,6 +1969,18 @@ class App extends Component {
         const eventData = e.detail;
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
+            let detections = [];
+            if (!this.props.displaySummarizedDetections) {
+                this.props.detections.forEach((det) => {
+                    if (det.view === constants.viewport.TOP)
+                        detections.push(det);
+                });
+            } else {
+                this.props.summarizedDetections.forEach((det) => {
+                    if (det.view === constants.viewport.TOP)
+                        detections.push(det);
+                });
+            }
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1936,10 +1990,6 @@ class App extends Component {
                     zoomLevelTop: eventData.viewport.scale,
                 });
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.TOP) detections.push(det);
-            });
             if (
                 this.props.cornerstoneMode ===
                     constants.cornerstoneMode.ANNOTATION &&
@@ -1952,6 +2002,18 @@ class App extends Component {
             eventData.element.id === 'dicomImageRight' &&
             this.props.singleViewport === false
         ) {
+            let detections = [];
+            if (!this.props.displaySummarizedDetections) {
+                this.props.detections.forEach((det) => {
+                    if (det.view === constants.viewport.SIDE)
+                        detections.push(det);
+                });
+            } else {
+                this.props.summarizedDetections.forEach((det) => {
+                    if (det.view === constants.viewport.SIDE)
+                        detections.push(det);
+                });
+            }
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1961,10 +2023,6 @@ class App extends Component {
                     zoomLevelSide: eventData.viewport.scale,
                 });
             }
-            let detections = [];
-            this.props.detections.forEach((det) => {
-                if (det.view === constants.viewport.SIDE) detections.push(det);
-            });
             this.renderDetections(detections, context);
             if (
                 this.props.cornerstoneMode ===
@@ -2087,20 +2145,17 @@ class App extends Component {
             if (boundingBoxCoords.length < B_BOX_COORDS) {
                 return;
             }
-            context.strokeStyle =
-                this.props.editionMode === constants.editionMode.COLOR &&
-                data[j].selected
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
-            context.fillStyle =
-                this.props.editionMode === constants.editionMode.COLOR &&
-                data[j].selected
-                    ? data[j].color
-                    : data[j].selected
-                    ? constants.detectionStyle.SELECTED_COLOR
-                    : data[j].displayColor;
+            let boundingBoxColor = data[j].color;
+            if (this.props.selectedDetection) {
+                if (this.props.selectedDetection.uuid !== data[j].uuid) {
+                    const rgb = Utils.hexToRgb(data[j].color);
+                    boundingBoxColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                } else {
+                    boundingBoxColor = constants.detectionStyle.SELECTED_COLOR;
+                }
+            }
+            context.strokeStyle = boundingBoxColor;
+            context.fillStyle = boundingBoxColor;
             const boundingBoxWidth = Math.abs(
                 boundingBoxCoords[2] - boundingBoxCoords[0]
             );
@@ -2212,6 +2267,9 @@ class App extends Component {
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
+            return;
+        }
+        if (this.props.displaySummarizedDetections) {
             return;
         }
         let combinedDetections;
@@ -3528,9 +3586,44 @@ class App extends Component {
                             thumbnails={this.state.thumbnails}
                         />
                     ) : null}
-
                     <NoFileSign />
                     <MetaData />
+                    {/* TODO: Button to be deleted */}
+                    <button
+                        style={{
+                            zIndex: 5,
+                            position: 'absolute',
+                            width: '10%',
+                            height: '10%',
+                            right: '0',
+                            top: '45%',
+                        }}
+                        onClick={() => {
+                            if (this.props.selectedDetection) {
+                                this.props.clearAllSelection();
+                                this.props.resetSelectedDetectionBoxesUpdate();
+                                this.resetCornerstoneTool();
+                                this.appUpdateImage();
+                            }
+                            this.props.toggleDisplaySummarizedDetections();
+                            if (
+                                isElectron() &&
+                                !this.props.remoteOrLocal &&
+                                this.props.localFileOutput !== ''
+                            ) {
+                                this.props.toggleCollapsedSideMenu({
+                                    cornerstone,
+                                    desktopMode: true,
+                                });
+                            } else {
+                                this.props.toggleCollapsedSideMenu({
+                                    cornerstone,
+                                    desktopMode: false,
+                                });
+                            }
+                        }}>
+                        Toggle Ensemble Detections
+                    </button>
                 </div>
             </div>
         );
@@ -3546,6 +3639,7 @@ const mapStateToProps = (state) => {
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
+        summarizedDetections: detections.summarizedDetections,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
         annotationMode: ui.annotationMode,
@@ -3561,6 +3655,7 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
+        displaySummarizedDetections: ui.displaySummarizedDetections,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
@@ -3585,7 +3680,6 @@ const mapDispatchToProps = {
     resetDetections,
     updateDetection,
     addDetection,
-    addDetections,
     clearAllSelection,
     selectDetection,
     selectDetectionSet,
@@ -3624,6 +3718,8 @@ const mapDispatchToProps = {
     updateEditLabelPosition,
     updateRecentScroll,
     setCurrentFileFormat,
+    toggleDisplaySummarizedDetections,
+    toggleCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
