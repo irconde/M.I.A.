@@ -39,21 +39,12 @@ const initialState = {
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
     generatingThumbnails: true,
-    displaySummarizedDetections: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
-        /**
-         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
-         * @param {State} state
-         */
-        toggleDisplaySummarizedDetections: (state) => {
-            state.displaySummarizedDetections =
-                !state.displaySummarizedDetections;
-        },
         /**
          * Sets whether the Electron process is generating thumbnails or not
          * @param {State} state
@@ -520,14 +511,6 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  * @returns {boolean} - True when the display settings component is visible; false otherwise
  */
 export const getDisplaySettings = (state) => state.ui.displaySettings;
-/**
- * Indicates whether the display of summarized detections is enabled
- *
- * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {boolean} - True when displaying summarized detections - false renders original detections
- */
-export const getDisplaySummarizedDetections = (state) =>
-    state.ui.displaySummarizedDetections;
 /**
  * Provides the current cornerstone mode
  *

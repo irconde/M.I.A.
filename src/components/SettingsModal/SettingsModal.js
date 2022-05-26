@@ -88,6 +88,8 @@ const SettingsModal = (props) => {
     const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
+    const [displaySummarizedDetections, setDisplaySummarizedDetections] =
+        useState(settings.displaySummarizedDetections);
     const dispatch = useDispatch();
     const svgContainerStyle = {
         margin: '0.3rem',
@@ -186,28 +188,30 @@ const SettingsModal = (props) => {
      */
     const visualizationModeToggle = () => {
         console.log('Clicked!!');
-        if (props.selectedDetection) {
-            props.clearAllSelection();
-            props.resetSelectedDetectionBoxesUpdate();
-            props.resetCornerstoneTool();
-            props.appUpdateImage();
-        }
-        props.toggleDisplaySummarizedDetections();
-        if (
-            isElectron() &&
-            !props.remoteOrLocal &&
-            props.localFileOutput !== ''
-        ) {
-            props.toggleCollapsedSideMenu({
-                cornerstone,
-                desktopMode: true,
-            });
-        } else {
-            props.toggleCollapsedSideMenu({
-                cornerstone,
-                desktopMode: false,
-            });
-        }
+        console.log(displaySummarizedDetections);
+        // if (props.selectedDetection) {
+        //     props.clearAllSelection();
+        //     props.resetSelectedDetectionBoxesUpdate();
+        //     props.resetCornerstoneTool();
+        //     props.appUpdateImage();
+        // }
+        // props.toggleDisplaySummarizedDetections();
+        // if (
+        //     isElectron() &&
+        //     !props.remoteOrLocal &&
+        //     props.localFileOutput !== ''
+        // ) {
+        //     props.toggleCollapsedSideMenu({
+        //         cornerstone,
+        //         desktopMode: true,
+        //     });
+        // } else {
+        //     props.toggleCollapsedSideMenu({
+        //         cornerstone,
+        //         desktopMode: false,
+        //     });
+        // }
+        setDisplaySummarizedDetections(!displaySummarizedDetections);
     };
 
     /**
@@ -231,6 +235,8 @@ const SettingsModal = (props) => {
                             fileSuffix,
                             remoteOrLocal,
                             deviceType: Utils.deviceType(),
+                            // ! you may not need this here --DAKO
+                            displaySummarizedDetections,
                         })
                     );
                     dispatch(toggleSettingsVisibility(false));
@@ -252,6 +258,7 @@ const SettingsModal = (props) => {
                     fileSuffix,
                     remoteOrLocal,
                     deviceType: Utils.deviceType(),
+                    displaySummarizedDetections,
                 })
             );
             dispatch(toggleSettingsVisibility(false));
@@ -510,6 +517,9 @@ const SettingsModal = (props) => {
                 color: '#9d9d9d',
                 fontSize: '.7rem',
             },
+            visualizationModeSelected: {
+                outline: '2px solid blue',
+            },
         };
     });
 
@@ -551,9 +561,12 @@ const SettingsModal = (props) => {
                                         }>
                                         <img
                                             src={DetailedModeIconSrc}
-                                            className={
+                                            className={`${
                                                 classes.visualizationModeIcon
-                                            }
+                                            } ${
+                                                displaySummarizedDetections &&
+                                                classes.visualizationModeSelected
+                                            }`}
                                             alt={'Detailed mode'}
                                             value={'detailed mode'}
                                             onClick={() => {
@@ -573,9 +586,12 @@ const SettingsModal = (props) => {
                                         }>
                                         <img
                                             src={SummarizedModeIconSrc}
-                                            className={
+                                            className={`${
                                                 classes.visualizationModeIcon
-                                            }
+                                            } ${
+                                                displaySummarizedDetections &&
+                                                classes.visualizationModeSelected
+                                            }`}
                                             alt={'Summarized mode'}
                                             value={'summarized mode'}
                                             onClick={() => {
@@ -1010,6 +1026,7 @@ SettingsModal.propTypes = {
     toggleCollapsedSideMenu: PropTypes.func,
     cornerstone: PropTypes.any,
     desktopMode: PropTypes.bool,
+    displaySummarizedDetections: PropTypes.bool,
 };
 
 export default SettingsModal;

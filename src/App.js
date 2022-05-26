@@ -3601,6 +3601,9 @@ class App extends Component {
                     remoteOrLocal={this.props.remoteOrLocal}
                     localFileOutput={this.props.localFileOutput}
                     toggleCollapsedSideMenu={this.props.toggleCollapsedSideMenu}
+                    displaySummarizedDetections={
+                        this.props.displaySummarizedDetections
+                    }
                     cornerstone
                     desktopMode></SettingsModal>
             </div>
