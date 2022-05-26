@@ -8,7 +8,6 @@ import {
 import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
-    getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../redux/slices/settings/settingsSlice';
