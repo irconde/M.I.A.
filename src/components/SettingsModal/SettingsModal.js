@@ -47,8 +47,8 @@ import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
 import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
-import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode.svg';
-import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode.svg';
+import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
+import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
 import * as cornerstone from 'cornerstone-core';
 import { prototype } from 'jszip';
 
@@ -187,7 +187,6 @@ const SettingsModal = (props) => {
      * mode between detailed, or summarized
      */
     const visualizationModeToggle = () => {
-        console.log('Clicked!!');
         console.log(displaySummarizedDetections);
         // if (props.selectedDetection) {
         //     props.clearAllSelection();
@@ -235,7 +234,6 @@ const SettingsModal = (props) => {
                             fileSuffix,
                             remoteOrLocal,
                             deviceType: Utils.deviceType(),
-                            // ! you may not need this here --DAKO
                             displaySummarizedDetections,
                         })
                     );
@@ -560,17 +558,21 @@ const SettingsModal = (props) => {
                                             classes.visualizationModeOption
                                         }>
                                         <img
-                                            src={DetailedModeIconSrc}
+                                            src={
+                                                displaySummarizedDetections
+                                                    ? DetailedModeIconSrc
+                                                    : DetailedModeIconCheckedSrc
+                                            }
                                             className={`${
                                                 classes.visualizationModeIcon
                                             } ${
-                                                displaySummarizedDetections &&
+                                                !displaySummarizedDetections &&
                                                 classes.visualizationModeSelected
                                             }`}
                                             alt={'Detailed mode'}
-                                            value={'detailed mode'}
                                             onClick={() => {
-                                                visualizationModeToggle();
+                                                displaySummarizedDetections &&
+                                                    visualizationModeToggle();
                                             }}
                                         />
                                         <p
@@ -585,7 +587,11 @@ const SettingsModal = (props) => {
                                             classes.visualizationModeOption
                                         }>
                                         <img
-                                            src={SummarizedModeIconSrc}
+                                            src={
+                                                displaySummarizedDetections
+                                                    ? SummarizedModeIconCheckedSrc
+                                                    : SummarizedModeIconSrc
+                                            }
                                             className={`${
                                                 classes.visualizationModeIcon
                                             } ${
@@ -593,9 +599,9 @@ const SettingsModal = (props) => {
                                                 classes.visualizationModeSelected
                                             }`}
                                             alt={'Summarized mode'}
-                                            value={'summarized mode'}
                                             onClick={() => {
-                                                visualizationModeToggle();
+                                                !displaySummarizedDetections &&
+                                                    visualizationModeToggle();
                                             }}
                                         />
                                         <p
