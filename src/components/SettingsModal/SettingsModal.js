@@ -13,8 +13,6 @@ import {
     MenuItem,
     Paper,
     Select,
-    Snackbar,
-    SnackbarContent,
     Switch,
     TextField,
 } from '@mui/material';
@@ -389,7 +387,7 @@ const SettingsModal = (props) => {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
-            margin: '1rem 0',
+            margin: '0 0 1.25rem 0',
         },
         settingsCogwheel: {
             marginRight: '1rem',
