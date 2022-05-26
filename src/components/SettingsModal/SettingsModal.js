@@ -1030,18 +1030,9 @@ const SettingsModal = (props) => {
 SettingsModal.propTypes = {
     title: PropTypes.string,
     connectToCommandServer: PropTypes.func,
-    selectedDetection: PropTypes.any,
-    clearAllSelection: PropTypes.func,
-    resetSelectedDetectionBoxesUpdate: PropTypes.func,
     resetCornerstoneTool: PropTypes.func,
     appUpdateImage: PropTypes.func,
-    toggleDisplaySummarizedDetections: PropTypes.func,
-    remoteOrLocal: PropTypes.any,
-    localFileOutput: PropTypes.string,
-    toggleCollapsedSideMenu: PropTypes.func,
     cornerstone: PropTypes.any,
-    desktopMode: PropTypes.bool,
-    displaySummarizedDetections: PropTypes.bool,
 };
 
 export default SettingsModal;

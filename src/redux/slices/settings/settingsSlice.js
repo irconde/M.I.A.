@@ -54,8 +54,8 @@ const settingsSlice = createSlice({
          * @param {State} state
          */
         toggleDisplaySummarizedDetections: (state) => {
-            state.displaySummarizedDetections =
-                !state.displaySummarizedDetections;
+            state.settings.displaySummarizedDetections =
+                !state.settings.displaySummarizedDetections;
         },
         /**
          * Saves the current settings into a cookie
@@ -98,7 +98,7 @@ export const { saveSettings } = settingsSlice.actions;
  * @returns {boolean} - True when displaying summarized detections - false renders original detections
  */
 export const getDisplaySummarizedDetections = (state) =>
-    state.ui.displaySummarizedDetections;
+    state.settings.settings.displaySummarizedDetections;
 /**
  * Provides the settings object
  * @param {Object} state
