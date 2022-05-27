@@ -36,7 +36,9 @@ if (cookieData !== undefined) {
     settings = defaultSettings;
     myCookie.set('settings', defaultSettings, {
         path: '/',
-        maxAge: COOKIE.TIME, // Current time is 3 hours
+        expires: isElectron()
+            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
     });
 }
 
@@ -75,14 +77,11 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
-
     },
 });
 
 // Actions
-export const {
-    saveSettings,
-} = settingsSlice.actions;
+export const { saveSettings } = settingsSlice.actions;
 
 // Selectors
 /**

@@ -152,15 +152,16 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  * @returns {string} Result
  */
 
-
-
-
 // TODO: Luka DNAATR-270
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-
         // NOTE: Check if file suffix is empty, if so then save file to original path.
-        if(args.fileSuffix === ''){
+        console.log('Save file event');
+        console.log(`Dir: ${args.fileDirectory}`);
+        console.log(`File Name: ${args.fileName}`);
+        // TODO: fileSuffix is coming with data even though settings for fileSuffix is empty
+        console.log(`File suffix: ${args.fileSuffix}`);
+        if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
                 if (error) {
@@ -169,23 +170,22 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     resolve('File saved');
                 }
             });
-        } 
+        }
         // NOTE: Otherwise save file to the original directory.
-        else{
+        else {
             readdir(args.fileDirectory)
                 .then((returnedFiles) => {
-                   
                     const fileIndex = findMaxFileSuffix(
                         args.fileSuffix,
                         returnedFiles
                     );
-                    
+
                     const filePath = generateFileName(
                         args,
                         fileIndex,
                         args.fileDirectory
                     );
-                    
+
                     fs.writeFile(filePath, args.file, (error) => {
                         if (error) {
                             reject(error);
@@ -195,12 +195,11 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                         }
                     });
                 })
-                
+
                 .catch((error) => {
                     reject(error);
                 });
         }
-
     });
 });
 
@@ -794,17 +793,29 @@ async function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
+            console.log(`File Added: ${path}`);
+            console.log(files);
             const addedFilename = getFileNameFromPath(path);
+            const foundIndex = files.findIndex(
+                (file) => getFileNameFromPath(file) === addedFilename
+            );
+            console.log(`index: ${foundIndex}`);
+            if (foundIndex !== -1) {
+                console.log('return');
+                return;
+            }
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
                     .then(() => {
                         files.push(path);
+                        console.log('files pushed');
                         saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
                         if (files.length === 1) {
                             currentFileIndex = 0;
                             getCurrentFile()
                                 .then((response) => {
+                                    console.log(`Finished adding ${path}`);
                                     notifyCurrentFileUpdate(response);
                                 })
                                 .catch((error) => {
@@ -815,6 +826,7 @@ async function handleExternalFileChanges(dirPath) {
                                 });
                         } else {
                             // if the files array already contained a file
+                            console.log('send new files');
                             sendNewFiles();
                         }
                     })
