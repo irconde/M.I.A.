@@ -161,22 +161,31 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if(args.fileSuffix === ''){
-            const path = `${args.fileDirectory}/${args.fileName}`;
-            args = path;
+            const filePath = `${args.fileDirectory}/${args.fileName}`;
+            fs.writeFile(filePath, args.file, (error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve('File saved');
+                }
+            });
         } 
         // NOTE: Otherwise save file to the original directory.
         else{
             readdir(args.fileDirectory)
                 .then((returnedFiles) => {
+                   
                     const fileIndex = findMaxFileSuffix(
                         args.fileSuffix,
                         returnedFiles
                     );
+                    
                     const filePath = generateFileName(
                         args,
                         fileIndex,
                         args.fileDirectory
                     );
+                    
                     fs.writeFile(filePath, args.file, (error) => {
                         if (error) {
                             reject(error);
@@ -186,6 +195,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                         }
                     });
                 })
+                
                 .catch((error) => {
                     reject(error);
                 });
