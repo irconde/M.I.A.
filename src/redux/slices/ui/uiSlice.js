@@ -69,6 +69,23 @@ const uiSlice = createSlice({
                 desktopMode
             );
         },
+        /**
+         * Sets the visibility of the side menu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean; newState: Boolean}} action.payload - Contains cornerstone object, whether in desktop mode, and whether sidemenu is should be open
+         */
+        setCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode, collapsedSideMenu } =
+                action.payload;
+            state.collapsedSideMenu = collapsedSideMenu;
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
+        },
 
         /**
          * Toggles the visibility of the lazy menu
@@ -793,6 +810,7 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
+    setCollapsedSideMenu,
 } = uiSlice.actions;
 
 // Export the reducer for the store

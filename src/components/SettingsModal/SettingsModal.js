@@ -27,7 +27,7 @@ import {
     getSettingsVisibility,
     toggleSettingsVisibility,
     resetSelectedDetectionBoxesUpdate,
-    toggleCollapsedSideMenu,
+    setCollapsedSideMenu,
 } from '../../redux/slices/ui/uiSlice';
 import {
     getSelectedDetection,
@@ -37,8 +37,6 @@ import {
     getLocalFileOutput,
     getSettings,
     saveSettings,
-    getRemoteOrLocal,
-    toggleDisplaySummarizedDetections,
 } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
@@ -57,7 +55,6 @@ import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
-import * as cornerstone from 'cornerstone-core';
 import { prototype } from 'jszip';
 
 let ipcRenderer;
@@ -96,8 +93,10 @@ const SettingsModal = (props) => {
     const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
+    const initDisplaySummarizedDetections =
+        settings.displaySummarizedDetections;
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
-        useState(settings.displaySummarizedDetections);
+        useState(initDisplaySummarizedDetections);
     const selectedDetection = useSelector(getSelectedDetection);
     const dispatch = useDispatch();
     const svgContainerStyle = {
@@ -192,14 +191,9 @@ const SettingsModal = (props) => {
     };
 
     /**
-     * Handles when the user taps one of the images in the modal window. It toggles between the display
-     * mode between detailed, or summarized
+     * It toggles between the display mode between detailed, or summarized depending on the displaySummarizedDetections
      */
-    const visualizationModeToggle = () => {
-        setDisplaySummarizedDetections(!displaySummarizedDetections);
-    };
-
-    const changeVisualizationMode = () => {
+    const updateVisualizationMode = () => {
         if (selectedDetection) {
             dispatch(clearAllSelection());
             dispatch(resetSelectedDetectionBoxesUpdate());
@@ -207,18 +201,27 @@ const SettingsModal = (props) => {
             props.appUpdateImage();
         }
 
+        // only update the UI when a new visualization mode is selected
+        if (initDisplaySummarizedDetections === displaySummarizedDetections) {
+            return;
+        }
+
+        // close the side menu if mode is summarized
+        // open it if the app is in detailed mode
         if (isElectron() && remoteOrLocal && localFileOutput !== '') {
             dispatch(
-                toggleCollapsedSideMenu({
+                setCollapsedSideMenu({
                     cornerstone: props.cornerstone,
                     desktopMode: true,
+                    collapsedSideMenu: displaySummarizedDetections,
                 })
             );
         } else {
             dispatch(
-                toggleCollapsedSideMenu({
+                setCollapsedSideMenu({
                     cornerstone: props.cornerstone,
                     desktopMode: false,
+                    collapsedSideMenu: displaySummarizedDetections,
                 })
             );
         }
@@ -229,7 +232,6 @@ const SettingsModal = (props) => {
      * If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
-        changeVisualizationMode();
         if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {
             ipcRenderer
                 .invoke(Channels.loadFiles, localFileOutput)
@@ -250,6 +252,7 @@ const SettingsModal = (props) => {
                         })
                     );
                     dispatch(toggleSettingsVisibility(false));
+                    updateVisualizationMode();
                 })
                 .catch((error) => {
                     // TODO: Error handling for an incorrectly typed directory
@@ -272,6 +275,7 @@ const SettingsModal = (props) => {
                 })
             );
             dispatch(toggleSettingsVisibility(false));
+            updateVisualizationMode();
             if (
                 remoteOrLocal === true &&
                 (remoteIp !== '' || remotePort !== '')
@@ -518,6 +522,9 @@ const SettingsModal = (props) => {
             },
             visualizationModeOption: {},
             visualizationModeIcon: {
+                '&:hover': {
+                    cursor: 'pointer',
+                },
                 backgroundColor: '#464646',
                 borderRadius: '10px',
             },
@@ -586,8 +593,9 @@ const SettingsModal = (props) => {
                                             }`}
                                             alt={'Detailed mode'}
                                             onClick={() => {
-                                                displaySummarizedDetections &&
-                                                    visualizationModeToggle();
+                                                setDisplaySummarizedDetections(
+                                                    false
+                                                );
                                             }}
                                         />
                                         <p
@@ -618,8 +626,9 @@ const SettingsModal = (props) => {
                                             }`}
                                             alt={'Summarized mode'}
                                             onClick={() => {
-                                                !displaySummarizedDetections &&
-                                                    visualizationModeToggle();
+                                                setDisplaySummarizedDetections(
+                                                    true
+                                                );
                                             }}
                                         />
                                         <p
