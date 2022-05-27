@@ -151,40 +151,46 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  * @param {{file: Buffer; fileDirectory: string; fileFormat: string; fileName: string; fileSuffix: string;}} args
  * @returns {string} Result
  */
+
+
+
+
+// TODO: Luka DNAATR-270
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        let returnedFilePath;
-        if (process.platform === 'win32') {
-            returnedFilePath = `${args.fileDirectory}\\returned`;
-        } else {
-            returnedFilePath = `${args.fileDirectory}/returned`;
-        }
-        if (fs.existsSync(returnedFilePath) === false) {
-            fs.mkdirSync(returnedFilePath);
-        }
-        readdir(returnedFilePath)
-            .then((returnedFiles) => {
-                const fileIndex = findMaxFileSuffix(
-                    args.fileSuffix,
-                    returnedFiles
-                );
-                const filePath = generateFileName(
-                    args,
-                    fileIndex,
-                    returnedFilePath
-                );
-                fs.writeFile(filePath, args.file, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        currentFileIndex++;
-                        resolve('File saved');
-                    }
+
+        // NOTE: Check if file suffix is empty, if so then save file to original path.
+        if(args.fileSuffix === ''){
+            const path = `${args.fileDirectory}/${args.fileName}`;
+            args = path;
+        } 
+        // NOTE: Otherwise save file to the original directory.
+        else{
+            readdir(args.fileDirectory)
+                .then((returnedFiles) => {
+                    const fileIndex = findMaxFileSuffix(
+                        args.fileSuffix,
+                        returnedFiles
+                    );
+                    const filePath = generateFileName(
+                        args,
+                        fileIndex,
+                        args.fileDirectory
+                    );
+                    fs.writeFile(filePath, args.file, (error) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            currentFileIndex++;
+                            resolve('File saved');
+                        }
+                    });
+                })
+                .catch((error) => {
+                    reject(error);
                 });
-            })
-            .catch((error) => {
-                reject(error);
-            });
+        }
+
     });
 });
 
