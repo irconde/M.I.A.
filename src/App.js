@@ -3589,42 +3589,6 @@ class App extends Component {
                     ) : null}
                     <NoFileSign />
                     <MetaData />
-                    {/* TODO: Button to be deleted */}
-                    <button
-                        style={{
-                            zIndex: 5,
-                            position: 'absolute',
-                            width: '10%',
-                            height: '10%',
-                            right: '0',
-                            top: '45%',
-                        }}
-                        onClick={() => {
-                            if (this.props.selectedDetection) {
-                                this.props.clearAllSelection();
-                                this.props.resetSelectedDetectionBoxesUpdate();
-                                this.resetCornerstoneTool();
-                                this.appUpdateImage();
-                            }
-                            this.props.toggleDisplaySummarizedDetections();
-                            if (
-                                isElectron() &&
-                                !this.props.remoteOrLocal &&
-                                this.props.localFileOutput !== ''
-                            ) {
-                                this.props.toggleCollapsedSideMenu({
-                                    cornerstone,
-                                    desktopMode: true,
-                                });
-                            } else {
-                                this.props.toggleCollapsedSideMenu({
-                                    cornerstone,
-                                    desktopMode: false,
-                                });
-                            }
-                        }}>
-                        Toggle Ensemble Detections
-                    </button>
                 </div>
                 <SettingsModal
                     connectToCommandServer={this.connectToCommandServer}
