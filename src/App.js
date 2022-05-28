@@ -150,6 +150,8 @@ class App extends Component {
             thumbnails: null,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
+        this.localDirectoryChangeHandler =
+            this.localDirectoryChangeHandler.bind(this);
         this.getFileFromLocalDirectory =
             this.getFileFromLocalDirectory.bind(this);
         this.getSpecificFileFromLocalDirectory =
@@ -274,6 +276,7 @@ class App extends Component {
                 this.connectToCommandServer();
             } else if (isElectron() && this.props.localFileOutput !== '') {
                 this.getFileFromLocalDirectory();
+                this.localDirectoryChangeHandler();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -789,6 +792,43 @@ class App extends Component {
                     this.props.setReceiveTime(null);
                     this.onNoImageLeft();
                 });
+        }
+    }
+
+    /**
+     * Handles changes from a local directory if working with a local workspace
+     */
+    localDirectoryChangeHandler() {
+        // handle a request to update the thumbnails state when the user modifies
+        // the dir content in the file system
+        if (isElectron()) {
+            ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
+                this.setState({ thumbnails: data.thumbnails });
+                this.props.setNumFilesInQueue(data.numberOfFiles);
+            });
+
+            ipcRenderer.on(
+                constants.Channels.updateCurrentFile,
+                (event, data) => {
+                    // no files left
+                    if (!data) {
+                        this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
+                        this.onNoImageLeft();
+                        return;
+                    }
+                    this.resetSelectedDetectionBoxes();
+                    this.props.resetDetections();
+                    // load the next image
+                    this.props.setLocalFileOpen(true);
+                    this.loadNextImage(
+                        data.file,
+                        data.fileName,
+                        data.numberOfFiles,
+                        data.thumbnails
+                    );
+                }
+            );
         }
     }
 

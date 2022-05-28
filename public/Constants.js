@@ -7,6 +7,15 @@ module.exports.Channels = {
     saveIndFile: 'save-individual-file',
     getThumbnail: 'get-thumbnail',
     thumbnailStatus: 'thumbnail-status',
+    updateFiles: 'update-files',
+    updateCurrentFile: 'update-current-file',
+};
+
+module.exports.FileWatcher = {
+    add: 'add',
+    change: 'change',
+    unlink: 'unlink',
+    all_json_files: '*.json',
 };
 
 module.exports.Settings = {

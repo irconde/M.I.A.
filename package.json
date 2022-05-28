@@ -18,6 +18,7 @@
     "babel-preset-react": "^6.24.1",
     "browser-fs-access": "^0.20.5",
     "browserify": "^17.0.0",
+    "chokidar": "^3.5.3",
     "concurrently": "^6.4.0",
     "cornerstone-core": "^2.3.0",
     "cornerstone-math": "^0.1.9",
