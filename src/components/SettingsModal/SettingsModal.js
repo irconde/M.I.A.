@@ -362,7 +362,7 @@ const SettingsModal = (props) => {
                 height: '70vh',
             },
             optionsContainer: {
-                overflowY: 'scroll',
+                overflowY: 'auto',
                 height: '80%',
                 padding: '0rem 0.25rem',
             },
@@ -370,7 +370,7 @@ const SettingsModal = (props) => {
                 margin: theme.spacing(1),
             },
             formControl: {
-                height: '85%',
+                height: '90%',
             },
             textField: {},
             longTextField: {
@@ -380,8 +380,7 @@ const SettingsModal = (props) => {
                 width: '70%',
             },
             saveButton: {
-                marginTop: 'auto',
-                marginRight: '1rem',
+                margin: 'auto 1rem auto 0',
                 float: 'right',
                 backgroundColor: '#367eff',
                 display: 'flex',
