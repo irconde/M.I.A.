@@ -337,8 +337,7 @@ const SettingsModal = (props) => {
             },
             modal: {
                 boxShadow: theme.shadows[5],
-                padding: theme.spacing(2, 4, 4),
-                maxHeight: '70vh',
+                padding: '1rem 2rem .5rem',
             },
             paper: {
                 padding: theme.spacing(1),
@@ -360,6 +359,7 @@ const SettingsModal = (props) => {
             root: {
                 flexGrow: 1,
                 height: '70vh',
+                maxHeight: '450px',
             },
             optionsContainer: {
                 overflowY: 'auto',
