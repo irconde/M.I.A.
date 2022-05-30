@@ -14,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 const SingleViewIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="Single View">
+            <Tooltip title="File contains information on a single view">
                 <svg
                     width={props.svgStyle.width}
                     height={props.svgStyle.height}

@@ -5,12 +5,12 @@ import {
     getReceivedTime,
     toggleCollapsedSideMenu,
 } from '../redux/slices/ui/uiSlice';
-import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
-import Tooltip from '@mui/material/Tooltip';
 import {
+    getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../redux/slices/settings/settingsSlice';
+import Tooltip from '@mui/material/Tooltip';
 import isElectron from 'is-electron';
 
 /**
@@ -46,7 +46,7 @@ const MenuToggleIcon = (props) => {
     if (visible !== null || hasFileOutput) {
         return (
             <div style={divStyle} onClick={toggleClickHandler}>
-                <Tooltip title="Side Menu Toggle" placement="bottom">
+                <Tooltip title="Fold/unfold menu" placement="bottom">
                     <svg
                         style={{ marginTop: 'auto', marginBottom: 'auto' }}
                         width="32px"

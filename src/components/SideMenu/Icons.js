@@ -2,7 +2,7 @@ import React from 'react';
 import Tooltip from '@mui/material/Tooltip';
 
 const EyeO = (props) => (
-    <Tooltip title="Hide Detection">
+    <Tooltip title="Hide">
         <svg {...props} viewBox="0 0 24 24">
             <g
                 id="ic_visibility_on"
@@ -24,7 +24,7 @@ const EyeO = (props) => (
 );
 
 const EyeC = (props) => (
-    <Tooltip title="Show Detection">
+    <Tooltip title="Make visible">
         <svg {...props} viewBox="0 0 24 24">
             <g
                 id="ic_visibility_off"

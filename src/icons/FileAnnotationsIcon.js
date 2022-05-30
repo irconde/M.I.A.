@@ -11,7 +11,7 @@ import Tooltip from '@mui/material/Tooltip';
 const FileAnnotationIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="File Annotation">
+            <Tooltip title="Select format for annotations">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height={props.svgStyle.height}

@@ -99,7 +99,7 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
 
     if (collapseBtn)
         return (
-            <Tooltip title="Next Image">
+            <Tooltip title="Go to next image">
                 <CollapsedNextButtonContainer
                     isCollapsed={isCollapsed}
                     style={{
@@ -119,7 +119,7 @@ const NextButton = ({ nextImageClick, collapseBtn = false }) => {
         );
     else
         return (
-            <Tooltip title="Next Image">
+            <Tooltip title="Go to next image">
                 <NextButtonContainer
                     enabled={enableNextButton}
                     onClick={handleClick}

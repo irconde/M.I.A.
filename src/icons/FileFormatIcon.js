@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tooltip from '@mui/material/Tooltip'
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * File format icon in SettingsModal next to file format drop-down menu.
@@ -11,7 +11,7 @@ import Tooltip from '@mui/material/Tooltip'
 const FileFormatIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="File Format">
+            <Tooltip title="Select output file format">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height={props.svgStyle.height}

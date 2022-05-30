@@ -6,13 +6,13 @@ import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
-import { editionMode, detectionContextStyle } from '../../utils/Constants';
 import * as constants from '../../utils/Constants';
+import { detectionContextStyle, editionMode } from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
+    getDetectionContextPosition,
     getEditionMode,
     getIsDetectionContextVisible,
-    getDetectionContextPosition,
     getRecentScroll,
 } from '../../redux/slices/ui/uiSlice';
 import {
@@ -115,7 +115,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                 <FlexContainer>
                     <MainWidget>
                         <Tooltip
-                            title="Edit Detection Label"
+                            title="Edit annotation class"
                             placement="bottom">
                             <IconContainer
                                 id="firstIcon"
@@ -125,7 +125,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             </IconContainer>
                         </Tooltip>
                         <Tooltip
-                            title="Edit Detection Color"
+                            title="Edit annotation color"
                             placement="bottom">
                             <IconContainer
                                 onClick={() => handleClick(editionMode.COLOR)}
@@ -142,7 +142,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                         </Tooltip>
                         {detectionType !== constants.detectionType.BINARY && (
                             <Tooltip
-                                title="Edit Bounding Box"
+                                title="Edit box annotation"
                                 placement="bottom">
                                 <IconContainer
                                     onClick={() =>
@@ -157,7 +157,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                         )}
                         {detectionType === constants.detectionType.POLYGON && (
                             <Tooltip
-                                title="Edit Polygon Mask"
+                                title="Edit mask annotation"
                                 placement="bottom">
                                 <IconContainer
                                     onClick={() =>
@@ -171,7 +171,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             </Tooltip>
                         )}
                         <Tooltip
-                            title="Move Detection"
+                            title="Translate annotation"
                             placement="bottom">
                             <IconContainer
                                 onClick={() => handleClick(editionMode.MOVE)}
@@ -182,7 +182,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                         </Tooltip>
                     </MainWidget>
                     <DeleteWidget>
-                        <Tooltip title="Delete Detection" placement="bottom">
+                        <Tooltip title="Delete annotation" placement="bottom">
                             <DeleteIcon
                                 onClick={() => handleClick(editionMode.DELETE)}
                             />

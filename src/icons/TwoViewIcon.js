@@ -14,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 const TwoViewIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="Two View">
+            <Tooltip title="File contains information on two views">
                 <svg
                     width={props.svgStyle.width}
                     height={props.svgStyle.height}

@@ -11,7 +11,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 const OpenIcon = (props) => {
     return (
-        <Tooltip title="Open File" placement="bottom-end">
+        <Tooltip title="Open file" placement="bottom-end">
             <div style={props.style}>
                 <svg
                     width="24px"

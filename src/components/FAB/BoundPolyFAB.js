@@ -157,7 +157,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
             fabOpacity={fabOpacity}
             show={show}
             deviceType={deviceType}>
-            <Tooltip title="Bounding Box" placement="bottom">
+            <Tooltip title="Create box annotation" placement="bottom">
                 <div
                     className="fabOption"
                     onClick={(e) => handleClick(e, onBoundingSelect)}>
@@ -166,7 +166,7 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
                 </div>
             </Tooltip>
             <div className="divider"></div>
-            <Tooltip title="Polygon Mask" placement="bottom">
+            <Tooltip title="Create mask annotation" placement="bottom">
                 <div
                     className="fabOption"
                     onClick={(e) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tooltip from '@mui/material/Tooltip'
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * File suffix icon in SettingsModal next to file suffix text-field.
@@ -11,7 +11,7 @@ import Tooltip from '@mui/material/Tooltip'
 const FileSuffixIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="File Suffix">
+            <Tooltip title="Input suffix appended to filenames">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height={props.svgStyle.height}
