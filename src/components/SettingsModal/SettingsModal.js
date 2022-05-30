@@ -25,13 +25,13 @@ import {
 import Modal from '@material-ui/core/Modal';
 import {
     getSettingsVisibility,
-    toggleSettingsVisibility,
     resetSelectedDetectionBoxesUpdate,
     setCollapsedSideMenu,
+    toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
 import {
-    getSelectedDetection,
     clearAllSelection,
+    getSelectedDetection,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
     getLocalFileOutput,
@@ -55,7 +55,6 @@ import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
-import { prototype } from 'jszip';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -138,7 +137,9 @@ const SettingsModal = (props) => {
             backgroundColor: '#1f1f1f',
             outline: 'none',
             fontFamily: 'Noto Sans JP',
-            minWidth: '30vw',
+            width: '30vw',
+            minWidth: '32rem',
+            maxWidth: '40rem',
         };
     }
 
@@ -337,7 +338,7 @@ const SettingsModal = (props) => {
             },
             modal: {
                 boxShadow: theme.shadows[5],
-                padding: '1rem 2rem .5rem',
+                padding: '.5rem 2rem 1rem',
             },
             paper: {
                 padding: theme.spacing(1),
@@ -358,8 +359,7 @@ const SettingsModal = (props) => {
             },
             root: {
                 flexGrow: 1,
-                height: '70vh',
-                maxHeight: '450px',
+                height: '37rem',
             },
             optionsContainer: {
                 overflowY: 'auto',
@@ -370,7 +370,7 @@ const SettingsModal = (props) => {
                 margin: theme.spacing(1),
             },
             formControl: {
-                height: '90%',
+                height: '95%',
             },
             textField: {},
             longTextField: {
@@ -413,7 +413,6 @@ const SettingsModal = (props) => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                // alignItems: 'center',
                 marginBottom: theme.spacing(2),
                 marginTop: theme.spacing(4),
             },
