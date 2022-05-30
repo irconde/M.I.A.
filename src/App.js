@@ -882,7 +882,10 @@ class App extends Component {
     async sendImageToLocalDirectory(file) {
         const result = new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
+                
+                // ANCHOR: console log here
                 console.log(`File Suffix: ${this.props.fileSuffix}`);
+                
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
                         file,
