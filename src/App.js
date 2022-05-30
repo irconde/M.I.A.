@@ -885,7 +885,7 @@ class App extends Component {
                 
                 // ANCHOR: console log here
                 console.log(`File Suffix: ${this.props.fileSuffix}`);
-                
+
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
                         file,
@@ -1203,6 +1203,7 @@ class App extends Component {
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
+                                console.log("App.js line 1205");
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
@@ -1222,6 +1223,7 @@ class App extends Component {
                             })
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
+                        console.log("App.js line 1225");
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
@@ -1452,6 +1454,7 @@ class App extends Component {
                         newOra
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
+                                console.log("App.js line 1456");
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
