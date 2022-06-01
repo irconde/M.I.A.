@@ -661,6 +661,7 @@ const SettingsModal = (props) => {
                                 style={{ margin: 'auto' }}
                                 variant="middle"
                             />
+                        </div>
                         <div>
                             <div style={classes.remoteWorkContainer}>
                                 <p style={classes.optionText}>
@@ -826,9 +827,14 @@ const SettingsModal = (props) => {
                                         <FormControl
                                             style={classes.longTextField}>
                                             <Tooltip title="Local File Path">
-                                                <div style={classes.fileIconContainer}>
+                                                <div
+                                                    style={
+                                                        classes.fileIconContainer
+                                                    }>
                                                     <FileOpenIcon
-                                                        style={svgContainerStyle}
+                                                        style={
+                                                            svgContainerStyle
+                                                        }
                                                         svgStyle={{
                                                             ...svgStyle,
                                                             color:
@@ -1079,6 +1085,9 @@ const SettingsModal = (props) => {
 SettingsModal.propTypes = {
     title: PropTypes.string,
     connectToCommandServer: PropTypes.func,
+    resetCornerstoneTool: PropTypes.func,
+    appUpdateImage: PropTypes.func,
+    cornerstone: PropTypes.object,
 };
 
 export default SettingsModal;
