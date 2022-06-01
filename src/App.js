@@ -882,10 +882,9 @@ class App extends Component {
     async sendImageToLocalDirectory(file) {
         const result = new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
-                
+
                 // ANCHOR: console log here
                 console.log(`File Suffix: ${this.props.fileSuffix}`);
-
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
                         file,
@@ -1454,7 +1453,6 @@ class App extends Component {
                         newOra
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
-                                console.log("App.js line 1456");
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({

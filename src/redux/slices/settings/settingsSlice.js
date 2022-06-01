@@ -6,6 +6,7 @@ import { COOKIE, SETTINGS } from '../../../utils/Constants';
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');
 
+// TODO: James - Need to implement Electron cookies rather than React - See Electron.js
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
@@ -75,7 +76,13 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+            /*storeCookieData(state.settings);*/
+            myCookie.set('settings', state.settings, {
+                path: '/',
+                expires: isElectron()
+                    ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+                    : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+            });
         },
     },
 });

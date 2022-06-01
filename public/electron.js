@@ -4,6 +4,7 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const screen = electron.screen;
 const dialog = electron.dialog;
+const session = electron.session;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -25,6 +26,7 @@ let thumbnailPath = '';
 let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
 const oraExp = /\.ora$/;
+const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
 const pngExp = /\.png$/;
 
@@ -41,11 +43,25 @@ function createWindow() {
             contextIsolation: false,
         },
     });
-    mainWindow.loadURL(
-        isDev
-            ? 'http://localhost:3000'
-            : `file://${path.join(__dirname, '../build/index.html')}`
-    );
+    mainWindow
+        .loadURL(
+            isDev
+                ? 'http://localhost:3000'
+                : `file://${path.join(__dirname, '../build/index.html')}`
+        )
+        .then((r) => {
+            console.log(r);
+            session.defaultSession.cookies
+                .get({ name: 'settings' })
+                .then((cookies) => {
+                    // TODO: https://www.electronjs.org/docs/latest/api/cookies
+                    console.log(cookies);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        })
+        .catch((err) => console.log(err));
     mainWindow.maximize();
     mainWindow.on('closed', () => (mainWindow = null));
     if (!isDev) mainWindow.removeMenu();
@@ -155,7 +171,6 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
 // TODO: Luka DNAATR-270
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        
         /* NOTE: now creates 3 copies at a time if there is no suffix in settings modal?
             Else statement works as intended but because the file suffix is passed even if its empty,
             it never jumps into if statement so it is now creating 3 objects in the database file at 
@@ -169,7 +184,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         // TODO: fileSuffix is coming with data even though settings for fileSuffix is empty
         console.log(`File suffix: ${args.fileSuffix}`);
         if (args.fileSuffix === '') {
-            console.log("Save File If Statement");
+            console.log('Save File If Statement');
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
                 if (error) {
@@ -181,7 +196,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         }
         // NOTE: Otherwise save file to the original directory.
         else {
-            console.log("Save File Else Statement");
+            console.log('Save File Else Statement');
             readdir(args.fileDirectory)
                 .then((returnedFiles) => {
                     const fileIndex = findMaxFileSuffix(
@@ -334,7 +349,7 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
  * @returns {Boolean}
  */
 const validateFileExtension = (fileName) => {
-    return oraExp.test(fileName);
+    return oraExp.test(fileName) || zipExp.test(fileName);
 };
 /**
  * Ensures that the file name being passed is in of type .ora or .dcs
