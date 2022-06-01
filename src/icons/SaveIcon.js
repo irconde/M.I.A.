@@ -12,7 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 const SaveIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="Save File">
+            <Tooltip title="Save file">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     enableBackground="new 0 0 24 24"

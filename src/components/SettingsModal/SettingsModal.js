@@ -565,13 +565,11 @@ const SettingsModal = (props) => {
                         <SettingsCog title={props.title} />
                     </div>
                     <div style={classes.settingsText}>Settings</div>
-                    <Tooltip title="Close Settings">
-                        <div
-                            onClick={() => handleClose()}
-                            style={classes.closeIconStyle}>
-                            <IcCloseIcon />
-                        </div>
-                    </Tooltip>
+                    <div
+                        onClick={() => handleClose()}
+                        style={classes.closeIconStyle}>
+                        <IcCloseIcon />
+                    </div>
                 </div>
                 <Divider style={{ margin: 'auto' }} variant="middle" />
                 <FormGroup style={classes.formControl}>
@@ -691,7 +689,7 @@ const SettingsModal = (props) => {
 
                             <div style={classes.remoteWorkRow}>
                                 <div style={classes.remoteInputContainer}>
-                                    <Tooltip title="Server Address">
+                                    <Tooltip title="Server address: ip address : port number">
                                         <div style={classes.cloudIconContainer}>
                                             <CloudIcon
                                                 style={svgContainerStyle}
@@ -752,7 +750,7 @@ const SettingsModal = (props) => {
                                 </div>
 
                                 <div style={classes.autoConnectContainer}>
-                                    <Tooltip title="Autoconnect to Server">
+                                    <Tooltip title="Enable/disable auto-connection with server">
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -773,7 +771,7 @@ const SettingsModal = (props) => {
                                 </div>
                             </div>
                             <div style={classes.connectionSection}>
-                                <Tooltip title="Check Server Connection">
+                                <Tooltip title="Check whether the server is reachable">
                                     <Button
                                         variant="outlined"
                                         size="small"
@@ -826,7 +824,7 @@ const SettingsModal = (props) => {
                                     <div style={classes.workingDirectory}>
                                         <FormControl
                                             style={classes.longTextField}>
-                                            <Tooltip title="Local File Path">
+                                            <Tooltip title="Workspace location">
                                                 <div
                                                     style={
                                                         classes.fileIconContainer
@@ -867,7 +865,7 @@ const SettingsModal = (props) => {
                                                 variant="standard"
                                             />
                                         </FormControl>
-                                        <Tooltip title="Select Image Folder">
+                                        <Tooltip title="Select workspace folder from the file explorer">
                                             <Button
                                                 disabled={remoteOrLocal}
                                                 variant="outlined"
@@ -1049,21 +1047,19 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
-                    <Tooltip title="Save Settings">
-                        <Button
-                            variant="outlined"
-                            onClick={() => saveSettingsEvent()}
-                            sx={{
-                                bgcolor: 'primary.main',
-                                color: '#ffffff',
-                                width: '30%',
-                                marginTop: 5,
-                                padding: 1,
-                                alignSelf: 'flex-end',
-                            }}>
-                            Save Settings
-                        </Button>
-                    </Tooltip>
+                    <Button
+                        variant="outlined"
+                        onClick={() => saveSettingsEvent()}
+                        sx={{
+                            bgcolor: 'primary.main',
+                            color: '#ffffff',
+                            width: '30%',
+                            marginTop: 5,
+                            padding: 1,
+                            alignSelf: 'flex-end',
+                        }}>
+                        Save Settings
+                    </Button>
                 </FormGroup>
             </div>
         </Paper>

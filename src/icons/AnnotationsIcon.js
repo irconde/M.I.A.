@@ -14,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 const AnnotationsIcon = (props) => {
     return (
         <div style={props.style}>
-            <Tooltip title="Annotation">
+            <Tooltip title="File contains annotation data">
                 <svg
                     width={props.svgStyle.width}
                     height={props.svgStyle.height}

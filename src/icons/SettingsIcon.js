@@ -36,7 +36,7 @@ const SettingsIcon = (props) => {
     };
     return (
         <>
-            <Tooltip title="Settings">
+            <Tooltip title="Open settings">
                 <IconStyle style={style} onClick={() => handleOpen()}>
                     <SettingsCog
                         style={{ marginTop: 'auto', marginBottom: 'auto' }}
