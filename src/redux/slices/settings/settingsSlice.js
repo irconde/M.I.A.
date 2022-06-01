@@ -28,6 +28,7 @@ const defaultSettings = {
     firstDisplaySettings: true,
     deviceType: '',
     hasFileOutput: false,
+    displaySummarizedDetections: false,
 };
 
 if (cookieData !== undefined) {
@@ -48,6 +49,14 @@ const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
+        /**
+         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
+         * @param {State} state
+         */
+        toggleDisplaySummarizedDetections: (state) => {
+            state.settings.displaySummarizedDetections =
+                !state.settings.displaySummarizedDetections;
+        },
         /**
          * Saves the current settings into a cookie
          *
@@ -75,16 +84,22 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = false;
             storeCookieData(state.settings);
         },
-
     },
 });
 
 // Actions
-export const {
-    saveSettings,
-} = settingsSlice.actions;
+export const { saveSettings, toggleDisplaySummarizedDetections } =
+    settingsSlice.actions;
 
 // Selectors
+/**
+ * Indicates whether the display of summarized detections is enabled
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when displaying summarized detections - false renders original detections
+ */
+export const getDisplaySummarizedDetections = (state) =>
+    state.settings.settings.displaySummarizedDetections;
 /**
  * Provides the settings object
  * @param {Object} state

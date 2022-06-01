@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import SettingsModal from '../components/SettingsModal/SettingsModal';
 import { toggleSettingsVisibility } from '../redux/slices/ui/uiSlice';
 import SettingsCog from './SettingsCog';
 import { getFirstDisplaySettings } from '../redux/slices/settings/settingsSlice';
@@ -45,11 +44,6 @@ const SettingsIcon = (props) => {
                     />
                 </IconStyle>
             </Tooltip>
-
-            <SettingsModal
-                connectToCommandServer={
-                    props.connectToCommandServer
-                }></SettingsModal>
         </>
     );
 };
