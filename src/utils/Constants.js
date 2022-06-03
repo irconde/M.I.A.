@@ -130,5 +130,7 @@ export const Channels = {
     thumbnailStatus: 'thumbnail-status',
     updateFiles: 'update-files',
     updateCurrentFile: 'update-current-file',
-    saveElectronCookie: 'save-electron-cookie',
+    saveSettingsCookie: 'save-settings-cookie',
+    getSettingsCookie: 'get-settings-cookie',
+    loadSettingsCookie: 'load-settings-cookie',
 };

@@ -15,9 +15,7 @@ if (isElectron()) {
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        expires: isElectron()
-            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        expires: new Date(Date.now() + COOKIE.DESKTOP_TIME),
     });
 };
 
@@ -50,6 +48,12 @@ if (!isElectron()) {
     }
 } else {
     settings = defaultSettings;
+    ipcRenderer.invoke(Channels.getSettingsCookie).then((cookie) => {
+        settings = cookie;
+    });
+    ipcRenderer.on(Channels.loadSettingsCookie, (event, cookie) => {
+        settings = cookie;
+    });
 }
 
 const initialState = {
@@ -61,7 +65,7 @@ export const saveElectronCookie = createAsyncThunk(
     async (payload, { rejectWithValue }) => {
         // TODO: Implement channel save to electron
         ipcRenderer
-            .invoke(Channels.saveElectronCookie, payload)
+            .invoke(Channels.saveSettingsCookie, payload)
             .then((res) => {
                 console.log(res);
                 return payload;

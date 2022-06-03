@@ -25,6 +25,7 @@ let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
+let settingsCookie = {};
 const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
@@ -49,12 +50,14 @@ function createWindow() {
                 ? 'http://localhost:3000'
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
-        .then((r) => {
+        .then(() => {
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
-                    // TODO: https://www.electronjs.org/docs/latest/api/cookies
-                    /*console.log(cookies);*/
+                    if (cookies.length > 0) {
+                        settingsCookie = JSON.parse(cookies[0].value);
+                        sendSettingsCookie();
+                    }
                 })
                 .catch((error) => {
                     console.log(error);
@@ -177,13 +180,8 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         */
 
         // NOTE: Check if file suffix is empty, if so then save file to original path.
-        console.log('Save file event');
-        console.log(`Dir: ${args.fileDirectory}`);
-        console.log(`File Name: ${args.fileName}`);
         // TODO: fileSuffix is coming with data even though settings for fileSuffix is empty
-        console.log(`File suffix: ${args.fileSuffix}`);
         if (args.fileSuffix === '') {
-            console.log('Save File If Statement');
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
                 if (error) {
@@ -195,7 +193,6 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         }
         // NOTE: Otherwise save file to the original directory.
         else {
-            console.log('Save File Else Statement');
             readdir(args.fileDirectory)
                 .then((returnedFiles) => {
                     const fileIndex = findMaxFileSuffix(
@@ -281,7 +278,7 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
     });
 });
 
-ipcMain.handle(Constants.Channels.saveElectronCookie, async (event, args) => {
+ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
     return new Promise((resolve, reject) => {
         try {
             session.defaultSession.cookies
@@ -289,6 +286,7 @@ ipcMain.handle(Constants.Channels.saveElectronCookie, async (event, args) => {
                     url: 'http://localhost:3000/',
                     name: 'settings',
                     value: JSON.stringify(args),
+                    expirationDate: 2093792393,
                 })
                 .then(() => {
                     resolve('Cookie saved');
@@ -300,6 +298,12 @@ ipcMain.handle(Constants.Channels.saveElectronCookie, async (event, args) => {
     });
 });
 
+ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
+    return new Promise((resolve) => {
+        resolve(settingsCookie);
+    });
+});
+
 /**
  * Sends the current thumbnail status (generating or not) to the React/renderer process
  */
@@ -307,6 +311,13 @@ const sendThumbnailStatus = () => {
     mainWindow.webContents.send(
         Constants.Channels.thumbnailStatus,
         isGeneratingThumbnails
+    );
+};
+
+const sendSettingsCookie = () => {
+    mainWindow.webContents.send(
+        Constants.Channels.loadSettingsCookie,
+        settingsCookie
     );
 };
 
@@ -835,29 +846,24 @@ async function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
-            console.log(`File Added: ${path}`);
-            console.log(files);
+            console.log('add event');
             const addedFilename = getFileNameFromPath(path);
             const foundIndex = files.findIndex(
                 (file) => getFileNameFromPath(file) === addedFilename
             );
-            console.log(`index: ${foundIndex}`);
             if (foundIndex !== -1) {
-                console.log('return');
                 return;
             }
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
                     .then(() => {
                         files.push(path);
-                        console.log('files pushed');
                         saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
                         if (files.length === 1) {
                             currentFileIndex = 0;
                             getCurrentFile()
                                 .then((response) => {
-                                    console.log(`Finished adding ${path}`);
                                     notifyCurrentFileUpdate(response);
                                 })
                                 .catch((error) => {
@@ -868,7 +874,6 @@ async function handleExternalFileChanges(dirPath) {
                                 });
                         } else {
                             // if the files array already contained a file
-                            console.log('send new files');
                             sendNewFiles();
                         }
                     })
