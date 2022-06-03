@@ -1,10 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
-import { COOKIE, SETTINGS } from '../../../utils/Constants';
+import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
 const cookieData = myCookie.get('settings');
+
+let ipcRenderer;
+if (isElectron()) {
+    ipcRenderer = window.require('electron').ipcRenderer;
+}
 
 // TODO: James - Need to implement Electron cookies rather than React - See Electron.js
 const storeCookieData = (settings) => {
@@ -47,6 +52,22 @@ const initialState = {
     settings,
 };
 
+export const saveElectronCookie = createAsyncThunk(
+    'settings/saveElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        // TODO: Implement channel save to electron
+        ipcRenderer
+            .invoke(Channels.saveElectronCookie, payload)
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        return payload;
+    }
+);
+
 const settingsSlice = createSlice({
     name: 'settings',
     initialState,
@@ -77,12 +98,26 @@ const settingsSlice = createSlice({
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             /*storeCookieData(state.settings);*/
-            myCookie.set('settings', state.settings, {
-                path: '/',
-                expires: isElectron()
-                    ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-                    : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
-            });
+            if (!isElectron()) {
+                myCookie.set('settings', state.settings, {
+                    path: '/',
+                    expires: isElectron()
+                        ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+                        : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+                });
+            }
+        },
+    },
+    extraReducers: {
+        [saveElectronCookie.fulfilled]: (state, { meta, payload }) => {
+            console.log('fullfilled');
+            console.log(payload);
+        },
+        [saveElectronCookie.pending]: (state, { meta, payload }) => {
+            console.log('pending');
+        },
+        [saveElectronCookie.rejected]: (state, { meta, payload }) => {
+            console.log('rejected');
         },
     },
 });

@@ -50,12 +50,11 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then((r) => {
-            console.log(r);
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
                     // TODO: https://www.electronjs.org/docs/latest/api/cookies
-                    console.log(cookies);
+                    /*console.log(cookies);*/
                 })
                 .catch((error) => {
                     console.log(error);
@@ -279,6 +278,13 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
         } else {
             reject('Could not determine file name from that path');
         }
+    });
+});
+
+ipcMain.handle(Constants.Channels.saveElectronCookie, async (event, args) => {
+    return new Promise((resolve, reject) => {
+        console.log(args);
+        resolve('Test successful');
     });
 });
 
