@@ -283,8 +283,20 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.saveElectronCookie, async (event, args) => {
     return new Promise((resolve, reject) => {
-        console.log(args);
-        resolve('Test successful');
+        try {
+            session.defaultSession.cookies
+                .set({
+                    url: 'http://localhost:3000/',
+                    name: 'settings',
+                    value: JSON.stringify(args),
+                })
+                .then(() => {
+                    resolve('Cookie saved');
+                })
+                .catch((error) => reject(error));
+        } catch (e) {
+            reject(e);
+        }
     });
 });
 

@@ -36,16 +36,20 @@ const defaultSettings = {
     hasFileOutput: false,
 };
 
-if (cookieData !== undefined) {
-    settings = cookieData;
+if (!isElectron()) {
+    if (cookieData !== undefined) {
+        settings = cookieData;
+    } else {
+        settings = defaultSettings;
+        myCookie.set('settings', defaultSettings, {
+            path: '/',
+            expires: isElectron()
+                ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+                : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        });
+    }
 } else {
     settings = defaultSettings;
-    myCookie.set('settings', defaultSettings, {
-        path: '/',
-        expires: isElectron()
-            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
-    });
 }
 
 const initialState = {
@@ -60,9 +64,11 @@ export const saveElectronCookie = createAsyncThunk(
             .invoke(Channels.saveElectronCookie, payload)
             .then((res) => {
                 console.log(res);
+                return payload;
             })
             .catch((error) => {
                 console.log(error);
+                rejectWithValue(error);
             });
         return payload;
     }
