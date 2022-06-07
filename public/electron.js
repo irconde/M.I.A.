@@ -302,7 +302,6 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
         if (settingsCookie === null) {
-            console.log('settings null');
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
@@ -315,7 +314,6 @@ ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
                     reject(error);
                 });
         } else {
-            console.log('settings not null');
             resolve(settingsCookie);
         }
     });

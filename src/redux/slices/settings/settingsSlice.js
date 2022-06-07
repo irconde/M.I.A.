@@ -126,26 +126,26 @@ const settingsSlice = createSlice({
             if (!isElectron()) {
                 myCookie.set('settings', state.settings, {
                     path: '/',
-                    expires: isElectron()
-                        ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-                        : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+                    expires: new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
                 });
             }
         },
     },
     extraReducers: {
-        [saveElectronCookie.fulfilled]: (state, { meta, payload }) => {
-            state.settings = payload;
+        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                if (payload[key] !== '') {
+                    state.settings[key] = payload[key];
+                }
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = false;
         },
-        [saveElectronCookie.pending]: (state, { meta, payload }) => {
-            // TODO
-            console.log('save pending');
+        [saveElectronCookie.rejected]: (state) => {
+            state.settings = defaultSettings;
         },
-        [saveElectronCookie.rejected]: (state, { meta, payload }) => {
-            // TODO
-            console.log('save rejected');
-        },
-        [loadElectronCookie.fulfilled]: (state, { meta, payload }) => {
+        [loadElectronCookie.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
                 if (payload[key] !== '') {
                     state.settings[key] = payload[key];
@@ -156,10 +156,10 @@ const settingsSlice = createSlice({
             state.settings.firstDisplaySettings = false;
             state.settings.loadingElectronCookie = false;
         },
-        [loadElectronCookie.pending]: (state, { meta, payload }) => {
+        [loadElectronCookie.pending]: (state) => {
             state.settings.loadingElectronCookie = true;
         },
-        [loadElectronCookie.rejected]: (state, { meta, payload }) => {
+        [loadElectronCookie.rejected]: (state) => {
             state.settings.loadingElectronCookie = false;
         },
     },
@@ -206,7 +206,7 @@ export const getHasFileOutput = (state) =>
 export const getLocalFileOutput = (state) =>
     state.settings.settings.localFileOutput;
 /**
- * Provides the remote connection info: ip, port, autoconnect.
+ * Provides the remote connection info: ip, port, auto-connect.
  * @param {Object} state
  * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
  */
