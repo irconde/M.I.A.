@@ -81,7 +81,6 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
-import { toggleDisplaySummarizedDetections } from './redux/slices/settings/settingsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
@@ -91,6 +90,7 @@ import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
+import { loadElectronCookie } from './redux/slices/settings/settingsSlice';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -270,6 +270,9 @@ class App extends Component {
      * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
+        if (isElectron()) {
+            this.props.loadElectronCookie();
+        }
         // Connect socket servers
         if (this.props.firstDisplaySettings === false) {
             if (this.props.remoteOrLocal === true) {
@@ -883,7 +886,6 @@ class App extends Component {
     async sendImageToLocalDirectory(file) {
         const result = new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
-
                 // ANCHOR: console log here
                 console.log(`File Suffix: ${this.props.fileSuffix}`);
                 ipcRenderer
@@ -1203,7 +1205,7 @@ class App extends Component {
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
-                                console.log("App.js line 1205");
+                                console.log('App.js line 1205');
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
@@ -1223,7 +1225,7 @@ class App extends Component {
                             })
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
-                        console.log("App.js line 1225");
+                        console.log('App.js line 1225');
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
@@ -3595,11 +3597,14 @@ class App extends Component {
                     <NoFileSign />
                     <MetaData />
                 </div>
-                <SettingsModal
-                    connectToCommandServer={this.connectToCommandServer}
-                    resetCornerstoneTool={this.resetCornerstoneTool}
-                    appUpdateImage={this.appUpdateImage}
-                    cornerstone={cornerstone}></SettingsModal>
+                {this.props.loadingElectronCookie === false ? (
+                    <SettingsModal
+                        connectToCommandServer={this.connectToCommandServer}
+                        resetCornerstoneTool={this.resetCornerstoneTool}
+                        appUpdateImage={this.appUpdateImage}
+                        cornerstone={cornerstone}
+                    />
+                ) : null}
             </div>
         );
     }
@@ -3630,9 +3635,9 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
+        // Settings
         displaySummarizedDetections:
             settings.settings.displaySummarizedDetections,
-        // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
         autoConnect: settings.settings.autoConnect,
@@ -3644,6 +3649,7 @@ const mapStateToProps = (state) => {
         hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
         localFileOutput: settings.settings.localFileOutput,
+        loadingElectronCookie: settings.settings.loadingElectronCookie,
     };
 };
 
@@ -3694,8 +3700,8 @@ const mapDispatchToProps = {
     updateEditLabelPosition,
     updateRecentScroll,
     setCurrentFileFormat,
-    toggleDisplaySummarizedDetections,
     toggleCollapsedSideMenu,
+    loadElectronCookie,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

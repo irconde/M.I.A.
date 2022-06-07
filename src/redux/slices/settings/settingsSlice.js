@@ -1,21 +1,22 @@
-import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
 import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
-const cookieData = myCookie.get('settings');
+let cookieData;
 
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
+} else {
+    cookieData = myCookie.get('settings');
 }
 
-// TODO: James - Need to implement Electron cookies rather than React - See Electron.js
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        expires: new Date(Date.now() + COOKIE.DESKTOP_TIME),
+        expires: new Date(Date.now() + COOKIE.WEB_TIME),
     });
 };
 
@@ -33,6 +34,7 @@ const defaultSettings = {
     deviceType: '',
     hasFileOutput: false,
     displaySummarizedDetections: false,
+    loadingElectronCookie: isElectron(),
 };
 
 export const saveElectronCookie = createAsyncThunk(
@@ -121,7 +123,6 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            /*storeCookieData(state.settings);*/
             if (!isElectron()) {
                 myCookie.set('settings', state.settings, {
                     path: '/',
@@ -134,18 +135,17 @@ const settingsSlice = createSlice({
     },
     extraReducers: {
         [saveElectronCookie.fulfilled]: (state, { meta, payload }) => {
-            console.log('save fullfilled');
-            console.log(payload);
             state.settings = payload;
         },
         [saveElectronCookie.pending]: (state, { meta, payload }) => {
+            // TODO
             console.log('save pending');
         },
         [saveElectronCookie.rejected]: (state, { meta, payload }) => {
+            // TODO
             console.log('save rejected');
         },
         [loadElectronCookie.fulfilled]: (state, { meta, payload }) => {
-            console.log('load fullfilled');
             for (let key in payload) {
                 if (payload[key] !== '') {
                     state.settings[key] = payload[key];
@@ -154,14 +154,13 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            console.log(payload);
-            console.log(current(state.settings));
+            state.settings.loadingElectronCookie = false;
         },
         [loadElectronCookie.pending]: (state, { meta, payload }) => {
-            console.log('load pending');
+            state.settings.loadingElectronCookie = true;
         },
         [loadElectronCookie.rejected]: (state, { meta, payload }) => {
-            console.log('load rejected');
+            state.settings.loadingElectronCookie = false;
         },
     },
 });

@@ -36,6 +36,7 @@ import {
 import {
     getLocalFileOutput,
     getSettings,
+    saveElectronCookie,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
@@ -72,13 +73,6 @@ if (isElectron()) {
 const SettingsModal = (props) => {
     const dispatch = useDispatch();
     const settings = useSelector(getSettings);
-    const previousSettings = Utils.usePrevious(settings);
-    useEffect(() => {
-        if (isElectron() && previousSettings !== settings) {
-            dispatch(loadElectronCookie());
-        }
-    });
-
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -246,7 +240,6 @@ const SettingsModal = (props) => {
                     .then((result) => {
                         setSnackBarOpen(true);
                         dispatch(
-                            // TODO
                             saveElectronCookie({
                                 remoteIp,
                                 remotePort,
@@ -1044,6 +1037,7 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
+
                     <Button
                         className={classes.saveButton}
                         variant="outlined"

@@ -25,7 +25,7 @@ let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
-let settingsCookie = {};
+let settingsCookie = null;
 const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
@@ -56,7 +56,6 @@ function createWindow() {
                 .then((cookies) => {
                     if (cookies.length > 0) {
                         settingsCookie = JSON.parse(cookies[0].value);
-                        console.log(settingsCookie);
                         sendSettingsCookie();
                     }
                 })
@@ -301,9 +300,24 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 });
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
-    return new Promise((resolve) => {
-        console.log(settingsCookie);
-        resolve(settingsCookie);
+    return new Promise((resolve, reject) => {
+        if (settingsCookie === null) {
+            console.log('settings null');
+            session.defaultSession.cookies
+                .get({ name: 'settings' })
+                .then((cookies) => {
+                    if (cookies.length > 0) {
+                        settingsCookie = JSON.parse(cookies[0].value);
+                        resolve(settingsCookie);
+                    }
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        } else {
+            console.log('settings not null');
+            resolve(settingsCookie);
+        }
     });
 });
 
