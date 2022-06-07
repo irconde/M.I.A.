@@ -39,21 +39,12 @@ const initialState = {
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
     generatingThumbnails: true,
-    displaySummarizedDetections: false,
 };
 
 const uiSlice = createSlice({
     name: 'ui',
     initialState,
     reducers: {
-        /**
-         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
-         * @param {State} state
-         */
-        toggleDisplaySummarizedDetections: (state) => {
-            state.displaySummarizedDetections =
-                !state.displaySummarizedDetections;
-        },
         /**
          * Sets whether the Electron process is generating thumbnails or not
          * @param {State} state
@@ -70,6 +61,23 @@ const uiSlice = createSlice({
         toggleCollapsedSideMenu: (state, action) => {
             const { cornerstone, desktopMode } = action.payload;
             state.collapsedSideMenu = !state.collapsedSideMenu;
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
+        },
+        /**
+         * Sets the visibility of the side menu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean; newState: Boolean}} action.payload - Contains cornerstone object, whether in desktop mode, and whether sidemenu is should be open
+         */
+        setCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode, collapsedSideMenu } =
+                action.payload;
+            state.collapsedSideMenu = collapsedSideMenu;
             Utils.calculateViewportDimensions(
                 cornerstone,
                 state.singleViewport,
@@ -521,14 +529,6 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  */
 export const getDisplaySettings = (state) => state.ui.displaySettings;
 /**
- * Indicates whether the display of summarized detections is enabled
- *
- * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {boolean} - True when displaying summarized detections - false renders original detections
- */
-export const getDisplaySummarizedDetections = (state) =>
-    state.ui.displaySummarizedDetections;
-/**
  * Provides the current cornerstone mode
  *
  * @param {State} state - Passed in via useSelector/mapStateToProps
@@ -810,7 +810,7 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
-    toggleDisplaySummarizedDetections,
+    setCollapsedSideMenu,
 } = uiSlice.actions;
 
 // Export the reducer for the store

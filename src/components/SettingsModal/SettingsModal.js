@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -25,13 +25,17 @@ import {
 import Modal from '@material-ui/core/Modal';
 import {
     getSettingsVisibility,
+    resetSelectedDetectionBoxesUpdate,
+    setCollapsedSideMenu,
     toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
 import {
+    clearAllSelection,
+    getSelectedDetection,
+} from '../../redux/slices/detections/detectionsSlice';
+import {
     getLocalFileOutput,
     getSettings,
-    loadElectronCookie,
-    saveElectronCookie,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
 import SettingsCog from '../../icons/SettingsCog';
@@ -47,6 +51,10 @@ import socketIOClient from 'socket.io-client';
 import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
+import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
+import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
+import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
+import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -91,7 +99,11 @@ const SettingsModal = (props) => {
     const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
-
+    const initDisplaySummarizedDetections =
+        settings.displaySummarizedDetections;
+    const [displaySummarizedDetections, setDisplaySummarizedDetections] =
+        useState(initDisplaySummarizedDetections);
+    const selectedDetection = useSelector(getSelectedDetection);
     const svgContainerStyle = {
         margin: '0.3rem',
         marginRight: '1rem',
@@ -131,7 +143,9 @@ const SettingsModal = (props) => {
             backgroundColor: '#1f1f1f',
             outline: 'none',
             fontFamily: 'Noto Sans JP',
-            minWidth: '30vw',
+            width: '30vw',
+            minWidth: '32rem',
+            maxWidth: '40rem',
         };
     }
 
@@ -184,6 +198,43 @@ const SettingsModal = (props) => {
     };
 
     /**
+     * It toggles between the display mode between detailed, or summarized depending on the displaySummarizedDetections
+     */
+    const updateVisualizationMode = () => {
+        if (selectedDetection) {
+            dispatch(clearAllSelection());
+            dispatch(resetSelectedDetectionBoxesUpdate());
+            props.resetCornerstoneTool();
+            props.appUpdateImage();
+        }
+
+        // only update the UI when a new visualization mode is selected
+        if (initDisplaySummarizedDetections === displaySummarizedDetections) {
+            return;
+        }
+
+        // close the side menu if mode is summarized
+        // open it if the app is in detailed mode
+        if (isElectron() && remoteOrLocal && localFileOutput !== '') {
+            dispatch(
+                setCollapsedSideMenu({
+                    cornerstone: props.cornerstone,
+                    desktopMode: true,
+                    collapsedSideMenu: displaySummarizedDetections,
+                })
+            );
+        } else {
+            dispatch(
+                setCollapsedSideMenu({
+                    cornerstone: props.cornerstone,
+                    desktopMode: false,
+                    collapsedSideMenu: displaySummarizedDetections,
+                })
+            );
+        }
+    };
+
+    /**
      * Action triggered when the save settings button is tapped. It sends all data to the settings slice.
      * If the user entered connection information it will change the command server to the new one.
      */
@@ -206,9 +257,11 @@ const SettingsModal = (props) => {
                                 fileSuffix,
                                 remoteOrLocal,
                                 deviceType: Utils.deviceType(),
+                                displaySummarizedDetections,
                             })
                         );
                         dispatch(toggleSettingsVisibility(false));
+                        updateVisualizationMode();
                     })
                     .catch((error) => {
                         // TODO: Error handling for an incorrectly typed directory
@@ -227,9 +280,11 @@ const SettingsModal = (props) => {
                         fileSuffix,
                         remoteOrLocal,
                         deviceType: Utils.deviceType(),
+                        displaySummarizedDetections,
                     })
                 );
                 dispatch(toggleSettingsVisibility(false));
+                updateVisualizationMode();
                 if (
                     remoteOrLocal === true &&
                     (remoteIp !== '' || remotePort !== '')
@@ -252,9 +307,11 @@ const SettingsModal = (props) => {
                     fileSuffix,
                     remoteOrLocal,
                     deviceType: Utils.deviceType(),
+                    displaySummarizedDetections,
                 })
             );
             dispatch(toggleSettingsVisibility(false));
+            updateVisualizationMode();
             if (
                 remoteOrLocal === true &&
                 (remoteIp !== '' || remotePort !== '')
@@ -316,7 +373,7 @@ const SettingsModal = (props) => {
             },
             modal: {
                 boxShadow: theme.shadows[5],
-                padding: theme.spacing(2, 4, 4),
+                padding: '.5rem 2rem 1rem',
             },
             paper: {
                 padding: theme.spacing(1),
@@ -337,12 +394,19 @@ const SettingsModal = (props) => {
             },
             root: {
                 flexGrow: 1,
+                height: '37rem',
             },
-            optionsContainer: {},
+            optionsContainer: {
+                overflowY: 'auto',
+                height: '80%',
+                padding: '0rem 0.25rem',
+            },
             form: {
                 margin: theme.spacing(1),
             },
-            formControl: {},
+            formControl: {
+                height: '95%',
+            },
             textField: {},
             longTextField: {
                 // width: '-webkit-fill-available',
@@ -351,7 +415,7 @@ const SettingsModal = (props) => {
                 width: '70%',
             },
             saveButton: {
-                marginTop: theme.spacing(2),
+                margin: 'auto 1rem auto 0',
                 float: 'right',
                 backgroundColor: '#367eff',
                 display: 'flex',
@@ -384,7 +448,6 @@ const SettingsModal = (props) => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                // alignItems: 'center',
                 marginBottom: theme.spacing(2),
                 marginTop: theme.spacing(4),
             },
@@ -484,6 +547,32 @@ const SettingsModal = (props) => {
             displayListSectionInput: {
                 width: '70%',
             },
+            visualizationModeContainer: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '3.5rem',
+                marginBottom: '1rem',
+            },
+            visualizationModeOption: {},
+            visualizationModeIcon: {
+                '&:hover': {
+                    cursor: 'pointer',
+                },
+                backgroundColor: '#464646',
+                borderRadius: '10px',
+            },
+            visualizationModeText: {
+                margin: '0.2rem 0',
+                textAlign: 'center',
+                color: '#9d9d9d',
+                fontSize: '.7rem',
+            },
+            visualizationModeTextSelected: {
+                color: '#fff',
+            },
+            visualizationModeSelected: {
+                outline: '2px solid #367fff',
+            },
         };
     });
 
@@ -507,6 +596,90 @@ const SettingsModal = (props) => {
                 <FormGroup className={classes.formControl}>
                     <div className={classes.optionsContainer}>
                         <div>
+                            <div className="visualizationModeContainer">
+                                <p className={classes.optionText}>
+                                    Visualization Mode
+                                </p>
+                                <p className={classes.greyText}>
+                                    Pick the visual granularity to use when
+                                    displaying multi-algorithm results.
+                                </p>
+                                <div
+                                    className={
+                                        classes.visualizationModeContainer
+                                    }>
+                                    <div
+                                        className={
+                                            classes.visualizationModeOption
+                                        }>
+                                        <img
+                                            src={
+                                                displaySummarizedDetections
+                                                    ? DetailedModeIconSrc
+                                                    : DetailedModeIconCheckedSrc
+                                            }
+                                            className={`${
+                                                classes.visualizationModeIcon
+                                            } ${
+                                                !displaySummarizedDetections &&
+                                                classes.visualizationModeSelected
+                                            }`}
+                                            alt={'Detailed mode'}
+                                            onClick={() => {
+                                                setDisplaySummarizedDetections(
+                                                    false
+                                                );
+                                            }}
+                                        />
+                                        <p
+                                            className={`${
+                                                classes.visualizationModeText
+                                            } ${
+                                                !displaySummarizedDetections &&
+                                                classes.visualizationModeTextSelected
+                                            }`}>
+                                            Detailed
+                                        </p>
+                                    </div>
+                                    <div
+                                        className={
+                                            classes.visualizationModeOption
+                                        }>
+                                        <img
+                                            src={
+                                                displaySummarizedDetections
+                                                    ? SummarizedModeIconCheckedSrc
+                                                    : SummarizedModeIconSrc
+                                            }
+                                            className={`${
+                                                classes.visualizationModeIcon
+                                            } ${
+                                                displaySummarizedDetections &&
+                                                classes.visualizationModeSelected
+                                            }`}
+                                            alt={'Summarized mode'}
+                                            onClick={() => {
+                                                setDisplaySummarizedDetections(
+                                                    true
+                                                );
+                                            }}
+                                        />
+                                        <p
+                                            className={`${
+                                                classes.visualizationModeText
+                                            } ${
+                                                displaySummarizedDetections &&
+                                                classes.visualizationModeTextSelected
+                                            }`}>
+                                            Summarized
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <Divider
+                                style={{ margin: 'auto' }}
+                                variant="middle"
+                            />
                             <div className={classes.remoteWorkContainer}>
                                 <p className={classes.optionText}>
                                     Work connected to a remote service
@@ -871,7 +1044,6 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
-
                     <Button
                         className={classes.saveButton}
                         variant="outlined"
@@ -912,6 +1084,9 @@ const SettingsModal = (props) => {
 SettingsModal.propTypes = {
     title: PropTypes.string,
     connectToCommandServer: PropTypes.func,
+    resetCornerstoneTool: PropTypes.func,
+    appUpdateImage: PropTypes.func,
+    cornerstone: PropTypes.any,
 };
 
 export default SettingsModal;

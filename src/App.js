@@ -70,7 +70,6 @@ import {
     setLocalFileOpen,
     setReceiveTime,
     toggleCollapsedSideMenu,
-    toggleDisplaySummarizedDetections,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -82,6 +81,7 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
+import { toggleDisplaySummarizedDetections } from './redux/slices/settings/settingsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
@@ -90,6 +90,7 @@ import ColorPicker from './components/Color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+import SettingsModal from './components/SettingsModal/SettingsModal';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -3593,43 +3594,12 @@ class App extends Component {
                     ) : null}
                     <NoFileSign />
                     <MetaData />
-                    {/* TODO: Button to be deleted */}
-                    <button
-                        style={{
-                            zIndex: 5,
-                            position: 'absolute',
-                            width: '10%',
-                            height: '10%',
-                            right: '0',
-                            top: '45%',
-                        }}
-                        onClick={() => {
-                            if (this.props.selectedDetection) {
-                                this.props.clearAllSelection();
-                                this.props.resetSelectedDetectionBoxesUpdate();
-                                this.resetCornerstoneTool();
-                                this.appUpdateImage();
-                            }
-                            this.props.toggleDisplaySummarizedDetections();
-                            if (
-                                isElectron() &&
-                                !this.props.remoteOrLocal &&
-                                this.props.localFileOutput !== ''
-                            ) {
-                                this.props.toggleCollapsedSideMenu({
-                                    cornerstone,
-                                    desktopMode: true,
-                                });
-                            } else {
-                                this.props.toggleCollapsedSideMenu({
-                                    cornerstone,
-                                    desktopMode: false,
-                                });
-                            }
-                        }}>
-                        Toggle Ensemble Detections
-                    </button>
                 </div>
+                <SettingsModal
+                    connectToCommandServer={this.connectToCommandServer}
+                    resetCornerstoneTool={this.resetCornerstoneTool}
+                    appUpdateImage={this.appUpdateImage}
+                    cornerstone={cornerstone}></SettingsModal>
             </div>
         );
     }
@@ -3660,7 +3630,8 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
-        displaySummarizedDetections: ui.displaySummarizedDetections,
+        displaySummarizedDetections:
+            settings.settings.displaySummarizedDetections,
         // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
