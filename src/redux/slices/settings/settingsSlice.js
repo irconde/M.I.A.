@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
 import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
@@ -34,6 +34,35 @@ const defaultSettings = {
     hasFileOutput: false,
 };
 
+export const saveElectronCookie = createAsyncThunk(
+    'settings/saveElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        await ipcRenderer
+            .invoke(Channels.saveSettingsCookie, payload)
+            .then((res) => {
+                return payload;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        return payload;
+    }
+);
+
+export const loadElectronCookie = createAsyncThunk(
+    'settings/loadElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        return await ipcRenderer
+            .invoke(Channels.getSettingsCookie)
+            .then((cookie) => {
+                console.log(cookie);
+                return cookie;
+            })
+            .catch((err) => rejectWithValue(err));
+    }
+);
+
 if (!isElectron()) {
     if (cookieData !== undefined) {
         settings = cookieData;
@@ -48,35 +77,11 @@ if (!isElectron()) {
     }
 } else {
     settings = defaultSettings;
-    ipcRenderer.invoke(Channels.getSettingsCookie).then((cookie) => {
-        settings = cookie;
-    });
-    ipcRenderer.on(Channels.loadSettingsCookie, (event, cookie) => {
-        settings = cookie;
-    });
 }
 
 const initialState = {
     settings,
 };
-
-export const saveElectronCookie = createAsyncThunk(
-    'settings/saveElectronCookie',
-    async (payload, { rejectWithValue }) => {
-        // TODO: Implement channel save to electron
-        ipcRenderer
-            .invoke(Channels.saveSettingsCookie, payload)
-            .then((res) => {
-                console.log(res);
-                return payload;
-            })
-            .catch((error) => {
-                console.log(error);
-                rejectWithValue(error);
-            });
-        return payload;
-    }
-);
 
 const settingsSlice = createSlice({
     name: 'settings',
@@ -120,14 +125,34 @@ const settingsSlice = createSlice({
     },
     extraReducers: {
         [saveElectronCookie.fulfilled]: (state, { meta, payload }) => {
-            console.log('fullfilled');
+            console.log('save fullfilled');
             console.log(payload);
+            state.settings = payload;
         },
         [saveElectronCookie.pending]: (state, { meta, payload }) => {
-            console.log('pending');
+            console.log('save pending');
         },
         [saveElectronCookie.rejected]: (state, { meta, payload }) => {
-            console.log('rejected');
+            console.log('save rejected');
+        },
+        [loadElectronCookie.fulfilled]: (state, { meta, payload }) => {
+            console.log('load fullfilled');
+            for (let key in payload) {
+                if (payload[key] !== '') {
+                    state.settings[key] = payload[key];
+                }
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = false;
+            console.log(payload);
+            console.log(current(state.settings));
+        },
+        [loadElectronCookie.pending]: (state, { meta, payload }) => {
+            console.log('load pending');
+        },
+        [loadElectronCookie.rejected]: (state, { meta, payload }) => {
+            console.log('load rejected');
         },
     },
 });

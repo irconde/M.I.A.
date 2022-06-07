@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -30,6 +30,7 @@ import {
 import {
     getLocalFileOutput,
     getSettings,
+    loadElectronCookie,
     saveElectronCookie,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
@@ -61,8 +62,15 @@ if (isElectron()) {
  */
 
 const SettingsModal = (props) => {
+    const dispatch = useDispatch();
     const settings = useSelector(getSettings);
-    const initLocalFileOutput = useSelector(getLocalFileOutput);
+    const previousSettings = Utils.usePrevious(settings);
+    useEffect(() => {
+        if (isElectron() && previousSettings !== settings) {
+            dispatch(loadElectronCookie());
+        }
+    });
+
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -72,7 +80,7 @@ const SettingsModal = (props) => {
         settings.annotationsFormat
     );
     const [localFileOutput, setLocalFileOutput] = useState(
-        initLocalFileOutput !== '' ? initLocalFileOutput : ''
+        useSelector(getLocalFileOutput)
     );
     const [fileSuffix, setFileSuffix] = useState(settings.fileSuffix);
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
@@ -83,7 +91,7 @@ const SettingsModal = (props) => {
     const [testConnectionResult, setTestConnectionResult] = useState(false);
     const [openAnnotationsFormat, setOpenAnnotationsFormat] = useState(false);
     const settingsVisibility = useSelector(getSettingsVisibility);
-    const dispatch = useDispatch();
+
     const svgContainerStyle = {
         margin: '0.3rem',
         marginRight: '1rem',

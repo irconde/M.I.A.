@@ -56,6 +56,7 @@ function createWindow() {
                 .then((cookies) => {
                     if (cookies.length > 0) {
                         settingsCookie = JSON.parse(cookies[0].value);
+                        console.log(settingsCookie);
                         sendSettingsCookie();
                     }
                 })
@@ -66,6 +67,7 @@ function createWindow() {
         .catch((err) => console.log(err));
     mainWindow.maximize();
     mainWindow.on('closed', () => (mainWindow = null));
+    mainWindow.on('show', () => sendSettingsCookie());
     if (!isDev) mainWindow.removeMenu();
 }
 
@@ -300,6 +302,7 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve) => {
+        console.log(settingsCookie);
         resolve(settingsCookie);
     });
 });
