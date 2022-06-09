@@ -59,7 +59,6 @@ export const loadElectronCookie = createAsyncThunk(
         return await ipcRenderer
             .invoke(Channels.getSettingsCookie)
             .then((cookie) => {
-                console.log(cookie);
                 return cookie;
             })
             .catch((err) => rejectWithValue(err));
@@ -131,12 +130,27 @@ const settingsSlice = createSlice({
             }
         },
     },
-    extraReducers: {
-        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+    /*extraReducers: (builder) => {
+        builder.addCase(loadElectronCookie.pending, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+        });
+        builder.addCase(loadElectronCookie.fulfilled, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+            const { payload } = action;
             for (let key in payload) {
                 if (payload[key] !== '') {
                     state.settings[key] = payload[key];
                 }
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.loadingElectronCookie = false;
+        });
+    },*/
+    extraReducers: {
+        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
             }
             state.settings.hasFileOutput =
                 payload.localFileOutput !== '' ? true : false;
@@ -147,9 +161,7 @@ const settingsSlice = createSlice({
         },
         [loadElectronCookie.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
-                if (payload[key] !== '') {
-                    state.settings[key] = payload[key];
-                }
+                state.settings[key] = payload[key];
             }
             state.settings.hasFileOutput =
                 payload.localFileOutput !== '' ? true : false;
@@ -218,6 +230,9 @@ export const getRemoteConnectionInfo = (state) => {
     };
 };
 
+export const getLoadingElectronCookie = (state) =>
+    state.settings.settings.loadingElectronCookie;
+
 /**
  * Determines if the settings should be displayed on first load or not
  * @param {Object} state
@@ -232,5 +247,7 @@ export const getFirstDisplaySettings = (state) =>
  * @returns {constants.DEVICE_TYPE}
  */
 export const getDeviceType = (state) => state.settings.settings.deviceType;
+
+export const getFileSuffix = (state) => state.settings.settings.fileSuffix;
 
 export default settingsSlice.reducer;

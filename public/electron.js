@@ -26,6 +26,8 @@ let thumbnailPath = '';
 let isGeneratingThumbnails = false;
 let currentFileIndex = 0;
 let settingsCookie = null;
+let watcher = null;
+let currentPath = '';
 const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
@@ -65,7 +67,10 @@ function createWindow() {
         })
         .catch((err) => console.log(err));
     mainWindow.maximize();
-    mainWindow.on('closed', () => (mainWindow = null));
+    mainWindow.on('closed', async () => {
+        await watcher.unwatch(currentPath);
+        mainWindow = null;
+    });
     mainWindow.on('show', () => sendSettingsCookie());
     if (!isDev) mainWindow.removeMenu();
 }
@@ -117,6 +122,8 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     return new Promise((resolve, reject) => {
+        console.log('get-next-file');
+        console.log(args);
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
                 sendThumbnailStatus();
@@ -125,6 +132,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
         } else if (files.length !== 0 && currentFileIndex >= files.length) {
             reject('End of queue');
         } else {
+            console.log(args);
             if (fs.existsSync(args)) {
                 loadFilesFromPath(args)
                     .then(() => {
@@ -282,6 +290,8 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
     return new Promise((resolve, reject) => {
         try {
+            console.log('save cookie');
+            console.log(args);
             session.defaultSession.cookies
                 .set({
                     url: 'http://localhost:3000/',
@@ -301,13 +311,28 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
+        console.log(settingsCookie);
         if (settingsCookie === null) {
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
+                    console.log(cookies);
                     if (cookies.length > 0) {
                         settingsCookie = JSON.parse(cookies[0].value);
                         resolve(settingsCookie);
+                    } else {
+                        settingsCookie = Constants.defaultSettings;
+                        session.defaultSession.cookies
+                            .set({
+                                url: 'http://localhost:3000/',
+                                name: 'settings',
+                                value: JSON.stringify(settingsCookie),
+                                expirationDate: 2093792393,
+                            })
+                            .then(() => {
+                                resolve(settingsCookie);
+                            })
+                            .catch((error) => reject(error));
                     }
                 })
                 .catch((error) => {
@@ -417,6 +442,7 @@ const validateImageExtension = (fileName) => {
 const loadFilesFromPath = async (path) => {
     return new Promise((resolve, reject) => {
         if (fs.existsSync(path)) {
+            currentPath = path;
             readdir(path)
                 .then((filesResult) => {
                     files = [];
@@ -852,11 +878,13 @@ const loadThumbnailDatabase = () => {
 async function handleExternalFileChanges(dirPath) {
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional re-renders
-    const watcher = chokidar.watch(dirPath, {
+    watcher = chokidar.watch(dirPath, {
         ignored: Constants.FileWatcher.all_json_files,
         depth: 0,
         ignoreInitial: true,
     });
+    console.log('watching directory');
+    console.log(watcher.getWatched());
 
     // wire the directory modification event handlers
     watcher

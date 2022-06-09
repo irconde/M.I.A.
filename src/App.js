@@ -263,6 +263,11 @@ class App extends Component {
             } else return false;
         }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
+        if (
+            this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
+        )
+            return true;
+        if (this.props.fileSuffix !== nextProps.fileSuffix) return true;
         return false;
     }
 

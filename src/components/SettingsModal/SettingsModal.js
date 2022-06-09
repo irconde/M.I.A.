@@ -34,6 +34,7 @@ import {
     getSelectedDetection,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
+    getFileSuffix,
     getLocalFileOutput,
     getSettings,
     saveElectronCookie,
@@ -84,7 +85,7 @@ const SettingsModal = (props) => {
     const [localFileOutput, setLocalFileOutput] = useState(
         useSelector(getLocalFileOutput)
     );
-    const [fileSuffix, setFileSuffix] = useState(settings.fileSuffix);
+    const [fileSuffix, setFileSuffix] = useState(useSelector(getFileSuffix));
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
