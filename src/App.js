@@ -3041,7 +3041,7 @@ class App extends Component {
     ) {
         //REVIEW: renderDetectionContextMenu log 1
         console.log("renderDetectionContextMenu ran");
-        
+
         let selectedDetection =
             this.props.selectedDetection !== null
                 ? this.props.selectedDetection
@@ -3055,6 +3055,7 @@ class App extends Component {
 
         //ANCHOR: log 2
         console.log("Above if statement null check");
+        console.log("SelectedDetection Null: ", selectedDetection === null);
 
         if (selectedDetection !== null) {
 
