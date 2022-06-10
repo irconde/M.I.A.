@@ -2987,6 +2987,8 @@ class App extends Component {
      * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
+        //REVIEW: getContextMenuPos log 1
+        console.log("getContextMenyPos ran");
         if (viewportInfo.viewport !== null) {
             if (coords !== undefined && coords.length > 0) {
                 let detectionContextGap = 0;
@@ -3037,18 +3039,28 @@ class App extends Component {
         draggedData = undefined,
         sideMenuDetection = null
     ) {
+        //REVIEW: renderDetectionContextMenu log 1
+        console.log("renderDetectionContextMenu ran");
+        
         let selectedDetection =
             this.props.selectedDetection !== null
                 ? this.props.selectedDetection
                 : sideMenuDetection !== null
                 ? sideMenuDetection
                 : null;
-
+        
         selectedDetection = sideMenuDetection
             ? sideMenuDetection
             : selectedDetection;
 
+        //ANCHOR: log 2
+        console.log("Above if statement null check");
+
         if (selectedDetection !== null) {
+
+            //ANCHOR: log 3
+            console.log("Inside if statement null check");
+
             const viewportInfo =
                 sideMenuDetection === null
                     ? Utils.eventToViewportInfo(event)
