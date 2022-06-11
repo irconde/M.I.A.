@@ -24,7 +24,6 @@ let files = [];
 let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
-let isAddEvent = false;
 let currentAddFile = '';
 let isDeleteEvent = false;
 let currentFileIndex = 0;
@@ -180,9 +179,6 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        // eslint-disable-next-line no-empty
-        while (isAddEvent) {}
-
         console.log(`File Suffix: ${args.fileSuffix}`);
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if (args.fileSuffix === '') {
@@ -878,24 +874,23 @@ async function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
-            isAddEvent = true;
             console.log('add event');
             const addedFilename = getFileNameFromPath(path);
             const foundIndex = files.findIndex(
                 (file) => getFileNameFromPath(file) === addedFilename
             );
             if (foundIndex !== -1) {
-                isAddEvent = false;
+                currentAddFile = '';
                 return;
             }
             if (addedFilename === currentAddFile) {
-                isAddEvent = false;
                 return;
             }
             currentAddFile = addedFilename;
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
-                    .then(() => {
+                    .then(async () => {
+                        console.log('adding file');
                         files.push(path);
                         saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
@@ -904,26 +899,26 @@ async function handleExternalFileChanges(dirPath) {
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
-                                    isAddEvent = false;
+                                    currentAddFile = '';
                                 })
                                 .catch((error) => {
                                     notifyCurrentFileUpdate(null);
                                     console.log(
                                         `Error getting the current file: ${error}`
                                     );
-                                    isAddEvent = false;
+                                    currentAddFile = '';
                                 });
                         } else {
                             // if the files array already contained a file
                             sendNewFiles();
-                            isAddEvent = false;
+                            currentAddFile = '';
                         }
                     })
                     .catch((error) => {
                         console.log(`Error in filewatcher: ${error}`);
-                        isAddEvent = false;
+                        currentAddFile = '';
                     });
-            } else isAddEvent = false;
+            } else currentAddFile = '';
         })
         .on(Constants.FileWatcher.unlink, (path) => {
             const removedFilename = getFileNameFromPath(path);
