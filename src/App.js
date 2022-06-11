@@ -236,14 +236,21 @@ class App extends Component {
      */
     shouldComponentUpdate(nextProps, nextState) {
         // TODO: Add remote connections back
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             isElectron() &&
             nextProps.localFileOutput !== '' &&
             !nextProps.loadingElectronCookie &&
+            this.props.currentProcessingFile === null &&
             nextProps.currentProcessingFile === null &&
             !fetchingFromLocalDirectory &&
             !nextProps.remoteOrLocal
         ) {
+            console.log('should update get from local');
+            console.log(this.state);
+            console.log(nextState);
+            console.log(this.props);
+            console.log(nextProps);
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
             return false;
@@ -254,7 +261,6 @@ class App extends Component {
         if (this.props.localFileOutput !== nextProps.localFileOutput)
             return true;
         if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) return true;
-        if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
         ) {
@@ -833,8 +839,10 @@ class App extends Component {
         if (isElectron()) {
             ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
                 console.log('update files');
-                this.setState({ thumbnails: data.thumbnails });
-                this.props.setNumFilesInQueue(data.numberOfFiles);
+                setTimeout(() => {
+                    this.setState({ thumbnails: data.thumbnails });
+                    this.props.setNumFilesInQueue(data.numberOfFiles);
+                }, 250);
             });
 
             ipcRenderer.on(
