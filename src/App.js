@@ -241,7 +241,8 @@ class App extends Component {
             nextProps.localFileOutput !== '' &&
             !nextProps.loadingElectronCookie &&
             nextProps.currentProcessingFile === null &&
-            !fetchingFromLocalDirectory
+            !fetchingFromLocalDirectory &&
+            !nextProps.remoteOrLocal
         ) {
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
@@ -909,9 +910,8 @@ class App extends Component {
      * @returns {Promise}
      */
     async sendImageToLocalDirectory(file) {
-        const result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
-                // ANCHOR: console log here
                 console.log(`File Suffix: ${this.props.fileSuffix}`);
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
@@ -929,7 +929,6 @@ class App extends Component {
                     });
             }
         });
-        return result;
     }
 
     /**
@@ -3660,7 +3659,6 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
-        loadingFileFromLocalDirectory: ui.loadingFileFromLocalDirectory,
         // Settings
         displaySummarizedDetections:
             settings.settings.displaySummarizedDetections,

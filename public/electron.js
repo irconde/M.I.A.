@@ -53,13 +53,11 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
-            console.log('load url then');
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
                     if (cookies.length > 0) {
                         settingsCookie = JSON.parse(cookies[0].value);
-                        sendSettingsCookie();
                     }
                 })
                 .catch((error) => {
@@ -72,16 +70,6 @@ function createWindow() {
         await watcher.unwatch(currentPath);
         await watcher.close();
         mainWindow = null;
-    });
-    mainWindow.on('show', () => {
-        console.log('show event');
-        sendSettingsCookie();
-    });
-    mainWindow.on('app-command', (e, cmd) => {
-        console.log('app-command');
-        console.log(e);
-        console.log(cmd);
-        console.log(currentPath);
     });
     if (!isDev) mainWindow.removeMenu();
 }
@@ -132,8 +120,6 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  * @returns {{file: string; fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
-    console.log('get-next-file');
-    console.log(args);
     return new Promise((resolve, reject) => {
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
@@ -143,7 +129,6 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
         } else if (files.length !== 0 && currentFileIndex >= files.length) {
             reject('End of queue');
         } else {
-            console.log(args);
             if (fs.existsSync(args)) {
                 loadFilesFromPath(args)
                     .then(() => {
@@ -193,12 +178,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
 // TODO: Luka DNAATR-270
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        /* NOTE: now creates 3 copies at a time if there is no suffix in settings modal?
-            Else statement works as intended but because the file suffix is passed even if its empty,
-            it never jumps into if statement so it is now creating 3 objects in the database file at 
-            a time when it has an empty suffix in the settings modal. 
-        */
-
+        console.log(`File Suffix: ${args.fileSuffix}`);
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         // TODO: fileSuffix is coming with data even though settings for fileSuffix is empty
         if (args.fileSuffix === '') {
@@ -207,6 +187,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                 if (error) {
                     reject(error);
                 } else {
+                    currentFileIndex++;
                     resolve('File saved');
                 }
             });
@@ -301,8 +282,6 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
     return new Promise((resolve, reject) => {
         try {
-            console.log('save cookie');
-            console.log(args);
             session.defaultSession.cookies
                 .set({
                     url: 'http://localhost:3000/',
@@ -322,12 +301,10 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
-        console.log(settingsCookie);
         if (settingsCookie === null) {
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
-                    console.log(cookies);
                     if (cookies.length > 0) {
                         settingsCookie = JSON.parse(cookies[0].value);
                         resolve(settingsCookie);
@@ -362,14 +339,6 @@ const sendThumbnailStatus = () => {
     mainWindow.webContents.send(
         Constants.Channels.thumbnailStatus,
         isGeneratingThumbnails
-    );
-};
-
-const sendSettingsCookie = () => {
-    console.log('sending settings cookie');
-    mainWindow.webContents.send(
-        Constants.Channels.loadSettingsCookie,
-        settingsCookie
     );
 };
 
@@ -895,8 +864,6 @@ async function handleExternalFileChanges(dirPath) {
         depth: 0,
         ignoreInitial: true,
     });
-    console.log('watching directory');
-    console.log(watcher.getWatched());
 
     watcher.on('ready', () => {
         console.log('watcher ready');
