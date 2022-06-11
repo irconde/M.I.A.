@@ -798,6 +798,7 @@ class App extends Component {
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
     getFileFromLocalDirectory() {
+        console.log('get file from local dir');
         if (isElectron()) {
             ipcRenderer
                 .invoke(
@@ -816,7 +817,6 @@ class App extends Component {
                 })
                 .catch((error) => {
                     fetchingFromLocalDirectory = false;
-
                     this.props.setLocalFileOpen(false);
                     this.props.setReceiveTime(null);
                     this.onNoImageLeft();
@@ -832,6 +832,7 @@ class App extends Component {
         // the dir content in the file system
         if (isElectron()) {
             ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
+                console.log('update files');
                 this.setState({ thumbnails: data.thumbnails });
                 this.props.setNumFilesInQueue(data.numberOfFiles);
             });
@@ -839,6 +840,7 @@ class App extends Component {
             ipcRenderer.on(
                 constants.Channels.updateCurrentFile,
                 (event, data) => {
+                    console.log('update current file');
                     // no files left
                     if (!data) {
                         this.props.setLocalFileOpen(false);

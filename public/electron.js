@@ -18,13 +18,15 @@ const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
 const chokidar = require('chokidar');
-// TODO Add event firing twice
 // TODO Starting App -> Loading Cookie -> Saving new Cookie Settings | Does not load the correct settings
 let mainWindow;
 let files = [];
 let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
+let isAddEvent = false;
+let currentAddFile = '';
+let isDeleteEvent = false;
 let currentFileIndex = 0;
 let settingsCookie = null;
 let watcher = null;
@@ -122,6 +124,7 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     return new Promise((resolve, reject) => {
+        console.log('get-next-file');
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
                 sendThumbnailStatus();
@@ -177,11 +180,15 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
+        // eslint-disable-next-line no-empty
+        while (isAddEvent) {}
+
         console.log(`File Suffix: ${args.fileSuffix}`);
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
+                console.log('finished writing file');
                 if (error) {
                     reject(error);
                 } else {
@@ -206,6 +213,7 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     );
 
                     fs.writeFile(filePath, args.file, (error) => {
+                        console.log('finished writing file');
                         if (error) {
                             reject(error);
                         } else {
@@ -870,14 +878,21 @@ async function handleExternalFileChanges(dirPath) {
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
+            isAddEvent = true;
             console.log('add event');
             const addedFilename = getFileNameFromPath(path);
             const foundIndex = files.findIndex(
                 (file) => getFileNameFromPath(file) === addedFilename
             );
             if (foundIndex !== -1) {
+                isAddEvent = false;
                 return;
             }
+            if (addedFilename === currentAddFile) {
+                isAddEvent = false;
+                return;
+            }
+            currentAddFile = addedFilename;
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
                     .then(() => {
@@ -889,22 +904,26 @@ async function handleExternalFileChanges(dirPath) {
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
+                                    isAddEvent = false;
                                 })
                                 .catch((error) => {
                                     notifyCurrentFileUpdate(null);
                                     console.log(
                                         `Error getting the current file: ${error}`
                                     );
+                                    isAddEvent = false;
                                 });
                         } else {
                             // if the files array already contained a file
                             sendNewFiles();
+                            isAddEvent = false;
                         }
                     })
                     .catch((error) => {
                         console.log(`Error in filewatcher: ${error}`);
+                        isAddEvent = false;
                     });
-            }
+            } else isAddEvent = false;
         })
         .on(Constants.FileWatcher.unlink, (path) => {
             const removedFilename = getFileNameFromPath(path);
@@ -983,6 +1002,7 @@ async function handleExternalFileChanges(dirPath) {
  * @param {{file: string, fileName: string, numberOfFiles: Number}} file
  */
 const notifyCurrentFileUpdate = (file) => {
+    console.log('current file update');
     mainWindow.webContents.send(Constants.Channels.updateCurrentFile, file);
 };
 
