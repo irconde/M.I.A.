@@ -18,7 +18,8 @@ const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
 const chokidar = require('chokidar');
-
+// TODO Add event firing twice
+// TODO Starting App -> Loading Cookie -> Saving new Cookie Settings | Does not load the correct settings
 let mainWindow;
 let files = [];
 let thumbnails = [];
@@ -174,13 +175,10 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  * @param {{file: Buffer; fileDirectory: string; fileFormat: string; fileName: string; fileSuffix: string;}} args
  * @returns {string} Result
  */
-
-// TODO: Luka DNAATR-270
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
         console.log(`File Suffix: ${args.fileSuffix}`);
         // NOTE: Check if file suffix is empty, if so then save file to original path.
-        // TODO: fileSuffix is coming with data even though settings for fileSuffix is empty
         if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
@@ -250,7 +248,7 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
 
 /**
  * Loads the specified thumbnail if the file name provided exists. If so it will
- * it will load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
+ * load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
  * @param {string} args File path sent from react
  * @returns {string}
  */
