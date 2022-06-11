@@ -114,10 +114,7 @@ const settingsSlice = createSlice({
          */
         saveSettings: (state, action) => {
             for (let key in action.payload) {
-                if (action.payload[key] !== '') {
-                    state.settings[key] = action.payload[key];
-                }
-                // detection[key] = update[key];
+                state.settings[key] = action.payload[key];
             }
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;

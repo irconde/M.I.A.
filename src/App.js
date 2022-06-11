@@ -90,7 +90,10 @@ import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
-import { loadElectronCookie } from './redux/slices/settings/settingsSlice';
+import {
+    loadElectronCookie,
+    saveSettings,
+} from './redux/slices/settings/settingsSlice';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -120,7 +123,7 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 });
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
-
+let fetchingFromLocalDirectory = false;
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
 
@@ -232,6 +235,30 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        // TODO: Add remote connections back
+        if (
+            isElectron() &&
+            nextProps.localFileOutput !== '' &&
+            !nextProps.loadingElectronCookie &&
+            nextProps.currentProcessingFile === null &&
+            !fetchingFromLocalDirectory
+        ) {
+            fetchingFromLocalDirectory = true;
+            this.getFileFromLocalDirectory();
+            return false;
+        }
+        if (this.props.firstDisplaySettings !== nextProps.firstDisplaySettings)
+            return true;
+        if (this.props.fileSuffix !== nextProps.fileSuffix) return true;
+        if (this.props.localFileOutput !== nextProps.localFileOutput)
+            return true;
+        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) return true;
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
+        if (
+            this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
+        ) {
+            return true;
+        }
         if (
             this.props.selectedDetection &&
             this.props.collapsedSideMenu !== nextProps.collapsedSideMenu &&
@@ -250,24 +277,6 @@ class App extends Component {
             }, 0);
             return true;
         }
-        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
-            if (nextProps.remoteOrLocal === false) {
-                if (isElectron() && nextProps.localFileOutput !== '') {
-                    this.getFileFromLocalDirectory();
-                }
-                if (this.state.commandServer !== null) {
-                    this.state.commandServer.disconnect();
-                    this.props.setConnected(false);
-                }
-                return true;
-            } else return false;
-        }
-        if (this.state.thumbnails !== nextState.thumbnails) return true;
-        if (
-            this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
-        )
-            return true;
-        if (this.props.fileSuffix !== nextProps.fileSuffix) return true;
         return false;
     }
 
@@ -279,12 +288,19 @@ class App extends Component {
             this.props.loadElectronCookie();
         }
         // Connect socket servers
-        if (this.props.firstDisplaySettings === false) {
-            if (this.props.remoteOrLocal === true) {
-                this.connectToCommandServer();
-            } else if (isElectron() && this.props.localFileOutput !== '') {
-                this.getFileFromLocalDirectory();
+        if (
+            this.props.firstDisplaySettings === false ||
+            this.props.loadingElectronCookie
+        ) {
+            if (isElectron()) {
                 this.localDirectoryChangeHandler();
+            }
+            if (!this.props.loadingElectronCookie) {
+                if (this.props.remoteOrLocal === true) {
+                    this.connectToCommandServer();
+                } else if (isElectron() && this.props.localFileOutput !== '') {
+                    this.getFileFromLocalDirectory();
+                }
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -776,6 +792,7 @@ class App extends Component {
             });
     }
 
+    // TODO: Refactor this
     /**
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
@@ -787,6 +804,7 @@ class App extends Component {
                     this.props.localFileOutput
                 )
                 .then((result) => {
+                    fetchingFromLocalDirectory = false;
                     this.props.setLocalFileOpen(true);
                     this.loadNextImage(
                         result.file,
@@ -796,6 +814,8 @@ class App extends Component {
                     );
                 })
                 .catch((error) => {
+                    fetchingFromLocalDirectory = false;
+
                     this.props.setLocalFileOpen(false);
                     this.props.setReceiveTime(null);
                     this.onNoImageLeft();
@@ -3640,6 +3660,7 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
+        loadingFileFromLocalDirectory: ui.loadingFileFromLocalDirectory,
         // Settings
         displaySummarizedDetections:
             settings.settings.displaySummarizedDetections,
@@ -3707,6 +3728,7 @@ const mapDispatchToProps = {
     setCurrentFileFormat,
     toggleCollapsedSideMenu,
     loadElectronCookie,
+    saveSettings,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

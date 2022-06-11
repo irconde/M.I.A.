@@ -53,6 +53,7 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
+            console.log('load url then');
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
@@ -69,9 +70,19 @@ function createWindow() {
     mainWindow.maximize();
     mainWindow.on('closed', async () => {
         await watcher.unwatch(currentPath);
+        await watcher.close();
         mainWindow = null;
     });
-    mainWindow.on('show', () => sendSettingsCookie());
+    mainWindow.on('show', () => {
+        console.log('show event');
+        sendSettingsCookie();
+    });
+    mainWindow.on('app-command', (e, cmd) => {
+        console.log('app-command');
+        console.log(e);
+        console.log(cmd);
+        console.log(currentPath);
+    });
     if (!isDev) mainWindow.removeMenu();
 }
 
@@ -121,9 +132,9 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  * @returns {{file: string; fileName: string; numberOfFiles: Number; thumbnails: Array<string>;}}
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
+    console.log('get-next-file');
+    console.log(args);
     return new Promise((resolve, reject) => {
-        console.log('get-next-file');
-        console.log(args);
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
                 sendThumbnailStatus();
@@ -147,7 +158,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                         reject(error);
                     });
             } else {
-                reject('Path does not exist');
+                reject(`Path does not exists ${args}`);
             }
         }
     });
@@ -167,7 +178,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
             sendThumbnailStatus();
             resolve(loadFile(args));
         } else {
-            reject('File path does not exist');
+            reject(`File path does not exists: ${args}`);
         }
     });
 });
@@ -355,6 +366,7 @@ const sendThumbnailStatus = () => {
 };
 
 const sendSettingsCookie = () => {
+    console.log('sending settings cookie');
     mainWindow.webContents.send(
         Constants.Channels.loadSettingsCookie,
         settingsCookie
@@ -886,6 +898,10 @@ async function handleExternalFileChanges(dirPath) {
     console.log('watching directory');
     console.log(watcher.getWatched());
 
+    watcher.on('ready', () => {
+        console.log('watcher ready');
+        console.log(watcher.getWatched());
+    });
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
