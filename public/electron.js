@@ -123,7 +123,6 @@ ipcMain.handle(Constants.Channels.loadFiles, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        console.log('get-next-file');
         if (files.length > 0 && currentFileIndex < files.length) {
             if (fs.existsSync(files[currentFileIndex])) {
                 sendThumbnailStatus();
@@ -179,12 +178,10 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        console.log(`File Suffix: ${args.fileSuffix}`);
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
             fs.writeFile(filePath, args.file, (error) => {
-                console.log('finished writing file');
                 if (error) {
                     reject(error);
                 } else {
@@ -209,7 +206,6 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                     );
 
                     fs.writeFile(filePath, args.file, (error) => {
-                        console.log('finished writing file');
                         if (error) {
                             reject(error);
                         } else {
@@ -867,14 +863,9 @@ async function handleExternalFileChanges(dirPath) {
         ignoreInitial: true,
     });
 
-    watcher.on('ready', () => {
-        console.log('watcher ready');
-        console.log(watcher.getWatched());
-    });
     // wire the directory modification event handlers
     watcher
         .on(Constants.FileWatcher.add, (path) => {
-            console.log('add event');
             const addedFilename = getFileNameFromPath(path);
             const foundIndex = files.findIndex(
                 (file) => getFileNameFromPath(file) === addedFilename
@@ -890,7 +881,6 @@ async function handleExternalFileChanges(dirPath) {
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
                     .then(async () => {
-                        console.log('adding file');
                         files.push(path);
                         saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
@@ -997,7 +987,6 @@ async function handleExternalFileChanges(dirPath) {
  * @param {{file: string, fileName: string, numberOfFiles: Number}} file
  */
 const notifyCurrentFileUpdate = (file) => {
-    console.log('current file update');
     mainWindow.webContents.send(Constants.Channels.updateCurrentFile, file);
 };
 

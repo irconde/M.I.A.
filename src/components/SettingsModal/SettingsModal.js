@@ -57,6 +57,7 @@ import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
+import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -255,6 +256,7 @@ const SettingsModal = (props) => {
                             })
                         );
                         dispatch(toggleSettingsVisibility(false));
+                        dispatch(setCurrentProcessingFile(null));
                         updateVisualizationMode();
                     })
                     .catch((error) => {

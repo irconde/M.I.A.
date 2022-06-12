@@ -235,7 +235,6 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
-        // TODO: Add remote connections back
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             isElectron() &&
@@ -246,11 +245,6 @@ class App extends Component {
             !fetchingFromLocalDirectory &&
             !nextProps.remoteOrLocal
         ) {
-            console.log('should update get from local');
-            console.log(this.state);
-            console.log(nextState);
-            console.log(this.props);
-            console.log(nextProps);
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
             return false;
@@ -804,7 +798,6 @@ class App extends Component {
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
     getFileFromLocalDirectory() {
-        console.log('get file from local dir');
         if (isElectron()) {
             ipcRenderer
                 .invoke(
@@ -823,9 +816,16 @@ class App extends Component {
                 })
                 .catch((error) => {
                     fetchingFromLocalDirectory = false;
-                    this.props.setLocalFileOpen(false);
-                    this.props.setReceiveTime(null);
-                    this.onNoImageLeft();
+                    if (
+                        error.toString() ===
+                        "Error: Error invoking remote method 'get-next-file': End of queue"
+                    ) {
+                        console.log('end of queue');
+                    } else {
+                        this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
+                        this.onNoImageLeft();
+                    }
                 });
         }
     }
@@ -838,17 +838,15 @@ class App extends Component {
         // the dir content in the file system
         if (isElectron()) {
             ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
-                console.log('update files');
                 setTimeout(() => {
                     this.setState({ thumbnails: data.thumbnails });
                     this.props.setNumFilesInQueue(data.numberOfFiles);
-                }, 250);
+                }, 450);
             });
 
             ipcRenderer.on(
                 constants.Channels.updateCurrentFile,
                 (event, data) => {
-                    console.log('update current file');
                     // no files left
                     if (!data) {
                         this.props.setLocalFileOpen(false);
@@ -922,7 +920,6 @@ class App extends Component {
     async sendImageToLocalDirectory(file) {
         return new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
-                console.log(`File Suffix: ${this.props.fileSuffix}`);
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
                         file,
@@ -1239,7 +1236,6 @@ class App extends Component {
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
-                                console.log('App.js line 1205');
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
                                         this.setState({
@@ -1251,7 +1247,6 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
-                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);
@@ -1259,7 +1254,6 @@ class App extends Component {
                             })
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
-                        console.log('App.js line 1225');
                         cocoZip
                             .generateAsync({ type: 'nodebuffer' })
                             .then((file) => {
@@ -1501,7 +1495,6 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
-                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);
