@@ -124,6 +124,7 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 let fetchingFromLocalDirectory = false;
+let connectingToCommandServer = false;
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
 
@@ -209,19 +210,23 @@ class App extends Component {
         this.props.setProcessingHost(
             `http://${this.props.remoteIp}:${this.props.remotePort}`
         );
-        this.setState(
-            {
-                commandServer: socketIOClient(
-                    `http://${this.props.remoteIp}:${this.props.remotePort}`,
-                    { autoConnect: this.props.autoConnect }
-                ),
-            },
-            () => {
-                this.state.commandServer.connect();
-                this.monitorConnectionEvent();
-                this.getFileFromCommandServer(update);
-            }
-        );
+        if (!connectingToCommandServer) {
+            connectingToCommandServer = true;
+            this.setState(
+                {
+                    commandServer: socketIOClient(
+                        `http://${this.props.remoteIp}:${this.props.remotePort}`,
+                        { autoConnect: this.props.autoConnect }
+                    ),
+                },
+                () => {
+                    connectingToCommandServer = false;
+                    this.state.commandServer.connect();
+                    this.monitorConnectionEvent();
+                    this.getFileFromCommandServer(update);
+                }
+            );
+        }
     }
 
     /**
@@ -236,6 +241,21 @@ class App extends Component {
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (this.state.thumbnails !== nextState.thumbnails) return true;
+        if (
+            this.state.commandServer === null &&
+            nextProps.remoteOrLocal === true &&
+            !nextProps.loadingElectronCookie
+        ) {
+            this.connectToCommandServer();
+            if (
+                this.props.loadingElectronCookie !==
+                nextProps.loadingElectronCookie
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
         if (
             isElectron() &&
             nextProps.localFileOutput !== '' &&

@@ -42,7 +42,7 @@ export const saveElectronCookie = createAsyncThunk(
     async (payload, { rejectWithValue }) => {
         await ipcRenderer
             .invoke(Channels.saveSettingsCookie, payload)
-            .then((res) => {
+            .then(() => {
                 return payload;
             })
             .catch((error) => {

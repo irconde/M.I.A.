@@ -29,7 +29,6 @@ const SettingsIcon = (props) => {
     const loadingElectronCookie = useSelector(getLoadingElectronCookie);
     useEffect(() => {
         if (firstDisplaySettings === true && !loadingElectronCookie) {
-            console.log('first display settings');
             handleOpen();
         }
     }, [firstDisplaySettings]);
