@@ -288,7 +288,6 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
                     expirationDate: 2093792393,
                 })
                 .then((res) => {
-                    console.log(res);
                     resolve('Cookie saved');
                 })
                 .catch((error) => reject(error));
