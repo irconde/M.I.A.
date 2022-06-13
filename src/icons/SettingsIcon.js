@@ -4,7 +4,10 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { toggleSettingsVisibility } from '../redux/slices/ui/uiSlice';
 import SettingsCog from './SettingsCog';
-import { getFirstDisplaySettings } from '../redux/slices/settings/settingsSlice';
+import {
+    getFirstDisplaySettings,
+    getLoadingElectronCookie,
+} from '../redux/slices/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 
 const IconStyle = styled.div`
@@ -24,8 +27,11 @@ const IconStyle = styled.div`
 const SettingsIcon = (props) => {
     const dispatch = useDispatch();
     const firstDisplaySettings = useSelector(getFirstDisplaySettings);
+    const loadingElectronCookie = useSelector(getLoadingElectronCookie);
     useEffect(() => {
-        if (firstDisplaySettings === true) handleOpen();
+        if (firstDisplaySettings === true && !loadingElectronCookie) {
+            handleOpen();
+        }
     }, [firstDisplaySettings]);
     const handleOpen = () => {
         dispatch(toggleSettingsVisibility(true));

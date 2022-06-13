@@ -81,7 +81,6 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
-import { toggleDisplaySummarizedDetections } from './redux/slices/settings/settingsSlice';
 import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
@@ -91,6 +90,10 @@ import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
+import {
+    loadElectronCookie,
+    saveSettings,
+} from './redux/slices/settings/settingsSlice';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -120,7 +123,8 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 });
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
-
+let fetchingFromLocalDirectory = false;
+let connectingToCommandServer = false;
 //TODO: re-add PropTypes and prop validation
 /* eslint-disable react/prop-types */
 
@@ -206,19 +210,23 @@ class App extends Component {
         this.props.setProcessingHost(
             `http://${this.props.remoteIp}:${this.props.remotePort}`
         );
-        this.setState(
-            {
-                commandServer: socketIOClient(
-                    `http://${this.props.remoteIp}:${this.props.remotePort}`,
-                    { autoConnect: this.props.autoConnect }
-                ),
-            },
-            () => {
-                this.state.commandServer.connect();
-                this.monitorConnectionEvent();
-                this.getFileFromCommandServer(update);
-            }
-        );
+        if (!connectingToCommandServer) {
+            connectingToCommandServer = true;
+            this.setState(
+                {
+                    commandServer: socketIOClient(
+                        `http://${this.props.remoteIp}:${this.props.remotePort}`,
+                        { autoConnect: this.props.autoConnect }
+                    ),
+                },
+                () => {
+                    connectingToCommandServer = false;
+                    this.state.commandServer.connect();
+                    this.monitorConnectionEvent();
+                    this.getFileFromCommandServer(update);
+                }
+            );
+        }
     }
 
     /**
@@ -232,6 +240,46 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (this.state.thumbnails !== nextState.thumbnails) return true;
+        if (
+            this.state.commandServer === null &&
+            nextProps.remoteOrLocal === true &&
+            !nextProps.loadingElectronCookie
+        ) {
+            this.connectToCommandServer();
+            if (
+                this.props.loadingElectronCookie !==
+                nextProps.loadingElectronCookie
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if (
+            isElectron() &&
+            nextProps.localFileOutput !== '' &&
+            !nextProps.loadingElectronCookie &&
+            this.props.currentProcessingFile === null &&
+            nextProps.currentProcessingFile === null &&
+            !fetchingFromLocalDirectory &&
+            !nextProps.remoteOrLocal
+        ) {
+            fetchingFromLocalDirectory = true;
+            this.getFileFromLocalDirectory();
+            return false;
+        }
+        if (this.props.firstDisplaySettings !== nextProps.firstDisplaySettings)
+            return true;
+        if (this.props.fileSuffix !== nextProps.fileSuffix) return true;
+        if (this.props.localFileOutput !== nextProps.localFileOutput)
+            return true;
+        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) return true;
+        if (
+            this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
+        ) {
+            return true;
+        }
         if (
             this.props.selectedDetection &&
             this.props.collapsedSideMenu !== nextProps.collapsedSideMenu &&
@@ -250,19 +298,6 @@ class App extends Component {
             }, 0);
             return true;
         }
-        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) {
-            if (nextProps.remoteOrLocal === false) {
-                if (isElectron() && nextProps.localFileOutput !== '') {
-                    this.getFileFromLocalDirectory();
-                }
-                if (this.state.commandServer !== null) {
-                    this.state.commandServer.disconnect();
-                    this.props.setConnected(false);
-                }
-                return true;
-            } else return false;
-        }
-        if (this.state.thumbnails !== nextState.thumbnails) return true;
         return false;
     }
 
@@ -270,14 +305,23 @@ class App extends Component {
      * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
-        console.log('componentDidMount()');
+        if (isElectron()) {
+            this.props.loadElectronCookie();
+        }
         // Connect socket servers
-        if (this.props.firstDisplaySettings === false) {
-            if (this.props.remoteOrLocal === true) {
-                this.connectToCommandServer();
-            } else if (isElectron() && this.props.localFileOutput !== '') {
-                this.getFileFromLocalDirectory();
+        if (
+            this.props.firstDisplaySettings === false ||
+            this.props.loadingElectronCookie
+        ) {
+            if (isElectron()) {
                 this.localDirectoryChangeHandler();
+            }
+            if (!this.props.loadingElectronCookie) {
+                if (this.props.remoteOrLocal === true) {
+                    this.connectToCommandServer();
+                } else if (isElectron() && this.props.localFileOutput !== '') {
+                    this.getFileFromLocalDirectory();
+                }
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -767,6 +811,7 @@ class App extends Component {
             });
     }
 
+    // TODO: Refactor this
     /**
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
@@ -778,6 +823,7 @@ class App extends Component {
                     this.props.localFileOutput
                 )
                 .then((result) => {
+                    fetchingFromLocalDirectory = false;
                     this.props.setLocalFileOpen(true);
                     this.loadNextImage(
                         result.file,
@@ -787,9 +833,17 @@ class App extends Component {
                     );
                 })
                 .catch((error) => {
-                    this.props.setLocalFileOpen(false);
-                    this.props.setReceiveTime(null);
-                    this.onNoImageLeft();
+                    fetchingFromLocalDirectory = false;
+                    if (
+                        error.toString() ===
+                        "Error: Error invoking remote method 'get-next-file': End of queue"
+                    ) {
+                        console.log('end of queue');
+                    } else {
+                        this.props.setLocalFileOpen(false);
+                        this.props.setReceiveTime(null);
+                        this.onNoImageLeft();
+                    }
                 });
         }
     }
@@ -802,8 +856,10 @@ class App extends Component {
         // the dir content in the file system
         if (isElectron()) {
             ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
-                this.setState({ thumbnails: data.thumbnails });
-                this.props.setNumFilesInQueue(data.numberOfFiles);
+                setTimeout(() => {
+                    this.setState({ thumbnails: data.thumbnails });
+                    this.props.setNumFilesInQueue(data.numberOfFiles);
+                }, 450);
             });
 
             ipcRenderer.on(
@@ -880,7 +936,7 @@ class App extends Component {
      * @returns {Promise}
      */
     async sendImageToLocalDirectory(file) {
-        const result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (isElectron() && this.props.localFileOutput !== '') {
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
@@ -898,7 +954,6 @@ class App extends Component {
                     });
             }
         });
-        return result;
     }
 
     /**
@@ -1210,7 +1265,6 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
-                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);
@@ -1459,7 +1513,6 @@ class App extends Component {
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.resetDetections();
                                         this.props.setReceiveTime(null);
-                                        this.getFileFromLocalDirectory();
                                     })
                                     .catch((error) => {
                                         console.log(error);
@@ -3589,11 +3642,14 @@ class App extends Component {
                     <NoFileSign />
                     <MetaData />
                 </div>
-                <SettingsModal
-                    connectToCommandServer={this.connectToCommandServer}
-                    resetCornerstoneTool={this.resetCornerstoneTool}
-                    appUpdateImage={this.appUpdateImage}
-                    cornerstone={cornerstone}></SettingsModal>
+                {this.props.loadingElectronCookie === false ? (
+                    <SettingsModal
+                        connectToCommandServer={this.connectToCommandServer}
+                        resetCornerstoneTool={this.resetCornerstoneTool}
+                        appUpdateImage={this.appUpdateImage}
+                        cornerstone={cornerstone}
+                    />
+                ) : null}
             </div>
         );
     }
@@ -3624,9 +3680,9 @@ const mapStateToProps = (state) => {
         collapsedLazyMenu: ui.collapsedLazyMenu,
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
+        // Settings
         displaySummarizedDetections:
             settings.settings.displaySummarizedDetections,
-        // Settings
         remoteIp: settings.settings.remoteIp,
         remotePort: settings.settings.remotePort,
         autoConnect: settings.settings.autoConnect,
@@ -3638,6 +3694,7 @@ const mapStateToProps = (state) => {
         hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
         localFileOutput: settings.settings.localFileOutput,
+        loadingElectronCookie: settings.settings.loadingElectronCookie,
     };
 };
 
@@ -3688,8 +3745,9 @@ const mapDispatchToProps = {
     updateEditLabelPosition,
     updateRecentScroll,
     setCurrentFileFormat,
-    toggleDisplaySummarizedDetections,
     toggleCollapsedSideMenu,
+    loadElectronCookie,
+    saveSettings,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
