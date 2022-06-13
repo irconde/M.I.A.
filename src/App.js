@@ -65,6 +65,7 @@ import {
     resetSelectedDetectionBoxesElseUpdate,
     resetSelectedDetectionBoxesUpdate,
     selectConfigInfoUpdate,
+    setCollapsedSideMenu,
     setCurrentFileFormat,
     setInputLabel,
     setLocalFileOpen,
@@ -240,6 +241,32 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (
+            this.props.displaySummarizedDetections &&
+            !this.props.collapsedSideMenu &&
+            nextProps.currentProcessingFile !== null &&
+            this.props.currentProcessingFile === null
+        ) {
+            console.log('hide menu');
+            if (
+                isElectron() &&
+                nextProps.remoteOrLocal &&
+                nextProps.localFileOutput !== ''
+            ) {
+                this.props.setCollapsedSideMenu({
+                    cornerstone: cornerstone,
+                    desktopMode: true,
+                    collapsedSideMenu: true,
+                });
+            } else {
+                this.props.setCollapsedSideMenu({
+                    cornerstone: cornerstone,
+                    desktopMode: false,
+                    collapsedSideMenu: true,
+                });
+            }
+            return true;
+        }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             this.state.commandServer === null &&
@@ -3750,6 +3777,7 @@ const mapDispatchToProps = {
     toggleCollapsedSideMenu,
     loadElectronCookie,
     saveSettings,
+    setCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

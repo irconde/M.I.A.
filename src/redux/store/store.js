@@ -3,6 +3,7 @@ import serverReducer from '../slices/server/serverSlice';
 import detectionsReducer from '../slices/detections/detectionsSlice';
 import settingsReducer from '../slices/settings/settingsSlice';
 import uiReducer from '../slices/ui/uiSlice';
+
 export default configureStore({
     reducer: {
         server: serverReducer,
@@ -17,6 +18,7 @@ export default configureStore({
                 'server/setCommandServerConnection',
                 'server/setFileServerConnection',
                 'ui/toggleCollapsedSideMenu',
+                'ui/setCollapsedSideMenu',
                 'ui/toggleCollapsedLazyMenu',
             ],
         },

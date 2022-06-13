@@ -6,6 +6,7 @@ import {
     toggleCollapsedSideMenu,
 } from '../redux/slices/ui/uiSlice';
 import {
+    getDisplaySummarizedDetections,
     getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
@@ -22,6 +23,9 @@ const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const visible = useSelector(getReceivedTime);
     const hasFileOutput = useSelector(getHasFileOutput);
+    const displaySummarizedDetections = useSelector(
+        getDisplaySummarizedDetections
+    );
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const localFileOutput = useSelector(getLocalFileOutput);
     const desktopMode =
@@ -38,7 +42,7 @@ const MenuToggleIcon = (props) => {
         ...props.style,
         cursor: 'pointer',
     };
-    if (visible !== null || hasFileOutput) {
+    if ((visible !== null || hasFileOutput) && !displaySummarizedDetections) {
         return (
             <div style={divStyle} onClick={toggleClickHandler}>
                 <svg
