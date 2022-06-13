@@ -25,7 +25,7 @@ let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
 let currentAddFile = '';
-let isDeleteEvent = false;
+let currentDeleteFile = '';
 let currentFileIndex = 0;
 let settingsCookie = null;
 let watcher = null;
@@ -925,6 +925,8 @@ async function handleExternalFileChanges(dirPath) {
             const { thumbnailPath } = thumbnails.at(thumbnailIndex);
 
             if (thumbnailPath === undefined) return;
+            if (currentDeleteFile === removedFilename) return;
+            currentDeleteFile = removedFilename;
 
             // remove the thumbnail from the database
             thumbnails.splice(thumbnailIndex, 1);
@@ -963,9 +965,11 @@ async function handleExternalFileChanges(dirPath) {
                         getCurrentFile()
                             .then((response) => {
                                 notifyCurrentFileUpdate(response);
+                                currentDeleteFile = '';
                             })
                             .catch((error) => {
                                 notifyCurrentFileUpdate(null);
+                                currentDeleteFile = '';
                                 console.log(
                                     `Error getting the current file: ${error}`
                                 );
@@ -975,8 +979,10 @@ async function handleExternalFileChanges(dirPath) {
 
                     // send the files for the react process
                     sendNewFiles();
+                    currentDeleteFile = '';
                 })
                 .catch((error) => {
+                    currentDeleteFile = '';
                     console.log(error);
                 });
         });
