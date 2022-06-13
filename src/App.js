@@ -247,7 +247,6 @@ class App extends Component {
             nextProps.currentProcessingFile !== null &&
             this.props.currentProcessingFile === null
         ) {
-            console.log('hide menu');
             if (
                 isElectron() &&
                 nextProps.remoteOrLocal &&
@@ -840,7 +839,6 @@ class App extends Component {
             });
     }
 
-    // TODO: Refactor this
     /**
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
