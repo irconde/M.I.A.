@@ -1,17 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
-import { COOKIE, SETTINGS } from '../../../utils/Constants';
+import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
-const cookieData = myCookie.get('settings');
+let cookieData;
+
+let ipcRenderer;
+if (isElectron()) {
+    ipcRenderer = window.require('electron').ipcRenderer;
+} else {
+    cookieData = myCookie.get('settings');
+}
 
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        expires: isElectron()
-            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        expires: new Date(Date.now() + COOKIE.WEB_TIME),
     });
 };
 
@@ -29,16 +34,51 @@ const defaultSettings = {
     deviceType: '',
     hasFileOutput: false,
     displaySummarizedDetections: false,
+    loadingElectronCookie: isElectron(),
 };
 
-if (cookieData !== undefined) {
-    settings = cookieData;
+export const saveElectronCookie = createAsyncThunk(
+    'settings/saveElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        await ipcRenderer
+            .invoke(Channels.saveSettingsCookie, payload)
+            .then(() => {
+                return payload;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        return payload;
+    }
+);
+
+export const loadElectronCookie = createAsyncThunk(
+    'settings/loadElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        return await ipcRenderer
+            .invoke(Channels.getSettingsCookie)
+            .then((cookie) => {
+                return cookie;
+            })
+            .catch((err) => rejectWithValue(err));
+    }
+);
+
+if (!isElectron()) {
+    if (cookieData !== undefined) {
+        settings = cookieData;
+    } else {
+        settings = defaultSettings;
+        myCookie.set('settings', defaultSettings, {
+            path: '/',
+            expires: isElectron()
+                ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+                : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        });
+    }
 } else {
     settings = defaultSettings;
-    myCookie.set('settings', defaultSettings, {
-        path: '/',
-        maxAge: COOKIE.TIME, // Current time is 3 hours
-    });
 }
 
 const initialState = {
@@ -74,15 +114,62 @@ const settingsSlice = createSlice({
          */
         saveSettings: (state, action) => {
             for (let key in action.payload) {
-                if (action.payload[key] !== '') {
-                    state.settings[key] = action.payload[key];
-                }
-                // detection[key] = update[key];
+                state.settings[key] = action.payload[key];
             }
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+            if (!isElectron()) {
+                myCookie.set('settings', state.settings, {
+                    path: '/',
+                    expires: new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+                });
+            }
+        },
+    },
+    /*extraReducers: (builder) => {
+        builder.addCase(loadElectronCookie.pending, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+        });
+        builder.addCase(loadElectronCookie.fulfilled, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+            const { payload } = action;
+            for (let key in payload) {
+                if (payload[key] !== '') {
+                    state.settings[key] = payload[key];
+                }
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.loadingElectronCookie = false;
+        });
+    },*/
+    extraReducers: {
+        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = false;
+        },
+        [saveElectronCookie.rejected]: (state) => {
+            state.settings = defaultSettings;
+        },
+        [loadElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = false;
+            state.settings.loadingElectronCookie = false;
+        },
+        [loadElectronCookie.pending]: (state) => {
+            state.settings.loadingElectronCookie = true;
+        },
+        [loadElectronCookie.rejected]: (state) => {
+            state.settings.loadingElectronCookie = false;
         },
     },
 });
@@ -128,7 +215,7 @@ export const getHasFileOutput = (state) =>
 export const getLocalFileOutput = (state) =>
     state.settings.settings.localFileOutput;
 /**
- * Provides the remote connection info: ip, port, autoconnect.
+ * Provides the remote connection info: ip, port, auto-connect.
  * @param {Object} state
  * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
  */
@@ -139,6 +226,9 @@ export const getRemoteConnectionInfo = (state) => {
         autoConnect: state.settings.settings.autoConnect,
     };
 };
+
+export const getLoadingElectronCookie = (state) =>
+    state.settings.settings.loadingElectronCookie;
 
 /**
  * Determines if the settings should be displayed on first load or not
@@ -154,5 +244,7 @@ export const getFirstDisplaySettings = (state) =>
  * @returns {constants.DEVICE_TYPE}
  */
 export const getDeviceType = (state) => state.settings.settings.deviceType;
+
+export const getFileSuffix = (state) => state.settings.settings.fileSuffix;
 
 export default settingsSlice.reducer;

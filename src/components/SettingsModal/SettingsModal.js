@@ -37,8 +37,10 @@ import {
     getSelectedDetection,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
+    getFileSuffix,
     getLocalFileOutput,
     getSettings,
+    saveElectronCookie,
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
 import socketIOClient from 'socket.io-client';
@@ -50,6 +52,7 @@ import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
 import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
+import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -65,8 +68,8 @@ if (isElectron()) {
  */
 
 const SettingsModal = (props) => {
+    const dispatch = useDispatch();
     const settings = useSelector(getSettings);
-    const initLocalFileOutput = useSelector(getLocalFileOutput);
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -76,9 +79,9 @@ const SettingsModal = (props) => {
         settings.annotationsFormat
     );
     const [localFileOutput, setLocalFileOutput] = useState(
-        initLocalFileOutput !== '' ? initLocalFileOutput : ''
+        useSelector(getLocalFileOutput)
     );
-    const [fileSuffix, setFileSuffix] = useState(settings.fileSuffix);
+    const [fileSuffix, setFileSuffix] = useState(useSelector(getFileSuffix));
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
     const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
@@ -92,7 +95,6 @@ const SettingsModal = (props) => {
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
         useState(initDisplaySummarizedDetections);
     const selectedDetection = useSelector(getSelectedDetection);
-    const dispatch = useDispatch();
     const svgContainerStyle = {
         margin: '0.3rem',
         marginRight: '1rem',
@@ -229,32 +231,61 @@ const SettingsModal = (props) => {
      * If the user entered connection information it will change the command server to the new one.
      */
     const saveSettingsEvent = () => {
-        if (isElectron() && remoteOrLocal === false && localFileOutput !== '') {
-            ipcRenderer
-                .invoke(Channels.loadFiles, localFileOutput)
-                .then((result) => {
-                    setSnackBarOpen(true);
-                    dispatch(
-                        saveSettings({
-                            remoteIp,
-                            remotePort,
-                            autoConnect,
-                            localFileOutput,
-                            fileFormat,
-                            annotationsFormat,
-                            fileSuffix,
-                            remoteOrLocal,
-                            deviceType: Utils.deviceType(),
-                            displaySummarizedDetections,
-                        })
-                    );
-                    dispatch(toggleSettingsVisibility(false));
-                    updateVisualizationMode();
-                })
-                .catch((error) => {
-                    // TODO: Error handling for an incorrectly typed directory
-                    console.log(error);
-                });
+        if (isElectron()) {
+            if (remoteOrLocal === false && localFileOutput !== '') {
+                ipcRenderer
+                    .invoke(Channels.loadFiles, localFileOutput)
+                    .then((result) => {
+                        setSnackBarOpen(true);
+                        dispatch(
+                            saveElectronCookie({
+                                remoteIp,
+                                remotePort,
+                                autoConnect,
+                                localFileOutput,
+                                fileFormat,
+                                annotationsFormat,
+                                fileSuffix,
+                                remoteOrLocal,
+                                deviceType: Utils.deviceType(),
+                                displaySummarizedDetections,
+                            })
+                        );
+                        dispatch(toggleSettingsVisibility(false));
+                        dispatch(setCurrentProcessingFile(null));
+                        updateVisualizationMode();
+                    })
+                    .catch((error) => {
+                        // TODO: Error handling for an incorrectly typed directory
+                        console.log(error);
+                    });
+            } else {
+                setSnackBarOpen(true);
+                dispatch(
+                    saveElectronCookie({
+                        remoteIp,
+                        remotePort,
+                        autoConnect,
+                        localFileOutput,
+                        fileFormat,
+                        annotationsFormat,
+                        fileSuffix,
+                        remoteOrLocal,
+                        deviceType: Utils.deviceType(),
+                        displaySummarizedDetections,
+                    })
+                );
+                dispatch(toggleSettingsVisibility(false));
+                updateVisualizationMode();
+                if (
+                    remoteOrLocal === true &&
+                    (remoteIp !== '' || remotePort !== '')
+                ) {
+                    setTimeout(() => {
+                        props.connectToCommandServer(true);
+                    }, 0);
+                }
+            }
         } else {
             setSnackBarOpen(true);
             dispatch(
@@ -1047,6 +1078,7 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                     </div>
+
                     <Button
                         variant="outlined"
                         onClick={() => saveSettingsEvent()}
