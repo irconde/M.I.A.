@@ -270,6 +270,7 @@ class App extends Component {
      * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
+        console.log('componentDidMount()');
         // Connect socket servers
         if (this.props.firstDisplaySettings === false) {
             if (this.props.remoteOrLocal === true) {
@@ -321,7 +322,6 @@ class App extends Component {
         this.state.imageViewportTop.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
-                event.stopImmediatePropagation();
                 this.onNewPolygonMaskCreated(
                     event,
                     this.state.imageViewportTop
@@ -369,7 +369,6 @@ class App extends Component {
         this.state.imageViewportSide.addEventListener(
             constants.events.POLYGON_MASK_CREATED,
             (event) => {
-                event.stopImmediatePropagation();
                 this.onNewPolygonMaskCreated(
                     event,
                     this.state.imageViewportSide

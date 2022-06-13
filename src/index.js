@@ -10,13 +10,11 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
-    <React.StrictMode>
-        <Provider store={store}>
-            <CookiesProvider>
-                <App />
-            </CookiesProvider>
-        </Provider>
-    </React.StrictMode>
+    <Provider store={store}>
+        <CookiesProvider>
+            <App />
+        </CookiesProvider>
+    </Provider>
 );
 
 // If you want your app to work offline and load faster, you can change
