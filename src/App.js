@@ -2422,7 +2422,11 @@ class App extends Component {
                         combinedDetections[clickedPos].uuid
                     );
                     this.props.detectionSelectedUpdate();
-                    this.renderDetectionContextMenu(e);
+                    this.renderDetectionContextMenu(
+                        e,
+                        undefined,
+                        combinedDetections[clickedPos]
+                    );
                     this.appUpdateImage();
                 } else if (
                     combinedDetections[clickedPos].visible !== false &&
@@ -2510,7 +2514,10 @@ class App extends Component {
                             constants.viewport.SIDE &&
                             event.target === this.state.imageViewportSide)
                     ) {
-                        this.renderDetectionContextMenu(event);
+                        this.renderDetectionContextMenu(
+                            event,
+                            this.props.selectedDetection
+                        );
                     } else {
                         // Otherwise hide the menu
                         // It will re-appear when they drag to correct the image
@@ -3064,8 +3071,9 @@ class App extends Component {
      * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
+        console.trace();
         //REVIEW: getContextMenuPos log 1
-        console.log("getContextMenyPos ran");
+        console.log('getContextMenyPos ran');
         if (viewportInfo.viewport !== null) {
             if (coords !== undefined && coords.length > 0) {
                 let detectionContextGap = 0;
@@ -3111,38 +3119,15 @@ class App extends Component {
      * function is called. Use the param data to render the context menu.
      *
      */
-    renderDetectionContextMenu(
-        event,
-        draggedData = undefined,
-        sideMenuDetection = null
-    ) {
-        //REVIEW: renderDetectionContextMenu log 1
-        console.log("renderDetectionContextMenu ran");
-
-        let selectedDetection =
-            this.props.selectedDetection !== null
-                ? this.props.selectedDetection
-                : sideMenuDetection !== null
-                ? sideMenuDetection
-                : null;
-        
-        selectedDetection = sideMenuDetection
-            ? sideMenuDetection
-            : selectedDetection;
-
-        //ANCHOR: log 2
-        console.log("Above if statement null check");
-        console.log("SelectedDetection Null: ", selectedDetection === null);
-
-        if (selectedDetection !== null) {
-
-            //ANCHOR: log 3
-            console.log("Inside if statement null check");
-
+    renderDetectionContextMenu(event, draggedData = undefined, detection) {
+        // TODO: Refactor into one detection parameter
+        console.trace();
+        if (
+            (detection !== null && detection !== undefined) ||
+            draggedData !== undefined
+        ) {
             const viewportInfo =
-                sideMenuDetection === null
-                    ? Utils.eventToViewportInfo(event)
-                    : selectedDetection.view === 'top'
+                detection.view === 'top'
                     ? Utils.eventToViewportInfo(
                           Utils.mockCornerstoneEvent(
                               event,
@@ -3155,7 +3140,7 @@ class App extends Component {
                               this.state.imageViewportSide
                           )
                       );
-            const detectionData = draggedData ? draggedData : selectedDetection;
+            const detectionData = draggedData ? draggedData : detection;
 
             const contextMenuPos = this.getContextMenuPos(
                 viewportInfo,
