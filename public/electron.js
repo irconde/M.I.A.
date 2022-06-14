@@ -4,6 +4,7 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const screen = electron.screen;
 const dialog = electron.dialog;
+const session = electron.session;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -17,14 +18,20 @@ const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
 const chokidar = require('chokidar');
-
+// TODO Starting App -> Loading Cookie -> Saving new Cookie Settings | Does not load the correct settings
 let mainWindow;
 let files = [];
 let thumbnails = [];
 let thumbnailPath = '';
 let isGeneratingThumbnails = false;
+let currentAddFile = '';
+let currentDeleteFile = '';
 let currentFileIndex = 0;
+let settingsCookie = null;
+let watcher = null;
+let currentPath = '';
 const oraExp = /\.ora$/;
+const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
 const pngExp = /\.png$/;
 
@@ -41,13 +48,31 @@ function createWindow() {
             contextIsolation: false,
         },
     });
-    mainWindow.loadURL(
-        isDev
-            ? 'http://localhost:3000'
-            : `file://${path.join(__dirname, '../build/index.html')}`
-    );
+    mainWindow
+        .loadURL(
+            isDev
+                ? 'http://localhost:3000'
+                : `file://${path.join(__dirname, '../build/index.html')}`
+        )
+        .then(() => {
+            session.defaultSession.cookies
+                .get({ name: 'settings' })
+                .then((cookies) => {
+                    if (cookies.length > 0) {
+                        settingsCookie = JSON.parse(cookies[0].value);
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        })
+        .catch((err) => console.log(err));
     mainWindow.maximize();
-    mainWindow.on('closed', () => (mainWindow = null));
+    mainWindow.on('closed', async () => {
+        await watcher.unwatch(currentPath);
+        await watcher.close();
+        mainWindow = null;
+    });
     if (!isDev) mainWindow.removeMenu();
 }
 
@@ -120,7 +145,7 @@ ipcMain.handle(Constants.Channels.getNextFile, async (event, args) => {
                         reject(error);
                     });
             } else {
-                reject('Path does not exist');
+                reject(`Path does not exists ${args}`);
             }
         }
     });
@@ -140,7 +165,7 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
             sendThumbnailStatus();
             resolve(loadFile(args));
         } else {
-            reject('File path does not exist');
+            reject(`File path does not exists: ${args}`);
         }
     });
 });
@@ -153,38 +178,47 @@ ipcMain.handle(Constants.Channels.getSpecificFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        let returnedFilePath;
-        if (process.platform === 'win32') {
-            returnedFilePath = `${args.fileDirectory}\\returned`;
-        } else {
-            returnedFilePath = `${args.fileDirectory}/returned`;
-        }
-        if (fs.existsSync(returnedFilePath) === false) {
-            fs.mkdirSync(returnedFilePath);
-        }
-        readdir(returnedFilePath)
-            .then((returnedFiles) => {
-                const fileIndex = findMaxFileSuffix(
-                    args.fileSuffix,
-                    returnedFiles
-                );
-                const filePath = generateFileName(
-                    args,
-                    fileIndex,
-                    returnedFilePath
-                );
-                fs.writeFile(filePath, args.file, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        currentFileIndex++;
-                        resolve('File saved');
-                    }
-                });
-            })
-            .catch((error) => {
-                reject(error);
+        // NOTE: Check if file suffix is empty, if so then save file to original path.
+        if (args.fileSuffix === '') {
+            const filePath = `${args.fileDirectory}/${args.fileName}`;
+            fs.writeFile(filePath, args.file, (error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    currentFileIndex++;
+                    resolve('File saved');
+                }
             });
+        }
+        // NOTE: Otherwise save file to the original directory.
+        else {
+            readdir(args.fileDirectory)
+                .then((returnedFiles) => {
+                    const fileIndex = findMaxFileSuffix(
+                        args.fileSuffix,
+                        returnedFiles
+                    );
+
+                    const filePath = generateFileName(
+                        args,
+                        fileIndex,
+                        args.fileDirectory
+                    );
+
+                    fs.writeFile(filePath, args.file, (error) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            currentFileIndex++;
+                            resolve('File saved');
+                        }
+                    });
+                })
+
+                .catch((error) => {
+                    reject(error);
+                });
+        }
     });
 });
 
@@ -214,7 +248,7 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
 
 /**
  * Loads the specified thumbnail if the file name provided exists. If so it will
- * it will load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
+ * load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
  * @param {string} args File path sent from react
  * @returns {string}
  */
@@ -239,6 +273,59 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
             }
         } else {
             reject('Could not determine file name from that path');
+        }
+    });
+});
+
+ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
+    return new Promise((resolve, reject) => {
+        try {
+            session.defaultSession.cookies
+                .set({
+                    url: 'http://localhost:3000/',
+                    name: 'settings',
+                    value: JSON.stringify(args),
+                    expirationDate: 2093792393,
+                })
+                .then((res) => {
+                    resolve('Cookie saved');
+                })
+                .catch((error) => reject(error));
+        } catch (e) {
+            reject(e);
+        }
+    });
+});
+
+ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
+    return new Promise((resolve, reject) => {
+        if (settingsCookie === null) {
+            session.defaultSession.cookies
+                .get({ name: 'settings' })
+                .then((cookies) => {
+                    if (cookies.length > 0) {
+                        settingsCookie = JSON.parse(cookies[0].value);
+                        resolve(settingsCookie);
+                    } else {
+                        settingsCookie = Constants.defaultSettings;
+                        session.defaultSession.cookies
+                            .set({
+                                url: 'http://localhost:3000/',
+                                name: 'settings',
+                                value: JSON.stringify(settingsCookie),
+                                expirationDate: 2093792393,
+                            })
+                            .then(() => {
+                                resolve(settingsCookie);
+                            })
+                            .catch((error) => reject(error));
+                    }
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        } else {
+            resolve(settingsCookie);
         }
     });
 });
@@ -310,7 +397,7 @@ const generateFileName = (args, fileIndex, returnedFilePath) => {
  * @returns {Boolean}
  */
 const validateFileExtension = (fileName) => {
-    return oraExp.test(fileName);
+    return oraExp.test(fileName) || zipExp.test(fileName);
 };
 /**
  * Ensures that the file name being passed is in of type .ora or .dcs
@@ -334,6 +421,7 @@ const validateImageExtension = (fileName) => {
 const loadFilesFromPath = async (path) => {
     return new Promise((resolve, reject) => {
         if (fs.existsSync(path)) {
+            currentPath = path;
             readdir(path)
                 .then((filesResult) => {
                     files = [];
@@ -769,7 +857,7 @@ const loadThumbnailDatabase = () => {
 async function handleExternalFileChanges(dirPath) {
     // create a directory watcher, making sure it ignores json files
     // it also doesn't fire the first time to avoid additional re-renders
-    const watcher = chokidar.watch(dirPath, {
+    watcher = chokidar.watch(dirPath, {
         ignored: Constants.FileWatcher.all_json_files,
         depth: 0,
         ignoreInitial: true,
@@ -779,9 +867,20 @@ async function handleExternalFileChanges(dirPath) {
     watcher
         .on(Constants.FileWatcher.add, (path) => {
             const addedFilename = getFileNameFromPath(path);
+            const foundIndex = files.findIndex(
+                (file) => getFileNameFromPath(file) === addedFilename
+            );
+            if (foundIndex !== -1) {
+                currentAddFile = '';
+                return;
+            }
+            if (addedFilename === currentAddFile) {
+                return;
+            }
+            currentAddFile = addedFilename;
             if (validateFileExtension(addedFilename)) {
                 parseThumbnail(path)
-                    .then(() => {
+                    .then(async () => {
                         files.push(path);
                         saveThumbnailDatabase(false);
                         // if the files array was empty before adding this file
@@ -790,22 +889,26 @@ async function handleExternalFileChanges(dirPath) {
                             getCurrentFile()
                                 .then((response) => {
                                     notifyCurrentFileUpdate(response);
+                                    currentAddFile = '';
                                 })
                                 .catch((error) => {
                                     notifyCurrentFileUpdate(null);
                                     console.log(
                                         `Error getting the current file: ${error}`
                                     );
+                                    currentAddFile = '';
                                 });
                         } else {
                             // if the files array already contained a file
                             sendNewFiles();
+                            currentAddFile = '';
                         }
                     })
                     .catch((error) => {
                         console.log(`Error in filewatcher: ${error}`);
+                        currentAddFile = '';
                     });
-            }
+            } else currentAddFile = '';
         })
         .on(Constants.FileWatcher.unlink, (path) => {
             const removedFilename = getFileNameFromPath(path);
@@ -822,6 +925,8 @@ async function handleExternalFileChanges(dirPath) {
             const { thumbnailPath } = thumbnails.at(thumbnailIndex);
 
             if (thumbnailPath === undefined) return;
+            if (currentDeleteFile === removedFilename) return;
+            currentDeleteFile = removedFilename;
 
             // remove the thumbnail from the database
             thumbnails.splice(thumbnailIndex, 1);
@@ -860,9 +965,11 @@ async function handleExternalFileChanges(dirPath) {
                         getCurrentFile()
                             .then((response) => {
                                 notifyCurrentFileUpdate(response);
+                                currentDeleteFile = '';
                             })
                             .catch((error) => {
                                 notifyCurrentFileUpdate(null);
+                                currentDeleteFile = '';
                                 console.log(
                                     `Error getting the current file: ${error}`
                                 );
@@ -872,8 +979,10 @@ async function handleExternalFileChanges(dirPath) {
 
                     // send the files for the react process
                     sendNewFiles();
+                    currentDeleteFile = '';
                 })
                 .catch((error) => {
+                    currentDeleteFile = '';
                     console.log(error);
                 });
         });
