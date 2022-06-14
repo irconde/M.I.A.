@@ -65,6 +65,7 @@ import {
     resetSelectedDetectionBoxesElseUpdate,
     resetSelectedDetectionBoxesUpdate,
     selectConfigInfoUpdate,
+    setCollapsedSideMenu,
     setCurrentFileFormat,
     setInputLabel,
     setLocalFileOpen,
@@ -240,6 +241,31 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (
+            this.props.displaySummarizedDetections &&
+            !this.props.collapsedSideMenu &&
+            nextProps.currentProcessingFile !== null &&
+            this.props.currentProcessingFile === null
+        ) {
+            if (
+                isElectron() &&
+                nextProps.remoteOrLocal &&
+                nextProps.localFileOutput !== ''
+            ) {
+                this.props.setCollapsedSideMenu({
+                    cornerstone: cornerstone,
+                    desktopMode: true,
+                    collapsedSideMenu: true,
+                });
+            } else {
+                this.props.setCollapsedSideMenu({
+                    cornerstone: cornerstone,
+                    desktopMode: false,
+                    collapsedSideMenu: true,
+                });
+            }
+            return true;
+        }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             this.state.commandServer === null &&
@@ -811,7 +837,6 @@ class App extends Component {
             });
     }
 
-    // TODO: Refactor this
     /**
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
@@ -3748,6 +3773,7 @@ const mapDispatchToProps = {
     toggleCollapsedSideMenu,
     loadElectronCookie,
     saveSettings,
+    setCollapsedSideMenu,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
