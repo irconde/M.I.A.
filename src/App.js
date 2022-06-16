@@ -2517,6 +2517,7 @@ class App extends Component {
                     ) {
                         this.renderDetectionContextMenu(
                             event,
+                            this.props.detectionData,
                             this.props.selectedDetection
                         );
                     } else {
