@@ -3077,9 +3077,6 @@ class App extends Component {
      * @returns {{x: number, y: number}}
      */
     getContextMenuPos(viewportInfo, coords) {
-        console.trace();
-        //REVIEW: getContextMenuPos log 1
-        console.log('getContextMenyPos ran');
         if (viewportInfo.viewport !== null) {
             if (coords !== undefined && coords.length > 0) {
                 let detectionContextGap = 0;
@@ -3126,8 +3123,6 @@ class App extends Component {
      *
      */
     renderDetectionContextMenu(event, draggedData = undefined, detection) {
-        // TODO: Refactor into one detection parameter
-        console.trace();
         if (
             (detection !== null && detection !== undefined) ||
             draggedData !== undefined
