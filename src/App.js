@@ -319,7 +319,8 @@ class App extends Component {
                             constants.viewport.TOP
                             ? this.state.imageViewportTop
                             : this.state.imageViewportSide
-                    )
+                    ),
+                    this.props.selectedDetection
                 );
             }, 0);
             return true;
@@ -2749,7 +2750,8 @@ class App extends Component {
                             });
                             // Detection coordinates changed and we need to re-render the detection context widget
                             if (this.props.selectedDetection) {
-                                this.renderDetectionContextMenu(event);
+                                this.renderDetectionContextMenu(event,
+                                    this.props.selectedDetection);
                             }
                         }
                     }
@@ -2887,7 +2889,8 @@ class App extends Component {
                         });
                         // Detection coordinates changed and we need to re-render the detection context widget
                         if (this.props.selectedDetection) {
-                            this.renderDetectionContextMenu(event);
+                            this.renderDetectionContextMenu(event,
+                                this.props.selectedDetection);
                         }
                     }
                 }
@@ -3003,7 +3006,9 @@ class App extends Component {
             this.appUpdateImage();
         } else if (this.props.selectedDetection) {
             setTimeout(() => {
-                this.renderDetectionContextMenu(e);
+                this.renderDetectionContextMenu(
+                    e,
+                    this.props.selectedDetection);
             }, 5);
         }
     }
