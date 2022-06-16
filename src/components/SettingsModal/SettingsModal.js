@@ -568,9 +568,7 @@ const SettingsModal = (props) => {
         },
         visualizationModeOption: {},
         visualizationModeIcon: {
-            '&:hover': {
-                cursor: 'pointer',
-            },
+            cursor: 'pointer',
             backgroundColor: '#464646',
             borderRadius: '10px',
         },
@@ -607,33 +605,27 @@ const SettingsModal = (props) => {
                     <div style={classes.optionsContainer}>
                         <div>
                             <div className="visualizationModeContainer">
-                                <p className={classes.optionText}>
+                                <p style={classes.optionText}>
                                     Visualization Mode
                                 </p>
-                                <p className={classes.greyText}>
+                                <p style={classes.greyText}>
                                     Pick the visual granularity to use when
                                     displaying multi-algorithm results.
                                 </p>
-                                <div
-                                    className={
-                                        classes.visualizationModeContainer
-                                    }>
+                                <div style={classes.visualizationModeContainer}>
                                     <div
-                                        className={
-                                            classes.visualizationModeOption
-                                        }>
+                                        style={classes.visualizationModeOption}>
                                         <img
                                             src={
                                                 displaySummarizedDetections
                                                     ? DetailedModeIconSrc
                                                     : DetailedModeIconCheckedSrc
                                             }
-                                            className={`${
-                                                classes.visualizationModeIcon
-                                            } ${
-                                                !displaySummarizedDetections &&
-                                                classes.visualizationModeSelected
-                                            }`}
+                                            style={{
+                                                ...classes.visualizationModeIcon,
+                                                ...(!displaySummarizedDetections &&
+                                                    classes.visualizationModeSelected),
+                                            }}
                                             alt={'Detailed mode'}
                                             onClick={() => {
                                                 setDisplaySummarizedDetections(
@@ -642,31 +634,27 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                         <p
-                                            className={`${
-                                                classes.visualizationModeText
-                                            } ${
-                                                !displaySummarizedDetections &&
-                                                classes.visualizationModeTextSelected
-                                            }`}>
+                                            style={{
+                                                ...classes.visualizationModeText,
+                                                ...(!displaySummarizedDetections &&
+                                                    classes.visualizationModeTextSelected),
+                                            }}>
                                             Detailed
                                         </p>
                                     </div>
                                     <div
-                                        className={
-                                            classes.visualizationModeOption
-                                        }>
+                                        style={classes.visualizationModeOption}>
                                         <img
                                             src={
                                                 displaySummarizedDetections
                                                     ? SummarizedModeIconCheckedSrc
                                                     : SummarizedModeIconSrc
                                             }
-                                            className={`${
-                                                classes.visualizationModeIcon
-                                            } ${
-                                                displaySummarizedDetections &&
-                                                classes.visualizationModeSelected
-                                            }`}
+                                            style={{
+                                                ...classes.visualizationModeIcon,
+                                                ...(displaySummarizedDetections &&
+                                                    classes.visualizationModeSelected),
+                                            }}
                                             alt={'Summarized mode'}
                                             onClick={() => {
                                                 setDisplaySummarizedDetections(
@@ -675,12 +663,11 @@ const SettingsModal = (props) => {
                                             }}
                                         />
                                         <p
-                                            className={`${
-                                                classes.visualizationModeText
-                                            } ${
-                                                displaySummarizedDetections &&
-                                                classes.visualizationModeTextSelected
-                                            }`}>
+                                            style={{
+                                                ...classes.visualizationModeText,
+                                                ...(displaySummarizedDetections &&
+                                                    classes.visualizationModeTextSelected),
+                                            }}>
                                             Summarized
                                         </p>
                                     </div>
