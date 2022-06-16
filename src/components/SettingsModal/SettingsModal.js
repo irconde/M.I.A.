@@ -568,9 +568,7 @@ const SettingsModal = (props) => {
         },
         visualizationModeOption: {},
         visualizationModeIcon: {
-            '&:hover': {
-                cursor: 'pointer',
-            },
+            cursor: 'pointer',
             backgroundColor: '#464646',
             borderRadius: '10px',
         },
