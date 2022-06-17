@@ -181,14 +181,19 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
-            fs.writeFile(filePath, args.file, (error) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    currentFileIndex++;
-                    resolve('File saved');
+
+            fs.writeFile(
+                filePath,
+                Utils.base64ToArrayBuffer(args.file),
+                (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        currentFileIndex++;
+                        resolve('File saved');
+                    }
                 }
-            });
+            );
         }
         // NOTE: Otherwise save file to the original directory.
         else {
@@ -205,14 +210,18 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                         args.fileDirectory
                     );
 
-                    fs.writeFile(filePath, args.file, (error) => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            currentFileIndex++;
-                            resolve('File saved');
+                    fs.writeFile(
+                        filePath,
+                        Utils.base64ToArrayBuffer(args.file),
+                        (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                currentFileIndex++;
+                                resolve('File saved');
+                            }
                         }
-                    });
+                    );
                 })
 
                 .catch((error) => {

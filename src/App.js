@@ -1277,7 +1277,7 @@ class App extends Component {
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         cocoZip
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
