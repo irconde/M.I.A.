@@ -3576,7 +3576,7 @@ class App extends Component {
     /**
      * Callback invoked when a mouse wheel event happens.
      */
-    onMouseWheel() {
+    onMouseWheel(event) {
         if (this.props.selectedDetection !== null) {
             this.props.updateRecentScroll(true);
             clearTimeout(this.state.timer);
@@ -3585,6 +3585,11 @@ class App extends Component {
                     this.props.updateRecentScroll(false);
                 }, 250),
             });
+            this.renderDetectionContextMenu(
+                event, 
+                this.props.draggedData, 
+                this.props.selectedDetection
+                );
         }
     }
 
