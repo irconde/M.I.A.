@@ -3166,8 +3166,8 @@ class App extends Component {
                     boundingHeight / boundingWidth;
                 viewport = this.state.imageViewportSide;
             }
-            /*console.log(`originCoordX: ${originCoordX}`);
-            console.log(`detectionContextGap: ${detectionContextGap}`);*/
+            console.log(`originCoordX: ${originCoordX}`);
+            console.log(`detectionContextGap: ${detectionContextGap}`);
             console.log(
                 '-----------------------------------------------------'
             );
