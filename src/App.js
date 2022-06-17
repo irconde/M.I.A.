@@ -1525,7 +1525,7 @@ class App extends Component {
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {

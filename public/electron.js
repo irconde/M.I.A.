@@ -184,7 +184,8 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 
             fs.writeFile(
                 filePath,
-                Utils.base64ToArrayBuffer(args.file),
+                args.file,
+                { encoding: 'base64' },
                 (error) => {
                     if (error) {
                         reject(error);
@@ -212,7 +213,8 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
 
                     fs.writeFile(
                         filePath,
-                        Utils.base64ToArrayBuffer(args.file),
+                        args.file,
+                        { encoding: 'base64' },
                         (error) => {
                             if (error) {
                                 reject(error);
