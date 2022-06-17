@@ -241,17 +241,23 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        dialog.showSaveDialog({}).then((cancelled, filePath) => {
+        dialog.showSaveDialog({}).then(({ cancelled, filePath }) => {
             if (!cancelled) {
-                fs.writeFile(filePath, args, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
+                fs.writeFile(
+                    filePath,
+                    args,
+                    { encoding: 'base64' },
+                    (error) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve();
+                        }
                     }
-                });
+                );
             } else {
                 reject('Save cancelled');
+                console.log('MINE', "It's still cancelled");
             }
         });
     });

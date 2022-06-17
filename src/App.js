@@ -1298,7 +1298,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         cocoZip
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
@@ -1546,7 +1546,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         newOra
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
