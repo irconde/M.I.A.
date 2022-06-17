@@ -257,7 +257,6 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
                 );
             } else {
                 reject('Save cancelled');
-                console.log('MINE', "It's still cancelled");
             }
         });
     });
