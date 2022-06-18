@@ -2068,6 +2068,16 @@ class App extends Component {
                 cornerstoneTools.setToolOptions('DetectionMovementTool', {
                     zoomLevelTop: eventData.viewport.scale,
                 });
+                if (
+                    this.props.selectedDetection &&
+                    this.props.editionMode === constants.editionMode.NO_TOOL
+                ) {
+                    this.renderDetectionContextMenu(
+                        e,
+                        this.props.selectedDetection,
+                        eventData.viewport.scale
+                    );
+                }
             }
             if (
                 this.props.cornerstoneMode ===
@@ -2101,6 +2111,16 @@ class App extends Component {
                 cornerstoneTools.setToolOptions('DetectionMovementTool', {
                     zoomLevelSide: eventData.viewport.scale,
                 });
+                if (
+                    this.props.selectedDetection &&
+                    this.props.editionMode === constants.editionMode.NO_TOOL
+                ) {
+                    this.renderDetectionContextMenu(
+                        e,
+                        this.props.selectedDetection,
+                        eventData.viewport.scale
+                    );
+                }
             }
             this.renderDetections(detections, context);
             if (
@@ -3125,7 +3145,7 @@ class App extends Component {
      * function is called. Use the param data to render the context menu.
      *
      */
-    renderDetectionContextMenu(event, detection) {
+    renderDetectionContextMenu(event, detection, updatedZoomLevel = null) {
         if (detection !== null && detection !== undefined) {
             const viewportInfo = Utils.eventToViewportInfo(
                 Utils.mockCornerstoneEvent(
@@ -3135,7 +3155,15 @@ class App extends Component {
                         : this.state.imageViewportSide
                 )
             );
-
+            let zoomLevel;
+            if (updatedZoomLevel !== null) {
+                zoomLevel = updatedZoomLevel;
+            } else {
+                zoomLevel =
+                    detection.view === constants.viewport.TOP
+                        ? this.props.zoomLevelTop
+                        : this.props.zoomLevelSide;
+            }
             let detectionContextGap = 0;
             let viewport, originCoordX;
             const boundingBoxCoords = detection.boundingBox;
@@ -3147,30 +3175,16 @@ class App extends Component {
             );
             if (viewportInfo.viewport === constants.viewport.TOP) {
                 originCoordX = 2;
-                console.log(`viewportInfo.offset: ${viewportInfo.offset}`);
-                console.log(
-                    `this.props.zoomLevelTop: ${this.props.zoomLevelTop}`
-                );
                 detectionContextGap =
-                    viewportInfo.offset / this.props.zoomLevelTop -
-                    boundingWidth;
+                    viewportInfo.offset / zoomLevel - boundingWidth;
                 viewport = this.state.imageViewportTop;
             } else {
                 originCoordX = 0;
-                console.log(`viewportInfo.offset: ${viewportInfo.offset}`);
-                console.log(
-                    `this.props.zoomLevelSide: ${this.props.zoomLevelSide}`
-                );
                 detectionContextGap =
-                    viewportInfo.offset / this.props.zoomLevelSide -
+                    viewportInfo.offset / zoomLevel -
                     boundingHeight / boundingWidth;
                 viewport = this.state.imageViewportSide;
             }
-            console.log(`originCoordX: ${originCoordX}`);
-            console.log(`detectionContextGap: ${detectionContextGap}`);
-            console.log(
-                '-----------------------------------------------------'
-            );
             const { x, y } = cornerstone.pixelToCanvas(viewport, {
                 x: boundingBoxCoords[originCoordX] + detectionContextGap,
                 y: boundingBoxCoords[1] + boundingHeight + 4,
@@ -3576,10 +3590,6 @@ class App extends Component {
                     this.props.updateRecentScroll(false);
                 }, 250),
             });
-            this.renderDetectionContextMenu(
-                event,
-                this.props.selectedDetection
-            );
         }
     }
 
@@ -3590,10 +3600,10 @@ class App extends Component {
      * @param {Event} event
      */
     onMouseLeave(event) {
-        /*if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
+        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
         else this.props.onMouseLeaveNoFilesUpdate();
         if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);*/
+            this.resetSelectedDetectionBoxes(event);
     }
 
     render() {
