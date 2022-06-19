@@ -941,13 +941,15 @@ class App extends Component {
     }
 
     /**
-     * Emits a new message to send a file to the server
+     * Sends a post request to the file server to save the file
      *
      * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        const response = await fetch('http://localhost:4001/fileFromClient', {
+        const { remoteIp, remotePort } = this.props;
+        const urlToFetch = `http://${remoteIp}:${remotePort}/fileFromClient`;
+        const response = await fetch(urlToFetch, {
             method: 'POST',
             body: JSON.stringify({
                 file: file,
