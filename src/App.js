@@ -799,7 +799,6 @@ class App extends Component {
      * @returns {Promise}
      */
     async getFileFromCommandServer(update = false) {
-        console.log('MINE', 'getFileFromCommandServer()');
         if (
             (this.props.currentProcessingFile === null &&
                 this.state.commandServer !== null) ||
@@ -947,14 +946,6 @@ class App extends Component {
      * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
-        console.log('sendImageToCommandServer()');
-
-        // this.props.setUpload(true);
-        // this.state.commandServer.emit('fileFromClient', {
-        //     file,
-        //     fileFormat: this.props.fileFormat,
-        //     fileSuffix: this.props.fileSuffix,
-        // });
         this.props.setUpload(true);
         const response = await fetch('http://localhost:4001/fileFromClient', {
             method: 'POST',
@@ -967,8 +958,8 @@ class App extends Component {
                 'Content-Type': 'application/json',
             },
         });
-        console.log(response);
-        console.log(await response.json());
+        const jsonRes = await response.json();
+        console.log(jsonRes);
     }
 
     /**
@@ -1538,12 +1529,10 @@ class App extends Component {
                                     }
                                 )
                                 .catch((error) => {
-                                    console.log('MINE', 'Error 1');
                                     console.log(error);
                                 });
                         })
                         .catch((error) => {
-                            console.log('MINE', 'Error 2');
                             console.log(error);
                         });
                 } else {
