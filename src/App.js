@@ -95,6 +95,7 @@ import {
     loadElectronCookie,
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
+import fetch from 'cross-fetch';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -798,6 +799,7 @@ class App extends Component {
      * @returns {Promise}
      */
     async getFileFromCommandServer(update = false) {
+        console.log('MINE', 'getFileFromCommandServer()');
         if (
             (this.props.currentProcessingFile === null &&
                 this.state.commandServer !== null) ||
@@ -945,12 +947,28 @@ class App extends Component {
      * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
+        console.log('sendImageToCommandServer()');
+
+        // this.props.setUpload(true);
+        // this.state.commandServer.emit('fileFromClient', {
+        //     file,
+        //     fileFormat: this.props.fileFormat,
+        //     fileSuffix: this.props.fileSuffix,
+        // });
         this.props.setUpload(true);
-        this.state.commandServer.emit('fileFromClient', {
-            file,
-            fileFormat: this.props.fileFormat,
-            fileSuffix: this.props.fileSuffix,
+        const response = await fetch('http://localhost:4001/fileFromClient', {
+            method: 'POST',
+            body: JSON.stringify({
+                file: file,
+                fileFormat: this.props.fileFormat,
+                fileSuffix: this.props.fileSuffix,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
+        console.log(response);
+        console.log(await response.json());
     }
 
     /**
@@ -1256,7 +1274,7 @@ class App extends Component {
             ).then((cocoZip) => {
                 if (this.props.remoteOrLocal === true) {
                     cocoZip
-                        .generateAsync({ type: 'nodebuffer' })
+                        .generateAsync({ type: 'base64' })
                         .then((file) => {
                             this.sendImageToCommandServer(file)
                                 .then(
@@ -1500,7 +1518,7 @@ class App extends Component {
                 );
                 if (this.props.remoteOrLocal === true) {
                     newOra
-                        .generateAsync({ type: 'nodebuffer' })
+                        .generateAsync({ type: 'base64' })
                         .then((file) => {
                             this.props.setCurrentProcessingFile(null);
                             this.setState(
@@ -1519,9 +1537,15 @@ class App extends Component {
                                         this.props.setReceiveTime(null);
                                     }
                                 )
-                                .catch((error) => console.log(error));
+                                .catch((error) => {
+                                    console.log('MINE', 'Error 1');
+                                    console.log(error);
+                                });
                         })
-                        .catch((error) => console.log(error));
+                        .catch((error) => {
+                            console.log('MINE', 'Error 2');
+                            console.log(error);
+                        });
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
