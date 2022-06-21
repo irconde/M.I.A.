@@ -63,9 +63,6 @@ const LabelListWrapper = styled.div`
  * Visible after selecting a detection and selecting `label` from context menu.
  *
  * @component
- *
- * @param {Array<string>} labels - Available detection labels
- * @param {function} onLabelSelect - Called when label is selected
  */
 const LabelList = ({ labels, onLabelSelect }) => {
     /**

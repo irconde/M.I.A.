@@ -1,17 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
-import { COOKIE, SETTINGS } from '../../../utils/Constants';
+import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
 
 const myCookie = new Cookies();
-const cookieData = myCookie.get('settings');
+let cookieData;
+
+let ipcRenderer;
+if (isElectron()) {
+    ipcRenderer = window.require('electron').ipcRenderer;
+} else {
+    cookieData = myCookie.get('settings');
+}
 
 const storeCookieData = (settings) => {
     myCookie.set('settings', settings, {
         path: '/',
-        expires: isElectron()
-            ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-            : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        expires: new Date(Date.now() + COOKIE.WEB_TIME),
     });
 };
 
@@ -28,16 +33,52 @@ const defaultSettings = {
     firstDisplaySettings: true,
     deviceType: '',
     hasFileOutput: false,
+    displaySummarizedDetections: false,
+    loadingElectronCookie: isElectron(),
 };
 
-if (cookieData !== undefined) {
-    settings = cookieData;
+export const saveElectronCookie = createAsyncThunk(
+    'settings/saveElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        await ipcRenderer
+            .invoke(Channels.saveSettingsCookie, payload)
+            .then(() => {
+                return payload;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        return payload;
+    }
+);
+
+export const loadElectronCookie = createAsyncThunk(
+    'settings/loadElectronCookie',
+    async (payload, { rejectWithValue }) => {
+        return await ipcRenderer
+            .invoke(Channels.getSettingsCookie)
+            .then((cookie) => {
+                return cookie;
+            })
+            .catch((err) => rejectWithValue(err));
+    }
+);
+
+if (!isElectron()) {
+    if (cookieData !== undefined) {
+        settings = cookieData;
+    } else {
+        settings = defaultSettings;
+        myCookie.set('settings', defaultSettings, {
+            path: '/',
+            expires: isElectron()
+                ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
+                : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+        });
+    }
 } else {
     settings = defaultSettings;
-    myCookie.set('settings', defaultSettings, {
-        path: '/',
-        maxAge: COOKIE.TIME, // Current time is 3 hours
-    });
 }
 
 const initialState = {
@@ -49,17 +90,12 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * Sets the cookie 'settings' to the passed in object
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action - Object containing key values for settings to be set in the cookie
+         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
+         * @param {State} state
          */
-        setSettings: (state, action) => {
-            state.settings = action.payload;
-            state.settings.hasFileOutput =
-                action.payload.localFileOutput !== '' ? true : false;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+        toggleDisplaySummarizedDetections: (state) => {
+            state.settings.displaySummarizedDetections =
+                !state.settings.displaySummarizedDetections;
         },
         /**
          * Saves the current settings into a cookie
@@ -78,135 +114,79 @@ const settingsSlice = createSlice({
          */
         saveSettings: (state, action) => {
             for (let key in action.payload) {
-                if (action.payload[key] !== '') {
-                    state.settings[key] = action.payload[key];
-                }
-                // detection[key] = update[key];
+                state.settings[key] = action.payload[key];
             }
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+            if (!isElectron()) {
+                myCookie.set('settings', state.settings, {
+                    path: '/',
+                    expires: new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
+                });
+            }
         },
-
-        /**
-         * Deletes the current settings cookie and reset the settings to default
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        removeCookieData: (state) => {
-            myCookie.remove('settings');
+    },
+    /*extraReducers: (builder) => {
+        builder.addCase(loadElectronCookie.pending, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+        });
+        builder.addCase(loadElectronCookie.fulfilled, (state, action) => {
+            state.settings.loadingElectronCookie = true;
+            const { payload } = action;
+            for (let key in payload) {
+                if (payload[key] !== '') {
+                    state.settings[key] = payload[key];
+                }
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.loadingElectronCookie = false;
+        });
+    },*/
+    extraReducers: {
+        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = false;
+        },
+        [saveElectronCookie.rejected]: (state) => {
             state.settings = defaultSettings;
-            state.settings.firstDisplaySettings = true;
         },
-        /**
-         * Sets the remote ip to the passed in action payload
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String with the ip of the remote server
-         */
-        setRemoteIp: (state, action) => {
-            state.settings.remoteIp = action.payload;
+        [loadElectronCookie.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
+            }
+            state.settings.hasFileOutput =
+                payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+            state.settings.loadingElectronCookie = false;
         },
-        /**
-         * Sets the remote port to the passed in action
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String with the port of the remote server
-         */
-        setRemotePort: (state, action) => {
-            state.settings.remotePort = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+        [loadElectronCookie.pending]: (state) => {
+            state.settings.loadingElectronCookie = true;
         },
-        /**
-         * Sets whether the app should automatically connect to the command server
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action - True if should auto-connect, false if not.
-         */
-        setAutoConnect: (state, action) => {
-            state.settings.autoConnect = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file output format, ora/zip
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value determining ora or zip
-         */
-        setFileFormat: (state, action) => {
-            state.settings.fileFormat = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file annotation format
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value containing the annotation format
-         */
-        setAnnotationsFormat: (state, action) => {
-            state.settings.annotationsFormat = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the local file output path to save files to
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value of the local path
-         */
-        setLocalFileOutput: (state, action) => {
-            state.settings.localFileOutput = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Sets the file suffix
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {string} action - String value of the file suffix
-         */
-        setFileSuffix: (state, action) => {
-            state.settings.fileSuffix = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
-        },
-        /**
-         * Determines whether the App is using a local or remote service
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Boolean} action - Boolean value true = remote and false = local
-         */
-        setRemoteOrLocal: (state, action) => {
-            state.settings.remoteOrLocal = action.payload;
-            state.settings.firstDisplaySettings = false;
-            storeCookieData(state.settings);
+        [loadElectronCookie.rejected]: (state) => {
+            state.settings.loadingElectronCookie = false;
         },
     },
 });
 
 // Actions
-export const {
-    setSettings,
-    saveSettings,
-    saveCookieData,
-    removeCookieData,
-    setRemoteIp,
-    setRemotePort,
-    setAutoConnect,
-    setFileFormat,
-    setAnnotationsFormat,
-    setLocalFileOutput,
-    setFileSuffix,
-    setRemoteOrLocal,
-} = settingsSlice.actions;
+export const { saveSettings, toggleDisplaySummarizedDetections } =
+    settingsSlice.actions;
 
 // Selectors
+/**
+ * Indicates whether the display of summarized detections is enabled
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when displaying summarized detections - false renders original detections
+ */
+export const getDisplaySummarizedDetections = (state) =>
+    state.settings.settings.displaySummarizedDetections;
 /**
  * Provides the settings object
  * @param {Object} state
@@ -235,7 +215,7 @@ export const getHasFileOutput = (state) =>
 export const getLocalFileOutput = (state) =>
     state.settings.settings.localFileOutput;
 /**
- * Provides the remote connection info: ip, port, autoconnect.
+ * Provides the remote connection info: ip, port, auto-connect.
  * @param {Object} state
  * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
  */
@@ -246,6 +226,9 @@ export const getRemoteConnectionInfo = (state) => {
         autoConnect: state.settings.settings.autoConnect,
     };
 };
+
+export const getLoadingElectronCookie = (state) =>
+    state.settings.settings.loadingElectronCookie;
 
 /**
  * Determines if the settings should be displayed on first load or not
@@ -261,5 +244,7 @@ export const getFirstDisplaySettings = (state) =>
  * @returns {constants.DEVICE_TYPE}
  */
 export const getDeviceType = (state) => state.settings.settings.deviceType;
+
+export const getFileSuffix = (state) => state.settings.settings.fileSuffix;
 
 export default settingsSlice.reducer;

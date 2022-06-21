@@ -5,30 +5,44 @@ import {
     getReceivedTime,
     toggleCollapsedSideMenu,
 } from '../redux/slices/ui/uiSlice';
-import { getHasFileOutput } from '../redux/slices/settings/settingsSlice';
+import {
+    getDisplaySummarizedDetections,
+    getHasFileOutput,
+    getLocalFileOutput,
+    getRemoteOrLocal,
+} from '../redux/slices/settings/settingsSlice';
+import isElectron from 'is-electron';
 
 /**
  * Menu toggle icon in TopBar component used to toggle SideMenu component visibility.
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: cornerstone<object>, style<object>
- * @param {CornerstoneObject} cornerstone - Destructured from props -- Main cornerstone object, used to resize viewports if needed.
- * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
- *
  */
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     const visible = useSelector(getReceivedTime);
     const hasFileOutput = useSelector(getHasFileOutput);
+    const displaySummarizedDetections = useSelector(
+        getDisplaySummarizedDetections
+    );
+    const remoteOrLocal = useSelector(getRemoteOrLocal);
+    const localFileOutput = useSelector(getLocalFileOutput);
+    const desktopMode =
+        isElectron() && !remoteOrLocal && localFileOutput !== '';
     const toggleClickHandler = () => {
-        dispatch(toggleCollapsedSideMenu(props.cornerstone));
+        dispatch(
+            toggleCollapsedSideMenu({
+                cornerstone: props.cornerstone,
+                desktopMode,
+            })
+        );
     };
     const divStyle = {
         ...props.style,
         cursor: 'pointer',
     };
-    if (visible !== null || hasFileOutput) {
+    if ((visible !== null || hasFileOutput) && !displaySummarizedDetections) {
         return (
             <div style={divStyle} onClick={toggleClickHandler}>
                 <svg

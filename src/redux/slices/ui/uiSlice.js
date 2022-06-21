@@ -56,25 +56,35 @@ const uiSlice = createSlice({
         /**
          * Toggles the visibility of the side menu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {CornerstoneObject?} action.payload - Can contain cornerstone object if local file is currently open
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean;}} action.payload - Contains cornerstone object and whether in desktop mode
          */
         toggleCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode } = action.payload;
             state.collapsedSideMenu = !state.collapsedSideMenu;
-            if (state.localFileOpen) {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu,
-                    state.collapsedLazyMenu,
-                    true
-                );
-            } else {
-                Utils.calculateViewportDimensions(
-                    action.payload,
-                    state.singleViewport,
-                    state.collapsedSideMenu
-                );
-            }
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
+        },
+        /**
+         * Sets the visibility of the side menu
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         * @param {{cornerstone: CornerstoneObject; desktopMode: Boolean; newState: Boolean}} action.payload - Contains cornerstone object, whether in desktop mode, and whether sidemenu is should be open
+         */
+        setCollapsedSideMenu: (state, action) => {
+            const { cornerstone, desktopMode, collapsedSideMenu } =
+                action.payload;
+            state.collapsedSideMenu = collapsedSideMenu;
+            Utils.calculateViewportDimensions(
+                cornerstone,
+                state.singleViewport,
+                state.collapsedSideMenu,
+                desktopMode ? state.collapsedLazyMenu : true,
+                desktopMode
+            );
         },
 
         /**
@@ -800,6 +810,7 @@ export const {
     updateEditLabelPosition,
     updateRecentScroll,
     setGeneratingThumbnails,
+    setCollapsedSideMenu,
 } = uiSlice.actions;
 
 // Export the reducer for the store

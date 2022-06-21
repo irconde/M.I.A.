@@ -5,9 +5,6 @@ import PropTypes from 'prop-types';
  * File suffix icon in SettingsModal next to file suffix text-field.
  *
  * @component
- * @param {PropTypes} props - Expected props: style<object>, svgStyle<object>
- * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
- * @param {Object} svgStyle - Destructured from props -- CSS object used for stylizing SVG element
  *
  */
 const FileSuffixIcon = (props) => {

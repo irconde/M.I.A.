@@ -29,9 +29,15 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         super(props, defaultProps);
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked on mouse move to know whether the mouse pointer is
-    // over (or close to) the rectangle's border
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked on mouse move to know whether the mouse pointer is over (or close to) the rectangle's border
+     *
+     * @param {HTMLElement} element HTML Element where mouse is over
+     * @param {{handles: {start: number, end: number}}} data HTML Element where mouse is over
+     * @param {Array<number>} coords 2D point defined as a pair of coordinates (x,y)
+     * @returns {boolean}
+     */
     pointNearTool(element, data, coords, interactionType) {
         const hasStartAndEndHandles =
             data && data.handles && data.handles.start && data.handles.end;
@@ -65,8 +71,11 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         }
     }
 
-    // Method that overrides the original abstract method in the cornerstone-tools library
-    // Automatically invoked to render all the widgets that comprise a detection
+    /**
+     * Method that overrides the original abstract method in the cornerstone-tools library
+     * Automatically invoked to render all the widgets that comprise a detection
+     * @param {*} evt Event object containing necessary event/canvas data
+     */
     renderToolData(evt) {
         const toolData = csTools.getToolState(evt.currentTarget, this.name);
         if (!toolData) {
@@ -196,9 +205,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 data.handles.start
                             );
                         }
-                        var fontArr = constants.detectionStyle.LABEL_FONT.split(
-                            ' '
-                        );
+                        var fontArr =
+                            constants.detectionStyle.LABEL_FONT.split(' ');
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;
@@ -375,8 +383,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
 /**
  *
- * @param {*} startHandle
- * @param {*} endHandle
+ * @param {{x: number, y: number}} startHandle
+ * @param {{x: number, y: number}} endHandle
  * @returns {{ left: number, top: number, width: number, height: number}}
  */
 
@@ -391,10 +399,10 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
 
 /**
  *
- * @param {*} context
- * @param {*} { className, score}
- * @param {*} [options={}]
- * @returns {string[]}
+ * @param {EventData.Context} context
+ * @param {{className: string, score: string}}
+ * @param {Array<string>} [options={}]
+ * @returns {Array<string>}
  */
 
 // eslint-disable-next-line no-unused-vars
@@ -407,10 +415,9 @@ function _createTextBoxContent(context, { className, score }, options = {}) {
 
 /**
  *
- *
- * @param {*} startHandle
- * @param {*} endHandle
- * @returns {Array.<{x: number, y: number}>}
+ * @param {{x: number, y: number}} startHandle
+ * @param {{x: number, y: number}} endHandle
+ * @returns {Array<{x: number, y: number}>}
  */
 
 // eslint-disable-next-line no-unused-vars

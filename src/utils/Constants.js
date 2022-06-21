@@ -51,7 +51,7 @@ export const viewportStyle = {
 };
 
 export const RESOLUTION_UNIT = 'px';
-export const sideMenuWidth = 285;
+export const sideMenuWidth = 238;
 export const sideMenuPaddingTop = 75;
 export const cornerstoneMode = {
     SELECTION: 'selection',
@@ -105,7 +105,6 @@ export const COOKIE = {
 export const SETTINGS = {
     ANNOTATIONS: {
         COCO: 'MS COCO',
-        PASCAL: 'Pascal VOC',
         TDR: 'DICOS TDR',
     },
     OUTPUT_FORMATS: {
@@ -129,4 +128,9 @@ export const Channels = {
     saveIndFile: 'save-individual-file',
     getThumbnail: 'get-thumbnail',
     thumbnailStatus: 'thumbnail-status',
+    updateFiles: 'update-files',
+    updateCurrentFile: 'update-current-file',
+    saveSettingsCookie: 'save-settings-cookie',
+    getSettingsCookie: 'get-settings-cookie',
+    loadSettingsCookie: 'load-settings-cookie',
 };

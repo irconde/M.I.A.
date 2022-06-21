@@ -35,10 +35,10 @@ export default class Utils {
     }
 
     /**
-     * @static Converts a decimal value into a percentage
+     * Converts a decimal value into a percentage
      *
-     * @param {number} num - Float value <= 1.0 with common decimal format
-     * @returns {number} - Percentage equivalent to the given input float value
+     * @param {number} num Float value <= 1.0 with common decimal format
+     * @returns {number} Percentage equivalent to the given input float value
      */
     static decimalToPercentage(num) {
         return Math.floor(num * 100);
@@ -569,6 +569,7 @@ export default class Utils {
             function updateScreenSize() {
                 setScreenSize([window.innerWidth, window.innerHeight]);
             }
+
             window.addEventListener('resize', updateScreenSize);
             updateScreenSize();
             return () => window.removeEventListener('resize', updateScreenSize);
@@ -691,7 +692,7 @@ export default class Utils {
      * Converts a list of handles into an array of float values representing the coordinates of a polygon
      *
      * @param {Array<number>} coordArray - The coordinates of a rectangle's diagonals (x_1, y_1, x_2, y_2, ...x_n, y_n )
-     * @returns {Array<number>} - List of handles, i.e., the vertices, of a polygon
+     * @returns {Array<{x: number, y: number}>} - List of handles, i.e., the vertices, of a polygon
      */
     static coordArrayToPolygonData(coordArray) {
         let data = {};

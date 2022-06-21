@@ -5,9 +5,6 @@ import PropTypes from 'prop-types';
  * Cloud icon in SettingsModal next to the host IP address text field
  *
  * @component
- * @param {PropTypes} props - Expected props: style<object>, svgStyle<object>
- * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG container
- * @param {Object} svgStyle - Destructured from props -- CSS object used for stylizing SVG element
  *
  */
 const CloudIcon = (props) => {

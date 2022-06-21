@@ -2,10 +2,12 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import SettingsModal from '../components/SettingsModal/SettingsModal';
 import { toggleSettingsVisibility } from '../redux/slices/ui/uiSlice';
 import SettingsCog from './SettingsCog';
-import { getFirstDisplaySettings } from '../redux/slices/settings/settingsSlice';
+import {
+    getFirstDisplaySettings,
+    getLoadingElectronCookie,
+} from '../redux/slices/settings/settingsSlice';
 
 const IconStyle = styled.div`
     margin: 1rem 2.5rem 0.5rem 0rem;
@@ -20,17 +22,15 @@ const IconStyle = styled.div`
  *
  * @component
  *
- * @param {PropTypes} props - Expected props: title<string>, connectToCommandServer<function>, style<object>
- * @param {string} title - Destructured from props -- String value that is shown when hovering component
- * @param {function} connectToCommandServer - Destructured from props -- Function passed in from App.js for connecting to command server (used in testing connection in SettingsModal.)
- * @param {Object} style - Destructured from props -- CSS object used for stylizing SVG element
- *
  */
 const SettingsIcon = (props) => {
     const dispatch = useDispatch();
     const firstDisplaySettings = useSelector(getFirstDisplaySettings);
+    const loadingElectronCookie = useSelector(getLoadingElectronCookie);
     useEffect(() => {
-        if (firstDisplaySettings === true) handleOpen();
+        if (firstDisplaySettings === true && !loadingElectronCookie) {
+            handleOpen();
+        }
     }, [firstDisplaySettings]);
     const handleOpen = () => {
         dispatch(toggleSettingsVisibility(true));
@@ -47,11 +47,6 @@ const SettingsIcon = (props) => {
                     title={props.title}
                 />
             </IconStyle>
-
-            <SettingsModal
-                connectToCommandServer={
-                    props.connectToCommandServer
-                }></SettingsModal>
         </>
     );
 };
