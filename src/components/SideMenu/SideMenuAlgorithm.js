@@ -12,7 +12,6 @@ import {
     updateDetectionSetVisibility,
 } from '../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
-import { findByLabelText } from '@testing-library/react';
 
 /**
  * Helper component for SideMenu component that allows user to view and sort detections by algorithm
