@@ -96,6 +96,9 @@ import {
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
 import fetch from 'cross-fetch';
+import { Snackbar } from '@mui/material';
+import { doc } from 'prettier';
+import { keyBy } from 'lodash';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -154,6 +157,7 @@ class App extends Component {
             commandServer: null,
             timer: null,
             thumbnails: null,
+            showSnackbar: true,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -200,7 +204,19 @@ class App extends Component {
             this.startListeningClickEvents.bind(this);
         this.stopListeningClickEvents =
             this.stopListeningClickEvents.bind(this);
+        this.setShowSnackbar = this.setShowSnackbar.bind(this);
     }
+
+    /**
+     * Updates a piece of state for the snack bar to show or hide
+     *
+     * @param {boolean} show - the value the state will be set to
+     */
+    setShowSnackbar = (show) => {
+        this.setState({ showSnackbar: show }, () => {
+            console.log('showSnackBar', this.state.showSnackbar);
+        });
+    };
 
     /**
      * Houses the code to connect to a server and starts listening for connection events. Lastly it
@@ -961,7 +977,10 @@ class App extends Component {
             },
         });
         const jsonRes = await response.json();
-        console.log(jsonRes);
+        // throw error if the server failed to save the file
+        if (jsonRes.confirm !== 'file-recieved') {
+            throw 'Error when saving the file - please try again.';
+        }
     }
 
     /**
@@ -1282,7 +1301,10 @@ class App extends Component {
                                         this.getFileFromCommandServer();
                                     }
                                 )
-                                .catch((error) => console.log(error));
+                                .catch((error) => {
+                                    console.log(error);
+                                    this.setShowSnackbar(true);
+                                });
                         })
                         .catch((error) => console.log(error));
                 } else {
@@ -3620,6 +3642,14 @@ class App extends Component {
     render() {
         return (
             <div>
+                <Snackbar
+                    open={this.state.showSnackbar}
+                    autoHideDuration={2000}
+                    onClose={() => {
+                        this.setShowSnackbar(false);
+                    }}
+                    message="Error when saving the file - Please try again."
+                />
                 <div
                     id="viewerContainer"
                     style={{
