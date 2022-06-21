@@ -157,7 +157,7 @@ class App extends Component {
             commandServer: null,
             timer: null,
             thumbnails: null,
-            showSnackbar: true,
+            showSnackbar: false,
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -212,11 +212,9 @@ class App extends Component {
      *
      * @param {boolean} show - the value the state will be set to
      */
-    setShowSnackbar = (show) => {
-        this.setState({ showSnackbar: show }, () => {
-            console.log('showSnackBar', this.state.showSnackbar);
-        });
-    };
+    setShowSnackbar(show) {
+        this.setState({ showSnackbar: show });
+    }
 
     /**
      * Houses the code to connect to a server and starts listening for connection events. Lastly it
@@ -258,6 +256,7 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
             !this.props.collapsedSideMenu &&
