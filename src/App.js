@@ -2647,11 +2647,6 @@ class App extends Component {
                     self.state.myOra.stackData[stackIndex].blobData[0].blob,
                     this.props.currentFileFormat
                 ).then((newBlob) => {
-                    const uuid = uuidv4();
-                    self.state.myOra.stackData[stackIndex].blobData.push({
-                        blob: newBlob,
-                        uuid,
-                    });
                     if (data[0] === undefined) {
                         self.props.emptyAreaClickUpdate();
                         self.resetSelectedDetectionBoxes(event);
@@ -2659,6 +2654,11 @@ class App extends Component {
                     }
                     // When the updating detection is false, this means we are creating a new detection
                     if (data[0].updatingDetection === false) {
+                        const uuid = uuidv4();
+                        self.state.myOra.stackData[stackIndex].blobData.push({
+                            blob: newBlob,
+                            uuid,
+                        });
                         const operator = constants.OPERATOR;
                         if (
                             boundingBoxArea >
@@ -2697,7 +2697,6 @@ class App extends Component {
                     } else {
                         // Updating existing Detection's bounding box
                         const { uuid } = data[0];
-
                         // Only update the Detection if the boundingBox actually changes
                         if (
                             hasDetectionCoordinatesChanged(
@@ -2707,6 +2706,16 @@ class App extends Component {
                                 polygonMask
                             )
                         ) {
+                            const blobIndex = self.state.myOra.stackData[
+                                stackIndex
+                            ].blobData.findIndex(
+                                (value) => (value.uuid = uuid)
+                            );
+                            if (blobIndex !== -1) {
+                                self.state.myOra.stackData[stackIndex].blobData[
+                                    blobIndex
+                                ] = newBlob;
+                            }
                             if (
                                 this.props.selectedDetection &&
                                 this.props.editionMode !==
