@@ -2705,11 +2705,6 @@ class App extends Component {
                     self.state.myOra.stackData[stackIndex].blobData[0].blob,
                     this.props.currentFileFormat
                 ).then((newBlob) => {
-                    const uuid = uuidv4();
-                    self.state.myOra.stackData[stackIndex].blobData.push({
-                        blob: newBlob,
-                        uuid,
-                    });
                     if (data[0] === undefined) {
                         self.props.emptyAreaClickUpdate();
                         self.resetSelectedDetectionBoxes(event);
@@ -2717,6 +2712,11 @@ class App extends Component {
                     }
                     // When the updating detection is false, this means we are creating a new detection
                     if (data[0].updatingDetection === false) {
+                        const uuid = uuidv4();
+                        self.state.myOra.stackData[stackIndex].blobData.push({
+                            blob: newBlob,
+                            uuid,
+                        });
                         const operator = constants.OPERATOR;
                         if (
                             boundingBoxArea >
@@ -2755,7 +2755,6 @@ class App extends Component {
                     } else {
                         // Updating existing Detection's bounding box
                         const { uuid } = data[0];
-
                         // Only update the Detection if the boundingBox actually changes
                         if (
                             hasDetectionCoordinatesChanged(
@@ -2765,6 +2764,16 @@ class App extends Component {
                                 polygonMask
                             )
                         ) {
+                            const blobIndex = self.state.myOra.stackData[
+                                stackIndex
+                            ].blobData.findIndex(
+                                (value) => (value.uuid = uuid)
+                            );
+                            if (blobIndex !== -1) {
+                                self.state.myOra.stackData[stackIndex].blobData[
+                                    blobIndex
+                                ] = newBlob;
+                            }
                             if (
                                 this.props.selectedDetection &&
                                 this.props.editionMode !==
@@ -2827,10 +2836,10 @@ class App extends Component {
                             });
                             // Detection coordinates changed and we need to re-render the detection context widget
                             if (this.props.selectedDetection) {
-                                this.renderDetectionContextMenu(
-                                    event,
-                                    this.props.selectedDetection
-                                );
+                                this.renderDetectionContextMenu(event, {
+                                    boundingBox: coords,
+                                    view: viewport,
+                                });
                             }
                         }
                     }
@@ -3198,7 +3207,8 @@ class App extends Component {
      * Invoked when user selects a detection (callback from onMouseClicked)
      *
      * @param {Event} event - Related mouse click event to position the widget relative to detection
-     * @param {Detection} [draggedData] - Optional detection data. In the case that
+     * @param detection
+     * @param updatedZoomLevel
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      *
