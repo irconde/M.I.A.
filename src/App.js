@@ -2769,10 +2769,10 @@ class App extends Component {
                             });
                             // Detection coordinates changed and we need to re-render the detection context widget
                             if (this.props.selectedDetection) {
-                                this.renderDetectionContextMenu(
-                                    event,
-                                    this.props.selectedDetection
-                                );
+                                this.renderDetectionContextMenu(event, {
+                                    boundingBox: coords,
+                                    view: viewport,
+                                });
                             }
                         }
                     }
@@ -3140,7 +3140,8 @@ class App extends Component {
      * Invoked when user selects a detection (callback from onMouseClicked)
      *
      * @param {Event} event - Related mouse click event to position the widget relative to detection
-     * @param {Detection} [draggedData] - Optional detection data. In the case that
+     * @param detection
+     * @param updatedZoomLevel
      * a detection is moved during a drag event, the data in state is out of date until after this
      * function is called. Use the param data to render the context menu.
      *
