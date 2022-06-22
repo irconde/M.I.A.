@@ -87,7 +87,7 @@ const SideMenuDetection = ({
                 dispatch(selectDetection(detection.uuid));
                 dispatch(detectionSelectedUpdate());
                 resetCornerstoneTools();
-                renderDetectionContextMenu(e, undefined, detection);
+                renderDetectionContextMenu(e, detection);
             } else {
                 dispatch(hideContextMenuUpdate());
                 dispatch(clearAllSelection());
