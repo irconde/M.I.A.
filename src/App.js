@@ -1689,10 +1689,14 @@ class App extends Component {
                 );
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelTop;
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportTop
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[0].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportTop,
@@ -1714,10 +1718,14 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportSide
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[1].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -1767,10 +1775,13 @@ class App extends Component {
             );
             viewport.translation.y = constants.viewportStyle.ORIGIN;
             viewport.scale = self.props.zoomLevelTop;
+            const displayedArea = cornerstone.getDisplayedArea(
+                image,
+                self.state.imageViewportTop
+            );
             // eslint-disable-next-line react/no-direct-mutation-state
-            if (viewport.displayedArea !== undefined)
-                self.state.myOra.stackData[0].dimensions =
-                    viewport.displayedArea.brhc;
+            if (displayedArea !== undefined)
+                self.state.myOra.stackData[0].dimensions = displayedArea.brhc;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
@@ -1792,10 +1803,14 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportSide
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[1].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -2654,6 +2669,13 @@ class App extends Component {
                     data[0].handles.points,
                     coords
                 );
+                if (data[0].binaryMask !== undefined) {
+                    binaryMask = [
+                        data[0].binaryMask[0],
+                        [coords[0], coords[1]],
+                        [coords[2] - coords[0], coords[3] - coords[1]],
+                    ];
+                }
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
