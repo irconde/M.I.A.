@@ -1298,7 +1298,7 @@ class App extends Component {
                                         this.props.resetDetections();
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.setUpload(false);
-                                        this.getFileFromCommandServer();
+                                        this.getFileFromCommandServer(true);
                                     }
                                 )
                                 .catch((error) => {
@@ -1546,10 +1546,13 @@ class App extends Component {
                                 .then(
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.props.resetDetections();
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.setUpload(false);
-                                        this.getFileFromCommandServer();
-                                        this.props.setReceiveTime(null);
+                                        this.getFileFromCommandServer(true);
                                     }
                                 )
                                 .catch((error) => {
