@@ -205,6 +205,17 @@ class App extends Component {
         this.stopListeningClickEvents =
             this.stopListeningClickEvents.bind(this);
         this.setShowSnackbar = this.setShowSnackbar.bind(this);
+        this.handleNextImageError = this.handleNextImageError.bind(this);
+    }
+
+    /**
+     * Generic handler for errors in the next image click function
+     * @param error
+     */
+    handleNextImageError(error) {
+        this.props.setUpload(false);
+        this.props.invalidateDetections();
+        this.setShowSnackbar(true, error);
     }
 
     /**
@@ -1294,112 +1305,122 @@ class App extends Component {
                 viewports,
                 cornerstone,
                 this.props.currentFileFormat
-            ).then((cocoZip) => {
-                if (this.props.remoteOrLocal === true) {
-                    cocoZip
-                        .generateAsync({ type: 'base64' })
-                        .then((file) => {
-                            this.sendImageToCommandServer(file)
-                                .then(
-                                    // eslint-disable-next-line no-unused-vars
-                                    (res) => {
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.props.resetDetections();
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.setUpload(false);
-                                        this.getFileFromCommandServer(true);
-                                    }
-                                )
-                                .catch((error) => {
-                                    this.props.setUpload(false);
-                                    this.props.invalidateDetections();
-                                    this.setShowSnackbar(true, error);
-                                });
-                        })
-                        .catch((error) => console.log(error));
-                } else {
-                    if (isElectron() && this.props.localFileOutput !== '') {
+            )
+                .then((cocoZip) => {
+                    if (this.props.remoteOrLocal === true) {
                         cocoZip
                             .generateAsync({ type: 'base64' })
                             .then((file) => {
-                                this.sendImageToLocalDirectory(file)
-                                    .then(() => {
-                                        this.setState({
-                                            myOra: new ORA(),
-                                        });
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.resetDetections();
-                                        this.props.setReceiveTime(null);
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                    });
-                            })
-                            .catch((error) => console.log(error));
-                    } else if (isElectron()) {
-                        cocoZip
-                            .generateAsync({ type: 'base64' })
-                            .then((file) => {
-                                ipcRenderer
-                                    .invoke(
-                                        constants.Channels.saveIndFile,
-                                        file
+                                this.sendImageToCommandServer(file)
+                                    .then(
+                                        // eslint-disable-next-line no-unused-vars
+                                        (res) => {
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.props.resetDetections();
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.setUpload(false);
+                                            this.getFileFromCommandServer(true);
+                                        }
                                     )
-                                    .then((result) => {
-                                        this.setState({
-                                            myOra: new ORA(),
-                                        });
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.resetDetections();
-                                        this.props.setLocalFileOpen(false);
-                                        this.props.setReceiveTime(null);
-                                        this.onNoImageLeft();
-                                    })
                                     .catch((error) => {
-                                        console.log(error);
+                                        this.handleNextImageError(error);
                                     });
                             })
-                            .catch((error) => console.log(error));
+                            .catch((error) => {
+                                this.handleNextImageError(error);
+                            });
                     } else {
-                        cocoZip.generateAsync({ type: 'blob' }).then((file) => {
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            })
-                                .then(() => {
-                                    this.setState({
-                                        myOra: new ORA(),
-                                    });
-
-                                    this.props.setCurrentProcessingFile(null);
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.resetDetections();
-                                    this.props.setReceiveTime(null);
-                                    this.props.setLocalFileOpen(false);
-                                    this.onNoImageLeft();
+                        if (isElectron() && this.props.localFileOutput !== '') {
+                            cocoZip
+                                .generateAsync({ type: 'base64' })
+                                .then((file) => {
+                                    this.sendImageToLocalDirectory(file)
+                                        .then(() => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setReceiveTime(null);
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
                                 })
-                                .catch((error) => console.log(error));
-                        });
+                                .catch((error) => {
+                                    this.handleNextImageError(error);
+                                });
+                        } else if (isElectron()) {
+                            cocoZip
+                                .generateAsync({ type: 'base64' })
+                                .then((file) => {
+                                    ipcRenderer
+                                        .invoke(
+                                            constants.Channels.saveIndFile,
+                                            file
+                                        )
+                                        .then((result) => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setLocalFileOpen(false);
+                                            this.props.setReceiveTime(null);
+                                            this.onNoImageLeft();
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    this.handleNextImageError(error);
+                                });
+                        } else {
+                            cocoZip
+                                .generateAsync({ type: 'blob' })
+                                .then((file) => {
+                                    fileSave(file, {
+                                        fileName: `1${this.props.fileSuffix}.${
+                                            this.props.fileFormat ===
+                                            constants.SETTINGS.OUTPUT_FORMATS
+                                                .ORA
+                                                ? 'ora'
+                                                : 'zip'
+                                        }`,
+                                    })
+                                        .then(() => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setReceiveTime(null);
+                                            this.props.setLocalFileOpen(false);
+                                            this.onNoImageLeft();
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
+                                });
+                        }
                     }
-                }
-            });
-        } else if (
-            this.props.annotationsFormat ===
-            constants.SETTINGS.ANNOTATIONS.PASCAL
-        ) {
-            // Convert to PASCAL
+                })
+                .catch((error) => {
+                    this.handleNextImageError(error);
+                });
         } else if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.TDR
         ) {
@@ -1457,9 +1478,16 @@ class App extends Component {
                         stack.view === constants.viewport.TOP
                             ? viewports[0]
                             : viewports[1]
-                    ).then((blob) => {
-                        newOra.file(`data/${stack.view}_pixel_data.dcs`, blob);
-                    });
+                    )
+                        .then((blob) => {
+                            newOra.file(
+                                `data/${stack.view}_pixel_data.dcs`,
+                                blob
+                            );
+                        })
+                        .catch((error) => {
+                            this.handleNextImageError(error);
+                        });
                     listOfPromises.push(tdrPromise);
                 }
                 const topStackIndex = this.state.myOra.stackData.findIndex(
@@ -1484,19 +1512,23 @@ class App extends Component {
                             this.state.myOra.stackData[topStackIndex]
                                 .blobData[0].blob,
                             this.props.currentFileFormat
-                        ).then((threatBlob) => {
-                            newOra.file(
-                                `data/top_threat_detection_${annotationID}.dcs`,
-                                threatBlob
-                            );
-                            let newLayer = stackXML.createElement('layer');
-                            newLayer.setAttribute(
-                                'src',
-                                `data/top_threat_detection_${annotationID}.dcs`
-                            );
-                            stackElem.appendChild(newLayer);
-                            annotationID++;
-                        });
+                        )
+                            .then((threatBlob) => {
+                                newOra.file(
+                                    `data/top_threat_detection_${annotationID}.dcs`,
+                                    threatBlob
+                                );
+                                let newLayer = stackXML.createElement('layer');
+                                newLayer.setAttribute(
+                                    'src',
+                                    `data/top_threat_detection_${annotationID}.dcs`
+                                );
+                                stackElem.appendChild(newLayer);
+                                annotationID++;
+                            })
+                            .catch((error) => {
+                                this.handleNextImageError(error);
+                            });
                         listOfPromises.push(threatPromise);
                     }
                     // Loop through each detection and only the side view of the detection
@@ -1510,19 +1542,23 @@ class App extends Component {
                             this.state.myOra.stackData[sideStackIndex]
                                 .blobData[0].blob,
                             this.props.currentFileFormat
-                        ).then((threatBlob) => {
-                            newOra.file(
-                                `data/side_threat_detection_${annotationID}.dcs`,
-                                threatBlob
-                            );
-                            let newLayer = stackXML.createElement('layer');
-                            newLayer.setAttribute(
-                                'src',
-                                `data/side_threat_detection_${annotationID}.dcs`
-                            );
-                            stackElem.appendChild(newLayer);
-                            annotationID++;
-                        });
+                        )
+                            .then((threatBlob) => {
+                                newOra.file(
+                                    `data/side_threat_detection_${annotationID}.dcs`,
+                                    threatBlob
+                                );
+                                let newLayer = stackXML.createElement('layer');
+                                newLayer.setAttribute(
+                                    'src',
+                                    `data/side_threat_detection_${annotationID}.dcs`
+                                );
+                                stackElem.appendChild(newLayer);
+                                annotationID++;
+                            })
+                            .catch((error) => {
+                                this.handleNextImageError(error);
+                            });
                         listOfPromises.push(threatPromise);
                     }
                 }
@@ -1530,128 +1566,146 @@ class App extends Component {
                 imageElem.appendChild(stackElem);
             });
             const promiseOfList = Promise.all(listOfPromises);
-            promiseOfList.then(() => {
-                stackXML.appendChild(imageElem);
+            promiseOfList
+                .then(() => {
+                    stackXML.appendChild(imageElem);
 
-                newOra.file(
-                    'stack.xml',
-                    new Blob(
-                        [
-                            prolog +
-                                new XMLSerializer().serializeToString(stackXML),
-                        ],
-                        { type: 'application/xml ' }
-                    )
-                );
-                if (this.props.remoteOrLocal === true) {
-                    newOra
-                        .generateAsync({ type: 'base64' })
-                        .then((file) => {
-                            this.props.setCurrentProcessingFile(null);
-                            this.setState(
-                                {
-                                    myOra: new ORA(),
-                                },
-                                () => this.props.resetDetections()
-                            );
-                            this.sendImageToCommandServer(file)
-                                .then(
-                                    // eslint-disable-next-line no-unused-vars
-                                    (res) => {
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.props.resetDetections();
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.setUpload(false);
-                                        this.getFileFromCommandServer(true);
-                                    }
-                                )
-                                .catch((error) => {
-                                    this.props.setUpload(false);
-                                    this.props.invalidateDetections();
-                                    this.setShowSnackbar(true, error);
-                                });
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
-                } else {
-                    if (isElectron() && this.props.localFileOutput !== '') {
+                    newOra.file(
+                        'stack.xml',
+                        new Blob(
+                            [
+                                prolog +
+                                    new XMLSerializer().serializeToString(
+                                        stackXML
+                                    ),
+                            ],
+                            { type: 'application/xml ' }
+                        )
+                    );
+                    if (this.props.remoteOrLocal === true) {
                         newOra
                             .generateAsync({ type: 'base64' })
                             .then((file) => {
-                                this.sendImageToLocalDirectory(file)
-                                    .then(() => {
-                                        this.setState({
-                                            myOra: new ORA(),
-                                        });
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.resetDetections();
-                                        this.props.setReceiveTime(null);
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                    });
-                            })
-                            .catch((error) => console.log(error));
-                    } else if (isElectron()) {
-                        newOra
-                            .generateAsync({ type: 'base64' })
-                            .then((file) => {
-                                ipcRenderer
-                                    .invoke(
-                                        constants.Channels.saveIndFile,
-                                        file
-                                    )
-                                    .then((result) => {
-                                        this.setState({
-                                            myOra: new ORA(),
-                                        });
-                                        this.props.setCurrentProcessingFile(
-                                            null
-                                        );
-                                        this.resetSelectedDetectionBoxes(e);
-                                        this.props.resetDetections();
-                                        this.props.setLocalFileOpen(false);
-                                        this.props.setReceiveTime(null);
-                                        this.onNoImageLeft();
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                    });
-                            })
-                            .catch((error) => console.log(error));
-                    } else {
-                        newOra.generateAsync({ type: 'blob' }).then((file) => {
-                            fileSave(file, {
-                                fileName: `1${this.props.fileSuffix}.${
-                                    this.props.fileFormat ===
-                                    constants.SETTINGS.OUTPUT_FORMATS.ORA
-                                        ? 'ora'
-                                        : 'zip'
-                                }`,
-                            })
-                                .then(() => {
-                                    this.setState({
+                                this.props.setCurrentProcessingFile(null);
+                                this.setState(
+                                    {
                                         myOra: new ORA(),
+                                    },
+                                    () => this.props.resetDetections()
+                                );
+                                this.sendImageToCommandServer(file)
+                                    .then(
+                                        // eslint-disable-next-line no-unused-vars
+                                        (res) => {
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.props.resetDetections();
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.setUpload(false);
+                                            this.getFileFromCommandServer(true);
+                                        }
+                                    )
+                                    .catch((error) => {
+                                        this.handleNextImageError(error);
                                     });
-
-                                    this.props.setCurrentProcessingFile(null);
-                                    this.resetSelectedDetectionBoxes(e);
-                                    this.props.resetDetections();
-                                    this.props.setLocalFileOpen(false);
-                                    this.props.setReceiveTime(null);
-                                    this.onNoImageLeft();
+                            })
+                            .catch((error) => {
+                                this.handleNextImageError(error);
+                            });
+                    } else {
+                        if (isElectron() && this.props.localFileOutput !== '') {
+                            newOra
+                                .generateAsync({ type: 'base64' })
+                                .then((file) => {
+                                    this.sendImageToLocalDirectory(file)
+                                        .then(() => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setReceiveTime(null);
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
                                 })
-                                .catch((error) => console.log(error));
-                        });
+                                .catch((error) => {
+                                    this.handleNextImageError(error);
+                                });
+                        } else if (isElectron()) {
+                            newOra
+                                .generateAsync({ type: 'base64' })
+                                .then((file) => {
+                                    ipcRenderer
+                                        .invoke(
+                                            constants.Channels.saveIndFile,
+                                            file
+                                        )
+                                        .then((result) => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setLocalFileOpen(false);
+                                            this.props.setReceiveTime(null);
+                                            this.onNoImageLeft();
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    this.handleNextImageError(error);
+                                });
+                        } else {
+                            newOra
+                                .generateAsync({ type: 'blob' })
+                                .then((file) => {
+                                    fileSave(file, {
+                                        fileName: `1${this.props.fileSuffix}.${
+                                            this.props.fileFormat ===
+                                            constants.SETTINGS.OUTPUT_FORMATS
+                                                .ORA
+                                                ? 'ora'
+                                                : 'zip'
+                                        }`,
+                                    })
+                                        .then(() => {
+                                            this.setState({
+                                                myOra: new ORA(),
+                                            });
+
+                                            this.props.setCurrentProcessingFile(
+                                                null
+                                            );
+                                            this.resetSelectedDetectionBoxes(e);
+                                            this.props.resetDetections();
+                                            this.props.setLocalFileOpen(false);
+                                            this.props.setReceiveTime(null);
+                                            this.onNoImageLeft();
+                                        })
+                                        .catch((error) => {
+                                            this.handleNextImageError(error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    this.handleNextImageError(error);
+                                });
+                        }
                     }
-                }
-            });
+                })
+                .catch((error) => {
+                    this.handleNextImageError(error);
+                });
         }
     }
 

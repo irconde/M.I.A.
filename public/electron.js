@@ -225,7 +225,6 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                         }
                     );
                 })
-
                 .catch((error) => {
                     reject(error);
                 });
