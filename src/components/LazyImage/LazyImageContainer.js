@@ -95,7 +95,6 @@ function LazyImageContainer(props) {
                         );
                     })
                     .catch((error) => {
-                        // TODO: Better error handling
                         console.log(error);
                     });
             }
@@ -123,15 +122,15 @@ function LazyImageContainer(props) {
             loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
             {thumbnailSrc !== null ? (
-                    <img
-                        onLoad={() => {
-                            thumbnailHeightHandler(
-                                containerElement.current.clientHeight
-                            );
-                        }}
-                        src={thumbnailSrc}
-                        alt={thisFileName}
-                    />
+                <img
+                    onLoad={() => {
+                        thumbnailHeightHandler(
+                            containerElement.current.clientHeight
+                        );
+                    }}
+                    src={thumbnailSrc}
+                    alt={thisFileName}
+                />
             ) : null}
             <div className="lazy-image-text-container">
                 <Tooltip title={props.file}>

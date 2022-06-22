@@ -18,7 +18,6 @@ const parseString = require('xml2js').parseString;
 const sharp = require('sharp');
 const dicomParser = require('dicom-parser');
 const chokidar = require('chokidar');
-// TODO Starting App -> Loading Cookie -> Saving new Cookie Settings | Does not load the correct settings
 let mainWindow;
 let files = [];
 let thumbnails = [];

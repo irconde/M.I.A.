@@ -256,7 +256,6 @@ const SettingsModal = (props) => {
                         updateVisualizationMode();
                     })
                     .catch((error) => {
-                        // TODO: Error handling for an incorrectly typed directory
                         console.log(error);
                     });
             } else {
@@ -862,7 +861,6 @@ const SettingsModal = (props) => {
                                                     />
                                                 </div>
                                             </Tooltip>
-                                            {/* TODO: For a user typing a directory, verify it exists when finished typing */}
                                             <TextField
                                                 required
                                                 fullWidth={true}

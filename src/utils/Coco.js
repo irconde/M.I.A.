@@ -36,8 +36,6 @@ export const buildCocoDataZip = async (
         const dd = String(currentDate.getDate()).padStart(2, '0');
         const mm = String(currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
         const yyyy = currentDate.getFullYear();
-
-        // TODO: DICOS files do not have a license encoded, determine what license we need to use.
         const licenses = [
             {
                 url: '',
@@ -75,7 +73,6 @@ export const buildCocoDataZip = async (
             pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.png`);
             stackElem.appendChild(pixelLayer);
             if (currentFileFormat === SETTINGS.ANNOTATIONS.TDR) {
-                // TODO move this out of the loop....
                 const pngPromise = dicosPixelDataToPng(
                     cornerstone,
                     viewports[index]

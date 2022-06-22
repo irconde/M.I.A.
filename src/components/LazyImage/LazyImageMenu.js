@@ -15,12 +15,11 @@ import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './LazyImageContainer';
 import FileOpenIcon from '../../icons/FileOpenIcon';
+
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
-
-
 
 /**
  * Component for displaying the lazy image menu.
@@ -74,14 +73,13 @@ function LazyImageMenu(props) {
 
     function handleMenuContainerScroll(event) {
         const element = event.target;
-        if(element.scrollTop > 0){
+        if (element.scrollTop > 0) {
             setShouldAddBoxShadow(true);
-        }else{
+        } else {
             setShouldAddBoxShadow(false);
+        }
     }
-}
 
-    // TODO: Scroll to selected thumbnail
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (
@@ -115,17 +113,22 @@ function LazyImageMenu(props) {
                     style={{
                         ...translateStyle,
                     }}>
-                        <p className="images-in-workspace"
-                            style={{boxShadow: shouldAddBoxShadow && "0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)"}}>
-                            <FileOpenIcon
-                                style={svgContainerStyle}
-                                svgStyle={{
-                                    ...svgStyle,
-                                    color: '#ffffff',
-                                }}
-                            />
-                            Images in Workspace
-                        </p>
+                    <p
+                        className="images-in-workspace"
+                        style={{
+                            boxShadow:
+                                shouldAddBoxShadow &&
+                                '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
+                        }}>
+                        <FileOpenIcon
+                            style={svgContainerStyle}
+                            svgStyle={{
+                                ...svgStyle,
+                                color: '#ffffff',
+                            }}
+                        />
+                        Images in Workspace
+                    </p>
                     <div
                         className="lazy-images-container"
                         style={{
