@@ -547,7 +547,17 @@ const detectionsSlice = createSlice({
                 det.textColor = constants.detectionStyle.VALID_COLOR;
             });
         },
-
+        /**
+         * Marks all DetectionSets as invalidated, for if the app errors and cannot send the file
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        invalidateDetections: (state) => {
+            state.detections.forEach((det) => {
+                det.validation = false;
+                det.textColor = 'white';
+            });
+        },
         /**
          * Update visibility on a DetectionSet
          *
@@ -896,6 +906,7 @@ export const {
     updateDetectionVisibility,
     addMissMatchedClassName,
     updateMissMatchedClassName,
+    invalidateDetections,
 } = detectionsSlice.actions;
 
 export default detectionsSlice.reducer;

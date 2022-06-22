@@ -41,6 +41,7 @@ import {
     getSideDetections,
     getTopDetections,
     hasDetectionCoordinatesChanged,
+    invalidateDetections,
     resetDetections,
     selectDetection,
     selectDetectionSet,
@@ -96,9 +97,7 @@ import {
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
 import fetch from 'cross-fetch';
-import { Snackbar } from '@mui/material';
-import { doc } from 'prettier';
-import { keyBy } from 'lodash';
+import { Alert, Snackbar } from '@mui/material';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -158,6 +157,7 @@ class App extends Component {
             timer: null,
             thumbnails: null,
             showSnackbar: false,
+            errorMessage: '',
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -211,9 +211,10 @@ class App extends Component {
      * Updates a piece of state for the snack bar to show or hide
      *
      * @param {boolean} show - the value the state will be set to
+     * @param error
      */
-    setShowSnackbar(show) {
-        this.setState({ showSnackbar: show });
+    setShowSnackbar(show, error) {
+        this.setState({ showSnackbar: show, errorMessage: error });
     }
 
     /**
@@ -963,24 +964,34 @@ class App extends Component {
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        const { remoteIp, remotePort } = this.props;
-        const urlToFetch = `http://${remoteIp}:${remotePort}/fileFromClient`;
-        const response = await fetch(urlToFetch, {
-            method: 'POST',
-            body: JSON.stringify({
-                file: file,
-                fileFormat: this.props.fileFormat,
-                fileSuffix: this.props.fileSuffix,
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
+        return new Promise((resolve, reject) => {
+            const { remoteIp, remotePort } = this.props;
+            const urlToFetch = `http://${remoteIp}:${remotePort}/fileFromClient`;
+            fetch(urlToFetch, {
+                method: 'POST',
+                body: JSON.stringify({
+                    file: file,
+                    fileFormat: this.props.fileFormat,
+                    fileSuffix: this.props.fileSuffix,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => {
+                    response
+                        .json()
+                        .then((jsonParsed) => {
+                            if (jsonParsed.confirm === 'file-received') {
+                                resolve(jsonParsed.confirm);
+                            } else {
+                                reject(jsonParsed.confirm);
+                            }
+                        })
+                        .catch((error) => reject(error));
+                })
+                .catch((error) => reject(error));
         });
-        const jsonRes = await response.json();
-        // throw error if the server failed to save the file
-        if (jsonRes.confirm !== 'file-recieved') {
-            throw 'Error when saving the file - please try again.';
-        }
     }
 
     /**
@@ -1302,8 +1313,9 @@ class App extends Component {
                                     }
                                 )
                                 .catch((error) => {
-                                    console.log(error);
-                                    this.setShowSnackbar(true);
+                                    this.props.setUpload(false);
+                                    this.props.invalidateDetections();
+                                    this.setShowSnackbar(true, error);
                                 });
                         })
                         .catch((error) => console.log(error));
@@ -1556,7 +1568,9 @@ class App extends Component {
                                     }
                                 )
                                 .catch((error) => {
-                                    console.log(error);
+                                    this.props.setUpload(false);
+                                    this.props.invalidateDetections();
+                                    this.setShowSnackbar(true, error);
                                 });
                         })
                         .catch((error) => {
@@ -3681,13 +3695,24 @@ class App extends Component {
         return (
             <div>
                 <Snackbar
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     open={this.state.showSnackbar}
-                    autoHideDuration={2000}
-                    onClose={() => {
-                        this.setShowSnackbar(false);
-                    }}
-                    message="Error when saving the file - Please try again."
-                />
+                    autoHideDuration={3000}
+                    onClose={(event, reason) => {
+                        if (reason !== 'clickaway') {
+                            this.setShowSnackbar(false, '');
+                        }
+                    }}>
+                    <Alert
+                        severity="error"
+                        onClose={(event, reason) => {
+                            if (reason !== 'clickaway') {
+                                this.setShowSnackbar(false, '');
+                            }
+                        }}>
+                        {this.state.errorMessage}
+                    </Alert>
+                </Snackbar>
                 <div
                     id="viewerContainer"
                     style={{
@@ -3857,6 +3882,7 @@ const mapDispatchToProps = {
     loadElectronCookie,
     saveSettings,
     setCollapsedSideMenu,
+    invalidateDetections,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
