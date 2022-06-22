@@ -1970,7 +1970,7 @@ class App extends Component {
                     imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
                 imagesRight[j].bbox[3] =
                     imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
-                let boundingBox = imagesLeft[j].bbox;
+                let boundingBox = imagesRight[j].bbox;
                 let binaryMask = [
                     [],
                     [boundingBox[0], boundingBox[1]],
@@ -1979,9 +1979,9 @@ class App extends Component {
                         boundingBox[3] - boundingBox[1],
                     ],
                 ];
-                if (imagesLeft[j].segmentation.length > 0) {
+                if (imagesRight[j].segmentation.length > 0) {
                     const polygonXY = Utils.coordArrayToPolygonData(
-                        imagesLeft[j].segmentation[0]
+                        imagesRight[j].segmentation[0]
                     );
                     polygonMask = Utils.polygonDataToXYArray(
                         polygonXY,
