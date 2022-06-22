@@ -2841,7 +2841,7 @@ class App extends Component {
                                 const blobIndex = self.state.myOra.stackData[
                                     stackIndex
                                 ].blobData.findIndex(
-                                    (value) => (value.uuid = uuid)
+                                    (value) => value.uuid === uuid
                                 );
                                 if (blobIndex !== -1) {
                                     self.state.myOra.stackData[

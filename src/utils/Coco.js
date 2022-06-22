@@ -75,82 +75,77 @@ export const buildCocoDataZip = async (
             pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.png`);
             stackElem.appendChild(pixelLayer);
             if (currentFileFormat === SETTINGS.ANNOTATIONS.TDR) {
+                // TODO move this out of the loop....
                 const pngPromise = dicosPixelDataToPng(
                     cornerstone,
                     viewports[index]
                 ).then((blob) => {
                     cocoZip.file(`data/${stack.view}_pixel_data.png`, blob);
+                    for (let i = 1; i < stack.blobData.length; i++) {
+                        const detection = detections.find(
+                            (det) => det.uuid === stack.blobData[i].uuid
+                        );
+                        if (detection !== undefined) {
+                            let annotations = [];
+                            annotations.push({
+                                id: annotationID,
+                                image_id: imageID,
+                                className: detection.className,
+                                confidence: detection.confidence,
+                                iscrowd: 0,
+                                category_id: 55,
+                                area: Math.abs(
+                                    (detection.boundingBox[0] -
+                                        detection.boundingBox[2]) *
+                                        (detection.boundingBox[1] -
+                                            detection.boundingBox[3])
+                                ),
+                                bbox: [
+                                    detection.boundingBox[0],
+                                    detection.boundingBox[1],
+                                    detection.binaryMask[2][0],
+                                    detection.binaryMask[2][1],
+                                ],
+                                segmentation:
+                                    detection.polygonMask.length > 0
+                                        ? [
+                                              Utils.polygonDataToCoordArray(
+                                                  detection.polygonMask
+                                              ),
+                                          ]
+                                        : [],
+                            });
+                            const info = {
+                                description: 'Annotated file from Pilot GUI',
+                                contributor: 'Pilot GUI',
+                                url: '',
+                                version: '1.0',
+                                year: currentDate.getFullYear(),
+                                data_created: `${yyyy}/${mm}/${dd}`,
+                                algorithm: detection.algorithm,
+                            };
+                            const cocoDataset = {
+                                info,
+                                licenses,
+                                images,
+                                annotations,
+                                categories,
+                            };
+                            cocoZip.file(
+                                `data/${stack.view}_annotation_${annotationID}.json`,
+                                JSON.stringify(cocoDataset, null, 4)
+                            );
+                            const newLayer = stackXML.createElement('layer');
+                            newLayer.setAttribute(
+                                'src',
+                                `data/${stack.view}_annotation_${annotationID}.json`
+                            );
+                            stackElem.appendChild(newLayer);
+                            annotationID++;
+                        }
+                    }
                 });
                 listOfPromises.push(pngPromise);
-
-                for (let i = 1; i < stack.blobData.length; i++) {
-                    const detection = detections.find(
-                        (det) => det.uuid === stack.blobData[i].uuid
-                    );
-                    if (detection !== undefined) {
-                        let annotations = [];
-                        // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
-                        //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
-                        annotations.push({
-                            id: annotationID,
-                            image_id: imageID,
-                            className: detection.className,
-                            confidence: detection.confidence,
-                            iscrowd: 0,
-                            // TODO: Implement better category selection for annotations
-                            category_id: 55,
-                            // TODO: Area for polygon masks is not the polygon mask but the bbox
-                            //       For accuracy, need to find area of a polygon mask if it exists
-                            area: Math.abs(
-                                (detection.boundingBox[0] -
-                                    detection.boundingBox[2]) *
-                                    (detection.boundingBox[1] -
-                                        detection.boundingBox[3])
-                            ),
-                            bbox: [
-                                detection.boundingBox[0],
-                                detection.boundingBox[1],
-                                detection.binaryMask[2][0],
-                                detection.binaryMask[2][1],
-                            ],
-                            segmentation:
-                                detection.polygonMask.length > 0
-                                    ? [
-                                          Utils.polygonDataToCoordArray(
-                                              detection.polygonMask
-                                          ),
-                                      ]
-                                    : [],
-                        });
-                        const info = {
-                            description: 'Annotated file from Pilot GUI',
-                            contributor: 'Pilot GUI',
-                            url: '',
-                            version: '1.0',
-                            year: currentDate.getFullYear(),
-                            data_created: `${yyyy}/${mm}/${dd}`,
-                            algorithm: detection.algorithm,
-                        };
-                        const cocoDataset = {
-                            info,
-                            licenses,
-                            images,
-                            annotations,
-                            categories,
-                        };
-                        cocoZip.file(
-                            `data/${stack.view}_annotation_${annotationID}.json`,
-                            JSON.stringify(cocoDataset, null, 4)
-                        );
-                        const newLayer = stackXML.createElement('layer');
-                        newLayer.setAttribute(
-                            'src',
-                            `data/${stack.view}_annotation_${annotationID}.json`
-                        );
-                        stackElem.appendChild(newLayer);
-                        annotationID++;
-                    }
-                }
             } else if (currentFileFormat === SETTINGS.ANNOTATIONS.COCO) {
                 cocoZip.file(
                     `data/${stack.view}_pixel_data.png`,
@@ -163,18 +158,13 @@ export const buildCocoDataZip = async (
                     });
                     if (detection !== undefined) {
                         let annotations = [];
-                        // TODO: Binary Masks can be presented differently in COCO via run-length-encoding in COCO
-                        //       Or, RLE for short. Which is the segmentation field but uses size and count with iscrowd = 1
                         annotations.push({
                             id: annotationID,
                             image_id: imageID,
                             className: detection.className,
                             confidence: detection.confidence,
                             iscrowd: 0,
-                            // TODO: Implement better category selection for annotations
                             category_id: 55,
-                            // TODO: Area for polygon masks is not the polygon mask but the bbox
-                            //       For accuracy, need to find area of a polygon mask if it exists
                             area: Math.abs(
                                 (detection.boundingBox[0] -
                                     detection.boundingBox[2]) *
