@@ -41,6 +41,7 @@ import {
     getSideDetections,
     getTopDetections,
     hasDetectionCoordinatesChanged,
+    invalidateDetections,
     resetDetections,
     selectDetection,
     selectDetectionSet,
@@ -95,6 +96,8 @@ import {
     loadElectronCookie,
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
+import fetch from 'cross-fetch';
+import { Alert, Snackbar } from '@mui/material';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -153,6 +156,8 @@ class App extends Component {
             commandServer: null,
             timer: null,
             thumbnails: null,
+            showSnackbar: false,
+            errorMessage: '',
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -199,6 +204,17 @@ class App extends Component {
             this.startListeningClickEvents.bind(this);
         this.stopListeningClickEvents =
             this.stopListeningClickEvents.bind(this);
+        this.setShowSnackbar = this.setShowSnackbar.bind(this);
+    }
+
+    /**
+     * Updates a piece of state for the snack bar to show or hide
+     *
+     * @param {boolean} show - the value the state will be set to
+     * @param error
+     */
+    setShowSnackbar(show, error) {
+        this.setState({ showSnackbar: show, errorMessage: error });
     }
 
     /**
@@ -241,6 +257,7 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
             !this.props.collapsedSideMenu &&
@@ -941,16 +958,39 @@ class App extends Component {
     }
 
     /**
-     * Emits a new message to send a file to the server
+     * Sends a post request to the file server to save the file
      *
      * @param {Blob} file - File sent to the server
      */
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
-        this.state.commandServer.emit('fileFromClient', {
-            file,
-            fileFormat: this.props.fileFormat,
-            fileSuffix: this.props.fileSuffix,
+        return new Promise((resolve, reject) => {
+            const { remoteIp, remotePort } = this.props;
+            const urlToFetch = `http://${remoteIp}:${remotePort}/fileFromClient`;
+            fetch(urlToFetch, {
+                method: 'POST',
+                body: JSON.stringify({
+                    file: file,
+                    fileFormat: this.props.fileFormat,
+                    fileSuffix: this.props.fileSuffix,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => {
+                    response
+                        .json()
+                        .then((jsonParsed) => {
+                            if (jsonParsed.confirm === 'file-received') {
+                                resolve(jsonParsed.confirm);
+                            } else {
+                                reject(jsonParsed.confirm);
+                            }
+                        })
+                        .catch((error) => reject(error));
+                })
+                .catch((error) => reject(error));
         });
     }
 
@@ -1257,7 +1297,7 @@ class App extends Component {
             ).then((cocoZip) => {
                 if (this.props.remoteOrLocal === true) {
                     cocoZip
-                        .generateAsync({ type: 'nodebuffer' })
+                        .generateAsync({ type: 'base64' })
                         .then((file) => {
                             this.sendImageToCommandServer(file)
                                 .then(
@@ -1269,16 +1309,20 @@ class App extends Component {
                                         this.props.resetDetections();
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.setUpload(false);
-                                        this.getFileFromCommandServer();
+                                        this.getFileFromCommandServer(true);
                                     }
                                 )
-                                .catch((error) => console.log(error));
+                                .catch((error) => {
+                                    this.props.setUpload(false);
+                                    this.props.invalidateDetections();
+                                    this.setShowSnackbar(true, error);
+                                });
                         })
                         .catch((error) => console.log(error));
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         cocoZip
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
@@ -1299,7 +1343,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         cocoZip
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
@@ -1501,7 +1545,7 @@ class App extends Component {
                 );
                 if (this.props.remoteOrLocal === true) {
                     newOra
-                        .generateAsync({ type: 'nodebuffer' })
+                        .generateAsync({ type: 'base64' })
                         .then((file) => {
                             this.props.setCurrentProcessingFile(null);
                             this.setState(
@@ -1514,19 +1558,28 @@ class App extends Component {
                                 .then(
                                     // eslint-disable-next-line no-unused-vars
                                     (res) => {
+                                        this.props.setCurrentProcessingFile(
+                                            null
+                                        );
+                                        this.props.resetDetections();
                                         this.resetSelectedDetectionBoxes(e);
                                         this.props.setUpload(false);
-                                        this.getFileFromCommandServer();
-                                        this.props.setReceiveTime(null);
+                                        this.getFileFromCommandServer(true);
                                     }
                                 )
-                                .catch((error) => console.log(error));
+                                .catch((error) => {
+                                    this.props.setUpload(false);
+                                    this.props.invalidateDetections();
+                                    this.setShowSnackbar(true, error);
+                                });
                         })
-                        .catch((error) => console.log(error));
+                        .catch((error) => {
+                            console.log(error);
+                        });
                 } else {
                     if (isElectron() && this.props.localFileOutput !== '') {
                         newOra
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 this.sendImageToLocalDirectory(file)
                                     .then(() => {
@@ -1547,7 +1600,7 @@ class App extends Component {
                             .catch((error) => console.log(error));
                     } else if (isElectron()) {
                         newOra
-                            .generateAsync({ type: 'nodebuffer' })
+                            .generateAsync({ type: 'base64' })
                             .then((file) => {
                                 ipcRenderer
                                     .invoke(
@@ -1653,10 +1706,14 @@ class App extends Component {
                 );
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelTop;
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportTop
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[0].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportTop,
@@ -1678,10 +1735,14 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportSide
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[1].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -1731,10 +1792,13 @@ class App extends Component {
             );
             viewport.translation.y = constants.viewportStyle.ORIGIN;
             viewport.scale = self.props.zoomLevelTop;
+            const displayedArea = cornerstone.getDisplayedArea(
+                image,
+                self.state.imageViewportTop
+            );
             // eslint-disable-next-line react/no-direct-mutation-state
-            if (viewport.displayedArea !== undefined)
-                self.state.myOra.stackData[0].dimensions =
-                    viewport.displayedArea.brhc;
+            if (displayedArea !== undefined)
+                self.state.myOra.stackData[0].dimensions = displayedArea.brhc;
             self.setState({ viewport: viewport });
             cornerstone.displayImage(
                 self.state.imageViewportTop,
@@ -1756,10 +1820,14 @@ class App extends Component {
                     self.state.imageViewportSide,
                     image
                 );
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportSide
+                );
                 // eslint-disable-next-line react/no-direct-mutation-state
-                if (viewport.displayedArea !== undefined)
+                if (displayedArea !== undefined)
                     self.state.myOra.stackData[1].dimensions =
-                        viewport.displayedArea.brhc;
+                        displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -2618,6 +2686,13 @@ class App extends Component {
                     data[0].handles.points,
                     coords
                 );
+                if (data[0].binaryMask !== undefined) {
+                    binaryMask = [
+                        data[0].binaryMask[0],
+                        [coords[0], coords[1]],
+                        [coords[2] - coords[0], coords[3] - coords[1]],
+                    ];
+                }
                 newDetection = {
                     uuid: data[0].uuid,
                     boundingBox: coords,
@@ -3619,6 +3694,25 @@ class App extends Component {
     render() {
         return (
             <div>
+                <Snackbar
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    open={this.state.showSnackbar}
+                    autoHideDuration={3000}
+                    onClose={(event, reason) => {
+                        if (reason !== 'clickaway') {
+                            this.setShowSnackbar(false, '');
+                        }
+                    }}>
+                    <Alert
+                        severity="error"
+                        onClose={(event, reason) => {
+                            if (reason !== 'clickaway') {
+                                this.setShowSnackbar(false, '');
+                            }
+                        }}>
+                        {this.state.errorMessage}
+                    </Alert>
+                </Snackbar>
                 <div
                     id="viewerContainer"
                     style={{
@@ -3788,6 +3882,7 @@ const mapDispatchToProps = {
     loadElectronCookie,
     saveSettings,
     setCollapsedSideMenu,
+    invalidateDetections,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

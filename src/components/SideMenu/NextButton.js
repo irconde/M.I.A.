@@ -55,6 +55,7 @@ const NextButtonContainer = styled.div`
     font-weight: bold;
     font-size: 12pt;
     height: 75px;
+    cursor: pointer;
 
     opacity: ${(props) => (props.enabled ? '100%' : '38%')};
 

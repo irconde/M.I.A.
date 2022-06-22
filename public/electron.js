@@ -181,14 +181,20 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
         // NOTE: Check if file suffix is empty, if so then save file to original path.
         if (args.fileSuffix === '') {
             const filePath = `${args.fileDirectory}/${args.fileName}`;
-            fs.writeFile(filePath, args.file, (error) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    currentFileIndex++;
-                    resolve('File saved');
+
+            fs.writeFile(
+                filePath,
+                args.file,
+                { encoding: 'base64' },
+                (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        currentFileIndex++;
+                        resolve('File saved');
+                    }
                 }
-            });
+            );
         }
         // NOTE: Otherwise save file to the original directory.
         else {
@@ -205,14 +211,19 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
                         args.fileDirectory
                     );
 
-                    fs.writeFile(filePath, args.file, (error) => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            currentFileIndex++;
-                            resolve('File saved');
+                    fs.writeFile(
+                        filePath,
+                        args.file,
+                        { encoding: 'base64' },
+                        (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                currentFileIndex++;
+                                resolve('File saved');
+                            }
                         }
-                    });
+                    );
                 })
 
                 .catch((error) => {
@@ -230,15 +241,20 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        dialog.showSaveDialog({}).then((cancelled, filePath) => {
+        dialog.showSaveDialog({}).then(({ cancelled, filePath }) => {
             if (!cancelled) {
-                fs.writeFile(filePath, args, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
+                fs.writeFile(
+                    filePath,
+                    args,
+                    { encoding: 'base64' },
+                    (error) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve();
+                        }
                     }
-                });
+                );
             } else {
                 reject('Save cancelled');
             }
