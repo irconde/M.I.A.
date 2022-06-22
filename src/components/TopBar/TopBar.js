@@ -104,9 +104,10 @@ const TopBar = (props) => {
             cursor: 'pointer',
             display: 'flex',
             height: 'inherit',
-            width: 'inherit',
             alignItems: 'center',
-            position: 'absolute',
+            position: 'fixed',
+            float: 'left',
+            left: '0',
         },
         openFileText: {
             marginRight: '1.5rem',
@@ -147,7 +148,7 @@ const TopBar = (props) => {
                         <div style={styles.verticalDivider} />
                     </div>
                 )}
-                {processingFile} &nbsp;
+                <span>{processingFile} &nbsp;</span>
             </div>
             <div style={styles.connectionStatusIconsContainer}>
                 {remoteOrLocal === true ||
