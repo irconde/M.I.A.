@@ -235,24 +235,20 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  * For when a user is selecting a single file and saving it. Displays a file dialog and saves
  * the sent file data
  * @param {Buffer} args - Binary data to be saved
- * @returns {Promise}
+ * @returns {Promise} - resolved with a boolean indicating whether the dialog was canceled or not
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
     return new Promise((resolve, reject) => {
         dialog.showSaveDialog({}).then(({ canceled, filePath }) => {
             if (canceled) {
-                reject('Save canceled');
+                resolve(canceled);
             } else {
                 fs.writeFile(
                     filePath,
                     args,
                     { encoding: 'base64' },
                     (error) => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            resolve();
-                        }
+                        error ? reject(error) : resolve(canceled);
                     }
                 );
             }

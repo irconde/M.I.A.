@@ -210,14 +210,16 @@ class App extends Component {
 
     /**
      * Generic handler for errors in the next image click function
-     * @param error
+     *
+     * @param {Error} error
+     * @param {boolean} showSnackbar - if true, show the snackbar with error
      */
-    handleNextImageError(error) {
+    handleNextImageError(error, showSnackbar = true) {
         this.props.setUpload(false);
         this.props.invalidateDetections();
-        // show snackbar with error
         const errorMsg = typeof error === 'object' ? error.message : error;
-        this.setShowSnackbar(true, errorMsg);
+        // show the snackbar based on param
+        showSnackbar && this.setShowSnackbar(true, errorMsg);
     }
 
     /**
@@ -1370,7 +1372,11 @@ class App extends Component {
                                             constants.Channels.saveIndFile,
                                             file
                                         )
-                                        .then((result) => {
+                                        .then((dialogCanceled) => {
+                                            // if save file dialog is canceled then don't do anything
+                                            if (dialogCanceled) {
+                                                return;
+                                            }
                                             this.setState({
                                                 myOra: new ORA(),
                                             });
@@ -1384,6 +1390,7 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            // handle the error and show snackbar
                                             this.handleNextImageError(error);
                                         });
                                 })
@@ -1652,7 +1659,11 @@ class App extends Component {
                                             constants.Channels.saveIndFile,
                                             file
                                         )
-                                        .then((result) => {
+                                        .then((dialogCanceled) => {
+                                            // if save file dialog is canceled then don't do anything
+                                            if (dialogCanceled) {
+                                                return;
+                                            }
                                             this.setState({
                                                 myOra: new ORA(),
                                             });
@@ -1666,6 +1677,7 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            // handle the error and show snackbar
                                             this.handleNextImageError(error);
                                         });
                                 })
