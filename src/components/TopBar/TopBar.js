@@ -8,6 +8,7 @@ import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import {
+    getFirstDisplaySettings,
     getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
@@ -25,6 +26,7 @@ const TopBar = (props) => {
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
     const localFileOutput = useSelector(getLocalFileOutput);
+    const firstDisplaySettings = useSelector(getFirstDisplaySettings);
 
     const {
         processingFile,
@@ -115,7 +117,7 @@ const TopBar = (props) => {
             fontSize: 'medium',
         },
     };
-    return processingFile ? (
+    return processingFile || isConnected ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
@@ -188,7 +190,27 @@ const TopBar = (props) => {
         </div>
     ) : (
         <div>
-            <div style={styles.titleLabelContainer}></div>
+            <div style={styles.titleLabelContainer}>
+                {/*TODO*/}
+                {!remoteOrLocal &&
+                localFileOutput === '' &&
+                !firstDisplaySettings ? (
+                    <div
+                        style={styles.openFileContainer}
+                        onClick={() => props.getFileFromLocal()}>
+                        <OpenIcon
+                            title="Open File"
+                            style={{
+                                marginRight: '0.75rem',
+                                marginLeft: '1.5rem',
+                                display: 'inherit',
+                            }}
+                        />
+                        <span style={styles.openFileText}>OPEN FILE</span>
+                        <div style={styles.verticalDivider} />
+                    </div>
+                ) : null}
+            </div>
             <div style={styles.connectionStatusIconsContainer}>
                 <SettingsIcon
                     style={styles.icon}
