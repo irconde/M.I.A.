@@ -8,6 +8,7 @@ import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import {
+    getFirstDisplaySettings,
     getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
@@ -25,6 +26,7 @@ const TopBar = (props) => {
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
     const localFileOutput = useSelector(getLocalFileOutput);
+    const firstDisplaySettings = useSelector(getFirstDisplaySettings);
 
     const {
         processingFile,
@@ -115,7 +117,7 @@ const TopBar = (props) => {
             fontSize: 'medium',
         },
     };
-    return processingFile ? (
+    return processingFile || isConnected ? (
         <div style={{ width: '100%' }}>
             <div style={styles.titleLabelContainer}>
                 {remoteOrLocal === true ||
@@ -189,18 +191,10 @@ const TopBar = (props) => {
     ) : (
         <div>
             <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
-                        <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
-                        <span style={styles.typeInfo}>Connected to </span>
-                        &nbsp;&nbsp;
-                        {connectedServer !== null
-                            ? connectedServer
-                            : localFileOutput}{' '}
-                        &nbsp; &nbsp;&nbsp;
-                    </React.Fragment>
-                ) : (
+                {/*TODO*/}
+                {!remoteOrLocal &&
+                localFileOutput === '' &&
+                !firstDisplaySettings ? (
                     <div
                         style={styles.openFileContainer}
                         onClick={() => props.getFileFromLocal()}>
@@ -215,42 +209,13 @@ const TopBar = (props) => {
                         <span style={styles.openFileText}>OPEN FILE</span>
                         <div style={styles.verticalDivider} />
                     </div>
-                )}
-                {processingFile} &nbsp;
+                ) : null}
             </div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
-                        <FileQueueIcon
-                            title="Number of Files"
-                            numberOfFiles={numberOfFiles}
-                            style={styles.icon}
-                        />
-                        {remoteOrLocal === true ? (
-                            <React.Fragment>
-                                <FileUploadStatus
-                                    isDownload={isDownload}
-                                    isUpload={isUpload}
-                                    styles={styles.icon}
-                                />
-                                <ConnectionStatus
-                                    isConnected={isConnected}
-                                    style={styles.icon}
-                                />
-                            </React.Fragment>
-                        ) : null}
-                    </React.Fragment>
-                ) : null}
-                <div style={styles.verticalDivider}></div>
                 <SettingsIcon
                     style={styles.icon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
-                />
-                <MenuToggleIcon
-                    style={styles.lastIcon}
-                    cornerstone={props.cornerstone}
                 />
             </div>
         </div>
