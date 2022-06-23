@@ -950,7 +950,6 @@ class App extends Component {
     getSpecificFileFromLocalDirectory(filePath) {
         if (isElectron()) {
             if (this.props.selectedDetection) {
-                this.resetSelectedDetectionBoxes();
                 this.props.resetSelectedDetectionBoxesUpdate();
                 this.props.updateFABVisibility(true);
             }
