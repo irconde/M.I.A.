@@ -188,69 +188,12 @@ const TopBar = (props) => {
         </div>
     ) : (
         <div>
-            <div style={styles.titleLabelContainer}>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
-                        <span style={styles.divider}>&#8427;</span>&nbsp;&nbsp;
-                        <span style={styles.typeInfo}>Connected to </span>
-                        &nbsp;&nbsp;
-                        {connectedServer !== null
-                            ? connectedServer
-                            : localFileOutput}{' '}
-                        &nbsp; &nbsp;&nbsp;
-                    </React.Fragment>
-                ) : (
-                    <div
-                        style={styles.openFileContainer}
-                        onClick={() => props.getFileFromLocal()}>
-                        <OpenIcon
-                            title="Open File"
-                            style={{
-                                marginRight: '0.75rem',
-                                marginLeft: '1.5rem',
-                                display: 'inherit',
-                            }}
-                        />
-                        <span style={styles.openFileText}>OPEN FILE</span>
-                        <div style={styles.verticalDivider} />
-                    </div>
-                )}
-                {processingFile} &nbsp;
-            </div>
+            <div style={styles.titleLabelContainer}></div>
             <div style={styles.connectionStatusIconsContainer}>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
-                        <FileQueueIcon
-                            title="Number of Files"
-                            numberOfFiles={numberOfFiles}
-                            style={styles.icon}
-                        />
-                        {remoteOrLocal === true ? (
-                            <React.Fragment>
-                                <FileUploadStatus
-                                    isDownload={isDownload}
-                                    isUpload={isUpload}
-                                    styles={styles.icon}
-                                />
-                                <ConnectionStatus
-                                    isConnected={isConnected}
-                                    style={styles.icon}
-                                />
-                            </React.Fragment>
-                        ) : null}
-                    </React.Fragment>
-                ) : null}
-                <div style={styles.verticalDivider}></div>
                 <SettingsIcon
                     style={styles.icon}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
-                />
-                <MenuToggleIcon
-                    style={styles.lastIcon}
-                    cornerstone={props.cornerstone}
                 />
             </div>
         </div>
