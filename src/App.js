@@ -302,7 +302,8 @@ class App extends Component {
         if (
             this.state.commandServer === null &&
             nextProps.remoteOrLocal === true &&
-            !nextProps.loadingElectronCookie
+            !nextProps.loadingElectronCookie &&
+            !nextProps.firstDisplaySettings
         ) {
             this.connectToCommandServer();
             if (
