@@ -239,8 +239,10 @@ ipcMain.handle(Constants.Channels.saveCurrentFile, async (event, args) => {
  */
 ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
     return new Promise((resolve, reject) => {
-        dialog.showSaveDialog({}).then(({ cancelled, filePath }) => {
-            if (!cancelled) {
+        dialog.showSaveDialog({}).then(({ canceled, filePath }) => {
+            if (canceled) {
+                reject('Save canceled');
+            } else {
                 fs.writeFile(
                     filePath,
                     args,
@@ -253,8 +255,6 @@ ipcMain.handle(Constants.Channels.saveIndFile, async (event, args) => {
                         }
                     }
                 );
-            } else {
-                reject('Save cancelled');
             }
         });
     });

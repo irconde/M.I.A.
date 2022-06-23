@@ -1678,6 +1678,7 @@ class App extends Component {
                                                 'MINE',
                                                 'Electron and single file 2'
                                             );
+                                            console.log(error);
                                             this.handleNextImageError(error);
                                         });
                                 })
