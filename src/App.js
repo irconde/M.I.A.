@@ -1384,10 +1384,6 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            console.log(
-                                                'MINE',
-                                                'electron and single file'
-                                            );
                                             this.handleNextImageError(error);
                                         });
                                 })
@@ -1422,10 +1418,6 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            console.log(
-                                                'MINE',
-                                                'react and single file'
-                                            );
                                             this.handleNextImageError(error);
                                         });
                                 });
@@ -1674,11 +1666,6 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            console.log(
-                                                'MINE',
-                                                'Electron and single file 2'
-                                            );
-                                            console.log(error);
                                             this.handleNextImageError(error);
                                         });
                                 })
@@ -1713,10 +1700,6 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            console.log(
-                                                'MINE',
-                                                'react and single file 2'
-                                            );
                                             this.handleNextImageError(error);
                                         });
                                 })
