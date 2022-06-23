@@ -1425,7 +1425,14 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            this.handleNextImageError(error);
+                                            // don't show error message if the save dialog is closed
+                                            const showSnackbar =
+                                                error.message !==
+                                                'The user aborted a request.';
+                                            this.handleNextImageError(
+                                                error,
+                                                showSnackbar
+                                            );
                                         });
                                 });
                         }
@@ -1712,7 +1719,14 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
-                                            this.handleNextImageError(error);
+                                            // don't show error message if the save dialog is closed
+                                            const showSnackbar =
+                                                error.message !==
+                                                'The user aborted a request.';
+                                            this.handleNextImageError(
+                                                error,
+                                                showSnackbar
+                                            );
                                         });
                                 })
                                 .catch((error) => {
