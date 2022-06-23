@@ -215,7 +215,9 @@ class App extends Component {
     handleNextImageError(error) {
         this.props.setUpload(false);
         this.props.invalidateDetections();
-        this.setShowSnackbar(true, error);
+        // show snackbar with error
+        const errorMsg = typeof error === 'object' ? error.message : error;
+        this.setShowSnackbar(true, errorMsg);
     }
 
     /**
@@ -1382,6 +1384,10 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            console.log(
+                                                'MINE',
+                                                'electron and single file'
+                                            );
                                             this.handleNextImageError(error);
                                         });
                                 })
@@ -1416,6 +1422,10 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            console.log(
+                                                'MINE',
+                                                'react and single file'
+                                            );
                                             this.handleNextImageError(error);
                                         });
                                 });
@@ -1664,6 +1674,10 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            console.log(
+                                                'MINE',
+                                                'Electron and single file 2'
+                                            );
                                             this.handleNextImageError(error);
                                         });
                                 })
@@ -1698,6 +1712,10 @@ class App extends Component {
                                             this.onNoImageLeft();
                                         })
                                         .catch((error) => {
+                                            console.log(
+                                                'MINE',
+                                                'react and single file 2'
+                                            );
                                             this.handleNextImageError(error);
                                         });
                                 })
