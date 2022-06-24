@@ -69,6 +69,8 @@ const EditLabel = ({ onLabelChange }) => {
     const newLabel = useSelector(getInputLabel);
     const inputField = useRef(null);
 
+    const formattedLabels = labels.filter((label) => label !== 'unknown');
+
     const placeholder = 'Input text';
     const arrowOrientation = {
         UP: 'up',
@@ -164,7 +166,7 @@ const EditLabel = ({ onLabelChange }) => {
                 {isListOpen && (
                     <LabelList
                         width={width}
-                        labels={labels}
+                        labels={formattedLabels}
                         onLabelSelect={submitFromList}
                     />
                 )}
