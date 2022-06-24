@@ -1,4 +1,4 @@
-# Pilot GUI version 4.3.5
+# Pilot GUI version 4.5.8
 
 The Pilot GUI is conceived as the client side of the decision support system developed in the pilot project. This client
 has the primary goal of allowing the end-user - that is, the x-ray machine operator - to visually check the multiple
