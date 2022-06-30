@@ -158,6 +158,7 @@ class App extends Component {
             thumbnails: null,
             showSnackbar: false,
             errorMessage: '',
+            localWorkspaceError: '',
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -322,7 +323,8 @@ class App extends Component {
             this.props.currentProcessingFile === null &&
             nextProps.currentProcessingFile === null &&
             !fetchingFromLocalDirectory &&
-            !nextProps.remoteOrLocal
+            !nextProps.remoteOrLocal &&
+            this.state.localWorkspaceError !== 'end-of-queue'
         ) {
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
@@ -884,6 +886,9 @@ class App extends Component {
                 .then((result) => {
                     fetchingFromLocalDirectory = false;
                     this.props.setLocalFileOpen(true);
+                    this.setState({
+                        localWorkspaceError: '',
+                    });
                     this.loadNextImage(
                         result.file,
                         result.fileName,
@@ -897,7 +902,10 @@ class App extends Component {
                         error.toString() ===
                         "Error: Error invoking remote method 'get-next-file': End of queue"
                     ) {
-                        console.log('end of queue');
+                        this.props.invalidateDetections();
+                        this.setState({
+                            localWorkspaceError: 'end-of-queue',
+                        });
                     } else {
                         this.props.setLocalFileOpen(false);
                         this.props.setReceiveTime(null);
@@ -1054,6 +1062,8 @@ class App extends Component {
         const verticalDivider = document.getElementById('verticalDivider');
         verticalDivider.classList.add('dividerHidden');
         verticalDivider.classList.remove('dividerVisible');
+        this.props.setReceiveTime(null);
+        this.props.setCurrentProcessingFile(null);
         this.props.setNumFilesInQueue(0);
         this.props.updateFABVisibility(false);
         this.setState({

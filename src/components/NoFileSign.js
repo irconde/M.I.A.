@@ -1,12 +1,15 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
-import { getNumFilesInQueue } from '../redux/slices/server/serverSlice';
+import {
+    getCurrentFile,
+    getNumFilesInQueue,
+} from '../redux/slices/server/serverSlice';
 import {
     getHasFileOutput,
+    getLocalFileOutput,
     getRemoteOrLocal,
 } from '../redux/slices/settings/settingsSlice';
-import { getLocalFileOpen } from '../redux/slices/ui/uiSlice';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
@@ -15,11 +18,35 @@ import { getLocalFileOpen } from '../redux/slices/ui/uiSlice';
  * @component
  */
 const NoFileSign = () => {
+    let isVisible;
     const numberOfFiles = useSelector(getNumFilesInQueue);
-    const localFileOpen = useSelector(getLocalFileOpen);
-    let isVisible = numberOfFiles <= 0 ? false : true;
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
+    const currentFile = useSelector(getCurrentFile);
+    const localFileOutput = useSelector(getLocalFileOutput);
+    if (remoteOrLocal) {
+        // Connected to a remote host and determining if files are in queue
+        if (numberOfFiles > 0) {
+            isVisible = false;
+        } else {
+            isVisible = true;
+        }
+    } else {
+        // Offline mode
+        if (localFileOutput !== '' && localFileOutput !== null) {
+            // Local workspace determination
+            isVisible = false;
+        } else {
+            // Single selection determination
+            if (currentFile === '' || currentFile === null) {
+                isVisible = true;
+            } else {
+                isVisible = false;
+            }
+        }
+    }
+    /*((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal))*/
+
     const paragraphStyle = {
         fontWeight: '500',
         marginTop: '0.0rem',
@@ -43,9 +70,7 @@ const NoFileSign = () => {
         width: '90%',
         height: '90%',
     };
-    if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
-        return <div></div>;
-    } else {
+    if (isVisible) {
         return (
             <div style={divStyle}>
                 <NoFilesIcon title="NoFilesAvailable" style={imgStyle} />
@@ -60,7 +85,7 @@ const NoFileSign = () => {
                 </p>
             </div>
         );
-    }
+    } else return null;
 };
 
 export default NoFileSign;
