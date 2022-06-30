@@ -89,7 +89,8 @@ function LazyImageMenu(props) {
                     style={{
                         ...translateStyle,
                         transition: 'none',
-                    }}>
+                    }}
+                    >
                     <div
                         style={{
                             height:
