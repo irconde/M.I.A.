@@ -13,7 +13,7 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
-import LazyImageContainer from './LazyImageContainer';
+import LazyImageContainer from './lazy-image-container.component';
 import FileOpenIcon from '../../icons/FileOpenIcon';
 
 let ipcRenderer;

@@ -1,6 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 import Utils from '../../utils/Utils';
@@ -11,26 +10,12 @@ import TwoViewIcon from '../../icons/TwoViewIcon';
 import SingleViewIcon from '../../icons/SingleViewIcon';
 import AnnotationsIcon from '../../icons/AnnotationsIcon';
 import Tooltip from '@mui/material/Tooltip';
+import { ImageContainer } from './lazy-image-container.styles';
 
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
-
-const ImageContainer = styled.div`
-    display: flex;
-    border: ${(props) =>
-        props.selected ? '4px solid #367eff' : '1px solid fff'};
-    overflow-x: hidden;
-    margin: 0 16px 60px 0;
-    border-radius: 6px;
-    background-color: #242424;
-    justify-content: center;
-    width: 197px;
-    height: ${(props) =>
-        props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
-    cursor: pointer;
-`;
 
 /**
  * Container component for the lazy image thumbnails

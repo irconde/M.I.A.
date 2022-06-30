@@ -90,7 +90,7 @@ import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
-import LazyImageMenu from './components/LazyImage/LazyImageMenu';
+import LazyImageMenu from './components/lazy-image/LazyImageMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import {
     loadElectronCookie,
