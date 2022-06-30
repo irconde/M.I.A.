@@ -88,7 +88,7 @@ import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/Color/ColorPicker';
-import MetaData from './components/Snackbars/meta-data.component';
+import MetaDataComponent from './components/snackbars/meta-data.component';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
@@ -3892,7 +3892,7 @@ class App extends Component {
                         />
                     ) : null}
                     <NoFileSignComponent />
-                    <MetaData />
+                    <MetaDataComponent />
                 </div>
                 {this.props.loadingElectronCookie === false ? (
                     <SettingsModal

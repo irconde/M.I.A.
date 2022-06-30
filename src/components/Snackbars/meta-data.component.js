@@ -21,7 +21,7 @@ import {
  * object detection algorithm
  *
  */
-const MetaData = () => {
+const MetaDataComponent = () => {
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
     const isVisible = selectedAlgorithm !== '' ? true : false;
     const configInfo = useSelector(getConfigInfo);
@@ -60,8 +60,8 @@ const MetaData = () => {
     }
 };
 
-MetaData.propTypes = {
+MetaDataComponent.propTypes = {
     isVisible: PropTypes.bool,
 };
 
-export default MetaData;
+export default MetaDataComponent;

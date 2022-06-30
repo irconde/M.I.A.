@@ -16,8 +16,7 @@ export const MetaDataGroup = styled.p`
     color: white;
 `;
 export const StyledMetaData = styled.div`
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-inline: 1rem;
     position: fixed;
     top: 5rem;
     // Width of screen - side menu width / 2
