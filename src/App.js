@@ -16,7 +16,7 @@ import NextButton from './components/side-menu/next-button.component';
 import SaveButton from './components/side-menu/save-button.component';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
-import NoFileSign from './components/no-file-sign.component';
+import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
@@ -3891,7 +3891,7 @@ class App extends Component {
                             thumbnails={this.state.thumbnails}
                         />
                     ) : null}
-                    <NoFileSign />
+                    <NoFileSignComponent />
                     <MetaData />
                 </div>
                 {this.props.loadingElectronCookie === false ? (
