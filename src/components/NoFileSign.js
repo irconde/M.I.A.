@@ -45,8 +45,6 @@ const NoFileSign = () => {
             }
         }
     }
-    /*((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal))*/
-
     const paragraphStyle = {
         fontWeight: '500',
         marginTop: '0.0rem',
