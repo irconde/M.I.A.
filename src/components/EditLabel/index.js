@@ -12,6 +12,7 @@ import {
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
+import { ReactComponent as ClearTextIcon } from '../../icons/ic_close.svg';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -25,6 +26,7 @@ const EditLabelWrapper = styled.div`
     .inputContainer {
         display: flex;
         justify-content: space-between;
+        align-items: center;
 
         .newLabelInput {
             background-color: transparent;
@@ -49,6 +51,9 @@ const EditLabelWrapper = styled.div`
             &::placeholder {
                 color: ${constants.colors.WHITE};
             }
+        }
+        .clearTextIcon {
+            width: fit-content;
         }
     }
 `;
@@ -151,6 +156,7 @@ const EditLabel = ({ onLabelChange }) => {
                         disabled={isListOpen}
                         ref={inputField}
                     />
+                    <ClearTextIcon className="clearTextIcon" />
                     <ArrowIcon
                         handleClick={() => {
                             setIsListOpen(!isListOpen);
