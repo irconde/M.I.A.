@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import '../../App.css';
-import NextButton from './NextButton';
+import NextButton from './next-button.component';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
-import SideMenuAlgorithm from './SideMenuAlgorithm';
+import SideMenuAlgorithm from './side-menu-algorithm.component';
 import {
     getCollapsedSideMenu,
     getReceivedTime,
@@ -14,7 +14,7 @@ import {
     getHasFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import SaveButton from './SaveButton';
+import SaveButton from './save-button.component';
 import Utils from '../../utils/Utils';
 
 /**

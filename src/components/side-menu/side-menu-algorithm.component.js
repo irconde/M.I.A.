@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import TreeDetection from './SideMenuDetection';
+import TreeDetection from './side-menu-detection.component';
 import * as Icons from './Icons';
 import * as constants from '../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
@@ -124,8 +124,8 @@ const SideMenuAlgorithm = ({
 
     let algorithmDisplay =
         algorithm === constants.OPERATOR
-                        ? algorithm
-                        : constants.ALGORITHM + ' - ' + algorithm;
+            ? algorithm
+            : constants.ALGORITHM + ' - ' + algorithm;
 
     algorithmDisplay = Utils.truncateString(algorithmDisplay, 20);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Info } from '../SideMenu/Icons';
+import { Info } from '../side-menu/Icons';
 import { useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
