@@ -73,6 +73,7 @@ const EditLabel = ({ onLabelChange }) => {
     const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
     const inputField = useRef(null);
+    const [showClearIcon, setShowClearIcon] = useState(false);
 
     const formattedLabels = labels.filter((label) => label !== 'unknown');
 
@@ -97,6 +98,7 @@ const EditLabel = ({ onLabelChange }) => {
         // Reset label list visibility when component is hidden
         if (!isVisible) {
             setIsListOpen(false);
+            setShowClearIcon(false);
         }
     }, [isVisible, isListOpen]);
 
@@ -128,6 +130,17 @@ const EditLabel = ({ onLabelChange }) => {
         return diff * zoom;
     };
 
+    /**
+     * Triggered when the edit label input field is changed. Shows and hides the clear icon
+     *
+     * @param {Event} e - change event object
+     */
+    const handleLabelInputChange = (e) => {
+        const { value } = e.target;
+        setShowClearIcon(value.length ? true : false);
+        dispatch(setInputLabel(value.toUpperCase()));
+    };
+
     if (isVisible) {
         return (
             <EditLabelWrapper
@@ -147,16 +160,14 @@ const EditLabel = ({ onLabelChange }) => {
                         className="newLabelInput"
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
-                        onChange={(e) =>
-                            dispatch(
-                                setInputLabel(e.target.value.toUpperCase())
-                            )
-                        }
+                        onChange={handleLabelInputChange}
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
                         ref={inputField}
                     />
-                    <ClearTextIcon className="clearTextIcon" />
+                    {showClearIcon && (
+                        <ClearTextIcon className="clearTextIcon" />
+                    )}
                     <ArrowIcon
                         handleClick={() => {
                             setIsListOpen(!isListOpen);
