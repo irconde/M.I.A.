@@ -25,7 +25,7 @@ import {
     MainWidget,
     IconContainer,
     DeleteWidget
-} from './detection-context-menu.styles'
+} from './detection-context-menu.styles';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
