@@ -83,11 +83,11 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
-import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
+import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
 import EditLabel from './components/EditLabel';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
-import ColorPicker from './components/Color/ColorPicker';
+import ColorPicker from './components/color/ColorPicker';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/LazyImage/LazyImageMenu';
