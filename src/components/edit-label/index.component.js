@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import LabelList from './LabelList';
+import LabelList from './label-list.component';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
