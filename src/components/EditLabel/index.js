@@ -166,7 +166,13 @@ const EditLabel = ({ onLabelChange }) => {
                         ref={inputField}
                     />
                     {showClearIcon && (
-                        <ClearTextIcon className="clearTextIcon" />
+                        <ClearTextIcon
+                            className="clearTextIcon"
+                            onClick={() => {
+                                setShowClearIcon(false);
+                                dispatch(setInputLabel(''));
+                            }}
+                        />
                     )}
                     <ArrowIcon
                         handleClick={() => {
