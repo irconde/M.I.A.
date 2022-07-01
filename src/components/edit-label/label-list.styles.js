@@ -33,25 +33,26 @@ export const LabelListWrapper = styled.div`
         height: 0;
         display: none;
     }
+`;
 
-    /* label list */
-    .labels {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        text-transform: uppercase;
-        color: ${constants.colors.BLUE};
+export const LabelList = styled.ul`
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-transform: uppercase;
+    color: ${constants.colors.BLUE};
 
-        li {
-            margin-top: 0.25rem;
-            margin-bottom: 0.25rem;
-        }
-        .divider {
-            border-bottom: 1px solid #e8e8e8;
-        }
-
-        & > *:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+    /* styles for list elements */
+    li {
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
     }
+
+    & > *:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+`;
+
+export const LabelDivider = styled.div`
+    border-bottom: 1px solid #e8e8e8;
 `;
