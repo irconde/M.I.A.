@@ -24,7 +24,8 @@ import {
     FlexContainer,
     MainWidget,
     IconContainer,
-    DeleteWidget
+    DeleteWidget,
+    StyledSelectedDetection
 } from './detection-context-menu.styles';
 
 /**
@@ -32,7 +33,7 @@ import {
  *
  * @component
  */
-const DetectionContextMenu = ({ setSelectedOption }) => {
+const DetectionContextMenuComponent = ({ setSelectedOption }) => {
     const selectedDetectionColor = useSelector(getSelectedDetectionColor);
     const selectedOption = useSelector(getEditionMode);
     const isVisible = useSelector(getIsDetectionContextVisible);
@@ -70,14 +71,7 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
                             <IconContainer
                                 onClick={() => handleClick(editionMode.COLOR)}
                                 selected={selectedOption === editionMode.COLOR}>
-                                <div
-                                    style={{
-                                        width: '16px',
-                                        height: '16px',
-                                        border: 'solid 2px #464646',
-                                        backgroundColor: selectedDetectionColor,
-                                    }}
-                                />
+                                <StyledSelectedDetection selectedDetectionColor={selectedDetectionColor}/>
                             </IconContainer>
                         </Tooltip>
                         {detectionType !== constants.detectionType.BINARY && (
@@ -136,11 +130,11 @@ const DetectionContextMenu = ({ setSelectedOption }) => {
     }
 };
 
-DetectionContextMenu.propTypes = {
+DetectionContextMenuComponent.propTypes = {
     /**
      * Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
      */
     setSelectedOption: PropTypes.func.isRequired,
 };
 
-export default DetectionContextMenu;
+export default DetectionContextMenuComponent;

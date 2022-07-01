@@ -68,3 +68,10 @@ export const DeleteWidget = styled.div`
         background: ${detectionContextStyle.HOVER_COLOR};
     }
 `;
+
+export const StyledSelectedDetection = styled.div`
+    width: 16px;
+    height: 16px;
+    border: solid 2px #464646;
+    background-color: ${(props) => props.selectedDetectionColor};
+`;
