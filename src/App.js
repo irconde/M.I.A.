@@ -12,8 +12,8 @@ import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
 import TapDetector from './utils/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
-import NextButton from './components/side-menu/next-button.component';
-import SaveButton from './components/side-menu/save-button.component';
+import NextButtonComponent from './components/side-menu/next-button.component';
+import SaveButtonComponent from './components/side-menu/save-button.component';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
@@ -3863,12 +3863,12 @@ class App extends Component {
                     />
                     {this.props.remoteOrLocal === true ||
                     (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
-                        <NextButton
+                        <NextButtonComponent
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
                         />
                     ) : (
-                        <SaveButton
+                        <SaveButtonComponent
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
                         />

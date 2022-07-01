@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import NextButton from './next-button.component';
+import NextButtonComponent from './next-button.component';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithmComponent from './side-menu-algorithm.component';
@@ -12,7 +12,7 @@ import {
     getHasFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import SaveButton from './save-button.component';
+import SaveButtonComponent from './save-button.component';
 import {
     SideMenuContainer,
     SideMenuList,
@@ -65,9 +65,9 @@ const SideMenuComponent = ({
                             : null}
                     </SideMenuList>
                     {remoteOrLocal || hasFileOutput ? (
-                        <NextButton nextImageClick={nextImageClick} />
+                        <NextButtonComponent nextImageClick={nextImageClick} />
                     ) : (
-                        <SaveButton nextImageClick={nextImageClick} />
+                        <SaveButtonComponent nextImageClick={nextImageClick} />
                     )}
                 </SideMenuListWrapper>
             </SideMenuContainer>
