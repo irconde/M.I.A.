@@ -22,7 +22,7 @@ import * as constants from '../../utils/Constants';
  * @component
  */
 
-const ColorPicker = () => {
+const ColorPickerComponent = () => {
     const isVisible = useSelector(getColorPickerVisible);
     const detectionContextPosition = useSelector(getDetectionContextPosition);
     const zoomLevels = useSelector(getZoomLevels);
@@ -94,7 +94,7 @@ const ColorPicker = () => {
     };
     if (isVisible === true) {
         return (
-            <div style={containerStyle}>
+            <div style={{containerStyle}}>
                 <TwitterPicker
                     color={color}
                     onChangeComplete={(color) => colorChangeComplete(color)}
@@ -107,4 +107,4 @@ const ColorPicker = () => {
     }
 };
 
-export default ColorPicker;
+export default ColorPickerComponent;

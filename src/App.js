@@ -87,7 +87,7 @@ import DetectionContextMenu from './components/detection-context/detection-conte
 import EditLabel from './components/edit-label/index.component';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
-import ColorPicker from './components/color/ColorPicker';
+import ColorPicker from './components/color/color-picker.component';
 import MetaData from './components/Snackbars/MetaData';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
