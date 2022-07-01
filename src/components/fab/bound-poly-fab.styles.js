@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/Constants';
+import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
+import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 
 export const FABContainer = styled.div`
     position: absolute;
@@ -38,21 +40,25 @@ export const FABContainer = styled.div`
     &:hover {
         cursor: pointer;
     }
+`;
 
-    .divider {
-        height: 1.5rem;
-        border-left: 1px solid #575757;
-        margin-left: 1rem;
-        margin-right: 1rem;
-    }
+export const FABoption = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
 
-    .fabOption {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+export const StyledRectangleIcon = styled(RectangleIcon)`
+    margin-right: 0.5rem;
+`;
 
-        .icon {
-            margin-right: 0.5rem;
-        }
-    }
+export const FABdivider = styled.div`
+    height: 1.5rem;
+    border-left: 1px solid #575757;
+    margin-left: 1rem;
+    margin-right: 1rem;
+`;
+
+export const StyledPolygonIcon = styled(PolygonIcon)`
+    margin-right: 0.5rem;
 `;

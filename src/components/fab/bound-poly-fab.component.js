@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
-import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 import * as constants from '../../utils/Constants';
 import { useSelector } from 'react-redux';
 import {
@@ -17,7 +15,13 @@ import {
 } from '../../redux/slices/settings/settingsSlice';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
-import { FABContainer } from './bound-poly-fab.styles';
+import { 
+    FABContainer, 
+    FABdivider, 
+    FABoption, 
+    StyledPolygonIcon,
+    StyledRectangleIcon,
+} from './bound-poly-fab.styles';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
@@ -35,7 +39,7 @@ import { FABContainer } from './bound-poly-fab.styles';
  *
  *
  */
-const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
+const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
     const isVisible = useSelector(getIsFabVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
@@ -104,29 +108,23 @@ const BoundPolyFAB = ({ onBoundingSelect, onPolygonSelect }) => {
             show={show}
             deviceType={deviceType}>
             <Tooltip title="Create box annotation" placement="bottom">
-                <div
-                    className="fabOption"
-                    onClick={(e) => handleClick(e, onBoundingSelect)}>
-                    <RectangleIcon className="icon" />
+                <FABoption onClick={(e) => handleClick(e, onBoundingSelect)}>
+                    <StyledRectangleIcon/>
                     <span>Bounding box</span>
-                </div>
+                </FABoption>
             </Tooltip>
-            <div className="divider"></div>
+            <FABdivider/>
             <Tooltip title="Create mask annotation" placement="bottom">
-                <div
-                    className="fabOption"
-                    onClick={(e) => {
-                        handleClick(e, onPolygonSelect);
-                    }}>
-                    <PolygonIcon className="icon" />
+                <FABoption onClick={(e) => {handleClick(e, onPolygonSelect);}}>
+                    <StyledPolygonIcon/>
                     <span>Polygon mask</span>
-                </div>
+                </FABoption>
             </Tooltip>
         </FABContainer>
     );
 };
 
-BoundPolyFAB.propTypes = {
+BoundPolyFABComponent.propTypes = {
     /**
      * Callback for bounding box selection
      */
@@ -137,4 +135,4 @@ BoundPolyFAB.propTypes = {
     onPolygonSelect: PropTypes.func.isRequired,
 };
 
-export default BoundPolyFAB;
+export default BoundPolyFABComponent;
