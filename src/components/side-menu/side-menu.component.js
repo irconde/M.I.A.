@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import NextButtonComponent from './next-button.component';
+import NextButtonComponent from './buttons/next-button.component';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithmComponent from './side-menu-algorithm.component';
@@ -12,7 +12,7 @@ import {
     getHasFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import SaveButtonComponent from './save-button.component';
+import SaveButtonComponent from './buttons/save-button.component';
 import {
     SideMenuContainer,
     SideMenuList,

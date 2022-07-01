@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getCollapsedSideMenu } from '../../redux/slices/ui/uiSlice';
-import { getDetectionChanged } from '../../redux/slices/detections/detectionsSlice';
-import SaveIcon from '../../icons/SaveIcon';
+import { getCollapsedSideMenu } from '../../../redux/slices/ui/uiSlice';
+import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
+import SaveIcon from '../../../icons/SaveIcon';
 import { Fab } from '@mui/material';
 
 import {

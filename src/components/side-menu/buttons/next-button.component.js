@@ -1,19 +1,19 @@
 import React from 'react';
-import nextIcon from '../../icons/navigate_next.png';
+import nextIcon from '../../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
     getCornerstoneMode,
-} from '../../redux/slices/ui/uiSlice';
-import * as constants from '../../utils/Constants';
-import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
+} from '../../../redux/slices/ui/uiSlice';
+import * as constants from '../../../utils/Constants';
+import { getSelectedDetection } from '../../../redux/slices/detections/detectionsSlice';
 import {
     getConnected,
     getNumFilesInQueue,
-} from '../../redux/slices/server/serverSlice';
+} from '../../../redux/slices/server/serverSlice';
 import { Fab } from '@mui/material';
-import { getLocalFileOutput } from '../../redux/slices/settings/settingsSlice';
+import { getLocalFileOutput } from '../../../redux/slices/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     CollapsedButtonContainer,
