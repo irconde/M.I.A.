@@ -52,7 +52,7 @@ export const viewportStyle = {
 
 export const RESOLUTION_UNIT = 'px';
 export const sideMenuWidth = 238;
-export const sideMenuPaddingTop = 75;
+export const sideMenuPaddingTop = 55;
 export const cornerstoneMode = {
     SELECTION: 'selection',
     ANNOTATION: 'annotation',

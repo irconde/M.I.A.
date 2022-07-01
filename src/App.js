@@ -11,7 +11,7 @@ import ORA from './utils/ORA.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
 import TapDetector from './utils/TapDetector';
-import SideMenu from './components/side-menu/side-menu-component';
+import SideMenuComponent from './components/side-menu/side-menu.component';
 import NextButton from './components/side-menu/next-button.component';
 import SaveButton from './components/side-menu/save-button.component';
 import TopBar from './components/TopBar/TopBar';
@@ -3854,7 +3854,7 @@ class App extends Component {
                         getFileFromLocal={this.getFileFromLocal}
                         cornerstone={cornerstone}
                     />
-                    <SideMenu
+                    <SideMenuComponent
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
                         renderDetectionContextMenu={

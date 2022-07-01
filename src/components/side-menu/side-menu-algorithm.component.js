@@ -14,7 +14,7 @@ import {
 import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
 
 /**
- * Helper component for SideMenu component that allows user to view and sort detections by algorithm
+ * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
  *
  * @component
  *
