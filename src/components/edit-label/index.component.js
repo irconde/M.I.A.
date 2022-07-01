@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import LabelList from './label-list.component';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
@@ -11,7 +10,12 @@ import {
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
-import { EditLabelWrapper } from './index.styles';
+import { 
+    EditLabelWrapper, 
+    InputContainer, 
+    NewLabelInput,
+} from './index.styles';
+import LabelListComponent from './label-list.component';
 
 /**
  * Widget for editing a selected detection's label.
@@ -19,7 +23,7 @@ import { EditLabelWrapper } from './index.styles';
  * List of labels is visible when toggled by arrow button.
  * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabel = ({ onLabelChange }) => {
+const EditLabelComponent = ({ onLabelChange }) => {
     const dispatch = useDispatch();
     const reduxInfo = useSelector(getDetectionContextInfo);
     const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
@@ -97,9 +101,8 @@ const EditLabel = ({ onLabelChange }) => {
                 left={position.left}
                 width={width}
                 fontSize={getFontSize(font)}>
-                <div className="inputContainer">
-                    <input
-                        className="newLabelInput"
+                <InputContainer>
+                    <NewLabelInput
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
                         onChange={(e) =>
@@ -122,9 +125,9 @@ const EditLabel = ({ onLabelChange }) => {
                         }
                         color={constants.colors.WHITE}
                     />
-                </div>
+                </InputContainer>
                 {isListOpen && (
-                    <LabelList
+                    <LabelListComponent
                         width={width}
                         labels={formattedLabels}
                         onLabelSelect={submitFromList}
@@ -143,7 +146,7 @@ function getFontSize(str) {
     return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
 }
 
-EditLabel.propTypes = {
+EditLabelComponent.propTypes = {
     onLabelChange: PropTypes.func.isRequired,
 };
-export default EditLabel;
+export default EditLabelComponent;
