@@ -1,4 +1,18 @@
 import styled from 'styled-components';
+import React from 'react';
+import TwoViewIcon from '../../icons/TwoViewIcon';
+import SingleViewIcon from '../../icons/SingleViewIcon';
+import AnnotationsIcon from '../../icons/AnnotationsIcon';
+
+const svgContainerStyle = { 
+    marginRight: '4px', 
+    marginLeft:  '4px', 
+};
+const svgImageStyle = { 
+    width: '20px',
+    height: '20px',
+};
+
 
 export const ImageContainer = styled.div`
     display: flex;
@@ -14,3 +28,52 @@ export const ImageContainer = styled.div`
         props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
     cursor: pointer;
 `;
+
+export const LazyImageTextContainer = styled.div`
+    display: flex;
+    position: absolute;
+    margin-top: 93%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    width: 80%;
+`;
+
+export const LazyImageText = styled.span`
+    display: inline-block;
+    opacity: 0.6;
+    font-size: 12px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: -0.5px;
+    color: #e3e3e3;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 117px;
+    margin-right: 4px;
+`;
+
+export const StyledTwoViewIcon = () => {
+    <TwoViewIcon
+        style={svgContainerStyle}
+        svgStyle={svgImageStyle}
+    />
+}
+
+export const StyledSingleViewIcon = () => {
+    <SingleViewIcon
+        style={svgContainerStyle}
+        svgStyle={svgImageStyle}
+    />
+}
+
+export const StyledAnnotationsIcon = () => {
+    <AnnotationsIcon
+        style={svgContainerStyle}
+        svgStyle={svgImageStyle}
+    />
+}

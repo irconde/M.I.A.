@@ -135,7 +135,7 @@ body {
     align-items: flex-start;
 } */
 
-.lazy-image-text-container {
+/* .lazy-image-text-container {
     display: flex;
     position: absolute;
     margin-top: 93%;
@@ -161,7 +161,7 @@ body {
     text-overflow: ellipsis;
     max-width: 117px;
     margin-right: 4px;
-}
+} */
 
 /* .images-in-workspace {
     width: 100%;

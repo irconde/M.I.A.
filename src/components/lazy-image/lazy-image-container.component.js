@@ -6,11 +6,15 @@ import Utils from '../../utils/Utils';
 import { Channels } from '../../utils/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
-import TwoViewIcon from '../../icons/TwoViewIcon';
-import SingleViewIcon from '../../icons/SingleViewIcon';
-import AnnotationsIcon from '../../icons/AnnotationsIcon';
 import Tooltip from '@mui/material/Tooltip';
-import { ImageContainer } from './lazy-image-container.styles';
+import { 
+    ImageContainer, 
+    LazyImageText, 
+    LazyImageTextContainer, 
+    StyledAnnotationsIcon, 
+    StyledSingleViewIcon, 
+    StyledTwoViewIcon 
+} from './lazy-image-container.styles';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -23,7 +27,7 @@ if (isElectron()) {
  * @component
  *
  */
-function LazyImageContainer(props) {
+function LazyImageContainerComponent(props) {
     const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState('auto');
@@ -97,8 +101,8 @@ function LazyImageContainer(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
-    const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
-    const svgImageStyle = { width: '20px', height: '20px' };
+    // const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
+    // const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
             ref={containerElement}
@@ -117,33 +121,24 @@ function LazyImageContainer(props) {
                     alt={thisFileName}
                 />
             ) : null}
-            <div className="lazy-image-text-container">
+            <LazyImageTextContainer>
                 <Tooltip title={props.file}>
-                    <span className="lazy-image-text">{thisFileName}</span>
+                    <LazyImageText>{thisFileName}</LazyImageText>
                 </Tooltip>
                 {numOfViews > 1 ? (
-                    <TwoViewIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
-                    />
+                    <StyledTwoViewIcon/>
                 ) : (
-                    <SingleViewIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
-                    />
+                    <StyledSingleViewIcon/>
                 )}
                 {isDetections === true ? (
-                    <AnnotationsIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
-                    />
+                    <StyledAnnotationsIcon/>
                 ) : null}
-            </div>
+            </LazyImageTextContainer>
         </ImageContainer>
     );
 }
 
-LazyImageContainer.propTypes = {
+LazyImageContainerComponent.propTypes = {
     /**
      * Name of file
      */
@@ -154,4 +149,4 @@ LazyImageContainer.propTypes = {
     getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 
-export default LazyImageContainer;
+export default LazyImageContainerComponent;
