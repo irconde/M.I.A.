@@ -14,7 +14,13 @@ import {
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './lazy-image-container.component';
-import FileOpenIcon from '../../icons/FileOpenIcon';
+import {
+    LazyImageMenuContainer,
+    LazyImagesContainer,
+    LazyImageMenuPadding,
+    ImagesInWorkspace,
+    StyledFileOpenIcon,
+} from './lazy-image-menu.styles';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -27,7 +33,7 @@ if (isElectron()) {
  * @component
  *
  */
-function LazyImageMenu(props) {
+function LazyImageMenuComponent(props) {
     const dispatch = useDispatch();
     ipcRenderer.on(constants.Channels.thumbnailStatus, (event, status) => {
         dispatch(setGeneratingThumbnails(status));
@@ -38,16 +44,9 @@ function LazyImageMenu(props) {
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const desktopMode =
         isElectron() && fileOutputPath !== '' && remoteOrLocal === false;
-    const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
-    const svgContainerStyle = {
-        float: 'left',
-        display: 'flex',
-        alignItems: 'center',
-        marginRight: '10px',
-    };
     const svgStyle = {
         height: '24px',
         width: '24px',
@@ -83,58 +82,25 @@ function LazyImageMenu(props) {
     if (enableMenu) {
         if (desktopMode && collapsedLazyMenu) {
             return (
-                <div
-                    className="lazy-image-menu-container"
+                <LazyImageMenuContainer
                     onScroll={handleMenuContainerScroll}
-                    style={{
-                        ...translateStyle,
-                        transition: 'none',
-                    }}
-                    >
-                    <div
-                        style={{
-                            height:
-                                constants.sideMenuPaddingTop +
-                                constants.RESOLUTION_UNIT,
-                            width: '100%',
-                        }}></div>
-                    <div
-                        className="lazy-images-container"
-                        style={{
-                            width: sideMenuWidth,
-                            height: document.documentElement.clientHeight,
-                        }}></div>
-                </div>
+                    translateStyle={translateStyle}>
+                    <LazyImageMenuPadding />
+                    <LazyImagesContainer
+                        collapsedLazyMenu={collapsedLazyMenu}
+                    />
+                </LazyImageMenuContainer>
             );
         } else if (desktopMode && !collapsedLazyMenu) {
             return (
-                <div
-                    className="lazy-image-menu-container"
+                <LazyImageMenuContainer
                     onScroll={handleMenuContainerScroll}
-                    style={{
-                        ...translateStyle,
-                    }}>
-                    <p
-                        className="images-in-workspace"
-                        style={{
-                            boxShadow:
-                                shouldAddBoxShadow &&
-                                '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
-                        }}>
-                        <FileOpenIcon
-                            style={svgContainerStyle}
-                            svgStyle={{
-                                ...svgStyle,
-                                color: '#ffffff',
-                            }}
-                        />
+                    translateStyle={translateStyle}>
+                    <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
+                        <StyledFileOpenIcon svgStyle={{ ...svgStyle }} />
                         Images in Workspace
-                    </p>
-                    <div
-                        className="lazy-images-container"
-                        style={{
-                            width: sideMenuWidth,
-                        }}>
+                    </ImagesInWorkspace>
+                    <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
                         {props.thumbnails !== null
                             ? props.thumbnails.map((file, index) => {
                                   return (
@@ -148,14 +114,14 @@ function LazyImageMenu(props) {
                                   );
                               })
                             : null}
-                    </div>
-                </div>
+                    </LazyImagesContainer>
+                </LazyImageMenuContainer>
             );
         } else return null;
     } else return null;
 }
 
-LazyImageMenu.propTypes = {
+LazyImageMenuComponent.propTypes = {
     /**
      * Array with string values to the file path of thumbnails,
      * IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png', ...]
@@ -167,4 +133,4 @@ LazyImageMenu.propTypes = {
     getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 
-export default LazyImageMenu;
+export default LazyImageMenuComponent;
