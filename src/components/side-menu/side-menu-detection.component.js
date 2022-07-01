@@ -21,7 +21,7 @@ import {
 } from './side-menu-detection.styles';
 
 /**
- * Helper component for SideMenuAlgorithm component that allows user to display tree view of detections
+ * Helper component for SideMenuAlgorithmComponent component that allows user to display tree view of detections
  *
  * @component
  *

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import NextButton from './next-button.component';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
-import SideMenuAlgorithm from './side-menu-algorithm.component';
+import SideMenuAlgorithmComponent from './side-menu-algorithm.component';
 import {
     getCollapsedSideMenu,
     getReceivedTime,
@@ -50,7 +50,7 @@ const SideMenuComponent = ({
                         {algorithms.length > 0
                             ? algorithms.map((detections, i) => {
                                   return (
-                                      <SideMenuAlgorithm
+                                      <SideMenuAlgorithmComponent
                                           key={i}
                                           detections={detections}
                                           resetCornerstoneTools={
