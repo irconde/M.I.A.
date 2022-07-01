@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import NextButtonComponent from './buttons/next-button.component';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
-import SideMenuAlgorithmComponent from './side-menu-algorithm.component';
+import SideMenuAlgorithmComponent from './algorithm-detection/side-menu-algorithm.component';
 import {
     getCollapsedSideMenu,
     getReceivedTime,

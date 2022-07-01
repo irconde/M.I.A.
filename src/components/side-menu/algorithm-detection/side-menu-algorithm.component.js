@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import TreeDetection from './side-menu-detection.component';
-import * as Icons from './Icons';
-import * as constants from '../../utils/Constants';
+import * as Icons from '../Icons';
+import * as constants from '../../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
-import Utils from '../../utils/Utils';
+import Utils from '../../../utils/Utils';
 import {
     clearAllSelection,
     getSelectedAlgorithm,
     selectDetectionSet,
     updateDetectionSetVisibility,
-} from '../../redux/slices/detections/detectionsSlice';
-import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+} from '../../../redux/slices/detections/detectionsSlice';
+import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
 import {
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
