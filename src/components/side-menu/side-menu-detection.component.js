@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Icons from './Icons';
-import { detectionStyle, MAX_LABEL_LENGTH } from '../../utils/Constants';
+import { MAX_LABEL_LENGTH } from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,6 +14,11 @@ import {
     detectionSelectedUpdate,
     hideContextMenuUpdate,
 } from '../../redux/slices/ui/uiSlice';
+import {
+    SideMenuDetection,
+    DetectionColorBox,
+    SideMenuDetectionText,
+} from './side-menu-detection.styles';
 
 /**
  * Helper component for SideMenuAlgorithm component that allows user to display tree view of detections
@@ -23,32 +28,13 @@ import {
  *
  */
 
-const SideMenuDetection = ({
+const SideMenuDetectionComponent = ({
     detection,
     resetCornerstoneTools,
     renderDetectionContextMenu,
 }) => {
     const dispatch = useDispatch();
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
-    const detectionBGStyle = {
-        width: '10px',
-        height: '10px',
-        display: 'inline-block',
-        border: '0.0625rem solid rgba(220,220,220,0.4)',
-        marginLeft: '2.4rem',
-        marginRight: '0.75rem',
-        verticalAlign: 'middle',
-        marginTop: '-0.2rem',
-    };
-    const typeStyle = {
-        textTransform: 'uppercase',
-        fontFamily: 'Noto Sans JP',
-        cursor: 'default',
-    };
-    const containerStyle = {
-        paddingTop: '0.45rem',
-        paddingBottom: '0.45rem',
-    };
     const eyeStyle = {
         height: '20px',
         width: '20px',
@@ -94,68 +80,47 @@ const SideMenuDetection = ({
             }
         }
     };
+
+    const detectionText = `${Utils.truncateString(
+        detection.className,
+        MAX_LABEL_LENGTH
+    )} - ${detection.confidence}%`;
     // We only display an open eye if both algorithm and detection are visible.
     if (detection.visible === true) {
         return (
-            <div
+            <SideMenuDetection
                 id={`${detection.view}-container`}
                 onClick={setSelected}
-                style={
-                    detection.selected
-                        ? {
-                              ...containerStyle,
-                              backgroundColor: detectionStyle.SELECTED_COLOR,
-                          }
-                        : containerStyle
-                }>
-                <div
-                    id="detectionBG"
-                    style={{
-                        ...detectionBGStyle,
-                        backgroundColor: detection.color,
-                    }}></div>
-                <span
+                selected={detection.selected}>
+                <DetectionColorBox bgColor={detection.color} />
+                <SideMenuDetectionText
                     id={`${detection.view}-span`}
-                    style={{
-                        ...typeStyle,
-                        color: detection.textColor,
-                    }}>{`${Utils.truncateString(
-                    detection.className,
-                    MAX_LABEL_LENGTH
-                )} - ${detection.confidence}%`}</span>
+                    color={detection.textColor}>
+                    {detectionText}
+                </SideMenuDetectionText>
                 <Icons.EyeO id="eye" onClick={setVisible} style={eyeStyle} />
-            </div>
+            </SideMenuDetection>
         );
     } else {
         return (
-            <div
-                id={`${detection.view}-hidden-container`}
-                style={containerStyle}>
-                <div
-                    style={{
-                        ...detectionBGStyle,
-                        backgroundColor: 'black',
-                    }}></div>
-                <span
+            <SideMenuDetection id={`${detection.view}-hidden-container`}>
+                <DetectionColorBox />
+                <SideMenuDetectionText
                     id={`${detection.view}-hidden-span`}
-                    style={{
-                        ...typeStyle,
-                        color: detection.textColor,
-                    }}>{`${Utils.truncateString(
-                    detection.className,
-                    MAX_LABEL_LENGTH
-                )} - ${detection.confidence}%`}</span>
+                    color={detection.textColor}>
+                    {detectionText}
+                </SideMenuDetectionText>
                 <Icons.EyeC
                     id="hidden-eye"
                     onClick={setVisible}
                     style={eyeStyle}
                 />
-            </div>
+            </SideMenuDetection>
         );
     }
 };
 
-SideMenuDetection.propTypes = {
+SideMenuDetectionComponent.propTypes = {
     /**
      * Array of detection objects
      */
@@ -170,4 +135,4 @@ SideMenuDetection.propTypes = {
     renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
-export default SideMenuDetection;
+export default SideMenuDetectionComponent;
