@@ -13,7 +13,11 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import SaveButton from './save-button.component';
-import { SideMenuContainer, TreeStyle, MainTreeView } from './side-menu.styles';
+import {
+    SideMenuContainer,
+    SideMenuList,
+    SideMenuListWrapper,
+} from './side-menu.styles';
 
 /**
  * Component menu that displays all detection objects, seperated by algorithm.
@@ -39,9 +43,10 @@ const SideMenuComponent = ({
     } else {
         return (
             <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
-                <MainTreeView height={document.documentElement.clientHeight}>
+                <SideMenuListWrapper
+                    height={document.documentElement.clientHeight}>
                     {/* How we create the trees and their nodes is using map */}
-                    <TreeStyle>
+                    <SideMenuList>
                         {algorithms.length > 0
                             ? algorithms.map((detections, i) => {
                                   return (
@@ -58,13 +63,13 @@ const SideMenuComponent = ({
                                   );
                               })
                             : null}
-                    </TreeStyle>
+                    </SideMenuList>
                     {remoteOrLocal || hasFileOutput ? (
                         <NextButton nextImageClick={nextImageClick} />
                     ) : (
                         <SaveButton nextImageClick={nextImageClick} />
                     )}
-                </MainTreeView>
+                </SideMenuListWrapper>
             </SideMenuContainer>
         );
     }

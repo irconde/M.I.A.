@@ -15,7 +15,7 @@ export const SideMenuContainer = styled.div`
     right: 0;
 `;
 
-export const TreeStyle = styled.div`
+export const SideMenuList = styled.div`
     top: 0;
     color: white;
     fill: white;
@@ -24,7 +24,7 @@ export const TreeStyle = styled.div`
     padding-top: ${sideMenuPaddingTop}px;
 `;
 
-export const MainTreeView = styled.div`
+export const SideMenuListWrapper = styled.div`
     position: absolute;
     height: 100vh;
     display: flex;
