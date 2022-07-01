@@ -6,11 +6,8 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import { getLocalFileOpen } from '../../redux/slices/ui/uiSlice';
-import {
-    NoFileSignLabel,
-    NoFileSignWrapper,
-    StyledNoFilesIcon,
-} from './no-file-sign.styles';
+import { NoFileSignLabel, NoFileSignWrapper } from './no-file-sign.styles';
+import { ReactComponent as NoFilesIcon } from '../../icons/ic_no_files.svg';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
@@ -25,12 +22,18 @@ const NoFileSignComponent = () => {
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
 
+    const imgStyle = {
+        opacity: '0.9',
+        width: '90%',
+        height: '90%',
+    };
+
     if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
         return <></>;
     } else {
         return (
             <NoFileSignWrapper>
-                <StyledNoFilesIcon title="NoFilesAvailable" />
+                <NoFilesIcon title="NoFilesAvailable" style={imgStyle} />
                 <NoFileSignLabel>
                     {' '}
                     ·{' '}

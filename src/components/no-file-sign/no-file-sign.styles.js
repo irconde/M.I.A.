@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { ReactComponent as NoFilesIcon } from '../../icons/ic_no_files.svg';
 
 export const NoFileSignWrapper = styled.div`
     position: fixed;
@@ -9,11 +8,6 @@ export const NoFileSignWrapper = styled.div`
     text-align: center;
     width: auto;
     opacity: 1;
-`;
-export const StyledNoFilesIcon = styled(NoFilesIcon)`
-    opacity: 0.9;
-    width: 90%;
-    height: 90%;
 `;
 export const NoFileSignLabel = styled.p`
     font-weight: 500;

@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Info } from '../side-menu/Icons';
 
 export const InlineSlash = styled.p`
     font-family: Noto Sans JP Black;
@@ -30,7 +29,4 @@ export const StyledMetaData = styled.div`
     text-align: left;
     color: #ffffff;
     width: max-content;
-`;
-export const StyledInfoIcon = styled(Info)`
-    vertical-align: text-top;
 `;

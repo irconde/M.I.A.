@@ -11,8 +11,9 @@ import {
     MetaDataText,
     MetaDataGroup,
     StyledMetaData,
-    StyledInfoIcon,
 } from './meta-data.styles';
+
+import { Info } from '../side-menu/Icons';
 
 /**
  * @component
@@ -32,7 +33,7 @@ const MetaDataComponent = () => {
     } else {
         return (
             <StyledMetaData sideMenuCollapsed={sideMenuCollapsed}>
-                <StyledInfoIcon />
+                <Info style={{ verticalAlign: 'text-top' }} />
                 <MetaDataGroup>
                     <MetaDataText>Detector Type:</MetaDataText>
                     <MetaDataText> {configInfo.detectorType}</MetaDataText>
