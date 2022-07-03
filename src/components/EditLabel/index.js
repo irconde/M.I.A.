@@ -12,7 +12,7 @@ import {
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
-import { ReactComponent as ClearTextIcon } from '../../icons/ic_close.svg';
+import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
 
 const EditLabelWrapper = styled.div`
     position: absolute;
@@ -53,7 +53,10 @@ const EditLabelWrapper = styled.div`
             }
         }
         .clearTextIcon {
-            width: fit-content;
+            width: 1.3rem;
+            height: fit-content;
+            fill: white;
+            padding-left: 0.2rem;
         }
     }
 `;
