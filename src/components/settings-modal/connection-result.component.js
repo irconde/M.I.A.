@@ -28,9 +28,9 @@ const ConnectionResultComponent = (props) => {
     const redColor = '#d94545';
     const greenColor = '#519e00';
     if (props.display === true) {
-        if (props.connected === true) {
-            return (
-                <ConnectionResult>
+        return (
+            <ConnectionResult>
+                {props.connected ? (
                     <ConnectionVerifiedIcon
                         style={svgContainerStyle}
                         svgStyle={{
@@ -38,14 +38,7 @@ const ConnectionResultComponent = (props) => {
                             color: greenColor,
                         }}
                     />
-                    <ConnectionStatusText connected={props.connected}>
-                        Connection Successful
-                    </ConnectionStatusText>
-                </ConnectionResult>
-            );
-        } else {
-            return (
-                <ConnectionResult>
+                ) : (
                     <ConnectionErrorIcon
                         style={svgContainerStyle}
                         svgStyle={{
@@ -53,12 +46,14 @@ const ConnectionResultComponent = (props) => {
                             color: redColor,
                         }}
                     />
-                    <ConnectionStatusText connected={props.connected}>
-                        Server unreachable
-                    </ConnectionStatusText>
-                </ConnectionResult>
-            );
-        }
+                )}
+                <ConnectionStatusText connected={props.connected}>
+                    {props.connected
+                        ? 'Connection Successful'
+                        : 'Server unreachable'}
+                </ConnectionStatusText>
+            </ConnectionResult>
+        );
     } else return null;
 };
 
