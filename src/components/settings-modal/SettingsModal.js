@@ -17,7 +17,7 @@ import {
     TextField,
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
-import ConnectionResult from './ConnectionResult';
+import ConnectionResultComponent from './connection-result.component';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
 import CloudIcon from '../../icons/CloudIcon.js';
@@ -818,7 +818,7 @@ const SettingsModal = (props) => {
                                     </Button>
                                 </Tooltip>
 
-                                <ConnectionResult
+                                <ConnectionResultComponent
                                     display={connectionDisplay}
                                     connected={testConnectionResult}
                                 />
