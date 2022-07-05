@@ -31,7 +31,7 @@ const ColorPickerComponent = () => {
     const [leftPosition, setLeftPosition] = useState();
     useEffect(() => {
         if (widthAndHeight !== null) {
-            let menuOffset = 37;
+            const menuOffset = 37;
             if (selectedViewport === constants.viewport.TOP) {
                 setTopPosition(
                     detectionContextPosition.top +
