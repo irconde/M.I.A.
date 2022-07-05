@@ -57,6 +57,15 @@ import {
     StyledPaper,
     ModalRoot,
     SettingsHeader,
+    SettingsCogwheel,
+    SettingsTitle,
+    CloseIconWrapper,
+    StyledDivider,
+    ScrollableContainer,
+    SettingOptionTitle,
+    SettingDescription,
+    VisualizationModeContainer,
+    VisualizationModeLabel,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -570,7 +579,6 @@ const SettingsModal = (props) => {
             gap: '3.5rem',
             marginBottom: '1rem',
         },
-        visualizationModeOption: {},
         visualizationModeIcon: {
             cursor: 'pointer',
             backgroundColor: '#464646',
@@ -594,99 +602,84 @@ const SettingsModal = (props) => {
         <StyledPaper>
             <ModalRoot>
                 <SettingsHeader>
-                    <div style={classes.settingsCogwheel}>
+                    <SettingsCogwheel>
                         <SettingsCog title={props.title} />
-                    </div>
-                    <div style={classes.settingsText}>Settings</div>
-                    <div
+                    </SettingsCogwheel>
+                    <SettingsTitle>Settings</SettingsTitle>
+                    <CloseIconWrapper
                         onClick={() => handleClose()}
                         style={classes.closeIconStyle}>
                         <IcCloseIcon />
-                    </div>
+                    </CloseIconWrapper>
                 </SettingsHeader>
-                <Divider style={{ margin: 'auto' }} variant="middle" />
+                <StyledDivider />
                 <FormGroup style={classes.formControl}>
-                    <div style={classes.optionsContainer}>
+                    <ScrollableContainer>
                         <div>
-                            <div className="visualizationModeContainer">
-                                <p style={classes.optionText}>
-                                    Visualization Mode
-                                </p>
-                                <p style={classes.greyText}>
-                                    Pick the visual granularity to use when
-                                    displaying multi-algorithm results.
-                                </p>
-                                <div style={classes.visualizationModeContainer}>
-                                    <div
-                                        style={classes.visualizationModeOption}>
-                                        <img
-                                            src={
-                                                displaySummarizedDetections
-                                                    ? DetailedModeIconSrc
-                                                    : DetailedModeIconCheckedSrc
-                                            }
-                                            style={{
-                                                ...classes.visualizationModeIcon,
-                                                ...(!displaySummarizedDetections &&
-                                                    classes.visualizationModeSelected),
-                                            }}
-                                            alt={'Detailed mode'}
-                                            onClick={() => {
-                                                setDisplaySummarizedDetections(
-                                                    false
-                                                );
-                                            }}
-                                        />
-                                        <p
-                                            style={{
-                                                ...classes.visualizationModeText,
-                                                ...(!displaySummarizedDetections &&
-                                                    classes.visualizationModeTextSelected),
-                                            }}>
-                                            Detailed
-                                        </p>
-                                    </div>
-                                    <div
-                                        style={classes.visualizationModeOption}>
-                                        <img
-                                            src={
-                                                displaySummarizedDetections
-                                                    ? SummarizedModeIconCheckedSrc
-                                                    : SummarizedModeIconSrc
-                                            }
-                                            style={{
-                                                ...classes.visualizationModeIcon,
-                                                ...(displaySummarizedDetections &&
-                                                    classes.visualizationModeSelected),
-                                            }}
-                                            alt={'Summarized mode'}
-                                            onClick={() => {
-                                                setDisplaySummarizedDetections(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                        <p
-                                            style={{
-                                                ...classes.visualizationModeText,
-                                                ...(displaySummarizedDetections &&
-                                                    classes.visualizationModeTextSelected),
-                                            }}>
-                                            Summarized
-                                        </p>
-                                    </div>
+                            <SettingOptionTitle>
+                                Visualization Mode
+                            </SettingOptionTitle>
+                            <SettingDescription>
+                                Pick the visual granularity to use when
+                                displaying multi-algorithm results.
+                            </SettingDescription>
+                            <VisualizationModeContainer>
+                                <div>
+                                    <img
+                                        src={
+                                            displaySummarizedDetections
+                                                ? DetailedModeIconSrc
+                                                : DetailedModeIconCheckedSrc
+                                        }
+                                        style={{
+                                            ...classes.visualizationModeIcon,
+                                            ...(!displaySummarizedDetections &&
+                                                classes.visualizationModeSelected),
+                                        }}
+                                        alt={'Detailed mode'}
+                                        onClick={() => {
+                                            setDisplaySummarizedDetections(
+                                                false
+                                            );
+                                        }}
+                                    />
+                                    <VisualizationModeLabel
+                                        selected={!displaySummarizedDetections}>
+                                        Detailed
+                                    </VisualizationModeLabel>
                                 </div>
-                            </div>
-                            <Divider
-                                style={{ margin: 'auto' }}
-                                variant="middle"
-                            />
+                                <div>
+                                    <img
+                                        src={
+                                            displaySummarizedDetections
+                                                ? SummarizedModeIconCheckedSrc
+                                                : SummarizedModeIconSrc
+                                        }
+                                        style={{
+                                            ...classes.visualizationModeIcon,
+                                            ...(displaySummarizedDetections &&
+                                                classes.visualizationModeSelected),
+                                        }}
+                                        alt={'Summarized mode'}
+                                        onClick={() => {
+                                            setDisplaySummarizedDetections(
+                                                true
+                                            );
+                                        }}
+                                    />
+                                    <VisualizationModeLabel
+                                        selected={displaySummarizedDetections}>
+                                        Summarized
+                                    </VisualizationModeLabel>
+                                </div>
+                            </VisualizationModeContainer>
                         </div>
+                        <StyledDivider />
                         <div>
                             <div style={classes.remoteWorkContainer}>
-                                <p style={classes.optionText}>
+                                <SettingOptionTitle>
                                     Work connected to a remote service
-                                </p>
+                                </SettingOptionTitle>
                                 <div style={classes.switchContainer}>
                                     <Switch
                                         checked={remoteOrLocal}
@@ -703,10 +696,10 @@ const SettingsModal = (props) => {
                                 </div>
                             </div>
                             {isElectron() ? (
-                                <p style={classes.greyText}>
+                                <SettingDescription>
                                     Choose the option if you want to
                                     receive/send images from/to a server
-                                </p>
+                                </SettingDescription>
                             ) : null}
 
                             <div style={classes.remoteWorkRow}>
@@ -830,18 +823,15 @@ const SettingsModal = (props) => {
                             </div>
                         </div>
                         <div>
-                            <Divider
-                                style={{ margin: 'auto' }}
-                                variant="middle"
-                            />
+                            <StyledDivider />
                             <div>
-                                <p style={classes.optionText}>
+                                <SettingOptionTitle>
                                     File management
-                                </p>
-                                <p style={classes.greyText}>
+                                </SettingOptionTitle>
+                                <SettingDescription>
                                     Default file management options to
                                     streamline file input and output
-                                </p>
+                                </SettingDescription>
                                 {isElectron() ? (
                                     <div style={classes.workingDirectory}>
                                         <FormControl
@@ -1067,7 +1057,7 @@ const SettingsModal = (props) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </ScrollableContainer>
 
                     <Button
                         variant="outlined"
