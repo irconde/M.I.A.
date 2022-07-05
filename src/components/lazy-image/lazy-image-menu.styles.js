@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/Constants';
-import FileOpenIcon from '../../icons/FileOpenIcon';
 
 
 const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
@@ -70,11 +69,3 @@ export const ImagesInWorkspace = styled.p`
         props.shouldAddBoxShadow &&
         '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'};
 `;
-
-export const StyledFileOpenIcon = styled(FileOpenIcon)`
-    float: left;
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-`;
-
