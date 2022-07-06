@@ -71,6 +71,7 @@ import {
     SettingsRow,
     CloudIconWrapper,
     WorkingDirectory,
+    VisualiationModeIcon,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -593,17 +594,13 @@ const SettingsModal = (props) => {
                             </SettingDescription>
                             <VisualizationModeContainer>
                                 <div>
-                                    <img
+                                    <VisualiationModeIcon
                                         src={
                                             displaySummarizedDetections
                                                 ? DetailedModeIconSrc
                                                 : DetailedModeIconCheckedSrc
                                         }
-                                        style={{
-                                            ...classes.visualizationModeIcon,
-                                            ...(!displaySummarizedDetections &&
-                                                classes.visualizationModeSelected),
-                                        }}
+                                        selected={!displaySummarizedDetections}
                                         alt={'Detailed mode'}
                                         onClick={() => {
                                             setDisplaySummarizedDetections(
@@ -617,17 +614,13 @@ const SettingsModal = (props) => {
                                     </VisualizationModeLabel>
                                 </div>
                                 <div>
-                                    <img
+                                    <VisualiationModeIcon
                                         src={
                                             displaySummarizedDetections
                                                 ? SummarizedModeIconCheckedSrc
                                                 : SummarizedModeIconSrc
                                         }
-                                        style={{
-                                            ...classes.visualizationModeIcon,
-                                            ...(displaySummarizedDetections &&
-                                                classes.visualizationModeSelected),
-                                        }}
+                                        selected={displaySummarizedDetections}
                                         alt={'Summarized mode'}
                                         onClick={() => {
                                             setDisplaySummarizedDetections(

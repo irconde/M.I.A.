@@ -91,6 +91,12 @@ export const VisualizationModeContainer = styled.div`
     gap: 3.5rem;
     margin-bottom: 1rem;
 `;
+export const VisualiationModeIcon = styled.img`
+    cursor: pointer;
+    background-color: #464646;
+    border-radius: 10px;
+    outline: ${(props) => props.selected && '2px solid #367fff'};
+`;
 export const VisualizationModeLabel = styled.p`
     margin: 0.2rem 0;
     text-align: center;
