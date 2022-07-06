@@ -69,9 +69,14 @@ import {
     RemoteWorkContainer,
     SwitchWrapper,
     SettingsRow,
-    CloudIconWrapper,
+    IconWrapper,
     WorkingDirectory,
     VisualiationModeIcon,
+    RemoteInputContainer,
+    AutoConnectContainer,
+    ConnectionButtonSection,
+    FileManagementSection,
+    FileManagementItem,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -462,7 +467,6 @@ const SettingsModal = (props) => {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
-            flexWrap: 'wrap',
             marginBottom: theme.spacing(2),
             marginTop: theme.spacing(4),
         },
@@ -532,12 +536,6 @@ const SettingsModal = (props) => {
         fileIconContainer: {
             alignSelf: 'center',
         },
-        autoConnectContainer: {
-            display: 'inline-block',
-            float: 'right',
-            color: '#9d9d9d',
-            marginTop: 'auto',
-        },
         flexAuto: {
             flex: 'auto',
         },
@@ -556,14 +554,6 @@ const SettingsModal = (props) => {
             justifyContent: 'center',
             gap: '3.5rem',
             marginBottom: '1rem',
-        },
-        visualizationModeIcon: {
-            cursor: 'pointer',
-            backgroundColor: '#464646',
-            borderRadius: '10px',
-        },
-        visualizationModeSelected: {
-            outline: '2px solid #367fff',
         },
     };
 
@@ -664,9 +654,9 @@ const SettingsModal = (props) => {
                             )}
 
                             <SettingsRow>
-                                <div style={classes.remoteInputContainer}>
+                                <RemoteInputContainer>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <CloudIconWrapper>
+                                        <IconWrapper>
                                             <CloudIcon
                                                 style={svgContainerStyle}
                                                 svgStyle={{
@@ -676,9 +666,9 @@ const SettingsModal = (props) => {
                                                         : '#9d9d9d',
                                                 }}
                                             />
-                                        </CloudIconWrapper>
+                                        </IconWrapper>
                                     </Tooltip>
-                                    <FormControl style={classes.flexAuto}>
+                                    <FormControl>
                                         <TextField
                                             required
                                             id="remoteIp"
@@ -696,9 +686,7 @@ const SettingsModal = (props) => {
                                         />
                                     </FormControl>
 
-                                    <span style={classes.cloudIconContainer}>
-                                        :
-                                    </span>
+                                    <IconWrapper>:</IconWrapper>
 
                                     <FormControl>
                                         <TextField
@@ -718,14 +706,11 @@ const SettingsModal = (props) => {
                                             }}
                                             style={classes.cloudIconContainer}
                                             variant="standard"
-                                            /*style={{
-                                                marginLeft: '0.75rem',
-                                            }}*/
                                         />
                                     </FormControl>
-                                </div>
+                                </RemoteInputContainer>
 
-                                <div style={classes.autoConnectContainer}>
+                                <AutoConnectContainer>
                                     <Tooltip title="Enable/disable auto-connection with server">
                                         <FormControlLabel
                                             control={
@@ -744,9 +729,9 @@ const SettingsModal = (props) => {
                                             label="Autoconnect"
                                         />
                                     </Tooltip>
-                                </div>
+                                </AutoConnectContainer>
                             </SettingsRow>
-                            <div style={classes.connectionSection}>
+                            <ConnectionButtonSection>
                                 <Tooltip title="Check whether the server is reachable">
                                     <Button
                                         variant="outlined"
@@ -781,7 +766,7 @@ const SettingsModal = (props) => {
                                     display={connectionDisplay}
                                     connected={testConnectionResult}
                                 />
-                            </div>
+                            </ConnectionButtonSection>
                         </div>
                         <div>
                             <StyledDivider />
@@ -878,8 +863,8 @@ const SettingsModal = (props) => {
                                     </WorkingDirectory>
                                 )}
 
-                                <div style={classes.displayListSection}>
-                                    <div style={classes.displayListSectionItem}>
+                                <FileManagementSection>
+                                    <FileManagementItem>
                                         <FileFormatIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
@@ -922,8 +907,8 @@ const SettingsModal = (props) => {
                                                 </MenuItem>
                                             </Select>
                                         </FormControl>
-                                    </div>
-                                    <div style={classes.displayListSectionItem}>
+                                    </FileManagementItem>
+                                    <FileManagementItem>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
@@ -984,9 +969,9 @@ const SettingsModal = (props) => {
                                                 })}
                                             </Select>
                                         </FormControl>
-                                    </div>
+                                    </FileManagementItem>
 
-                                    <div style={classes.displayListSectionItem}>
+                                    <FileManagementItem>
                                         <FileSuffixIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
@@ -1012,8 +997,8 @@ const SettingsModal = (props) => {
                                                 variant="standard"
                                             />
                                         </FormControl>
-                                    </div>
-                                </div>
+                                    </FileManagementItem>
+                                </FileManagementSection>
                             </div>
                         </div>
                     </ScrollableContainer>

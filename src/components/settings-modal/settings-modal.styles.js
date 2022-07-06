@@ -109,7 +109,7 @@ export const RemoteWorkContainer = styled(SettingsHeader)`
 export const SwitchWrapper = styled.div`
     align-self: flex-end;
 `;
-export const CloudIconWrapper = styled.div`
+export const IconWrapper = styled.div`
     align-self: center;
     padding-inline: 0.25rem;
 `;
@@ -120,4 +120,36 @@ export const SettingsRow = styled(SettingsHeader)`
 export const WorkingDirectory = styled(SettingsHeader)`
     align-items: center;
     margin: 0;
+`;
+export const RemoteInputContainer = styled.div`
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 70%;
+    align-self: center;
+`;
+export const AutoConnectContainer = styled.div`
+    float: right;
+    color: #9d9d9d;
+    margin-top: auto;
+`;
+export const ConnectionButtonSection = styled.div`
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: row;
+    margin-block: 16px;
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+`;
+export const FileManagementSection = styled(SettingsHeader)`
+    margin-bottom: 16px;
+    margin-top: 32px;
+`;
+export const FileManagementItem = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 33%;
 `;
