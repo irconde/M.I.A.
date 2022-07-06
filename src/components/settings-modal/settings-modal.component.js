@@ -66,6 +66,11 @@ import {
     SettingDescription,
     VisualizationModeContainer,
     VisualizationModeLabel,
+    RemoteWorkContainer,
+    SwitchWrapper,
+    SettingsRow,
+    CloudIconWrapper,
+    WorkingDirectory,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -368,12 +373,12 @@ const SettingsModal = (props) => {
             backgroundColor: '#1f1f1f',
             color: '#ffffff',
         },
-        workingDirectory: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-        },
+        // workingDirectory: {
+        //     display: 'flex',
+        //     flexDirection: 'row',
+        //     alignItems: 'center',
+        //     justifyContent: 'space-between',
+        // },
         checkIcon: {
             margin: '0.3rem',
             display: 'flex',
@@ -388,9 +393,6 @@ const SettingsModal = (props) => {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
-        },
-        switchContainer: {
-            alignSelf: 'flex-end',
         },
         modal: {
             boxShadow: theme.shadows[5],
@@ -412,15 +414,6 @@ const SettingsModal = (props) => {
             color: theme.palette.primary,
             background: '#515151',
             cursor: 'pointer',
-        },
-        root: {
-            flexGrow: 1,
-            height: '37rem',
-        },
-        optionsContainer: {
-            overflowY: 'auto',
-            height: '80%',
-            padding: '0rem 0.25rem',
         },
         form: {
             margin: theme.spacing(1),
@@ -497,13 +490,6 @@ const SettingsModal = (props) => {
             justifyContent: 'space-between',
             margin: '1rem 0',
         },
-        settingsCogwheel: {
-            marginRight: '1rem',
-            marginLeft: '0',
-            width: '20px',
-            height: '20px',
-            alignSelf: 'center',
-        },
         closeIconStyle: {
             alignSelf: 'center',
             width: '24px',
@@ -542,10 +528,6 @@ const SettingsModal = (props) => {
             width: '70%',
             alignSelf: 'center',
         },
-        cloudIconContainer: {
-            alignSelf: 'center',
-            padding: '0 0.25rem',
-        },
         fileIconContainer: {
             alignSelf: 'center',
         },
@@ -557,11 +539,6 @@ const SettingsModal = (props) => {
         },
         flexAuto: {
             flex: 'auto',
-        },
-        remoteWorkRow: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '2rem',
         },
         displayListSectionItem: {
             display: 'flex',
@@ -583,15 +560,6 @@ const SettingsModal = (props) => {
             cursor: 'pointer',
             backgroundColor: '#464646',
             borderRadius: '10px',
-        },
-        visualizationModeText: {
-            margin: '0.2rem 0',
-            textAlign: 'center',
-            color: '#9d9d9d',
-            fontSize: '.7rem',
-        },
-        visualizationModeTextSelected: {
-            color: '#fff',
         },
         visualizationModeSelected: {
             outline: '2px solid #367fff',
@@ -676,11 +644,11 @@ const SettingsModal = (props) => {
                         </div>
                         <StyledDivider />
                         <div>
-                            <div style={classes.remoteWorkContainer}>
+                            <RemoteWorkContainer>
                                 <SettingOptionTitle>
                                     Work connected to a remote service
                                 </SettingOptionTitle>
-                                <div style={classes.switchContainer}>
+                                <SwitchWrapper>
                                     <Switch
                                         checked={remoteOrLocal}
                                         size="small"
@@ -693,19 +661,19 @@ const SettingsModal = (props) => {
                                             'aria-label': 'secondary checkbox',
                                         }}
                                     />
-                                </div>
-                            </div>
-                            {isElectron() ? (
+                                </SwitchWrapper>
+                            </RemoteWorkContainer>
+                            {isElectron() && (
                                 <SettingDescription>
                                     Choose the option if you want to
                                     receive/send images from/to a server
                                 </SettingDescription>
-                            ) : null}
+                            )}
 
-                            <div style={classes.remoteWorkRow}>
+                            <SettingsRow>
                                 <div style={classes.remoteInputContainer}>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <div style={classes.cloudIconContainer}>
+                                        <CloudIconWrapper>
                                             <CloudIcon
                                                 style={svgContainerStyle}
                                                 svgStyle={{
@@ -715,7 +683,7 @@ const SettingsModal = (props) => {
                                                         : '#9d9d9d',
                                                 }}
                                             />
-                                        </div>
+                                        </CloudIconWrapper>
                                     </Tooltip>
                                     <FormControl style={classes.flexAuto}>
                                         <TextField
@@ -784,7 +752,7 @@ const SettingsModal = (props) => {
                                         />
                                     </Tooltip>
                                 </div>
-                            </div>
+                            </SettingsRow>
                             <div style={classes.connectionSection}>
                                 <Tooltip title="Check whether the server is reachable">
                                     <Button
@@ -832,8 +800,8 @@ const SettingsModal = (props) => {
                                     Default file management options to
                                     streamline file input and output
                                 </SettingDescription>
-                                {isElectron() ? (
-                                    <div style={classes.workingDirectory}>
+                                {isElectron() && (
+                                    <WorkingDirectory>
                                         <FormControl
                                             style={classes.longTextField}>
                                             <Tooltip title="Workspace location">
@@ -914,9 +882,7 @@ const SettingsModal = (props) => {
                                                 Select Folder
                                             </Button>
                                         </Tooltip>
-                                    </div>
-                                ) : (
-                                    <></>
+                                    </WorkingDirectory>
                                 )}
 
                                 <div style={classes.displayListSection}>

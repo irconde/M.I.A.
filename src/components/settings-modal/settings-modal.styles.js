@@ -4,7 +4,7 @@ import { Divider, Paper } from '@mui/material';
 const GREY_COLOR = '#9d9d9d';
 const WHITE_COLOR = 'white';
 
-export const StyledPaper = styled(Paper).attrs((props) => ({
+export const StyledPaper = styled(Paper).attrs(() => ({
     elevation: 3,
 }))`
     position: absolute;
@@ -96,4 +96,22 @@ export const VisualizationModeLabel = styled.p`
     text-align: center;
     color: ${(props) => (props.selected ? WHITE_COLOR : GREY_COLOR)};
     font-size: 0.7rem;
+`;
+export const RemoteWorkContainer = styled(SettingsHeader)`
+    margin: 0;
+`;
+export const SwitchWrapper = styled.div`
+    align-self: flex-end;
+`;
+export const CloudIconWrapper = styled.div`
+    align-self: center;
+    padding-inline: 0.25rem;
+`;
+export const SettingsRow = styled(SettingsHeader)`
+    margin-top: 2rem;
+    margin-bottom: 0;
+`;
+export const WorkingDirectory = styled(SettingsHeader)`
+    align-items: center;
+    margin: 0;
 `;
