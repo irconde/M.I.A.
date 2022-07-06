@@ -80,6 +80,8 @@ import {
     SaveSettingsButton,
     StyledFormGroup,
     ConnectionButton,
+    StyledSwitch,
+    HostTextField,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -520,17 +522,11 @@ const SettingsModal = (props) => {
                                     Work connected to a remote service
                                 </SettingOptionTitle>
                                 <SwitchWrapper>
-                                    <Switch
+                                    <StyledSwitch
                                         checked={remoteOrLocal}
-                                        size="small"
                                         onChange={() =>
                                             setRemoteOrLocal(!remoteOrLocal)
                                         }
-                                        color="primary"
-                                        name="remoteOrLocal"
-                                        inputProps={{
-                                            'aria-label': 'secondary checkbox',
-                                        }}
                                     />
                                 </SwitchWrapper>
                             </RemoteWorkContainer>
@@ -557,20 +553,12 @@ const SettingsModal = (props) => {
                                         </IconWrapper>
                                     </Tooltip>
                                     <FormControl>
-                                        <TextField
-                                            required
-                                            id="remoteIp"
-                                            placeholder="Host"
+                                        <HostTextField
                                             value={remoteIp}
                                             disabled={!remoteOrLocal}
-                                            inputProps={{
-                                                size: 30,
-                                                padding: 10,
-                                            }}
                                             onChange={(e) => {
                                                 setRemoteIp(e.target.value);
                                             }}
-                                            variant="standard"
                                         />
                                     </FormControl>
 

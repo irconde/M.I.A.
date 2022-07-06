@@ -1,5 +1,13 @@
 import styled from 'styled-components';
-import { Button, Divider, FormGroup, Paper, createTheme } from '@mui/material';
+import {
+    Button,
+    Divider,
+    FormGroup,
+    Paper,
+    createTheme,
+    Switch,
+    TextField,
+} from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
 const WHITE_COLOR = 'white';
@@ -207,3 +215,23 @@ export const ConnectionButton = styled(Button).attrs((props) => ({
     text-transform: none !important;
     padding-inline: ${theme.spacing(3)} !important;
 `;
+
+export const StyledSwitch = styled(Switch).attrs(() => ({
+    size: 'small',
+    color: 'primary',
+    name: 'remoteOrLocal',
+    inputProps: {
+        'aria-label': 'secondary checkbox',
+    },
+}))``;
+
+export const HostTextField = styled(TextField).attrs(() => ({
+    required: true,
+    id: 'remoteIp',
+    placeholder: 'Host',
+    inputProps: {
+        size: 30,
+        padding: 10,
+    },
+    variant: 'standard',
+}))``;
