@@ -14,6 +14,7 @@ import {
     getDetectionContextPosition,
     getZoomLevels,
 } from '../../redux/slices/ui/uiSlice';
+import { ColorPickerContainer } from './color-picker.styles';
 
 /**
  * Component within DetectionContextMenu component for editing colors of detection bounding box.
@@ -76,18 +77,15 @@ const ColorPickerComponent = () => {
     };
     if (isVisible === true) {
         return (
-            <div
-                style={{
-                    position: 'absolute',
-                    top: topPosition,
-                    left: leftPosition,
-                }}>
+            <ColorPickerContainer 
+                top={topPosition} 
+                left={leftPosition}>
                 <TwitterPicker
                     color={color}
                     onChangeComplete={(color) => colorChangeComplete(color)}
                     triangle="top-left"
                 />
-            </div>
+            </ColorPickerContainer>
         );
     } else {
         return null;
