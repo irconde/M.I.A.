@@ -1,8 +1,37 @@
 import styled from 'styled-components';
-import { Button, Divider, Paper } from '@mui/material';
+import { Button, Divider, FormGroup, Paper, createTheme } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
 const WHITE_COLOR = 'white';
+
+const theme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            light: '#5e97ff',
+            main: '#367eff',
+            dark: '#2558b2',
+            contrastText: '#9d9d9d',
+        },
+    },
+    zIndex: {
+        modal: 3,
+    },
+    transitions: {
+        duration: {
+            shortest: 150,
+            shorter: 200,
+            // most basic recommended timing
+            standard: 300,
+            // this is to be used in complex animations
+            complex: 375,
+            // recommended when something is entering screen
+            enteringScreen: 225,
+            // recommended when something is leaving screen
+            leavingScreen: 195,
+        },
+    },
+});
 
 export const StyledPaper = styled(Paper).attrs(() => ({
     elevation: 3,
@@ -165,4 +194,16 @@ export const SaveSettingsButton = styled(Button).attrs(() => ({
     width: 30%;
     padding: 1;
     align-self: flex-end;
+`;
+
+export const StyledFormGroup = styled(FormGroup)`
+    height: 95%;
+`;
+
+export const ConnectionButton = styled(Button).attrs((props) => ({
+    variant: 'outlined',
+    size: 'small',
+}))`
+    text-transform: none !important;
+    padding-inline: ${theme.spacing(3)} !important;
 `;

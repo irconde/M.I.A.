@@ -78,6 +78,8 @@ import {
     FileManagementSection,
     FileManagementItem,
     SaveSettingsButton,
+    StyledFormGroup,
+    ConnectionButton,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -380,12 +382,6 @@ const SettingsModal = (props) => {
             backgroundColor: '#1f1f1f',
             color: '#ffffff',
         },
-        // workingDirectory: {
-        //     display: 'flex',
-        //     flexDirection: 'row',
-        //     alignItems: 'center',
-        //     justifyContent: 'space-between',
-        // },
         checkIcon: {
             margin: '0.3rem',
             display: 'flex',
@@ -396,21 +392,6 @@ const SettingsModal = (props) => {
             paddingLeft: theme.spacing(3),
             paddingRight: theme.spacing(3),
         },
-        remoteWorkContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-        },
-        modal: {
-            boxShadow: theme.shadows[5],
-            padding: '.5rem 2rem 1rem',
-        },
-        paper: {
-            padding: theme.spacing(1),
-            textAlign: 'center',
-            color: theme.palette.text.primary,
-        },
-        selector: {},
         links: {
             fontSize: theme.typography.fontSize,
             color: theme.palette.primary,
@@ -425,50 +406,17 @@ const SettingsModal = (props) => {
         form: {
             margin: theme.spacing(1),
         },
-        formControl: {
-            height: '95%',
-        },
         longTextField: {
-            // width: '-webkit-fill-available',
             display: 'flex',
             flexDirection: 'row',
             width: '70%',
         },
-        SaveButtonComponent: {
-            margin: 'auto 1rem auto 0',
-            float: 'right',
-            backgroundColor: '#367eff',
-            display: 'flex',
-            alignSelf: 'flex-end',
-            outline: 'none',
-            '&:hover': {
-                backgroundColor: '#5e97ff',
-                outline: 'none',
-            },
-        },
         connectionLabel: {
             margin: 'auto',
-        },
-        connectionSection: {
-            display: 'flex',
-            flexShrink: '0',
-            flexDirection: 'row',
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-            justifyContent: 'flex-start',
-            alignContent: 'center',
-            alignItems: 'center',
         },
         circularProgress: {
             marginRight: theme.spacing(2),
             display: connecting ? 'none' : 'initial',
-        },
-        displayListSection: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: theme.spacing(2),
-            marginTop: theme.spacing(4),
         },
         sectionLabel: {
             marginRight: theme.spacing(2),
@@ -480,20 +428,8 @@ const SettingsModal = (props) => {
         container: {
             display: 'flex',
         },
-        greyText: {
-            color: '#9d9d9d',
-            fontSize: '12px',
-            margin: '0',
-            marginBottom: '2rem',
-        },
         disabledText: {
             color: '#9d9d9d',
-        },
-        settingsContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            margin: '1rem 0',
         },
         closeIconStyle: {
             alignSelf: 'center',
@@ -501,59 +437,11 @@ const SettingsModal = (props) => {
             height: '24px',
             cursor: 'pointer',
         },
-        settingsText: {
-            objectFit: 'contain',
-            fontFamily: 'Noto Sans JP',
-            fontSize: '22px',
-            fontWeight: '500',
-            fontStretch: 'normal',
-            fontStyle: 'normal',
-            lineHeight: 'normal',
-            letterSpacing: 'normal',
-            color: '#fff',
-            flex: 'auto',
-            alignSelf: 'center',
-        },
-        optionText: {
-            fontFamily: 'Noto Sans JP',
-            fontSize: '1rem',
-            fontWeight: 'normal',
-            fontStretch: 'normal',
-            fontStyle: 'normal',
-            lineHeight: 'normal',
-            letterSpacing: 'normal',
-            color: '#fff',
-            marginBottom: '0.25rem',
-            marginTop: '0.75rem',
-        },
-        remoteInputContainer: {
-            display: 'inline-flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            width: '70%',
-            alignSelf: 'center',
-        },
         fileIconContainer: {
             alignSelf: 'center',
         },
-        flexAuto: {
-            flex: 'auto',
-        },
-        displayListSectionItem: {
-            display: 'flex',
-            justifyContent: 'flex-start',
-            flexDirection: 'row',
-            flexGrow: '1',
-            width: '33%',
-        },
         displayListSectionInput: {
             width: '70%',
-        },
-        visualizationModeContainer: {
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '3.5rem',
-            marginBottom: '1rem',
         },
     };
 
@@ -572,7 +460,7 @@ const SettingsModal = (props) => {
                     </CloseIconWrapper>
                 </SettingsHeader>
                 <StyledDivider />
-                <FormGroup style={classes.formControl}>
+                <StyledFormGroup>
                     <ScrollableContainer>
                         <div>
                             <SettingOptionTitle>
@@ -733,11 +621,8 @@ const SettingsModal = (props) => {
                             </SettingsRow>
                             <ConnectionButtonSection>
                                 <Tooltip title="Check whether the server is reachable">
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
+                                    <ConnectionButton
                                         disabled={!remoteOrLocal}
-                                        style={classes.checkConnectionButton}
                                         onClick={() => {
                                             testConnection();
                                         }}>
@@ -759,7 +644,7 @@ const SettingsModal = (props) => {
                                             />
                                         )}
                                         Check connection
-                                    </Button>
+                                    </ConnectionButton>
                                 </Tooltip>
 
                                 <ConnectionResultComponent
@@ -978,7 +863,6 @@ const SettingsModal = (props) => {
                                         />
                                         <FormControl>
                                             <TextField
-                                                style={classes.textField}
                                                 required
                                                 id="outputSuffix"
                                                 placeholder="Filename suffix"
@@ -1003,7 +887,7 @@ const SettingsModal = (props) => {
                     <SaveSettingsButton onClick={() => saveSettingsEvent()}>
                         Save Settings
                     </SaveSettingsButton>
-                </FormGroup>
+                </StyledFormGroup>
             </ModalRoot>
         </StyledPaper>
     );
