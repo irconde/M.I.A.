@@ -14,7 +14,7 @@ import TapDetector from './utils/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import NextButtonComponent from './components/side-menu/buttons/next-button.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
-import TopBar from './components/top-bar/top-bar-component';
+import TopBar from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/Constants';

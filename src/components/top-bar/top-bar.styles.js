@@ -81,3 +81,6 @@ export const OpenFileText = styled.div`
     font-size: medium;
 `;
 
+export const FragmentWrapper = styled.div`
+    display: flex;
+`;

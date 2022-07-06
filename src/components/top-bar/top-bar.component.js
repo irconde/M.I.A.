@@ -14,7 +14,7 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
-import { ConnectionTypeInfo, InfoDivider, TitleLabelContainer, TopBarStyle } from './top-bar-styles';
+import { ConnectionStatusIconsContainer, ConnectionTypeInfo, FragmentWrapper, InfoDivider, OpenFileContainer, OpenFileText, TitleLabelContainer, TopBarStyle, VerticalDivider } from './top-bar.styles';
 
 /**
  * Component for GUI's top bar display.
@@ -38,93 +38,14 @@ const TopBar = (props) => {
         isConnected,
     } = reduxInfo;
 
-    const styles = {
-        // bar: {
-        //     position: 'absolute',
-        //     display: 'flex',
-        //     height: '3.375rem',
-        //     backgroundColor: '#3a3a3a',
-        //     left: '0',
-        //     top: '0',
-        //     width: '100%',
-        //     zIndex: '1',
-        //     alignItems: 'center',
-        //     justifyContent: 'flex-end',
-        //     color: 'white',
-        //     boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
-        // },
-        lazyMenuToggleContainer: {
-            position: 'absolute',
-            zIndex: '2',
-        },
-        // titleLabelContainer: {
-        //     position: 'absolute',
-        //     display: 'flex',
-        //     height: '3.375rem',
-        //     backgroundColor: '#3a3a3a',
-        //     left: '0',
-        //     top: '0',
-        //     width: '100%',
-        //     zIndex: '1',
-        //     alignItems: 'center',
-        //     color: 'white',
-        //     justifyContent: 'center',
-        //     fontWeight: 500,
-        //     fontSize: '10pt',
-        //     boxShadow: '0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)',
-        // },
-        connectionStatusIconsContainer: {
-            position: 'absolute',
-            display: 'flex',
-            height: '3.375rem',
-            left: '0',
-            top: '0',
-            width: '35%',
-            zIndex: '1',
-            marginLeft: '65%',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            color: 'white',
-        },
-        // icon: {
-        //     margin: '0.75rem',
-        // },
-        // lastIcon: {
-        //     margin: '0.5rem 1.5rem 0.5rem -0.5rem',
-        // },
-        typeInfo: {
-            color: '#C3C3C3',
-        },
-        divider: {
-            color: '#6A6A6A',
-            fontWeight: 'bold',
-        },
-        verticalDivider: {
-            border: '1px solid #5B5B5B',
-            height: '50%',
-        },
-        openFileContainer: {
-            cursor: 'pointer',
-            display: 'flex',
-            height: 'inherit',
-            alignItems: 'center',
-            position: 'fixed',
-            float: 'left',
-            left: '0',
-        },
-        openFileText: {
-            marginRight: '1.5rem',
-            fontWeight: '400',
-            fontSize: 'medium',
-        },
-    };
-    return processingFile || isConnected ? (
+   return processingFile || isConnected ? (
         <TopBarStyle>
             <TitleLabelContainer>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
-                        <InfoDivider>&#8427;</InfoDivider>&nbsp;&nbsp;
+                    <FragmentWrapper>
+                        <InfoDivider>&#8427;</InfoDivider>
+                        &nbsp;&nbsp;
                         <ConnectionTypeInfo>Connected to </ConnectionTypeInfo>
                         &nbsp;&nbsp;
                         {connectedServer !== null
@@ -134,11 +55,9 @@ const TopBar = (props) => {
                         <InfoDivider>/</InfoDivider>&nbsp;
                         <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
                         &nbsp;&nbsp;
-                    </React.Fragment>
+                    </FragmentWrapper>
                 ) : (
-                    <div
-                        style={styles.openFileContainer}
-                        onClick={() => props.getFileFromLocal()}>
+                    <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
                             title="Open File"
                             style={{
@@ -147,23 +66,23 @@ const TopBar = (props) => {
                                 display: 'inherit',
                             }}
                         />
-                        <span style={styles.openFileText}>OPEN FILE</span>
-                        <div style={styles.verticalDivider} />
-                    </div>
+                        <OpenFileText>OPEN FILE</OpenFileText>
+                        <VerticalDivider/>
+                    </OpenFileContainer>
                 )}
                 <span>{processingFile} &nbsp;</span>
             </TitleLabelContainer>
-            <div style={styles.connectionStatusIconsContainer}>
+            <ConnectionStatusIconsContainer>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
-                    <React.Fragment>
+                    <FragmentWrapper>
                         <FileQueueIcon
                             title="Number of Files"
                             numberOfFiles={numberOfFiles}
                             style={{ margin: '0.75rem' }}
                         />
                         {remoteOrLocal === true ? (
-                            <React.Fragment>
+                            <FragmentWrapper>
                                 <FileUploadStatus
                                     isDownload={isDownload}
                                     isUpload={isUpload}
@@ -173,11 +92,11 @@ const TopBar = (props) => {
                                     isConnected={isConnected}
                                     style={{ margin: '0.75rem' }}
                                 />
-                            </React.Fragment>
+                            </FragmentWrapper>
                         ) : null}
-                    </React.Fragment>
+                    </FragmentWrapper>
                 ) : null}
-                <div style={styles.verticalDivider}></div>
+                <VerticalDivider/>
                 <SettingsIcon
                     style={{ margin: '0.75rem' }}
                     connectToCommandServer={props.connectToCommandServer}
@@ -187,7 +106,7 @@ const TopBar = (props) => {
                     style={{ margin: '0.5rem 1.5rem 0.5rem -0.5rem' }}
                     cornerstone={props.cornerstone}
                 />
-            </div>
+            </ConnectionStatusIconsContainer>
         </TopBarStyle>
     ) : (
         <TopBarStyle>
@@ -196,9 +115,8 @@ const TopBar = (props) => {
                 {!remoteOrLocal &&
                 localFileOutput === '' &&
                 !firstDisplaySettings ? (
-                    <div
-                        style={styles.openFileContainer}
-                        onClick={() => props.getFileFromLocal()}>
+                    <OpenFileContainer 
+                    onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
                             title="Open File"
                             style={{
@@ -207,18 +125,18 @@ const TopBar = (props) => {
                                 display: 'inherit',
                             }}
                         />
-                        <span style={styles.openFileText}>OPEN FILE</span>
-                        <div style={styles.verticalDivider} />
-                    </div>
+                        <OpenFileText>OPEN FILE</OpenFileText>
+                        <VerticalDivider/>
+                    </OpenFileContainer>
                 ) : null}
             </TitleLabelContainer>
-            <div style={styles.connectionStatusIconsContainer}>
+            <ConnectionStatusIconsContainer>
                 <SettingsIcon
                     style={{ margin: '0.75rem' }}
                     connectToCommandServer={props.connectToCommandServer}
                     title="Settings"
                 />
-            </div>
+            </ConnectionStatusIconsContainer>
         </TopBarStyle>
     );
 };
