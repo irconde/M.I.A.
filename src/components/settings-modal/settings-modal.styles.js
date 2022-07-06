@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Divider, Paper } from '@mui/material';
+import { Button, Divider, Paper } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
 const WHITE_COLOR = 'white';
@@ -152,4 +152,17 @@ export const FileManagementItem = styled.div`
     flex-direction: row;
     flex-grow: 1;
     width: 33%;
+`;
+
+export const SaveSettingsButton = styled(Button).attrs(() => ({
+    variant: 'outlined',
+    sx: {
+        bgcolor: 'primary.main',
+        color: '#ffffff',
+        marginTop: 5,
+    },
+}))`
+    width: 30%;
+    padding: 1;
+    align-self: flex-end;
 `;

@@ -77,6 +77,7 @@ import {
     ConnectionButtonSection,
     FileManagementSection,
     FileManagementItem,
+    SaveSettingsButton,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -427,7 +428,6 @@ const SettingsModal = (props) => {
         formControl: {
             height: '95%',
         },
-        textField: {},
         longTextField: {
             // width: '-webkit-fill-available',
             display: 'flex',
@@ -976,10 +976,7 @@ const SettingsModal = (props) => {
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }>
+                                        <FormControl>
                                             <TextField
                                                 style={classes.textField}
                                                 required
@@ -1003,19 +1000,9 @@ const SettingsModal = (props) => {
                         </div>
                     </ScrollableContainer>
 
-                    <Button
-                        variant="outlined"
-                        onClick={() => saveSettingsEvent()}
-                        sx={{
-                            bgcolor: 'primary.main',
-                            color: '#ffffff',
-                            width: '30%',
-                            marginTop: 5,
-                            padding: 1,
-                            alignSelf: 'flex-end',
-                        }}>
+                    <SaveSettingsButton onClick={() => saveSettingsEvent()}>
                         Save Settings
-                    </Button>
+                    </SaveSettingsButton>
                 </FormGroup>
             </ModalRoot>
         </StyledPaper>
@@ -1028,7 +1015,7 @@ const SettingsModal = (props) => {
                 onClose={handleClose}
                 aria-labelledby="settings-window"
                 aria-describedby="control the apps remote and local settings">
-                <div>{body}</div>
+                {body}
             </Modal>
         </ThemeProvider>
     );
