@@ -14,14 +14,14 @@ import TapDetector from './utils/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import NextButtonComponent from './components/side-menu/buttons/next-button.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
-import TopBar from './components/TopBar/TopBar';
+import TopBarComponent from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
-import BoundPolyFAB from './components/FAB/BoundPolyFAB';
+import BoundPolyFAB from './components/fab/bound-poly-fab.component';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import socketIOClient from 'socket.io-client';
@@ -83,15 +83,15 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
-import DetectionContextMenu from './components/DetectionContext/DetectionContextMenu';
-import EditLabel from './components/EditLabel';
+import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
+import EditLabel from './components/edit-label/index.component';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
-import ColorPicker from './components/Color/ColorPicker';
+import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
 import isElectron from 'is-electron';
-import LazyImageMenu from './components/LazyImage/LazyImageMenu';
-import SettingsModal from './components/settings-modal/settings-modal.component';
+import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
+import SettingsModal from './components/SettingsModal/SettingsModal';
 import {
     loadElectronCookie,
     saveSettings,
@@ -854,7 +854,7 @@ class App extends Component {
     }
 
     /**
-     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
+     * Function called from the TopBarComponent Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
      * blob then needs to be converted to base64 to be loaded into the app.
      */
     getFileFromLocal() {
@@ -3849,7 +3849,7 @@ class App extends Component {
                                 e.preventDefault();
                             });
                     }}>
-                    <TopBar
+                    <TopBarComponent
                         connectToCommandServer={this.connectToCommandServer}
                         getFileFromLocal={this.getFileFromLocal}
                         cornerstone={cornerstone}

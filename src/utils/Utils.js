@@ -65,7 +65,7 @@ export default class Utils {
     /**
      * Produces a random hexadecimal color for a given seed value.
      * @param {string} seed - Seed value
-     * @returns {string} - Color value in hexadecimal format
+     * @returns {string} - color value in hexadecimal format
      */
     static getRandomColor(seed) {
         return randomColor({
