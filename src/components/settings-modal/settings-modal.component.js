@@ -115,7 +115,6 @@ const SettingsModal = (props) => {
     );
     const [fileSuffix, setFileSuffix] = useState(useSelector(getFileSuffix));
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
-    const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [connectionDisplay, setConnectionDisplay] = useState(false);
     const [connecting, setConnecting] = useState(false);
@@ -127,17 +126,6 @@ const SettingsModal = (props) => {
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
         useState(initDisplaySummarizedDetections);
     const selectedDetection = useSelector(getSelectedDetection);
-    const svgContainerStyle = {
-        margin: '0.3rem',
-        marginRight: '1rem',
-        display: 'flex',
-        float: 'left',
-    };
-    const svgStyle = {
-        height: '24px',
-        width: '24px',
-        color: '#ffffff',
-    };
 
     /**
      * Event handler for when the snackbar closes
@@ -151,27 +139,6 @@ const SettingsModal = (props) => {
         }
         setSnackBarOpen(false);
     };
-
-    /**
-     * Returns the main modal body style
-     *
-     * @returns {Object} Containing styles for the modal
-     */
-    function getModalStyle() {
-        return {
-            position: 'absolute',
-            top: `50%`,
-            left: `50%`,
-            transform: `translate(-50%, -50%)`,
-            backgroundColor: '#1f1f1f',
-            outline: 'none',
-            fontFamily: 'Noto Sans JP',
-            width: '30vw',
-            minWidth: '32rem',
-            maxWidth: '40rem',
-            padding: '2rem',
-        };
-    }
 
     /**
      * Tests the connection with the typed input fields. This does some simulation
@@ -346,63 +313,32 @@ const SettingsModal = (props) => {
         }
     };
 
+    const svgContainerStyle = {
+        margin: '0.3rem',
+        marginRight: '1rem',
+        display: 'flex',
+        float: 'left',
+    };
+    const svgStyle = {
+        height: '24px',
+        width: '24px',
+        color: '#ffffff',
+    };
+
     const classes = {
-        snackBarClass: {
-            backgroundColor: '#1f1f1f',
-            color: '#ffffff',
-        },
         checkIcon: {
             margin: '0.3rem',
             display: 'flex',
         },
-        checkConnectionButton: {
-            color: '#367eff',
-            textTransform: 'none',
-            paddingLeft: modalTheme.spacing(3),
-            paddingRight: modalTheme.spacing(3),
-        },
-        links: {
-            fontSize: modalTheme.typography.fontSize,
-            color: modalTheme.palette.primary,
-            cursor: 'pointer',
-        },
-        linkSelected: {
-            fontSize: modalTheme.typography.fontSize,
-            color: modalTheme.palette.primary,
-            background: '#515151',
-            cursor: 'pointer',
-        },
-        form: {
-            margin: modalTheme.spacing(1),
-        },
-        connectionLabel: {
-            margin: 'auto',
-        },
         circularProgress: {
             marginRight: modalTheme.spacing(2),
             display: connecting ? 'none' : 'initial',
-        },
-        sectionLabel: {
-            marginRight: modalTheme.spacing(2),
-        },
-        outputFolderSection: {
-            display: 'flex',
-            flexDirection: 'column',
-        },
-        container: {
-            display: 'flex',
-        },
-        disabledText: {
-            color: '#9d9d9d',
         },
         closeIconStyle: {
             alignSelf: 'center',
             width: '24px',
             height: '24px',
             cursor: 'pointer',
-        },
-        displayListSectionInput: {
-            width: '70%',
         },
     };
 
