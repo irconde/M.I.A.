@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { 
-    LabelDivider,
-    LabelList, 
-    LabelListWrapper,
-} from './label-list.styles';
+import { LabelDivider, LabelList, LabelListWrapper } from './label-list.styles';
 
 /**
  * Component for displaying list of available detection labels.
@@ -23,17 +19,15 @@ const LabelListComponent = ({ labels, onLabelSelect }) => {
     return (
         <LabelListWrapper>
             <LabelList>
-            {labels &&
-            labels.map((label, i) => {
-                return (
-                    <li key={i} onClick={() => handleClick(i)}>
-                    <span>{label}</span>
-                    {i !== labels.length - 1 && (
-                        <LabelDivider/>
-                    )}
-                    </li> 
-                );
-            })}   
+                {labels &&
+                    labels.map((label, i) => {
+                        return (
+                            <li key={i} onClick={() => handleClick(i)}>
+                                <span>{label}</span>
+                                {i !== labels.length - 1 && <LabelDivider />}
+                            </li>
+                        );
+                    })}
             </LabelList>
         </LabelListWrapper>
     );

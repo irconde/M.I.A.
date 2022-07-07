@@ -1,18 +1,5 @@
 import styled from 'styled-components';
 import React from 'react';
-import TwoViewIcon from '../../icons/TwoViewIcon';
-import SingleViewIcon from '../../icons/SingleViewIcon';
-import AnnotationsIcon from '../../icons/AnnotationsIcon';
-
-const svgContainerStyle = { 
-    marginRight: '4px', 
-    marginLeft:  '4px', 
-};
-const svgImageStyle = { 
-    width: '20px',
-    height: '20px',
-};
-
 
 export const ImageContainer = styled.div`
     display: flex;
@@ -56,24 +43,3 @@ export const LazyImageText = styled.span`
     max-width: 117px;
     margin-right: 4px;
 `;
-
-export const StyledTwoViewIcon = () => {
-    <TwoViewIcon
-        style={svgContainerStyle}
-        svgStyle={svgImageStyle}
-    />
-}
-
-export const StyledSingleViewIcon = () => {
-    <SingleViewIcon
-        style={svgContainerStyle}
-        svgStyle={svgImageStyle}
-    />
-}
-
-export const StyledAnnotationsIcon = () => {
-    <AnnotationsIcon
-        style={svgContainerStyle}
-        svgStyle={svgImageStyle}
-    />
-}

@@ -16,10 +16,10 @@ import Utils from '../../utils/Utils';
 import LazyImageContainer from './lazy-image-container.component';
 import FileOpenIcon from '../../icons/FileOpenIcon';
 import {
-    LazyImageMenuContainer,
-    LazyImagesContainer,
-    LazyImageMenuPadding,
     ImagesInWorkspace,
+    LazyImageMenuContainer,
+    LazyImageMenuPadding,
+    LazyImagesContainer,
 } from './lazy-image-menu.styles';
 
 let ipcRenderer;
@@ -103,7 +103,7 @@ function LazyImageMenuComponent(props) {
                     onScroll={handleMenuContainerScroll}
                     translateStyle={translateStyle}>
                     <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
-                    <FileOpenIcon
+                        <FileOpenIcon
                             style={svgContainerStyle}
                             svgStyle={{
                                 ...svgStyle,

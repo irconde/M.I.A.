@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/Constants';
 
-
 const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
-
-
 
 export const LazyImageMenuContainer = styled.div`
     position: fixed;
@@ -19,19 +16,15 @@ export const LazyImageMenuContainer = styled.div`
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
     transition: ${(props) =>
-        props.collapsedLazyMenu === true
-        ? 'none'
-        : 'all 0.3s ease-in'};
+        props.collapsedLazyMenu === true ? 'none' : 'all 0.3s ease-in'};
     z-index: 2;
     width: 256px;
-    transform: ${(props) =>
-        props.translateStyle};
+    transform: ${(props) => props.translateStyle};
 `;
 
 export const LazyImageMenuPadding = styled.div`
-    height: ${constants.sideMenuPaddingTop} +
-            ${constants.RESOLUTION_UNIT};
-    width: '100%';
+    height: ${constants.sideMenuPaddingTop} + ${constants.RESOLUTION_UNIT};
+    width: 100%;
 `;
 
 export const LazyImagesContainer = styled.div`
@@ -42,8 +35,8 @@ export const LazyImagesContainer = styled.div`
     width: ${sideMenuWidth};
     height: ${(props) =>
         props.collapsedLazyMenu === true
-        ? document.documentElement.clientHeight
-        : 'none'};
+            ? document.documentElement.clientHeight
+            : 'none'};
 `;
 
 export const ImagesInWorkspace = styled.p`

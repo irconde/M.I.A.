@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { detectionContextStyle } from '../../utils/Constants';
 
-
 export const Positioner = styled.div`
     position: absolute;
     top: ${(props) => `${props.position.top}px`};
@@ -24,10 +23,12 @@ export const MainWidget = styled.div`
     overflow: hidden;
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
     /* make sure when either icon is selected, the color fills to the rounded corners */
+
     #firstIcon {
         border-top-left-radius: 40px;
         border-bottom-left-radius: 40px;
     }
+
     #lastIcon {
         border-top-right-radius: 40px;
         border-bottom-right-radius: 40px;
@@ -43,6 +44,7 @@ export const IconContainer = styled.div`
     height: ${detectionContextStyle.HEIGHT}px;
     background: ${(props) =>
         props.selected ? detectionContextStyle.SELECTED_COLOR : null};
+
     &:active {
         background: ${detectionContextStyle.SELECTED_COLOR};
     }

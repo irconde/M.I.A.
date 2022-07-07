@@ -12,10 +12,12 @@ export const LabelListWrapper = styled.div`
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
 
     /* container scrollbar styles */
+
     ::-webkit-scrollbar {
         width: 15px;
         height: 18px;
     }
+
     ::-webkit-scrollbar-thumb {
         height: 45px;
         border: 4px solid rgba(0, 0, 0, 0);
@@ -25,9 +27,11 @@ export const LabelListWrapper = styled.div`
         box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05),
             inset 1px 1px 0px rgba(0, 0, 0, 0.05);
     }
+
     ::-webkit-scrollbar-thumb:hover {
         background-color: rgba(0, 0, 0, 0.25);
     }
+
     ::-webkit-scrollbar-button {
         width: 0;
         height: 0;
@@ -43,6 +47,7 @@ export const LabelList = styled.ul`
     color: ${constants.colors.BLUE};
 
     /* styles for list elements */
+
     li {
         margin-top: 0.25rem;
         margin-bottom: 0.25rem;

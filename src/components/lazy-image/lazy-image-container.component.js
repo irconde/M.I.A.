@@ -7,14 +7,14 @@ import { Channels } from '../../utils/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
-import { 
-    ImageContainer, 
-    LazyImageText, 
-    LazyImageTextContainer, 
-    StyledAnnotationsIcon, 
-    StyledSingleViewIcon, 
-    StyledTwoViewIcon 
+import {
+    ImageContainer,
+    LazyImageText,
+    LazyImageTextContainer,
 } from './lazy-image-container.styles';
+import TwoViewIcon from '../../icons/TwoViewIcon';
+import SingleViewIcon from '../../icons/SingleViewIcon';
+import AnnotationsIcon from '../../icons/AnnotationsIcon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -101,8 +101,8 @@ function LazyImageContainerComponent(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
-    // const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
-    // const svgImageStyle = { width: '20px', height: '20px' };
+    const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
+    const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
             ref={containerElement}
@@ -126,12 +126,21 @@ function LazyImageContainerComponent(props) {
                     <LazyImageText>{thisFileName}</LazyImageText>
                 </Tooltip>
                 {numOfViews > 1 ? (
-                    <StyledTwoViewIcon/>
+                    <TwoViewIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
                 ) : (
-                    <StyledSingleViewIcon/>
+                    <SingleViewIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
                 )}
                 {isDetections === true ? (
-                    <StyledAnnotationsIcon/>
+                    <AnnotationsIcon
+                        style={svgContainerStyle}
+                        svgStyle={svgImageStyle}
+                    />
                 ) : null}
             </LazyImageTextContainer>
         </ImageContainer>

@@ -50,7 +50,7 @@ const ColorPickerComponent = () => {
                     detectionContextPosition.top +
                         zoomLevels.zoomLevelSide +
                         detectionContextStyle.HEIGHT +
-                        10
+                        11
                 );
                 setLeftPosition(
                     detectionContextPosition.left +
@@ -77,9 +77,7 @@ const ColorPickerComponent = () => {
     };
     if (isVisible === true) {
         return (
-            <ColorPickerContainer 
-                top={topPosition} 
-                left={leftPosition}>
+            <ColorPickerContainer top={topPosition} left={leftPosition}>
                 <TwitterPicker
                     color={color}
                     onChangeComplete={(color) => colorChangeComplete(color)}

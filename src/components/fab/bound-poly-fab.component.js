@@ -15,10 +15,10 @@ import {
 } from '../../redux/slices/settings/settingsSlice';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
-import { 
-    FABContainer, 
-    FABdivider, 
-    FABoption, 
+import {
+    FABContainer,
+    FABdivider,
+    FABoption,
     StyledPolygonIcon,
     StyledRectangleIcon,
 } from './bound-poly-fab.styles';
@@ -30,7 +30,6 @@ import {
  * @property {fabOpacity} - Prop to control opacity based on the current cornerstoneMode
  * @property {show} - Prop to control whether the component should be displayed
  */
-
 
 /**
  * Component for user to create a new detection and its polygon mask.
@@ -82,6 +81,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
         fabOpacity = false;
         show = true;
         if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
+            // TODO: Future refactoring
             let canvasElements =
                 document.getElementsByClassName('cornerstone-canvas');
             let multipleViewports = canvasElements.length > 1;
@@ -94,6 +94,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
     } else {
         fabOpacity = true;
         show = true;
+        // TODO: Future refactoring
         let canvasElements =
             document.getElementsByClassName('cornerstone-canvas');
         let multipleViewports = canvasElements.length > 1;
@@ -109,14 +110,17 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
             deviceType={deviceType}>
             <Tooltip title="Create box annotation" placement="bottom">
                 <FABoption onClick={(e) => handleClick(e, onBoundingSelect)}>
-                    <StyledRectangleIcon/>
+                    <StyledRectangleIcon />
                     <span>Bounding box</span>
                 </FABoption>
             </Tooltip>
-            <FABdivider/>
+            <FABdivider />
             <Tooltip title="Create mask annotation" placement="bottom">
-                <FABoption onClick={(e) => {handleClick(e, onPolygonSelect);}}>
-                    <StyledPolygonIcon/>
+                <FABoption
+                    onClick={(e) => {
+                        handleClick(e, onPolygonSelect);
+                    }}>
+                    <StyledPolygonIcon />
                     <span>Polygon mask</span>
                 </FABoption>
             </Tooltip>

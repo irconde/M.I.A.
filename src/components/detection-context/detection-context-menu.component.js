@@ -20,12 +20,12 @@ import {
 } from '../../redux/slices/detections/detectionsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
-    Positioner,
-    FlexContainer,
-    MainWidget,
-    IconContainer,
     DeleteWidget,
-    StyledSelectedDetection
+    FlexContainer,
+    IconContainer,
+    MainWidget,
+    Positioner,
+    StyledSelectedDetection,
 } from './detection-context-menu.styles';
 
 /**
@@ -71,7 +71,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                             <IconContainer
                                 onClick={() => handleClick(editionMode.COLOR)}
                                 selected={selectedOption === editionMode.COLOR}>
-                                <StyledSelectedDetection selectedDetectionColor={selectedDetectionColor}/>
+                                <StyledSelectedDetection
+                                    selectedDetectionColor={
+                                        selectedDetectionColor
+                                    }
+                                />
                             </IconContainer>
                         </Tooltip>
                         {detectionType !== constants.detectionType.BINARY && (
