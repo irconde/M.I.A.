@@ -14,7 +14,7 @@ import TapDetector from './utils/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import NextButtonComponent from './components/side-menu/buttons/next-button.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
-import TopBar from './components/top-bar/top-bar.component';
+import TopBarComponent from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/Constants';
@@ -854,7 +854,7 @@ class App extends Component {
     }
 
     /**
-     * Function called from the TopBar Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
+     * Function called from the TopBarComponent Icon OpenFile. Uses the browser-fs-access library to load a file as a blob. That
      * blob then needs to be converted to base64 to be loaded into the app.
      */
     getFileFromLocal() {
@@ -3849,7 +3849,7 @@ class App extends Component {
                                 e.preventDefault();
                             });
                     }}>
-                    <TopBar
+                    <TopBarComponent
                         connectToCommandServer={this.connectToCommandServer}
                         getFileFromLocal={this.getFileFromLocal}
                         cornerstone={cornerstone}

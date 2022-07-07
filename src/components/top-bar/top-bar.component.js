@@ -22,7 +22,7 @@ import { ConnectionStatusIconsContainer, ConnectionTypeInfo, FragmentWrapper, In
  * @component
  *
  */
-const TopBar = (props) => {
+const TopBarComponent = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
@@ -141,7 +141,7 @@ const TopBar = (props) => {
     );
 };
 
-TopBar.propTypes = {
+TopBarComponent.propTypes = {
     /**
      * Function passed into the SettingsIcon component to check connection to command server
      */
@@ -156,4 +156,4 @@ TopBar.propTypes = {
     getFileFromLocal: PropTypes.func,
 };
 
-export default TopBar;
+export default TopBarComponent;
