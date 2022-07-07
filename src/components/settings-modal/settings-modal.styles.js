@@ -156,6 +156,7 @@ export const SettingsRow = styled(SettingsHeader)`
     margin-bottom: 0;
 `;
 export const WorkingDirectory = styled(SettingsHeader)`
+    display: flex;
     align-items: center;
     margin: 0;
 `;
@@ -251,9 +252,12 @@ export const PortTextField = styled(TextField).attrs(() => ({
 }))``;
 
 export const WorkSpaceFormControl = styled(FormControl)`
-    display: flex;
+    display: inline-block;
     flex-direction: row;
     width: 70%;
+    &.MuiFormControl-root {
+        display: inline-block;
+    }
 `;
 
 export const AlignedContainer = styled.div`
@@ -269,4 +273,8 @@ export const LocalFileOutputField = styled(TextField).attrs(() => ({
         size: '40',
     },
     variant: 'standard',
-}))``;
+}))`
+    &.MuiFormControl-root {
+        width: 70%;
+    }
+`;
