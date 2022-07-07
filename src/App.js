@@ -11,12 +11,12 @@ import ORA from './utils/ORA.js';
 import Utils from './utils/Utils.js';
 import Dicos from './utils/Dicos.js';
 import TapDetector from './utils/TapDetector';
-import SideMenu from './components/SideMenu/SideMenu';
-import NextButton from './components/SideMenu/NextButton';
-import SaveButton from './components/SideMenu/SaveButton';
+import SideMenuComponent from './components/side-menu/side-menu.component';
+import NextButtonComponent from './components/side-menu/buttons/next-button.component';
+import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 import TopBar from './components/TopBar/TopBar';
 import JSZip from 'jszip';
-import NoFileSign from './components/NoFileSign';
+import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
@@ -87,8 +87,13 @@ import DetectionContextMenu from './components/detection-context/detection-conte
 import EditLabel from './components/edit-label/index.component';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
+<<<<<<< HEAD
 import ColorPicker from './components/color/color-picker.component';
 import MetaData from './components/Snackbars/MetaData';
+=======
+import ColorPicker from './components/Color/ColorPicker';
+import MetaDataComponent from './components/snackbars/meta-data.component';
+>>>>>>> remotes/origin/develop
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
 import SettingsModal from './components/SettingsModal/SettingsModal';
@@ -158,6 +163,7 @@ class App extends Component {
             thumbnails: null,
             showSnackbar: false,
             errorMessage: '',
+            localWorkspaceError: '',
         };
         this.getFileFromLocal = this.getFileFromLocal.bind(this);
         this.localDirectoryChangeHandler =
@@ -322,7 +328,8 @@ class App extends Component {
             this.props.currentProcessingFile === null &&
             nextProps.currentProcessingFile === null &&
             !fetchingFromLocalDirectory &&
-            !nextProps.remoteOrLocal
+            !nextProps.remoteOrLocal &&
+            this.state.localWorkspaceError !== 'end-of-queue'
         ) {
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
@@ -884,6 +891,9 @@ class App extends Component {
                 .then((result) => {
                     fetchingFromLocalDirectory = false;
                     this.props.setLocalFileOpen(true);
+                    this.setState({
+                        localWorkspaceError: '',
+                    });
                     this.loadNextImage(
                         result.file,
                         result.fileName,
@@ -897,7 +907,10 @@ class App extends Component {
                         error.toString() ===
                         "Error: Error invoking remote method 'get-next-file': End of queue"
                     ) {
-                        console.log('end of queue');
+                        this.props.invalidateDetections();
+                        this.setState({
+                            localWorkspaceError: 'end-of-queue',
+                        });
                     } else {
                         this.props.setLocalFileOpen(false);
                         this.props.setReceiveTime(null);
@@ -1054,6 +1067,8 @@ class App extends Component {
         const verticalDivider = document.getElementById('verticalDivider');
         verticalDivider.classList.add('dividerHidden');
         verticalDivider.classList.remove('dividerVisible');
+        this.props.setReceiveTime(null);
+        this.props.setCurrentProcessingFile(null);
         this.props.setNumFilesInQueue(0);
         this.props.updateFABVisibility(false);
         this.setState({
@@ -3844,7 +3859,7 @@ class App extends Component {
                         getFileFromLocal={this.getFileFromLocal}
                         cornerstone={cornerstone}
                     />
-                    <SideMenu
+                    <SideMenuComponent
                         nextImageClick={this.nextImageClick}
                         resetCornerstoneTools={this.resetCornerstoneTool}
                         renderDetectionContextMenu={
@@ -3853,12 +3868,12 @@ class App extends Component {
                     />
                     {this.props.remoteOrLocal === true ||
                     (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
-                        <NextButton
+                        <NextButtonComponent
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
                         />
                     ) : (
-                        <SaveButton
+                        <SaveButtonComponent
                             collapseBtn={true}
                             nextImageClick={this.nextImageClick}
                         />
@@ -3881,8 +3896,8 @@ class App extends Component {
                             thumbnails={this.state.thumbnails}
                         />
                     ) : null}
-                    <NoFileSign />
-                    <MetaData />
+                    <NoFileSignComponent />
+                    <MetaDataComponent />
                 </div>
                 {this.props.loadingElectronCookie === false ? (
                     <SettingsModal

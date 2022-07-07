@@ -15,7 +15,7 @@ import Tooltip from '@mui/material/Tooltip';
 import isElectron from 'is-electron';
 
 /**
- * Menu toggle icon in TopBar component used to toggle SideMenu component visibility.
+ * Menu toggle icon in TopBar component used to toggle SideMenuComponent component visibility.
  *
  * @component
  *

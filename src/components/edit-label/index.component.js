@@ -16,6 +16,7 @@ import {
     NewLabelInput,
 } from './index.styles';
 import LabelListComponent from './label-list.component';
+import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
 
 /**
  * Widget for editing a selected detection's label.
@@ -32,6 +33,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
     const inputField = useRef(null);
+    const [showClearIcon, setShowClearIcon] = useState(false);
 
     const formattedLabels = labels.filter((label) => label !== 'unknown');
 
@@ -56,6 +58,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
         // Reset label list visibility when component is hidden
         if (!isVisible) {
             setIsListOpen(false);
+            setShowClearIcon(false);
         }
     }, [isVisible, isListOpen]);
 
@@ -87,6 +90,17 @@ const EditLabelComponent = ({ onLabelChange }) => {
         return diff * zoom;
     };
 
+    /**
+     * Triggered when the edit label input field is changed. Shows and hides the clear icon
+     *
+     * @param {Event} e - change event object
+     */
+    const handleLabelInputChange = (e) => {
+        const { value } = e.target;
+        setShowClearIcon(value.length ? true : false);
+        dispatch(setInputLabel(value.toUpperCase()));
+    };
+
     if (isVisible) {
         return (
             <EditLabelWrapper
@@ -105,15 +119,20 @@ const EditLabelComponent = ({ onLabelChange }) => {
                     <NewLabelInput
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
-                        onChange={(e) =>
-                            dispatch(
-                                setInputLabel(e.target.value.toUpperCase())
-                            )
-                        }
+                        onChange={handleLabelInputChange}
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
                         ref={inputField}
                     />
+                    {showClearIcon && (
+                        <ClearTextIcon
+                            className="clearTextIcon"
+                            onClick={() => {
+                                setShowClearIcon(false);
+                                dispatch(setInputLabel(''));
+                            }}
+                        />
+                    )}
                     <ArrowIcon
                         handleClick={() => {
                             setIsListOpen(!isListOpen);

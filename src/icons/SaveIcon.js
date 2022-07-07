@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Tooltip from '@mui/material/Tooltip';
 
 /**
- * Save icon in SaveButton component.
+ * Save icon in SaveButtonComponent component.
  *
  * @component
  *

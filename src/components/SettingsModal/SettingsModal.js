@@ -421,7 +421,7 @@ const SettingsModal = (props) => {
             flexDirection: 'row',
             width: '70%',
         },
-        saveButton: {
+        SaveButtonComponent: {
             margin: 'auto 1rem auto 0',
             float: 'right',
             backgroundColor: '#367eff',

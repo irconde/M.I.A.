@@ -47,10 +47,10 @@ body {
     border-width: 1px;
     border-style: solid;
     border-image: linear-gradient(
-            to bottom,
-            rgba(75, 75, 75, 0) 0%,
-            rgba(75, 75, 75, 1) 48%,
-            rgba(75, 75, 75, 0) 100%
+        to bottom,
+        rgba(75, 75, 75, 0) 0%,
+        rgba(75, 75, 75, 1) 48%,
+        rgba(75, 75, 75, 0) 100%
     );
     border-image-slice: 1;
     position: absolute;
@@ -74,28 +74,6 @@ body {
     position: absolute;
 }
 
-.side-menu-container {
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
-    transition: all 0.3s ease-in;
-    position: fixed;
-    right: 0;
-}
-
-.treeview-main {
-    position: absolute;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background-color: #1f1f1f;
-    overflow: hidden;
-    font-size: 11.5px;
-    right: 0;
-}
-
 .treeview > .toggle {
     pointer-events: all;
     cursor: pointer;
@@ -111,6 +89,82 @@ body {
     cursor: none;
 }
 
+<<<<<<< HEAD
+=======
+.lazy-image-menu-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+    background-color: #292929;
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
+    -ms-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
+    z-index: 2;
+    width: 256px;
+}
+
+.lazy-images-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.lazy-image-text-container {
+    display: flex;
+    position: absolute;
+    margin-top: 93%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    width: 80%;
+}
+
+.lazy-image-text {
+    display: inline-block;
+    opacity: 0.6;
+    font-size: 12px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: -0.5px;
+    color: #e3e3e3;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 117px;
+    margin-right: 4px;
+}
+
+.images-in-workspace {
+    width: 100%;
+    height: 20px;
+    margin-top: 0;
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: -0.58px;
+    text-align: center;
+    color: #e3e3e3;
+    display: flex;
+    justify-content: flex-start;
+    position: sticky;
+    top: 0px;
+    background-color: #292929;
+    z-index: 1;
+    padding: 1rem 0 1rem 1rem;
+}
+
+>>>>>>> remotes/origin/develop
 /* width */
 ::-webkit-scrollbar {
     width: 9px;

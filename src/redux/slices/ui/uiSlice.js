@@ -72,7 +72,7 @@ const uiSlice = createSlice({
         /**
          * Sets the visibility of the side menu
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {{cornerstone: CornerstoneObject, desktopMode: Boolean, newState: Boolean}} action.payload - Contains cornerstone object, whether in desktop mode, and whether sidemenu is should be open
+         * @param {{cornerstone: CornerstoneObject, desktopMode: Boolean, newState: Boolean}} action.payload - Contains cornerstone object, whether in desktop mode, and whether SideMenuComponent is should be open
          */
         setCollapsedSideMenu: (state, action) => {
             const { cornerstone, desktopMode, collapsedSideMenu } =

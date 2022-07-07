@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import TreeDetection from './SideMenuDetection';
-import * as Icons from './Icons';
-import * as constants from '../../utils/Constants';
+import TreeDetection from './side-menu-detection.component';
+import * as Icons from '../Icons';
+import * as constants from '../../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
-import Utils from '../../utils/Utils';
+import Utils from '../../../utils/Utils';
 import {
     clearAllSelection,
     getSelectedAlgorithm,
     selectDetectionSet,
     updateDetectionSetVisibility,
-} from '../../redux/slices/detections/detectionsSlice';
-import { menuDetectionSelectedUpdate } from '../../redux/slices/ui/uiSlice';
+} from '../../../redux/slices/detections/detectionsSlice';
+import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
+import {
+    SideMenuAlgorithm,
+    SideMenuAlgorithmName,
+} from './side-menu-algorithm.styles';
 
 /**
- * Helper component for SideMenu component that allows user to view and sort detections by algorithm
+ * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
  *
  * @component
  *
  *
  */
-const SideMenuAlgorithm = ({
+const SideMenuAlgorithmComponent = ({
     detections,
     resetCornerstoneTools,
     renderDetectionContextMenu,
@@ -58,18 +62,6 @@ const SideMenuAlgorithm = ({
         float: 'right',
         marginRight: '1.0rem',
         paddingTop: '0.2rem',
-    };
-    const typeStyles = {
-        verticalAlign: 'top',
-        fontFamily: 'Noto Sans JP',
-        display: 'inline-block',
-        margin: 'auto',
-        cursor: 'default',
-        paddingTop: '0.2rem',
-    };
-    const containerStyle = {
-        paddingBottom: '0.75rem',
-        paddingTop: '0.75rem',
     };
 
     /**
@@ -124,23 +116,15 @@ const SideMenuAlgorithm = ({
 
     let algorithmDisplay =
         algorithm === constants.OPERATOR
-                        ? algorithm
-                        : constants.ALGORITHM + ' - ' + algorithm;
+            ? algorithm
+            : constants.ALGORITHM + ' - ' + algorithm;
 
     algorithmDisplay = Utils.truncateString(algorithmDisplay, 20);
 
     return (
         <div>
-            <div
-                style={
-                    isAlgorithmSelected === algorithm && isVisible
-                        ? {
-                              ...containerStyle,
-                              backgroundColor:
-                                  constants.detectionStyle.SELECTED_COLOR,
-                          }
-                        : containerStyle
-                }
+            <SideMenuAlgorithm
+                selected={isAlgorithmSelected === algorithm && isVisible}
                 onClick={setSelected}>
                 {isExpanded ? (
                     <Icons.ExpendedArrow
@@ -155,15 +139,11 @@ const SideMenuAlgorithm = ({
                         onClick={() => setIsExpanded(!isExpanded)}
                     />
                 )}
-                <div
+                <SideMenuAlgorithmName
                     id="algorithm-name"
-                    style={
-                        anyVisible
-                            ? typeStyles
-                            : { ...typeStyles, color: 'gray' }
-                    }>
+                    anyDetectionVisible={anyVisible}>
                     {algorithmDisplay}
-                </div>
+                </SideMenuAlgorithmName>
                 {anyVisible ? (
                     <Icons.EyeO
                         id="eye"
@@ -177,7 +157,7 @@ const SideMenuAlgorithm = ({
                         style={eyeStyle}
                     />
                 )}
-            </div>
+            </SideMenuAlgorithm>
             <div id="detection-holder">
                 {detections !== undefined && isExpanded === true ? (
                     detections.map((detection, index) => {
@@ -201,7 +181,7 @@ const SideMenuAlgorithm = ({
     );
 };
 
-SideMenuAlgorithm.propTypes = {
+SideMenuAlgorithmComponent.propTypes = {
     /**
      * Array of detection objects
      */
@@ -216,4 +196,4 @@ SideMenuAlgorithm.propTypes = {
     renderDetectionContextMenu: PropTypes.func.isRequired,
 };
 
-export default SideMenuAlgorithm;
+export default SideMenuAlgorithmComponent;

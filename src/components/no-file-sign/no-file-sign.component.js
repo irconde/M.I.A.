@@ -1,12 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { ReactComponent as NoFilesIcon } from '../icons/ic_no_files.svg';
-import { getNumFilesInQueue } from '../redux/slices/server/serverSlice';
+import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 import {
     getHasFileOutput,
     getRemoteOrLocal,
-} from '../redux/slices/settings/settingsSlice';
-import { getLocalFileOpen } from '../redux/slices/ui/uiSlice';
+} from '../../redux/slices/settings/settingsSlice';
+import { getLocalFileOpen } from '../../redux/slices/ui/uiSlice';
+import { NoFileSignLabel, NoFileSignWrapper } from './no-file-sign.styles';
+import { ReactComponent as NoFilesIcon } from '../../icons/ic_no_files.svg';
 
 /**
  * GUI widget that provides displays an image in the middle of the screen to
@@ -14,42 +15,26 @@ import { getLocalFileOpen } from '../redux/slices/ui/uiSlice';
  *
  * @component
  */
-const NoFileSign = () => {
+const NoFileSignComponent = () => {
     const numberOfFiles = useSelector(getNumFilesInQueue);
     const localFileOpen = useSelector(getLocalFileOpen);
     let isVisible = numberOfFiles <= 0 ? false : true;
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
-    const paragraphStyle = {
-        fontWeight: '500',
-        marginTop: '0.0rem',
-        textAlign: 'center',
-        width: '100%',
-        fontSize: '34pt',
-        textTransform: 'uppercase',
-        color: '#367FFF',
-    };
-    const divStyle = {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        textAlign: 'center',
-        width: 'auto',
-        opacity: '1.0',
-    };
+
     const imgStyle = {
         opacity: '0.9',
         width: '90%',
         height: '90%',
     };
+
     if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
-        return <div></div>;
+        return <></>;
     } else {
         return (
-            <div style={divStyle}>
+            <NoFileSignWrapper>
                 <NoFilesIcon title="NoFilesAvailable" style={imgStyle} />
-                <p style={paragraphStyle}>
+                <NoFileSignLabel>
                     {' '}
                     ·{' '}
                     {remoteOrLocal === true ||
@@ -57,10 +42,10 @@ const NoFileSign = () => {
                         ? 'No file available'
                         : 'Select a file'}{' '}
                     ·
-                </p>
-            </div>
+                </NoFileSignLabel>
+            </NoFileSignWrapper>
         );
     }
 };
 
-export default NoFileSign;
+export default NoFileSignComponent;
