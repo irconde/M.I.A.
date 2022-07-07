@@ -8,12 +8,13 @@ import {
     Switch,
     TextField,
     FormControl,
+    Select,
 } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
 const WHITE_COLOR = 'white';
 
-const theme = createTheme({
+export const modalTheme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
@@ -169,7 +170,7 @@ export const RemoteInputContainer = styled.div`
 `;
 export const AutoConnectContainer = styled.div`
     float: right;
-    color: #9d9d9d;
+    color: ${GREY_COLOR};
     margin-top: auto;
 `;
 export const ConnectionButtonSection = styled.div`
@@ -210,12 +211,12 @@ export const StyledFormGroup = styled(FormGroup)`
     height: 95%;
 `;
 
-export const ConnectionButton = styled(Button).attrs((props) => ({
+export const ConnectionButton = styled(Button).attrs(() => ({
     variant: 'outlined',
     size: 'small',
 }))`
     text-transform: none !important;
-    padding-inline: ${theme.spacing(3)} !important;
+    padding-inline: ${modalTheme.spacing(3)} !important;
 `;
 
 export const StyledSwitch = styled(Switch).attrs(() => ({
@@ -252,8 +253,6 @@ export const PortTextField = styled(TextField).attrs(() => ({
 }))``;
 
 export const WorkSpaceFormControl = styled(FormControl)`
-    display: inline-block;
-    flex-direction: row;
     width: 70%;
     &.MuiFormControl-root {
         display: inline-block;
@@ -278,3 +277,35 @@ export const LocalFileOutputField = styled(TextField).attrs(() => ({
         width: 70%;
     }
 `;
+
+export const SelectFolderButton = styled(Button).attrs(() => ({
+    variant: 'outlined',
+    size: 'medium',
+    id: 'btnFolder',
+}))`
+    &.MuiButton-root {
+        color: #367eff;
+        text-transform: none;
+        padding-inline: ${modalTheme.spacing(3)};
+    }
+`;
+
+export const StyledSelect = styled(Select).attrs(() => ({
+    displayEmpty: true,
+}))`
+    color: ${(props) => props.grayText && GREY_COLOR};
+`;
+
+export const StandardFormControl = styled(FormControl).attrs(() => ({
+    variant: 'standard',
+}))``;
+
+export const FileSuffixField = styled(TextField).attrs(() => ({
+    required: true,
+    id: 'outputSuffix',
+    placeholder: 'Filename suffix',
+    variant: 'standard',
+    inputProps: {
+        size: '10',
+    },
+}))``;

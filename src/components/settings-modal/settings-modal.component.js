@@ -1,20 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import { modalTheme } from './settings-modal.styles';
 import {
-    Button,
     Checkbox,
     CircularProgress,
-    Divider,
     FormControl,
     FormControlLabel,
-    FormGroup,
     MenuItem,
-    Paper,
-    Select,
-    Switch,
-    TextField,
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
@@ -86,6 +80,10 @@ import {
     WorkSpaceFormControl,
     AlignedContainer,
     LocalFileOutputField,
+    SelectFolderButton,
+    StyledSelect,
+    StandardFormControl,
+    FileSuffixField,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -348,42 +346,7 @@ const SettingsModal = (props) => {
         }
     };
 
-    const theme = createTheme({
-        palette: {
-            mode: 'dark',
-            primary: {
-                light: '#5e97ff',
-                main: '#367eff',
-                dark: '#2558b2',
-                contrastText: '#9d9d9d',
-            },
-        },
-        zIndex: {
-            modal: 3,
-        },
-        transitions: {
-            duration: {
-                shortest: 150,
-                shorter: 200,
-                // most basic recommended timing
-                standard: 300,
-                // this is to be used in complex animations
-                complex: 375,
-                // recommended when something is entering screen
-                enteringScreen: 225,
-                // recommended when something is leaving screen
-                leavingScreen: 195,
-            },
-        },
-    });
-
     const classes = {
-        pathButton: {
-            color: '#367eff',
-            textTransform: 'none',
-            paddingLeft: theme.spacing(3),
-            paddingRight: theme.spacing(3),
-        },
         snackBarClass: {
             backgroundColor: '#1f1f1f',
             color: '#ffffff',
@@ -395,32 +358,32 @@ const SettingsModal = (props) => {
         checkConnectionButton: {
             color: '#367eff',
             textTransform: 'none',
-            paddingLeft: theme.spacing(3),
-            paddingRight: theme.spacing(3),
+            paddingLeft: modalTheme.spacing(3),
+            paddingRight: modalTheme.spacing(3),
         },
         links: {
-            fontSize: theme.typography.fontSize,
-            color: theme.palette.primary,
+            fontSize: modalTheme.typography.fontSize,
+            color: modalTheme.palette.primary,
             cursor: 'pointer',
         },
         linkSelected: {
-            fontSize: theme.typography.fontSize,
-            color: theme.palette.primary,
+            fontSize: modalTheme.typography.fontSize,
+            color: modalTheme.palette.primary,
             background: '#515151',
             cursor: 'pointer',
         },
         form: {
-            margin: theme.spacing(1),
+            margin: modalTheme.spacing(1),
         },
         connectionLabel: {
             margin: 'auto',
         },
         circularProgress: {
-            marginRight: theme.spacing(2),
+            marginRight: modalTheme.spacing(2),
             display: connecting ? 'none' : 'initial',
         },
         sectionLabel: {
-            marginRight: theme.spacing(2),
+            marginRight: modalTheme.spacing(2),
         },
         outputFolderSection: {
             display: 'flex',
@@ -667,12 +630,8 @@ const SettingsModal = (props) => {
                                             />
                                         </WorkSpaceFormControl>
                                         <Tooltip title="Select workspace folder from the file explorer">
-                                            <Button
+                                            <SelectFolderButton
                                                 disabled={remoteOrLocal}
-                                                variant="outlined"
-                                                size="medium"
-                                                id="btnFolder"
-                                                style={classes.pathButton}
                                                 onClick={() => {
                                                     if (isElectron()) {
                                                         ipcRenderer
@@ -702,7 +661,7 @@ const SettingsModal = (props) => {
                                                     }
                                                 }}>
                                                 Select Folder
-                                            </Button>
+                                            </SelectFolderButton>
                                         </Tooltip>
                                     </WorkingDirectory>
                                 )}
@@ -713,20 +672,11 @@ const SettingsModal = (props) => {
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }
-                                            variant="standard">
-                                            <Select
-                                                style={
-                                                    fileFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
-                                                displayEmpty={true}
+                                        <StandardFormControl>
+                                            <StyledSelect
+                                                grayText={fileFormat === ''}
                                                 open={openFileFormat}
-                                                defaultValue="Open Raster"
+                                                defaultValue={'Open Raster'}
                                                 onClose={() => {
                                                     setOpenFileFormat(false);
                                                 }}
@@ -749,8 +699,8 @@ const SettingsModal = (props) => {
                                                 <MenuItem value={'Zip Archive'}>
                                                     Zip Archive
                                                 </MenuItem>
-                                            </Select>
-                                        </FormControl>
+                                            </StyledSelect>
+                                        </StandardFormControl>
                                     </FileManagementItem>
                                     <FileManagementItem>
                                         <FileAnnotationsIcon
@@ -758,18 +708,11 @@ const SettingsModal = (props) => {
                                             svgStyle={svgStyle}
                                         />
 
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }
-                                            variant="standard">
-                                            <Select
-                                                style={
+                                        <StandardFormControl>
+                                            <StyledSelect
+                                                grayText={
                                                     annotationsFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
                                                 }
-                                                displayEmpty={true}
                                                 open={openAnnotationsFormat}
                                                 onClose={() => {
                                                     setOpenAnnotationsFormat(
@@ -793,26 +736,20 @@ const SettingsModal = (props) => {
                                                 {Object.keys(
                                                     SETTINGS.ANNOTATIONS
                                                 ).map((key, index) => {
+                                                    const annotation =
+                                                        SETTINGS.ANNOTATIONS[
+                                                            key
+                                                        ];
                                                     return (
                                                         <MenuItem
                                                             key={index}
-                                                            value={
-                                                                SETTINGS
-                                                                    .ANNOTATIONS[
-                                                                    key
-                                                                ]
-                                                            }>
-                                                            {
-                                                                SETTINGS
-                                                                    .ANNOTATIONS[
-                                                                    key
-                                                                ]
-                                                            }
+                                                            value={annotation}>
+                                                            {annotation}
                                                         </MenuItem>
                                                     );
                                                 })}
-                                            </Select>
-                                        </FormControl>
+                                            </StyledSelect>
+                                        </StandardFormControl>
                                     </FileManagementItem>
 
                                     <FileManagementItem>
@@ -821,20 +758,13 @@ const SettingsModal = (props) => {
                                             svgStyle={svgStyle}
                                         />
                                         <FormControl>
-                                            <TextField
-                                                required
-                                                id="outputSuffix"
-                                                placeholder="Filename suffix"
+                                            <FileSuffixField
                                                 value={fileSuffix}
-                                                inputProps={{
-                                                    size: '10',
-                                                }}
                                                 onChange={(e) => {
                                                     setFileSuffix(
                                                         e.target.value
                                                     );
                                                 }}
-                                                variant="standard"
                                             />
                                         </FormControl>
                                     </FileManagementItem>
@@ -852,7 +782,7 @@ const SettingsModal = (props) => {
     );
 
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={modalTheme}>
             <Modal
                 open={settingsVisibility}
                 onClose={handleClose}
