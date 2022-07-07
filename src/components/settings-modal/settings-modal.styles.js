@@ -1,14 +1,14 @@
 import styled from 'styled-components';
 import {
     Button,
+    createTheme,
     Divider,
+    FormControl,
     FormGroup,
     Paper,
-    createTheme,
+    Select,
     Switch,
     TextField,
-    FormControl,
-    Select,
 } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
@@ -254,6 +254,7 @@ export const PortTextField = styled(TextField).attrs(() => ({
 
 export const WorkSpaceFormControl = styled(FormControl)`
     width: 70%;
+
     &.MuiFormControl-root {
         display: inline-block;
     }
@@ -292,9 +293,7 @@ export const SelectFolderButton = styled(Button).attrs(() => ({
 
 export const StyledSelect = styled(Select).attrs(() => ({
     displayEmpty: true,
-}))`
-    color: ${(props) => props.grayText && GREY_COLOR};
-`;
+}))``;
 
 export const StandardFormControl = styled(FormControl).attrs(() => ({
     variant: 'standard',

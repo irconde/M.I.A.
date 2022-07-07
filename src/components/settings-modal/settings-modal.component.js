@@ -2,7 +2,45 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { ThemeProvider } from '@mui/material/styles';
-import { modalTheme } from './settings-modal.styles';
+import {
+    AlignedContainer,
+    AutoConnectContainer,
+    CloseIconWrapper,
+    ConnectionButton,
+    ConnectionButtonSection,
+    FileManagementItem,
+    FileManagementSection,
+    FileSuffixField,
+    HostTextField,
+    IconWrapper,
+    LocalFileOutputField,
+    ModalRoot,
+    modalTheme,
+    PortTextField,
+    RemoteInputContainer,
+    RemoteWorkContainer,
+    SaveSettingsButton,
+    ScrollableContainer,
+    SelectFolderButton,
+    SettingDescription,
+    SettingOptionTitle,
+    SettingsCogwheel,
+    SettingsHeader,
+    SettingsRow,
+    SettingsTitle,
+    StandardFormControl,
+    StyledDivider,
+    StyledFormGroup,
+    StyledPaper,
+    StyledSelect,
+    StyledSwitch,
+    SwitchWrapper,
+    VisualiationModeIcon,
+    VisualizationModeContainer,
+    VisualizationModeLabel,
+    WorkingDirectory,
+    WorkSpaceFormControl,
+} from './settings-modal.styles';
 import {
     Checkbox,
     CircularProgress,
@@ -47,44 +85,6 @@ import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
-import {
-    StyledPaper,
-    ModalRoot,
-    SettingsHeader,
-    SettingsCogwheel,
-    SettingsTitle,
-    CloseIconWrapper,
-    StyledDivider,
-    ScrollableContainer,
-    SettingOptionTitle,
-    SettingDescription,
-    VisualizationModeContainer,
-    VisualizationModeLabel,
-    RemoteWorkContainer,
-    SwitchWrapper,
-    SettingsRow,
-    IconWrapper,
-    WorkingDirectory,
-    VisualiationModeIcon,
-    RemoteInputContainer,
-    AutoConnectContainer,
-    ConnectionButtonSection,
-    FileManagementSection,
-    FileManagementItem,
-    SaveSettingsButton,
-    StyledFormGroup,
-    ConnectionButton,
-    StyledSwitch,
-    HostTextField,
-    PortTextField,
-    WorkSpaceFormControl,
-    AlignedContainer,
-    LocalFileOutputField,
-    SelectFolderButton,
-    StyledSelect,
-    StandardFormControl,
-    FileSuffixField,
-} from './settings-modal.styles';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -102,6 +102,7 @@ if (isElectron()) {
 const SettingsModal = (props) => {
     const dispatch = useDispatch();
     const settings = useSelector(getSettings);
+    // TODO: Re-implement MUI Snackbar
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -324,22 +325,11 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
-
-    const classes = {
-        checkIcon: {
-            margin: '0.3rem',
-            display: 'flex',
-        },
-        circularProgress: {
-            marginRight: modalTheme.spacing(2),
-            display: connecting ? 'none' : 'initial',
-        },
-        closeIconStyle: {
-            alignSelf: 'center',
-            width: '24px',
-            height: '24px',
-            cursor: 'pointer',
-        },
+    const closeIconStyle = {
+        alignSelf: 'center',
+        width: '24px',
+        height: '24px',
+        cursor: 'pointer',
     };
 
     let body = (
@@ -352,7 +342,7 @@ const SettingsModal = (props) => {
                     <SettingsTitle>Settings</SettingsTitle>
                     <CloseIconWrapper
                         onClick={() => handleClose()}
-                        style={classes.closeIconStyle}>
+                        style={closeIconStyle}>
                         <IcCloseIcon />
                     </CloseIconWrapper>
                 </SettingsHeader>
@@ -610,7 +600,6 @@ const SettingsModal = (props) => {
                                         />
                                         <StandardFormControl>
                                             <StyledSelect
-                                                grayText={fileFormat === ''}
                                                 open={openFileFormat}
                                                 defaultValue={'Open Raster'}
                                                 onClose={() => {
@@ -646,9 +635,6 @@ const SettingsModal = (props) => {
 
                                         <StandardFormControl>
                                             <StyledSelect
-                                                grayText={
-                                                    annotationsFormat === ''
-                                                }
                                                 open={openAnnotationsFormat}
                                                 onClose={() => {
                                                     setOpenAnnotationsFormat(
