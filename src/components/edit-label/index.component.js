@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import LabelList from './LabelList';
 import ArrowIcon from '../../icons/ArrowIcon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
@@ -12,54 +10,13 @@ import {
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
+import { 
+    EditLabelWrapper, 
+    InputContainer, 
+    NewLabelInput,
+} from './index.styles';
+import LabelListComponent from './label-list.component';
 import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
-
-const EditLabelWrapper = styled.div`
-    position: absolute;
-    width: ${(props) => `${props.width}px`};
-    min-width: 120px;
-    z-index: 500;
-    left: ${(props) => `${props.left - props.positionDiff}px`};
-    top: ${(props) => `${props.top}px`};
-    background: ${constants.colors.BLUE};
-
-    .inputContainer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .newLabelInput {
-            background-color: transparent;
-            font-family: 'Arial';
-            font-weight: '600px';
-            font-size: ${(props) => `${props.fontSize}px`};
-            height: ${(props) => `${props.heightDiff}px`};
-            color: ${constants.colors.WHITE};
-            border: none;
-            border-radius: 4px;
-            user-select: none;
-            width: 100%;
-            &:disabled {
-                background-color: rgba(0, 0, 0, 0.35);
-            }
-            &:focus {
-                border-color: ${constants.colors.BLUE};
-                outline: 0;
-                box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
-                    0 0 8px rgba(102, 175, 233, 0.6);
-            }
-            &::placeholder {
-                color: ${constants.colors.WHITE};
-            }
-        }
-        .clearTextIcon {
-            width: 1.3rem;
-            height: fit-content;
-            fill: white;
-            padding-left: 0.2rem;
-        }
-    }
-`;
 
 /**
  * Widget for editing a selected detection's label.
@@ -67,7 +24,7 @@ const EditLabelWrapper = styled.div`
  * List of labels is visible when toggled by arrow button.
  * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabel = ({ onLabelChange }) => {
+const EditLabelComponent = ({ onLabelChange }) => {
     const dispatch = useDispatch();
     const reduxInfo = useSelector(getDetectionContextInfo);
     const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
@@ -158,9 +115,8 @@ const EditLabel = ({ onLabelChange }) => {
                 left={position.left}
                 width={width}
                 fontSize={getFontSize(font)}>
-                <div className="inputContainer">
-                    <input
-                        className="newLabelInput"
+                <InputContainer>
+                    <NewLabelInput
                         placeholder={isListOpen ? '' : placeholder}
                         value={newLabel}
                         onChange={handleLabelInputChange}
@@ -188,9 +144,9 @@ const EditLabel = ({ onLabelChange }) => {
                         }
                         color={constants.colors.WHITE}
                     />
-                </div>
+                </InputContainer>
                 {isListOpen && (
-                    <LabelList
+                    <LabelListComponent
                         width={width}
                         labels={formattedLabels}
                         onLabelSelect={submitFromList}
@@ -209,7 +165,7 @@ function getFontSize(str) {
     return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
 }
 
-EditLabel.propTypes = {
+EditLabelComponent.propTypes = {
     onLabelChange: PropTypes.func.isRequired,
 };
-export default EditLabel;
+export default EditLabelComponent;
