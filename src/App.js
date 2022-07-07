@@ -2427,7 +2427,10 @@ class App extends Component {
                 boundingBoxCoords[3] - boundingBoxCoords[1]
             );
             const detectionLabel = Utils.formatDetectionLabel(
-                data[j].className,
+                Utils.truncateString(
+                    data[j].className,
+                    constants.MAX_LABEL_LENGTH
+                ),
                 data[j].confidence
             );
             const labelSize = Utils.getTextLabelSize(
