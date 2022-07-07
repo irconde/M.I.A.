@@ -14,7 +14,7 @@ const inRange = (value, min, max) => {
  * It returns an 8 bit gray scale value between 0 - 255. There is lose of data but the image retains most of it's quality
  * @param {Number} greyScale
  * @param {Array<{min: Number; max: Number;}>} intervals
- * @returns {Number} 8 Bit Color in range of 0-255
+ * @returns {Number} 8 Bit color in range of 0-255
  */
 const findGrayValue = (greyScale, intervals) => {
     let result;

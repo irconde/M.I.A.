@@ -1,36 +1,25 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 import Utils from '../../utils/Utils';
 import { Channels } from '../../utils/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
+import Tooltip from '@mui/material/Tooltip';
+import {
+    ImageContainer,
+    LazyImageText,
+    LazyImageTextContainer,
+} from './lazy-image-container.styles';
 import TwoViewIcon from '../../icons/TwoViewIcon';
 import SingleViewIcon from '../../icons/SingleViewIcon';
 import AnnotationsIcon from '../../icons/AnnotationsIcon';
-import Tooltip from '@mui/material/Tooltip';
 
 let ipcRenderer;
 if (isElectron()) {
     ipcRenderer = window.require('electron').ipcRenderer;
 }
-
-const ImageContainer = styled.div`
-    display: flex;
-    border: ${(props) =>
-        props.selected ? '4px solid #367eff' : '1px solid fff'};
-    overflow-x: hidden;
-    margin: 0 16px 60px 0;
-    border-radius: 6px;
-    background-color: #242424;
-    justify-content: center;
-    width: 197px;
-    height: ${(props) =>
-        props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
-    cursor: pointer;
-`;
 
 /**
  * Container component for the lazy image thumbnails
@@ -38,7 +27,7 @@ const ImageContainer = styled.div`
  * @component
  *
  */
-function LazyImageContainer(props) {
+function LazyImageContainerComponent(props) {
     const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState('auto');
@@ -132,9 +121,9 @@ function LazyImageContainer(props) {
                     alt={thisFileName}
                 />
             ) : null}
-            <div className="lazy-image-text-container">
+            <LazyImageTextContainer>
                 <Tooltip title={props.file}>
-                    <span className="lazy-image-text">{thisFileName}</span>
+                    <LazyImageText>{thisFileName}</LazyImageText>
                 </Tooltip>
                 {numOfViews > 1 ? (
                     <TwoViewIcon
@@ -153,12 +142,12 @@ function LazyImageContainer(props) {
                         svgStyle={svgImageStyle}
                     />
                 ) : null}
-            </div>
+            </LazyImageTextContainer>
         </ImageContainer>
     );
 }
 
-LazyImageContainer.propTypes = {
+LazyImageContainerComponent.propTypes = {
     /**
      * Name of file
      */
@@ -169,4 +158,4 @@ LazyImageContainer.propTypes = {
     getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 
-export default LazyImageContainer;
+export default LazyImageContainerComponent;
