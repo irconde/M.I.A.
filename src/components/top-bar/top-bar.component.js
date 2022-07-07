@@ -14,7 +14,17 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import OpenIcon from '../../icons/OpenIcon';
-import { ConnectionStatusIconsContainer, ConnectionTypeInfo, FragmentWrapper, InfoDivider, OpenFileContainer, OpenFileText, TitleLabelContainer, TopBarStyle, VerticalDivider } from './top-bar.styles';
+import {
+    ConnectionStatusIconsContainer,
+    ConnectionTypeInfo,
+    FragmentWrapper,
+    InfoDivider,
+    OpenFileContainer,
+    OpenFileText,
+    TitleLabelContainer,
+    TopBarContainer,
+    VerticalDivider,
+} from './top-bar.styles';
 
 /**
  * Component for GUI's top bar display.
@@ -38,8 +48,9 @@ const TopBarComponent = (props) => {
         isConnected,
     } = reduxInfo;
 
-   return processingFile || isConnected ? (
-        <TopBarStyle>
+    // TODO: Future refactoring, clean up the ternary logic
+    return processingFile || isConnected ? (
+        <TopBarContainer>
             <TitleLabelContainer>
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
@@ -67,7 +78,7 @@ const TopBarComponent = (props) => {
                             }}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
-                        <VerticalDivider/>
+                        <VerticalDivider />
                     </OpenFileContainer>
                 )}
                 <span>{processingFile} &nbsp;</span>
@@ -96,7 +107,7 @@ const TopBarComponent = (props) => {
                         ) : null}
                     </FragmentWrapper>
                 ) : null}
-                <VerticalDivider/>
+                <VerticalDivider />
                 <SettingsIcon
                     style={{ margin: '0.75rem' }}
                     connectToCommandServer={props.connectToCommandServer}
@@ -107,16 +118,14 @@ const TopBarComponent = (props) => {
                     cornerstone={props.cornerstone}
                 />
             </ConnectionStatusIconsContainer>
-        </TopBarStyle>
+        </TopBarContainer>
     ) : (
-        <TopBarStyle>
+        <TopBarContainer>
             <TitleLabelContainer>
-                {/*TODO*/}
                 {!remoteOrLocal &&
                 localFileOutput === '' &&
                 !firstDisplaySettings ? (
-                    <OpenFileContainer 
-                    onClick={() => props.getFileFromLocal()}>
+                    <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
                             title="Open File"
                             style={{
@@ -126,7 +135,7 @@ const TopBarComponent = (props) => {
                             }}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
-                        <VerticalDivider/>
+                        <VerticalDivider />
                     </OpenFileContainer>
                 ) : null}
             </TitleLabelContainer>
@@ -137,7 +146,7 @@ const TopBarComponent = (props) => {
                     title="Settings"
                 />
             </ConnectionStatusIconsContainer>
-        </TopBarStyle>
+        </TopBarContainer>
     );
 };
 

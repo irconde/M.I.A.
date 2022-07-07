@@ -1,6 +1,6 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-export const TopBarStyle = styled.div`
+export const TopBarContainer = styled.div`
     position: absolute;
     display: flex;
     height: 3.375rem;
@@ -8,7 +8,7 @@ export const TopBarStyle = styled.div`
     left: 0;
     top: 0;
     width: 100%;
-    z-Index: 1;
+    z-index: 1;
     align-items: center;
     justify-content: flex-end;
     color: white;
@@ -17,7 +17,7 @@ export const TopBarStyle = styled.div`
 
 export const LazyMenuToggleContainer = styled.div`
     position: absolute;
-    z-Index: 2;
+    z-index: 2;
 `;
 
 export const TitleLabelContainer = styled.div`
@@ -28,7 +28,7 @@ export const TitleLabelContainer = styled.div`
     left: 0;
     top: 0;
     width: 100%;
-    z-Index: 1;
+    z-index: 1;
     align-items: center;
     color: white;
     justify-content: center;
@@ -44,7 +44,7 @@ export const ConnectionStatusIconsContainer = styled.div`
     left: 0;
     top: 0;
     width: 35%;
-    z-Index: 1;
+    z-index: 1;
     margin-left: 65%;
     align-items: center;
     justify-content: flex-end;
@@ -52,16 +52,16 @@ export const ConnectionStatusIconsContainer = styled.div`
 `;
 
 export const ConnectionTypeInfo = styled.div`
-    color: #C3C3C3;
+    color: #c3c3c3;
 `;
 
 export const InfoDivider = styled.div`
-    color: #6A6A6A;
+    color: #6a6a6a;
     font-weight: bold;
 `;
 
 export const VerticalDivider = styled.div`
-    border: 1px solid #5B5B5B;
+    border: 1px solid #5b5b5b;
     height: 50%;
 `;
 
