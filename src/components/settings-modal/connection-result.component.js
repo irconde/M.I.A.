@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 
 import ConnectionErrorIcon from '../../icons/ConnectionErrorIcon.js';
 import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
+import {
+    ConnectionResult,
+    ConnectionStatusText,
+} from './connection-result.styles.js';
 
 /**
  * Connection result icon in SettingsModal displaying ConnectionVerifiedIcon.js component on success and ConnectionErrorIcon.js on failure.
@@ -10,13 +14,7 @@ import ConnectionVerifiedIcon from '../../icons/ConnectionVerifiedIcon.js';
  * @component
  *
  */
-const ConnectionResult = (props) => {
-    const containerStyle = {
-        display: 'inline-flex',
-        flexDirection: 'row',
-        flexShrink: '0',
-        alignItems: 'center',
-    };
+const ConnectionResultComponent = (props) => {
     const svgContainerStyle = {
         display: 'inline-flex',
         alignItems: 'center',
@@ -27,44 +25,39 @@ const ConnectionResult = (props) => {
         height: '24px',
         width: '24px',
     };
-    const redColor = '#519e00';
-    const greenColor = '#d94545';
+    const redColor = '#d94545';
+    const greenColor = '#519e00';
     if (props.display === true) {
-        if (props.connected === true) {
-            return (
-                <div style={containerStyle}>
+        return (
+            <ConnectionResult>
+                {props.connected ? (
                     <ConnectionVerifiedIcon
-                        style={svgContainerStyle}
-                        svgStyle={{
-                            ...svgStyle,
-                            color: redColor,
-                        }}
-                    />
-                    <span style={{ color: redColor }}>
-                        Connection Successful
-                    </span>
-                </div>
-            );
-        } else {
-            return (
-                <div style={containerStyle}>
-                    <ConnectionErrorIcon
                         style={svgContainerStyle}
                         svgStyle={{
                             ...svgStyle,
                             color: greenColor,
                         }}
                     />
-                    <span style={{ color: greenColor }}>
-                        Server unreachable
-                    </span>
-                </div>
-            );
-        }
+                ) : (
+                    <ConnectionErrorIcon
+                        style={svgContainerStyle}
+                        svgStyle={{
+                            ...svgStyle,
+                            color: redColor,
+                        }}
+                    />
+                )}
+                <ConnectionStatusText connected={props.connected}>
+                    {props.connected
+                        ? 'Connection Successful'
+                        : 'Server unreachable'}
+                </ConnectionStatusText>
+            </ConnectionResult>
+        );
     } else return null;
 };
 
-ConnectionResult.propTypes = {
+ConnectionResultComponent.propTypes = {
     /**
      * True if icon should be visible.
      */
@@ -75,4 +68,4 @@ ConnectionResult.propTypes = {
     connected: PropTypes.bool,
 };
 
-export default ConnectionResult;
+export default ConnectionResultComponent;

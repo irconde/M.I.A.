@@ -91,7 +91,7 @@ import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
-import SettingsModal from './components/SettingsModal/SettingsModal';
+import SettingsModal from './components/settings-modal/settings-modal.component';
 import {
     loadElectronCookie,
     saveSettings,

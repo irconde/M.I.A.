@@ -1,23 +1,55 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import {
-    Button,
+    AlignedContainer,
+    AutoConnectContainer,
+    CloseIconWrapper,
+    ConnectionButton,
+    ConnectionButtonSection,
+    FileManagementItem,
+    FileManagementSection,
+    FileSuffixField,
+    HostTextField,
+    IconWrapper,
+    LocalFileOutputField,
+    ModalRoot,
+    modalTheme,
+    PortTextField,
+    RemoteInputContainer,
+    RemoteWorkContainer,
+    SaveSettingsButton,
+    ScrollableContainer,
+    SelectFolderButton,
+    SettingDescription,
+    SettingOptionTitle,
+    SettingsCogwheel,
+    SettingsHeader,
+    SettingsRow,
+    SettingsTitle,
+    StandardFormControl,
+    StyledDivider,
+    StyledFormGroup,
+    StyledPaper,
+    StyledSelect,
+    StyledSwitch,
+    SwitchWrapper,
+    VisualiationModeIcon,
+    VisualizationModeContainer,
+    VisualizationModeLabel,
+    WorkingDirectory,
+    WorkSpaceFormControl,
+} from './settings-modal.styles';
+import {
     Checkbox,
     CircularProgress,
-    Divider,
     FormControl,
     FormControlLabel,
-    FormGroup,
     MenuItem,
-    Paper,
-    Select,
-    Switch,
-    TextField,
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
-import ConnectionResult from './ConnectionResult';
+import ConnectionResultComponent from './connection-result.component';
 import SettingsCog from '../../icons/SettingsCog';
 import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
 import CloudIcon from '../../icons/CloudIcon.js';
@@ -70,6 +102,7 @@ if (isElectron()) {
 const SettingsModal = (props) => {
     const dispatch = useDispatch();
     const settings = useSelector(getSettings);
+    // TODO: Re-implement MUI Snackbar
     const [snackBarOpen, setSnackBarOpen] = useState(false);
     const [remoteIp, setRemoteIp] = useState(settings.remoteIp);
     const [remotePort, setRemotePort] = useState(settings.remotePort);
@@ -83,7 +116,6 @@ const SettingsModal = (props) => {
     );
     const [fileSuffix, setFileSuffix] = useState(useSelector(getFileSuffix));
     const [remoteOrLocal, setRemoteOrLocal] = useState(settings.remoteOrLocal);
-    const [modalStyle] = useState(getModalStyle);
     const [openFileFormat, setOpenFileFormat] = useState(false);
     const [connectionDisplay, setConnectionDisplay] = useState(false);
     const [connecting, setConnecting] = useState(false);
@@ -95,17 +127,6 @@ const SettingsModal = (props) => {
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
         useState(initDisplaySummarizedDetections);
     const selectedDetection = useSelector(getSelectedDetection);
-    const svgContainerStyle = {
-        margin: '0.3rem',
-        marginRight: '1rem',
-        display: 'flex',
-        float: 'left',
-    };
-    const svgStyle = {
-        height: '24px',
-        width: '24px',
-        color: '#ffffff',
-    };
 
     /**
      * Event handler for when the snackbar closes
@@ -119,27 +140,6 @@ const SettingsModal = (props) => {
         }
         setSnackBarOpen(false);
     };
-
-    /**
-     * Returns the main modal body style
-     *
-     * @returns {Object} Containing styles for the modal
-     */
-    function getModalStyle() {
-        return {
-            position: 'absolute',
-            top: `50%`,
-            left: `50%`,
-            transform: `translate(-50%, -50%)`,
-            backgroundColor: '#1f1f1f',
-            outline: 'none',
-            fontFamily: 'Noto Sans JP',
-            width: '30vw',
-            minWidth: '32rem',
-            maxWidth: '40rem',
-            padding: '2rem',
-        };
-    }
 
     /**
      * Tests the connection with the typed input fields. This does some simulation
@@ -314,400 +314,118 @@ const SettingsModal = (props) => {
         }
     };
 
-    const theme = createTheme({
-        palette: {
-            mode: 'dark',
-            primary: {
-                light: '#5e97ff',
-                main: '#367eff',
-                dark: '#2558b2',
-                contrastText: '#9d9d9d',
-            },
-        },
-        zIndex: {
-            modal: 3,
-        },
-        transitions: {
-            duration: {
-                shortest: 150,
-                shorter: 200,
-                // most basic recommended timing
-                standard: 300,
-                // this is to be used in complex animations
-                complex: 375,
-                // recommended when something is entering screen
-                enteringScreen: 225,
-                // recommended when something is leaving screen
-                leavingScreen: 195,
-            },
-        },
-    });
-
-    const classes = {
-        pathButton: {
-            color: '#367eff',
-            textTransform: 'none',
-            paddingLeft: theme.spacing(3),
-            paddingRight: theme.spacing(3),
-        },
-        snackBarClass: {
-            backgroundColor: '#1f1f1f',
-            color: '#ffffff',
-        },
-        workingDirectory: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-        },
-        checkIcon: {
-            margin: '0.3rem',
-            display: 'flex',
-        },
-        checkConnectionButton: {
-            color: '#367eff',
-            textTransform: 'none',
-            paddingLeft: theme.spacing(3),
-            paddingRight: theme.spacing(3),
-        },
-        remoteWorkContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-        },
-        switchContainer: {
-            alignSelf: 'flex-end',
-        },
-        modal: {
-            boxShadow: theme.shadows[5],
-            padding: '.5rem 2rem 1rem',
-        },
-        paper: {
-            padding: theme.spacing(1),
-            textAlign: 'center',
-            color: theme.palette.text.primary,
-        },
-        selector: {},
-        links: {
-            fontSize: theme.typography.fontSize,
-            color: theme.palette.primary,
-            cursor: 'pointer',
-        },
-        linkSelected: {
-            fontSize: theme.typography.fontSize,
-            color: theme.palette.primary,
-            background: '#515151',
-            cursor: 'pointer',
-        },
-        root: {
-            flexGrow: 1,
-            height: '37rem',
-        },
-        optionsContainer: {
-            overflowY: 'auto',
-            height: '80%',
-            padding: '0rem 0.25rem',
-        },
-        form: {
-            margin: theme.spacing(1),
-        },
-        formControl: {
-            height: '95%',
-        },
-        textField: {},
-        longTextField: {
-            // width: '-webkit-fill-available',
-            display: 'flex',
-            flexDirection: 'row',
-            width: '70%',
-        },
-        SaveButtonComponent: {
-            margin: 'auto 1rem auto 0',
-            float: 'right',
-            backgroundColor: '#367eff',
-            display: 'flex',
-            alignSelf: 'flex-end',
-            outline: 'none',
-            '&:hover': {
-                backgroundColor: '#5e97ff',
-                outline: 'none',
-            },
-        },
-        connectionLabel: {
-            margin: 'auto',
-        },
-        connectionSection: {
-            display: 'flex',
-            flexShrink: '0',
-            flexDirection: 'row',
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-            justifyContent: 'flex-start',
-            alignContent: 'center',
-            alignItems: 'center',
-        },
-        circularProgress: {
-            marginRight: theme.spacing(2),
-            display: connecting ? 'none' : 'initial',
-        },
-        displayListSection: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            marginBottom: theme.spacing(2),
-            marginTop: theme.spacing(4),
-        },
-        sectionLabel: {
-            marginRight: theme.spacing(2),
-        },
-        outputFolderSection: {
-            display: 'flex',
-            flexDirection: 'column',
-        },
-        container: {
-            display: 'flex',
-        },
-        greyText: {
-            color: '#9d9d9d',
-            fontSize: '12px',
-            margin: '0',
-            marginBottom: '2rem',
-        },
-        disabledText: {
-            color: '#9d9d9d',
-        },
-        settingsContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            margin: '1rem 0',
-        },
-        settingsCogwheel: {
-            marginRight: '1rem',
-            marginLeft: '0',
-            width: '20px',
-            height: '20px',
-            alignSelf: 'center',
-        },
-        closeIconStyle: {
-            alignSelf: 'center',
-            width: '24px',
-            height: '24px',
-            cursor: 'pointer',
-        },
-        settingsText: {
-            objectFit: 'contain',
-            fontFamily: 'Noto Sans JP',
-            fontSize: '22px',
-            fontWeight: '500',
-            fontStretch: 'normal',
-            fontStyle: 'normal',
-            lineHeight: 'normal',
-            letterSpacing: 'normal',
-            color: '#fff',
-            flex: 'auto',
-            alignSelf: 'center',
-        },
-        optionText: {
-            fontFamily: 'Noto Sans JP',
-            fontSize: '1rem',
-            fontWeight: 'normal',
-            fontStretch: 'normal',
-            fontStyle: 'normal',
-            lineHeight: 'normal',
-            letterSpacing: 'normal',
-            color: '#fff',
-            marginBottom: '0.25rem',
-            marginTop: '0.75rem',
-        },
-        remoteInputContainer: {
-            display: 'inline-flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            width: '70%',
-            alignSelf: 'center',
-        },
-        cloudIconContainer: {
-            alignSelf: 'center',
-            padding: '0 0.25rem',
-        },
-        fileIconContainer: {
-            alignSelf: 'center',
-        },
-        autoConnectContainer: {
-            display: 'inline-block',
-            float: 'right',
-            color: '#9d9d9d',
-            marginTop: 'auto',
-        },
-        flexAuto: {
-            flex: 'auto',
-        },
-        remoteWorkRow: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '2rem',
-        },
-        displayListSectionItem: {
-            display: 'flex',
-            justifyContent: 'flex-start',
-            flexDirection: 'row',
-            flexGrow: '1',
-            width: '33%',
-        },
-        displayListSectionInput: {
-            width: '70%',
-        },
-        visualizationModeContainer: {
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '3.5rem',
-            marginBottom: '1rem',
-        },
-        visualizationModeOption: {},
-        visualizationModeIcon: {
-            cursor: 'pointer',
-            backgroundColor: '#464646',
-            borderRadius: '10px',
-        },
-        visualizationModeText: {
-            margin: '0.2rem 0',
-            textAlign: 'center',
-            color: '#9d9d9d',
-            fontSize: '.7rem',
-        },
-        visualizationModeTextSelected: {
-            color: '#fff',
-        },
-        visualizationModeSelected: {
-            outline: '2px solid #367fff',
-        },
+    const svgContainerStyle = {
+        margin: '0.3rem',
+        marginRight: '1rem',
+        display: 'flex',
+        float: 'left',
+    };
+    const svgStyle = {
+        height: '24px',
+        width: '24px',
+        color: '#ffffff',
+    };
+    const closeIconStyle = {
+        alignSelf: 'center',
+        width: '24px',
+        height: '24px',
+        cursor: 'pointer',
     };
 
     let body = (
-        <Paper sx={modalStyle} elevation={3}>
-            <div style={classes.root}>
-                <div style={classes.settingsContainer}>
-                    <div style={classes.settingsCogwheel}>
+        <StyledPaper>
+            <ModalRoot>
+                <SettingsHeader>
+                    <SettingsCogwheel>
                         <SettingsCog title={props.title} />
-                    </div>
-                    <div style={classes.settingsText}>Settings</div>
-                    <div
+                    </SettingsCogwheel>
+                    <SettingsTitle>Settings</SettingsTitle>
+                    <CloseIconWrapper
                         onClick={() => handleClose()}
-                        style={classes.closeIconStyle}>
+                        style={closeIconStyle}>
                         <IcCloseIcon />
-                    </div>
-                </div>
-                <Divider style={{ margin: 'auto' }} variant="middle" />
-                <FormGroup style={classes.formControl}>
-                    <div style={classes.optionsContainer}>
+                    </CloseIconWrapper>
+                </SettingsHeader>
+                <StyledDivider />
+                <StyledFormGroup>
+                    <ScrollableContainer>
                         <div>
-                            <div className="visualizationModeContainer">
-                                <p style={classes.optionText}>
-                                    Visualization Mode
-                                </p>
-                                <p style={classes.greyText}>
-                                    Pick the visual granularity to use when
-                                    displaying multi-algorithm results.
-                                </p>
-                                <div style={classes.visualizationModeContainer}>
-                                    <div
-                                        style={classes.visualizationModeOption}>
-                                        <img
-                                            src={
-                                                displaySummarizedDetections
-                                                    ? DetailedModeIconSrc
-                                                    : DetailedModeIconCheckedSrc
-                                            }
-                                            style={{
-                                                ...classes.visualizationModeIcon,
-                                                ...(!displaySummarizedDetections &&
-                                                    classes.visualizationModeSelected),
-                                            }}
-                                            alt={'Detailed mode'}
-                                            onClick={() => {
-                                                setDisplaySummarizedDetections(
-                                                    false
-                                                );
-                                            }}
-                                        />
-                                        <p
-                                            style={{
-                                                ...classes.visualizationModeText,
-                                                ...(!displaySummarizedDetections &&
-                                                    classes.visualizationModeTextSelected),
-                                            }}>
-                                            Detailed
-                                        </p>
-                                    </div>
-                                    <div
-                                        style={classes.visualizationModeOption}>
-                                        <img
-                                            src={
-                                                displaySummarizedDetections
-                                                    ? SummarizedModeIconCheckedSrc
-                                                    : SummarizedModeIconSrc
-                                            }
-                                            style={{
-                                                ...classes.visualizationModeIcon,
-                                                ...(displaySummarizedDetections &&
-                                                    classes.visualizationModeSelected),
-                                            }}
-                                            alt={'Summarized mode'}
-                                            onClick={() => {
-                                                setDisplaySummarizedDetections(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                        <p
-                                            style={{
-                                                ...classes.visualizationModeText,
-                                                ...(displaySummarizedDetections &&
-                                                    classes.visualizationModeTextSelected),
-                                            }}>
-                                            Summarized
-                                        </p>
-                                    </div>
+                            <SettingOptionTitle>
+                                Visualization Mode
+                            </SettingOptionTitle>
+                            <SettingDescription>
+                                Pick the visual granularity to use when
+                                displaying multi-algorithm results.
+                            </SettingDescription>
+                            <VisualizationModeContainer>
+                                <div>
+                                    <VisualiationModeIcon
+                                        src={
+                                            displaySummarizedDetections
+                                                ? DetailedModeIconSrc
+                                                : DetailedModeIconCheckedSrc
+                                        }
+                                        selected={!displaySummarizedDetections}
+                                        alt={'Detailed mode'}
+                                        onClick={() => {
+                                            setDisplaySummarizedDetections(
+                                                false
+                                            );
+                                        }}
+                                    />
+                                    <VisualizationModeLabel
+                                        selected={!displaySummarizedDetections}>
+                                        Detailed
+                                    </VisualizationModeLabel>
                                 </div>
-                            </div>
-                            <Divider
-                                style={{ margin: 'auto' }}
-                                variant="middle"
-                            />
+                                <div>
+                                    <VisualiationModeIcon
+                                        src={
+                                            displaySummarizedDetections
+                                                ? SummarizedModeIconCheckedSrc
+                                                : SummarizedModeIconSrc
+                                        }
+                                        selected={displaySummarizedDetections}
+                                        alt={'Summarized mode'}
+                                        onClick={() => {
+                                            setDisplaySummarizedDetections(
+                                                true
+                                            );
+                                        }}
+                                    />
+                                    <VisualizationModeLabel
+                                        selected={displaySummarizedDetections}>
+                                        Summarized
+                                    </VisualizationModeLabel>
+                                </div>
+                            </VisualizationModeContainer>
                         </div>
+                        <StyledDivider />
                         <div>
-                            <div style={classes.remoteWorkContainer}>
-                                <p style={classes.optionText}>
+                            <RemoteWorkContainer>
+                                <SettingOptionTitle>
                                     Work connected to a remote service
-                                </p>
-                                <div style={classes.switchContainer}>
-                                    <Switch
+                                </SettingOptionTitle>
+                                <SwitchWrapper>
+                                    <StyledSwitch
                                         checked={remoteOrLocal}
-                                        size="small"
                                         onChange={() =>
                                             setRemoteOrLocal(!remoteOrLocal)
                                         }
-                                        color="primary"
-                                        name="remoteOrLocal"
-                                        inputProps={{
-                                            'aria-label': 'secondary checkbox',
-                                        }}
                                     />
-                                </div>
-                            </div>
-                            {isElectron() ? (
-                                <p style={classes.greyText}>
+                                </SwitchWrapper>
+                            </RemoteWorkContainer>
+                            {isElectron() && (
+                                <SettingDescription>
                                     Choose the option if you want to
                                     receive/send images from/to a server
-                                </p>
-                            ) : null}
+                                </SettingDescription>
+                            )}
 
-                            <div style={classes.remoteWorkRow}>
-                                <div style={classes.remoteInputContainer}>
+                            <SettingsRow>
+                                <RemoteInputContainer>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <div style={classes.cloudIconContainer}>
+                                        <IconWrapper>
                                             <CloudIcon
                                                 style={svgContainerStyle}
                                                 svgStyle={{
@@ -717,56 +435,32 @@ const SettingsModal = (props) => {
                                                         : '#9d9d9d',
                                                 }}
                                             />
-                                        </div>
+                                        </IconWrapper>
                                     </Tooltip>
-                                    <FormControl style={classes.flexAuto}>
-                                        <TextField
-                                            required
-                                            id="remoteIp"
-                                            placeholder="Host"
+                                    <FormControl>
+                                        <HostTextField
                                             value={remoteIp}
                                             disabled={!remoteOrLocal}
-                                            inputProps={{
-                                                size: 30,
-                                                padding: 10,
-                                            }}
                                             onChange={(e) => {
                                                 setRemoteIp(e.target.value);
                                             }}
-                                            variant="standard"
                                         />
                                     </FormControl>
 
-                                    <span style={classes.cloudIconContainer}>
-                                        :
-                                    </span>
+                                    <IconWrapper>:</IconWrapper>
 
                                     <FormControl>
-                                        <TextField
-                                            required
-                                            id="remotePort"
-                                            placeholder="Port"
+                                        <PortTextField
                                             value={remotePort}
                                             onChange={(e) => {
                                                 setRemotePort(e.target.value);
                                             }}
                                             disabled={!remoteOrLocal}
-                                            inputProps={{
-                                                size: 6,
-                                                maxLength: 5,
-                                                inputMode: 'numeric',
-                                                pattern: '[0-9]*',
-                                            }}
-                                            style={classes.cloudIconContainer}
-                                            variant="standard"
-                                            /*style={{
-                                                marginLeft: '0.75rem',
-                                            }}*/
                                         />
                                     </FormControl>
-                                </div>
+                                </RemoteInputContainer>
 
-                                <div style={classes.autoConnectContainer}>
+                                <AutoConnectContainer>
                                     <Tooltip title="Enable/disable auto-connection with server">
                                         <FormControlLabel
                                             control={
@@ -785,15 +479,12 @@ const SettingsModal = (props) => {
                                             label="Autoconnect"
                                         />
                                     </Tooltip>
-                                </div>
-                            </div>
-                            <div style={classes.connectionSection}>
+                                </AutoConnectContainer>
+                            </SettingsRow>
+                            <ConnectionButtonSection>
                                 <Tooltip title="Check whether the server is reachable">
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
+                                    <ConnectionButton
                                         disabled={!remoteOrLocal}
-                                        style={classes.checkConnectionButton}
                                         onClick={() => {
                                             testConnection();
                                         }}>
@@ -815,37 +506,30 @@ const SettingsModal = (props) => {
                                             />
                                         )}
                                         Check connection
-                                    </Button>
+                                    </ConnectionButton>
                                 </Tooltip>
 
-                                <ConnectionResult
+                                <ConnectionResultComponent
                                     display={connectionDisplay}
                                     connected={testConnectionResult}
                                 />
-                            </div>
+                            </ConnectionButtonSection>
                         </div>
                         <div>
-                            <Divider
-                                style={{ margin: 'auto' }}
-                                variant="middle"
-                            />
+                            <StyledDivider />
                             <div>
-                                <p style={classes.optionText}>
+                                <SettingOptionTitle>
                                     File management
-                                </p>
-                                <p style={classes.greyText}>
+                                </SettingOptionTitle>
+                                <SettingDescription>
                                     Default file management options to
                                     streamline file input and output
-                                </p>
-                                {isElectron() ? (
-                                    <div style={classes.workingDirectory}>
-                                        <FormControl
-                                            style={classes.longTextField}>
+                                </SettingDescription>
+                                {isElectron() && (
+                                    <WorkingDirectory>
+                                        <WorkSpaceFormControl>
                                             <Tooltip title="Workspace location">
-                                                <div
-                                                    style={
-                                                        classes.fileIconContainer
-                                                    }>
+                                                <AlignedContainer>
                                                     <FileOpenIcon
                                                         style={
                                                             svgContainerStyle
@@ -859,35 +543,21 @@ const SettingsModal = (props) => {
                                                                     : '#ffffff',
                                                         }}
                                                     />
-                                                </div>
+                                                </AlignedContainer>
                                             </Tooltip>
-                                            <TextField
-                                                required
-                                                fullWidth={true}
-                                                id="localFileOutput"
-                                                placeholder={
-                                                    'Working directory'
-                                                }
+                                            <LocalFileOutputField
                                                 value={localFileOutput}
                                                 disabled={remoteOrLocal}
-                                                inputProps={{
-                                                    size: '40',
-                                                }}
                                                 onChange={(e) => {
                                                     setLocalFileOutput(
                                                         e.target.value
                                                     );
                                                 }}
-                                                variant="standard"
                                             />
-                                        </FormControl>
+                                        </WorkSpaceFormControl>
                                         <Tooltip title="Select workspace folder from the file explorer">
-                                            <Button
+                                            <SelectFolderButton
                                                 disabled={remoteOrLocal}
-                                                variant="outlined"
-                                                size="medium"
-                                                id="btnFolder"
-                                                style={classes.pathButton}
                                                 onClick={() => {
                                                     if (isElectron()) {
                                                         ipcRenderer
@@ -917,33 +587,21 @@ const SettingsModal = (props) => {
                                                     }
                                                 }}>
                                                 Select Folder
-                                            </Button>
+                                            </SelectFolderButton>
                                         </Tooltip>
-                                    </div>
-                                ) : (
-                                    <></>
+                                    </WorkingDirectory>
                                 )}
 
-                                <div style={classes.displayListSection}>
-                                    <div style={classes.displayListSectionItem}>
+                                <FileManagementSection>
+                                    <FileManagementItem>
                                         <FileFormatIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }
-                                            variant="standard">
-                                            <Select
-                                                style={
-                                                    fileFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
-                                                displayEmpty={true}
+                                        <StandardFormControl>
+                                            <StyledSelect
                                                 open={openFileFormat}
-                                                defaultValue="Open Raster"
+                                                defaultValue={'Open Raster'}
                                                 onClose={() => {
                                                     setOpenFileFormat(false);
                                                 }}
@@ -966,27 +624,17 @@ const SettingsModal = (props) => {
                                                 <MenuItem value={'Zip Archive'}>
                                                     Zip Archive
                                                 </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-                                    <div style={classes.displayListSectionItem}>
+                                            </StyledSelect>
+                                        </StandardFormControl>
+                                    </FileManagementItem>
+                                    <FileManagementItem>
                                         <FileAnnotationsIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
 
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }
-                                            variant="standard">
-                                            <Select
-                                                style={
-                                                    annotationsFormat === ''
-                                                        ? classes.disabledText
-                                                        : null
-                                                }
-                                                displayEmpty={true}
+                                        <StandardFormControl>
+                                            <StyledSelect
                                                 open={openAnnotationsFormat}
                                                 onClose={() => {
                                                     setOpenAnnotationsFormat(
@@ -1010,86 +658,59 @@ const SettingsModal = (props) => {
                                                 {Object.keys(
                                                     SETTINGS.ANNOTATIONS
                                                 ).map((key, index) => {
+                                                    const annotation =
+                                                        SETTINGS.ANNOTATIONS[
+                                                            key
+                                                        ];
                                                     return (
                                                         <MenuItem
                                                             key={index}
-                                                            value={
-                                                                SETTINGS
-                                                                    .ANNOTATIONS[
-                                                                    key
-                                                                ]
-                                                            }>
-                                                            {
-                                                                SETTINGS
-                                                                    .ANNOTATIONS[
-                                                                    key
-                                                                ]
-                                                            }
+                                                            value={annotation}>
+                                                            {annotation}
                                                         </MenuItem>
                                                     );
                                                 })}
-                                            </Select>
-                                        </FormControl>
-                                    </div>
+                                            </StyledSelect>
+                                        </StandardFormControl>
+                                    </FileManagementItem>
 
-                                    <div style={classes.displayListSectionItem}>
+                                    <FileManagementItem>
                                         <FileSuffixIcon
                                             style={svgContainerStyle}
                                             svgStyle={svgStyle}
                                         />
-                                        <FormControl
-                                            style={
-                                                classes.displayListSectionInput
-                                            }>
-                                            <TextField
-                                                style={classes.textField}
-                                                required
-                                                id="outputSuffix"
-                                                placeholder="Filename suffix"
+                                        <FormControl>
+                                            <FileSuffixField
                                                 value={fileSuffix}
-                                                inputProps={{
-                                                    size: '10',
-                                                }}
                                                 onChange={(e) => {
                                                     setFileSuffix(
                                                         e.target.value
                                                     );
                                                 }}
-                                                variant="standard"
                                             />
                                         </FormControl>
-                                    </div>
-                                </div>
+                                    </FileManagementItem>
+                                </FileManagementSection>
                             </div>
                         </div>
-                    </div>
+                    </ScrollableContainer>
 
-                    <Button
-                        variant="outlined"
-                        onClick={() => saveSettingsEvent()}
-                        sx={{
-                            bgcolor: 'primary.main',
-                            color: '#ffffff',
-                            width: '30%',
-                            marginTop: 5,
-                            padding: 1,
-                            alignSelf: 'flex-end',
-                        }}>
+                    <SaveSettingsButton onClick={() => saveSettingsEvent()}>
                         Save Settings
-                    </Button>
-                </FormGroup>
-            </div>
-        </Paper>
+                    </SaveSettingsButton>
+                </StyledFormGroup>
+            </ModalRoot>
+        </StyledPaper>
     );
 
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={modalTheme}>
             <Modal
                 open={settingsVisibility}
                 onClose={handleClose}
                 aria-labelledby="settings-window"
                 aria-describedby="control the apps remote and local settings">
-                <div>{body}</div>
+                {body}
             </Modal>
         </ThemeProvider>
     );

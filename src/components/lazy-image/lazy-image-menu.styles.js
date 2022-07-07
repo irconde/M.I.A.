@@ -39,7 +39,7 @@ export const LazyImagesContainer = styled.div`
             : 'none'};
 `;
 
-export const ImagesInWorkspace = styled.p`
+export const ImagesInWorkspace = styled.div`
     width: 100%;
     height: 20px;
     margin-top: 0;
