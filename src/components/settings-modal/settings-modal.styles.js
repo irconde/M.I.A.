@@ -7,6 +7,7 @@ import {
     createTheme,
     Switch,
     TextField,
+    FormControl,
 } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
@@ -232,6 +233,40 @@ export const HostTextField = styled(TextField).attrs(() => ({
     inputProps: {
         size: 30,
         padding: 10,
+    },
+    variant: 'standard',
+}))``;
+
+export const PortTextField = styled(TextField).attrs(() => ({
+    required: true,
+    id: 'remotePort',
+    placeholder: 'Port',
+    inputProps: {
+        size: 6,
+        maxLength: 5,
+        inputMode: 'numeric',
+        pattern: '[0-9]*',
+    },
+    variant: 'standard',
+}))``;
+
+export const WorkSpaceFormControl = styled(FormControl)`
+    display: flex;
+    flex-direction: row;
+    width: 70%;
+`;
+
+export const AlignedContainer = styled.div`
+    align-self: center;
+`;
+
+export const LocalFileOutputField = styled(TextField).attrs(() => ({
+    required: true,
+    fullWidth: true,
+    id: 'localFileOutput',
+    placeholder: 'Working directory',
+    inputProps: {
+        size: '40',
     },
     variant: 'standard',
 }))``;

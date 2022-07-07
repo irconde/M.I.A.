@@ -82,6 +82,10 @@ import {
     ConnectionButton,
     StyledSwitch,
     HostTextField,
+    PortTextField,
+    WorkSpaceFormControl,
+    AlignedContainer,
+    LocalFileOutputField,
 } from './settings-modal.styles';
 
 let ipcRenderer;
@@ -408,11 +412,6 @@ const SettingsModal = (props) => {
         form: {
             margin: theme.spacing(1),
         },
-        longTextField: {
-            display: 'flex',
-            flexDirection: 'row',
-            width: '70%',
-        },
         connectionLabel: {
             margin: 'auto',
         },
@@ -438,9 +437,6 @@ const SettingsModal = (props) => {
             width: '24px',
             height: '24px',
             cursor: 'pointer',
-        },
-        fileIconContainer: {
-            alignSelf: 'center',
         },
         displayListSectionInput: {
             width: '70%',
@@ -565,23 +561,12 @@ const SettingsModal = (props) => {
                                     <IconWrapper>:</IconWrapper>
 
                                     <FormControl>
-                                        <TextField
-                                            required
-                                            id="remotePort"
-                                            placeholder="Port"
+                                        <PortTextField
                                             value={remotePort}
                                             onChange={(e) => {
                                                 setRemotePort(e.target.value);
                                             }}
                                             disabled={!remoteOrLocal}
-                                            inputProps={{
-                                                size: 6,
-                                                maxLength: 5,
-                                                inputMode: 'numeric',
-                                                pattern: '[0-9]*',
-                                            }}
-                                            style={classes.cloudIconContainer}
-                                            variant="standard"
                                         />
                                     </FormControl>
                                 </RemoteInputContainer>
@@ -653,13 +638,9 @@ const SettingsModal = (props) => {
                                 </SettingDescription>
                                 {isElectron() && (
                                     <WorkingDirectory>
-                                        <FormControl
-                                            style={classes.longTextField}>
+                                        <WorkSpaceFormControl>
                                             <Tooltip title="Workspace location">
-                                                <div
-                                                    style={
-                                                        classes.fileIconContainer
-                                                    }>
+                                                <AlignedContainer>
                                                     <FileOpenIcon
                                                         style={
                                                             svgContainerStyle
@@ -673,28 +654,18 @@ const SettingsModal = (props) => {
                                                                     : '#ffffff',
                                                         }}
                                                     />
-                                                </div>
+                                                </AlignedContainer>
                                             </Tooltip>
-                                            <TextField
-                                                required
-                                                fullWidth={true}
-                                                id="localFileOutput"
-                                                placeholder={
-                                                    'Working directory'
-                                                }
+                                            <LocalFileOutputField
                                                 value={localFileOutput}
                                                 disabled={remoteOrLocal}
-                                                inputProps={{
-                                                    size: '40',
-                                                }}
                                                 onChange={(e) => {
                                                     setLocalFileOutput(
                                                         e.target.value
                                                     );
                                                 }}
-                                                variant="standard"
                                             />
-                                        </FormControl>
+                                        </WorkSpaceFormControl>
                                         <Tooltip title="Select workspace folder from the file explorer">
                                             <Button
                                                 disabled={remoteOrLocal}
