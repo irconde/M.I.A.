@@ -10,6 +10,7 @@ export const LabelListWrapper = styled.div`
     background: ${constants.colors.WHITE};
     border-radius: 4px;
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
+    height: 100%;
 
     /* container scrollbar styles */
 

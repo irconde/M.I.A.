@@ -14,6 +14,10 @@ export const EditLabelWrapper = styled.div`
 export const InputContainer = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 1.5rem;
+    width: 100%;
+    position: relative;
 `;
 
 export const NewLabelInput = styled.input`
@@ -27,6 +31,8 @@ export const NewLabelInput = styled.input`
     border-radius: 4px;
     user-select: none;
     width: 100%;
+    height: 100%;
+    padding-right: 1.3rem;
 
     &:disabled {
         background-color: rgba(0, 0, 0, 0.35);

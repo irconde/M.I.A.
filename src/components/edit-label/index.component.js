@@ -90,6 +90,14 @@ const EditLabelComponent = ({ onLabelChange }) => {
         return diff * zoom;
     };
 
+    const clearTextIconStyle = {
+        height: '20px',
+        fill: 'white',
+        position: 'absolute',
+        right: '0',
+        width: 'fit-content',
+    };
+
     /**
      * Triggered when the edit label input field is changed. Shows and hides the clear icon
      *
@@ -127,7 +135,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
                         />
                         {showClearIcon && (
                             <ClearTextIcon
-                                className="clearTextIcon"
+                                style={clearTextIconStyle}
                                 onClick={() => {
                                     setShowClearIcon(false);
                                     dispatch(setInputLabel(''));
