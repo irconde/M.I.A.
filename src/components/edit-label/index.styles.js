@@ -32,7 +32,7 @@ export const NewLabelInput = styled.input`
     user-select: none;
     width: 100%;
     height: 100%;
-    padding-right: 1.3rem;
+    padding-right: 1.5rem;
 
     &:disabled {
         background-color: rgba(0, 0, 0, 0.35);
@@ -46,6 +46,6 @@ export const NewLabelInput = styled.input`
     }
 
     &::placeholder {
-        color: ${constants.colors.WHITE};
+        color: #e0e0e0;
     }
 `;

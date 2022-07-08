@@ -15,6 +15,7 @@ import {
     InputContainer,
     NewLabelInput,
 } from './index.styles';
+import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import LabelListComponent from './label-list.component';
 import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
 
@@ -30,9 +31,10 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
         reduxInfo;
     const labels = useSelector(getDetectionLabels);
-    const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
+    const selectedDetection = useSelector(getSelectedDetection);
     const inputField = useRef(null);
+    const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
 
     const formattedLabels = labels.filter((label) => label !== 'unknown');
@@ -42,6 +44,8 @@ const EditLabelComponent = ({ onLabelChange }) => {
         UP: 'up',
         DOWN: 'down',
     };
+
+    console.log('something');
 
     // Clear input field when list is opened
     useEffect(() => {
@@ -60,6 +64,8 @@ const EditLabelComponent = ({ onLabelChange }) => {
         if (!isVisible) {
             setIsListOpen(false);
             setShowClearIcon(false);
+        } else {
+            dispatch(setInputLabel(selectedDetection?.className));
         }
     }, [isVisible, isListOpen]);
 
