@@ -7,12 +7,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getDetectionContextInfo,
     getInputLabel,
+    getRecentScroll,
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
-import { 
-    EditLabelWrapper, 
-    InputContainer, 
+import {
+    EditLabelWrapper,
+    InputContainer,
     NewLabelInput,
 } from './index.styles';
 import LabelListComponent from './label-list.component';
@@ -30,6 +31,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
         reduxInfo;
     const labels = useSelector(getDetectionLabels);
+    const recentScroll = useSelector(getRecentScroll);
     const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
     const inputField = useRef(null);
@@ -101,7 +103,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
-    if (isVisible) {
+    if (isVisible && !recentScroll) {
         return (
             <EditLabelWrapper
                 viewport={viewport}

@@ -3794,6 +3794,29 @@ class App extends Component {
             clearTimeout(this.state.timer);
             this.setState({
                 timer: setTimeout(() => {
+                    if (
+                        this.props.editionMode === constants.editionMode.LABEL
+                    ) {
+                        let payload = {
+                            editionMode: constants.editionMode.LABEL,
+                            isEditLabelWidgetVisible: true,
+                        };
+                        const editLabelWidgetPosInfo =
+                            this.getEditLabelWidgetPos(
+                                this.props.selectedDetection
+                            );
+                        const widgetPosition = {
+                            top: editLabelWidgetPosInfo.y,
+                            left: editLabelWidgetPosInfo.x,
+                        };
+                        payload = {
+                            ...payload,
+                            detectionLabelEditWidth:
+                                editLabelWidgetPosInfo.boundingWidth,
+                            detectionLabelEditPosition: widgetPosition,
+                        };
+                        this.props.updateEditionMode(payload);
+                    }
                     this.props.updateRecentScroll(false);
                 }, 250),
             });
