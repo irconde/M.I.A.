@@ -10,9 +10,9 @@ import {
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
-import { 
-    EditLabelWrapper, 
-    InputContainer, 
+import {
+    EditLabelWrapper,
+    InputContainer,
     NewLabelInput,
 } from './index.styles';
 import LabelListComponent from './label-list.component';
@@ -116,23 +116,25 @@ const EditLabelComponent = ({ onLabelChange }) => {
                 width={width}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
-                    <NewLabelInput
-                        placeholder={isListOpen ? '' : placeholder}
-                        value={newLabel}
-                        onChange={handleLabelInputChange}
-                        onKeyDown={submitFromInput}
-                        disabled={isListOpen}
-                        ref={inputField}
-                    />
-                    {showClearIcon && (
-                        <ClearTextIcon
-                            className="clearTextIcon"
-                            onClick={() => {
-                                setShowClearIcon(false);
-                                dispatch(setInputLabel(''));
-                            }}
+                    <InputContainer>
+                        <NewLabelInput
+                            placeholder={isListOpen ? '' : placeholder}
+                            value={newLabel}
+                            onChange={handleLabelInputChange}
+                            onKeyDown={submitFromInput}
+                            disabled={isListOpen}
+                            ref={inputField}
                         />
-                    )}
+                        {showClearIcon && (
+                            <ClearTextIcon
+                                className="clearTextIcon"
+                                onClick={() => {
+                                    setShowClearIcon(false);
+                                    dispatch(setInputLabel(''));
+                                }}
+                            />
+                        )}
+                    </InputContainer>
                     <ArrowIcon
                         handleClick={() => {
                             setIsListOpen(!isListOpen);
