@@ -273,6 +273,19 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            !nextProps.remoteOrLocal &&
+            this.props.localFileOutput !== '' &&
+            nextProps.localFileOutput === ''
+        ) {
+            this.props.setCollapsedSideMenu({
+                cornerstone: cornerstone,
+                desktopMode: false,
+                collapsedSideMenu: false,
+            });
+        }
         if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
