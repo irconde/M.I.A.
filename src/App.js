@@ -3807,10 +3807,15 @@ class App extends Component {
      * @param {Event} event
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);
+        if (this.props.selectedDetection !== null) {
+            // TODO: Future refactoring
+            this.props.emptyAreaClickUpdate();
+            this.props.onMouseLeaveNoFilesUpdate();
+            this.props.clearAllSelection();
+            this.props.resetSelectedDetectionBoxesUpdate();
+            this.resetCornerstoneTool();
+            this.appUpdateImage();
+        }
     }
 
     render() {
