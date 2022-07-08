@@ -58,14 +58,16 @@ const EditLabelComponent = ({ onLabelChange }) => {
         // When component is updated to be visible or the label list is closed, focus the text input field for user input
         if (isVisible && !isListOpen) {
             inputField.current.focus();
+            // set the value of the text input to the current detection class name
+            const currentClassName = selectedDetection.className.toUpperCase();
+            dispatch(setInputLabel(currentClassName));
+            currentClassName.length && setShowClearIcon(true);
         }
 
         // Reset label list visibility when component is hidden
         if (!isVisible) {
             setIsListOpen(false);
             setShowClearIcon(false);
-        } else {
-            dispatch(setInputLabel(selectedDetection?.className));
         }
     }, [isVisible, isListOpen]);
 
