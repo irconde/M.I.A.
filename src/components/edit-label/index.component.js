@@ -45,8 +45,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
         DOWN: 'down',
     };
 
-    console.log('something');
-
     // Clear input field when list is opened
     useEffect(() => {
         if (isListOpen) {
@@ -61,7 +59,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
             // set the value of the text input to the current detection class name
             const currentClassName = selectedDetection.className.toUpperCase();
             dispatch(setInputLabel(currentClassName));
-            currentClassName.length && setShowClearIcon(true);
+            setShowClearIcon(true);
         }
 
         // Reset label list visibility when component is hidden
@@ -86,7 +84,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @param {KeyboardEvent} e event fired for every key press
      */
     const submitFromInput = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && e.target.value !== '') {
             onLabelChange(
                 Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
             );

@@ -28,7 +28,6 @@ export const NewLabelInput = styled.input`
     height: ${(props) => `${props.heightDiff}px`};
     color: ${constants.colors.WHITE};
     border: none;
-    border-radius: 4px;
     user-select: none;
     width: 100%;
     height: 100%;
