@@ -47,6 +47,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
     useEffect(() => {
         if (isListOpen) {
             dispatch(setInputLabel(''));
+            setShowClearIcon(false);
         }
     }, [isListOpen]);
     useEffect(() => {
@@ -94,7 +95,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
         height: '20px',
         fill: 'white',
         position: 'absolute',
-        right: '0',
+        right: '2px',
         width: 'fit-content',
     };
 
@@ -138,6 +139,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
                                 style={clearTextIconStyle}
                                 onClick={() => {
                                     setShowClearIcon(false);
+                                    inputField.current.focus();
                                     dispatch(setInputLabel(''));
                                 }}
                             />
