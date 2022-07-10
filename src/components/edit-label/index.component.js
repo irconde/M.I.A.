@@ -9,13 +9,15 @@ import {
     getInputLabel,
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
-import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
+import {
+    getDetectionLabels,
+    getSelectedDetection,
+} from '../../redux/slices/detections/detectionsSlice';
 import {
     EditLabelWrapper,
     InputContainer,
     NewLabelInput,
 } from './index.styles';
-import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import LabelListComponent from './label-list.component';
 import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
 
@@ -92,9 +94,28 @@ const EditLabelComponent = ({ onLabelChange }) => {
         }
     };
 
+    /**
+     * Calculates the difference in height or width based on the given viewport and diff(erence)
+     * @param {number} diff
+     * @param {string} viewport
+     * @returns {number}
+     */
     const getEditLabelDiff = (diff, viewport) => {
         const zoom = viewport === 'side' ? zoomSide : zoomTop;
         return diff * zoom;
+    };
+
+    /**
+     * Calculate the font size based on the given string
+     * @param {string} str
+     * @returns {number} fontSize
+     */
+    const getFontSize = (str) => {
+        var fontArr = str.split(' ');
+        let floatNum = parseFloat(fontArr[1]);
+        Math.floor(floatNum);
+        let fontSize = parseInt(floatNum);
+        return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
     };
 
     const clearTextIconStyle = {
@@ -174,14 +195,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
         );
     } else return null;
 };
-
-function getFontSize(str) {
-    var fontArr = str.split(' ');
-    let floatNum = parseFloat(fontArr[1]);
-    Math.floor(floatNum);
-    let fontSize = parseInt(floatNum);
-    return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
-}
 
 EditLabelComponent.propTypes = {
     onLabelChange: PropTypes.func.isRequired,
