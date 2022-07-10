@@ -48,7 +48,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
     // Clear input field when list is opened
     useEffect(() => {
         if (isListOpen) {
-            dispatch(setInputLabel(''));
             setShowClearIcon(false);
         }
     }, [isListOpen]);
@@ -56,10 +55,13 @@ const EditLabelComponent = ({ onLabelChange }) => {
         // When component is updated to be visible or the label list is closed, focus the text input field for user input
         if (isVisible && !isListOpen) {
             inputField.current.focus();
-            // set the value of the text input to the current detection class name
-            const currentClassName = selectedDetection.className.toUpperCase();
-            dispatch(setInputLabel(currentClassName));
             setShowClearIcon(true);
+            // set the value of the text input to the current detection class name
+            if (inputField.current.value === '') {
+                const currentClassName =
+                    selectedDetection.className.toUpperCase();
+                dispatch(setInputLabel(currentClassName));
+            }
         }
 
         // Reset label list visibility when component is hidden
@@ -134,7 +136,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
                     <InputContainer>
                         <NewLabelInput
                             placeholder={isListOpen ? '' : placeholder}
-                            value={newLabel}
+                            value={isListOpen ? '' : newLabel}
                             onChange={handleLabelInputChange}
                             onKeyDown={submitFromInput}
                             disabled={isListOpen}
