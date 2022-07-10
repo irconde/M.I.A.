@@ -35,7 +35,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
         reduxInfo;
     const labels = useSelector(getDetectionLabels);
     const recentScroll = useSelector(getRecentScroll);
-    const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
     const selectedDetection = useSelector(getSelectedDetection);
     const inputField = useRef(null);
