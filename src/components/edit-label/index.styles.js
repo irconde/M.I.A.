@@ -14,6 +14,10 @@ export const EditLabelWrapper = styled.div`
 export const InputContainer = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 1.5rem;
+    width: 100%;
+    position: relative;
 `;
 
 export const NewLabelInput = styled.input`
@@ -24,9 +28,10 @@ export const NewLabelInput = styled.input`
     height: ${(props) => `${props.heightDiff}px`};
     color: ${constants.colors.WHITE};
     border: none;
-    border-radius: 4px;
     user-select: none;
     width: 100%;
+    height: 100%;
+    padding-right: 1.5rem;
 
     &:disabled {
         background-color: rgba(0, 0, 0, 0.35);
@@ -38,8 +43,8 @@ export const NewLabelInput = styled.input`
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
             0 0 8px rgba(102, 175, 233, 0.6);
     }
-    
+
     &::placeholder {
-        color: ${constants.colors.WHITE};
+        color: #e0e0e0;
     }
 `;

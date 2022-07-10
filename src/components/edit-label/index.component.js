@@ -10,7 +10,10 @@ import {
     getRecentScroll,
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
-import { getDetectionLabels } from '../../redux/slices/detections/detectionsSlice';
+import {
+    getDetectionLabels,
+    getSelectedDetection,
+} from '../../redux/slices/detections/detectionsSlice';
 import {
     EditLabelWrapper,
     InputContainer,
@@ -34,7 +37,9 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const recentScroll = useSelector(getRecentScroll);
     const [isListOpen, setIsListOpen] = useState(false);
     const newLabel = useSelector(getInputLabel);
+    const selectedDetection = useSelector(getSelectedDetection);
     const inputField = useRef(null);
+    const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
 
     const formattedLabels = labels.filter((label) => label !== 'unknown');
@@ -48,13 +53,20 @@ const EditLabelComponent = ({ onLabelChange }) => {
     // Clear input field when list is opened
     useEffect(() => {
         if (isListOpen) {
-            dispatch(setInputLabel(''));
+            setShowClearIcon(false);
         }
     }, [isListOpen]);
     useEffect(() => {
         // When component is updated to be visible or the label list is closed, focus the text input field for user input
         if (isVisible && !isListOpen) {
             inputField.current.focus();
+            setShowClearIcon(true);
+            // set the value of the text input to the current detection class name
+            if (inputField.current.value === '') {
+                const currentClassName =
+                    selectedDetection.className.toUpperCase();
+                dispatch(setInputLabel(currentClassName));
+            }
         }
 
         // Reset label list visibility when component is hidden
@@ -79,7 +91,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @param {KeyboardEvent} e event fired for every key press
      */
     const submitFromInput = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && e.target.value !== '') {
             onLabelChange(
                 Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
             );
@@ -87,9 +99,36 @@ const EditLabelComponent = ({ onLabelChange }) => {
         }
     };
 
+    /**
+     * Calculates the difference in height or width based on the given viewport and diff(erence)
+     * @param {number} diff
+     * @param {string} viewport
+     * @returns {number}
+     */
     const getEditLabelDiff = (diff, viewport) => {
         const zoom = viewport === 'side' ? zoomSide : zoomTop;
         return diff * zoom;
+    };
+
+    /**
+     * Calculate the font size based on the given string
+     * @param {string} str
+     * @returns {number} fontSize
+     */
+    const getFontSize = (str) => {
+        var fontArr = str.split(' ');
+        let floatNum = parseFloat(fontArr[1]);
+        Math.floor(floatNum);
+        let fontSize = parseInt(floatNum);
+        return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
+    };
+
+    const clearTextIconStyle = {
+        height: '20px',
+        fill: 'white',
+        position: 'absolute',
+        right: '2px',
+        width: 'fit-content',
     };
 
     /**
@@ -118,23 +157,26 @@ const EditLabelComponent = ({ onLabelChange }) => {
                 width={width}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
-                    <NewLabelInput
-                        placeholder={isListOpen ? '' : placeholder}
-                        value={newLabel}
-                        onChange={handleLabelInputChange}
-                        onKeyDown={submitFromInput}
-                        disabled={isListOpen}
-                        ref={inputField}
-                    />
-                    {showClearIcon && (
-                        <ClearTextIcon
-                            className="clearTextIcon"
-                            onClick={() => {
-                                setShowClearIcon(false);
-                                dispatch(setInputLabel(''));
-                            }}
+                    <InputContainer>
+                        <NewLabelInput
+                            placeholder={isListOpen ? '' : placeholder}
+                            value={isListOpen ? '' : newLabel}
+                            onChange={handleLabelInputChange}
+                            onKeyDown={submitFromInput}
+                            disabled={isListOpen}
+                            ref={inputField}
                         />
-                    )}
+                        {showClearIcon && (
+                            <ClearTextIcon
+                                style={clearTextIconStyle}
+                                onClick={() => {
+                                    setShowClearIcon(false);
+                                    inputField.current.focus();
+                                    dispatch(setInputLabel(''));
+                                }}
+                            />
+                        )}
+                    </InputContainer>
                     <ArrowIcon
                         handleClick={() => {
                             setIsListOpen(!isListOpen);
@@ -158,14 +200,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
         );
     } else return null;
 };
-
-function getFontSize(str) {
-    var fontArr = str.split(' ');
-    let floatNum = parseFloat(fontArr[1]);
-    Math.floor(floatNum);
-    let fontSize = parseInt(floatNum);
-    return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
-}
 
 EditLabelComponent.propTypes = {
     onLabelChange: PropTypes.func.isRequired,
