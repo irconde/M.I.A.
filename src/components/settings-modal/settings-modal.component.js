@@ -5,7 +5,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import {
     AlignedContainer,
     AutoConnectContainer,
-    CloseIconWrapper,
     ConnectionButton,
     ConnectionButtonSection,
     FileManagementItem,
@@ -51,7 +50,6 @@ import {
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
 import SettingsCog from '../../icons/SettingsCog';
-import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
 import CloudIcon from '../../icons/CloudIcon.js';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
@@ -85,7 +83,10 @@ import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
-
+import {
+    CloseIcon,
+    CloseIconWrapper,
+} from '../../icons/settings-modal/close-icon/close.icon.styles';
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
@@ -325,12 +326,6 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
-    const closeIconStyle = {
-        alignSelf: 'center',
-        width: '24px',
-        height: '24px',
-        cursor: 'pointer',
-    };
 
     let body = (
         <StyledPaper>
@@ -340,10 +335,8 @@ const SettingsModal = (props) => {
                         <SettingsCog title={props.title} />
                     </SettingsCogwheel>
                     <SettingsTitle>Settings</SettingsTitle>
-                    <CloseIconWrapper
-                        onClick={() => handleClose()}
-                        style={closeIconStyle}>
-                        <IcCloseIcon />
+                    <CloseIconWrapper onClick={() => handleClose()}>
+                        <CloseIcon />
                     </CloseIconWrapper>
                 </SettingsHeader>
                 <StyledDivider />

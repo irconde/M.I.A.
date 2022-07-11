@@ -90,12 +90,7 @@ export const SettingsTitle = styled.div`
     flex: auto;
     align-self: center;
 `;
-export const CloseIconWrapper = styled.div`
-    align-self: center;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-`;
+
 export const StyledDivider = styled(Divider).attrs(() => ({
     variant: 'middle',
 }))`
