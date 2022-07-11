@@ -3707,11 +3707,10 @@ class App extends Component {
                 const labelSize = Utils.getTextLabelSize(
                     ctx,
                     detectionLabel,
-                    constants.MAX_LABEL_LENGTH
+                    constants.detectionStyle.LABEL_PADDING
                 );
                 const { offsetLeft } = currentViewport;
                 const gap = offsetLeft / zoomLevel;
-                console.log(`zoomLevel: ${zoomLevel}`);
                 const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
@@ -3720,10 +3719,10 @@ class App extends Component {
                     currentViewport.id === 'dicomImageRight'
                         ? constants.viewport.SIDE
                         : constants.viewport.TOP;
-                const verticalGap = bbox[1] - labelSize.height;
+                const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + gap,
-                    y: verticalGap,
+                    y: bbox[1] - verticalGap - 4,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
