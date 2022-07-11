@@ -70,12 +70,31 @@ export const SettingsHeader = styled.div`
     justify-content: space-between;
     margin: 1rem 0;
 `;
-export const SettingsCogwheel = styled.div`
+
+export const CogIconWrapper = styled.div`
     margin-right: 1rem;
     margin-left: 0;
     width: 20px;
     height: 20px;
     align-self: center;
+`;
+
+export const IconWrapper = styled.div`
+    align-self: center;
+    padding-inline: 0.25rem;
+`;
+
+export const CloseIconWrapper = styled.div`
+    align-self: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+`;
+export const CloudIconWrapper = styled.div`
+    margin: 0.3rem;
+    margin-right: 1rem;
+    display: flex;
+    float: left;
 `;
 export const SettingsTitle = styled.div`
     object-fit: contain;

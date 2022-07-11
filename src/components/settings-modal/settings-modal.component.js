@@ -22,7 +22,6 @@ import {
     SelectFolderButton,
     SettingDescription,
     SettingOptionTitle,
-    SettingsCogwheel,
     SettingsHeader,
     SettingsRow,
     SettingsTitle,
@@ -38,6 +37,10 @@ import {
     VisualizationModeLabel,
     WorkingDirectory,
     WorkSpaceFormControl,
+    CogIconWrapper,
+    IconWrapper,
+    CloseIconWrapper,
+    CloudIconWrapper,
 } from './settings-modal.styles';
 import {
     Checkbox,
@@ -48,7 +51,6 @@ import {
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
-import SettingsCog from '../../icons/SettingsCog';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
@@ -81,14 +83,10 @@ import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
 import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
 import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
-import {
-    CloseIcon,
-    CloseIconWrapper,
-} from '../../icons/settings-modal/close-icon/close.icon.styles';
-import {
-    IconWrapper,
-    CloudIcon,
-} from '../../icons/settings-modal/cloud-icon/cloud.icon.styles';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
+import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
+
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
@@ -333,12 +331,16 @@ const SettingsModal = (props) => {
         <StyledPaper>
             <ModalRoot>
                 <SettingsHeader>
-                    <SettingsCogwheel>
-                        <SettingsCog title={props.title} />
-                    </SettingsCogwheel>
+                    <CogIconWrapper>
+                        <CogWheelIcon
+                            height="24px"
+                            width="24px"
+                            color="white"
+                        />
+                    </CogIconWrapper>
                     <SettingsTitle>Settings</SettingsTitle>
                     <CloseIconWrapper onClick={() => handleClose()}>
-                        <CloseIcon />
+                        <CloseIcon height="24px" width="24px" color="white" />
                     </CloseIconWrapper>
                 </SettingsHeader>
                 <StyledDivider />
@@ -420,11 +422,17 @@ const SettingsModal = (props) => {
                             <SettingsRow>
                                 <RemoteInputContainer>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <IconWrapper>
+                                        <CloudIconWrapper>
                                             <CloudIcon
-                                                enabled={remoteOrLocal}
+                                                color={
+                                                    remoteOrLocal
+                                                        ? '#ffffff'
+                                                        : '#9d9d9d'
+                                                }
+                                                height="24px"
+                                                width="24px"
                                             />
-                                        </IconWrapper>
+                                        </CloudIconWrapper>
                                     </Tooltip>
                                     <FormControl>
                                         <HostTextField
