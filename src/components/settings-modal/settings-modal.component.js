@@ -484,14 +484,12 @@ const SettingsModal = (props) => {
                                         onClick={() => {
                                             testConnection();
                                         }}>
-                                        {connecting ? (
-                                            <LeftAlignedWrapper>
+                                        <LeftAlignedWrapper>
+                                            {connecting ? (
                                                 <CircularProgress
                                                     size={'24px'}
                                                 />
-                                            </LeftAlignedWrapper>
-                                        ) : (
-                                            <LeftAlignedWrapper>
+                                            ) : (
                                                 <CheckConnectionIcon
                                                     color={
                                                         remoteOrLocal
@@ -501,8 +499,8 @@ const SettingsModal = (props) => {
                                                     width="24px"
                                                     height="24px"
                                                 />
-                                            </LeftAlignedWrapper>
-                                        )}
+                                            )}
+                                        </LeftAlignedWrapper>
                                         Check connection
                                     </ConnectionButton>
                                 </Tooltip>
