@@ -81,16 +81,10 @@ export const CogIconWrapper = styled.div`
 
 export const IconWrapper = styled.div`
     align-self: center;
-    padding-inline: 0.25rem;
+    padding-inline: 0.5rem;
 `;
 
-export const CloseIconWrapper = styled.div`
-    align-self: center;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-`;
-export const CloudIconWrapper = styled.div`
+export const LeftAlignedWrapper = styled.div`
     margin: 0.3rem;
     margin-right: 1rem;
     display: flex;

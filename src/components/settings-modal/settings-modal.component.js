@@ -39,8 +39,7 @@ import {
     WorkSpaceFormControl,
     CogIconWrapper,
     IconWrapper,
-    CloseIconWrapper,
-    CloudIconWrapper,
+    LeftAlignedWrapper,
 } from './settings-modal.styles';
 import {
     Checkbox,
@@ -51,7 +50,7 @@ import {
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
-import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
+import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
 import FileFormatIcon from '../../icons/FileFormatIcon.js';
@@ -339,9 +338,9 @@ const SettingsModal = (props) => {
                         />
                     </CogIconWrapper>
                     <SettingsTitle>Settings</SettingsTitle>
-                    <CloseIconWrapper onClick={() => handleClose()}>
+                    <div onClick={() => handleClose()}>
                         <CloseIcon height="24px" width="24px" color="white" />
-                    </CloseIconWrapper>
+                    </div>
                 </SettingsHeader>
                 <StyledDivider />
                 <StyledFormGroup>
@@ -422,7 +421,7 @@ const SettingsModal = (props) => {
                             <SettingsRow>
                                 <RemoteInputContainer>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <CloudIconWrapper>
+                                        <LeftAlignedWrapper>
                                             <CloudIcon
                                                 color={
                                                     remoteOrLocal
@@ -432,7 +431,7 @@ const SettingsModal = (props) => {
                                                 height="24px"
                                                 width="24px"
                                             />
-                                        </CloudIconWrapper>
+                                        </LeftAlignedWrapper>
                                     </Tooltip>
                                     <FormControl>
                                         <HostTextField
@@ -486,21 +485,23 @@ const SettingsModal = (props) => {
                                             testConnection();
                                         }}>
                                         {connecting ? (
-                                            <div>
+                                            <LeftAlignedWrapper>
                                                 <CircularProgress
                                                     size={'24px'}
                                                 />
-                                            </div>
+                                            </LeftAlignedWrapper>
                                         ) : (
-                                            <CheckConnectionIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={{
-                                                    ...svgStyle,
-                                                    color: remoteOrLocal
-                                                        ? '#367eff'
-                                                        : '#9d9d9d',
-                                                }}
-                                            />
+                                            <LeftAlignedWrapper>
+                                                <CheckConnectionIcon
+                                                    color={
+                                                        remoteOrLocal
+                                                            ? '#367eff'
+                                                            : '#9d9d9d'
+                                                    }
+                                                    width="24px"
+                                                    height="24px"
+                                                />
+                                            </LeftAlignedWrapper>
                                         )}
                                         Check connection
                                     </ConnectionButton>
