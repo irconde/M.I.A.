@@ -143,10 +143,6 @@ export const RemoteWorkContainer = styled(SettingsHeader)`
 export const SwitchWrapper = styled.div`
     align-self: flex-end;
 `;
-export const IconWrapper = styled.div`
-    align-self: center;
-    padding-inline: 0.25rem;
-`;
 export const SettingsRow = styled(SettingsHeader)`
     margin-top: 2rem;
     margin-bottom: 0;

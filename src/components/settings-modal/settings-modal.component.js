@@ -11,7 +11,6 @@ import {
     FileManagementSection,
     FileSuffixField,
     HostTextField,
-    IconWrapper,
     LocalFileOutputField,
     ModalRoot,
     modalTheme,
@@ -50,7 +49,6 @@ import {
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
 import SettingsCog from '../../icons/SettingsCog';
-import CloudIcon from '../../icons/CloudIcon.js';
 import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
 import FileOpenIcon from '../../icons/FileOpenIcon.js';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
@@ -87,6 +85,10 @@ import {
     CloseIcon,
     CloseIconWrapper,
 } from '../../icons/settings-modal/close-icon/close.icon.styles';
+import {
+    IconWrapper,
+    CloudIcon,
+} from '../../icons/settings-modal/cloud-icon/cloud.icon.styles';
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
@@ -420,13 +422,7 @@ const SettingsModal = (props) => {
                                     <Tooltip title="Server address: ip address : port number">
                                         <IconWrapper>
                                             <CloudIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={{
-                                                    ...svgStyle,
-                                                    color: remoteOrLocal
-                                                        ? '#ffffff'
-                                                        : '#9d9d9d',
-                                                }}
+                                                enabled={remoteOrLocal}
                                             />
                                         </IconWrapper>
                                     </Tooltip>
