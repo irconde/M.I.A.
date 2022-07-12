@@ -45,7 +45,7 @@ import {
     MenuItem,
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
-import ConnectionResultComponent from './connection-result.component';
+import ConnectionResultComponent from './connection-result/connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import {
     getSettingsVisibility,
@@ -73,8 +73,8 @@ import Tooltip from '@mui/material/Tooltip';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
-import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
-import FolderIcon from '../../icons/settings-modal/folder-icon/folder.icon';
+import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
+import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
 import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
