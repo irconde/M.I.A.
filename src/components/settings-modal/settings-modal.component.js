@@ -51,7 +51,6 @@ import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
-import FileFormatIcon from '../../icons/FileFormatIcon.js';
 import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import {
     getSettingsVisibility,
@@ -84,6 +83,7 @@ import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
 import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
 import FolderIcon from '../../icons/settings-modal/folder-icon/folder.icon';
+import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -585,10 +585,15 @@ const SettingsModal = (props) => {
 
                                 <FileManagementSection>
                                     <FileManagementItem>
-                                        <FileFormatIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
+                                        <Tooltip title="Select output file format">
+                                            <LeftAlignedWrapper>
+                                                <FileIcon
+                                                    height="24px"
+                                                    width="24px"
+                                                    color="white"
+                                                />
+                                            </LeftAlignedWrapper>
+                                        </Tooltip>
                                         <StandardFormControl>
                                             <StyledSelect
                                                 open={openFileFormat}
