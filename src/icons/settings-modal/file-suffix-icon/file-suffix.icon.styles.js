@@ -8,6 +8,5 @@ export const StyledFileSuffixIcon = styled(FileSuffixIconComponent).attrs(
     })
 )`
     align-self: center;
-    cursor: pointer;
     fill: ${(props) => props.color};
 `;

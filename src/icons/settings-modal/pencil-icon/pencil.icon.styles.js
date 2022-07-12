@@ -6,6 +6,5 @@ export const StyledPencilIcon = styled(PencilIconComponent).attrs((props) => ({
     height: props.height || '24px',
 }))`
     align-self: center;
-    cursor: pointer;
     fill: ${(props) => props.color};
 `;

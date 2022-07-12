@@ -1,19 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    VisualizationModeIconWrapper,
     VisualizationModeContainer,
+    VisualizationModeIconWrapper,
     VisualizationModeLabel,
 } from './visualization-mode-picker.styles';
 import {
-    SettingOptionTitle,
     SettingDescription,
+    SettingOptionTitle,
 } from '../settings-modal.styles';
 
 import SummarizedModeIcon from '../../../icons/settings-modal/summarized-mode-icon/summarized-mode.icon';
 import SummarizedModeCheckedIcon from '../../../icons/settings-modal/summarized-mode-checked-icon/summarized-mode-checked.icon';
 import DetailedModeIcon from '../../../icons/settings-modal/detailed-mode-icon/detailed-mode.icon';
 import DetailedModeCheckedIcon from '../../../icons/settings-modal/detailed-mode-checked-icon/detailed-mode-checked.icon';
+import Tooltip from '@mui/material/Tooltip';
 
 const IconProps = {
     height: '8rem',
@@ -34,34 +35,38 @@ const VisualizationModePickerComponent = ({
             </SettingDescription>
             <VisualizationModeContainer>
                 <div>
-                    <VisualizationModeIconWrapper
-                        selected={!isSummarized}
-                        onClick={() => {
-                            setIsSummarized(false);
-                        }}>
-                        {isSummarized ? (
-                            <DetailedModeIcon {...IconProps} />
-                        ) : (
-                            <DetailedModeCheckedIcon {...IconProps} />
-                        )}
-                    </VisualizationModeIconWrapper>
+                    <Tooltip title="Detailed Detections" placement="top">
+                        <VisualizationModeIconWrapper
+                            selected={!isSummarized}
+                            onClick={() => {
+                                setIsSummarized(false);
+                            }}>
+                            {isSummarized ? (
+                                <DetailedModeIcon {...IconProps} />
+                            ) : (
+                                <DetailedModeCheckedIcon {...IconProps} />
+                            )}
+                        </VisualizationModeIconWrapper>
+                    </Tooltip>
 
                     <VisualizationModeLabel selected={!isSummarized}>
                         Detailed
                     </VisualizationModeLabel>
                 </div>
                 <div>
-                    <VisualizationModeIconWrapper
-                        selected={isSummarized}
-                        onClick={() => {
-                            setIsSummarized(true);
-                        }}>
-                        {!isSummarized ? (
-                            <SummarizedModeIcon {...IconProps} />
-                        ) : (
-                            <SummarizedModeCheckedIcon {...IconProps} />
-                        )}
-                    </VisualizationModeIconWrapper>
+                    <Tooltip title="Summarized Detections" placement="top">
+                        <VisualizationModeIconWrapper
+                            selected={isSummarized}
+                            onClick={() => {
+                                setIsSummarized(true);
+                            }}>
+                            {!isSummarized ? (
+                                <SummarizedModeIcon {...IconProps} />
+                            ) : (
+                                <SummarizedModeCheckedIcon {...IconProps} />
+                            )}
+                        </VisualizationModeIconWrapper>
+                    </Tooltip>
                     <VisualizationModeLabel selected={isSummarized}>
                         Summarized
                     </VisualizationModeLabel>
