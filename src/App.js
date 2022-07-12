@@ -3650,11 +3650,6 @@ class App extends Component {
                 className: newLabel,
                 uuid: uuid,
             });
-            cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
-                cornerstoneMode: constants.cornerstoneMode.EDITION,
-                editionMode: constants.editionMode.NO_TOOL,
-                temporaryLabel: newLabel,
-            });
             this.props.onLabelEditionEnd({
                 editionMode: constants.editionMode.NO_TOOL,
                 detectionLabelEditWidth: 0,
