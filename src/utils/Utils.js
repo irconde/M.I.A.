@@ -93,7 +93,7 @@ export default class Utils {
      * @static
      * @param {Context} context - 2d canvas context
      * @param {string} labelText - Text content of the label
-     * @param {string} padding - Blank space surrounding the text within the label
+     * @param {number} padding - Blank space surrounding the text within the label
      * @returns {{width: number, height: number}} - Label's dimensions
      */
     static getTextLabelSize(context, labelText, padding) {

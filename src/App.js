@@ -3682,7 +3682,7 @@ class App extends Component {
             if (bbox) {
                 const boundingWidth = Math.abs(bbox[2] - bbox[0]);
                 // Position component on top of existing detection label
-                let gap, viewport, labelHeight, currentViewport, zoomLevel;
+                let currentViewport, zoomLevel;
                 if (view === constants.viewport.TOP) {
                     currentViewport = this.state.imageViewportTop;
                     zoomLevel = this.props.zoomLevelTop;
@@ -3691,13 +3691,13 @@ class App extends Component {
                     zoomLevel = this.props.zoomLevelSide;
                 }
 
-                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
-                var fontSizeArr = fontArr[1].split('px');
-                var fontSize = fontSizeArr[0];
-                fontSize *= zoomLevel;
-                fontSizeArr[0] = fontSize;
-                var newFontSize = fontSizeArr.join('px');
-                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+                // TODO: Future refactoring of how the label to be rendered is calculated. The size calculation at certain zoom levels needs to be taken into account
+                const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                const fontSizeArr = fontArr[1].split('px');
+                fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
+                const newFontSize = fontSizeArr.join('px');
+                const newFont =
+                    fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
                 const canvas = currentViewport.children[0];
                 const ctx = canvas.getContext('2d');
@@ -3711,19 +3711,19 @@ class App extends Component {
                     constants.detectionStyle.LABEL_PADDING
                 );
                 const { offsetLeft } = currentViewport;
-                gap = offsetLeft / zoomLevel;
-                viewport =
+                const horizontalGap = offsetLeft / zoomLevel;
+                const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
                         : this.state.imageViewportTop;
-                labelHeight = labelSize.height;
                 const newViewport =
                     currentViewport.id === 'dicomImageRight'
                         ? constants.viewport.SIDE
                         : constants.viewport.TOP;
+                const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                    x: bbox[0] + gap,
-                    y: bbox[1] - labelHeight,
+                    x: bbox[0] + horizontalGap,
+                    y: bbox[1] - verticalGap - 6,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
