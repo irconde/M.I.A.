@@ -3,16 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { ThemeProvider } from '@mui/material/styles';
 import {
-    AlignedContainer,
     AutoConnectContainer,
-    CloseIconWrapper,
     ConnectionButton,
     ConnectionButtonSection,
     FileManagementItem,
     FileManagementSection,
     FileSuffixField,
     HostTextField,
-    IconWrapper,
     LocalFileOutputField,
     ModalRoot,
     modalTheme,
@@ -24,7 +21,6 @@ import {
     SelectFolderButton,
     SettingDescription,
     SettingOptionTitle,
-    SettingsCogwheel,
     SettingsHeader,
     SettingsRow,
     SettingsTitle,
@@ -35,11 +31,11 @@ import {
     StyledSelect,
     StyledSwitch,
     SwitchWrapper,
-    VisualiationModeIcon,
-    VisualizationModeContainer,
-    VisualizationModeLabel,
     WorkingDirectory,
     WorkSpaceFormControl,
+    CogIconWrapper,
+    IconWrapper,
+    LeftAlignedWrapper,
 } from './settings-modal.styles';
 import {
     Checkbox,
@@ -49,15 +45,8 @@ import {
     MenuItem,
 } from '@mui/material';
 import Modal from '@mui/material/Modal';
-import ConnectionResultComponent from './connection-result.component';
-import SettingsCog from '../../icons/SettingsCog';
-import { ReactComponent as IcCloseIcon } from '../../icons/ic_close.svg';
-import CloudIcon from '../../icons/CloudIcon.js';
-import CheckConnectionIcon from '../../icons/CheckConnectionIcon.js';
-import FileOpenIcon from '../../icons/FileOpenIcon.js';
-import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
-import FileFormatIcon from '../../icons/FileFormatIcon.js';
-import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
+import ConnectionResultComponent from './connection-result/connection-result.component';
+import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import {
     getSettingsVisibility,
     resetSelectedDetectionBoxesUpdate,
@@ -80,11 +69,16 @@ import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
-import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
-import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
-import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
-import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
+
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
+import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
+import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
+import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
+import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
+import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
+import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -325,81 +319,30 @@ const SettingsModal = (props) => {
         width: '24px',
         color: '#ffffff',
     };
-    const closeIconStyle = {
-        alignSelf: 'center',
-        width: '24px',
-        height: '24px',
-        cursor: 'pointer',
-    };
 
     let body = (
         <StyledPaper>
             <ModalRoot>
                 <SettingsHeader>
-                    <SettingsCogwheel>
-                        <SettingsCog title={props.title} />
-                    </SettingsCogwheel>
+                    <CogIconWrapper>
+                        <CogWheelIcon
+                            height="24px"
+                            width="24px"
+                            color="white"
+                        />
+                    </CogIconWrapper>
                     <SettingsTitle>Settings</SettingsTitle>
-                    <CloseIconWrapper
-                        onClick={() => handleClose()}
-                        style={closeIconStyle}>
-                        <IcCloseIcon />
-                    </CloseIconWrapper>
+                    <div onClick={() => handleClose()}>
+                        <CloseIcon height="24px" width="24px" color="white" />
+                    </div>
                 </SettingsHeader>
                 <StyledDivider />
                 <StyledFormGroup>
                     <ScrollableContainer>
-                        <div>
-                            <SettingOptionTitle>
-                                Visualization Mode
-                            </SettingOptionTitle>
-                            <SettingDescription>
-                                Pick the visual granularity to use when
-                                displaying multi-algorithm results.
-                            </SettingDescription>
-                            <VisualizationModeContainer>
-                                <div>
-                                    <VisualiationModeIcon
-                                        src={
-                                            displaySummarizedDetections
-                                                ? DetailedModeIconSrc
-                                                : DetailedModeIconCheckedSrc
-                                        }
-                                        selected={!displaySummarizedDetections}
-                                        alt={'Detailed mode'}
-                                        onClick={() => {
-                                            setDisplaySummarizedDetections(
-                                                false
-                                            );
-                                        }}
-                                    />
-                                    <VisualizationModeLabel
-                                        selected={!displaySummarizedDetections}>
-                                        Detailed
-                                    </VisualizationModeLabel>
-                                </div>
-                                <div>
-                                    <VisualiationModeIcon
-                                        src={
-                                            displaySummarizedDetections
-                                                ? SummarizedModeIconCheckedSrc
-                                                : SummarizedModeIconSrc
-                                        }
-                                        selected={displaySummarizedDetections}
-                                        alt={'Summarized mode'}
-                                        onClick={() => {
-                                            setDisplaySummarizedDetections(
-                                                true
-                                            );
-                                        }}
-                                    />
-                                    <VisualizationModeLabel
-                                        selected={displaySummarizedDetections}>
-                                        Summarized
-                                    </VisualizationModeLabel>
-                                </div>
-                            </VisualizationModeContainer>
-                        </div>
+                        <VisualizationModePickerComponent
+                            isSummarized={displaySummarizedDetections}
+                            setIsSummarized={setDisplaySummarizedDetections}
+                        />
                         <StyledDivider />
                         <div>
                             <RemoteWorkContainer>
@@ -425,17 +368,17 @@ const SettingsModal = (props) => {
                             <SettingsRow>
                                 <RemoteInputContainer>
                                     <Tooltip title="Server address: ip address : port number">
-                                        <IconWrapper>
+                                        <LeftAlignedWrapper>
                                             <CloudIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={{
-                                                    ...svgStyle,
-                                                    color: remoteOrLocal
+                                                color={
+                                                    remoteOrLocal
                                                         ? '#ffffff'
-                                                        : '#9d9d9d',
-                                                }}
+                                                        : '#9d9d9d'
+                                                }
+                                                height="24px"
+                                                width="24px"
                                             />
-                                        </IconWrapper>
+                                        </LeftAlignedWrapper>
                                     </Tooltip>
                                     <FormControl>
                                         <HostTextField
@@ -488,23 +431,23 @@ const SettingsModal = (props) => {
                                         onClick={() => {
                                             testConnection();
                                         }}>
-                                        {connecting ? (
-                                            <div>
+                                        <LeftAlignedWrapper>
+                                            {connecting ? (
                                                 <CircularProgress
                                                     size={'24px'}
                                                 />
-                                            </div>
-                                        ) : (
-                                            <CheckConnectionIcon
-                                                style={svgContainerStyle}
-                                                svgStyle={{
-                                                    ...svgStyle,
-                                                    color: remoteOrLocal
-                                                        ? '#367eff'
-                                                        : '#9d9d9d',
-                                                }}
-                                            />
-                                        )}
+                                            ) : (
+                                                <CheckConnectionIcon
+                                                    color={
+                                                        remoteOrLocal
+                                                            ? '#367eff'
+                                                            : '#9d9d9d'
+                                                    }
+                                                    width="24px"
+                                                    height="24px"
+                                                />
+                                            )}
+                                        </LeftAlignedWrapper>
                                         Check connection
                                     </ConnectionButton>
                                 </Tooltip>
@@ -529,21 +472,17 @@ const SettingsModal = (props) => {
                                     <WorkingDirectory>
                                         <WorkSpaceFormControl>
                                             <Tooltip title="Workspace location">
-                                                <AlignedContainer>
-                                                    <FileOpenIcon
-                                                        style={
-                                                            svgContainerStyle
+                                                <LeftAlignedWrapper>
+                                                    <FolderIcon
+                                                        width="24px"
+                                                        height="24px"
+                                                        color={
+                                                            remoteOrLocal
+                                                                ? '#9d9d9d'
+                                                                : '#ffffff'
                                                         }
-                                                        svgStyle={{
-                                                            ...svgStyle,
-                                                            color:
-                                                                remoteOrLocal ===
-                                                                true
-                                                                    ? '#9d9d9d'
-                                                                    : '#ffffff',
-                                                        }}
                                                     />
-                                                </AlignedContainer>
+                                                </LeftAlignedWrapper>
                                             </Tooltip>
                                             <LocalFileOutputField
                                                 value={localFileOutput}
@@ -594,10 +533,15 @@ const SettingsModal = (props) => {
 
                                 <FileManagementSection>
                                     <FileManagementItem>
-                                        <FileFormatIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
+                                        <Tooltip title="Select output file format">
+                                            <LeftAlignedWrapper>
+                                                <FileIcon
+                                                    height="24px"
+                                                    width="24px"
+                                                    color="white"
+                                                />
+                                            </LeftAlignedWrapper>
+                                        </Tooltip>
                                         <StandardFormControl>
                                             <StyledSelect
                                                 open={openFileFormat}
@@ -628,10 +572,15 @@ const SettingsModal = (props) => {
                                         </StandardFormControl>
                                     </FileManagementItem>
                                     <FileManagementItem>
-                                        <FileAnnotationsIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
+                                        <Tooltip title="Select format for annotations">
+                                            <LeftAlignedWrapper>
+                                                <PencilIcon
+                                                    height="24px"
+                                                    width="24px"
+                                                    color="white"
+                                                />
+                                            </LeftAlignedWrapper>
+                                        </Tooltip>
 
                                         <StandardFormControl>
                                             <StyledSelect
@@ -675,10 +624,15 @@ const SettingsModal = (props) => {
                                     </FileManagementItem>
 
                                     <FileManagementItem>
-                                        <FileSuffixIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
+                                        <Tooltip title="Input suffix appended to filenames">
+                                            <LeftAlignedWrapper>
+                                                <FileSuffixIcon
+                                                    height="24px"
+                                                    width="24px"
+                                                    color="white"
+                                                />
+                                            </LeftAlignedWrapper>
+                                        </Tooltip>
                                         <FormControl>
                                             <FileSuffixField
                                                 value={fileSuffix}

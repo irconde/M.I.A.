@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
-const WHITE_COLOR = 'white';
 
 export const modalTheme = createTheme({
     palette: {
@@ -70,12 +69,24 @@ export const SettingsHeader = styled.div`
     justify-content: space-between;
     margin: 1rem 0;
 `;
-export const SettingsCogwheel = styled.div`
+
+export const CogIconWrapper = styled.div`
     margin-right: 1rem;
     margin-left: 0;
     width: 20px;
     height: 20px;
     align-self: center;
+`;
+
+export const IconWrapper = styled.div`
+    align-self: center;
+    padding-inline: 0.5rem;
+`;
+
+export const LeftAlignedWrapper = styled.div`
+    margin: 0.3rem;
+    margin-right: 1rem;
+    display: flex;
 `;
 export const SettingsTitle = styled.div`
     object-fit: contain;
@@ -90,12 +101,7 @@ export const SettingsTitle = styled.div`
     flex: auto;
     align-self: center;
 `;
-export const CloseIconWrapper = styled.div`
-    align-self: center;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-`;
+
 export const StyledDivider = styled(Divider).attrs(() => ({
     variant: 'middle',
 }))`
@@ -124,33 +130,12 @@ export const SettingDescription = styled.p`
     margin: 0;
     margin-bottom: 2rem;
 `;
-export const VisualizationModeContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 3.5rem;
-    margin-bottom: 1rem;
-`;
-export const VisualiationModeIcon = styled.img`
-    cursor: pointer;
-    background-color: #464646;
-    border-radius: 10px;
-    outline: ${(props) => props.selected && '2px solid #367fff'};
-`;
-export const VisualizationModeLabel = styled.p`
-    margin: 0.2rem 0;
-    text-align: center;
-    color: ${(props) => (props.selected ? WHITE_COLOR : GREY_COLOR)};
-    font-size: 0.7rem;
-`;
+
 export const RemoteWorkContainer = styled(SettingsHeader)`
     margin: 0;
 `;
 export const SwitchWrapper = styled.div`
     align-self: flex-end;
-`;
-export const IconWrapper = styled.div`
-    align-self: center;
-    padding-inline: 0.25rem;
 `;
 export const SettingsRow = styled(SettingsHeader)`
     margin-top: 2rem;
@@ -256,12 +241,9 @@ export const WorkSpaceFormControl = styled(FormControl)`
     width: 70%;
 
     &.MuiFormControl-root {
-        display: inline-block;
+        display: flex;
+        flex-direction: row;
     }
-`;
-
-export const AlignedContainer = styled.div`
-    align-self: center;
 `;
 
 export const LocalFileOutputField = styled(TextField).attrs(() => ({
