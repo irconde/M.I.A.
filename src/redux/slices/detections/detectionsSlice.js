@@ -354,11 +354,16 @@ const detectionsSlice = createSlice({
             if (detection) {
                 oldClassName = detection.className.toLowerCase();
                 detection.className = newClassName;
-                detection.color = randomColor({
+                const detColor = randomColor({
                     seed: className,
                     hue: 'random',
                     luminosity: 'bright',
                 });
+                detection.color = detColor;
+                if (state.selectedDetection?.uuid === detection.uuid) {
+                    state.selectedDetection.className = newClassName;
+                    state.selectedDetection.color = detColor;
+                }
                 state.detectionChanged = true;
                 if (state.detectionLabels.indexOf(className) === -1) {
                     state.detectionLabels.push(className);
@@ -370,6 +375,12 @@ const detectionsSlice = createSlice({
                             det.className
                         ) {
                             det.color = missMatched.color;
+                            if (
+                                state.selectedDetection?.uuid === detection.uuid
+                            ) {
+                                state.selectedDetection.color =
+                                    missMatched.color;
+                            }
                         }
                     });
                 });
