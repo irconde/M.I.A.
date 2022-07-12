@@ -88,7 +88,6 @@ export const LeftAlignedWrapper = styled.div`
     margin: 0.3rem;
     margin-right: 1rem;
     display: flex;
-    float: left;
 `;
 export const SettingsTitle = styled.div`
     object-fit: contain;
@@ -260,12 +259,9 @@ export const WorkSpaceFormControl = styled(FormControl)`
     width: 70%;
 
     &.MuiFormControl-root {
-        display: inline-block;
+        display: flex;
+        flex-direction: row;
     }
-`;
-
-export const AlignedContainer = styled.div`
-    align-self: center;
 `;
 
 export const LocalFileOutputField = styled(TextField).attrs(() => ({

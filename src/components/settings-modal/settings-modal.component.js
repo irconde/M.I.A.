@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { ThemeProvider } from '@mui/material/styles';
 import {
-    AlignedContainer,
     AutoConnectContainer,
     ConnectionButton,
     ConnectionButtonSection,
@@ -51,7 +50,6 @@ import {
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
-import FileOpenIcon from '../../icons/FileOpenIcon.js';
 import FileAnnotationsIcon from '../../icons/FileAnnotationsIcon.js';
 import FileFormatIcon from '../../icons/FileFormatIcon.js';
 import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
@@ -85,6 +83,7 @@ import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice'
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
 import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
+import FolderIcon from '../../icons/settings-modal/folder-icon/folder.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -525,21 +524,17 @@ const SettingsModal = (props) => {
                                     <WorkingDirectory>
                                         <WorkSpaceFormControl>
                                             <Tooltip title="Workspace location">
-                                                <AlignedContainer>
-                                                    <FileOpenIcon
-                                                        style={
-                                                            svgContainerStyle
+                                                <LeftAlignedWrapper>
+                                                    <FolderIcon
+                                                        width="24px"
+                                                        height="24px"
+                                                        color={
+                                                            remoteOrLocal
+                                                                ? '#9d9d9d'
+                                                                : '#ffffff'
                                                         }
-                                                        svgStyle={{
-                                                            ...svgStyle,
-                                                            color:
-                                                                remoteOrLocal ===
-                                                                true
-                                                                    ? '#9d9d9d'
-                                                                    : '#ffffff',
-                                                        }}
                                                     />
-                                                </AlignedContainer>
+                                                </LeftAlignedWrapper>
                                             </Tooltip>
                                             <LocalFileOutputField
                                                 value={localFileOutput}
