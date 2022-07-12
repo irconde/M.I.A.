@@ -50,7 +50,6 @@ import {
 import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
-import FileSuffixIcon from '../../icons/FileSuffixIcon.js';
 import {
     getSettingsVisibility,
     resetSelectedDetectionBoxesUpdate,
@@ -84,6 +83,7 @@ import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-
 import FolderIcon from '../../icons/settings-modal/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
+import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -676,10 +676,15 @@ const SettingsModal = (props) => {
                                     </FileManagementItem>
 
                                     <FileManagementItem>
-                                        <FileSuffixIcon
-                                            style={svgContainerStyle}
-                                            svgStyle={svgStyle}
-                                        />
+                                        <Tooltip title="Input suffix appended to filenames">
+                                            <LeftAlignedWrapper>
+                                                <FileSuffixIcon
+                                                    height="24px"
+                                                    width="24px"
+                                                    color="white"
+                                                />
+                                            </LeftAlignedWrapper>
+                                        </Tooltip>
                                         <FormControl>
                                             <FileSuffixField
                                                 value={fileSuffix}
