@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 
 const GREY_COLOR = '#9d9d9d';
-const WHITE_COLOR = 'white';
 
 export const modalTheme = createTheme({
     palette: {
@@ -131,24 +130,7 @@ export const SettingDescription = styled.p`
     margin: 0;
     margin-bottom: 2rem;
 `;
-export const VisualizationModeContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 3.5rem;
-    margin-bottom: 1rem;
-`;
-export const VisualiationModeIcon = styled.img`
-    cursor: pointer;
-    background-color: #464646;
-    border-radius: 10px;
-    outline: ${(props) => props.selected && '2px solid #367fff'};
-`;
-export const VisualizationModeLabel = styled.p`
-    margin: 0.2rem 0;
-    text-align: center;
-    color: ${(props) => (props.selected ? WHITE_COLOR : GREY_COLOR)};
-    font-size: 0.7rem;
-`;
+
 export const RemoteWorkContainer = styled(SettingsHeader)`
     margin: 0;
 `;

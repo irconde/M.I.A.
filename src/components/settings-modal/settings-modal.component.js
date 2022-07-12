@@ -31,9 +31,6 @@ import {
     StyledSelect,
     StyledSwitch,
     SwitchWrapper,
-    VisualiationModeIcon,
-    VisualizationModeContainer,
-    VisualizationModeLabel,
     WorkingDirectory,
     WorkSpaceFormControl,
     CogIconWrapper,
@@ -72,10 +69,7 @@ import { Channels, SETTINGS } from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
-import DetailedModeIconSrc from '../../icons/ic_detailed_mode.svg';
-import SummarizedModeIconSrc from '../../icons/ic_summarized_mode.svg';
-import DetailedModeIconCheckedSrc from '../../icons/ic_detailed_mode_checked.svg';
-import SummarizedModeIconCheckedSrc from '../../icons/ic_summarized_mode_checked.svg';
+
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
@@ -84,6 +78,7 @@ import FolderIcon from '../../icons/settings-modal/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
 import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
+import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -344,57 +339,10 @@ const SettingsModal = (props) => {
                 <StyledDivider />
                 <StyledFormGroup>
                     <ScrollableContainer>
-                        <div>
-                            <SettingOptionTitle>
-                                Visualization Mode
-                            </SettingOptionTitle>
-                            <SettingDescription>
-                                Pick the visual granularity to use when
-                                displaying multi-algorithm results.
-                            </SettingDescription>
-                            <VisualizationModeContainer>
-                                <div>
-                                    <VisualiationModeIcon
-                                        src={
-                                            displaySummarizedDetections
-                                                ? DetailedModeIconSrc
-                                                : DetailedModeIconCheckedSrc
-                                        }
-                                        selected={!displaySummarizedDetections}
-                                        alt={'Detailed mode'}
-                                        onClick={() => {
-                                            setDisplaySummarizedDetections(
-                                                false
-                                            );
-                                        }}
-                                    />
-                                    <VisualizationModeLabel
-                                        selected={!displaySummarizedDetections}>
-                                        Detailed
-                                    </VisualizationModeLabel>
-                                </div>
-                                <div>
-                                    <VisualiationModeIcon
-                                        src={
-                                            displaySummarizedDetections
-                                                ? SummarizedModeIconCheckedSrc
-                                                : SummarizedModeIconSrc
-                                        }
-                                        selected={displaySummarizedDetections}
-                                        alt={'Summarized mode'}
-                                        onClick={() => {
-                                            setDisplaySummarizedDetections(
-                                                true
-                                            );
-                                        }}
-                                    />
-                                    <VisualizationModeLabel
-                                        selected={displaySummarizedDetections}>
-                                        Summarized
-                                    </VisualizationModeLabel>
-                                </div>
-                            </VisualizationModeContainer>
-                        </div>
+                        <VisualizationModePickerComponent
+                            isSummarized={displaySummarizedDetections}
+                            setIsSummarized={setDisplaySummarizedDetections}
+                        />
                         <StyledDivider />
                         <div>
                             <RemoteWorkContainer>
