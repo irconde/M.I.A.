@@ -3691,6 +3691,7 @@ class App extends Component {
                     zoomLevel = this.props.zoomLevelSide;
                 }
 
+                // TODO: Future refactoring of how the label to be rendered is calculated. The size calculation at certain zoom levels needs to be taken into account
                 const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
                 const fontSizeArr = fontArr[1].split('px');
                 fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
@@ -3710,7 +3711,7 @@ class App extends Component {
                     constants.detectionStyle.LABEL_PADDING
                 );
                 const { offsetLeft } = currentViewport;
-                const gap = offsetLeft / zoomLevel;
+                const horizontalGap = offsetLeft / zoomLevel;
                 const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
@@ -3721,8 +3722,8 @@ class App extends Component {
                         : constants.viewport.TOP;
                 const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                    x: bbox[0] + gap,
-                    y: bbox[1] - verticalGap - 4,
+                    x: bbox[0] + horizontalGap,
+                    y: bbox[1] - verticalGap - 6,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
