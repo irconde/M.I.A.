@@ -8,6 +8,5 @@ export const StyledCogWheelIcon = styled(SettingsCogIconComponent).attrs(
     })
 )`
     align-self: center;
-    cursor: pointer;
     fill: ${(props) => props.color};
 `;
