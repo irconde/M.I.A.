@@ -17,6 +17,6 @@ export const VisualizationModeIconWrapper = styled.div`
     cursor: pointer;
     background-color: #464646;
     border-radius: 10px;
-    height: fit-content;
+    display: flex;
     outline: ${(props) => props.selected && '2px solid #367fff'};
 `;
