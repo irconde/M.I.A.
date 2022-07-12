@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getDetectionContextInfo,
     getInputLabel,
+    getRecentScroll,
     setInputLabel,
 } from '../../redux/slices/ui/uiSlice';
 import {
@@ -33,6 +34,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
         reduxInfo;
     const labels = useSelector(getDetectionLabels);
+    const recentScroll = useSelector(getRecentScroll);
     const newLabel = useSelector(getInputLabel);
     const selectedDetection = useSelector(getSelectedDetection);
     const inputField = useRef(null);
@@ -139,7 +141,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
-    if (isVisible) {
+    if (isVisible && !recentScroll) {
         return (
             <EditLabelWrapper
                 viewport={viewport}

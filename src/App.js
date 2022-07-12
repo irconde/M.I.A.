@@ -273,6 +273,19 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
+        if (
+            isElectron() &&
+            !this.props.remoteOrLocal &&
+            !nextProps.remoteOrLocal &&
+            this.props.localFileOutput !== '' &&
+            nextProps.localFileOutput === ''
+        ) {
+            this.props.setCollapsedSideMenu({
+                cornerstone: cornerstone,
+                desktopMode: false,
+                collapsedSideMenu: false,
+            });
+        }
         if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
@@ -3794,6 +3807,29 @@ class App extends Component {
             clearTimeout(this.state.timer);
             this.setState({
                 timer: setTimeout(() => {
+                    if (
+                        this.props.editionMode === constants.editionMode.LABEL
+                    ) {
+                        let payload = {
+                            editionMode: constants.editionMode.LABEL,
+                            isEditLabelWidgetVisible: true,
+                        };
+                        const editLabelWidgetPosInfo =
+                            this.getEditLabelWidgetPos(
+                                this.props.selectedDetection
+                            );
+                        const widgetPosition = {
+                            top: editLabelWidgetPosInfo.y,
+                            left: editLabelWidgetPosInfo.x,
+                        };
+                        payload = {
+                            ...payload,
+                            detectionLabelEditWidth:
+                                editLabelWidgetPosInfo.boundingWidth,
+                            detectionLabelEditPosition: widgetPosition,
+                        };
+                        this.props.updateEditionMode(payload);
+                    }
                     this.props.updateRecentScroll(false);
                 }, 250),
             });
@@ -3807,10 +3843,15 @@ class App extends Component {
      * @param {Event} event
      */
     onMouseLeave(event) {
-        if (this.props.numFilesInQueue > 0) this.props.emptyAreaClickUpdate();
-        else this.props.onMouseLeaveNoFilesUpdate();
-        if (this.props.selectedDetection !== null)
-            this.resetSelectedDetectionBoxes(event);
+        if (this.props.selectedDetection !== null) {
+            // TODO: Future refactoring
+            this.props.emptyAreaClickUpdate();
+            this.props.onMouseLeaveNoFilesUpdate();
+            this.props.clearAllSelection();
+            this.props.resetSelectedDetectionBoxesUpdate();
+            this.resetCornerstoneTool();
+            this.appUpdateImage();
+        }
     }
 
     render() {
