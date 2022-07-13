@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import TreeDetection from './side-menu-detection.component';
-import * as Icons from '../Icons';
 import * as constants from '../../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import Utils from '../../../utils/Utils';
@@ -13,6 +12,7 @@ import {
 } from '../../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
 import {
+    CollapsableArrowIconContainer,
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
 } from './side-menu-algorithm.styles';
@@ -20,6 +20,7 @@ import { EyeIconWrapper } from '../side-menu.styles';
 import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
 import Tooltip from '@mui/material/Tooltip';
 import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
+import ExpandArrowIcon from '../../../icons/side-menu/expand-arrow-icon/expand-arrow.icon';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
@@ -50,15 +51,6 @@ const SideMenuAlgorithmComponent = ({
     }
     const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
     const algorithm = detections.length > 0 ? detections[0].algorithm : '';
-    let arrowStyle = {
-        height: '1.5rem',
-        width: '1.5rem',
-        marginLeft: '0.5rem',
-        marginRight: '0.5rem',
-        transform: isExpanded
-            ? constants.PERPENDICULAR_DEGREE_TRANSFORM
-            : constants.ZERO_DEGREE_TRANSFORM,
-    };
 
     /**
      * Updates the eye-like icon's visibility.
@@ -93,16 +85,6 @@ const SideMenuAlgorithmComponent = ({
             resetCornerstoneTools();
         } else {
             if (e.target.id == 'arrow' || e.target.id == 'Path') {
-                let rotationValue = arrowStyle.transform;
-                if (rotationValue == constants.PERPENDICULAR_DEGREE_TRANSFORM) {
-                    rotationValue = constants.ZERO_DEGREE_TRANSFORM;
-                } else {
-                    rotationValue = constants.PERPENDICULAR_DEGREE_TRANSFORM;
-                }
-                arrowStyle = {
-                    ...arrowStyle,
-                    transform: rotationValue,
-                };
                 dispatch(clearAllSelection());
             }
         }
@@ -121,17 +103,15 @@ const SideMenuAlgorithmComponent = ({
                 selected={isAlgorithmSelected === algorithm && isVisible}
                 id="algorithm-container"
                 onClick={setSelected}>
-                {isExpanded ? (
-                    <Icons.ExpendedArrow
-                        style={arrowStyle}
-                        onClick={() => setIsExpanded(!isExpanded)}
+                <CollapsableArrowIconContainer
+                    onClick={() => setIsExpanded(!isExpanded)}>
+                    <ExpandArrowIcon
+                        expanded={isExpanded}
+                        width="1.5rem"
+                        height="1.5rem"
+                        color="white"
                     />
-                ) : (
-                    <Icons.CollapsedArrow
-                        style={arrowStyle}
-                        onClick={() => setIsExpanded(!isExpanded)}
-                    />
-                )}
+                </CollapsableArrowIconContainer>
                 <SideMenuAlgorithmName
                     id="algorithm-name"
                     anyDetectionVisible={anyVisible}>

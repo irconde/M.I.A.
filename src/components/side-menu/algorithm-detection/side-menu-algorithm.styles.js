@@ -15,3 +15,8 @@ export const SideMenuAlgorithmName = styled.div`
     padding-top: 0.2rem;
     color: ${(props) => (props.anyDetectionVisible ? 'white' : 'gray')};
 `;
+export const CollapsableArrowIconContainer = styled.span`
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-inline: 0.5rem;
+`;
