@@ -10,5 +10,5 @@ export const StyledExpandArrowIcon = styled(ExpandArrowIconComponent).attrs(
     align-self: center;
     cursor: pointer;
     fill: ${(props) => props.color};
-    transform: rotate(${(props) => (props.expanded ? '90' : '0')}deg);
+    transform: rotate(${(props) => (props.$expanded ? '90' : '0')}deg);
 `;

@@ -1,23 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledExpandArrowIcon } from './expand-arrow.icon.styles';
+import { StyledInfoIcon } from './info.icon.styles';
 
-const ExpandArrowIcon = (props) => {
+const InfoIcon = (props) => {
     return (
-        <StyledExpandArrowIcon
+        <StyledInfoIcon
             width={props.width}
             height={props.height}
             color={props.color}
-            $expanded={props.$expanded}
         />
     );
 };
 
-ExpandArrowIcon.propTypes = {
+InfoIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
-    $expanded: PropTypes.bool.isRequired,
 };
 
-export default ExpandArrowIcon;
+export default InfoIcon;
