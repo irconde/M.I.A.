@@ -15,3 +15,11 @@ export const SideMenuAlgorithmName = styled.div`
     padding-top: 0.2rem;
     color: ${(props) => (props.anyDetectionVisible ? 'white' : 'gray')};
 `;
+export const EyeIconWrapper = styled.span`
+    height: 20px;
+    width: 20px;
+    display: inline-block;
+    float: right;
+    margin-right: 1rem;
+    padding-top: 0.2rem;
+`;

@@ -15,7 +15,10 @@ import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
 import {
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
+    EyeIconWrapper,
 } from './side-menu-algorithm.styles';
+import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
@@ -145,11 +148,15 @@ const SideMenuAlgorithmComponent = ({
                     {algorithmDisplay}
                 </SideMenuAlgorithmName>
                 {anyVisible ? (
-                    <Icons.EyeO
-                        id="eye"
-                        onClick={setVisibility}
-                        style={eyeStyle}
-                    />
+                    <Tooltip title="Hide">
+                        <EyeIconWrapper onClick={setVisibility}>
+                            <EyeOpenIcon
+                                height="20px"
+                                width="20px"
+                                color="white"
+                            />
+                        </EyeIconWrapper>
+                    </Tooltip>
                 ) : (
                     <Icons.EyeC
                         id="eye"
