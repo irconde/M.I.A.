@@ -79,10 +79,8 @@ const SideMenuAlgorithmComponent = ({
      */
     const setSelected = (e) => {
         if (
-            e.target.id !== 'Path' &&
-            e.target.id !== 'eye' &&
-            e.target.id !== 'Shape' &&
-            e.target.id !== 'arrow' &&
+            (e.target.id === 'algorithm-container' ||
+                e.target.id === 'algorithm-name') &&
             isExpanded &&
             isVisible
         ) {
@@ -121,16 +119,15 @@ const SideMenuAlgorithmComponent = ({
         <div>
             <SideMenuAlgorithm
                 selected={isAlgorithmSelected === algorithm && isVisible}
+                id="algorithm-container"
                 onClick={setSelected}>
                 {isExpanded ? (
                     <Icons.ExpendedArrow
-                        id="arrow"
                         style={arrowStyle}
                         onClick={() => setIsExpanded(!isExpanded)}
                     />
                 ) : (
                     <Icons.CollapsedArrow
-                        id="arrow"
                         style={arrowStyle}
                         onClick={() => setIsExpanded(!isExpanded)}
                     />
