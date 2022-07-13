@@ -37,3 +37,11 @@ export const SideMenuListWrapper = styled.div`
     width: ${sideMenuWidth}px;
     height: ${(props) => props.height};
 `;
+
+export const EyeIconWrapper = styled.span`
+    height: 20px;
+    width: 20px;
+    float: right;
+    margin-right: 1rem;
+    padding-top: 0.2rem;
+`;

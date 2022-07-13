@@ -15,8 +15,8 @@ import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
 import {
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
-    EyeIconWrapper,
 } from './side-menu-algorithm.styles';
+import { EyeIconWrapper } from '../side-menu.styles';
 import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
 import Tooltip from '@mui/material/Tooltip';
 import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
@@ -58,14 +58,6 @@ const SideMenuAlgorithmComponent = ({
         transform: isExpanded
             ? constants.PERPENDICULAR_DEGREE_TRANSFORM
             : constants.ZERO_DEGREE_TRANSFORM,
-    };
-    const eyeStyle = {
-        height: '20px',
-        width: '20px',
-        display: 'inline-block',
-        float: 'right',
-        marginRight: '1.0rem',
-        paddingTop: '0.2rem',
     };
 
     /**

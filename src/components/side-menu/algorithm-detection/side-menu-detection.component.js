@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as Icons from '../Icons';
 import { MAX_LABEL_LENGTH } from '../../../utils/Constants';
 import Utils from '../../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,6 +18,10 @@ import {
     DetectionColorBox,
     SideMenuDetectionText,
 } from './side-menu-detection.styles';
+import { EyeIconWrapper } from '../side-menu.styles';
+import Tooltip from '@mui/material/Tooltip';
+import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
+import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
 
 /**
  * Helper component for SideMenuAlgorithmComponent component that allows user to display tree view of detections
@@ -35,14 +38,6 @@ const SideMenuDetectionComponent = ({
 }) => {
     const dispatch = useDispatch();
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
-    const eyeStyle = {
-        height: '20px',
-        width: '20px',
-        display: 'inline-block',
-        float: 'right',
-        marginRight: '1.0rem',
-        marginBottom: '0.25rem',
-    };
 
     /**
      * Sets each detection's eye-like icon visibility
@@ -98,7 +93,16 @@ const SideMenuDetectionComponent = ({
                     color={detection.textColor}>
                     {detectionText}
                 </SideMenuDetectionText>
-                <Icons.EyeO id="eye" onClick={setVisible} style={eyeStyle} />
+
+                <Tooltip title="Hide">
+                    <EyeIconWrapper onClick={setVisible}>
+                        <EyeOpenIcon
+                            height="20px"
+                            width="20px"
+                            color="#494949"
+                        />
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuDetection>
         );
     } else {
@@ -110,11 +114,15 @@ const SideMenuDetectionComponent = ({
                     color={detection.textColor}>
                     {detectionText}
                 </SideMenuDetectionText>
-                <Icons.EyeC
-                    id="hidden-eye"
-                    onClick={setVisible}
-                    style={eyeStyle}
-                />
+                <Tooltip title="Make Visible">
+                    <EyeIconWrapper onClick={setVisible}>
+                        <EyeCloseIcon
+                            height="20px"
+                            width="20px"
+                            color="#494949"
+                        />
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuDetection>
         );
     }
