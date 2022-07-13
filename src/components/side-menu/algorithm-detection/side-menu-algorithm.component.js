@@ -19,6 +19,7 @@ import {
 } from './side-menu-algorithm.styles';
 import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
 import Tooltip from '@mui/material/Tooltip';
+import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
@@ -147,23 +148,24 @@ const SideMenuAlgorithmComponent = ({
                     anyDetectionVisible={anyVisible}>
                     {algorithmDisplay}
                 </SideMenuAlgorithmName>
-                {anyVisible ? (
-                    <Tooltip title="Hide">
-                        <EyeIconWrapper onClick={setVisibility}>
+
+                <Tooltip title={anyVisible ? 'Hide' : 'Make visible'}>
+                    <EyeIconWrapper onClick={setVisibility}>
+                        {anyVisible ? (
                             <EyeOpenIcon
                                 height="20px"
                                 width="20px"
-                                color="white"
+                                color="#494949"
                             />
-                        </EyeIconWrapper>
-                    </Tooltip>
-                ) : (
-                    <Icons.EyeC
-                        id="eye"
-                        onClick={setVisibility}
-                        style={eyeStyle}
-                    />
-                )}
+                        ) : (
+                            <EyeCloseIcon
+                                height="20px"
+                                width="20px"
+                                color="#494949"
+                            />
+                        )}
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuAlgorithm>
             <div id="detection-holder">
                 {detections !== undefined && isExpanded === true ? (
