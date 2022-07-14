@@ -44,7 +44,7 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                 enabled={detectionChanged}
                 onClick={() => nextImageClick()}
                 id="SaveButtonComponent">
-                <SaveIcon style={{ marginRight: '4%', display: 'inherit' }} />
+                <SaveIcon width="24px" height="24px" color="white" />
                 <SaveButtonText>Save File</SaveButtonText>
             </SideMenuButtonContainer>
         );
