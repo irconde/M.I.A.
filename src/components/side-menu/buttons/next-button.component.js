@@ -1,5 +1,4 @@
 import React from 'react';
-import nextIcon from '../../../icons/navigate_next.png';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
@@ -19,6 +18,8 @@ import {
     CollapsedButtonContainer,
     SideMenuButtonContainer,
 } from './shared/button.styles';
+import RightArrowIcon from '../../../icons/side-menu/right-arrow-icon/right-arrow.icon';
+import { NextIconWrapper } from './next-button.styles';
 
 /**
  * Component button that allows user to save edited detections and load next files in queue.
@@ -53,7 +54,13 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                         onClick={handleClick}
                         disabled={!enableNextButton}
                         color="primary">
-                        {!enableNextButton ? <></> : <img src={nextIcon} />}
+                        {enableNextButton && (
+                            <RightArrowIcon
+                                height="24px"
+                                width="24px"
+                                color="white"
+                            />
+                        )}
                     </Fab>
                 </CollapsedButtonContainer>
             </Tooltip>
@@ -66,7 +73,13 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                     onClick={handleClick}
                     id="NextButtonComponent">
                     <p>Next</p>
-                    <img src={nextIcon} />
+                    <NextIconWrapper>
+                        <RightArrowIcon
+                            height="24px"
+                            width="24px"
+                            color="white"
+                        />
+                    </NextIconWrapper>
                 </SideMenuButtonContainer>
             </Tooltip>
         );
