@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getCollapsedSideMenu } from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
-import SaveIcon from '../../../icons/SaveIcon';
+import SaveIcon from '../../../icons/side-menu/save-icon/save.icon';
 import { Fab } from '@mui/material';
 
 import {
@@ -33,10 +33,7 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                     {detectionChanged ? (
                         <></>
                     ) : (
-                        <SaveIcon
-                            title="Save File"
-                            style={{ display: 'inherit' }}
-                        />
+                        <SaveIcon width="24px" height="24px" color="white" />
                     )}
                 </Fab>
             </CollapsedButtonContainer>
