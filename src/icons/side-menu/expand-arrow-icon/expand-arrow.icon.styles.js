@@ -10,5 +10,27 @@ export const StyledExpandArrowIcon = styled(ExpandArrowIconComponent).attrs(
     align-self: center;
     cursor: pointer;
     fill: ${(props) => props.color};
-    transform: rotate(${(props) => (props.$expanded ? '90' : '0')}deg);
+    transform: rotate(${(props) => getRotationAngle(props.direction)}deg);
 `;
+
+/**
+ * Converts a string direction into an the proper angle with accordance to the
+ * expand arrow icon. Right marks the 0 degree starting point
+ *
+ * @param {string} direction - string direction
+ * @returns {number}
+ */
+function getRotationAngle(direction) {
+    switch (direction) {
+        case 'right':
+            return 0;
+        case 'down':
+            return 90;
+        case 'left':
+            return 180;
+        case 'up':
+            return 270;
+        default:
+            return 0;
+    }
+}

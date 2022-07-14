@@ -8,7 +8,7 @@ const ExpandArrowIcon = (props) => {
             width={props.width}
             height={props.height}
             color={props.color}
-            $expanded={props.$expanded}
+            direction={props.direction}
         />
     );
 };
@@ -17,7 +17,7 @@ ExpandArrowIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
-    $expanded: PropTypes.bool.isRequired,
+    direction: PropTypes.oneOf(['up', 'down', 'right', 'left']),
 };
 
 export default ExpandArrowIcon;

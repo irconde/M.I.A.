@@ -106,7 +106,7 @@ const SideMenuAlgorithmComponent = ({
                 <CollapsableArrowIconContainer
                     onClick={() => setIsExpanded(!isExpanded)}>
                     <ExpandArrowIcon
-                        $expanded={isExpanded}
+                        direction={isExpanded ? 'down' : 'right'}
                         width="1.5rem"
                         height="1.5rem"
                         color="white"
