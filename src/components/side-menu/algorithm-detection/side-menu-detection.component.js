@@ -43,16 +43,10 @@ const SideMenuDetectionComponent = ({
      * Sets each detection's eye-like icon visibility
      */
     const setVisible = (e) => {
-        if (
-            e.target.id === 'Shape' ||
-            e.target.id === 'eye' ||
-            e.target.id === 'hidden-eye'
-        ) {
-            dispatch(updateDetectionVisibility(detection.uuid));
-            if (detection.selected === true) {
-                dispatch(hideContextMenuUpdate());
-                dispatch(clearAllSelection());
-            }
+        dispatch(updateDetectionVisibility(detection.uuid));
+        if (detection.selected === true) {
+            dispatch(hideContextMenuUpdate());
+            dispatch(clearAllSelection());
         }
     };
 
