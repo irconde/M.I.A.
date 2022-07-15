@@ -1,7 +1,7 @@
-import { ReactComponent as EyeOpenIconComponent } from './eye-open.icon.svg';
+import { ReactComponent as RightArrowIconComponent } from './next-arrow.icon.svg';
 import styled from 'styled-components';
 
-export const StyledEyeOpenIcon = styled(EyeOpenIconComponent).attrs(
+export const StyledNextArrowIcon = styled(RightArrowIconComponent).attrs(
     (props) => ({
         width: props.width || '24px',
         height: props.height || '24px',
@@ -10,4 +10,5 @@ export const StyledEyeOpenIcon = styled(EyeOpenIconComponent).attrs(
     align-self: center;
     cursor: pointer;
     fill: ${(props) => props.color};
+    display: inherit;
 `;

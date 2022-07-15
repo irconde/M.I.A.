@@ -14,14 +14,14 @@ import {
     hideContextMenuUpdate,
 } from '../../../redux/slices/ui/uiSlice';
 import {
-    SideMenuDetection,
     DetectionColorBox,
+    SideMenuDetection,
     SideMenuDetectionText,
 } from './side-menu-detection.styles';
 import { EyeIconWrapper } from '../side-menu.styles';
 import Tooltip from '@mui/material/Tooltip';
-import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
-import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
+import VisibilityOnIcon from '../../../icons/side-menu/visibility-on-icon/visibility-on.icon';
+import VisibilityOffIcon from '../../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 
 /**
  * Helper component for SideMenuAlgorithmComponent component that allows user to display tree view of detections
@@ -90,10 +90,10 @@ const SideMenuDetectionComponent = ({
 
                 <Tooltip title="Hide">
                     <EyeIconWrapper onClick={setVisible}>
-                        <EyeOpenIcon
+                        <VisibilityOnIcon
                             height="20px"
                             width="20px"
-                            color="#494949"
+                            color="#b9b9b9"
                         />
                     </EyeIconWrapper>
                 </Tooltip>
@@ -110,7 +110,7 @@ const SideMenuDetectionComponent = ({
                 </SideMenuDetectionText>
                 <Tooltip title="Make Visible">
                     <EyeIconWrapper onClick={setVisible}>
-                        <EyeCloseIcon
+                        <VisibilityOffIcon
                             height="20px"
                             width="20px"
                             color="#494949"

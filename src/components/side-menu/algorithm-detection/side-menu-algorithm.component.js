@@ -17,10 +17,10 @@ import {
     SideMenuAlgorithmName,
 } from './side-menu-algorithm.styles';
 import { EyeIconWrapper } from '../side-menu.styles';
-import EyeOpenIcon from '../../../icons/side-menu/eye-open-icon/eye-open.icon';
+import VisibilityOnIcon from '../../../icons/side-menu/visibility-on-icon/visibility-on.icon';
 import Tooltip from '@mui/material/Tooltip';
-import EyeCloseIcon from '../../../icons/side-menu/eye-close-icon/eye-close.icon';
-import ExpandArrowIcon from '../../../icons/side-menu/expand-arrow-icon/expand-arrow.icon';
+import VisibilityOffIcon from '../../../icons/side-menu/visibility-off-icon/visibility-off.icon';
+import ArrowIcon from '../../../icons/side-menu/arrow-icon/arrow.icon';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
@@ -105,7 +105,7 @@ const SideMenuAlgorithmComponent = ({
                 onClick={setSelected}>
                 <CollapsableArrowIconContainer
                     onClick={() => setIsExpanded(!isExpanded)}>
-                    <ExpandArrowIcon
+                    <ArrowIcon
                         direction={isExpanded ? 'down' : 'right'}
                         width="1.5rem"
                         height="1.5rem"
@@ -121,13 +121,13 @@ const SideMenuAlgorithmComponent = ({
                 <Tooltip title={anyVisible ? 'Hide' : 'Make visible'}>
                     <EyeIconWrapper onClick={setVisibility}>
                         {anyVisible ? (
-                            <EyeOpenIcon
+                            <VisibilityOnIcon
                                 height="20px"
                                 width="20px"
-                                color="#494949"
+                                color="#b9b9b9"
                             />
                         ) : (
-                            <EyeCloseIcon
+                            <VisibilityOffIcon
                                 height="20px"
                                 width="20px"
                                 color="#494949"

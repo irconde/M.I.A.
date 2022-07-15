@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getCollapsedSideMenu } from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
-import SaveIcon from '../../../icons/side-menu/save-icon/save.icon';
+import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Fab } from '@mui/material';
 
 import {
@@ -12,6 +12,7 @@ import {
 } from './shared/button.styles';
 
 import { SaveButtonText } from './save-button.styles';
+
 /**
  * Component button that allows user to save edited detections and load next files in queue. Similar to NextButtonComponent compnent but for local files only.
  *
@@ -33,7 +34,11 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                     {detectionChanged ? (
                         <></>
                     ) : (
-                        <SaveIcon width="24px" height="24px" color="white" />
+                        <SaveArrowIcon
+                            width="24px"
+                            height="24px"
+                            color="white"
+                        />
                     )}
                 </Fab>
             </CollapsedButtonContainer>
@@ -44,7 +49,7 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                 enabled={detectionChanged}
                 onClick={() => nextImageClick()}
                 id="SaveButtonComponent">
-                <SaveIcon width="24px" height="24px" color="white" />
+                <SaveArrowIcon width="24px" height="24px" color="white" />
                 <SaveButtonText>Save File</SaveButtonText>
             </SideMenuButtonContainer>
         );

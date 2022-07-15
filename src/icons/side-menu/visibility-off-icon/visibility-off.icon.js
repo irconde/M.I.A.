@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledEyeOpenIcon } from './eye-open.icon.styles';
+import { StyledVisibilityOffIcon } from './visibility-off.icon.styles';
 
-const EyeOpenIcon = (props) => {
+const VisibilityOffIcon = (props) => {
     return (
-        <StyledEyeOpenIcon
+        <StyledVisibilityOffIcon
             width={props.width}
             height={props.height}
             color={props.color}
@@ -12,10 +12,10 @@ const EyeOpenIcon = (props) => {
     );
 };
 
-EyeOpenIcon.propTypes = {
+VisibilityOffIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
 };
 
-export default EyeOpenIcon;
+export default VisibilityOffIcon;

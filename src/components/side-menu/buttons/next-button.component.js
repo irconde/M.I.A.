@@ -18,7 +18,7 @@ import {
     CollapsedButtonContainer,
     SideMenuButtonContainer,
 } from './shared/button.styles';
-import RightArrowIcon from '../../../icons/side-menu/right-arrow-icon/right-arrow.icon';
+import NextArrowIcon from '../../../icons/side-menu/next-arrow-icon/next-arrow.icon';
 import { NextIconWrapper } from './next-button.styles';
 
 /**
@@ -55,7 +55,7 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                         disabled={!enableNextButton}
                         color="primary">
                         {enableNextButton && (
-                            <RightArrowIcon
+                            <NextArrowIcon
                                 height="24px"
                                 width="24px"
                                 color="white"
@@ -74,7 +74,7 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                     id="NextButtonComponent">
                     <p>Next</p>
                     <NextIconWrapper>
-                        <RightArrowIcon
+                        <NextArrowIcon
                             height="24px"
                             width="24px"
                             color="white"

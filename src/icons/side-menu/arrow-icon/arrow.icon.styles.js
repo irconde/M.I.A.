@@ -1,7 +1,7 @@
-import { ReactComponent as ExpandArrowIconComponent } from './expand-arrow.icon.svg';
+import { ReactComponent as ExpandArrowIconComponent } from './arrow.icon.svg';
 import styled from 'styled-components';
 
-export const StyledExpandArrowIcon = styled(ExpandArrowIconComponent).attrs(
+export const StyledArrowIcon = styled(ExpandArrowIconComponent).attrs(
     (props) => ({
         width: props.width || '24px',
         height: props.height || '24px',
@@ -20,7 +20,7 @@ export const StyledExpandArrowIcon = styled(ExpandArrowIconComponent).attrs(
  * @param {string} direction - string direction
  * @returns {number}
  */
-function getRotationAngle(direction) {
+const getRotationAngle = (direction) => {
     switch (direction) {
         case 'right':
             return 0;
@@ -33,4 +33,4 @@ function getRotationAngle(direction) {
         default:
             return 0;
     }
-}
+};

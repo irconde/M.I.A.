@@ -1,7 +1,7 @@
-import { ReactComponent as EyeCloseIconComponent } from './eye-close.icon.svg';
+import { ReactComponent as EyeOpenIconComponent } from './visibility-on.icon.svg';
 import styled from 'styled-components';
 
-export const StyledEyeCloseIcon = styled(EyeCloseIconComponent).attrs(
+export const StyledVisibilityOnIcon = styled(EyeOpenIconComponent).attrs(
     (props) => ({
         width: props.width || '24px',
         height: props.height || '24px',
