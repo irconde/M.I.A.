@@ -3,6 +3,8 @@ import { detectionStyle } from '../../../utils/Constants';
 
 export const SideMenuDetection = styled.div`
     padding-block: 0.45rem;
+    display: flex;
+    align-items: center;
     background-color: ${(props) =>
         props.selected ? detectionStyle.SELECTED_COLOR : ''};
 `;
@@ -10,10 +12,9 @@ export const SideMenuDetection = styled.div`
 export const DetectionColorBox = styled.div`
     width: 10px;
     height: 10px;
-    display: inline-block;
     border: 0.0625rem solid rgba(220, 220, 220, 0.4);
-    vertical-align: middle;
-    margin: -0.2rem 0.75rem 0rem 2.4rem;
+    margin-right: 0.75rem;
+    margin-left: 2.4rem;
     background-color: ${(props) => props.bgColor || 'black'};
 `;
 

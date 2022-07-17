@@ -41,7 +41,6 @@ export const SideMenuListWrapper = styled.div`
 export const EyeIconWrapper = styled.span`
     height: 20px;
     width: 20px;
-    float: right;
     margin-right: 1rem;
-    padding-top: 0.2rem;
+    margin-left: auto;
 `;
