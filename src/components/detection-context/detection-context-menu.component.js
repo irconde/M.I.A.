@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
+//import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
+import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
@@ -120,8 +121,12 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                         </Tooltip>
                     </MainWidget>
                     <DeleteWidget>
-                        <Tooltip title="Delete annotation" placement="bottom">
+                        <Tooltip title="Delete annotation">
                             <DeleteIcon
+                                pathColor={'#464646'}
+                                fillColor={'#000000'}
+                                width={"24px"}
+                                height={"24px"}
                                 onClick={() => handleClick(editionMode.DELETE)}
                             />
                         </Tooltip>

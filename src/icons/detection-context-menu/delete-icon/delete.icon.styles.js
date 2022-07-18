@@ -6,8 +6,9 @@ export const StyledDeleteIcon = styled(
 ).attrs((props) => ({
     width: props.width || '24px',
     height: props.height || '24px',
+    pathColor: props.pathColor || '#464646',
+    fillColor: props.fillColor || '#000000',
 }))`
     align-self: center;
     cursor: pointer;
-    fill: ${(props) => props.color};
 `;
