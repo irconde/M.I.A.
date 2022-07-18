@@ -1,10 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-//import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
-//import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
-import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
+import PolygonIcon from '../../icons/detection-context-menu/polygon-icon/polygon.icon';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
 import * as constants from '../../utils/Constants';
@@ -110,7 +108,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     selected={
                                         selectedOption === editionMode.POLYGON
                                     }>
-                                    <PolygonIcon />
+                                    <PolygonIcon
+                                        color={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
                                 </IconContainer>
                             </Tooltip>
                         )}
