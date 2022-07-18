@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 //import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
-import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
+//import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
+import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
 import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
@@ -63,7 +64,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                 id="firstIcon"
                                 onClick={() => handleClick(editionMode.LABEL)}
                                 selected={selectedOption === editionMode.LABEL}>
-                                <TextIcon />
+                                <TextIcon
+                                    color={'#464646'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
                             </IconContainer>
                         </Tooltip>
                         <Tooltip
