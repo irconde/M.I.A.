@@ -120,17 +120,16 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                             </IconContainer>
                         </Tooltip>
                     </MainWidget>
-                    <DeleteWidget>
-                        <Tooltip title="Delete annotation">
+                    <Tooltip title="Delete annotation">
+                        <DeleteWidget
+                            onClick={() => handleClick(editionMode.DELETE)}>
                             <DeleteIcon
-                                pathColor={'#464646'}
-                                fillColor={'#000000'}
-                                width={"24px"}
-                                height={"24px"}
-                                onClick={() => handleClick(editionMode.DELETE)}
+                                color={'#464646'}
+                                width={'24px'}
+                                height={'24px'}
                             />
-                        </Tooltip>
-                    </DeleteWidget>
+                        </DeleteWidget>
+                    </Tooltip>
                 </FlexContainer>
             </Positioner>
         );

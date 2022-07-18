@@ -15,8 +15,7 @@ const DeleteIcon = (props) => {
 DeleteIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
-    pathColor: PropTypes.string.isRequired,
-    fillColor: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired,
 };
 
 export default DeleteIcon;
