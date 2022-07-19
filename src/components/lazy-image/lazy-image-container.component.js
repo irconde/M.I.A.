@@ -107,10 +107,12 @@ function LazyImageContainerComponent(props) {
             ref={containerElement}
             selected={selected}
             thumbnailHeight={thumbnailHeight}
-            loading={generatingThumbnails.toString()}
-            onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
+            loading={generatingThumbnails.toString()}>
             {thumbnailSrc !== null ? (
-                <ThumbnailContainer>
+                <ThumbnailContainer
+                    onClick={() =>
+                        props.getSpecificFileFromLocalDirectory(props.file)
+                    }>
                     <img
                         onLoad={() => {
                             thumbnailHeightHandler(

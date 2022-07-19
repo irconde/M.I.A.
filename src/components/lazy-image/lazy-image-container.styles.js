@@ -24,6 +24,7 @@ export const LazyImageTextContainer = styled.div`
     align-content: center;
     justify-content: flex-start;
     width: 80%;
+    cursor: default;
 `;
 
 export const LazyImageText = styled.span`
