@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import ArrowIcon from '../../icons/ArrowIcon';
+import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,12 +15,14 @@ import {
     getSelectedDetection,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
+    ArrowIconWrapper,
+    ClearIconWrapper,
     EditLabelWrapper,
     InputContainer,
     NewLabelInput,
-} from './index.styles';
+} from './edit-label.styles';
 import LabelListComponent from './label-list.component';
-import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
+import ClearIcon from '../../icons/edit-label/clear-icon/clear.icon';
 
 /**
  * Widget for editing a selected detection's label.
@@ -44,10 +46,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
     const formattedLabels = labels.filter((label) => label !== 'unknown');
 
     const placeholder = 'Input text';
-    const arrowOrientation = {
-        UP: 'up',
-        DOWN: 'down',
-    };
 
     // Clear input field when list is opened
     useEffect(() => {
@@ -122,14 +120,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
         return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
     };
 
-    const clearTextIconStyle = {
-        height: '20px',
-        fill: 'white',
-        position: 'absolute',
-        right: '2px',
-        width: 'fit-content',
-    };
-
     /**
      * Triggered when the edit label input field is changed. Shows and hides the clear icon
      *
@@ -166,27 +156,31 @@ const EditLabelComponent = ({ onLabelChange }) => {
                             ref={inputField}
                         />
                         {showClearIcon && (
-                            <ClearTextIcon
-                                style={clearTextIconStyle}
+                            <ClearIconWrapper
                                 onClick={() => {
                                     setShowClearIcon(false);
                                     inputField.current.focus();
                                     dispatch(setInputLabel(''));
-                                }}
-                            />
+                                }}>
+                                <ClearIcon
+                                    width={'20px'}
+                                    height={'20px'}
+                                    color={'white'}
+                                />
+                            </ClearIconWrapper>
                         )}
                     </InputContainer>
-                    <ArrowIcon
-                        handleClick={() => {
+                    <ArrowIconWrapper
+                        onClick={() => {
                             setIsListOpen(!isListOpen);
-                        }}
-                        direction={
-                            isListOpen
-                                ? arrowOrientation.UP
-                                : arrowOrientation.DOWN
-                        }
-                        color={constants.colors.WHITE}
-                    />
+                        }}>
+                        <ArrowIcon
+                            direction={isListOpen ? 'up' : 'down'}
+                            height="24px"
+                            width="24px"
+                            color={'white'}
+                        />
+                    </ArrowIconWrapper>
                 </InputContainer>
                 {isListOpen && (
                     <LabelListComponent
