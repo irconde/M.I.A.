@@ -13,7 +13,6 @@ export const ImageContainer = styled.div`
     width: 197px;
     height: ${(props) =>
         props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
-    cursor: pointer;
 `;
 
 export const LazyImageTextContainer = styled.div`
@@ -25,6 +24,7 @@ export const LazyImageTextContainer = styled.div`
     align-content: center;
     justify-content: flex-start;
     width: 80%;
+    cursor: default;
 `;
 
 export const LazyImageText = styled.span`
@@ -42,4 +42,10 @@ export const LazyImageText = styled.span`
     text-overflow: ellipsis;
     max-width: 117px;
     margin-right: 4px;
+`;
+
+export const ThumbnailContainer = styled.div`
+    display: flex;
+    cursor: pointer;
+    border-radius: 6px;
 `;

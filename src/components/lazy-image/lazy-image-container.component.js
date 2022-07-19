@@ -11,10 +11,11 @@ import {
     ImageContainer,
     LazyImageText,
     LazyImageTextContainer,
+    ThumbnailContainer,
 } from './lazy-image-container.styles';
-import TwoViewIcon from '../../icons/TwoViewIcon';
-import SingleViewIcon from '../../icons/SingleViewIcon';
-import AnnotationsIcon from '../../icons/AnnotationsIcon';
+import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
+import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
+import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -101,25 +102,27 @@ function LazyImageContainerComponent(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
-    const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
-    const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
             ref={containerElement}
             selected={selected}
             thumbnailHeight={thumbnailHeight}
-            loading={generatingThumbnails.toString()}
-            onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
+            loading={generatingThumbnails.toString()}>
             {thumbnailSrc !== null ? (
-                <img
-                    onLoad={() => {
-                        thumbnailHeightHandler(
-                            containerElement.current.clientHeight
-                        );
-                    }}
-                    src={thumbnailSrc}
-                    alt={thisFileName}
-                />
+                <ThumbnailContainer
+                    onClick={() =>
+                        props.getSpecificFileFromLocalDirectory(props.file)
+                    }>
+                    <img
+                        onLoad={() => {
+                            thumbnailHeightHandler(
+                                containerElement.current.clientHeight
+                            );
+                        }}
+                        src={thumbnailSrc}
+                        alt={thisFileName}
+                    />
+                </ThumbnailContainer>
             ) : null}
             <LazyImageTextContainer>
                 <Tooltip title={props.file}>
@@ -127,19 +130,22 @@ function LazyImageContainerComponent(props) {
                 </Tooltip>
                 {numOfViews > 1 ? (
                     <TwoViewIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
+                        width={'20px'}
+                        height={'20px'}
+                        color={'#E3E3E3'}
                     />
                 ) : (
                     <SingleViewIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
+                        width={'20px'}
+                        height={'20px'}
+                        color={'#E3E3E3'}
                     />
                 )}
                 {isDetections === true ? (
                     <AnnotationsIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
+                        width={'20px'}
+                        height={'20px'}
+                        color={'#E3E3E3'}
                     />
                 ) : null}
             </LazyImageTextContainer>
