@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ReactComponent as DeleteIcon } from '../../icons/ic_delete.svg';
-import { ReactComponent as TextIcon } from '../../icons/ic_text_label.svg';
-import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon_dark.svg';
-import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
-import { ReactComponent as MovementIcon } from '../../icons/move.svg';
+import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
+import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
+import PolygonIcon from '../../icons/detection-context-menu/polygon-icon/polygon.icon';
+import RectangleIcon from '../../icons/detection-context-menu/rectangle-icon/rectangle.icon';
+import MovementIcon from '../../icons/detection-context-menu/movement-icon/movement.icon';
 import * as constants from '../../utils/Constants';
 import { editionMode } from '../../utils/Constants';
 import { useSelector } from 'react-redux';
@@ -62,7 +62,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                 id="firstIcon"
                                 onClick={() => handleClick(editionMode.LABEL)}
                                 selected={selectedOption === editionMode.LABEL}>
-                                <TextIcon />
+                                <TextIcon
+                                    color={'#464646'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
                             </IconContainer>
                         </Tooltip>
                         <Tooltip
@@ -89,7 +93,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     selected={
                                         selectedOption === editionMode.BOUNDING
                                     }>
-                                    <RectangleIcon />
+                                    <RectangleIcon
+                                        color={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
                                 </IconContainer>
                             </Tooltip>
                         )}
@@ -104,7 +112,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     selected={
                                         selectedOption === editionMode.POLYGON
                                     }>
-                                    <PolygonIcon />
+                                    <PolygonIcon
+                                        color={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
                                 </IconContainer>
                             </Tooltip>
                         )}
@@ -115,17 +127,24 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                 onClick={() => handleClick(editionMode.MOVE)}
                                 id="lastIcon"
                                 selected={selectedOption === editionMode.MOVE}>
-                                <MovementIcon />
+                                <MovementIcon
+                                    color={'#464646'}
+                                    width={'32px'}
+                                    height={'32px'}
+                                />
                             </IconContainer>
                         </Tooltip>
                     </MainWidget>
-                    <DeleteWidget>
-                        <Tooltip title="Delete annotation" placement="bottom">
+                    <Tooltip title="Delete annotation">
+                        <DeleteWidget
+                            onClick={() => handleClick(editionMode.DELETE)}>
                             <DeleteIcon
-                                onClick={() => handleClick(editionMode.DELETE)}
+                                color={'#464646'}
+                                width={'24px'}
+                                height={'24px'}
                             />
-                        </Tooltip>
-                    </DeleteWidget>
+                        </DeleteWidget>
+                    </Tooltip>
                 </FlexContainer>
             </Positioner>
         );
