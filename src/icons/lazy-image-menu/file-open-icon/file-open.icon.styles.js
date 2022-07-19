@@ -3,8 +3,8 @@ import { ReactComponent as FileOpenIconComponent } from './file-open.icon.svg';
 
 export const StyledFileOpenIcon = styled(FileOpenIconComponent).attrs(
     (props) => ({
-        width: props.width || '20px',
-        height: props.height || '20px',
+        width: props.width || '24px',
+        height: props.height || '24px',
     })
 )`
     align-self: center;
