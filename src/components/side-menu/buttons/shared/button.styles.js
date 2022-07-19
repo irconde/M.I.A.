@@ -46,6 +46,7 @@ export const SideMenuButtonContainer = styled.div`
     box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
     font-size: 12pt;
     height: 75px;
+    gap: 0.3rem;
     cursor: ${(props) => (props.enabled ? 'pointer' : 'normal')};
 
     opacity: ${(props) => (props.enabled ? '100%' : '38%')};

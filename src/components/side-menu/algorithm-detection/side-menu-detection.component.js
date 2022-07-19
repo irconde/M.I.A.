@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as Icons from '../Icons';
 import { MAX_LABEL_LENGTH } from '../../../utils/Constants';
 import Utils from '../../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,10 +14,14 @@ import {
     hideContextMenuUpdate,
 } from '../../../redux/slices/ui/uiSlice';
 import {
-    SideMenuDetection,
     DetectionColorBox,
+    SideMenuDetection,
     SideMenuDetectionText,
 } from './side-menu-detection.styles';
+import { EyeIconWrapper } from '../side-menu.styles';
+import Tooltip from '@mui/material/Tooltip';
+import VisibilityOnIcon from '../../../icons/side-menu/visibility-on-icon/visibility-on.icon';
+import VisibilityOffIcon from '../../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 
 /**
  * Helper component for SideMenuAlgorithmComponent component that allows user to display tree view of detections
@@ -35,29 +38,15 @@ const SideMenuDetectionComponent = ({
 }) => {
     const dispatch = useDispatch();
     const selectedAlgorithm = useSelector(getSelectedAlgorithm);
-    const eyeStyle = {
-        height: '20px',
-        width: '20px',
-        display: 'inline-block',
-        float: 'right',
-        marginRight: '1.0rem',
-        marginBottom: '0.25rem',
-    };
 
     /**
      * Sets each detection's eye-like icon visibility
      */
     const setVisible = (e) => {
-        if (
-            e.target.id === 'Shape' ||
-            e.target.id === 'eye' ||
-            e.target.id === 'hidden-eye'
-        ) {
-            dispatch(updateDetectionVisibility(detection.uuid));
-            if (detection.selected === true) {
-                dispatch(hideContextMenuUpdate());
-                dispatch(clearAllSelection());
-            }
+        dispatch(updateDetectionVisibility(detection.uuid));
+        if (detection.selected === true) {
+            dispatch(hideContextMenuUpdate());
+            dispatch(clearAllSelection());
         }
     };
 
@@ -98,7 +87,16 @@ const SideMenuDetectionComponent = ({
                     color={detection.textColor}>
                     {detectionText}
                 </SideMenuDetectionText>
-                <Icons.EyeO id="eye" onClick={setVisible} style={eyeStyle} />
+
+                <Tooltip title="Hide">
+                    <EyeIconWrapper onClick={setVisible}>
+                        <VisibilityOnIcon
+                            height="20px"
+                            width="20px"
+                            color="#b9b9b9"
+                        />
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuDetection>
         );
     } else {
@@ -110,11 +108,15 @@ const SideMenuDetectionComponent = ({
                     color={detection.textColor}>
                     {detectionText}
                 </SideMenuDetectionText>
-                <Icons.EyeC
-                    id="hidden-eye"
-                    onClick={setVisible}
-                    style={eyeStyle}
-                />
+                <Tooltip title="Make Visible">
+                    <EyeIconWrapper onClick={setVisible}>
+                        <VisibilityOffIcon
+                            height="20px"
+                            width="20px"
+                            color="#494949"
+                        />
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuDetection>
         );
     }
