@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/detection-context-menu/polygon-icon/polygon.icon';
-import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle_dark.svg';
+import RectangleIcon from '../../icons/detection-context-menu/rectangle-icon/rectangle.icon';
 import { ReactComponent as MovementIcon } from '../../icons/move.svg';
 import * as constants from '../../utils/Constants';
 import { editionMode } from '../../utils/Constants';
@@ -93,7 +93,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     selected={
                                         selectedOption === editionMode.BOUNDING
                                     }>
-                                    <RectangleIcon />
+                                    <RectangleIcon
+                                        color={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
                                 </IconContainer>
                             </Tooltip>
                         )}
