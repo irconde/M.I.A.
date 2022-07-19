@@ -4,7 +4,7 @@ import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.ic
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/detection-context-menu/polygon-icon/polygon.icon';
 import RectangleIcon from '../../icons/detection-context-menu/rectangle-icon/rectangle.icon';
-import { ReactComponent as MovementIcon } from '../../icons/move.svg';
+import MovementIcon from '../../icons/detection-context-menu/movement-icon/movement.icon';
 import * as constants from '../../utils/Constants';
 import { editionMode } from '../../utils/Constants';
 import { useSelector } from 'react-redux';
@@ -127,7 +127,11 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                 onClick={() => handleClick(editionMode.MOVE)}
                                 id="lastIcon"
                                 selected={selectedOption === editionMode.MOVE}>
-                                <MovementIcon />
+                                <MovementIcon
+                                    color={'#464646'}
+                                    width={'32px'}
+                                    height={'32px'}
+                                />
                             </IconContainer>
                         </Tooltip>
                     </MainWidget>
