@@ -14,7 +14,7 @@ import {
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './lazy-image-container.component';
-import FileOpenIcon from '../../icons/FileOpenIcon';
+import FileOpenIcon from '../../icons/lazy-image-menu/file-open-icon/file-open.icon';
 import {
     ImagesInWorkspace,
     LazyImageMenuContainer,
@@ -47,17 +47,6 @@ function LazyImageMenuComponent(props) {
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
-    const svgContainerStyle = {
-        float: 'left',
-        display: 'flex',
-        alignItems: 'center',
-        marginRight: '10px',
-    };
-    const svgStyle = {
-        height: '24px',
-        width: '24px',
-        color: '#ffffff',
-    };
     const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
     useEffect(() => {
         if (prevIsMenuCollapsed !== collapsedLazyMenu) {
@@ -104,11 +93,9 @@ function LazyImageMenuComponent(props) {
                     translateStyle={translateStyle}>
                     <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
                         <FileOpenIcon
-                            style={svgContainerStyle}
-                            svgStyle={{
-                                ...svgStyle,
-                                color: '#ffffff',
-                            }}
+                            width={'24px'}
+                            height={'24px'}
+                            color={'#ffffff'}
                         />
                         Images in Workspace
                     </ImagesInWorkspace>
