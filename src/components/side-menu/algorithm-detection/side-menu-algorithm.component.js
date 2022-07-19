@@ -20,7 +20,7 @@ import { EyeIconWrapper } from '../side-menu.styles';
 import VisibilityOnIcon from '../../../icons/side-menu/visibility-on-icon/visibility-on.icon';
 import Tooltip from '@mui/material/Tooltip';
 import VisibilityOffIcon from '../../../icons/side-menu/visibility-off-icon/visibility-off.icon';
-import ArrowIcon from '../../../icons/side-menu/arrow-icon/arrow.icon';
+import ArrowIcon from '../../../icons/shared/arrow-icon/arrow.icon';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
