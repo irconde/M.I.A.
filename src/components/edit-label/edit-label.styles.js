@@ -52,3 +52,11 @@ export const NewLabelInput = styled.input`
         color: #e0e0e0;
     }
 `;
+
+export const ClearIconWrapper = styled.div`
+    height: 20px;
+    fill: white;
+    position: absolute;
+    right: 2px;
+    width: fit-content;
+`;
