@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import TreeDetection from './side-menu-detection.component';
-import * as Icons from '../Icons';
 import * as constants from '../../../utils/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import Utils from '../../../utils/Utils';
@@ -13,9 +12,15 @@ import {
 } from '../../../redux/slices/detections/detectionsSlice';
 import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
 import {
+    CollapsableArrowIconContainer,
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
 } from './side-menu-algorithm.styles';
+import { EyeIconWrapper } from '../side-menu.styles';
+import VisibilityOnIcon from '../../../icons/side-menu/visibility-on-icon/visibility-on.icon';
+import Tooltip from '@mui/material/Tooltip';
+import VisibilityOffIcon from '../../../icons/side-menu/visibility-off-icon/visibility-off.icon';
+import ArrowIcon from '../../../icons/side-menu/arrow-icon/arrow.icon';
 
 /**
  * Helper component for SideMenuComponent component that allows user to view and sort detections by algorithm
@@ -46,23 +51,6 @@ const SideMenuAlgorithmComponent = ({
     }
     const isAlgorithmSelected = useSelector(getSelectedAlgorithm);
     const algorithm = detections.length > 0 ? detections[0].algorithm : '';
-    let arrowStyle = {
-        height: '1.5rem',
-        width: '1.5rem',
-        marginLeft: '0.5rem',
-        marginRight: '0.5rem',
-        transform: isExpanded
-            ? constants.PERPENDICULAR_DEGREE_TRANSFORM
-            : constants.ZERO_DEGREE_TRANSFORM,
-    };
-    const eyeStyle = {
-        height: '20px',
-        width: '20px',
-        display: 'inline-block',
-        float: 'right',
-        marginRight: '1.0rem',
-        paddingTop: '0.2rem',
-    };
 
     /**
      * Updates the eye-like icon's visibility.
@@ -83,10 +71,8 @@ const SideMenuAlgorithmComponent = ({
      */
     const setSelected = (e) => {
         if (
-            e.target.id !== 'Path' &&
-            e.target.id !== 'eye' &&
-            e.target.id !== 'Shape' &&
-            e.target.id !== 'arrow' &&
+            (e.target.id === 'algorithm-container' ||
+                e.target.id === 'algorithm-name') &&
             isExpanded &&
             isVisible
         ) {
@@ -99,16 +85,6 @@ const SideMenuAlgorithmComponent = ({
             resetCornerstoneTools();
         } else {
             if (e.target.id == 'arrow' || e.target.id == 'Path') {
-                let rotationValue = arrowStyle.transform;
-                if (rotationValue == constants.PERPENDICULAR_DEGREE_TRANSFORM) {
-                    rotationValue = constants.ZERO_DEGREE_TRANSFORM;
-                } else {
-                    rotationValue = constants.PERPENDICULAR_DEGREE_TRANSFORM;
-                }
-                arrowStyle = {
-                    ...arrowStyle,
-                    transform: rotationValue,
-                };
                 dispatch(clearAllSelection());
             }
         }
@@ -125,38 +101,40 @@ const SideMenuAlgorithmComponent = ({
         <div>
             <SideMenuAlgorithm
                 selected={isAlgorithmSelected === algorithm && isVisible}
+                id="algorithm-container"
                 onClick={setSelected}>
-                {isExpanded ? (
-                    <Icons.ExpendedArrow
-                        id="arrow"
-                        style={arrowStyle}
-                        onClick={() => setIsExpanded(!isExpanded)}
+                <CollapsableArrowIconContainer
+                    onClick={() => setIsExpanded(!isExpanded)}>
+                    <ArrowIcon
+                        direction={isExpanded ? 'down' : 'right'}
+                        width="1.5rem"
+                        height="1.5rem"
+                        color="white"
                     />
-                ) : (
-                    <Icons.CollapsedArrow
-                        id="arrow"
-                        style={arrowStyle}
-                        onClick={() => setIsExpanded(!isExpanded)}
-                    />
-                )}
+                </CollapsableArrowIconContainer>
                 <SideMenuAlgorithmName
                     id="algorithm-name"
                     anyDetectionVisible={anyVisible}>
                     {algorithmDisplay}
                 </SideMenuAlgorithmName>
-                {anyVisible ? (
-                    <Icons.EyeO
-                        id="eye"
-                        onClick={setVisibility}
-                        style={eyeStyle}
-                    />
-                ) : (
-                    <Icons.EyeC
-                        id="eye"
-                        onClick={setVisibility}
-                        style={eyeStyle}
-                    />
-                )}
+
+                <Tooltip title={anyVisible ? 'Hide' : 'Make visible'}>
+                    <EyeIconWrapper onClick={setVisibility}>
+                        {anyVisible ? (
+                            <VisibilityOnIcon
+                                height="20px"
+                                width="20px"
+                                color="#b9b9b9"
+                            />
+                        ) : (
+                            <VisibilityOffIcon
+                                height="20px"
+                                width="20px"
+                                color="#494949"
+                            />
+                        )}
+                    </EyeIconWrapper>
+                </Tooltip>
             </SideMenuAlgorithm>
             <div id="detection-holder">
                 {detections !== undefined && isExpanded === true ? (
