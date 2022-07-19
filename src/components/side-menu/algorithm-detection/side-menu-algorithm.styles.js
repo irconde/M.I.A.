@@ -12,7 +12,6 @@ export const SideMenuAlgorithmName = styled.div`
     vertical-align: top;
     font-family: Noto Sans JP;
     cursor: default;
-    /* padding-top: 0.2rem; */
     color: ${(props) => (props.anyDetectionVisible ? 'white' : 'gray')};
 `;
 export const CollapsableArrowIconContainer = styled.span`
