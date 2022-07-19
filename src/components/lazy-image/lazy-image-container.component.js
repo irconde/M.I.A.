@@ -11,6 +11,7 @@ import {
     ImageContainer,
     LazyImageText,
     LazyImageTextContainer,
+    ThumbnailContainer,
 } from './lazy-image-container.styles';
 import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
 import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
@@ -101,8 +102,6 @@ function LazyImageContainerComponent(props) {
     }
     const thisFileName = splitPath[splitPath.length - 1];
     const selected = currentFileName === thisFileName;
-    const svgContainerStyle = { marginRight: '4px', marginLeft: '4px' };
-    const svgImageStyle = { width: '20px', height: '20px' };
     return (
         <ImageContainer
             ref={containerElement}
@@ -111,15 +110,17 @@ function LazyImageContainerComponent(props) {
             loading={generatingThumbnails.toString()}
             onClick={() => props.getSpecificFileFromLocalDirectory(props.file)}>
             {thumbnailSrc !== null ? (
-                <img
-                    onLoad={() => {
-                        thumbnailHeightHandler(
-                            containerElement.current.clientHeight
-                        );
-                    }}
-                    src={thumbnailSrc}
-                    alt={thisFileName}
-                />
+                <ThumbnailContainer>
+                    <img
+                        onLoad={() => {
+                            thumbnailHeightHandler(
+                                containerElement.current.clientHeight
+                            );
+                        }}
+                        src={thumbnailSrc}
+                        alt={thisFileName}
+                    />
+                </ThumbnailContainer>
             ) : null}
             <LazyImageTextContainer>
                 <Tooltip title={props.file}>
