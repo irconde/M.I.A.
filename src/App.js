@@ -84,7 +84,7 @@ import {
     updateZoomLevelTop,
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
-import EditLabel from './components/edit-label/index.component';
+import EditLabel from './components/edit-label/edit-label.component';
 import { buildCocoDataZip } from './utils/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/color/color-picker.component';

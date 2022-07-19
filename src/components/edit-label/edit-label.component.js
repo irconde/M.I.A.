@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import ArrowIcon from '../../icons/ArrowIcon';
+import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,10 +15,11 @@ import {
     getSelectedDetection,
 } from '../../redux/slices/detections/detectionsSlice';
 import {
+    ArrowIconWrapper,
     EditLabelWrapper,
     InputContainer,
     NewLabelInput,
-} from './index.styles';
+} from './edit-label.styles';
 import LabelListComponent from './label-list.component';
 import { ReactComponent as ClearTextIcon } from '../../icons/ic_clean.svg';
 
@@ -176,17 +177,17 @@ const EditLabelComponent = ({ onLabelChange }) => {
                             />
                         )}
                     </InputContainer>
-                    <ArrowIcon
-                        handleClick={() => {
+                    <ArrowIconWrapper
+                        onClick={() => {
                             setIsListOpen(!isListOpen);
-                        }}
-                        direction={
-                            isListOpen
-                                ? arrowOrientation.UP
-                                : arrowOrientation.DOWN
-                        }
-                        color={constants.colors.WHITE}
-                    />
+                        }}>
+                        <ArrowIcon
+                            direction={isListOpen ? 'up' : 'down'}
+                            height="24px"
+                            width="24px"
+                            color={'white'}
+                        />
+                    </ArrowIconWrapper>
                 </InputContainer>
                 {isListOpen && (
                     <LabelListComponent
