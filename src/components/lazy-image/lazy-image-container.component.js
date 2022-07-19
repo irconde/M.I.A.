@@ -14,7 +14,7 @@ import {
 } from './lazy-image-container.styles';
 import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
 import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
-import AnnotationsIcon from '../../icons/AnnotationsIcon';
+import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -140,8 +140,9 @@ function LazyImageContainerComponent(props) {
                 )}
                 {isDetections === true ? (
                     <AnnotationsIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
+                        width={'20px'}
+                        height={'20px'}
+                        color={'#E3E3E3'}
                     />
                 ) : null}
             </LazyImageTextContainer>
