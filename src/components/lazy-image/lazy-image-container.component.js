@@ -12,7 +12,7 @@ import {
     LazyImageText,
     LazyImageTextContainer,
 } from './lazy-image-container.styles';
-import TwoViewIcon from '../../icons/TwoViewIcon';
+import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
 import SingleViewIcon from '../../icons/SingleViewIcon';
 import AnnotationsIcon from '../../icons/AnnotationsIcon';
 
@@ -127,8 +127,9 @@ function LazyImageContainerComponent(props) {
                 </Tooltip>
                 {numOfViews > 1 ? (
                     <TwoViewIcon
-                        style={svgContainerStyle}
-                        svgStyle={svgImageStyle}
+                        width={'20px'}
+                        height={'20px'}
+                        color={'#E3E3E3'}
                     />
                 ) : (
                     <SingleViewIcon
