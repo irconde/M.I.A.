@@ -20,6 +20,10 @@ export const InputContainer = styled.div`
     position: relative;
 `;
 
+export const ArrowIconWrapper = styled.div`
+    display: flex;
+`;
+
 export const NewLabelInput = styled.input`
     background-color: transparent;
     font-family: 'Arial';
@@ -47,4 +51,12 @@ export const NewLabelInput = styled.input`
     &::placeholder {
         color: #e0e0e0;
     }
+`;
+
+export const ClearIconWrapper = styled.div`
+    height: 20px;
+    fill: white;
+    position: absolute;
+    right: 2px;
+    width: fit-content;
 `;
