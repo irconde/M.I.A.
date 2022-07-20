@@ -21,8 +21,8 @@ import {
     FabIconWrapper,
     FABoption,
 } from './bound-poly-fab.styles';
-import RectangleIcon from '../../icons/fab/rectangle-icon/rectangle.icon';
-import PolygonIcon from '../../icons/fab/polygon-icon/polygon.icon';
+import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
+import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
