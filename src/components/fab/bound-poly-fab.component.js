@@ -18,10 +18,11 @@ import Tooltip from '@mui/material/Tooltip';
 import {
     FABContainer,
     FABdivider,
+    FabIconWrapper,
     FABoption,
     StyledPolygonIcon,
-    StyledRectangleIcon,
 } from './bound-poly-fab.styles';
+import RectangleIcon from '../../icons/fab/rectangle.icon';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
@@ -110,7 +111,13 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
             deviceType={deviceType}>
             <Tooltip title="Create box annotation" placement="bottom">
                 <FABoption onClick={(e) => handleClick(e, onBoundingSelect)}>
-                    <StyledRectangleIcon />
+                    <FabIconWrapper>
+                        <RectangleIcon
+                            width={'31px'}
+                            height={'31px'}
+                            color={'white'}
+                        />
+                    </FabIconWrapper>
                     <span>Bounding box</span>
                 </FABoption>
             </Tooltip>
