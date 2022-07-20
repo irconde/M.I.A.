@@ -20,9 +20,9 @@ import {
     FABdivider,
     FabIconWrapper,
     FABoption,
-    StyledPolygonIcon,
 } from './bound-poly-fab.styles';
-import RectangleIcon from '../../icons/fab/rectangle.icon';
+import RectangleIcon from '../../icons/fab/rectangle-icon/rectangle.icon';
+import PolygonIcon from '../../icons/fab/polygon-icon/polygon.icon';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
@@ -127,7 +127,13 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
                     onClick={(e) => {
                         handleClick(e, onPolygonSelect);
                     }}>
-                    <StyledPolygonIcon />
+                    <FabIconWrapper>
+                        <PolygonIcon
+                            width={'31px'}
+                            height={'31px'}
+                            color={'white'}
+                        />
+                    </FabIconWrapper>
                     <span>Polygon mask</span>
                 </FABoption>
             </Tooltip>
