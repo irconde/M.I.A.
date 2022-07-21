@@ -290,3 +290,10 @@ export const FileSuffixField = styled(TextField).attrs(() => ({
         size: '10',
     },
 }))``;
+
+export const DefaultIconWrapper = styled.div`
+    height: fit-content;
+    width: fit-content;
+    display: flex;
+    cursor: pointer;
+`;

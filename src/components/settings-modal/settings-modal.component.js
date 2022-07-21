@@ -4,12 +4,16 @@ import PropTypes from 'prop-types';
 import { ThemeProvider } from '@mui/material/styles';
 import {
     AutoConnectContainer,
+    CogIconWrapper,
     ConnectionButton,
     ConnectionButtonSection,
+    DefaultIconWrapper,
     FileManagementItem,
     FileManagementSection,
     FileSuffixField,
     HostTextField,
+    IconWrapper,
+    LeftAlignedWrapper,
     LocalFileOutputField,
     ModalRoot,
     modalTheme,
@@ -33,9 +37,6 @@ import {
     SwitchWrapper,
     WorkingDirectory,
     WorkSpaceFormControl,
-    CogIconWrapper,
-    IconWrapper,
-    LeftAlignedWrapper,
 } from './settings-modal.styles';
 import {
     Checkbox,
@@ -332,9 +333,9 @@ const SettingsModal = (props) => {
                         />
                     </CogIconWrapper>
                     <SettingsTitle>Settings</SettingsTitle>
-                    <div onClick={() => handleClose()}>
+                    <DefaultIconWrapper onClick={() => handleClose()}>
                         <CloseIcon height="24px" width="24px" color="white" />
-                    </div>
+                    </DefaultIconWrapper>
                 </SettingsHeader>
                 <StyledDivider />
                 <StyledFormGroup>

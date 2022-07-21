@@ -7,6 +7,5 @@ export const StyledCogWheelIcon = styled(SettingsCogIconComponent).attrs(
         height: props.height || '24px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
 `;
