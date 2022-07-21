@@ -8,6 +8,7 @@ const PolygonIcon = (props) => {
             width={props.width}
             height={props.height}
             color={props.color}
+            borderColor={props.borderColor}
         />
     );
 };
@@ -16,6 +17,7 @@ PolygonIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
+    borderColor: PropTypes.string.isRequired,
 };
 
 export default PolygonIcon;

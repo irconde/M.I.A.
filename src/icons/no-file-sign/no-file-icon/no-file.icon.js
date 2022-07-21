@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledRectangleIcon } from './rectangle.icon.styles';
+import { StyledNoFileIcon } from './no-file.icon.styles.js';
 
-const RectangleIcon = (props) => {
+const NoFileIcon = (props) => {
     return (
-        <StyledRectangleIcon
+        <StyledNoFileIcon
             width={props.width}
             height={props.height}
             color={props.color}
@@ -12,10 +12,10 @@ const RectangleIcon = (props) => {
     );
 };
 
-RectangleIcon.propTypes = {
+NoFileIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
 };
 
-export default RectangleIcon;
+export default NoFileIcon;

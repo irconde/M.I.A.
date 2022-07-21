@@ -9,5 +9,9 @@ export const StyledRectangleIcon = styled(RectangleIconComponent).attrs(
 )`
     align-self: center;
     cursor: pointer;
-    fill: ${(props) => props.color};
+
+    .coloredTag {
+        fill: ${(props) => props.color};
+        stroke: ${(props) => props.borderColor};
+    }
 `;

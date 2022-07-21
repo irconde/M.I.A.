@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/Constants';
-import { ReactComponent as PolygonIcon } from '../../icons/ic_polygon.svg';
-import { ReactComponent as RectangleIcon } from '../../icons/ic_rectangle.svg';
 
 export const FABContainer = styled.div`
     position: absolute;
@@ -48,8 +46,9 @@ export const FABoption = styled.div`
     justify-content: center;
 `;
 
-export const StyledRectangleIcon = styled(RectangleIcon)`
+export const FabIconWrapper = styled.div`
     margin-right: 0.5rem;
+    display: flex;
 `;
 
 export const FABdivider = styled.div`
@@ -57,8 +56,4 @@ export const FABdivider = styled.div`
     border-left: 1px solid #575757;
     margin-left: 1rem;
     margin-right: 1rem;
-`;
-
-export const StyledPolygonIcon = styled(PolygonIcon)`
-    margin-right: 0.5rem;
 `;

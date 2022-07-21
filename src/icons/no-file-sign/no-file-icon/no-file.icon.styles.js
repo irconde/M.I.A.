@@ -1,0 +1,10 @@
+import styled from 'styled-components';
+import { ReactComponent as NoFileIconComponent } from './no-file.icon.svg';
+
+export const StyledNoFileIcon = styled(NoFileIconComponent).attrs((props) => ({
+    width: props.width || '24px',
+    height: props.height || '24px',
+}))`
+    align-self: center;
+    fill: ${(props) => props.color};
+`;

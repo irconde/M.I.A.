@@ -13,7 +13,8 @@
             fill-opacity="0.5">
         <g
                 id="bbox-creation-step01"
-                transform="translate(-415.000000, -927.000000)"
+                transform="translate(-574.000000, -927.000000)"
+                class="coloredTag"
                 fill="#464646"
                 stroke="#464646"
                 stroke-width="2">
@@ -21,13 +22,12 @@
                     id="Group-2"
                     transform="translate(378.000000, 915.000000)">
                 <g
-                        id="Group-3"
-                        transform="translate(37.000000, 12.000000)">
-                    <rect
-                            id="Rectangle"
-                            x="6" y="7"
-                            width="19.1764706"
-                            height="16"/>
+                        id="Group-4"
+                        transform="translate(196.000000, 12.000000)">
+                    <polygon
+                            id="Path-2"
+                            transform="translate(15.536975, 15.000000) rotate(-11.000000) translate(-15.536975, -15.000000) "
+                            points="14.3023525 6.43364061 12.6396597 11.2969901 5 12.9177293 9.65117626 25 24.6662328 23.4702078 26.07395 10.2996793 21.3156685 5"/>
                 </g>
             </g>
         </g>
