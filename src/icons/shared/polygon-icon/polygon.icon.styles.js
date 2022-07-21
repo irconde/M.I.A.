@@ -7,9 +7,6 @@ export const StyledPolygonIcon = styled(PolygonIconComponent).attrs(
         height: props.height || '24px',
     })
 )`
-    align-self: center;
-    cursor: pointer;
-
     .coloredTag {
         fill: ${(props) => props.color};
         stroke: ${(props) => props.borderColor};
