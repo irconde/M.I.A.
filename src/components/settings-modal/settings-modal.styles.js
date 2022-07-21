@@ -87,7 +87,6 @@ export const LeftAlignedWrapper = styled.div`
     margin: 0.3rem;
     margin-right: 1rem;
     display: flex;
-    cursor: pointer;
 `;
 export const SettingsTitle = styled.div`
     object-fit: contain;
