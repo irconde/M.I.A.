@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import FileQueueIcon from '../../icons/FileQueueIcon';
+import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import SettingsIcon from '../../icons/SettingsIcon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
@@ -88,9 +88,9 @@ const TopBarComponent = (props) => {
                 (remoteOrLocal === false && hasFileOutput === true) ? (
                     <FragmentWrapper>
                         <FileQueueIcon
-                            title="Number of Files"
-                            numberOfFiles={numberOfFiles}
-                            style={{ margin: '0.75rem' }}
+                            color={'#ffffff'}
+                            width={'32px'}
+                            height={'32px'}
                         />
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
