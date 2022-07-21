@@ -115,7 +115,8 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
                         <RectangleIcon
                             width={'31px'}
                             height={'31px'}
-                            color={'white'}
+                            color={'#464646'}
+                            borderColor={'grey'}
                         />
                     </FabIconWrapper>
                     <span>Bounding box</span>
@@ -131,7 +132,8 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
                         <PolygonIcon
                             width={'31px'}
                             height={'31px'}
-                            color={'white'}
+                            color={'#464646'}
+                            borderColor={'grey'}
                         />
                     </FabIconWrapper>
                     <span>Polygon mask</span>
