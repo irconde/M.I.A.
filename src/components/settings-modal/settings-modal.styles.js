@@ -87,6 +87,7 @@ export const LeftAlignedWrapper = styled.div`
     margin: 0.3rem;
     margin-right: 1rem;
     display: flex;
+    cursor: pointer;
 `;
 export const SettingsTitle = styled.div`
     object-fit: contain;
@@ -290,3 +291,10 @@ export const FileSuffixField = styled(TextField).attrs(() => ({
         size: '10',
     },
 }))``;
+
+export const DefaultIconWrapper = styled.div`
+    height: fit-content;
+    width: fit-content;
+    display: flex;
+    cursor: pointer;
+`;

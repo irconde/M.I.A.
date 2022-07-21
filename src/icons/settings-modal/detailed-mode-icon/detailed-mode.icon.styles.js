@@ -7,7 +7,5 @@ export const StyledDetailedModeIcon = styled(DetailedModeIconComponent).attrs(
         height: props.height || '24px',
     })
 )`
-    align-self: center;
-    cursor: pointer;
     fill: ${(props) => props.color};
 `;
