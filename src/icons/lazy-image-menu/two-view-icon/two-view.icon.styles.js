@@ -7,8 +7,5 @@ export const StyledTwoViewIcon = styled(TwoViewIconComponent).attrs(
         height: props.height || '20px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
-    margin-right: 4px;
-    margin-left: 4px;
 `;

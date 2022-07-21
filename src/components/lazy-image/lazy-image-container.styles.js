@@ -49,3 +49,9 @@ export const ThumbnailContainer = styled.div`
     cursor: pointer;
     border-radius: 6px;
 `;
+
+export const LazyImageIconWrapper = styled.div`
+    margin-right: 4px;
+    margin-left: 4px;
+    display: flex;
+`;
