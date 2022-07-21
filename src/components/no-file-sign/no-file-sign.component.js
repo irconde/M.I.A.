@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
 import {
+    getFirstDisplaySettings,
     getHasFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
@@ -18,11 +19,15 @@ import NoFileIcon from '../../icons/no-file-sign/no-file-icon/no-file.icon';
 const NoFileSignComponent = () => {
     const numberOfFiles = useSelector(getNumFilesInQueue);
     const localFileOpen = useSelector(getLocalFileOpen);
-    let isVisible = numberOfFiles <= 0 ? false : true;
     const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
+    const firstDisplaySettings = useSelector(getFirstDisplaySettings);
 
-    if ((isVisible && remoteOrLocal) || (localFileOpen && !remoteOrLocal)) {
+    if (
+        (numberOfFiles > 0 && remoteOrLocal) ||
+        firstDisplaySettings ||
+        (localFileOpen && !remoteOrLocal)
+    ) {
         return <></>;
     } else {
         return (
