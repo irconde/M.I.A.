@@ -2,12 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
-//import CogWheelIcon from '../../icons/CogWheelIcon';
 import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
-import MenuToggleIcon from '../../icons/MenuToggleIcon';
+import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import {
     getFirstDisplaySettings,
     getHasFileOutput,
@@ -116,7 +115,9 @@ const TopBarComponent = (props) => {
                     height={'24px'}
                 />
                 <MenuToggleIcon
-                    style={{ margin: '0.5rem 1.5rem 0.5rem -0.5rem' }}
+                    color={'#ffffff'}
+                    width={'32px'}
+                    height={'32px'}
                     cornerstone={props.cornerstone}
                 />
             </ConnectionStatusIconsContainer>
