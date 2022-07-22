@@ -5,9 +5,8 @@ import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
-//import ConnectionStatus from './ConnectionStatus';
 import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/shared/connection-status.icon';
-import FileUploadStatus from './FileUploadStatus';
+import TrafficIcon from '../../icons/top-bar/traffic-icons/shared/traffic.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import {
     getFirstDisplaySettings,
@@ -92,10 +91,12 @@ const TopBarComponent = (props) => {
                         />
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
-                                <FileUploadStatus
+                                <TrafficIcon
                                     isDownload={isDownload}
                                     isUpload={isUpload}
-                                    styles={{ margin: '0.75rem' }}
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
                                 />
                                 <ConnectionStatusIcon
                                     color={'#ffffff'}
