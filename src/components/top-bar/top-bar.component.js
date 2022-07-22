@@ -3,17 +3,18 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
-import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
-import ConnectionStatus from './ConnectionStatus';
-import FileUploadStatus from './FileUploadStatus';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
+import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
+//import ConnectionStatus from './ConnectionStatus';
+import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/shared/connection-status.icon';
+import FileUploadStatus from './FileUploadStatus';
+import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import {
     getFirstDisplaySettings,
     getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
 import {
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
@@ -96,9 +97,11 @@ const TopBarComponent = (props) => {
                                     isUpload={isUpload}
                                     styles={{ margin: '0.75rem' }}
                                 />
-                                <ConnectionStatus
+                                <ConnectionStatusIcon
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
                                     isConnected={isConnected}
-                                    style={{ margin: '0.75rem' }}
                                 />
                             </FragmentWrapper>
                         ) : null}
