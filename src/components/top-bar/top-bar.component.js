@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
-import SettingsIcon from '../../icons/SettingsIcon';
+//import CogWheelIcon from '../../icons/CogWheelIcon';
+import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import ConnectionStatus from './ConnectionStatus';
 import FileUploadStatus from './FileUploadStatus';
@@ -108,10 +109,11 @@ const TopBarComponent = (props) => {
                     </FragmentWrapper>
                 ) : null}
                 <VerticalDivider />
-                <SettingsIcon
-                    style={{ margin: '0.75rem' }}
+                <CogWheelIcon
                     connectToCommandServer={props.connectToCommandServer}
-                    title="Settings"
+                    color={'#ffffff'}
+                    width={'24px'}
+                    height={'24px'}
                 />
                 <MenuToggleIcon
                     style={{ margin: '0.5rem 1.5rem 0.5rem -0.5rem' }}
@@ -140,10 +142,11 @@ const TopBarComponent = (props) => {
                 ) : null}
             </TitleLabelContainer>
             <ConnectionStatusIconsContainer>
-                <SettingsIcon
-                    style={{ margin: '0.75rem' }}
+                <CogWheelIcon
                     connectToCommandServer={props.connectToCommandServer}
-                    title="Settings"
+                    color={'#ffffff'}
+                    width={'24px'}
+                    height={'24px'}
                 />
             </ConnectionStatusIconsContainer>
         </TopBarContainer>
