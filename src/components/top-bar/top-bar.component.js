@@ -13,7 +13,7 @@ import {
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import OpenIcon from '../../icons/OpenIcon';
+import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
 import {
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
@@ -70,12 +70,9 @@ const TopBarComponent = (props) => {
                 ) : (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
-                            title="Open File"
-                            style={{
-                                marginRight: '0.75rem',
-                                marginLeft: '1.5rem',
-                                display: 'inherit',
-                            }}
+                            color={'#ffffff'}
+                            width={'24px'}
+                            height={'24px'}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
@@ -130,12 +127,9 @@ const TopBarComponent = (props) => {
                 !firstDisplaySettings ? (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
-                            title="Open File"
-                            style={{
-                                marginRight: '0.75rem',
-                                marginLeft: '1.5rem',
-                                display: 'inherit',
-                            }}
+                            color={'#ffffff'}
+                            width={'24px'}
+                            height={'24px'}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
