@@ -73,8 +73,8 @@ export const SettingsHeader = styled.div`
 export const CogIconWrapper = styled.div`
     margin-right: 1rem;
     margin-left: 0;
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 24px;
     align-self: center;
 `;
 
@@ -100,6 +100,7 @@ export const SettingsTitle = styled.div`
     color: #fff;
     flex: auto;
     align-self: center;
+    height: 32px;
 `;
 
 export const StyledDivider = styled(Divider).attrs(() => ({

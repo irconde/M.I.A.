@@ -8,4 +8,12 @@ export const StyledCogWheelIcon = styled(SettingsCogIconComponent).attrs(
     })
 )`
     fill: ${(props) => props.color};
+    margin: auto 0.75rem;
+    cursor: pointer;
+`;
+
+export const CogIconWrapper = styled.div`
+    width: fit-content;
+    height: fit-content;
+    display: flex;
 `;

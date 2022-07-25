@@ -1,19 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import FileQueueIcon from '../../icons/FileQueueIcon';
-import SettingsIcon from '../../icons/SettingsIcon';
+import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
+import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
+import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
+import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
+import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/shared/connection-status.icon';
+import TrafficIcon from '../../icons/top-bar/traffic-icons/shared/traffic.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
-import ConnectionStatus from './ConnectionStatus';
-import FileUploadStatus from './FileUploadStatus';
-import MenuToggleIcon from '../../icons/MenuToggleIcon';
 import {
     getFirstDisplaySettings,
     getHasFileOutput,
     getLocalFileOutput,
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
-import OpenIcon from '../../icons/OpenIcon';
 import {
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
@@ -70,12 +70,9 @@ const TopBarComponent = (props) => {
                 ) : (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
-                            title="Open File"
-                            style={{
-                                marginRight: '0.75rem',
-                                marginLeft: '1.5rem',
-                                display: 'inherit',
-                            }}
+                            color={'#ffffff'}
+                            width={'24px'}
+                            height={'24px'}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
@@ -88,33 +85,41 @@ const TopBarComponent = (props) => {
                 (remoteOrLocal === false && hasFileOutput === true) ? (
                     <FragmentWrapper>
                         <FileQueueIcon
-                            title="Number of Files"
+                            color={'#ffffff'}
+                            width={'32px'}
+                            height={'32px'}
                             numberOfFiles={numberOfFiles}
-                            style={{ margin: '0.75rem' }}
                         />
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
-                                <FileUploadStatus
+                                <TrafficIcon
                                     isDownload={isDownload}
                                     isUpload={isUpload}
-                                    styles={{ margin: '0.75rem' }}
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
                                 />
-                                <ConnectionStatus
+                                <ConnectionStatusIcon
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
                                     isConnected={isConnected}
-                                    style={{ margin: '0.75rem' }}
                                 />
                             </FragmentWrapper>
                         ) : null}
                     </FragmentWrapper>
                 ) : null}
                 <VerticalDivider />
-                <SettingsIcon
-                    style={{ margin: '0.75rem' }}
+                <CogWheelIcon
                     connectToCommandServer={props.connectToCommandServer}
-                    title="Settings"
+                    color={'#ffffff'}
+                    width={'24px'}
+                    height={'24px'}
                 />
                 <MenuToggleIcon
-                    style={{ margin: '0.5rem 1.5rem 0.5rem -0.5rem' }}
+                    color={'#ffffff'}
+                    width={'32px'}
+                    height={'32px'}
                     cornerstone={props.cornerstone}
                 />
             </ConnectionStatusIconsContainer>
@@ -127,12 +132,9 @@ const TopBarComponent = (props) => {
                 !firstDisplaySettings ? (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <OpenIcon
-                            title="Open File"
-                            style={{
-                                marginRight: '0.75rem',
-                                marginLeft: '1.5rem',
-                                display: 'inherit',
-                            }}
+                            color={'#ffffff'}
+                            width={'24px'}
+                            height={'24px'}
                         />
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
@@ -140,10 +142,11 @@ const TopBarComponent = (props) => {
                 ) : null}
             </TitleLabelContainer>
             <ConnectionStatusIconsContainer>
-                <SettingsIcon
-                    style={{ margin: '0.75rem' }}
+                <CogWheelIcon
                     connectToCommandServer={props.connectToCommandServer}
-                    title="Settings"
+                    color={'#ffffff'}
+                    width={'24px'}
+                    height={'24px'}
                 />
             </ConnectionStatusIconsContainer>
         </TopBarContainer>
