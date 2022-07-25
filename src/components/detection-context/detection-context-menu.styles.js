@@ -42,6 +42,7 @@ export const IconContainer = styled.div`
     justify-content: center;
     width: 40px;
     height: ${detectionContextStyle.HEIGHT}px;
+    cursor: pointer;
     background: ${(props) =>
         props.selected ? detectionContextStyle.SELECTED_COLOR : null};
 

@@ -49,6 +49,7 @@ export const FABoption = styled.div`
 export const FabIconWrapper = styled.div`
     margin-right: 0.5rem;
     display: flex;
+    cursor: pointer;
 `;
 
 export const FABdivider = styled.div`

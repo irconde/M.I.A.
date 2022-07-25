@@ -14,13 +14,14 @@ import {
 import * as constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import LazyImageContainer from './lazy-image-container.component';
-import FileOpenIcon from '../../icons/lazy-image-menu/file-open-icon/file-open.icon';
 import {
+    FolderIconWrapper,
     ImagesInWorkspace,
     LazyImageMenuContainer,
     LazyImageMenuPadding,
     LazyImagesContainer,
 } from './lazy-image-menu.styles';
+import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -92,11 +93,13 @@ function LazyImageMenuComponent(props) {
                     onScroll={handleMenuContainerScroll}
                     translateStyle={translateStyle}>
                     <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
-                        <FileOpenIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'#ffffff'}
-                        />
+                        <FolderIconWrapper>
+                            <FolderIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        </FolderIconWrapper>
                         Images in Workspace
                     </ImagesInWorkspace>
                     <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
