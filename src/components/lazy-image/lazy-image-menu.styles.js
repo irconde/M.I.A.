@@ -62,3 +62,10 @@ export const ImagesInWorkspace = styled.div`
         props.shouldAddBoxShadow &&
         '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'};
 `;
+
+export const FolderIconWrapper = styled.div`
+    margin-right: 10px;
+    align-self: center;
+    display: flex;
+    align-items: center;
+`;

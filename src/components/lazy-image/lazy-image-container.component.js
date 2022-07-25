@@ -9,6 +9,7 @@ import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
+    LazyImageIconWrapper,
     LazyImageText,
     LazyImageTextContainer,
     ThumbnailContainer,
@@ -128,25 +129,29 @@ function LazyImageContainerComponent(props) {
                 <Tooltip title={props.file}>
                     <LazyImageText>{thisFileName}</LazyImageText>
                 </Tooltip>
-                {numOfViews > 1 ? (
-                    <TwoViewIcon
-                        width={'20px'}
-                        height={'20px'}
-                        color={'#E3E3E3'}
-                    />
-                ) : (
-                    <SingleViewIcon
-                        width={'20px'}
-                        height={'20px'}
-                        color={'#E3E3E3'}
-                    />
-                )}
+                <LazyImageIconWrapper>
+                    {numOfViews > 1 ? (
+                        <TwoViewIcon
+                            width={'20px'}
+                            height={'20px'}
+                            color={'#E3E3E3'}
+                        />
+                    ) : (
+                        <SingleViewIcon
+                            width={'20px'}
+                            height={'20px'}
+                            color={'#E3E3E3'}
+                        />
+                    )}
+                </LazyImageIconWrapper>
                 {isDetections === true ? (
-                    <AnnotationsIcon
-                        width={'20px'}
-                        height={'20px'}
-                        color={'#E3E3E3'}
-                    />
+                    <LazyImageIconWrapper>
+                        <AnnotationsIcon
+                            width={'20px'}
+                            height={'20px'}
+                            color={'#E3E3E3'}
+                        />
+                    </LazyImageIconWrapper>
                 ) : null}
             </LazyImageTextContainer>
         </ImageContainer>
