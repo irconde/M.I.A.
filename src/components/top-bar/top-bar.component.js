@@ -88,6 +88,7 @@ const TopBarComponent = (props) => {
                             color={'#ffffff'}
                             width={'32px'}
                             height={'32px'}
+                            numberOfFiles={numberOfFiles}
                         />
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
