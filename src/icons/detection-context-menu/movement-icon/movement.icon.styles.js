@@ -7,7 +7,5 @@ export const StyledMovementIcon = styled(MovementIconComponent).attrs(
         height: props.height || '24px',
     })
 )`
-    align-self: center;
-    cursor: pointer;
     fill: ${(props) => props.color};
 `;

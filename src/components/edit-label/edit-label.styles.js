@@ -55,8 +55,9 @@ export const NewLabelInput = styled.input`
 
 export const ClearIconWrapper = styled.div`
     height: 20px;
-    fill: white;
     position: absolute;
     right: 2px;
     width: fit-content;
+    cursor: pointer;
+    vertical-align: text-top;
 `;

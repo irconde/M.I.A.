@@ -66,6 +66,8 @@ export const DeleteWidget = styled.div`
     align-items: center;
     justify-content: center;
     background-color: ${detectionContextStyle.WHITE};
+    align-self: center;
+    cursor: pointer;
 
     &:hover {
         background: ${detectionContextStyle.HOVER_COLOR};
