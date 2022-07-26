@@ -110,14 +110,21 @@ const TopBarComponent = (props) => {
                                     width={'32px'}
                                     height={'32px'}
                                 />
-                                <TopBarIconWrapper>
-                                    <ConnectionStatusIcon
-                                        color={'#ffffff'}
-                                        width={'32px'}
-                                        height={'32px'}
-                                        isConnected={isConnected}
-                                    />
-                                </TopBarIconWrapper>
+                                <Tooltip
+                                    title={
+                                        isConnected
+                                            ? 'Connected'
+                                            : 'Not Connected'
+                                    }>
+                                    <TopBarIconWrapper>
+                                        <ConnectionStatusIcon
+                                            color={'#ffffff'}
+                                            width={'32px'}
+                                            height={'32px'}
+                                            isConnected={isConnected}
+                                        />
+                                    </TopBarIconWrapper>
+                                </Tooltip>
                             </FragmentWrapper>
                         ) : null}
                     </FragmentWrapper>
