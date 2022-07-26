@@ -84,3 +84,7 @@ export const OpenFileText = styled.div`
 export const FragmentWrapper = styled.div`
     display: flex;
 `;
+
+export const ConnectionIconWrapper = styled(FragmentWrapper)`
+    margin: 0.75rem;
+`;

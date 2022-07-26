@@ -15,6 +15,7 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import {
+    ConnectionIconWrapper,
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
     FragmentWrapper,
@@ -99,12 +100,14 @@ const TopBarComponent = (props) => {
                                     width={'32px'}
                                     height={'32px'}
                                 />
-                                <ConnectionStatusIcon
-                                    color={'#ffffff'}
-                                    width={'32px'}
-                                    height={'32px'}
-                                    isConnected={isConnected}
-                                />
+                                <ConnectionIconWrapper>
+                                    <ConnectionStatusIcon
+                                        color={'#ffffff'}
+                                        width={'32px'}
+                                        height={'32px'}
+                                        isConnected={isConnected}
+                                    />
+                                </ConnectionIconWrapper>
                             </FragmentWrapper>
                         ) : null}
                     </FragmentWrapper>
