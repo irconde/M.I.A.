@@ -85,6 +85,6 @@ export const FragmentWrapper = styled.div`
     display: flex;
 `;
 
-export const ConnectionIconWrapper = styled(FragmentWrapper)`
+export const TopBarIconWrapper = styled(FragmentWrapper)`
     margin: 0.75rem;
 `;

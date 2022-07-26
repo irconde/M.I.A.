@@ -15,7 +15,6 @@ import {
     getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import {
-    ConnectionIconWrapper,
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
     FragmentWrapper,
@@ -24,6 +23,7 @@ import {
     OpenFileText,
     TitleLabelContainer,
     TopBarContainer,
+    TopBarIconWrapper,
     VerticalDivider,
 } from './top-bar.styles';
 
@@ -85,12 +85,14 @@ const TopBarComponent = (props) => {
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
                     <FragmentWrapper>
-                        <FileQueueIcon
-                            color={'#ffffff'}
-                            width={'32px'}
-                            height={'32px'}
-                            numberOfFiles={numberOfFiles}
-                        />
+                        <TopBarIconWrapper>
+                            <FileQueueIcon
+                                color={'#ffffff'}
+                                width={'32px'}
+                                height={'32px'}
+                                numberOfFiles={numberOfFiles}
+                            />
+                        </TopBarIconWrapper>
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
                                 <TrafficIcon
@@ -100,14 +102,14 @@ const TopBarComponent = (props) => {
                                     width={'32px'}
                                     height={'32px'}
                                 />
-                                <ConnectionIconWrapper>
+                                <TopBarIconWrapper>
                                     <ConnectionStatusIcon
                                         color={'#ffffff'}
                                         width={'32px'}
                                         height={'32px'}
                                         isConnected={isConnected}
                                     />
-                                </ConnectionIconWrapper>
+                                </TopBarIconWrapper>
                             </FragmentWrapper>
                         ) : null}
                     </FragmentWrapper>
