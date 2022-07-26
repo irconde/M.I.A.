@@ -21,11 +21,13 @@ import {
     InfoDivider,
     OpenFileContainer,
     OpenFileText,
+    OpenIconWrapper,
     TitleLabelContainer,
     TopBarContainer,
     TopBarIconWrapper,
     VerticalDivider,
 } from './top-bar.styles';
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * Component for GUI's top bar display.
@@ -70,11 +72,15 @@ const TopBarComponent = (props) => {
                     </FragmentWrapper>
                 ) : (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
-                        <OpenIcon
-                            color={'#ffffff'}
-                            width={'24px'}
-                            height={'24px'}
-                        />
+                        <Tooltip title={'Open File'}>
+                            <OpenIconWrapper>
+                                <OpenIcon
+                                    color={'#ffffff'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
+                            </OpenIconWrapper>
+                        </Tooltip>
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
                     </OpenFileContainer>
@@ -136,11 +142,15 @@ const TopBarComponent = (props) => {
                 localFileOutput === '' &&
                 !firstDisplaySettings ? (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
-                        <OpenIcon
-                            color={'#ffffff'}
-                            width={'24px'}
-                            height={'24px'}
-                        />
+                        <Tooltip title={'Open File'}>
+                            <OpenIconWrapper>
+                                <OpenIcon
+                                    color={'#ffffff'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
+                            </OpenIconWrapper>
+                        </Tooltip>
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
                     </OpenFileContainer>

@@ -87,3 +87,8 @@ export const FragmentWrapper = styled.div`
 export const TopBarIconWrapper = styled(FragmentWrapper)`
     margin: 0.75rem;
 `;
+export const OpenIconWrapper = styled.div`
+    margin-right: 0.75rem;
+    margin-left: 1.5rem;
+    display: inherit;
+`;
