@@ -91,14 +91,16 @@ const TopBarComponent = (props) => {
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
                     <FragmentWrapper>
-                        <TopBarIconWrapper>
-                            <FileQueueIcon
-                                color={'#ffffff'}
-                                width={'32px'}
-                                height={'32px'}
-                                numberOfFiles={numberOfFiles}
-                            />
-                        </TopBarIconWrapper>
+                        <Tooltip title={'Number of Files'}>
+                            <TopBarIconWrapper>
+                                <FileQueueIcon
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
+                                    numberOfFiles={numberOfFiles}
+                                />
+                            </TopBarIconWrapper>
+                        </Tooltip>
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
                                 <TrafficIcon

@@ -1,7 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { StyledFileQueueIcon } from './file-queue.icon.styles';
-import Tooltip from '@mui/material/Tooltip';
 
 const FileQueueIcon = (props) => {
     useLayoutEffect(() => {
@@ -9,13 +8,11 @@ const FileQueueIcon = (props) => {
         svgTextElement.textContent = props?.numberOfFiles;
     });
     return (
-        <Tooltip title={'Number of Files'}>
-            <StyledFileQueueIcon
-                width={props.width}
-                height={props.height}
-                color={props.color}
-            />
-        </Tooltip>
+        <StyledFileQueueIcon
+            width={props.width}
+            height={props.height}
+            color={props.color}
+        />
     );
 };
 
