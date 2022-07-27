@@ -43,4 +43,5 @@ export const EyeIconWrapper = styled.span`
     width: 20px;
     margin-right: 1rem;
     margin-left: auto;
+    cursor: pointer;
 `;
