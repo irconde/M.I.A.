@@ -4,25 +4,20 @@ import {
     StyledConnectionIcon,
     StyledNoConnectionIcon,
 } from './connection-status.icon.styles';
-import Tooltip from '@mui/material/Tooltip';
 
 const ConnectionStatusIcon = (props) => {
     return props.isConnected ? (
-        <Tooltip title={'Connected'}>
-            <StyledConnectionIcon
-                width={props.width}
-                height={props.height}
-                color={props.color}
-            />
-        </Tooltip>
+        <StyledConnectionIcon
+            width={props.width}
+            height={props.height}
+            color={props.color}
+        />
     ) : (
-        <Tooltip title={'Not Connected'}>
-            <StyledNoConnectionIcon
-                width={props.width}
-                height={props.height}
-                color={props.color}
-            />
-        </Tooltip>
+        <StyledNoConnectionIcon
+            width={props.width}
+            height={props.height}
+            color={props.color}
+        />
     );
 };
 
