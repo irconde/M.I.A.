@@ -52,6 +52,35 @@ const TopBarComponent = (props) => {
         isConnected,
     } = reduxInfo;
 
+    const getTrafficIconProps = (isDownload, isUpload) => {
+        if (isDownload && isUpload) {
+            return {
+                trafficIconTitle: 'Downloading and Uploading',
+                trafficIconType: 'downloadAndUpload',
+            };
+        } else if (!(isDownload && isUpload)) {
+            return {
+                trafficIconTitle: 'No Transmission',
+                trafficIconType: 'noTransmission',
+            };
+        } else if (isDownload) {
+            return {
+                trafficIconTitle: 'Downloading',
+                trafficIconType: 'downloading',
+            };
+        } else if (isUpload) {
+            return {
+                trafficIconTitle: 'Uploading',
+                trafficIconType: 'uploading',
+            };
+        }
+    };
+
+    const { trafficIconTitle, trafficIconType } = getTrafficIconProps(
+        isDownload,
+        isUpload
+    );
+
     // TODO: Future refactoring, clean up the ternary logic
     return processingFile || isConnected ? (
         <TopBarContainer>
@@ -104,13 +133,16 @@ const TopBarComponent = (props) => {
                         </Tooltip>
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
-                                <TrafficIcon
-                                    isDownload={isDownload}
-                                    isUpload={isUpload}
-                                    color={'#ffffff'}
-                                    width={'32px'}
-                                    height={'32px'}
-                                />
+                                <Tooltip title={trafficIconTitle}>
+                                    <TopBarIconWrapper>
+                                        <TrafficIcon
+                                            color={'#ffffff'}
+                                            width={'32px'}
+                                            height={'32px'}
+                                            type={trafficIconType}
+                                        />
+                                    </TopBarIconWrapper>
+                                </Tooltip>
                                 <Tooltip
                                     title={
                                         isConnected

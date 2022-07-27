@@ -4,44 +4,31 @@ import { ReactComponent as UploadIconComponent } from '../traffic-upload.icon.sv
 import { ReactComponent as DownloadUploadIconComponent } from '../traffic-download-upload.icon.svg';
 import { ReactComponent as NoTransmissionIconComponent } from '../traffic-no-transmission.icon.svg';
 
-export const StyledDownloadIcon = styled(DownloadIconComponent).attrs(
-    (props) => ({
-        width: props.width || '32px',
-        height: props.height || '32px',
-    })
-)`
-    align-self: center;
-    fill: ${(props) => props.color};
-    margin: 0.75rem;
-`;
-
-export const StyledUploadIcon = styled(UploadIconComponent).attrs((props) => ({
+const trafficIconDimen = (props) => ({
     width: props.width || '32px',
     height: props.height || '32px',
-}))`
-    align-self: center;
+});
+
+export const StyledDownloadIcon = styled(DownloadIconComponent).attrs(
+    trafficIconDimen
+)`
     fill: ${(props) => props.color};
-    margin: 0.75rem;
+`;
+
+export const StyledUploadIcon = styled(UploadIconComponent).attrs(
+    trafficIconDimen
+)`
+    fill: ${(props) => props.color};
 `;
 
 export const StyledDownloadUploadIcon = styled(
     DownloadUploadIconComponent
-).attrs((props) => ({
-    width: props.width || '32px',
-    height: props.height || '32px',
-}))`
-    align-self: center;
+).attrs(trafficIconDimen)`
     fill: ${(props) => props.color};
-    margin: 0.75rem;
 `;
 
 export const StyledNoTransmissionIcon = styled(
     NoTransmissionIconComponent
-).attrs((props) => ({
-    width: props.width || '32px',
-    height: props.height || '32px',
-}))`
-    align-self: center;
+).attrs(trafficIconDimen)`
     fill: ${(props) => props.color};
-    margin: 0.75rem;
 `;
