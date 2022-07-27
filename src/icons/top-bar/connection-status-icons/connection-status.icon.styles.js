@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { ReactComponent as ConnectionIconComponent } from '../connection-status.icon.svg';
-import { ReactComponent as NoConnectionIconComponent } from '../no-connection-status.icon.svg';
+import { ReactComponent as ConnectionIconComponent } from './svgs/connection-status.icon.svg';
+import { ReactComponent as NoConnectionIconComponent } from './svgs/no-connection-status.icon.svg';
 
 export const StyledConnectionIcon = styled(ConnectionIconComponent).attrs(
     (props) => ({

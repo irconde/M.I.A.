@@ -5,8 +5,8 @@ import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
-import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/shared/connection-status.icon';
-import TrafficIcon from '../../icons/top-bar/traffic-icons/shared/traffic.icon';
+import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/connection-status.icon';
+import TrafficIcon from '../../icons/top-bar/traffic-icons/traffic.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import {
     getFirstDisplaySettings,

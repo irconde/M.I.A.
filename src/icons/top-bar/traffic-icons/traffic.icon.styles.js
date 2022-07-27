@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { ReactComponent as DownloadIconComponent } from '../traffic-download.icon.svg';
-import { ReactComponent as UploadIconComponent } from '../traffic-upload.icon.svg';
-import { ReactComponent as DownloadUploadIconComponent } from '../traffic-download-upload.icon.svg';
-import { ReactComponent as NoTransmissionIconComponent } from '../traffic-no-transmission.icon.svg';
+import { ReactComponent as DownloadIconComponent } from './svgs/traffic-download.icon.svg';
+import { ReactComponent as UploadIconComponent } from './svgs/traffic-upload.icon.svg';
+import { ReactComponent as DownloadUploadIconComponent } from './svgs/traffic-download-upload.icon.svg';
+import { ReactComponent as NoTransmissionIconComponent } from './svgs/traffic-no-transmission.icon.svg';
 
 const trafficIconDimen = (props) => ({
     width: props.width || '32px',
