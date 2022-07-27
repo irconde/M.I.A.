@@ -7,12 +7,5 @@ export const StyledMenuToggleIcon = styled(MenuToggleIconComponent).attrs(
         height: props.height || '32px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
-    margin: auto 0;
-`;
-
-export const MenuIconWrapper = styled.div`
-    margin: 0.5rem 1.5rem 0.5rem -0.5rem;
-    cursor: pointer;
 `;

@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    MenuIconWrapper,
-    StyledMenuToggleIcon,
-} from './menu-toggle.icon.styles';
-import Tooltip from '@mui/material/Tooltip';
+import { StyledMenuToggleIcon } from './menu-toggle.icon.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getReceivedTime,
@@ -39,15 +35,13 @@ const MenuToggleIcon = (props) => {
     };
     if ((visible !== null || hasFileOutput) && !displaySummarizedDetections) {
         return (
-            <MenuIconWrapper onClick={toggleClickHandler}>
-                <Tooltip title={'Fold/unfold menu'}>
-                    <StyledMenuToggleIcon
-                        width={props.width}
-                        height={props.height}
-                        color={props.color}
-                    />
-                </Tooltip>
-            </MenuIconWrapper>
+            <span onClick={toggleClickHandler}>
+                <StyledMenuToggleIcon
+                    width={props.width}
+                    height={props.height}
+                    color={props.color}
+                />
+            </span>
         );
     } else return null;
 };

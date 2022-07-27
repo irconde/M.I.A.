@@ -19,6 +19,7 @@ import {
     ConnectionTypeInfo,
     FragmentWrapper,
     InfoDivider,
+    MenuIconWrapper,
     OpenFileContainer,
     OpenFileText,
     OpenIconWrapper,
@@ -136,12 +137,16 @@ const TopBarComponent = (props) => {
                     width={'24px'}
                     height={'24px'}
                 />
-                <MenuToggleIcon
-                    color={'#ffffff'}
-                    width={'32px'}
-                    height={'32px'}
-                    cornerstone={props.cornerstone}
-                />
+                <Tooltip title={'Fold/unfold menu'}>
+                    <MenuIconWrapper>
+                        <MenuToggleIcon
+                            color={'#ffffff'}
+                            width={'32px'}
+                            height={'32px'}
+                            cornerstone={props.cornerstone}
+                        />
+                    </MenuIconWrapper>
+                </Tooltip>
             </ConnectionStatusIconsContainer>
         </TopBarContainer>
     ) : (

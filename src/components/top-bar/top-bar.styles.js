@@ -92,3 +92,8 @@ export const OpenIconWrapper = styled.div`
     margin-left: 1.5rem;
     display: inherit;
 `;
+
+export const MenuIconWrapper = styled.div`
+    margin: 0.5rem 1.5rem 0.5rem -0.5rem;
+    cursor: pointer;
+`;
