@@ -1,14 +1,10 @@
 import styled from 'styled-components';
 import { ReactComponent as PolygonIconComponent } from './polygon.icon.svg';
+import { iconColor, iconSize } from '../24px.icon.styles';
 
-export const StyledPolygonIcon = styled(PolygonIconComponent).attrs(
-    (props) => ({
-        width: props.width || '24px',
-        height: props.height || '24px',
-    })
-)`
+export const StyledPolygonIcon = styled(PolygonIconComponent).attrs(iconSize)`
     .coloredTag {
-        fill: ${(props) => props.color};
-        stroke: ${(props) => props.borderColor};
+        stroke: ${(props) => props.border};
+        ${iconColor}
     }
 `;

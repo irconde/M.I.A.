@@ -95,7 +95,7 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     }>
                                     <RectangleIcon
                                         color={'#464646'}
-                                        borderColor={'#464646'}
+                                        border={'#464646'}
                                         width={'31px'}
                                         height={'31px'}
                                     />
@@ -115,7 +115,7 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                     }>
                                     <PolygonIcon
                                         color={'#464646'}
-                                        borderColor={'#464646'}
+                                        border={'#464646'}
                                         width={'31px'}
                                         height={'31px'}
                                     />

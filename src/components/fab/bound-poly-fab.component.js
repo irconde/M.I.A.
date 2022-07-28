@@ -116,7 +116,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
                             width={'31px'}
                             height={'31px'}
                             color={'#464646'}
-                            borderColor={'grey'}
+                            border={'grey'}
                         />
                     </FabIconWrapper>
                     <span>Bounding box</span>
@@ -133,7 +133,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
                             width={'31px'}
                             height={'31px'}
                             color={'#464646'}
-                            borderColor={'grey'}
+                            border={'grey'}
                         />
                     </FabIconWrapper>
                     <span>Polygon mask</span>
