@@ -163,12 +163,14 @@ const TopBarComponent = (props) => {
                     </FragmentWrapper>
                 ) : null}
                 <VerticalDivider />
+
                 <CogWheelIcon
                     connectToCommandServer={props.connectToCommandServer}
                     color={'#ffffff'}
                     width={'24px'}
                     height={'24px'}
                 />
+
                 <Tooltip title={'Fold/unfold menu'}>
                     <MenuIconWrapper>
                         <MenuToggleIcon
