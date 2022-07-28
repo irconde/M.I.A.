@@ -861,11 +861,12 @@ class App extends Component {
                     response
                         .json()
                         .then((jsonParsed) => {
-                            if (jsonParsed.confirm === 'file-received') {
+                            console.log(jsonParsed);
+                            if (jsonParsed.status === 'Ok') {
                                 this.loadNextImage(
-                                    response.file,
-                                    response.fileName,
-                                    response.numberOfFiles
+                                    jsonParsed.file,
+                                    jsonParsed.fileName,
+                                    jsonParsed.numberOfFiles
                                 );
                             } else {
                                 this.onNoImageLeft();
@@ -1119,6 +1120,8 @@ class App extends Component {
 
         let contentType;
         // Lets load the compressed ORA file as base64
+        console.log(typeof image);
+        console.log(image);
         myZip.loadAsync(image, { base64: true }).then(() => {
             //First, after loading, we need to check our stack.xml
             myZip
