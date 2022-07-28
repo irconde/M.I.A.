@@ -852,18 +852,30 @@ class App extends Component {
                 this.state.commandServer !== null) ||
             update === true
         ) {
-            this.state.commandServer.emit('currentFile', (response) => {
-                if (response.status === 'Ok') {
-                    this.loadNextImage(
-                        response.file,
-                        response.fileName,
-                        response.numberOfFiles
-                    );
-                } else {
-                    this.onNoImageLeft();
-                }
+            return new Promise((resolve, reject) => {
+                const {remoteIp, remotePort} = this.props;
+                const urlToFetch = `http://${remoteIp}:${remotePort}/getCurrentFile`;
+                fetch(urlToFetch, {
+                    method: 'GET'
+                })
+                    .then((response) => {
+                        response
+                            .json()
+                            .then((jsonParsed) => {
+                                if (jsonParsed.confirm === 'file-received') {
+                                    this.loadNextImage(
+                                        response.file,
+                                        response.fileName,
+                                        response.numberOfFiles
+                                    );
+                                } else {
+                                    this.onNoImageLeft();
+                                }
+                            })
+                            .catch((error) => this.onNoImageLeft());
+                    })
+                    .catch((error) => this.onNoImageLeft());
             });
-        }
     }
 
     /**
