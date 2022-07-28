@@ -852,11 +852,11 @@ class App extends Component {
                 this.state.commandServer !== null) ||
             update === true
         ) {
-                const {remoteIp, remotePort} = this.props;
-                const urlToFetch = `http://${remoteIp}:${remotePort}/getCurrentFile`;
-                fetch(urlToFetch, {
-                    method: 'GET'
-                })
+            const { remoteIp, remotePort } = this.props;
+            const urlToFetch = `http://${remoteIp}:${remotePort}/getCurrentFile`;
+            fetch(urlToFetch, {
+                method: 'GET',
+            })
                 .then((response) => {
                     response
                         .json()
@@ -873,7 +873,8 @@ class App extends Component {
                         })
                         .catch((error) => this.onNoImageLeft());
                 })
-                    .catch((error) => this.onNoImageLeft());
+                .catch((error) => this.onNoImageLeft());
+        }
     }
 
     /**
