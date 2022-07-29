@@ -213,7 +213,7 @@ class App extends Component {
      * Generic handler for errors in the next image click function
      *
      * @param {Error} error
-     * @param {boolean} showSnackbar - if true, show the snackbar with error
+     * @param {boolean?} showSnackbar - if true, show the snackbar with error
      */
     handleNextImageError(error, showSnackbar = true) {
         this.props.setUpload(false);
@@ -227,7 +227,7 @@ class App extends Component {
      * Updates a piece of state for the snack bar to show or hide
      *
      * @param {boolean} show - the value the state will be set to
-     * @param error
+     * @param {string} error
      */
     setShowSnackbar(show, error) {
         this.setState({ showSnackbar: show, errorMessage: error });
@@ -237,7 +237,7 @@ class App extends Component {
      * Houses the code to connect to a server and starts listening for connection events. Lastly it
      * is what trigger to ask for a file from the command server.
      *
-     * @param {boolean} update - Optional variable for when the settings changes the command server
+     * @param {boolean?} update - Optional variable for when the settings change the command server
      */
     connectToCommandServer(update = false) {
         this.props.setProcessingHost(
@@ -268,8 +268,8 @@ class App extends Component {
      * Namely, this is an edge case for if a user is connected to a server, then decides to use the
      * local mode option, this handles the disconnect.
      *
-     * @param {Object} nextProps
-     * @param {Object} nextState
+     * @param {Readonly<P>} nextProps
+     * @param {Readonly<S>} nextState
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
@@ -843,7 +843,7 @@ class App extends Component {
     /**
      * Gets files from command server and loads them once received.
      *
-     * @param {boolean} update
+     * @param {boolean?} update
      * @returns {Promise}
      */
     async getFileFromCommandServer(update = false) {
@@ -852,16 +852,13 @@ class App extends Component {
                 this.state.commandServer !== null) ||
             update === true
         ) {
-            const { remoteIp, remotePort } = this.props;
-            const urlToFetch = `http://${remoteIp}:${remotePort}/getCurrentFile`;
-            fetch(urlToFetch, {
+            fetch(`${this.props.apiPrefix}/getCurrentFile`, {
                 method: 'GET',
             })
                 .then((response) => {
                     response
                         .json()
                         .then((jsonParsed) => {
-                            console.log(jsonParsed);
                             if (jsonParsed.status === 'Ok') {
                                 this.loadNextImage(
                                     jsonParsed.file,
@@ -872,9 +869,15 @@ class App extends Component {
                                 this.onNoImageLeft();
                             }
                         })
-                        .catch((error) => this.onNoImageLeft());
+                        .catch((error) => {
+                            this.handleNextImageError(error);
+                            this.onNoImageLeft();
+                        });
                 })
-                .catch((error) => this.onNoImageLeft());
+                .catch((error) => {
+                    this.handleNextImageError(error);
+                    this.onNoImageLeft();
+                });
         }
     }
 
@@ -1018,9 +1021,7 @@ class App extends Component {
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
         return new Promise((resolve, reject) => {
-            const { remoteIp, remotePort } = this.props;
-            const urlToFetch = `http://${remoteIp}:${remotePort}/fileFromClient`;
-            fetch(urlToFetch, {
+            fetch(`${this.props.apiPrefix}/fileFromClient`, {
                 method: 'POST',
                 body: JSON.stringify({
                     file: file,
@@ -1099,7 +1100,7 @@ class App extends Component {
 
     /**
      * Takes new XML file (image) and does all parsing/pre-processing for detections/images to be loaded.
-     * @param {Base64} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
+     * @param {string} image - Base-64 encoded string containing all data for annotations/images (Supported file formats: DICOS-TDR, MS COCO)
      * @param {string} fileName - Name of current file being processed. Used to prevent duplicate annotations.
      * @param {number} [numberOfFiles = 0] - Number of files left in queue
      * @param {Array<string>} [thumbnails = null] - Array with string values to the file path of thumbnails,
@@ -1119,9 +1120,7 @@ class App extends Component {
         let listOfStacks = [];
 
         let contentType;
-        // Lets load the compressed ORA file as base64
-        console.log(typeof image);
-        console.log(image);
+        // Let's load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
             //First, after loading, we need to check our stack.xml
             myZip
@@ -3810,7 +3809,7 @@ class App extends Component {
     /**
      * Callback invoked when a mouse wheel event happens.
      */
-    onMouseWheel(event) {
+    onMouseWheel() {
         if (this.props.selectedDetection !== null) {
             this.props.updateRecentScroll(true);
             clearTimeout(this.state.timer);
@@ -3848,10 +3847,8 @@ class App extends Component {
     /**
      * Mouse leave event handler. It mainly serves as a way to make sure a user does not try to drag a detection out of
      * the window.
-     *
-     * @param {Event} event
      */
-    onMouseLeave(event) {
+    onMouseLeave() {
         if (this.props.selectedDetection !== null) {
             // TODO: Future refactoring
             this.props.emptyAreaClickUpdate();
@@ -4000,6 +3997,7 @@ const mapStateToProps = (state) => {
         deviceType: settings.settings.deviceType,
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,
+        apiPrefix: settings.apiPrefix,
     };
 };
 
