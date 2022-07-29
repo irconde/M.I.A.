@@ -7,7 +7,5 @@ export const StyledFileQueueIcon = styled(FileQueueIconComponent).attrs(
         height: props.height || '32px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
-    margin: 0.75rem;
 `;

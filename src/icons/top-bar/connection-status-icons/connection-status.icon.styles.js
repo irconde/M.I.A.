@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { ReactComponent as ConnectionIconComponent } from '../connection-status.icon.svg';
-import { ReactComponent as NoConnectionIconComponent } from '../no-connection-status.icon.svg';
+import { ReactComponent as ConnectionIconComponent } from './svgs/connection-status.icon.svg';
+import { ReactComponent as NoConnectionIconComponent } from './svgs/no-connection-status.icon.svg';
 
 export const StyledConnectionIcon = styled(ConnectionIconComponent).attrs(
     (props) => ({
@@ -8,9 +8,7 @@ export const StyledConnectionIcon = styled(ConnectionIconComponent).attrs(
         height: props.height || '32px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
-    margin: 0.75rem;
 `;
 
 export const StyledNoConnectionIcon = styled(NoConnectionIconComponent).attrs(
@@ -19,7 +17,5 @@ export const StyledNoConnectionIcon = styled(NoConnectionIconComponent).attrs(
         height: props.height || '32px',
     })
 )`
-    align-self: center;
     fill: ${(props) => props.color};
-    margin: 0.75rem;
 `;

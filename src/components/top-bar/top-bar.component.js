@@ -5,8 +5,8 @@ import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
-import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/shared/connection-status.icon';
-import TrafficIcon from '../../icons/top-bar/traffic-icons/shared/traffic.icon';
+import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/connection-status.icon';
+import TrafficIcon from '../../icons/top-bar/traffic-icons/traffic.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import {
     getFirstDisplaySettings,
@@ -19,12 +19,16 @@ import {
     ConnectionTypeInfo,
     FragmentWrapper,
     InfoDivider,
+    MenuIconWrapper,
     OpenFileContainer,
     OpenFileText,
+    OpenIconWrapper,
     TitleLabelContainer,
     TopBarContainer,
+    TopBarIconWrapper,
     VerticalDivider,
 } from './top-bar.styles';
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * Component for GUI's top bar display.
@@ -48,6 +52,35 @@ const TopBarComponent = (props) => {
         isConnected,
     } = reduxInfo;
 
+    const getTrafficIconProps = (isDownload, isUpload) => {
+        if (isDownload && isUpload) {
+            return {
+                trafficIconTitle: 'Downloading and Uploading',
+                trafficIconType: 'downloadAndUpload',
+            };
+        } else if (!(isDownload && isUpload)) {
+            return {
+                trafficIconTitle: 'No Transmission',
+                trafficIconType: 'noTransmission',
+            };
+        } else if (isDownload) {
+            return {
+                trafficIconTitle: 'Downloading',
+                trafficIconType: 'downloading',
+            };
+        } else if (isUpload) {
+            return {
+                trafficIconTitle: 'Uploading',
+                trafficIconType: 'uploading',
+            };
+        }
+    };
+
+    const { trafficIconTitle, trafficIconType } = getTrafficIconProps(
+        isDownload,
+        isUpload
+    );
+
     // TODO: Future refactoring, clean up the ternary logic
     return processingFile || isConnected ? (
         <TopBarContainer>
@@ -69,11 +102,15 @@ const TopBarComponent = (props) => {
                     </FragmentWrapper>
                 ) : (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
-                        <OpenIcon
-                            color={'#ffffff'}
-                            width={'24px'}
-                            height={'24px'}
-                        />
+                        <Tooltip title={'Open File'}>
+                            <OpenIconWrapper>
+                                <OpenIcon
+                                    color={'#ffffff'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
+                            </OpenIconWrapper>
+                        </Tooltip>
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
                     </OpenFileContainer>
@@ -84,27 +121,43 @@ const TopBarComponent = (props) => {
                 {remoteOrLocal === true ||
                 (remoteOrLocal === false && hasFileOutput === true) ? (
                     <FragmentWrapper>
-                        <FileQueueIcon
-                            color={'#ffffff'}
-                            width={'32px'}
-                            height={'32px'}
-                            numberOfFiles={numberOfFiles}
-                        />
+                        <Tooltip title={'Number of Files'}>
+                            <TopBarIconWrapper>
+                                <FileQueueIcon
+                                    color={'#ffffff'}
+                                    width={'32px'}
+                                    height={'32px'}
+                                    numberOfFiles={numberOfFiles}
+                                />
+                            </TopBarIconWrapper>
+                        </Tooltip>
                         {remoteOrLocal === true ? (
                             <FragmentWrapper>
-                                <TrafficIcon
-                                    isDownload={isDownload}
-                                    isUpload={isUpload}
-                                    color={'#ffffff'}
-                                    width={'32px'}
-                                    height={'32px'}
-                                />
-                                <ConnectionStatusIcon
-                                    color={'#ffffff'}
-                                    width={'32px'}
-                                    height={'32px'}
-                                    isConnected={isConnected}
-                                />
+                                <Tooltip title={trafficIconTitle}>
+                                    <TopBarIconWrapper>
+                                        <TrafficIcon
+                                            color={'#ffffff'}
+                                            width={'32px'}
+                                            height={'32px'}
+                                            type={trafficIconType}
+                                        />
+                                    </TopBarIconWrapper>
+                                </Tooltip>
+                                <Tooltip
+                                    title={
+                                        isConnected
+                                            ? 'Connected'
+                                            : 'Not Connected'
+                                    }>
+                                    <TopBarIconWrapper>
+                                        <ConnectionStatusIcon
+                                            color={'#ffffff'}
+                                            width={'32px'}
+                                            height={'32px'}
+                                            isConnected={isConnected}
+                                        />
+                                    </TopBarIconWrapper>
+                                </Tooltip>
                             </FragmentWrapper>
                         ) : null}
                     </FragmentWrapper>
@@ -116,12 +169,16 @@ const TopBarComponent = (props) => {
                     width={'24px'}
                     height={'24px'}
                 />
-                <MenuToggleIcon
-                    color={'#ffffff'}
-                    width={'32px'}
-                    height={'32px'}
-                    cornerstone={props.cornerstone}
-                />
+                <Tooltip title={'Fold/unfold menu'}>
+                    <MenuIconWrapper>
+                        <MenuToggleIcon
+                            color={'#ffffff'}
+                            width={'32px'}
+                            height={'32px'}
+                            cornerstone={props.cornerstone}
+                        />
+                    </MenuIconWrapper>
+                </Tooltip>
             </ConnectionStatusIconsContainer>
         </TopBarContainer>
     ) : (
@@ -131,11 +188,15 @@ const TopBarComponent = (props) => {
                 localFileOutput === '' &&
                 !firstDisplaySettings ? (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
-                        <OpenIcon
-                            color={'#ffffff'}
-                            width={'24px'}
-                            height={'24px'}
-                        />
+                        <Tooltip title={'Open File'}>
+                            <OpenIconWrapper>
+                                <OpenIcon
+                                    color={'#ffffff'}
+                                    width={'24px'}
+                                    height={'24px'}
+                                />
+                            </OpenIconWrapper>
+                        </Tooltip>
                         <OpenFileText>OPEN FILE</OpenFileText>
                         <VerticalDivider />
                     </OpenFileContainer>

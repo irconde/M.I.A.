@@ -5,7 +5,6 @@ export const TopBarContainer = styled.div`
     display: flex;
     height: 3.375rem;
     background-color: #3a3a3a;
-    left: 0;
     top: 0;
     width: 100%;
     z-index: 1;
@@ -83,4 +82,18 @@ export const OpenFileText = styled.div`
 
 export const FragmentWrapper = styled.div`
     display: flex;
+`;
+
+export const TopBarIconWrapper = styled(FragmentWrapper)`
+    margin: 0.75rem;
+`;
+export const OpenIconWrapper = styled.div`
+    margin-right: 0.75rem;
+    margin-left: 1.5rem;
+    display: inherit;
+`;
+
+export const MenuIconWrapper = styled.div`
+    margin: 0.5rem 1.5rem 0.5rem -0.5rem;
+    cursor: pointer;
 `;

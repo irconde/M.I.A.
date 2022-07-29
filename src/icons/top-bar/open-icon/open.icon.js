@@ -1,19 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { OpenIconWrapper, StyledOpenIcon } from './open.icon.styles';
-import Tooltip from '@mui/material/Tooltip';
+import { StyledOpenIcon } from './open.icon.styles';
 
 const OpenIcon = (props) => {
     return (
-        <OpenIconWrapper>
-            <Tooltip title={'Open File'}>
-                <StyledOpenIcon
-                    width={props.width}
-                    height={props.height}
-                    color={props.color}
-                />
-            </Tooltip>
-        </OpenIconWrapper>
+        <StyledOpenIcon
+            width={props.width}
+            height={props.height}
+            color={props.color}
+        />
     );
 };
 
