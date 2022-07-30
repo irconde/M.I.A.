@@ -7,11 +7,3 @@ export const StyledCogWheelIcon = styled(SettingsCogIconComponent).attrs(
 )`
     ${iconColor}
 `;
-
-export const CogIconWrapper = styled.div`
-    width: fit-content;
-    height: fit-content;
-    display: flex;
-    margin: auto 0.75rem;
-    cursor: pointer;
-`;
