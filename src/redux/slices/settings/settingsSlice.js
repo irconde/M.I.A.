@@ -83,6 +83,7 @@ if (!isElectron()) {
 
 const initialState = {
     settings,
+    apiPrefix: `http://${settings.remoteIp}:${settings.remotePort}`,
 };
 
 const settingsSlice = createSlice({
@@ -119,6 +120,7 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
+            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
             if (!isElectron()) {
                 myCookie.set('settings', state.settings, {
                     path: '/',
@@ -127,23 +129,6 @@ const settingsSlice = createSlice({
             }
         },
     },
-    /*extraReducers: (builder) => {
-        builder.addCase(loadElectronCookie.pending, (state, action) => {
-            state.settings.loadingElectronCookie = true;
-        });
-        builder.addCase(loadElectronCookie.fulfilled, (state, action) => {
-            state.settings.loadingElectronCookie = true;
-            const { payload } = action;
-            for (let key in payload) {
-                if (payload[key] !== '') {
-                    state.settings[key] = payload[key];
-                }
-            }
-            state.settings.hasFileOutput =
-                payload.localFileOutput !== '' ? true : false;
-            state.settings.loadingElectronCookie = false;
-        });
-    },*/
     extraReducers: {
         [saveElectronCookie.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
@@ -152,6 +137,7 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
+            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
         },
         [saveElectronCookie.rejected]: (state) => {
             state.settings = defaultSettings;
@@ -164,6 +150,7 @@ const settingsSlice = createSlice({
                 payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
             state.settings.loadingElectronCookie = false;
+            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
         },
         [loadElectronCookie.pending]: (state) => {
             state.settings.loadingElectronCookie = true;
@@ -246,5 +233,7 @@ export const getFirstDisplaySettings = (state) =>
 export const getDeviceType = (state) => state.settings.settings.deviceType;
 
 export const getFileSuffix = (state) => state.settings.settings.fileSuffix;
+
+export const getApiPrefix = (state) => state.settings.apiPrefix;
 
 export default settingsSlice.reducer;
