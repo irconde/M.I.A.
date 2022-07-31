@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
-import CogWheelIcon from './settings-cog.icon';
+import CogWheelIcon from '../../icons/top-bar/settings-cog-icon/settings-cog.icon';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
 import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/connection-status.icon';

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledCogWheelIcon } from '../../icons/shared/settings-cog-icon/settings-cog.icon.styles';
+import { StyledCogWheelIcon } from '../../shared/settings-cog-icon/settings-cog.icon.styles';
 
 const CogWheelIcon = (props) => {
     return (

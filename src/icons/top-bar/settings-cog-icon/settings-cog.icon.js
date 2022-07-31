@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledCogWheelIcon } from '../../icons/shared/settings-cog-icon/settings-cog.icon.styles';
-import { toggleSettingsVisibility } from '../../redux/slices/ui/uiSlice';
+import { StyledCogWheelIcon } from '../../shared/settings-cog-icon/settings-cog.icon.styles';
+import { toggleSettingsVisibility } from '../../../redux/slices/ui/uiSlice';
 import { useDispatch } from 'react-redux';
 import Tooltip from '@mui/material/Tooltip';
-import { TopBarCogIconWrapper } from './top-bar.styles';
+import { TopBarCogIconWrapper } from '../../../components/top-bar/top-bar.styles';
 
 const CogWheelIcon = (props) => {
     const dispatch = useDispatch();
