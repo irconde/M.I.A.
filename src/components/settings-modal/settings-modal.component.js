@@ -74,7 +74,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
-import CogWheelIcon from '../../icons/shared/settings-cog-icon/settings-cog.icon';
+import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
 import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
@@ -307,18 +307,6 @@ const SettingsModal = (props) => {
                 }, 0);
             }
         }
-    };
-
-    const svgContainerStyle = {
-        margin: '0.3rem',
-        marginRight: '1rem',
-        display: 'flex',
-        float: 'left',
-    };
-    const svgStyle = {
-        height: '24px',
-        width: '24px',
-        color: '#ffffff',
     };
 
     let body = (

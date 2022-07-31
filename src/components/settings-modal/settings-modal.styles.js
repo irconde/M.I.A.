@@ -71,8 +71,6 @@ export const SettingsHeader = styled.div`
 `;
 
 export const CogIconWrapper = styled.div`
-    margin-right: 1rem;
-    margin-left: 0;
     width: 32px;
     height: 24px;
     align-self: center;

@@ -22,6 +22,7 @@ export const InputContainer = styled.div`
 
 export const ArrowIconWrapper = styled.div`
     display: flex;
+    cursor: pointer;
 `;
 
 export const NewLabelInput = styled.input`

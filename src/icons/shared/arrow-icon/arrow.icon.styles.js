@@ -1,16 +1,10 @@
 import { ReactComponent as ExpandArrowIconComponent } from './arrow.icon.svg';
 import styled from 'styled-components';
+import { iconColor, iconSize } from '../24px.icon.styles';
 
-export const StyledArrowIcon = styled(ExpandArrowIconComponent).attrs(
-    (props) => ({
-        width: props.width || '24px',
-        height: props.height || '24px',
-    })
-)`
-    align-self: center;
-    cursor: pointer;
-    fill: ${(props) => props.color};
+export const StyledArrowIcon = styled(ExpandArrowIconComponent).attrs(iconSize)`
     transform: rotate(${(props) => getRotationAngle(props.direction)}deg);
+    ${iconColor}
 `;
 
 /**

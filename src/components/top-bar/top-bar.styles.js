@@ -97,3 +97,11 @@ export const MenuIconWrapper = styled.div`
     margin: 0.5rem 1.5rem 0.5rem -0.5rem;
     cursor: pointer;
 `;
+
+export const TopBarCogIconWrapper = styled.div`
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    margin: auto 0.75rem;
+    cursor: pointer;
+`;
