@@ -852,7 +852,7 @@ class App extends Component {
                 this.state.commandServer !== null) ||
             update === true
         ) {
-            fetch(`${this.props.apiPrefix}/getCurrentFile`, {
+            fetch(`${this.props.apiPrefix}/files/getCurrentFile`, {
                 method: 'GET',
             })
                 .then((response) => {
@@ -1021,7 +1021,7 @@ class App extends Component {
     async sendImageToCommandServer(file) {
         this.props.setUpload(true);
         return new Promise((resolve, reject) => {
-            fetch(`${this.props.apiPrefix}/fileFromClient`, {
+            fetch(`${this.props.apiPrefix}/files/fileFromClient`, {
                 method: 'POST',
                 body: JSON.stringify({
                     file: file,
