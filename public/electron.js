@@ -33,16 +33,18 @@ const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
 const pngExp = /\.png$/;
-const MONITOR_FILE_NAME = 'monitorConfig.json';
+const MONITOR_FILE_PATH = isDev
+    ? 'monitorConfig.json'
+    : path.join(app.getPath('userData'), 'monitorConfig.json');
 
 function createWindow() {
     let display;
     // check for file containing information about last window location and dimensions
     // if not found, open the window in the primary display
-    if (!fs.existsSync(MONITOR_FILE_NAME)) {
+    if (!fs.existsSync(MONITOR_FILE_PATH)) {
         display = screen.getPrimaryDisplay();
     } else {
-        const data = fs.readFileSync(MONITOR_FILE_NAME);
+        const data = fs.readFileSync(MONITOR_FILE_PATH);
         const rectangle = JSON.parse(data);
         display = screen.getDisplayMatching(rectangle);
     }
@@ -78,7 +80,7 @@ function createWindow() {
     mainWindow.maximize();
     mainWindow.on('close', async () => {
         const rectangle = mainWindow.getBounds();
-        fs.writeFile(MONITOR_FILE_NAME, JSON.stringify(rectangle), (err) => {
+        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
             if (err) throw err;
         });
     });
