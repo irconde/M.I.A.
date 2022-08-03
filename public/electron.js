@@ -36,17 +36,19 @@ const pngExp = /\.png$/;
 const MONITOR_FILE_NAME = 'monitorConfig.json';
 
 function createWindow() {
+    let display;
+    // check for file containing information about last window location and dimensions
+    // if not found, open the window in the primary display
     if (!fs.existsSync(MONITOR_FILE_NAME)) {
-        console.log('NOT FOUND');
+        display = screen.getPrimaryDisplay();
     } else {
         const data = fs.readFileSync(MONITOR_FILE_NAME);
         const rectangle = JSON.parse(data);
+        display = screen.getDisplayMatching(rectangle);
     }
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
+
     mainWindow = new BrowserWindow({
-        width,
-        height,
+        ...display.bounds,
         webPreferences: {
             // Node Integration enables the use of the Node.JS File system
             // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
