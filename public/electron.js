@@ -68,8 +68,8 @@ function createWindow() {
         .catch((err) => console.log(err));
     mainWindow.maximize();
     mainWindow.on('closed', async () => {
-        await watcher.unwatch(currentPath);
-        await watcher.close();
+        await watcher?.unwatch(currentPath);
+        await watcher?.close();
         mainWindow = null;
     });
     if (!isDev) mainWindow.removeMenu();
