@@ -33,8 +33,15 @@ const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
 const pngExp = /\.png$/;
+const MONITOR_FILE_NAME = 'monitorConfig.json';
 
 function createWindow() {
+    if (!fs.existsSync(MONITOR_FILE_NAME)) {
+        console.log('NOT FOUND');
+    } else {
+        const data = fs.readFileSync(MONITOR_FILE_NAME);
+        const rectangle = JSON.parse(data);
+    }
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
     mainWindow = new BrowserWindow({
@@ -69,7 +76,7 @@ function createWindow() {
     mainWindow.maximize();
     mainWindow.on('close', async () => {
         const rectangle = mainWindow.getBounds();
-        fs.writeFile('monitorConfig.json', JSON.stringify(rectangle), (err) => {
+        fs.writeFile(MONITOR_FILE_NAME, JSON.stringify(rectangle), (err) => {
             if (err) throw err;
         });
     });
