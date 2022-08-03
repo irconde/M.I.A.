@@ -67,6 +67,12 @@ function createWindow() {
         })
         .catch((err) => console.log(err));
     mainWindow.maximize();
+    mainWindow.on('close', async () => {
+        const rectangle = mainWindow.getBounds();
+        fs.writeFile('monitorConfig.json', JSON.stringify(rectangle), (err) => {
+            if (err) throw err;
+        });
+    });
     mainWindow.on('closed', async () => {
         await watcher?.unwatch(currentPath);
         await watcher?.close();
