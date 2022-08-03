@@ -3,6 +3,7 @@ import { ReactComponent as DownloadIconComponent } from './svgs/traffic-download
 import { ReactComponent as UploadIconComponent } from './svgs/traffic-upload.icon.svg';
 import { ReactComponent as DownloadUploadIconComponent } from './svgs/traffic-download-upload.icon.svg';
 import { ReactComponent as NoTransmissionIconComponent } from './svgs/traffic-no-transmission.icon.svg';
+import { iconColor } from '../../shared/24px.icon.styles';
 
 const trafficIconDimen = (props) => ({
     width: props.width || '32px',
@@ -12,23 +13,23 @@ const trafficIconDimen = (props) => ({
 export const StyledDownloadIcon = styled(DownloadIconComponent).attrs(
     trafficIconDimen
 )`
-    fill: ${(props) => props.color};
+    ${iconColor}
 `;
 
 export const StyledUploadIcon = styled(UploadIconComponent).attrs(
     trafficIconDimen
 )`
-    fill: ${(props) => props.color};
+    ${iconColor}
 `;
 
 export const StyledDownloadUploadIcon = styled(
     DownloadUploadIconComponent
 ).attrs(trafficIconDimen)`
-    fill: ${(props) => props.color};
+    ${iconColor}
 `;
 
 export const StyledNoTransmissionIcon = styled(
     NoTransmissionIconComponent
 ).attrs(trafficIconDimen)`
-    fill: ${(props) => props.color};
+    ${iconColor}
 `;
