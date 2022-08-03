@@ -1,6 +1,4 @@
-export const iconColor = `
-    fill: ${(props) => props.color};
-`;
+export const iconColor = (props) => `fill: ${props.color}`;
 
 export const iconSize = (props) => ({
     width: props.width || '24px',
