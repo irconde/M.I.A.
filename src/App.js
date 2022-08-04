@@ -17,7 +17,7 @@ import SaveButtonComponent from './components/side-menu/buttons/save-button.comp
 import TopBarComponent from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
-import * as constants from './utils/general/Constants';
+import * as constants from './utils/enums/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';

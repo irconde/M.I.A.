@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 import Utils from '../../utils/general/Utils';
-import { Channels } from '../../utils/general/Constants';
+import { Channels } from '../../utils/enums/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';

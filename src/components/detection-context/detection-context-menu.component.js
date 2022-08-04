@@ -5,8 +5,8 @@ import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 import MovementIcon from '../../icons/detection-context-menu/movement-icon/movement.icon';
-import * as constants from '../../utils/general/Constants';
-import { editionMode } from '../../utils/general/Constants';
+import * as constants from '../../utils/enums/Constants';
+import { editionMode } from '../../utils/enums/Constants';
 import { useSelector } from 'react-redux';
 import {
     getDetectionContextPosition,

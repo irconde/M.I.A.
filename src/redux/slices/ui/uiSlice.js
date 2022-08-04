@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../utils/general/Constants';
+import * as constants from '../../../utils/enums/Constants';
 import Utils from '../../../utils/general/Utils';
 
 const initialState = {

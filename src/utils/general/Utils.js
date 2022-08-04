@@ -1,7 +1,7 @@
 /**
  * Class that encompasses any secondary method to support the primary features of the client
  */
-import * as constants from './Constants';
+import * as constants from '../enums/Constants';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';

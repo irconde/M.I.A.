@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
-import * as constants from '../../utils/general/Constants';
+import * as constants from '../../utils/enums/Constants';
 import Utils from '../../utils/general/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
 import {

@@ -66,7 +66,7 @@ import {
     saveSettings,
 } from '../../redux/slices/settings/settingsSlice';
 import socketIOClient from 'socket.io-client';
-import { Channels, SETTINGS } from '../../utils/general/Constants';
+import { Channels, SETTINGS } from '../../utils/enums/Constants';
 import Utils from '../../utils/general/Utils';
 import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import TreeDetection from './side-menu-detection.component';
-import * as constants from '../../../utils/general/Constants';
+import * as constants from '../../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import Utils from '../../../utils/general/Utils';
 import {

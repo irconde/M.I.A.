@@ -1,5 +1,5 @@
 import * as dcmjs from 'dcmjs';
-import { SETTINGS } from '../general/Constants';
+import { SETTINGS } from '../enums/Constants';
 import Utils from '../general/Utils';
 
 /**

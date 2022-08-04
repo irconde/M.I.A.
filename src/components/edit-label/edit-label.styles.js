@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import * as constants from '../../utils/general/Constants';
+import * as constants from '../../utils/enums/Constants';
 
 export const EditLabelWrapper = styled.div`
     position: absolute;

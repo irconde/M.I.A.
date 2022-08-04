@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { TwitterPicker } from 'react-color';
 import { useDispatch, useSelector } from 'react-redux';
-import * as constants from '../../utils/general/Constants';
-import { detectionContextStyle } from '../../utils/general/Constants';
+import * as constants from '../../utils/enums/Constants';
+import { detectionContextStyle } from '../../utils/enums/Constants';
 import {
     addMissMatchedClassName,
     getSelectedDetectionClassName,

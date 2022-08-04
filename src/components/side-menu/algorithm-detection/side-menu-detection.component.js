@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { MAX_LABEL_LENGTH } from '../../../utils/general/Constants';
+import { MAX_LABEL_LENGTH } from '../../../utils/enums/Constants';
 import Utils from '../../../utils/general/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
 import {

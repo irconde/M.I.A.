@@ -1,4 +1,4 @@
-import { SETTINGS } from '../general/Constants';
+import { SETTINGS } from '../enums/Constants';
 
 export default class XmlParserUtil {
     _xmlData = '';

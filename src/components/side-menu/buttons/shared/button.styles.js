@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { sideMenuWidth } from '../../../../utils/general/Constants';
+import { sideMenuWidth } from '../../../../utils/enums/Constants';
 
 export const CollapsedButtonContainer = styled.div`
     width: 75px;
