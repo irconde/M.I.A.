@@ -33,13 +33,24 @@ const oraExp = /\.ora$/;
 const zipExp = /\.zip$/;
 const dcsExp = /\.dcs$/;
 const pngExp = /\.png$/;
+const MONITOR_FILE_PATH = isDev
+    ? 'monitorConfig.json'
+    : path.join(app.getPath('userData'), 'monitorConfig.json');
 
 function createWindow() {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
+    let display;
+    // check for file containing information about last window location and dimensions
+    // if not found, open the window in the primary display
+    if (!fs.existsSync(MONITOR_FILE_PATH)) {
+        display = screen.getPrimaryDisplay();
+    } else {
+        const data = fs.readFileSync(MONITOR_FILE_PATH);
+        const rectangle = JSON.parse(data);
+        display = screen.getDisplayMatching(rectangle);
+    }
+
     mainWindow = new BrowserWindow({
-        width,
-        height,
+        ...display.bounds,
         webPreferences: {
             // Node Integration enables the use of the Node.JS File system
             // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
@@ -67,9 +78,15 @@ function createWindow() {
         })
         .catch((err) => console.log(err));
     mainWindow.maximize();
+    mainWindow.on('close', async () => {
+        const rectangle = mainWindow.getBounds();
+        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
+            if (err) throw err;
+        });
+    });
     mainWindow.on('closed', async () => {
-        await watcher.unwatch(currentPath);
-        await watcher.close();
+        await watcher?.unwatch(currentPath);
+        await watcher?.close();
         mainWindow = null;
     });
     if (!isDev) mainWindow.removeMenu();
