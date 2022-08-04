@@ -1,6 +1,9 @@
 import JSZip from 'jszip';
 import XmlParserUtil from './xml-parser-util';
 
+/**
+ * Class that manages the loading and generating of files for the application
+ */
 export default class FileUtils {
     _fileData = '';
     _blobData = [];
@@ -16,6 +19,10 @@ export default class FileUtils {
         this._loadData();
     }
 
+    /**
+     * Loads the data from the passed in file string data
+     * @private
+     */
     _loadData() {
         const zipUtil = new JSZip();
         zipUtil.loadAsync(this._fileData, { base64: true }).then(() => {

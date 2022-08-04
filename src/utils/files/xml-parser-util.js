@@ -1,5 +1,8 @@
 import { SETTINGS } from '../enums/Constants';
 
+/**
+ * Class that parses a xml file based on the given string
+ */
 export default class XmlParserUtil {
     _xmlData = '';
     _xmlDoc = null;
@@ -29,10 +32,20 @@ export default class XmlParserUtil {
         }
     }
 
+    /**
+     * Returns the parsed data of a coco formatted file
+     * @returns {string}
+     * @private
+     */
     _parseCocoData() {
         return 'TODO: Return parsed coco data';
     }
 
+    /**
+     * Returns the parsed data of a tdr/dicos formatted file
+     * @returns {string}
+     * @private
+     */
     _parseTdrData() {
         return 'TODO: Return parsed tdr data';
     }
