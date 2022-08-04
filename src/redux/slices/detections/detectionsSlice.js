@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../utils/Constants';
+import * as constants from '../../../utils/general/Constants';
 import randomColor from 'randomcolor';
-import Utils from '../../../utils/Utils';
+import Utils from '../../../utils/general/Utils';
 import { Cookies } from 'react-cookie';
-import * as Ensemble from '../../../utils/Ensemble';
+import * as Ensemble from '../../../utils/detections/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier

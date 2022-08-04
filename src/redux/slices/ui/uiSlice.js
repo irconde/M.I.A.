@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import * as constants from '../../../utils/Constants';
-import Utils from '../../../utils/Utils';
+import * as constants from '../../../utils/general/Constants';
+import Utils from '../../../utils/general/Utils';
 
 const initialState = {
     editionMode: constants.editionMode.NO_TOOL,

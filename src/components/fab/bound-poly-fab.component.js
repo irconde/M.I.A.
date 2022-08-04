@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as constants from '../../utils/Constants';
+import * as constants from '../../utils/general/Constants';
 import { useSelector } from 'react-redux';
 import {
     getCollapsedLazyMenu,

@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
-import Utils from './Utils';
-import { SETTINGS } from './Constants';
+import Utils from '../general/Utils';
+import { SETTINGS } from '../general/Constants';
 import React from 'react';
 
 /**

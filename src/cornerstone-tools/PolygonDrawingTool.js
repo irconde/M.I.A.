@@ -1,8 +1,8 @@
 import csTools from 'eac-cornerstone-tools';
-import * as constants from '../utils/Constants';
+import * as constants from '../utils/general/Constants';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneMath from 'cornerstone-math';
-import Utils from '../utils/Utils';
+import Utils from '../utils/general/Utils';
 const drawHandles = csTools.importInternal('drawing/drawHandles');
 const BaseAnnotationTool = csTools.importInternal('base/BaseAnnotationTool');
 const getNewContext = csTools.importInternal('drawing/getNewContext');

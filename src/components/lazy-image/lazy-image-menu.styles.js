@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import * as constants from '../../utils/Constants';
+import * as constants from '../../utils/general/Constants';
 
 const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
 

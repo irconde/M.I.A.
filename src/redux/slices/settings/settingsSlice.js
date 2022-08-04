@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import isElectron from 'is-electron';
 import { Cookies } from 'react-cookie';
-import { Channels, COOKIE, SETTINGS } from '../../../utils/Constants';
+import { Channels, COOKIE, SETTINGS } from '../../../utils/general/Constants';
 
 const myCookie = new Cookies();
 let cookieData;

@@ -7,17 +7,17 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
-import ORA from './utils/ORA.js';
-import Utils from './utils/Utils.js';
-import Dicos from './utils/Dicos.js';
-import TapDetector from './utils/TapDetector';
+import ORA from './utils/detections/ORA.js';
+import Utils from './utils/general/Utils.js';
+import Dicos from './utils/detections/Dicos.js';
+import TapDetector from './utils/general/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import NextButtonComponent from './components/side-menu/buttons/next-button.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 import TopBarComponent from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
-import * as constants from './utils/Constants';
+import * as constants from './utils/general/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
 import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
 import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
@@ -85,7 +85,7 @@ import {
 } from './redux/slices/ui/uiSlice';
 import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
 import EditLabel from './components/edit-label/edit-label.component';
-import { buildCocoDataZip } from './utils/Coco';
+import { buildCocoDataZip } from './utils/detections/Coco';
 import { fileOpen, fileSave } from 'browser-fs-access';
 import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
@@ -98,6 +98,7 @@ import {
 } from './redux/slices/settings/settingsSlice';
 import fetch from 'cross-fetch';
 import { Alert, Snackbar } from '@mui/material';
+import FileUtils from './utils/files/file-utils';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -1120,6 +1121,10 @@ class App extends Component {
         let listOfStacks = [];
 
         let contentType;
+        if (this.props.fileLoadingFlag) {
+            // TODO
+            const fileUtils = new FileUtils(image);
+        }
         // Let's load the compressed ORA file as base64
         myZip.loadAsync(image, { base64: true }).then(() => {
             //First, after loading, we need to check our stack.xml
@@ -3958,7 +3963,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections, ui, settings } = state;
+    const { server, detections, ui, settings, featureFlag } = state;
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
@@ -3998,6 +4003,8 @@ const mapStateToProps = (state) => {
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,
         apiPrefix: settings.apiPrefix,
+        // Feature Flags
+        fileLoadingFlag: featureFlag.fileLoadingFlag,
     };
 };
 

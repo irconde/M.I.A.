@@ -1,5 +1,8 @@
 import styled from 'styled-components';
-import { sideMenuPaddingTop, sideMenuWidth } from '../../utils/Constants';
+import {
+    sideMenuPaddingTop,
+    sideMenuWidth,
+} from '../../utils/general/Constants';
 
 export const SideMenuContainer = styled.div`
     -webkit-transition: all 0.3s ease-in;
