@@ -36,6 +36,11 @@ const pngExp = /\.png$/;
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
+const {
+    default: installExtension,
+    REDUX_DEVTOOLS,
+    REACT_DEVELOPER_TOOLS,
+} = require('electron-devtools-installer');
 
 function createWindow() {
     let display;
@@ -56,6 +61,7 @@ function createWindow() {
             // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
             nodeIntegration: true,
             contextIsolation: false,
+            devTools: isDev,
         },
     });
     mainWindow
@@ -89,7 +95,18 @@ function createWindow() {
         await watcher?.close();
         mainWindow = null;
     });
-    if (!isDev) mainWindow.removeMenu();
+    if (isDev) {
+        mainWindow.webContents.once('dom-ready', async () => {
+            await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+                .then((name) => console.log(`Added Extension:  ${name}`))
+                .catch((err) => console.log('An error occurred: ', err))
+                .finally(() => {
+                    mainWindow.webContents.openDevTools();
+                });
+        });
+    } else {
+        mainWindow.removeMenu();
+    }
 }
 
 app.on('ready', () => {
