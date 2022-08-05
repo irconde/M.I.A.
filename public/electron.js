@@ -83,6 +83,7 @@ function createWindow() {
                 });
         })
         .catch((err) => console.log(err));
+
     mainWindow.maximize();
     mainWindow.on('close', async () => {
         const rectangle = mainWindow.getBounds();
@@ -96,22 +97,15 @@ function createWindow() {
         mainWindow = null;
     });
     if (isDev) {
-        mainWindow.webContents.once('dom-ready', async () => {
-            await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-                .then((name) => console.log(`Added Extension:  ${name}`))
-                .catch((err) => console.log('An error occurred: ', err))
-                .finally(() => {
-                    mainWindow.webContents.openDevTools();
-                });
-        });
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+            .then((name) => console.log(`Added Extension:  ${name}`))
+            .catch((err) => console.log('An error occurred: ', err));
     } else {
         mainWindow.removeMenu();
     }
 }
 
-app.on('ready', () => {
-    createWindow();
-});
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
