@@ -41,6 +41,18 @@ const {
     REDUX_DEVTOOLS,
     REACT_DEVELOPER_TOOLS,
 } = require('electron-devtools-installer');
+const { finalize } = require('@babel/core/lib/config/helpers/deep-array');
+
+// If development environment
+if (isDev) {
+    try {
+        require('electron-reloader')(module, {
+            watchRenderer: true,
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 function createWindow() {
     let display;
@@ -100,6 +112,19 @@ function createWindow() {
         installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
             .then((name) => console.log(`Added Extension:  ${name}`))
             .catch((err) => console.log('An error occurred: ', err));
+
+        // Open the DevTools.
+        mainWindow.webContents.on('did-frame-finish-load', () => {
+            // We close the DevTools so that it can be reopened and redux reconnected.
+            // This is a workaround for a bug in redux devtools.
+            mainWindow.webContents.closeDevTools();
+
+            mainWindow.webContents.once('devtools-opened', () => {
+                mainWindow.focus();
+            });
+
+            mainWindow.webContents.openDevTools();
+        });
     } else {
         mainWindow.removeMenu();
     }
