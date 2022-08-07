@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { detectionContextStyle } from '../../utils/Constants';
+import { detectionContextStyle } from '../../utils/enums/Constants';
 
 export const Positioner = styled.div`
     position: absolute;

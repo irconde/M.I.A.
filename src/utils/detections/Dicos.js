@@ -1,6 +1,6 @@
 import * as dcmjs from 'dcmjs';
-import { SETTINGS } from './Constants';
-import Utils from './Utils';
+import { SETTINGS } from '../enums/Constants';
+import Utils from '../general/Utils';
 
 /**
  * Collection of auxiliary methods for managing DICOS files
