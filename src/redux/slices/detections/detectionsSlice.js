@@ -182,44 +182,7 @@ const detectionsSlice = createSlice({
             }
             /*                  End bList sorting                    */
             /*                  WBF Calculation                    */
-            state.summarizedDetections = [];
-            state.bLists.forEach((list) => {
-                const bListDetections = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        bListDetections.push({
-                            view: detection.view,
-                            className: detection.className.toLowerCase(),
-                            algorithm: detection.algorithm.toLowerCase(),
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-                const { lList, fList } =
-                    Ensemble.calculateLFLists(bListDetections);
-                for (let i = 0; i < fList.length; i++) {
-                    const { x1, x2, y1, y2, fusedConfidence } =
-                        Ensemble.calculateFusedBox(lList, i);
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence =
-                        fusedConfidence >= 100 ? 100 : fusedConfidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
-            });
+            calculateWBF(state);
             /*                  End WBF Calculation                    */
             /*                  End Ensemble                    */
         },
@@ -297,44 +260,7 @@ const detectionsSlice = createSlice({
             }
             /*                  Begin Ensemble                    */
             /*                  WBF Calculation                    */
-            state.summarizedDetections = [];
-            state.bLists.forEach((list) => {
-                const bListDetections = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        bListDetections.push({
-                            view: detection.view,
-                            className: detection.className.toLowerCase(),
-                            algorithm: detection.algorithm.toLowerCase(),
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-                const { lList, fList } =
-                    Ensemble.calculateLFLists(bListDetections);
-                for (let i = 0; i < fList.length; i++) {
-                    const { x1, x2, y1, y2, fusedConfidence } =
-                        Ensemble.calculateFusedBox(lList, i);
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence =
-                        fusedConfidence >= 100 ? 100 : fusedConfidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
-            });
+            calculateWBF(state);
             /*                  End WBF Calculation                    */
             /*                  End Ensemble                    */
         },
@@ -430,44 +356,7 @@ const detectionsSlice = createSlice({
                 }
                 /*                  End bList sorting                    */
                 /*                  WBF Calculation                    */
-                state.summarizedDetections = [];
-                state.bLists.forEach((list) => {
-                    const bListDetections = [];
-                    list.items.forEach((item) => {
-                        const detection = state.detections.find(
-                            (det) => det.uuid === item.uuid
-                        );
-                        try {
-                            bListDetections.push({
-                                view: detection.view,
-                                className: detection.className.toLowerCase(),
-                                algorithm: detection.algorithm.toLowerCase(),
-                                boundingBox: JSON.parse(
-                                    JSON.stringify(detection.boundingBox)
-                                ),
-                                confidence: detection.confidence,
-                                color: detection.color,
-                                visible: true,
-                                selected: false,
-                            });
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    });
-                    const { lList, fList } =
-                        Ensemble.calculateLFLists(bListDetections);
-                    for (let i = 0; i < fList.length; i++) {
-                        const { x1, x2, y1, y2, fusedConfidence } =
-                            Ensemble.calculateFusedBox(lList, i);
-                        fList[i].algorithm = 'Summarized - WBF';
-                        fList[i].boundingBox = [x1, y1, x2, y2];
-                        fList[i].confidence =
-                            fusedConfidence >= 100 ? 100 : fusedConfidence;
-                        fList[i].polygonMask = [];
-                        fList[i].binaryMask = [[], [], []];
-                        state.summarizedDetections.push(fList[i]);
-                    }
-                });
+                calculateWBF(state);
                 /*                  End WBF Calculation                    */
                 /*                  End Ensemble                    */
             }
@@ -504,44 +393,7 @@ const detectionsSlice = createSlice({
                 }
                 /*                  End bList sorting                    */
                 /*                  WBF Calculation                    */
-                state.summarizedDetections = [];
-                state.bLists.forEach((list) => {
-                    const bListDetections = [];
-                    list.items.forEach((item) => {
-                        const detection = state.detections.find(
-                            (det) => det.uuid === item.uuid
-                        );
-                        try {
-                            bListDetections.push({
-                                view: detection.view,
-                                className: detection.className.toLowerCase(),
-                                algorithm: detection.algorithm.toLowerCase(),
-                                boundingBox: JSON.parse(
-                                    JSON.stringify(detection.boundingBox)
-                                ),
-                                confidence: detection.confidence,
-                                color: detection.color,
-                                visible: true,
-                                selected: false,
-                            });
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    });
-                    const { lList, fList } =
-                        Ensemble.calculateLFLists(bListDetections);
-                    for (let i = 0; i < fList.length; i++) {
-                        const { x1, x2, y1, y2, fusedConfidence } =
-                            Ensemble.calculateFusedBox(lList, i);
-                        fList[i].algorithm = 'Summarized - WBF';
-                        fList[i].boundingBox = [x1, y1, x2, y2];
-                        fList[i].confidence =
-                            fusedConfidence >= 100 ? 100 : fusedConfidence;
-                        fList[i].polygonMask = [];
-                        fList[i].binaryMask = [[], [], []];
-                        state.summarizedDetections.push(fList[i]);
-                    }
-                });
+                calculateWBF(state);
                 /*                  End WBF Calculation                    */
                 /*                  End Ensemble                    */
             }
@@ -901,6 +753,46 @@ export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.detectionType;
     }
+};
+
+const calculateWBF = (state) => {
+    state.summarizedDetections = [];
+    state.bLists.forEach((list) => {
+        const bListDetections = [];
+        list.items.forEach((item) => {
+            const detection = state.detections.find(
+                (det) => det.uuid === item.uuid
+            );
+            try {
+                bListDetections.push({
+                    view: detection.view,
+                    className: detection.className.toLowerCase(),
+                    algorithm: detection.algorithm.toLowerCase(),
+                    boundingBox: JSON.parse(
+                        JSON.stringify(detection.boundingBox)
+                    ),
+                    confidence: detection.confidence,
+                    color: detection.color,
+                    visible: true,
+                    selected: false,
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        });
+        const { lList, fList } = Ensemble.calculateLFLists(bListDetections);
+        for (let i = 0; i < fList.length; i++) {
+            const { x1, x2, y1, y2, fusedConfidence } =
+                Ensemble.calculateFusedBox(lList, i);
+            fList[i].algorithm = 'Summarized - WBF';
+            fList[i].boundingBox = [x1, y1, x2, y2];
+            fList[i].confidence =
+                fusedConfidence >= 100 ? 100 : fusedConfidence;
+            fList[i].polygonMask = [];
+            fList[i].binaryMask = [[], [], []];
+            state.summarizedDetections.push(fList[i]);
+        }
+    });
 };
 
 export const {
