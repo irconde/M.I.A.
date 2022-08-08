@@ -131,15 +131,14 @@ const detectionsSlice = createSlice({
                 validation: null,
                 textColor: 'white',
             });
-            state.detections[state.detections.length - 1].detectionType =
-                Utils.getDetectionType(
-                    state.detections[state.detections.length - 1]
-                );
+            state.detections.at(-1).detectionType = Utils.getDetectionType(
+                state.detections.at(-1)
+            );
             const foundIndex = state.missMatchedClassNames.findIndex(
                 (el) => el.className === className
             );
             if (foundIndex !== -1) {
-                state.detections[state.detections.length - 1].color =
+                state.detections.at(-1).color =
                     state.missMatchedClassNames[foundIndex].color;
             }
             if (state.detectionLabels.indexOf(className) === -1) {
@@ -151,9 +150,8 @@ const detectionsSlice = createSlice({
             /*                  Begin Ensemble                    */
             /*                  bList sorting                    */
             const bListRef = {
-                uuid: state.detections[state.detections.length - 1].uuid,
-                confidence:
-                    state.detections[state.detections.length - 1].confidence,
+                uuid: state.detections.at(-1).uuid,
+                confidence: state.detections.at(-1).confidence,
             };
             if (state.bLists.length === 0) {
                 state.bLists[0] = {
@@ -781,17 +779,16 @@ const calculateWBF = (state) => {
             }
         });
         const { lList, fList } = Ensemble.calculateLFLists(bListDetections);
-        for (let i = 0; i < fList.length; i++) {
+        fList.forEach((fBox, index) => {
             const { x1, x2, y1, y2, fusedConfidence } =
-                Ensemble.calculateFusedBox(lList, i);
-            fList[i].algorithm = 'Summarized - WBF';
-            fList[i].boundingBox = [x1, y1, x2, y2];
-            fList[i].confidence =
-                fusedConfidence >= 100 ? 100 : fusedConfidence;
-            fList[i].polygonMask = [];
-            fList[i].binaryMask = [[], [], []];
-            state.summarizedDetections.push(fList[i]);
-        }
+                Ensemble.calculateFusedBox(lList, index);
+            fBox.algorithm = 'Summarized - WBF';
+            fBox.boundingBox = [x1, y1, x2, y2];
+            fBox.confidence = fusedConfidence >= 100 ? 100 : fusedConfidence;
+            fBox.polygonMask = [];
+            fBox.binaryMask = [[], [], []];
+            state.summarizedDetections.push(fBox);
+        });
     });
 };
 
