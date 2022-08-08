@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { detectionStyle } from '../../../utils/Constants';
+import { detectionStyle } from '../../../utils/enums/Constants';
 
 export const SideMenuAlgorithm = styled.div`
     padding-block: 0.75rem;

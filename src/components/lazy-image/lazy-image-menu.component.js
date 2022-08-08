@@ -11,8 +11,8 @@ import {
     getLocalFileOpen,
     setGeneratingThumbnails,
 } from '../../redux/slices/ui/uiSlice';
-import * as constants from '../../utils/Constants';
-import Utils from '../../utils/Utils';
+import * as constants from '../../utils/enums/Constants';
+import Utils from '../../utils/general/Utils';
 import LazyImageContainer from './lazy-image-container.component';
 import {
     FolderIconWrapper,

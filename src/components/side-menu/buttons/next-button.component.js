@@ -5,7 +5,7 @@ import {
     getCollapsedSideMenu,
     getCornerstoneMode,
 } from '../../../redux/slices/ui/uiSlice';
-import * as constants from '../../../utils/Constants';
+import * as constants from '../../../utils/enums/Constants';
 import { getSelectedDetection } from '../../../redux/slices/detections/detectionsSlice';
 import {
     getConnected,
