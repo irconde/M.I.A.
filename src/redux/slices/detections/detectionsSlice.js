@@ -160,9 +160,10 @@ const detectionsSlice = createSlice({
                     items: [bListRef],
                 };
             } else {
-                const index = state.bLists.findIndex(
-                    (value) =>
-                        value.view === view && value.className === className
+                const index = getIndexByViewAndClassName(
+                    state.bLists,
+                    view,
+                    className
                 );
                 if (index !== -1) {
                     state.bLists[index].items.push(bListRef);
@@ -316,10 +317,10 @@ const detectionsSlice = createSlice({
                         state.bLists.splice(oldIndex, 1);
                     }
                 }
-                let newIndex = state.bLists.findIndex(
-                    (list) =>
-                        list.view === detection.view &&
-                        list.className.toLowerCase() === newClassName
+                let newIndex = getIndexByViewAndClassName(
+                    state.bLists,
+                    detection.view,
+                    newClassName
                 );
                 const bListRef = {
                     uuid,
@@ -733,6 +734,12 @@ export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.detectionType;
     }
+};
+
+const getIndexByViewAndClassName = (bList, view, className) => {
+    return bList.findIndex(
+        (list) => list.view === view && list.className === className
+    );
 };
 
 const sortByConfidence = (a, b) => {
