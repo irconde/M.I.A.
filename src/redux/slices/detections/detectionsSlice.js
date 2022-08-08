@@ -266,83 +266,77 @@ const detectionsSlice = createSlice({
          */
         editDetectionLabel: (state, action) => {
             const { uuid, className } = action.payload;
-            const newClassName = className.toLowerCase();
-            let oldClassName = '';
             let detection = state.detections.find((det) => det.uuid === uuid);
-            if (detection) {
-                oldClassName = detection.className.toLowerCase();
-                detection.className = newClassName;
-                const detColor = randomColor({
-                    seed: className,
-                    hue: 'random',
-                    luminosity: 'bright',
-                });
-                detection.color = detColor;
-                if (state.selectedDetection?.uuid === detection.uuid) {
-                    state.selectedDetection.className = newClassName;
-                    state.selectedDetection.color = detColor;
-                }
-                state.detectionChanged = true;
-                if (state.detectionLabels.indexOf(className) === -1) {
-                    state.detectionLabels.push(className);
-                }
-                state.missMatchedClassNames.forEach((missMatched) => {
-                    state.detections.forEach((det) => {
-                        if (
-                            missMatched.className.toLowerCase() ===
-                            det.className
-                        ) {
-                            det.color = missMatched.color;
-                            if (
-                                state.selectedDetection?.uuid === detection.uuid
-                            ) {
-                                state.selectedDetection.color =
-                                    missMatched.color;
-                            }
-                        }
-                    });
-                });
-                /*                  Begin Ensemble                    */
-                /*                  bList sorting                    */
-                const oldIndex = state.bLists.findIndex(
-                    (list) =>
-                        list.view === detection.view &&
-                        list.className.toLowerCase() === oldClassName
-                );
-                if (oldIndex !== -1) {
-                    state.bLists[oldIndex].items = state.bLists[
-                        oldIndex
-                    ].items.filter((det) => det.uuid !== uuid);
-                    if (state.bLists[oldIndex].items.length === 0) {
-                        state.bLists.splice(oldIndex, 1);
-                    }
-                }
-                let newIndex = getIndexByViewAndClassName(
-                    state.bLists,
-                    detection.view,
-                    newClassName
-                );
-                const bListRef = {
-                    uuid,
-                    confidence: detection.confidence,
-                };
-                if (newIndex !== -1) {
-                    state.bLists[newIndex].items.push(bListRef);
-                } else {
-                    state.bLists.push({
-                        view: detection.view,
-                        className: newClassName,
-                        items: [bListRef],
-                    });
-                    newIndex = state.bLists.length - 1;
-                }
-                if (state.bLists[newIndex].items.length > 1) {
-                    state.bLists[newIndex].items.sort(sortByConfidence);
-                }
-                /*                  End bList sorting                    */
-                calculateWBF(state);
-                /*                  End Ensemble                    */
+            // exit function if id is not found
+            if (!detection) return;
+
+            const newClassName = className.toLowerCase();
+            const oldClassName = detection.className.toLowerCase();
+            detection.className = newClassName;
+            const detColor = randomColor({
+                seed: className,
+                hue: 'random',
+                luminosity: 'bright',
+            });
+            detection.color = detColor;
+            if (state.selectedDetection?.uuid === detection.uuid) {
+                state.selectedDetection.className = newClassName;
+                state.selectedDetection.color = detColor;
             }
+            state.detectionChanged = true;
+            if (state.detectionLabels.indexOf(className) === -1) {
+                state.detectionLabels.push(className);
+            }
+            state.missMatchedClassNames.forEach((missMatched) => {
+                state.detections.forEach((det) => {
+                    if (missMatched.className.toLowerCase() === det.className) {
+                        det.color = missMatched.color;
+                        if (state.selectedDetection?.uuid === detection.uuid) {
+                            state.selectedDetection.color = missMatched.color;
+                        }
+                    }
+                });
+            });
+            /*                  Begin Ensemble                    */
+            /*                  bList sorting                    */
+            const oldIndex = getIndexByViewAndClassName(
+                state.bLists,
+                detection.view,
+                oldClassName
+            );
+            if (oldIndex !== -1) {
+                state.bLists[oldIndex].items = state.bLists[
+                    oldIndex
+                ].items.filter((det) => det.uuid !== uuid);
+                if (state.bLists[oldIndex].items.length === 0) {
+                    state.bLists.splice(oldIndex, 1);
+                }
+            }
+            let newIndex = getIndexByViewAndClassName(
+                state.bLists,
+                detection.view,
+                newClassName
+            );
+            const bListRef = {
+                uuid,
+                confidence: detection.confidence,
+            };
+            if (newIndex !== -1) {
+                state.bLists[newIndex].items.push(bListRef);
+            } else {
+                state.bLists.push({
+                    view: detection.view,
+                    className: newClassName,
+                    items: [bListRef],
+                });
+                newIndex = state.bLists.length - 1;
+            }
+            if (state.bLists[newIndex].items.length > 1) {
+                state.bLists[newIndex].items.sort(sortByConfidence);
+            }
+            /*                  End bList sorting                    */
+            calculateWBF(state);
+            /*                  End Ensemble                    */
         },
 
         /**
