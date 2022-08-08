@@ -166,10 +166,7 @@ const detectionsSlice = createSlice({
                 );
                 if (index !== -1) {
                     state.bLists[index].items.push(bListRef);
-                    state.bLists[index].items.sort((a, b) => {
-                        if (a.confidence < b.confidence) return 1;
-                        else return -1;
-                    });
+                    state.bLists[index].items.sort(sortByConfidence);
                 } else {
                     state.bLists.push({
                         view,
@@ -179,9 +176,7 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  End bList sorting                    */
-            /*                  WBF Calculation                    */
             calculateWBF(state);
-            /*                  End WBF Calculation                    */
             /*                  End Ensemble                    */
         },
         /**
@@ -257,9 +252,7 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  Begin Ensemble                    */
-            /*                  WBF Calculation                    */
             calculateWBF(state);
-            /*                  End WBF Calculation                    */
             /*                  End Ensemble                    */
         },
 
@@ -328,34 +321,25 @@ const detectionsSlice = createSlice({
                         list.view === detection.view &&
                         list.className.toLowerCase() === newClassName
                 );
+                const bListRef = {
+                    uuid,
+                    confidence: detection.confidence,
+                };
                 if (newIndex !== -1) {
-                    state.bLists[newIndex].items.push({
-                        uuid,
-                        confidence: detection.confidence,
-                    });
+                    state.bLists[newIndex].items.push(bListRef);
                 } else {
                     state.bLists.push({
                         view: detection.view,
                         className: newClassName,
-                        items: [
-                            {
-                                uuid,
-                                confidence: detection.confidence,
-                            },
-                        ],
+                        items: [bListRef],
                     });
                     newIndex = state.bLists.length - 1;
                 }
                 if (state.bLists[newIndex].items.length > 1) {
-                    state.bLists[newIndex].items.sort((a, b) => {
-                        if (a.confidence < b.confidence) return 1;
-                        else return -1;
-                    });
+                    state.bLists[newIndex].items.sort(sortByConfidence);
                 }
                 /*                  End bList sorting                    */
-                /*                  WBF Calculation                    */
                 calculateWBF(state);
-                /*                  End WBF Calculation                    */
                 /*                  End Ensemble                    */
             }
         },
@@ -390,9 +374,7 @@ const detectionsSlice = createSlice({
                     }
                 }
                 /*                  End bList sorting                    */
-                /*                  WBF Calculation                    */
                 calculateWBF(state);
-                /*                  End WBF Calculation                    */
                 /*                  End Ensemble                    */
             }
         },
@@ -751,6 +733,11 @@ export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.detectionType;
     }
+};
+
+const sortByConfidence = (a, b) => {
+    if (a.confidence < b.confidence) return 1;
+    else return -1;
 };
 
 const calculateWBF = (state) => {
