@@ -181,7 +181,10 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  End bList sorting                    */
-            state.summarizedDetections = calculateWBF(state);
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
             /*                  End Ensemble                    */
         },
         /**
@@ -257,7 +260,10 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  Begin Ensemble                    */
-            state.summarizedDetections = calculateWBF(state);
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
             /*                  End Ensemble                    */
         },
 
@@ -339,7 +345,10 @@ const detectionsSlice = createSlice({
                 state.bLists[newIndex].items.sort(compareConfidence);
             }
             /*                  End bList sorting                    */
-            state.summarizedDetections = calculateWBF(state);
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
             /*                  End Ensemble                    */
         },
 
@@ -373,7 +382,10 @@ const detectionsSlice = createSlice({
                     }
                 }
                 /*                  End bList sorting                    */
-                calculateWBF(state);
+                state.summarizedDetections = calculateWBF(
+                    state.bLists,
+                    state.detections
+                );
                 /*                  End Ensemble                    */
             }
         },

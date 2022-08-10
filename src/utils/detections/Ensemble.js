@@ -120,24 +120,24 @@ export const compareConfidence = (a, b) => {
 };
 
 /**
- * Returns a list of the summarized detections that the state should be updated with
- *
- * @param state
- * @returns {*[]}
- */
-/**
  * TODO: Refactor the parameters to be (bLists, detections). Provide proper type definitions in the jsdoc above for parameters and return
  * TODO: See here for more info on jsdoc: https://eac-ualr.atlassian.net/wiki/spaces/D/pages/3122397195/Code+commenting
  */
-export const calculateWBF = (state) => {
+
+/**
+ * Returns a list of the summarized detections that the state should be updated with
+ *
+ * @param {Array<Object>} bLists
+ * @param {Array<Object>} detections
+ * @returns {Array<Object>}
+ */
+export const calculateWBF = (bLists, detections) => {
     const summarizedDetections = [];
 
-    state.bLists.forEach((list) => {
+    bLists.forEach((list) => {
         const bListDetections = [];
         list.items.forEach((item) => {
-            const detection = state.detections.find(
-                (det) => det.uuid === item.uuid
-            );
+            const detection = detections.find((det) => det.uuid === item.uuid);
             try {
                 bListDetections.push({
                     view: detection.view,
