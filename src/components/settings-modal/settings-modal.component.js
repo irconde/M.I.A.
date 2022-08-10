@@ -346,11 +346,7 @@ const SettingsModal = (props) => {
         }
     };
 
-    const [value, setValue] = React.useState(0);
-
-    const handleTabChange = (event, newValue) => {
-        setValue(newValue);
-    };
+    const [tabIndex, setTabIndex] = React.useState(0);
 
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
@@ -377,27 +373,22 @@ const SettingsModal = (props) => {
         value: PropTypes.number.isRequired,
     };
 
-    const a11yProps = (index) => {
-        return {
-            id: `simple-tab-${index}`,
-            'aria-controls': `simple-tabpanel-${index}`,
-        };
-    };
-
     let body = (
         <StyledPaper>
             <ModalRoot>
                 <ModalTabContext>
                     <ModalTabWrapper>
                         <Tabs
-                            value={value}
-                            onChange={handleTabChange}
+                            value={tabIndex}
+                            onChange={(event, index) =>
+                                setTabIndex(parseInt(index))
+                            }
                             aria-label="Settings Modal Tabs">
-                            <Tab label="Settings" {...a11yProps(0)} />
-                            <Tab label="About" {...a11yProps(1)} />
+                            <Tab label="Settings" />
+                            <Tab label="About" />
                         </Tabs>
                     </ModalTabWrapper>
-                    <TabPanel value={value} index="0">
+                    <TabPanel value={tabIndex} index={0}>
                         <SettingsHeader>
                             <CogIconWrapper>
                                 <CogWheelIcon
@@ -777,7 +768,7 @@ const SettingsModal = (props) => {
                             </SaveSettingsButton>
                         </StyledFormGroup>
                     </TabPanel>
-                    <TabPanel value={value} index="1">
+                    <TabPanel value={tabIndex} index={1}>
                         <button>About tab button</button>
                     </TabPanel>
                 </ModalTabContext>
