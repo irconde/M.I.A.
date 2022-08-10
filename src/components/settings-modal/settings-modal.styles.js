@@ -86,6 +86,7 @@ export const LeftAlignedWrapper = styled.div`
     margin-right: 1rem;
     display: flex;
 `;
+
 export const SettingsTitle = styled.div`
     object-fit: contain;
     font-family: Noto Sans JP;
@@ -106,11 +107,13 @@ export const StyledDivider = styled(Divider).attrs(() => ({
 }))`
     margin: auto;
 `;
+
 export const ScrollableContainer = styled.div`
     overflow-y: auto;
     height: 80%;
     padding: 0rem 0.25rem;
 `;
+
 export const SettingOptionTitle = styled.p`
     font-family: Noto Sans JP;
     font-size: 1rem;
@@ -123,6 +126,7 @@ export const SettingOptionTitle = styled.p`
     margin-bottom: 0.25rem;
     margin-top: 0.75rem;
 `;
+
 export const SettingDescription = styled.p`
     color: ${GREY_COLOR};
     font-size: 12px;
@@ -133,18 +137,22 @@ export const SettingDescription = styled.p`
 export const RemoteWorkContainer = styled(SettingsHeader)`
     margin: 0;
 `;
+
 export const SwitchWrapper = styled.div`
     align-self: flex-end;
 `;
+
 export const SettingsRow = styled(SettingsHeader)`
     margin-top: 2rem;
     margin-bottom: 0;
 `;
+
 export const WorkingDirectory = styled(SettingsHeader)`
     display: flex;
     align-items: center;
     margin: 0;
 `;
+
 export const RemoteInputContainer = styled.div`
     display: inline-flex;
     flex-direction: row;
@@ -152,11 +160,13 @@ export const RemoteInputContainer = styled.div`
     width: 70%;
     align-self: center;
 `;
+
 export const AutoConnectContainer = styled.div`
     float: right;
     color: ${GREY_COLOR};
     margin-top: auto;
 `;
+
 export const ConnectionButtonSection = styled.div`
     display: flex;
     flex-shrink: 0;
@@ -166,10 +176,12 @@ export const ConnectionButtonSection = styled.div`
     align-content: center;
     align-items: center;
 `;
+
 export const FileManagementSection = styled(SettingsHeader)`
     margin-bottom: 16px;
     margin-top: 32px;
 `;
+
 export const FileManagementItem = styled.div`
     display: flex;
     justify-content: flex-start;
@@ -295,4 +307,9 @@ export const DefaultIconWrapper = styled.div`
     width: fit-content;
     display: flex;
     cursor: pointer;
+`;
+
+export const ModalTabWrapper = styled.div`
+    border-bottom: 1px;
+    border-color: #4e4e4e;
 `;
