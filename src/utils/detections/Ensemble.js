@@ -125,6 +125,10 @@ export const compareConfidence = (a, b) => {
  * @param state
  * @returns {*[]}
  */
+/**
+ * TODO: Refactor the parameters to be (bLists, detections). Provide proper type definitions in the jsdoc above for parameters and return
+ * TODO: See here for more info on jsdoc: https://eac-ualr.atlassian.net/wiki/spaces/D/pages/3122397195/Code+commenting
+ */
 export const calculateWBF = (state) => {
     const summarizedDetections = [];
 
