@@ -313,3 +313,7 @@ export const ModalTabWrapper = styled.div`
     border-bottom: 1px;
     border-color: #4e4e4e;
 `;
+
+export const ModalTabContext = styled.div`
+    width: 100%;
+`;

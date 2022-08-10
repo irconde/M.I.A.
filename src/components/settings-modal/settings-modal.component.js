@@ -15,6 +15,7 @@ import {
     LeftAlignedWrapper,
     LocalFileOutputField,
     ModalRoot,
+    ModalTabContext,
     ModalTabWrapper,
     modalTheme,
     PortTextField,
@@ -39,6 +40,7 @@ import {
     WorkSpaceFormControl,
 } from './settings-modal.styles';
 import {
+    Box,
     Checkbox,
     CircularProgress,
     FormControl,
@@ -46,12 +48,11 @@ import {
     MenuItem,
     Modal,
     Tab,
+    Tabs,
     ThemeProvider,
     Tooltip,
+    Typography,
 } from '@mui/material';
-
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-
 import ConnectionResultComponent from './connection-result/connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import {
@@ -90,6 +91,38 @@ if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
+
+// const TabPanel = (props) => {
+//     const { children, value, index, ...other } = props;
+//
+//     return (
+//         <div
+//             role="tabpanel"
+//             hidden={value !== index}
+//             id={`simple-tabpanel-${index}`}
+//             aria-labelledby={`simple-tab-${index}`}
+//             {...other}>
+//             {value === index && (
+//                 <Box sx={{ p: 3 }}>
+//                     <Typography>{children}</Typography>
+//                 </Box>
+//             )}
+//         </div>
+//     );
+// };
+//
+// TabPanel.propTypes = {
+//     children: PropTypes.node,
+//     index: PropTypes.number.isRequired,
+//     value: PropTypes.number.isRequired,
+// };
+//
+// const a11yProps = (index) => {
+//     return {
+//         id: `simple-tab-${index}`,
+//         'aria-controls': `simple-tabpanel-${index}`,
+//     };
+// };
 
 /**
  * Component dialog for changing settings of application.
@@ -313,23 +346,58 @@ const SettingsModal = (props) => {
         }
     };
 
-    const [value, setValue] = React.useState('1');
+    const [value, setValue] = React.useState(0);
 
     const handleTabChange = (event, newValue) => {
         setValue(newValue);
     };
 
+    const TabPanel = (props) => {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}>
+                {value === index && (
+                    <Box sx={{ p: 3 }}>
+                        <Typography>{children}</Typography>
+                    </Box>
+                )}
+            </div>
+        );
+    };
+
+    TabPanel.propTypes = {
+        children: PropTypes.node,
+        index: PropTypes.number.isRequired,
+        value: PropTypes.number.isRequired,
+    };
+
+    const a11yProps = (index) => {
+        return {
+            id: `simple-tab-${index}`,
+            'aria-controls': `simple-tabpanel-${index}`,
+        };
+    };
+
     let body = (
         <StyledPaper>
             <ModalRoot>
-                <TabContext value={value}>
+                <ModalTabContext>
                     <ModalTabWrapper>
-                        <TabList onChange={handleTabChange}>
-                            <Tab label="Settings" value="1" />
-                            <Tab label="About" value="2" />
-                        </TabList>
+                        <Tabs
+                            value={value}
+                            onChange={handleTabChange}
+                            aria-label="Settings Modal Tabs">
+                            <Tab label="Settings" {...a11yProps(0)} />
+                            <Tab label="About" {...a11yProps(1)} />
+                        </Tabs>
                     </ModalTabWrapper>
-                    <TabPanel value="1">
+                    <TabPanel value={value} index="0">
                         <SettingsHeader>
                             <CogIconWrapper>
                                 <CogWheelIcon
@@ -709,10 +777,10 @@ const SettingsModal = (props) => {
                             </SaveSettingsButton>
                         </StyledFormGroup>
                     </TabPanel>
-                    <TabPanel value="2">
+                    <TabPanel value={value} index="1">
                         <button>About tab button</button>
                     </TabPanel>
-                </TabContext>
+                </ModalTabContext>
             </ModalRoot>
         </StyledPaper>
     );
