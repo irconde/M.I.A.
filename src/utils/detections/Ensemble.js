@@ -3,7 +3,7 @@
  * @param {Array<{view: string, className: string, algorithm: string, boundingBox: Array<number>, confidence: number, color: string, visible: boolean, selected: boolean}>} bListDetections
  * @returns {{fList: Array<{view: string, className: string, algorithm: string, boundingBox: Array<number>, confidence: number, color: string, visible: boolean, selected: boolean}>, lList: Array<Array<{view: string, className: string, algorithm: string, boundingBox: Array<number>, confidence: number, color: string, visible: boolean, selected: boolean}>>}}
  */
-export const calculateLFLists = (bListDetections) => {
+const calculateLFLists = (bListDetections) => {
     let lList = [],
         fList = [];
     const firstDet = bListDetections.shift();
@@ -33,7 +33,7 @@ export const calculateLFLists = (bListDetections) => {
  * @param {number} i
  * @returns {{y1: number, x1: number, y2: number, x2: number, fusedConfidence: number}}
  */
-export const calculateFusedBox = (lList, i) => {
+const calculateFusedBox = (lList, i) => {
     let x1 = 0,
         y1 = 0,
         x2 = 0,
@@ -75,7 +75,7 @@ export const calculateFusedBox = (lList, i) => {
  * @param {{view: string, className: string, algorithm: string, boundingBox: Array<number>, confidence: number, color: string, visible: boolean, selected: boolean}} detB
  * @returns {number}
  */
-export const calculateIoU = (detA, detB) => {
+const calculateIoU = (detA, detB) => {
     const detAArea = Math.abs(
         (detA.boundingBox[2] - detA.boundingBox[0]) *
             (detA.boundingBox[3] - detA.boundingBox[1])
@@ -91,4 +91,80 @@ export const calculateIoU = (detA, detB) => {
 
     const interArea = Math.max(xB - xA, 0) * Math.max(yB - yA, 0);
     return interArea / parseFloat(detAArea + detBArea - interArea);
+};
+
+/**
+ * loops through the bList and returns the index of the item that matches both the view type, and className
+ *
+ * @param bList
+ * @param view
+ * @param className
+ * @returns {*}
+ */
+export const getIndexByViewAndClassName = (bList, view, className) => {
+    return bList.findIndex(
+        (list) => list.view === view && list.className === className
+    );
+};
+
+/**
+ * call back defines a criteria that elements should be sorted based on confidence from highest to lowest
+ *
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+export const compareConfidence = (a, b) => {
+    if (a.confidence < b.confidence) return 1;
+    else return -1;
+};
+
+/**
+ * Returns a list of the summarized detections that the state should be updated with
+ *
+ * @param state
+ * @returns {*[]}
+ */
+export const calculateWBF = (state) => {
+    const summarizedDetections = [];
+
+    state.bLists.forEach((list) => {
+        const bListDetections = [];
+        list.items.forEach((item) => {
+            const detection = state.detections.find(
+                (det) => det.uuid === item.uuid
+            );
+            try {
+                bListDetections.push({
+                    view: detection.view,
+                    className: detection.className.toLowerCase(),
+                    algorithm: detection.algorithm.toLowerCase(),
+                    boundingBox: JSON.parse(
+                        JSON.stringify(detection.boundingBox)
+                    ),
+                    confidence: detection.confidence,
+                    color: detection.color,
+                    visible: true,
+                    selected: false,
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        });
+        const { lList, fList } = calculateLFLists(bListDetections);
+        fList.forEach((fBox, index) => {
+            const { x1, x2, y1, y2, fusedConfidence } = calculateFusedBox(
+                lList,
+                index
+            );
+            fBox.algorithm = 'Summarized - WBF';
+            fBox.boundingBox = [x1, y1, x2, y2];
+            fBox.confidence = fusedConfidence >= 100 ? 100 : fusedConfidence;
+            fBox.polygonMask = [];
+            fBox.binaryMask = [[], [], []];
+            summarizedDetections.push(fBox);
+        });
+    });
+
+    return summarizedDetections;
 };

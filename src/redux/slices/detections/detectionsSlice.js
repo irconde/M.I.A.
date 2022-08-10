@@ -3,7 +3,11 @@ import * as constants from '../../../utils/enums/Constants';
 import randomColor from 'randomcolor';
 import Utils from '../../../utils/general/Utils';
 import { Cookies } from 'react-cookie';
-import * as Ensemble from '../../../utils/detections/Ensemble';
+import {
+    calculateWBF,
+    compareConfidence,
+    getIndexByViewAndClassName,
+} from '../../../utils/detections/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier
@@ -167,7 +171,7 @@ const detectionsSlice = createSlice({
                 );
                 if (index !== -1) {
                     state.bLists[index].items.push(bListRef);
-                    state.bLists[index].items.sort(sortByConfidence);
+                    state.bLists[index].items.sort(compareConfidence);
                 } else {
                     state.bLists.push({
                         view,
@@ -177,7 +181,7 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  End bList sorting                    */
-            calculateWBF(state);
+            state.summarizedDetections = calculateWBF(state);
             /*                  End Ensemble                    */
         },
         /**
@@ -253,7 +257,7 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  Begin Ensemble                    */
-            calculateWBF(state);
+            state.summarizedDetections = calculateWBF(state);
             /*                  End Ensemble                    */
         },
 
@@ -332,10 +336,10 @@ const detectionsSlice = createSlice({
                 newIndex = state.bLists.length - 1;
             }
             if (state.bLists[newIndex].items.length > 1) {
-                state.bLists[newIndex].items.sort(sortByConfidence);
+                state.bLists[newIndex].items.sort(compareConfidence);
             }
             /*                  End bList sorting                    */
-            calculateWBF(state);
+            state.summarizedDetections = calculateWBF(state);
             /*                  End Ensemble                    */
         },
 
@@ -728,56 +732,6 @@ export const getSelectedDetectionType = (state) => {
     if (state.detections.selectedDetection) {
         return state.detections.selectedDetection.detectionType;
     }
-};
-
-const getIndexByViewAndClassName = (bList, view, className) => {
-    return bList.findIndex(
-        (list) => list.view === view && list.className === className
-    );
-};
-
-const sortByConfidence = (a, b) => {
-    if (a.confidence < b.confidence) return 1;
-    else return -1;
-};
-
-const calculateWBF = (state) => {
-    state.summarizedDetections = [];
-    state.bLists.forEach((list) => {
-        const bListDetections = [];
-        list.items.forEach((item) => {
-            const detection = state.detections.find(
-                (det) => det.uuid === item.uuid
-            );
-            try {
-                bListDetections.push({
-                    view: detection.view,
-                    className: detection.className.toLowerCase(),
-                    algorithm: detection.algorithm.toLowerCase(),
-                    boundingBox: JSON.parse(
-                        JSON.stringify(detection.boundingBox)
-                    ),
-                    confidence: detection.confidence,
-                    color: detection.color,
-                    visible: true,
-                    selected: false,
-                });
-            } catch (e) {
-                console.log(e);
-            }
-        });
-        const { lList, fList } = Ensemble.calculateLFLists(bListDetections);
-        fList.forEach((fBox, index) => {
-            const { x1, x2, y1, y2, fusedConfidence } =
-                Ensemble.calculateFusedBox(lList, index);
-            fBox.algorithm = 'Summarized - WBF';
-            fBox.boundingBox = [x1, y1, x2, y2];
-            fBox.confidence = fusedConfidence >= 100 ? 100 : fusedConfidence;
-            fBox.polygonMask = [];
-            fBox.binaryMask = [[], [], []];
-            state.summarizedDetections.push(fBox);
-        });
-    });
 };
 
 export const {
