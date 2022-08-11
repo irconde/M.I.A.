@@ -1,3 +1,5 @@
+import { SETTINGS } from '../enums/Constants';
+
 /**
  * Class that parses a xml file based on the given string
  */
@@ -31,6 +33,21 @@ export default class XmlParserUtil {
             const view = stack.getAttribute('view');
             const firstLayer = stack.firstElementChild;
             const pixelData = firstLayer.getAttribute('src');
+            if (jsonObj.format === null) {
+                const fileExtension = pixelData.split('.').pop();
+                switch (fileExtension) {
+                    case 'dcs':
+                        jsonObj.format = SETTINGS.ANNOTATIONS.TDR;
+                        break;
+                    case 'png':
+                    case 'jpg':
+                    case 'jpeg':
+                        jsonObj.format = SETTINGS.ANNOTATIONS.COCO;
+                        break;
+                    default:
+                        jsonObj.format = '';
+                }
+            }
             const detectionData = [];
             for (
                 let currLayer = firstLayer.nextElementSibling;
