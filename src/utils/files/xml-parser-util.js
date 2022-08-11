@@ -22,6 +22,7 @@ export default class XmlParserUtil {
         const parser = new DOMParser();
         this._xmlDoc = parser.parseFromString(this._xmlData, 'text/xml');
         const xmlImage = this._xmlDoc.getElementsByTagName('image');
-        const currentFileFormat = xmlImage[0].getAttribute('format');
+        const currentFileFormat = xmlImage[0]?.getAttribute('format');
+        // MS COCO
     }
 }
