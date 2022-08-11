@@ -8,6 +8,8 @@ import {
     Paper,
     Select,
     Switch,
+    Tab,
+    Tabs,
     TextField,
 } from '@mui/material';
 
@@ -21,6 +23,12 @@ export const modalTheme = createTheme({
             main: '#367eff',
             dark: '#2558b2',
             contrastText: '#9d9d9d',
+        },
+        secondary: {
+            light: '#ffffff',
+            main: '#fafafa',
+            dark: '#9d9d9d',
+            contrastText: '#000000',
         },
     },
     zIndex: {
@@ -99,7 +107,7 @@ export const SettingsTitle = styled.div`
     color: #fff;
     flex: auto;
     align-self: center;
-    height: 32px;
+    height: fit-content;
 `;
 
 export const StyledDivider = styled(Divider).attrs(() => ({
@@ -198,8 +206,8 @@ export const SaveSettingsButton = styled(Button).attrs(() => ({
         marginTop: 5,
     },
 }))`
-    width: 30%;
-    padding: 1;
+    width: 35%;
+    padding: 10px;
     align-self: flex-end;
 `;
 
@@ -310,8 +318,11 @@ export const DefaultIconWrapper = styled.div`
 `;
 
 export const ModalTabWrapper = styled.div`
-    border-bottom: 1px;
-    border-color: #4e4e4e;
+    display: flex;
+    align-items: center;
+    border-bottom: solid 1px #4e4e4e;
+    margin-bottom: 1rem;
+    height: fit-content;
 `;
 
 export const ModalTabContext = styled.div`
@@ -323,4 +334,21 @@ export const ModalTabPanel = styled.div`
     height: 90%;
     overflow: scroll;
     overflow-x: hidden;
+`;
+
+export const TabList = styled(Tabs).attrs(() => ({
+    textColor: 'secondary',
+    indicatorColor: 'secondary',
+}))`
+    width: 95%;
+    justify-content: center;
+`;
+
+//TODO: Add space between icon and text, as well as switch icon color when not in focus
+export const StyledTab = styled(Tab).attrs(() => ({}))`
+    &.MuiButtonBase-root.MuiTab-root {
+        text-transform: none;
+        padding: 5px;
+        font-size: 18px;
+    }
 `;

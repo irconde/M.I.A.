@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
     AutoConnectContainer,
-    CogIconWrapper,
     ConnectionButton,
     ConnectionButtonSection,
     DefaultIconWrapper,
@@ -27,16 +26,16 @@ import {
     SelectFolderButton,
     SettingDescription,
     SettingOptionTitle,
-    SettingsHeader,
     SettingsRow,
-    SettingsTitle,
     StandardFormControl,
     StyledDivider,
     StyledFormGroup,
     StyledPaper,
     StyledSelect,
     StyledSwitch,
+    StyledTab,
     SwitchWrapper,
+    TabList,
     WorkingDirectory,
     WorkSpaceFormControl,
 } from './settings-modal.styles';
@@ -49,7 +48,6 @@ import {
     MenuItem,
     Modal,
     Tab,
-    Tabs,
     ThemeProvider,
     Tooltip,
 } from '@mui/material';
@@ -359,7 +357,7 @@ const SettingsModal = (props) => {
                 aria-labelledby={`tab-${index}`}
                 {...other}>
                 {value === index && (
-                    <Box sx={{ p: 3 }} id="Tab Panel Box">
+                    <Box sx={{ padding: '20px 10px' }} id="Tab Panel Box">
                         {children}
                     </Box>
                 )}
@@ -378,35 +376,34 @@ const SettingsModal = (props) => {
             <ModalRoot id="ModalRoot">
                 <ModalTabContext id="TabContext">
                     <ModalTabWrapper id="Modal Tab Wrapper">
-                        <Tabs
+                        <TabList
                             value={tabIndex}
                             onChange={(event, index) =>
                                 setTabIndex(parseInt(index))
                             }
-                            aria-label="Settings Modal Tabs">
-                            <Tab label="Settings" />
+                            aria-label="Settings Modal Tab">
+                            <StyledTab
+                                icon={
+                                    <CogWheelIcon
+                                        width="18px"
+                                        height="18px"
+                                        color="white"
+                                    />
+                                }
+                                iconPosition="start"
+                                label="Settings"
+                            />
                             <Tab label="About" />
-                        </Tabs>
+                        </TabList>
+                        <DefaultIconWrapper onClick={() => handleClose()}>
+                            <CloseIcon
+                                height="24px"
+                                width="24px"
+                                color="white"
+                            />
+                        </DefaultIconWrapper>
                     </ModalTabWrapper>
                     <TabPanel value={tabIndex} index={0}>
-                        <SettingsHeader>
-                            <CogIconWrapper>
-                                <CogWheelIcon
-                                    height="24px"
-                                    width="24px"
-                                    color="white"
-                                />
-                            </CogIconWrapper>
-                            <SettingsTitle>Settings</SettingsTitle>
-                            <DefaultIconWrapper onClick={() => handleClose()}>
-                                <CloseIcon
-                                    height="24px"
-                                    width="24px"
-                                    color="white"
-                                />
-                            </DefaultIconWrapper>
-                        </SettingsHeader>
-                        <StyledDivider />
                         <StyledFormGroup>
                             <ScrollableContainer>
                                 <VisualizationModePickerComponent
