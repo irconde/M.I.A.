@@ -16,6 +16,7 @@ import {
     LocalFileOutputField,
     ModalRoot,
     ModalTabContext,
+    ModalTabPanel,
     ModalTabWrapper,
     modalTheme,
     PortTextField,
@@ -51,7 +52,6 @@ import {
     Tabs,
     ThemeProvider,
     Tooltip,
-    Typography,
 } from '@mui/material';
 import ConnectionResultComponent from './connection-result/connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
@@ -352,18 +352,18 @@ const SettingsModal = (props) => {
         const { children, value, index, ...other } = props;
 
         return (
-            <div
+            <ModalTabPanel
                 role="tabpanel"
                 hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
+                id={`tabpanel-${index}`}
+                aria-labelledby={`tab-${index}`}
                 {...other}>
                 {value === index && (
-                    <Box sx={{ p: 3 }}>
-                        <Typography>{children}</Typography>
+                    <Box sx={{ p: 3 }} id="Tab Panel Box">
+                        {children}
                     </Box>
                 )}
-            </div>
+            </ModalTabPanel>
         );
     };
 
@@ -375,9 +375,9 @@ const SettingsModal = (props) => {
 
     let body = (
         <StyledPaper>
-            <ModalRoot>
-                <ModalTabContext>
-                    <ModalTabWrapper>
+            <ModalRoot id="ModalRoot">
+                <ModalTabContext id="TabContext">
+                    <ModalTabWrapper id="Modal Tab Wrapper">
                         <Tabs
                             value={tabIndex}
                             onChange={(event, index) =>

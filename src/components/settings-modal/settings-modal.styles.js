@@ -316,4 +316,11 @@ export const ModalTabWrapper = styled.div`
 
 export const ModalTabContext = styled.div`
     width: 100%;
+    height: inherit;
+`;
+
+export const ModalTabPanel = styled.div`
+    height: 90%;
+    overflow: scroll;
+    overflow-x: hidden;
 `;
