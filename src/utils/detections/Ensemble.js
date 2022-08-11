@@ -120,16 +120,11 @@ export const compareConfidence = (a, b) => {
 };
 
 /**
- * TODO: Refactor the parameters to be (bLists, detections). Provide proper type definitions in the jsdoc above for parameters and return
- * TODO: See here for more info on jsdoc: https://eac-ualr.atlassian.net/wiki/spaces/D/pages/3122397195/Code+commenting
- */
-
-/**
  * Returns a list of the summarized detections that the state should be updated with
  *
- * @param {Array<Object>} bLists
- * @param {Array<Object>} detections
- * @returns {Array<Object>}
+ * @param {Array<{view: string; className: string; items: Array<{uuid: string; confidence: number;}>;}>} bLists
+ * @param {Array<{algorithm: string; className: string; confidence: number; view: string; binaryMask: Array<Array<number>>; polygonMask?: Array<number>; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation?: boolean; textColor: string; detectionType: string;}>} detections
+ * @returns {Array<{view: string, className: string, algorithm: string, boundingBox: Array<number>, confidence: number, color: string, visible: boolean, selected: boolean}>}
  */
 export const calculateWBF = (bLists, detections) => {
     const summarizedDetections = [];
