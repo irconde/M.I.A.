@@ -346,9 +346,17 @@ export const TabList = styled(Tabs).attrs(() => ({
 
 //TODO: Add space between icon and text, as well as switch icon color when not in focus
 export const StyledTab = styled(Tab).attrs(() => ({}))`
-    &.MuiButtonBase-root.MuiTab-root {
-        text-transform: none;
-        padding: 5px;
-        font-size: 18px;
+    /*&.MuiButtonBase-root.MuiTab-root {
+text-transform: none;
+padding: 5px;
+font-size: 18px;
+}*/
+
+    &.MuiTab-labelIcon {
+        padding: 10px;
+    }
+
+    &.Mui-selected {
+        // TODO
     }
 `;

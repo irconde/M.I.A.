@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { ReactComponent as SettingsCogIconComponent } from '../../icons/shared/settings-cog-icon/settings-cog.icon.svg';
 import PropTypes from 'prop-types';
 import {
     AutoConnectContainer,
@@ -77,7 +78,6 @@ import isElectron from 'is-electron';
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
-import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
 import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
@@ -383,13 +383,7 @@ const SettingsModal = (props) => {
                             }
                             aria-label="Settings Modal Tab">
                             <StyledTab
-                                icon={
-                                    <CogWheelIcon
-                                        width="18px"
-                                        height="18px"
-                                        color="white"
-                                    />
-                                }
+                                icon={<SettingsCogIconComponent />}
                                 iconPosition="start"
                                 label="Settings"
                             />
