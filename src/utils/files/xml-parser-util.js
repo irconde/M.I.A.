@@ -21,8 +21,28 @@ export default class XmlParserUtil {
         // TODO: Simply return an easily readable and parsable json object of the xml data
         const parser = new DOMParser();
         this._xmlDoc = parser.parseFromString(this._xmlData, 'text/xml');
-        const xmlImage = this._xmlDoc.getElementsByTagName('image');
-        const currentFileFormat = xmlImage[0]?.getAttribute('format');
+        const xmlImages = this._xmlDoc.getElementsByTagName('image');
+        const currentFileFormat = xmlImages[0]?.getAttribute('format');
+        const jsonObj = {
+            format: currentFileFormat,
+            views: [],
+        };
+        [...xmlImages[0].children].forEach((stack) => {
+            const view = stack.getAttribute('view');
+            const firstLayer = stack.firstElementChild;
+            const pixelData = firstLayer.getAttribute('src');
+            const detectionData = [];
+            for (
+                let currLayer = firstLayer.nextElementSibling;
+                currLayer;
+                currLayer = currLayer.nextElementSibling
+            ) {
+                detectionData.push(currLayer.getAttribute('src'));
+            }
+            jsonObj.views.push({ view, pixelData, detectionData });
+        });
+
+        return jsonObj;
         // MS COCO
     }
 }
