@@ -376,7 +376,7 @@ export const VersionInfo = styled.div`
 
 export const AboutTitle = styled.div`
     object-fit: contain;
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 400;
     font-stretch: normal;
     font-style: normal;
@@ -411,7 +411,7 @@ export const AppIconWrapper = styled.div`
 export const AppSummary = styled.div`
     height: 19.5%;
     font-weight: normal;
-    font-size: 15px;
+    font-size: 14px;
     color: #a6a6a6;
     text-align: justify;
     margin: 0 10px;
@@ -438,7 +438,7 @@ export const TeamLibraryHeader = styled.div`
 export const TeamLibraryTitle = styled.div`
     color: #e1e1e1;
     margin-left: 5px;
-    font-size: 22px;
+    font-size: 18px;
 `;
 
 export const TeamLibraryWrapper = styled.div`
@@ -451,7 +451,7 @@ export const TeamLibraryList = styled.div`
     justify-content: start;
     align-items: center;
     color: #a6a6a6;
-    font-size: 16px;
+    font-size: 14px;
 
     ul {
         list-style-type: square;

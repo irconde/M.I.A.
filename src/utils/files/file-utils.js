@@ -32,7 +32,6 @@ export default class FileUtils {
                 .then((stackFile) => {
                     this._xmlParser = new XmlParserUtil(stackFile);
                     const parsedData = this._xmlParser.getParsedXmlData();
-                    console.log(parsedData);
                 });
         });
     }
