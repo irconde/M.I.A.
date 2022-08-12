@@ -817,37 +817,58 @@ const SettingsModal = (props) => {
                                     <TeamLibraryList>
                                         <ul>
                                             <li>
-                                                <a href="https://github.com/facebook/react/">
+                                                <a
+                                                    href="https://github.com/facebook/react/"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     React.js
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://github.com/mui/material-ui">
+                                                <a
+                                                    href="https://github.com/mui/material-ui"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     MUI - Material UI
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://github.com/cornerstonejs/cornerstone3D-beta/">
+                                                <a
+                                                    href="https://github.com/cornerstonejs/cornerstone"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     CornerstoneJS
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://github.com/reduxjs/redux">
+                                                <a
+                                                    href="https://github.com/reduxjs/redux"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     Redux
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://www.npmjs.com/package/eac-cornerstone-tools">
+                                                <a
+                                                    href="https://www.npmjs.com/package/eac-cornerstone-tools"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     EAC Cornerstone Tools
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://github.com/electron/electron">
+                                                <a
+                                                    href="https://github.com/electron/electron"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     ElectronJS
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="https://github.com/socketio/socket.io">
+                                                <a
+                                                    href="https://github.com/socketio/socket.io"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
                                                     Socket.IO
                                                 </a>
                                             </li>
