@@ -814,13 +814,41 @@ const SettingsModal = (props) => {
                                     </TeamLibraryHeader>
                                     <TeamLibraryList>
                                         <ul>
-                                            <li>React.js</li>
-                                            <li>MUI - Material UI</li>
-                                            <li>CornerstoneJS</li>
-                                            <li>Redux</li>
-                                            <li>EAC Cornerstone Tools</li>
-                                            <li>ElectronJS</li>
-                                            <li>Socket.IO</li>
+                                            <li>
+                                                <a href="https://github.com/facebook/react/">
+                                                    React.js
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="https://github.com/mui/material-ui">
+                                                    MUI - Material UI
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="https://github.com/cornerstonejs/cornerstone3D-beta/">
+                                                    CornerstoneJS
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="https://github.com/reduxjs/redux">
+                                                    Redux
+                                                </a>
+                                            </li>
+                                            <li>
+                                                {/*<a href="">*/}
+                                                EAC Cornerstone Tools
+                                                {/*</a>*/}
+                                            </li>
+                                            <li>
+                                                <a href="https://github.com/electron/electron">
+                                                    ElectronJS
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="https://github.com/socketio/socket.io">
+                                                    Socket.IO
+                                                </a>
+                                            </li>
                                         </ul>
                                     </TeamLibraryList>
                                 </TeamLibraryWrapper>

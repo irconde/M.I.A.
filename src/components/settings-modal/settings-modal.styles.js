@@ -431,7 +431,7 @@ export const TeamLibraryHeader = styled.div`
     display: flex;
     align-items: center;
     justify-content: start;
-    border-bottom: solid 1px ${GREY_COLOR};
+    border-bottom: solid 1px #a6a6a6;
     padding: 0 15px 5px 10px;
 `;
 
@@ -457,5 +457,13 @@ export const TeamLibraryList = styled.div`
         list-style-type: square;
         list-style-position: inside;
         padding: 0;
+    }
+
+    a {
+        color: #a6a6a6;
+
+        :hover {
+            color: #727272;
+        }
     }
 `;
