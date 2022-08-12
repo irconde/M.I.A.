@@ -835,9 +835,9 @@ const SettingsModal = (props) => {
                                                 </a>
                                             </li>
                                             <li>
-                                                {/*<a href="">*/}
-                                                EAC Cornerstone Tools
-                                                {/*</a>*/}
+                                                <a href="https://www.npmjs.com/package/eac-cornerstone-tools">
+                                                    EAC Cornerstone Tools
+                                                </a>
                                             </li>
                                             <li>
                                                 <a href="https://github.com/electron/electron">
