@@ -3,7 +3,11 @@ import * as constants from '../../../utils/enums/Constants';
 import randomColor from 'randomcolor';
 import Utils from '../../../utils/general/Utils';
 import { Cookies } from 'react-cookie';
-import * as Ensemble from '../../../utils/detections/Ensemble';
+import {
+    calculateWBF,
+    compareConfidence,
+    getIndexByViewAndClassName,
+} from '../../../utils/detections/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier
@@ -131,15 +135,14 @@ const detectionsSlice = createSlice({
                 validation: null,
                 textColor: 'white',
             });
-            state.detections[state.detections.length - 1].detectionType =
-                Utils.getDetectionType(
-                    state.detections[state.detections.length - 1]
-                );
+            state.detections.at(-1).detectionType = Utils.getDetectionType(
+                state.detections.at(-1)
+            );
             const foundIndex = state.missMatchedClassNames.findIndex(
                 (el) => el.className === className
             );
             if (foundIndex !== -1) {
-                state.detections[state.detections.length - 1].color =
+                state.detections.at(-1).color =
                     state.missMatchedClassNames[foundIndex].color;
             }
             if (state.detectionLabels.indexOf(className) === -1) {
@@ -151,9 +154,8 @@ const detectionsSlice = createSlice({
             /*                  Begin Ensemble                    */
             /*                  bList sorting                    */
             const bListRef = {
-                uuid: state.detections[state.detections.length - 1].uuid,
-                confidence:
-                    state.detections[state.detections.length - 1].confidence,
+                uuid: state.detections.at(-1).uuid,
+                confidence: state.detections.at(-1).confidence,
             };
             if (state.bLists.length === 0) {
                 state.bLists[0] = {
@@ -162,16 +164,14 @@ const detectionsSlice = createSlice({
                     items: [bListRef],
                 };
             } else {
-                const index = state.bLists.findIndex(
-                    (value) =>
-                        value.view === view && value.className === className
+                const index = getIndexByViewAndClassName(
+                    state.bLists,
+                    view,
+                    className
                 );
                 if (index !== -1) {
                     state.bLists[index].items.push(bListRef);
-                    state.bLists[index].items.sort((a, b) => {
-                        if (a.confidence < b.confidence) return 1;
-                        else return -1;
-                    });
+                    state.bLists[index].items.sort(compareConfidence);
                 } else {
                     state.bLists.push({
                         view,
@@ -181,46 +181,10 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  End bList sorting                    */
-            /*                  WBF Calculation                    */
-            state.summarizedDetections = [];
-            state.bLists.forEach((list) => {
-                const bListDetections = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        bListDetections.push({
-                            view: detection.view,
-                            className: detection.className.toLowerCase(),
-                            algorithm: detection.algorithm.toLowerCase(),
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-                const { lList, fList } =
-                    Ensemble.calculateLFLists(bListDetections);
-                for (let i = 0; i < fList.length; i++) {
-                    const { x1, x2, y1, y2, fusedConfidence } =
-                        Ensemble.calculateFusedBox(lList, i);
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence =
-                        fusedConfidence >= 100 ? 100 : fusedConfidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
-            });
-            /*                  End WBF Calculation                    */
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
             /*                  End Ensemble                    */
         },
         /**
@@ -296,46 +260,10 @@ const detectionsSlice = createSlice({
                 }
             }
             /*                  Begin Ensemble                    */
-            /*                  WBF Calculation                    */
-            state.summarizedDetections = [];
-            state.bLists.forEach((list) => {
-                const bListDetections = [];
-                list.items.forEach((item) => {
-                    const detection = state.detections.find(
-                        (det) => det.uuid === item.uuid
-                    );
-                    try {
-                        bListDetections.push({
-                            view: detection.view,
-                            className: detection.className.toLowerCase(),
-                            algorithm: detection.algorithm.toLowerCase(),
-                            boundingBox: JSON.parse(
-                                JSON.stringify(detection.boundingBox)
-                            ),
-                            confidence: detection.confidence,
-                            color: detection.color,
-                            visible: true,
-                            selected: false,
-                        });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-                const { lList, fList } =
-                    Ensemble.calculateLFLists(bListDetections);
-                for (let i = 0; i < fList.length; i++) {
-                    const { x1, x2, y1, y2, fusedConfidence } =
-                        Ensemble.calculateFusedBox(lList, i);
-                    fList[i].algorithm = 'Summarized - WBF';
-                    fList[i].boundingBox = [x1, y1, x2, y2];
-                    fList[i].confidence =
-                        fusedConfidence >= 100 ? 100 : fusedConfidence;
-                    fList[i].polygonMask = [];
-                    fList[i].binaryMask = [[], [], []];
-                    state.summarizedDetections.push(fList[i]);
-                }
-            });
-            /*                  End WBF Calculation                    */
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
             /*                  End Ensemble                    */
         },
 
@@ -348,129 +276,80 @@ const detectionsSlice = createSlice({
          */
         editDetectionLabel: (state, action) => {
             const { uuid, className } = action.payload;
-            const newClassName = className.toLowerCase();
-            let oldClassName = '';
             let detection = state.detections.find((det) => det.uuid === uuid);
-            if (detection) {
-                oldClassName = detection.className.toLowerCase();
-                detection.className = newClassName;
-                const detColor = randomColor({
-                    seed: className,
-                    hue: 'random',
-                    luminosity: 'bright',
-                });
-                detection.color = detColor;
-                if (state.selectedDetection?.uuid === detection.uuid) {
-                    state.selectedDetection.className = newClassName;
-                    state.selectedDetection.color = detColor;
-                }
-                state.detectionChanged = true;
-                if (state.detectionLabels.indexOf(className) === -1) {
-                    state.detectionLabels.push(className);
-                }
-                state.missMatchedClassNames.forEach((missMatched) => {
-                    state.detections.forEach((det) => {
-                        if (
-                            missMatched.className.toLowerCase() ===
-                            det.className
-                        ) {
-                            det.color = missMatched.color;
-                            if (
-                                state.selectedDetection?.uuid === detection.uuid
-                            ) {
-                                state.selectedDetection.color =
-                                    missMatched.color;
-                            }
-                        }
-                    });
-                });
-                /*                  Begin Ensemble                    */
-                /*                  bList sorting                    */
-                const oldIndex = state.bLists.findIndex(
-                    (list) =>
-                        list.view === detection.view &&
-                        list.className.toLowerCase() === oldClassName
-                );
-                if (oldIndex !== -1) {
-                    state.bLists[oldIndex].items = state.bLists[
-                        oldIndex
-                    ].items.filter((det) => det.uuid !== uuid);
-                    if (state.bLists[oldIndex].items.length === 0) {
-                        state.bLists.splice(oldIndex, 1);
-                    }
-                }
-                let newIndex = state.bLists.findIndex(
-                    (list) =>
-                        list.view === detection.view &&
-                        list.className.toLowerCase() === newClassName
-                );
-                if (newIndex !== -1) {
-                    state.bLists[newIndex].items.push({
-                        uuid,
-                        confidence: detection.confidence,
-                    });
-                } else {
-                    state.bLists.push({
-                        view: detection.view,
-                        className: newClassName,
-                        items: [
-                            {
-                                uuid,
-                                confidence: detection.confidence,
-                            },
-                        ],
-                    });
-                    newIndex = state.bLists.length - 1;
-                }
-                if (state.bLists[newIndex].items.length > 1) {
-                    state.bLists[newIndex].items.sort((a, b) => {
-                        if (a.confidence < b.confidence) return 1;
-                        else return -1;
-                    });
-                }
-                /*                  End bList sorting                    */
-                /*                  WBF Calculation                    */
-                state.summarizedDetections = [];
-                state.bLists.forEach((list) => {
-                    const bListDetections = [];
-                    list.items.forEach((item) => {
-                        const detection = state.detections.find(
-                            (det) => det.uuid === item.uuid
-                        );
-                        try {
-                            bListDetections.push({
-                                view: detection.view,
-                                className: detection.className.toLowerCase(),
-                                algorithm: detection.algorithm.toLowerCase(),
-                                boundingBox: JSON.parse(
-                                    JSON.stringify(detection.boundingBox)
-                                ),
-                                confidence: detection.confidence,
-                                color: detection.color,
-                                visible: true,
-                                selected: false,
-                            });
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    });
-                    const { lList, fList } =
-                        Ensemble.calculateLFLists(bListDetections);
-                    for (let i = 0; i < fList.length; i++) {
-                        const { x1, x2, y1, y2, fusedConfidence } =
-                            Ensemble.calculateFusedBox(lList, i);
-                        fList[i].algorithm = 'Summarized - WBF';
-                        fList[i].boundingBox = [x1, y1, x2, y2];
-                        fList[i].confidence =
-                            fusedConfidence >= 100 ? 100 : fusedConfidence;
-                        fList[i].polygonMask = [];
-                        fList[i].binaryMask = [[], [], []];
-                        state.summarizedDetections.push(fList[i]);
-                    }
-                });
-                /*                  End WBF Calculation                    */
-                /*                  End Ensemble                    */
+            // exit function if id is not found
+            if (!detection) return;
+
+            const newClassName = className.toLowerCase();
+            const oldClassName = detection.className.toLowerCase();
+            detection.className = newClassName;
+            const detColor = randomColor({
+                seed: className,
+                hue: 'random',
+                luminosity: 'bright',
+            });
+            detection.color = detColor;
+            if (state.selectedDetection?.uuid === detection.uuid) {
+                state.selectedDetection.className = newClassName;
+                state.selectedDetection.color = detColor;
             }
+            state.detectionChanged = true;
+            if (state.detectionLabels.indexOf(className) === -1) {
+                state.detectionLabels.push(className);
+            }
+            state.missMatchedClassNames.forEach((missMatched) => {
+                state.detections.forEach((det) => {
+                    if (missMatched.className.toLowerCase() === det.className) {
+                        det.color = missMatched.color;
+                        if (state.selectedDetection?.uuid === detection.uuid) {
+                            state.selectedDetection.color = missMatched.color;
+                        }
+                    }
+                });
+            });
+            /*                  Begin Ensemble                    */
+            /*                  bList sorting                    */
+            const oldIndex = getIndexByViewAndClassName(
+                state.bLists,
+                detection.view,
+                oldClassName
+            );
+            if (oldIndex !== -1) {
+                state.bLists[oldIndex].items = state.bLists[
+                    oldIndex
+                ].items.filter((det) => det.uuid !== uuid);
+                if (state.bLists[oldIndex].items.length === 0) {
+                    state.bLists.splice(oldIndex, 1);
+                }
+            }
+            let newIndex = getIndexByViewAndClassName(
+                state.bLists,
+                detection.view,
+                newClassName
+            );
+            const bListRef = {
+                uuid,
+                confidence: detection.confidence,
+            };
+            if (newIndex !== -1) {
+                state.bLists[newIndex].items.push(bListRef);
+            } else {
+                state.bLists.push({
+                    view: detection.view,
+                    className: newClassName,
+                    items: [bListRef],
+                });
+                newIndex = state.bLists.length - 1;
+            }
+            if (state.bLists[newIndex].items.length > 1) {
+                state.bLists[newIndex].items.sort(compareConfidence);
+            }
+            /*                  End bList sorting                    */
+            state.summarizedDetections = calculateWBF(
+                state.bLists,
+                state.detections
+            );
+            /*                  End Ensemble                    */
         },
 
         /**
@@ -503,46 +382,10 @@ const detectionsSlice = createSlice({
                     }
                 }
                 /*                  End bList sorting                    */
-                /*                  WBF Calculation                    */
-                state.summarizedDetections = [];
-                state.bLists.forEach((list) => {
-                    const bListDetections = [];
-                    list.items.forEach((item) => {
-                        const detection = state.detections.find(
-                            (det) => det.uuid === item.uuid
-                        );
-                        try {
-                            bListDetections.push({
-                                view: detection.view,
-                                className: detection.className.toLowerCase(),
-                                algorithm: detection.algorithm.toLowerCase(),
-                                boundingBox: JSON.parse(
-                                    JSON.stringify(detection.boundingBox)
-                                ),
-                                confidence: detection.confidence,
-                                color: detection.color,
-                                visible: true,
-                                selected: false,
-                            });
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    });
-                    const { lList, fList } =
-                        Ensemble.calculateLFLists(bListDetections);
-                    for (let i = 0; i < fList.length; i++) {
-                        const { x1, x2, y1, y2, fusedConfidence } =
-                            Ensemble.calculateFusedBox(lList, i);
-                        fList[i].algorithm = 'Summarized - WBF';
-                        fList[i].boundingBox = [x1, y1, x2, y2];
-                        fList[i].confidence =
-                            fusedConfidence >= 100 ? 100 : fusedConfidence;
-                        fList[i].polygonMask = [];
-                        fList[i].binaryMask = [[], [], []];
-                        state.summarizedDetections.push(fList[i]);
-                    }
-                });
-                /*                  End WBF Calculation                    */
+                state.summarizedDetections = calculateWBF(
+                    state.bLists,
+                    state.detections
+                );
                 /*                  End Ensemble                    */
             }
         },
