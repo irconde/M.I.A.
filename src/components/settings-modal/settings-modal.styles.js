@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import {
+    Box,
     Button,
     createTheme,
     Divider,
@@ -212,7 +213,7 @@ export const SaveSettingsButton = styled(Button).attrs(() => ({
 `;
 
 export const StyledFormGroup = styled(FormGroup)`
-    height: 95%;
+    height: 100%;
 `;
 
 export const ConnectionButton = styled(Button).attrs(() => ({
@@ -332,8 +333,6 @@ export const ModalTabContext = styled.div`
 
 export const ModalTabPanel = styled.div`
     height: 90%;
-    overflow: scroll;
-    overflow-x: hidden;
 `;
 
 export const TabList = styled(Tabs).attrs(() => ({
@@ -344,19 +343,28 @@ export const TabList = styled(Tabs).attrs(() => ({
     justify-content: center;
 `;
 
-//TODO: Add space between icon and text, as well as switch icon color when not in focus
+//TODO: switch icon color when not in focus
 export const StyledTab = styled(Tab).attrs(() => ({}))`
-    /*&.MuiButtonBase-root.MuiTab-root {
-text-transform: none;
-padding: 5px;
-font-size: 18px;
-}*/
+    &.MuiButtonBase-root.MuiTab-root {
+        text-transform: none;
+        font-size: 20px;
+    }
+
+    &.MuiTab-iconWrapper {
+        color: #4e4e4e;
+    }
 
     &.MuiTab-labelIcon {
-        padding: 10px;
+        padding: 0 10px;
     }
 
     &.Mui-selected {
         // TODO
+        color: #fff;
     }
+`;
+
+export const StyledBox = styled(Box).attrs(() => ({}))`
+    padding: 20px 10px;
+    height: inherit;
 `;

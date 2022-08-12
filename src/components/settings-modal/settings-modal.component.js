@@ -29,6 +29,7 @@ import {
     SettingOptionTitle,
     SettingsRow,
     StandardFormControl,
+    StyledBox,
     StyledDivider,
     StyledFormGroup,
     StyledPaper,
@@ -41,14 +42,12 @@ import {
     WorkSpaceFormControl,
 } from './settings-modal.styles';
 import {
-    Box,
     Checkbox,
     CircularProgress,
     FormControl,
     FormControlLabel,
     MenuItem,
     Modal,
-    Tab,
     ThemeProvider,
     Tooltip,
 } from '@mui/material';
@@ -356,11 +355,7 @@ const SettingsModal = (props) => {
                 id={`tabpanel-${index}`}
                 aria-labelledby={`tab-${index}`}
                 {...other}>
-                {value === index && (
-                    <Box sx={{ padding: '20px 10px' }} id="Tab Panel Box">
-                        {children}
-                    </Box>
-                )}
+                {value === index && <StyledBox>{children}</StyledBox>}
             </ModalTabPanel>
         );
     };
@@ -373,9 +368,9 @@ const SettingsModal = (props) => {
 
     let body = (
         <StyledPaper>
-            <ModalRoot id="ModalRoot">
-                <ModalTabContext id="TabContext">
-                    <ModalTabWrapper id="Modal Tab Wrapper">
+            <ModalRoot>
+                <ModalTabContext>
+                    <ModalTabWrapper>
                         <TabList
                             value={tabIndex}
                             onChange={(event, index) =>
@@ -387,7 +382,12 @@ const SettingsModal = (props) => {
                                 iconPosition="start"
                                 label="Settings"
                             />
-                            <Tab label="About" />
+                            {/*// TODO: Create icon component for about tab*/}
+                            <StyledTab
+                                icon={<SettingsCogIconComponent />}
+                                iconPosition="start"
+                                label="About"
+                            />
                         </TabList>
                         <DefaultIconWrapper onClick={() => handleClose()}>
                             <CloseIcon
