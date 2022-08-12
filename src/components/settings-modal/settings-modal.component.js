@@ -15,7 +15,6 @@ import {
     FileManagementItem,
     FileManagementSection,
     FileSuffixField,
-    GUIicon,
     HostTextField,
     IconWrapper,
     LeftAlignedWrapper,
@@ -45,6 +44,8 @@ import {
     SwitchWrapper,
     TabList,
     TeamAndLibraryWrapper,
+    TeamLibraryHeader,
+    TeamLibraryTitle,
     VersionInfo,
     WorkingDirectory,
     WorkSpaceFormControl,
@@ -92,6 +93,8 @@ import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suf
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
 import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
+import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
+import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -773,8 +776,24 @@ const SettingsModal = (props) => {
                                 of interest by the system itself.
                             </AppSummary>
                             <TeamAndLibraryWrapper>
-                                <div> Team</div>
-                                <div> Built With</div>
+                                <TeamLibraryHeader>
+                                    <TeamIcon
+                                        width="32px"
+                                        height="32px"
+                                        color="#e1e1e1"
+                                    />
+                                    <TeamLibraryTitle>Team</TeamLibraryTitle>
+                                </TeamLibraryHeader>
+                                <TeamLibraryHeader>
+                                    <CodeBracketsIcon
+                                        width="32px"
+                                        height="32px"
+                                        color="#e1e1e1"
+                                    />
+                                    <TeamLibraryTitle>
+                                        Built With
+                                    </TeamLibraryTitle>
+                                </TeamLibraryHeader>
                             </TeamAndLibraryWrapper>
                         </ScrollableContainer>
                     </TabPanel>

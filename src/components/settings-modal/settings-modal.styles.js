@@ -382,7 +382,7 @@ export const AboutTitle = styled.div`
     font-style: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: #fff;
+    color: #e1e1e1;
     flex: auto;
     align-self: center;
     height: fit-content;
@@ -419,4 +419,22 @@ export const AppSummary = styled.div`
 
 export const TeamAndLibraryWrapper = styled.div`
     height: 57%;
+    display: flex;
+    justify-content: space-around;
+    color: #e1e1e1;
+    margin: 25px 0 0;
+    font-size: 20px;
+`;
+
+export const TeamLibraryHeader = styled.div`
+    height: 15%;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const TeamLibraryTitle = styled.div`
+    color: #e1e1e1;
+    margin-left: 5px;
 `;
