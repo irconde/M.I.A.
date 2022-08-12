@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, version } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
+    AboutHeader,
+    AboutHeaderInfo,
+    AboutTitle,
+    AppIcon,
+    AppIconWrapper,
     AutoConnectContainer,
     ConnectionButton,
     ConnectionButtonSection,
@@ -9,6 +14,7 @@ import {
     FileManagementItem,
     FileManagementSection,
     FileSuffixField,
+    GUIicon,
     HostTextField,
     IconWrapper,
     LeftAlignedWrapper,
@@ -37,6 +43,7 @@ import {
     StyledTab,
     SwitchWrapper,
     TabList,
+    VersionInfo,
     WorkingDirectory,
     WorkSpaceFormControl,
 } from './settings-modal.styles';
@@ -379,7 +386,7 @@ const SettingsModal = (props) => {
                     </ModalTabWrapper>
                     <TabPanel value={tabIndex} index={0}>
                         <StyledFormGroup>
-                            <ScrollableContainer>
+                            <ScrollableContainer height={80}>
                                 <VisualizationModePickerComponent
                                     isSummarized={displaySummarizedDetections}
                                     setIsSummarized={
@@ -740,7 +747,26 @@ const SettingsModal = (props) => {
                         </StyledFormGroup>
                     </TabPanel>
                     <TabPanel value={tabIndex} index={1}>
-                        <button>About tab button</button>
+                        <ScrollableContainer height={100}>
+                            <AboutHeader>
+                                <AppIconWrapper>
+                                    <AppIcon />
+                                </AppIconWrapper>
+                                <AboutHeaderInfo>
+                                    <AboutTitle>
+                                        Pilot<strong>GUI</strong>
+                                    </AboutTitle>
+                                    <VersionInfo>Version {version}</VersionInfo>
+                                </AboutHeaderInfo>
+                            </AboutHeader>
+                            <div>
+                                <p>App summary here.</p>
+                            </div>
+                            <div>
+                                <div> Team</div>
+                                <div> Built With</div>
+                            </div>
+                        </ScrollableContainer>
                     </TabPanel>
                 </ModalTabContext>
             </ModalRoot>

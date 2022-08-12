@@ -14,6 +14,8 @@ import {
     TextField,
 } from '@mui/material';
 
+import GUIicon from '../../../public/app_icon_192.png';
+
 const GREY_COLOR = '#9d9d9d';
 
 export const modalTheme = createTheme({
@@ -79,12 +81,6 @@ export const SettingsHeader = styled.div`
     margin: 1rem 0;
 `;
 
-export const CogIconWrapper = styled.div`
-    width: 32px;
-    height: 24px;
-    align-self: center;
-`;
-
 export const IconWrapper = styled.div`
     align-self: center;
     padding-inline: 0.5rem;
@@ -96,21 +92,6 @@ export const LeftAlignedWrapper = styled.div`
     display: flex;
 `;
 
-export const SettingsTitle = styled.div`
-    object-fit: contain;
-    font-family: Noto Sans JP;
-    font-size: 22px;
-    font-weight: 500;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: normal;
-    color: #fff;
-    flex: auto;
-    align-self: center;
-    height: fit-content;
-`;
-
 export const StyledDivider = styled(Divider).attrs(() => ({
     variant: 'middle',
 }))`
@@ -119,8 +100,9 @@ export const StyledDivider = styled(Divider).attrs(() => ({
 
 export const ScrollableContainer = styled.div`
     overflow-y: auto;
-    height: 80%;
-    padding: 0rem 0.25rem;
+    height: ${(props) => `${props.height}%`};
+    //80%;
+    padding: 0 0.25rem;
 `;
 
 export const SettingOptionTitle = styled.p`
@@ -369,4 +351,59 @@ export const StyledTab = styled(Tab)`
 export const StyledBox = styled(Box)`
     padding: 20px 10px;
     height: inherit;
+`;
+
+// ---------------- ABOUT TAB -----------------
+
+export const AboutHeader = styled.div`
+    display: flex;
+    flex-direction: row;
+    margin: 0 0 20px;
+    align-items: center;
+`;
+
+export const AboutHeaderInfo = styled.div`
+    flex-direction: column;
+    font-family: Noto Sans JP;
+    margin: 0 10px 10px;
+`;
+
+export const VersionInfo = styled.div`
+    font-size: 18px;
+    color: #7e7e7e;
+`;
+
+export const AboutTitle = styled.div`
+    object-fit: contain;
+    font-size: 54px;
+    font-weight: 400;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #fff;
+    flex: auto;
+    align-self: center;
+    height: fit-content;
+
+    strong {
+        font-weight: 900;
+    }
+`;
+
+export const AppIcon = styled.img.attrs({
+    src: `${GUIicon}`,
+})`
+    height: auto;
+    max-width: 80%;
+`;
+
+export const AppIconWrapper = styled.div`
+    height: 121px;
+    width: 121px;
+    background: #282828;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0 0 0;
 `;
