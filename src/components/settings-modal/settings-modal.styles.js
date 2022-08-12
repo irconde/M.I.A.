@@ -101,8 +101,7 @@ export const StyledDivider = styled(Divider).attrs(() => ({
 export const ScrollableContainer = styled.div`
     overflow-y: auto;
     height: ${(props) => `${props.height}%`};
-    //80%;
-    padding: 0 0.25rem;
+    padding: 0.5rem 0 0.25rem;
 `;
 
 export const SettingOptionTitle = styled.p`
@@ -304,7 +303,7 @@ export const ModalTabWrapper = styled.div`
     display: flex;
     align-items: center;
     border-bottom: solid 1px #4e4e4e;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     height: fit-content;
 `;
 
@@ -349,8 +348,8 @@ export const StyledTab = styled(Tab)`
 `;
 
 export const StyledBox = styled(Box)`
-    padding: 20px 10px;
-    height: inherit;
+    padding: 2px 0 0;
+    height: 95%;
 `;
 
 // ---------------- ABOUT TAB -----------------
@@ -358,8 +357,9 @@ export const StyledBox = styled(Box)`
 export const AboutHeader = styled.div`
     display: flex;
     flex-direction: row;
-    margin: 0 0 20px;
+    padding: 10px 0 20px;
     align-items: center;
+    height: 14%;
 `;
 
 export const AboutHeaderInfo = styled.div`
@@ -395,7 +395,7 @@ export const AppIcon = styled.img.attrs({
     src: `${GUIicon}`,
 })`
     height: auto;
-    max-width: 80%;
+    max-width: 100%;
 `;
 
 export const AppIconWrapper = styled.div`
@@ -405,5 +405,12 @@ export const AppIconWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 5px 0 0 0;
+`;
+
+export const AppSummary = styled.div`
+    height: 19.5%;
+`;
+
+export const TeamAndLibraryWrapper = styled.div`
+    height: 57%;
 `;

@@ -7,6 +7,7 @@ import {
     AboutTitle,
     AppIcon,
     AppIconWrapper,
+    AppSummary,
     AutoConnectContainer,
     ConnectionButton,
     ConnectionButtonSection,
@@ -43,6 +44,7 @@ import {
     StyledTab,
     SwitchWrapper,
     TabList,
+    TeamAndLibraryWrapper,
     VersionInfo,
     WorkingDirectory,
     WorkSpaceFormControl,
@@ -759,13 +761,13 @@ const SettingsModal = (props) => {
                                     <VersionInfo>Version {version}</VersionInfo>
                                 </AboutHeaderInfo>
                             </AboutHeader>
-                            <div>
+                            <AppSummary>
                                 <p>App summary here.</p>
-                            </div>
-                            <div>
+                            </AppSummary>
+                            <TeamAndLibraryWrapper>
                                 <div> Team</div>
                                 <div> Built With</div>
-                            </div>
+                            </TeamAndLibraryWrapper>
                         </ScrollableContainer>
                     </TabPanel>
                 </ModalTabContext>
