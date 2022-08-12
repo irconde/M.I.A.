@@ -14,7 +14,7 @@ import {
     TextField,
 } from '@mui/material';
 
-import GUIicon from '../../../public/app_icon_192.png';
+import GUIicon from '../../icons/settings-modal/app-icon.png';
 
 const GREY_COLOR = '#9d9d9d';
 
