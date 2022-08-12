@@ -1,4 +1,4 @@
-import React, { useState, version } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -763,7 +763,9 @@ const SettingsModal = (props) => {
                                     <AboutTitle>
                                         Pilot<strong>GUI</strong>
                                     </AboutTitle>
-                                    <VersionInfo>Version {version}</VersionInfo>
+                                    <VersionInfo>
+                                        Version {process.env.REACT_APP_VERSION}
+                                    </VersionInfo>
                                 </AboutHeaderInfo>
                             </AboutHeader>
                             <AppSummary>
