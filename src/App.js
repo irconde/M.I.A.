@@ -1824,7 +1824,6 @@ class App extends Component {
     async displayCOCOimage() {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
         const self = this;
-        console.log(self.state.myOra);
 
         let imageId = 'coco:0';
         Utils.loadImage(imageId, self.state.myOra.stackData[0].arrayBuf).then(
@@ -1913,7 +1912,6 @@ class App extends Component {
         const pixelDataTop = cornerstoneWADOImageLoader.wadouri.fileManager.add(
             self.state.myOra.stackData[0].blobData[0].blob
         );
-        console.log(self.state.myOra);
 
         cornerstone.loadImage(pixelDataTop).then(function (image) {
             const viewport = cornerstone.getDefaultViewportForImage(
