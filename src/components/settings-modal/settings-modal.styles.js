@@ -101,7 +101,8 @@ export const StyledDivider = styled(Divider).attrs(() => ({
 export const ScrollableContainer = styled.div`
     overflow-y: auto;
     height: ${(props) => `${props.height}%`};
-    padding: 0.5rem 0 0.25rem;
+    display: flex;
+    flex-direction: column;
 `;
 
 export const SettingOptionTitle = styled.p`
@@ -348,8 +349,7 @@ export const StyledTab = styled(Tab)`
 `;
 
 export const StyledBox = styled(Box)`
-    padding: 2px 0 0;
-    height: 95%;
+    height: 100%;
 `;
 
 // ---------------- ABOUT TAB -----------------
@@ -357,7 +357,8 @@ export const StyledBox = styled(Box)`
 export const AboutHeader = styled.div`
     display: flex;
     flex-direction: row;
-    padding: 10px 0 20px;
+    padding: 20px;
+    margin-bottom: 10px;
     align-items: center;
     height: 14%;
 `;
@@ -369,13 +370,13 @@ export const AboutHeaderInfo = styled.div`
 `;
 
 export const VersionInfo = styled.div`
-    font-size: 18px;
+    font-size: 15px;
     color: #7e7e7e;
 `;
 
 export const AboutTitle = styled.div`
     object-fit: contain;
-    font-size: 54px;
+    font-size: 48px;
     font-weight: 400;
     font-stretch: normal;
     font-style: normal;
@@ -399,8 +400,8 @@ export const AppIcon = styled.img.attrs({
 `;
 
 export const AppIconWrapper = styled.div`
-    height: 121px;
-    width: 121px;
+    height: 80px;
+    width: 80px;
     background: #282828;
     display: flex;
     align-items: center;
@@ -409,6 +410,11 @@ export const AppIconWrapper = styled.div`
 
 export const AppSummary = styled.div`
     height: 19.5%;
+    font-weight: normal;
+    font-size: 15px;
+    color: #a6a6a6;
+    text-align: justify;
+    margin: 0 10px;
 `;
 
 export const TeamAndLibraryWrapper = styled.div`

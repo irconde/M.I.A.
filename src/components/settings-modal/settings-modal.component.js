@@ -762,7 +762,15 @@ const SettingsModal = (props) => {
                                 </AboutHeaderInfo>
                             </AboutHeader>
                             <AppSummary>
-                                <p>App summary here.</p>
+                                The Pilot GUI is a cross-platform application,
+                                developed by the{' '}
+                                <strong>Emerging Analytics Center</strong> as a
+                                part of the <strong>Pilot System</strong> - an
+                                intelligent decision support system for baggage
+                                screening - in order to enable x-ray machine
+                                operators to visually check the multiple
+                                detections or objects identified as potentially
+                                of interest by the system itself.
                             </AppSummary>
                             <TeamAndLibraryWrapper>
                                 <div> Team</div>
