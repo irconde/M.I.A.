@@ -343,28 +343,30 @@ export const TabList = styled(Tabs).attrs(() => ({
     justify-content: center;
 `;
 
-//TODO: switch icon color when not in focus
-export const StyledTab = styled(Tab).attrs(() => ({}))`
+export const StyledTab = styled(Tab)`
     &.MuiButtonBase-root.MuiTab-root {
         text-transform: none;
-        font-size: 20px;
-    }
-
-    &.MuiTab-iconWrapper {
-        color: #4e4e4e;
+        font-size: 22px;
+        align-items: center;
     }
 
     &.MuiTab-labelIcon {
         padding: 0 10px;
     }
 
-    &.Mui-selected {
-        // TODO
-        color: #fff;
+    &&.Mui-selected {
+        && > svg {
+            fill: #ffffff;
+        }
+    }
+
+    && > svg {
+        padding-right: 5px;
+        padding-bottom: 3px;
     }
 `;
 
-export const StyledBox = styled(Box).attrs(() => ({}))`
+export const StyledBox = styled(Box)`
     padding: 20px 10px;
     height: inherit;
 `;

@@ -82,7 +82,7 @@ import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
 import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
-import { StyledCogWheelIcon } from '../../icons/shared/settings-cog-icon/settings-cog.icon.styles';
+import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -347,16 +347,22 @@ const SettingsModal = (props) => {
                             }
                             aria-label="Settings Modal Tab">
                             <StyledTab
-                                icon={<StyledCogWheelIcon />}
+                                icon={
+                                    <CogWheelIcon
+                                        width="24px"
+                                        height="24px"
+                                        color="#9d9d9d"
+                                    />
+                                }
                                 iconPosition="start"
                                 label="Settings"
                             />
                             <StyledTab
                                 icon={
                                     <InfoIcon
-                                        width="20px"
-                                        height="20px"
-                                        color="white"
+                                        width="24px"
+                                        height="24px"
+                                        color="#9d9d9d"
                                     />
                                 }
                                 iconPosition="start"
@@ -365,8 +371,8 @@ const SettingsModal = (props) => {
                         </TabList>
                         <DefaultIconWrapper onClick={() => handleClose()}>
                             <CloseIcon
-                                height="24px"
-                                width="24px"
+                                height="32px"
+                                width="32px"
                                 color="white"
                             />
                         </DefaultIconWrapper>
