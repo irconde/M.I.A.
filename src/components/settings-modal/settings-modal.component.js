@@ -43,9 +43,11 @@ import {
     StyledTab,
     SwitchWrapper,
     TabList,
-    TeamAndLibraryWrapper,
+    TeamAndLibrary,
     TeamLibraryHeader,
+    TeamLibraryList,
     TeamLibraryTitle,
+    TeamLibraryWrapper,
     VersionInfo,
     WorkingDirectory,
     WorkSpaceFormControl,
@@ -775,26 +777,54 @@ const SettingsModal = (props) => {
                                 detections or objects identified as potentially
                                 of interest by the system itself.
                             </AppSummary>
-                            <TeamAndLibraryWrapper>
-                                <TeamLibraryHeader>
-                                    <TeamIcon
-                                        width="32px"
-                                        height="32px"
-                                        color="#e1e1e1"
-                                    />
-                                    <TeamLibraryTitle>Team</TeamLibraryTitle>
-                                </TeamLibraryHeader>
-                                <TeamLibraryHeader>
-                                    <CodeBracketsIcon
-                                        width="32px"
-                                        height="32px"
-                                        color="#e1e1e1"
-                                    />
-                                    <TeamLibraryTitle>
-                                        Built With
-                                    </TeamLibraryTitle>
-                                </TeamLibraryHeader>
-                            </TeamAndLibraryWrapper>
+                            <TeamAndLibrary>
+                                <TeamLibraryWrapper>
+                                    <TeamLibraryHeader>
+                                        <TeamIcon
+                                            width="32px"
+                                            height="32px"
+                                            color="#e1e1e1"
+                                        />
+                                        <TeamLibraryTitle>
+                                            Team
+                                        </TeamLibraryTitle>
+                                    </TeamLibraryHeader>
+                                    <TeamLibraryList>
+                                        <ul>
+                                            <li>Dr. Ivan Rodriguez-Conde</li>
+                                            <li>James Bromley</li>
+                                            <li>Dako Albeik</li>
+                                            <li>Luka Woodson</li>
+                                            <li>Toby Ebarb</li>
+                                            <li>Dylan Johnson</li>
+                                            <li>Stephanie Bagandov</li>
+                                        </ul>
+                                    </TeamLibraryList>
+                                </TeamLibraryWrapper>
+                                <TeamLibraryWrapper>
+                                    <TeamLibraryHeader>
+                                        <CodeBracketsIcon
+                                            width="32px"
+                                            height="32px"
+                                            color="#e1e1e1"
+                                        />
+                                        <TeamLibraryTitle>
+                                            Built With
+                                        </TeamLibraryTitle>
+                                    </TeamLibraryHeader>
+                                    <TeamLibraryList>
+                                        <ul>
+                                            <li>React.js</li>
+                                            <li>MUI - Material UI</li>
+                                            <li>CornerstoneJS</li>
+                                            <li>Redux</li>
+                                            <li>EAC Cornerstone Tools</li>
+                                            <li>ElectronJS</li>
+                                            <li>Socket.IO</li>
+                                        </ul>
+                                    </TeamLibraryList>
+                                </TeamLibraryWrapper>
+                            </TeamAndLibrary>
                         </ScrollableContainer>
                     </TabPanel>
                 </ModalTabContext>

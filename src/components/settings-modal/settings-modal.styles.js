@@ -417,7 +417,7 @@ export const AppSummary = styled.div`
     margin: 0 10px;
 `;
 
-export const TeamAndLibraryWrapper = styled.div`
+export const TeamAndLibrary = styled.div`
     height: 57%;
     display: flex;
     justify-content: space-around;
@@ -427,14 +427,35 @@ export const TeamAndLibraryWrapper = styled.div`
 `;
 
 export const TeamLibraryHeader = styled.div`
-    height: 15%;
-    margin-bottom: 20px;
+    height: 14%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
+    border-bottom: solid 1px ${GREY_COLOR};
+    padding: 0 15px 5px 10px;
 `;
 
 export const TeamLibraryTitle = styled.div`
     color: #e1e1e1;
     margin-left: 5px;
+    font-size: 22px;
+`;
+
+export const TeamLibraryWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const TeamLibraryList = styled.div`
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    color: #a6a6a6;
+    font-size: 16px;
+
+    ul {
+        list-style-type: square;
+        list-style-position: inside;
+        padding: 0;
+    }
 `;
