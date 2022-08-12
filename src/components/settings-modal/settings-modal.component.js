@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { ThemeProvider } from '@mui/material/styles';
 import {
+    AboutHeader,
+    AboutHeaderInfo,
+    AboutTitle,
+    AppIcon,
+    AppIconWrapper,
+    AppSummary,
     AutoConnectContainer,
-    CogIconWrapper,
     ConnectionButton,
     ConnectionButtonSection,
     DefaultIconWrapper,
@@ -16,6 +20,9 @@ import {
     LeftAlignedWrapper,
     LocalFileOutputField,
     ModalRoot,
+    ModalTabContext,
+    ModalTabPanel,
+    ModalTabWrapper,
     modalTheme,
     PortTextField,
     RemoteInputContainer,
@@ -25,16 +32,23 @@ import {
     SelectFolderButton,
     SettingDescription,
     SettingOptionTitle,
-    SettingsHeader,
     SettingsRow,
-    SettingsTitle,
     StandardFormControl,
+    StyledBox,
     StyledDivider,
     StyledFormGroup,
     StyledPaper,
     StyledSelect,
     StyledSwitch,
+    StyledTab,
     SwitchWrapper,
+    TabList,
+    TeamAndLibrary,
+    TeamLibraryHeader,
+    TeamLibraryList,
+    TeamLibraryTitle,
+    TeamLibraryWrapper,
+    VersionInfo,
     WorkingDirectory,
     WorkSpaceFormControl,
 } from './settings-modal.styles';
@@ -44,8 +58,10 @@ import {
     FormControl,
     FormControlLabel,
     MenuItem,
+    Modal,
+    ThemeProvider,
+    Tooltip,
 } from '@mui/material';
-import Modal from '@mui/material/Modal';
 import ConnectionResultComponent from './connection-result/connection-result.component';
 import CheckConnectionIcon from '../../icons/settings-modal/check-connection-icon/check-connection.icon';
 import {
@@ -69,17 +85,18 @@ import socketIOClient from 'socket.io-client';
 import { Channels, SETTINGS } from '../../utils/enums/Constants';
 import Utils from '../../utils/general/Utils';
 import isElectron from 'is-electron';
-import Tooltip from '@mui/material/Tooltip';
-
 import { setCurrentProcessingFile } from '../../redux/slices/server/serverSlice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import CloudIcon from '../../icons/settings-modal/cloud-icon/cloud.icon';
-import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
 import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
 import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
+import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
+import CogWheelIcon from '../../icons/settings-modal/settings-cog-icon/settings-cog.icon';
+import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
+import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -309,339 +326,559 @@ const SettingsModal = (props) => {
         }
     };
 
+    const [tabIndex, setTabIndex] = React.useState(0);
+
+    const TabPanel = (props) => {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <ModalTabPanel
+                role="tabpanel"
+                hidden={value !== index}
+                id={`tabpanel-${index}`}
+                aria-labelledby={`tab-${index}`}
+                {...other}>
+                {value === index && <StyledBox>{children}</StyledBox>}
+            </ModalTabPanel>
+        );
+    };
+
+    TabPanel.propTypes = {
+        children: PropTypes.node,
+        index: PropTypes.number.isRequired,
+        value: PropTypes.number.isRequired,
+    };
+
     let body = (
         <StyledPaper>
             <ModalRoot>
-                <SettingsHeader>
-                    <CogIconWrapper>
-                        <CogWheelIcon
-                            height="24px"
-                            width="24px"
-                            color="white"
-                        />
-                    </CogIconWrapper>
-                    <SettingsTitle>Settings</SettingsTitle>
-                    <DefaultIconWrapper onClick={() => handleClose()}>
-                        <CloseIcon height="24px" width="24px" color="white" />
-                    </DefaultIconWrapper>
-                </SettingsHeader>
-                <StyledDivider />
-                <StyledFormGroup>
-                    <ScrollableContainer>
-                        <VisualizationModePickerComponent
-                            isSummarized={displaySummarizedDetections}
-                            setIsSummarized={setDisplaySummarizedDetections}
-                        />
-                        <StyledDivider />
-                        <div>
-                            <RemoteWorkContainer>
-                                <SettingOptionTitle>
-                                    Work connected to a remote service
-                                </SettingOptionTitle>
-                                <SwitchWrapper>
-                                    <StyledSwitch
-                                        checked={remoteOrLocal}
-                                        onChange={() =>
-                                            setRemoteOrLocal(!remoteOrLocal)
-                                        }
+                <ModalTabContext>
+                    <ModalTabWrapper>
+                        <TabList
+                            value={tabIndex}
+                            onChange={(event, index) =>
+                                setTabIndex(parseInt(index))
+                            }
+                            aria-label="Settings Modal Tab">
+                            <StyledTab
+                                icon={
+                                    <CogWheelIcon
+                                        width="24px"
+                                        height="24px"
+                                        color="#9d9d9d"
                                     />
-                                </SwitchWrapper>
-                            </RemoteWorkContainer>
-                            {isElectron() && (
-                                <SettingDescription>
-                                    Choose the option if you want to
-                                    receive/send images from/to a server
-                                </SettingDescription>
-                            )}
-
-                            <SettingsRow>
-                                <RemoteInputContainer>
-                                    <Tooltip title="Server address: ip address : port number">
-                                        <LeftAlignedWrapper>
-                                            <CloudIcon
-                                                color={
-                                                    remoteOrLocal
-                                                        ? '#ffffff'
-                                                        : '#9d9d9d'
-                                                }
-                                                height="24px"
-                                                width="24px"
-                                            />
-                                        </LeftAlignedWrapper>
-                                    </Tooltip>
-                                    <FormControl>
-                                        <HostTextField
-                                            value={remoteIp}
-                                            disabled={!remoteOrLocal}
-                                            onChange={(e) => {
-                                                setRemoteIp(e.target.value);
-                                            }}
-                                        />
-                                    </FormControl>
-
-                                    <IconWrapper>:</IconWrapper>
-
-                                    <FormControl>
-                                        <PortTextField
-                                            value={remotePort}
-                                            onChange={(e) => {
-                                                setRemotePort(e.target.value);
-                                            }}
-                                            disabled={!remoteOrLocal}
-                                        />
-                                    </FormControl>
-                                </RemoteInputContainer>
-
-                                <AutoConnectContainer>
-                                    <Tooltip title="Enable/disable auto-connection with server">
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    disabled={!remoteOrLocal}
-                                                    color={'primary'}
-                                                    checked={autoConnect}
-                                                    onChange={() => {
-                                                        setAutoConnect(
-                                                            !autoConnect
-                                                        );
-                                                    }}
-                                                    name="autoConnect"
-                                                />
-                                            }
-                                            label="Autoconnect"
-                                        />
-                                    </Tooltip>
-                                </AutoConnectContainer>
-                            </SettingsRow>
-                            <ConnectionButtonSection>
-                                <Tooltip title="Check whether the server is reachable">
-                                    <ConnectionButton
-                                        disabled={!remoteOrLocal}
-                                        onClick={() => {
-                                            testConnection();
-                                        }}>
-                                        <LeftAlignedWrapper>
-                                            {connecting ? (
-                                                <CircularProgress
-                                                    size={'24px'}
-                                                />
-                                            ) : (
-                                                <CheckConnectionIcon
-                                                    color={
-                                                        remoteOrLocal
-                                                            ? '#367eff'
-                                                            : '#9d9d9d'
-                                                    }
-                                                    width="24px"
-                                                    height="24px"
-                                                />
-                                            )}
-                                        </LeftAlignedWrapper>
-                                        Check connection
-                                    </ConnectionButton>
-                                </Tooltip>
-
-                                <ConnectionResultComponent
-                                    display={connectionDisplay}
-                                    connected={testConnectionResult}
+                                }
+                                iconPosition="start"
+                                label="Settings"
+                            />
+                            <StyledTab
+                                icon={
+                                    <InfoIcon
+                                        width="24px"
+                                        height="24px"
+                                        color="#9d9d9d"
+                                    />
+                                }
+                                iconPosition="start"
+                                label="About"
+                            />
+                        </TabList>
+                        <DefaultIconWrapper onClick={() => handleClose()}>
+                            <CloseIcon
+                                height="32px"
+                                width="32px"
+                                color="white"
+                            />
+                        </DefaultIconWrapper>
+                    </ModalTabWrapper>
+                    <TabPanel value={tabIndex} index={0}>
+                        <StyledFormGroup>
+                            <ScrollableContainer height={80}>
+                                <VisualizationModePickerComponent
+                                    isSummarized={displaySummarizedDetections}
+                                    setIsSummarized={
+                                        setDisplaySummarizedDetections
+                                    }
                                 />
-                            </ConnectionButtonSection>
-                        </div>
-                        <div>
-                            <StyledDivider />
-                            <div>
-                                <SettingOptionTitle>
-                                    File management
-                                </SettingOptionTitle>
-                                <SettingDescription>
-                                    Default file management options to
-                                    streamline file input and output
-                                </SettingDescription>
-                                {isElectron() && (
-                                    <WorkingDirectory>
-                                        <WorkSpaceFormControl>
-                                            <Tooltip title="Workspace location">
+                                <StyledDivider />
+                                <div>
+                                    <RemoteWorkContainer>
+                                        <SettingOptionTitle>
+                                            Work connected to a remote service
+                                        </SettingOptionTitle>
+                                        <SwitchWrapper>
+                                            <StyledSwitch
+                                                checked={remoteOrLocal}
+                                                onChange={() =>
+                                                    setRemoteOrLocal(
+                                                        !remoteOrLocal
+                                                    )
+                                                }
+                                            />
+                                        </SwitchWrapper>
+                                    </RemoteWorkContainer>
+                                    {isElectron() && (
+                                        <SettingDescription>
+                                            Choose the option if you want to
+                                            receive/send images from/to a server
+                                        </SettingDescription>
+                                    )}
+
+                                    <SettingsRow>
+                                        <RemoteInputContainer>
+                                            <Tooltip title="Server address: ip address : port number">
                                                 <LeftAlignedWrapper>
-                                                    <FolderIcon
-                                                        width="24px"
-                                                        height="24px"
+                                                    <CloudIcon
                                                         color={
                                                             remoteOrLocal
-                                                                ? '#9d9d9d'
-                                                                : '#ffffff'
+                                                                ? '#ffffff'
+                                                                : '#9d9d9d'
                                                         }
+                                                        height="24px"
+                                                        width="24px"
                                                     />
                                                 </LeftAlignedWrapper>
                                             </Tooltip>
-                                            <LocalFileOutputField
-                                                value={localFileOutput}
-                                                disabled={remoteOrLocal}
-                                                onChange={(e) => {
-                                                    setLocalFileOutput(
-                                                        e.target.value
-                                                    );
-                                                }}
-                                            />
-                                        </WorkSpaceFormControl>
-                                        <Tooltip title="Select workspace folder from the file explorer">
-                                            <SelectFolderButton
-                                                disabled={remoteOrLocal}
-                                                onClick={() => {
-                                                    if (isElectron()) {
-                                                        ipcRenderer
-                                                            .invoke(
-                                                                Channels.selectDirectory
-                                                            )
-                                                            .then((result) => {
-                                                                if (
-                                                                    result.canceled ===
-                                                                        false &&
-                                                                    result
-                                                                        .filePaths
-                                                                        .length >
-                                                                        0
-                                                                ) {
-                                                                    setLocalFileOutput(
-                                                                        result
-                                                                            .filePaths[0]
-                                                                    );
-                                                                }
-                                                            })
-                                                            .catch((err) => {
-                                                                console.log(
-                                                                    err
+                                            <FormControl>
+                                                <HostTextField
+                                                    value={remoteIp}
+                                                    disabled={!remoteOrLocal}
+                                                    onChange={(e) => {
+                                                        setRemoteIp(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                />
+                                            </FormControl>
+
+                                            <IconWrapper>:</IconWrapper>
+
+                                            <FormControl>
+                                                <PortTextField
+                                                    value={remotePort}
+                                                    onChange={(e) => {
+                                                        setRemotePort(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    disabled={!remoteOrLocal}
+                                                />
+                                            </FormControl>
+                                        </RemoteInputContainer>
+
+                                        <AutoConnectContainer>
+                                            <Tooltip title="Enable/disable auto-connection with server">
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            disabled={
+                                                                !remoteOrLocal
+                                                            }
+                                                            color={'primary'}
+                                                            checked={
+                                                                autoConnect
+                                                            }
+                                                            onChange={() => {
+                                                                setAutoConnect(
+                                                                    !autoConnect
                                                                 );
-                                                            });
+                                                            }}
+                                                            name="autoConnect"
+                                                        />
                                                     }
-                                                }}>
-                                                Select Folder
-                                            </SelectFolderButton>
-                                        </Tooltip>
-                                    </WorkingDirectory>
-                                )}
-
-                                <FileManagementSection>
-                                    <FileManagementItem>
-                                        <Tooltip title="Select output file format">
-                                            <LeftAlignedWrapper>
-                                                <FileIcon
-                                                    height="24px"
-                                                    width="24px"
-                                                    color="white"
+                                                    label="Autoconnect"
                                                 />
-                                            </LeftAlignedWrapper>
-                                        </Tooltip>
-                                        <StandardFormControl>
-                                            <StyledSelect
-                                                open={openFileFormat}
-                                                defaultValue={'Open Raster'}
-                                                onClose={() => {
-                                                    setOpenFileFormat(false);
-                                                }}
-                                                onOpen={() => {
-                                                    setOpenFileFormat(true);
-                                                }}
-                                                value={fileFormat}
-                                                onChange={(e) => {
-                                                    setFileFormat(
-                                                        e.target.value
-                                                    );
+                                            </Tooltip>
+                                        </AutoConnectContainer>
+                                    </SettingsRow>
+                                    <ConnectionButtonSection>
+                                        <Tooltip title="Check whether the server is reachable">
+                                            <ConnectionButton
+                                                disabled={!remoteOrLocal}
+                                                onClick={() => {
+                                                    testConnection();
                                                 }}>
-                                                <MenuItem value={''} disabled>
-                                                    Output file format
-                                                </MenuItem>
-
-                                                <MenuItem value={'Open Raster'}>
-                                                    Open Raster
-                                                </MenuItem>
-                                                <MenuItem value={'Zip Archive'}>
-                                                    Zip Archive
-                                                </MenuItem>
-                                            </StyledSelect>
-                                        </StandardFormControl>
-                                    </FileManagementItem>
-                                    <FileManagementItem>
-                                        <Tooltip title="Select format for annotations">
-                                            <LeftAlignedWrapper>
-                                                <PencilIcon
-                                                    height="24px"
-                                                    width="24px"
-                                                    color="white"
-                                                />
-                                            </LeftAlignedWrapper>
+                                                <LeftAlignedWrapper>
+                                                    {connecting ? (
+                                                        <CircularProgress
+                                                            size={'24px'}
+                                                        />
+                                                    ) : (
+                                                        <CheckConnectionIcon
+                                                            color={
+                                                                remoteOrLocal
+                                                                    ? '#367eff'
+                                                                    : '#9d9d9d'
+                                                            }
+                                                            width="24px"
+                                                            height="24px"
+                                                        />
+                                                    )}
+                                                </LeftAlignedWrapper>
+                                                Check connection
+                                            </ConnectionButton>
                                         </Tooltip>
 
-                                        <StandardFormControl>
-                                            <StyledSelect
-                                                open={openAnnotationsFormat}
-                                                onClose={() => {
-                                                    setOpenAnnotationsFormat(
-                                                        false
-                                                    );
-                                                }}
-                                                onOpen={() => {
-                                                    setOpenAnnotationsFormat(
-                                                        true
-                                                    );
-                                                }}
-                                                value={annotationsFormat}
-                                                onChange={(e) => {
-                                                    setAnnotationsFormat(
-                                                        e.target.value
-                                                    );
-                                                }}>
-                                                <MenuItem disabled value={''}>
-                                                    Annotations format
-                                                </MenuItem>
-                                                {Object.keys(
-                                                    SETTINGS.ANNOTATIONS
-                                                ).map((key, index) => {
-                                                    const annotation =
-                                                        SETTINGS.ANNOTATIONS[
-                                                            key
-                                                        ];
-                                                    return (
+                                        <ConnectionResultComponent
+                                            display={connectionDisplay}
+                                            connected={testConnectionResult}
+                                        />
+                                    </ConnectionButtonSection>
+                                </div>
+                                <div>
+                                    <StyledDivider />
+                                    <div>
+                                        <SettingOptionTitle>
+                                            File management
+                                        </SettingOptionTitle>
+                                        <SettingDescription>
+                                            Default file management options to
+                                            streamline file input and output
+                                        </SettingDescription>
+                                        {isElectron() && (
+                                            <WorkingDirectory>
+                                                <WorkSpaceFormControl>
+                                                    <Tooltip title="Workspace location">
+                                                        <LeftAlignedWrapper>
+                                                            <FolderIcon
+                                                                width="24px"
+                                                                height="24px"
+                                                                color={
+                                                                    remoteOrLocal
+                                                                        ? '#9d9d9d'
+                                                                        : '#ffffff'
+                                                                }
+                                                            />
+                                                        </LeftAlignedWrapper>
+                                                    </Tooltip>
+                                                    <LocalFileOutputField
+                                                        value={localFileOutput}
+                                                        disabled={remoteOrLocal}
+                                                        onChange={(e) => {
+                                                            setLocalFileOutput(
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </WorkSpaceFormControl>
+                                                <Tooltip title="Select workspace folder from the file explorer">
+                                                    <SelectFolderButton
+                                                        disabled={remoteOrLocal}
+                                                        onClick={() => {
+                                                            if (isElectron()) {
+                                                                ipcRenderer
+                                                                    .invoke(
+                                                                        Channels.selectDirectory
+                                                                    )
+                                                                    .then(
+                                                                        (
+                                                                            result
+                                                                        ) => {
+                                                                            if (
+                                                                                result.canceled ===
+                                                                                    false &&
+                                                                                result
+                                                                                    .filePaths
+                                                                                    .length >
+                                                                                    0
+                                                                            ) {
+                                                                                setLocalFileOutput(
+                                                                                    result
+                                                                                        .filePaths[0]
+                                                                                );
+                                                                            }
+                                                                        }
+                                                                    )
+                                                                    .catch(
+                                                                        (
+                                                                            err
+                                                                        ) => {
+                                                                            console.log(
+                                                                                err
+                                                                            );
+                                                                        }
+                                                                    );
+                                                            }
+                                                        }}>
+                                                        Select Folder
+                                                    </SelectFolderButton>
+                                                </Tooltip>
+                                            </WorkingDirectory>
+                                        )}
+
+                                        <FileManagementSection>
+                                            <FileManagementItem>
+                                                <Tooltip title="Select output file format">
+                                                    <LeftAlignedWrapper>
+                                                        <FileIcon
+                                                            height="24px"
+                                                            width="24px"
+                                                            color="white"
+                                                        />
+                                                    </LeftAlignedWrapper>
+                                                </Tooltip>
+                                                <StandardFormControl>
+                                                    <StyledSelect
+                                                        open={openFileFormat}
+                                                        defaultValue={
+                                                            'Open Raster'
+                                                        }
+                                                        onClose={() => {
+                                                            setOpenFileFormat(
+                                                                false
+                                                            );
+                                                        }}
+                                                        onOpen={() => {
+                                                            setOpenFileFormat(
+                                                                true
+                                                            );
+                                                        }}
+                                                        value={fileFormat}
+                                                        onChange={(e) => {
+                                                            setFileFormat(
+                                                                e.target.value
+                                                            );
+                                                        }}>
                                                         <MenuItem
-                                                            key={index}
-                                                            value={annotation}>
-                                                            {annotation}
+                                                            value={''}
+                                                            disabled>
+                                                            Output file format
                                                         </MenuItem>
-                                                    );
-                                                })}
-                                            </StyledSelect>
-                                        </StandardFormControl>
-                                    </FileManagementItem>
 
-                                    <FileManagementItem>
-                                        <Tooltip title="Input suffix appended to filenames">
-                                            <LeftAlignedWrapper>
-                                                <FileSuffixIcon
-                                                    height="24px"
-                                                    width="24px"
-                                                    color="white"
-                                                />
-                                            </LeftAlignedWrapper>
-                                        </Tooltip>
-                                        <FormControl>
-                                            <FileSuffixField
-                                                value={fileSuffix}
-                                                onChange={(e) => {
-                                                    setFileSuffix(
-                                                        e.target.value
-                                                    );
-                                                }}
-                                            />
-                                        </FormControl>
-                                    </FileManagementItem>
-                                </FileManagementSection>
-                            </div>
-                        </div>
-                    </ScrollableContainer>
+                                                        <MenuItem
+                                                            value={
+                                                                'Open Raster'
+                                                            }>
+                                                            Open Raster
+                                                        </MenuItem>
+                                                        <MenuItem
+                                                            value={
+                                                                'Zip Archive'
+                                                            }>
+                                                            Zip Archive
+                                                        </MenuItem>
+                                                    </StyledSelect>
+                                                </StandardFormControl>
+                                            </FileManagementItem>
+                                            <FileManagementItem>
+                                                <Tooltip title="Select format for annotations">
+                                                    <LeftAlignedWrapper>
+                                                        <PencilIcon
+                                                            height="24px"
+                                                            width="24px"
+                                                            color="white"
+                                                        />
+                                                    </LeftAlignedWrapper>
+                                                </Tooltip>
 
-                    <SaveSettingsButton onClick={() => saveSettingsEvent()}>
-                        Save Settings
-                    </SaveSettingsButton>
-                </StyledFormGroup>
+                                                <StandardFormControl>
+                                                    <StyledSelect
+                                                        open={
+                                                            openAnnotationsFormat
+                                                        }
+                                                        onClose={() => {
+                                                            setOpenAnnotationsFormat(
+                                                                false
+                                                            );
+                                                        }}
+                                                        onOpen={() => {
+                                                            setOpenAnnotationsFormat(
+                                                                true
+                                                            );
+                                                        }}
+                                                        value={
+                                                            annotationsFormat
+                                                        }
+                                                        onChange={(e) => {
+                                                            setAnnotationsFormat(
+                                                                e.target.value
+                                                            );
+                                                        }}>
+                                                        <MenuItem
+                                                            disabled
+                                                            value={''}>
+                                                            Annotations format
+                                                        </MenuItem>
+                                                        {Object.keys(
+                                                            SETTINGS.ANNOTATIONS
+                                                        ).map((key, index) => {
+                                                            const annotation =
+                                                                SETTINGS
+                                                                    .ANNOTATIONS[
+                                                                    key
+                                                                ];
+                                                            return (
+                                                                <MenuItem
+                                                                    key={index}
+                                                                    value={
+                                                                        annotation
+                                                                    }>
+                                                                    {annotation}
+                                                                </MenuItem>
+                                                            );
+                                                        })}
+                                                    </StyledSelect>
+                                                </StandardFormControl>
+                                            </FileManagementItem>
+
+                                            <FileManagementItem>
+                                                <Tooltip title="Input suffix appended to filenames">
+                                                    <LeftAlignedWrapper>
+                                                        <FileSuffixIcon
+                                                            height="24px"
+                                                            width="24px"
+                                                            color="white"
+                                                        />
+                                                    </LeftAlignedWrapper>
+                                                </Tooltip>
+                                                <FormControl>
+                                                    <FileSuffixField
+                                                        value={fileSuffix}
+                                                        onChange={(e) => {
+                                                            setFileSuffix(
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                            </FileManagementItem>
+                                        </FileManagementSection>
+                                    </div>
+                                </div>
+                            </ScrollableContainer>
+
+                            <SaveSettingsButton
+                                onClick={() => saveSettingsEvent()}>
+                                Save Settings
+                            </SaveSettingsButton>
+                        </StyledFormGroup>
+                    </TabPanel>
+                    <TabPanel value={tabIndex} index={1}>
+                        <ScrollableContainer height={100}>
+                            <AboutHeader>
+                                <AppIconWrapper>
+                                    <AppIcon />
+                                </AppIconWrapper>
+                                <AboutHeaderInfo>
+                                    <AboutTitle>
+                                        Pilot<strong>GUI</strong>
+                                    </AboutTitle>
+                                    <VersionInfo>
+                                        Version {process.env.REACT_APP_VERSION}
+                                    </VersionInfo>
+                                </AboutHeaderInfo>
+                            </AboutHeader>
+                            <AppSummary>
+                                The Pilot GUI is a cross-platform application,
+                                developed by the{' '}
+                                <strong>Emerging Analytics Center</strong> as a
+                                part of the <strong>Pilot System</strong> - an
+                                intelligent decision support system for baggage
+                                screening - in order to enable x-ray machine
+                                operators to visually check the multiple
+                                detections or objects identified as potentially
+                                of interest by the system itself.
+                            </AppSummary>
+                            <TeamAndLibrary>
+                                <TeamLibraryWrapper>
+                                    <TeamLibraryHeader>
+                                        <TeamIcon
+                                            width="32px"
+                                            height="32px"
+                                            color="#e1e1e1"
+                                        />
+                                        <TeamLibraryTitle>
+                                            Team
+                                        </TeamLibraryTitle>
+                                    </TeamLibraryHeader>
+                                    <TeamLibraryList>
+                                        <ul>
+                                            <li>Dr. Ivan Rodriguez-Conde</li>
+                                            <li>James Bromley</li>
+                                            <li>Dako Albeik</li>
+                                            <li>Luka Woodson</li>
+                                            <li>Toby Ebarb</li>
+                                            <li>Dylan Johnson</li>
+                                            <li>Stephanie Bagandov</li>
+                                        </ul>
+                                    </TeamLibraryList>
+                                </TeamLibraryWrapper>
+                                <TeamLibraryWrapper>
+                                    <TeamLibraryHeader>
+                                        <CodeBracketsIcon
+                                            width="32px"
+                                            height="32px"
+                                            color="#e1e1e1"
+                                        />
+                                        <TeamLibraryTitle>
+                                            Built With
+                                        </TeamLibraryTitle>
+                                    </TeamLibraryHeader>
+                                    <TeamLibraryList>
+                                        <ul>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/facebook/react/"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    React.js
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/mui/material-ui"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    MUI - Material UI
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/cornerstonejs/cornerstone"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    CornerstoneJS
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/reduxjs/redux"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    Redux
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://www.npmjs.com/package/eac-cornerstone-tools"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    EAC Cornerstone Tools
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/electron/electron"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    ElectronJS
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="https://github.com/socketio/socket.io"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer">
+                                                    Socket.IO
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </TeamLibraryList>
+                                </TeamLibraryWrapper>
+                            </TeamAndLibrary>
+                        </ScrollableContainer>
+                    </TabPanel>
+                </ModalTabContext>
             </ModalRoot>
         </StyledPaper>
     );

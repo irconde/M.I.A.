@@ -60,6 +60,5 @@ export default class XmlParserUtil {
         });
 
         return jsonObj;
-        // MS COCO
     }
 }
