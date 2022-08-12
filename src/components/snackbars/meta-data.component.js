@@ -8,12 +8,12 @@ import {
 import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import {
     InlineSlash,
-    MetaDataText,
     MetaDataGroup,
+    MetaDataText,
     StyledMetaData,
 } from './meta-data.styles';
 
-import InfoIcon from '../../icons/meta-data/info-icon/info.icon';
+import InfoIcon from '../../icons/shared/info-icon/info.icon';
 
 /**
  * @component
@@ -32,8 +32,13 @@ const MetaDataComponent = () => {
         return <></>;
     } else {
         return (
-            <StyledMetaData sideMenuCollapsed={sideMenuCollapsed}>
-                <InfoIcon width="1.5rem" height="1.5rem" color="white" />
+            <StyledMetaData sideMenuCollapsed={sideMenuCollapsed} id="Metadata">
+                <InfoIcon
+                    width="24px"
+                    height="24px"
+                    color="white"
+                    id="InfoIcon"
+                />
                 <MetaDataGroup>
                     <MetaDataText>Detector Type:</MetaDataText>
                     <MetaDataText> {configInfo.detectorType}</MetaDataText>

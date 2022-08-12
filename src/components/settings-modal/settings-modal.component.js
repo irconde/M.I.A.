@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReactComponent as SettingsCogIconComponent } from '../../icons/shared/settings-cog-icon/settings-cog.icon.svg';
 import PropTypes from 'prop-types';
 import {
     AutoConnectContainer,
@@ -81,45 +80,15 @@ import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import FileIcon from '../../icons/settings-modal/file-icon/file.icon';
 import PencilIcon from '../../icons/settings-modal/pencil-icon/pencil.icon';
 import FileSuffixIcon from '../../icons/settings-modal/file-suffix-icon/file-suffix.icon';
+import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import VisualizationModePickerComponent from './visualization-mode-picker/visualization-mode-picker.component';
+import { StyledCogWheelIcon } from '../../icons/shared/settings-cog-icon/settings-cog.icon.styles';
 
 let ipcRenderer;
 if (isElectron()) {
     const electron = window.require('electron');
     ipcRenderer = electron.ipcRenderer;
 }
-
-// const TabPanel = (props) => {
-//     const { children, value, index, ...other } = props;
-//
-//     return (
-//         <div
-//             role="tabpanel"
-//             hidden={value !== index}
-//             id={`simple-tabpanel-${index}`}
-//             aria-labelledby={`simple-tab-${index}`}
-//             {...other}>
-//             {value === index && (
-//                 <Box sx={{ p: 3 }}>
-//                     <Typography>{children}</Typography>
-//                 </Box>
-//             )}
-//         </div>
-//     );
-// };
-//
-// TabPanel.propTypes = {
-//     children: PropTypes.node,
-//     index: PropTypes.number.isRequired,
-//     value: PropTypes.number.isRequired,
-// };
-//
-// const a11yProps = (index) => {
-//     return {
-//         id: `simple-tab-${index}`,
-//         'aria-controls': `simple-tabpanel-${index}`,
-//     };
-// };
 
 /**
  * Component dialog for changing settings of application.
@@ -378,13 +347,18 @@ const SettingsModal = (props) => {
                             }
                             aria-label="Settings Modal Tab">
                             <StyledTab
-                                icon={<SettingsCogIconComponent />}
+                                icon={<StyledCogWheelIcon />}
                                 iconPosition="start"
                                 label="Settings"
                             />
-                            {/*// TODO: Create icon component for about tab*/}
                             <StyledTab
-                                icon={<SettingsCogIconComponent />}
+                                icon={
+                                    <InfoIcon
+                                        width="20px"
+                                        height="20px"
+                                        color="white"
+                                    />
+                                }
                                 iconPosition="start"
                                 label="About"
                             />
