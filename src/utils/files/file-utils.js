@@ -35,20 +35,38 @@ export default class FileUtils {
                     const parsedData = this._xmlParser.getParsedXmlData();
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        const promises = [];
+                        const detectionData = [];
                         parsedData.views.forEach((view) => {
                             view.detectionData.forEach((detectionPath) => {
-                                promises.push(
-                                    zipUtil.file(detectionPath).async('string')
-                                );
+                                zipUtil
+                                    .file(detectionPath)
+                                    .async('string')
+                                    .then((string) => {
+                                        const detection = JSON.parse(string);
+                                        console.log(detection);
+                                        const { annotations, info } = detection;
+                                        const {
+                                            className,
+                                            confidence,
+                                            bbox,
+                                            id,
+                                            image_id,
+                                        } = annotations[0];
+                                        detectionData.push({
+                                            algorithm: info.algorithm,
+                                            className,
+                                            confidence,
+                                            view: view.view,
+                                            boundingBox: bbox,
+                                            binaryMask: [],
+                                            polygonMask: [],
+                                            uuid: id, // make sure this is the right id
+                                            detectionFromFile: true,
+                                            imageId: image_id,
+                                        });
+                                        console.log(detectionData);
+                                    });
                             });
-                        });
-                        const detectionsData = [];
-                        Promise.all(promises).then((strings) => {
-                            strings.forEach((string) =>
-                                detectionsData.push(JSON.parse(string))
-                            );
-                            console.log(detectionsData);
                         });
                     }
                 });
