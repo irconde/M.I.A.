@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import XmlParserUtil from './xml-parser-util';
+import { SETTINGS } from '../enums/Constants';
 
 /**
  * Class that manages the loading and generating of files for the application
@@ -32,6 +33,24 @@ export default class FileUtils {
                 .then((stackFile) => {
                     this._xmlParser = new XmlParserUtil(stackFile);
                     const parsedData = this._xmlParser.getParsedXmlData();
+                    console.log(parsedData);
+                    if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
+                        const promises = [];
+                        parsedData.views.forEach((view) => {
+                            view.detectionData.forEach((detectionPath) => {
+                                promises.push(
+                                    zipUtil.file(detectionPath).async('string')
+                                );
+                            });
+                        });
+                        const detectionsData = [];
+                        Promise.all(promises).then((strings) => {
+                            strings.forEach((string) =>
+                                detectionsData.push(JSON.parse(string))
+                            );
+                            console.log(detectionsData);
+                        });
+                    }
                 });
         });
     }
