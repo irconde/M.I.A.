@@ -37,7 +37,7 @@ export default class FileUtils {
                     const parsedData = this._xmlParser.getParsedXmlData();
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        this._loadCOCOdata(parsedData, zipUtil).then(
+                        this.#loadCOCOdata(parsedData, zipUtil).then(
                             (detectionData) => console.log(detectionData)
                         );
                     }
@@ -45,7 +45,15 @@ export default class FileUtils {
         });
     }
 
-    async _loadCOCOdata(parsedData, zipUtil) {
+    /**
+     * Returns an array of detection data parsed from the json files using JSZip
+     *
+     * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
+     * @param {JSZip} zipUtil
+     * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
+     * @private
+     */
+    async #loadCOCOdata(parsedData, zipUtil) {
         const detectionData = [];
         const allPromises = [];
         parsedData.views.forEach((view) => {
@@ -53,13 +61,11 @@ export default class FileUtils {
                 allPromises.push(zipUtil.file(detectionPath).async('string'));
                 allPromises.at(-1).then((string) => {
                     const detection = JSON.parse(string);
-                    console.log(detection);
                     const { annotations, info } = detection;
                     const {
                         className,
                         confidence,
                         bbox,
-                        id,
                         image_id,
                         segmentation,
                     } = annotations[0];
@@ -76,7 +82,7 @@ export default class FileUtils {
                         boundingBox,
                         binaryMask,
                         polygonMask,
-                        uuid: uuidv4(), // make sure this is the right id
+                        uuid: uuidv4(),
                         detectionFromFile: true,
                         imageId: image_id,
                     });
@@ -88,12 +94,25 @@ export default class FileUtils {
         return detectionData;
     }
 
+    /**
+     * Converts COCO bbox to a bounding box
+     *
+     * @param {{x, y, width, height}} bbox
+     * @returns {{x_start, y_start, x_end, y_end}}
+     */
     #getBoundingBox(bbox) {
         bbox[2] = bbox[0] + bbox[2];
         bbox[3] = bbox[1] + bbox[3];
         return bbox;
     }
 
+    /**
+     * Returns an object with polygon and binary mask properties depending on the segmentation
+     *
+     * @param {{x_start, y_start, x_end, y_end}} boundingBox
+     * @param {Array} segmentation
+     * @returns {{polygonMask: [], binaryMask: []}}
+     */
     #getMasks(boundingBox, segmentation) {
         let binaryMask = [];
         let polygonMask = [];
