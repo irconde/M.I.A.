@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import XmlParserUtil from './xml-parser-util';
 import { SETTINGS } from '../enums/Constants';
 import { v4 as uuidv4 } from 'uuid';
+import Utils from '../general/Utils';
 
 /**
  * Class that manages the loading and generating of files for the application
@@ -54,18 +55,27 @@ export default class FileUtils {
                     const detection = JSON.parse(string);
                     console.log(detection);
                     const { annotations, info } = detection;
-                    const { className, confidence, bbox, id, image_id } =
-                        annotations[0];
+                    const {
+                        className,
+                        confidence,
+                        bbox,
+                        id,
+                        image_id,
+                        segmentation,
+                    } = annotations[0];
                     const boundingBox = this.#getBoundingBox(bbox);
+                    const { binaryMask, polygonMask } = this.#getMasks(
+                        boundingBox,
+                        segmentation
+                    );
                     detectionData.push({
                         algorithm: info.algorithm,
                         className,
                         confidence,
                         view: view.view,
                         boundingBox,
-                        // To be calculated
-                        binaryMask: [],
-                        polygonMask: [],
+                        binaryMask,
+                        polygonMask,
                         uuid: uuidv4(), // make sure this is the right id
                         detectionFromFile: true,
                         imageId: image_id,
@@ -82,5 +92,26 @@ export default class FileUtils {
         bbox[2] = bbox[0] + bbox[2];
         bbox[3] = bbox[1] + bbox[3];
         return bbox;
+    }
+
+    #getMasks(boundingBox, segmentation) {
+        let binaryMask = [];
+        let polygonMask = [];
+        if (segmentation.length > 0) {
+            const polygonXY = Utils.coordArrayToPolygonData(segmentation[0]);
+            polygonMask = Utils.polygonDataToXYArray(polygonXY, boundingBox);
+            binaryMask = Utils.polygonToBinaryMask(polygonMask);
+        } else {
+            binaryMask = [
+                [],
+                [boundingBox[0], boundingBox[1]],
+                [
+                    boundingBox[2] - boundingBox[0],
+                    boundingBox[3] - boundingBox[1],
+                ],
+            ];
+        }
+
+        return { binaryMask, polygonMask };
     }
 }
