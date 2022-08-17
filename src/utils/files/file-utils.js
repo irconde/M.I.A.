@@ -8,36 +8,36 @@ import Utils from '../general/Utils';
  * Class that manages the loading and generating of files for the application
  */
 export default class FileUtils {
-    _fileData = '';
-    _blobData = [];
-    _imageData = [];
-    _xmlParser = null;
+    #fileData = '';
+    #blobData = [];
+    #imageData = [];
+    #xmlParser = null;
 
     /**
      * Constructor for the file utils class
      * @param {string} fileData Base 64 string of the binary data
      */
     constructor(fileData) {
-        this._fileData = fileData;
-        this._loadData();
+        this.#fileData = fileData;
+        this.#loadData();
     }
 
     /**
      * Loads the data from the passed in file string data
      * @private
      */
-    _loadData() {
+    #loadData() {
         const zipUtil = new JSZip();
-        zipUtil.loadAsync(this._fileData, { base64: true }).then(() => {
+        zipUtil.loadAsync(this.#fileData, { base64: true }).then(() => {
             zipUtil
                 .file('stack.xml')
                 .async('string')
                 .then((stackFile) => {
-                    this._xmlParser = new XmlParserUtil(stackFile);
-                    const parsedData = this._xmlParser.getParsedXmlData();
+                    this.#xmlParser = new XmlParserUtil(stackFile);
+                    const parsedData = this.#xmlParser.getParsedXmlData();
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        this.#loadCOCOdata(parsedData, zipUtil).then(
+                        this.#loadCocoDetections(parsedData, zipUtil).then(
                             (detectionData) => console.log(detectionData)
                         );
                     }
@@ -53,7 +53,7 @@ export default class FileUtils {
      * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
      * @private
      */
-    async #loadCOCOdata(parsedData, zipUtil) {
+    async #loadCocoDetections(parsedData, zipUtil) {
         const detectionData = [];
         const allPromises = [];
         parsedData.views.forEach((view) => {

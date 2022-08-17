@@ -4,15 +4,15 @@ import { SETTINGS } from '../enums/Constants';
  * Class that parses a xml file based on the given string
  */
 export default class XmlParserUtil {
-    _xmlData = '';
-    _xmlDoc = null;
+    #xmlData = '';
+    #xmlDoc = null;
 
     /**
      * Takes in the xml data as a string
      * @param {string} xmlData
      */
     constructor(xmlData) {
-        this._xmlData = xmlData;
+        this.#xmlData = xmlData;
     }
 
     /**
@@ -22,8 +22,8 @@ export default class XmlParserUtil {
     getParsedXmlData() {
         // TODO: Simply return an easily readable and parsable json object of the xml data
         const parser = new DOMParser();
-        this._xmlDoc = parser.parseFromString(this._xmlData, 'text/xml');
-        const xmlImages = this._xmlDoc.getElementsByTagName('image');
+        this.#xmlDoc = parser.parseFromString(this.#xmlData, 'text/xml');
+        const xmlImages = this.#xmlDoc.getElementsByTagName('image');
         const currentFileFormat = xmlImages[0]?.getAttribute('format');
         const jsonObj = {
             format: currentFileFormat,
