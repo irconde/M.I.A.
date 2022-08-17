@@ -56,12 +56,13 @@ export default class FileUtils {
                     const { annotations, info } = detection;
                     const { className, confidence, bbox, id, image_id } =
                         annotations[0];
+                    const boundingBox = this.#getBoundingBox(bbox);
                     detectionData.push({
                         algorithm: info.algorithm,
                         className,
                         confidence,
                         view: view.view,
-                        boundingBox: bbox,
+                        boundingBox,
                         // To be calculated
                         binaryMask: [],
                         polygonMask: [],
@@ -75,5 +76,11 @@ export default class FileUtils {
 
         await Promise.all(allPromises);
         return detectionData;
+    }
+
+    #getBoundingBox(bbox) {
+        bbox[2] = bbox[0] + bbox[2];
+        bbox[3] = bbox[1] + bbox[3];
+        return bbox;
     }
 }
