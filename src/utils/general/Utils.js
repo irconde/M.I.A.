@@ -856,6 +856,46 @@ export default class Utils {
     }
 
     /**
+     * Converts COCO bbox to a bounding box
+     *
+     * @param {{x, y, width, height}} bbox
+     * @returns {{x_start, y_start, x_end, y_end}}
+     */
+    static getBoundingBox(bbox) {
+        bbox[2] = bbox[0] + bbox[2];
+        bbox[3] = bbox[1] + bbox[3];
+        return bbox;
+    }
+
+    /**
+     * Returns an object with polygon and binary mask properties depending on the segmentation
+     *
+     * @param {{x_start, y_start, x_end, y_end}} boundingBox
+     * @param {Array} segmentation
+     * @returns {{polygonMask: [], binaryMask: []}}
+     */
+    static getMasks(boundingBox, segmentation) {
+        let binaryMask = [];
+        let polygonMask = [];
+        if (segmentation.length > 0) {
+            const polygonXY = Utils.coordArrayToPolygonData(segmentation[0]);
+            polygonMask = Utils.polygonDataToXYArray(polygonXY, boundingBox);
+            binaryMask = Utils.polygonToBinaryMask(polygonMask);
+        } else {
+            binaryMask = [
+                [],
+                [boundingBox[0], boundingBox[1]],
+                [
+                    boundingBox[2] - boundingBox[0],
+                    boundingBox[3] - boundingBox[1],
+                ],
+            ];
+        }
+
+        return { binaryMask, polygonMask };
+    }
+
+    /**
      * Calculates the Euclidean distance between two 2D points.
      *
      * @param {{x: number, y: number}} position1 - Start point
