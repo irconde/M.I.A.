@@ -36,8 +36,8 @@ export default class FileUtils {
                     const parsedData = this._xmlParser.getParsedXmlData();
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        this._loadCOCOdata(parsedData, zipUtil).then((data) =>
-                            console.log(data)
+                        this._loadCOCOdata(parsedData, zipUtil).then(
+                            (detectionData) => console.log(detectionData)
                         );
                     }
                 });
@@ -46,33 +46,34 @@ export default class FileUtils {
 
     async _loadCOCOdata(parsedData, zipUtil) {
         const detectionData = [];
+        const allPromises = [];
         parsedData.views.forEach((view) => {
             view.detectionData.forEach((detectionPath) => {
-                zipUtil
-                    .file(detectionPath)
-                    .async('string')
-                    .then((string) => {
-                        const detection = JSON.parse(string);
-                        console.log(detection);
-                        const { annotations, info } = detection;
-                        const { className, confidence, bbox, id, image_id } =
-                            annotations[0];
-                        detectionData.push({
-                            algorithm: info.algorithm,
-                            className,
-                            confidence,
-                            view: view.view,
-                            boundingBox: bbox,
-                            // To be calculated
-                            binaryMask: [],
-                            polygonMask: [],
-                            uuid: uuidv4(), // make sure this is the right id
-                            detectionFromFile: true,
-                            imageId: image_id,
-                        });
+                allPromises.push(zipUtil.file(detectionPath).async('string'));
+                allPromises.at(-1).then((string) => {
+                    const detection = JSON.parse(string);
+                    console.log(detection);
+                    const { annotations, info } = detection;
+                    const { className, confidence, bbox, id, image_id } =
+                        annotations[0];
+                    detectionData.push({
+                        algorithm: info.algorithm,
+                        className,
+                        confidence,
+                        view: view.view,
+                        boundingBox: bbox,
+                        // To be calculated
+                        binaryMask: [],
+                        polygonMask: [],
+                        uuid: uuidv4(), // make sure this is the right id
+                        detectionFromFile: true,
+                        imageId: image_id,
                     });
+                });
             });
         });
+
+        await Promise.all(allPromises);
         return detectionData;
     }
 }
