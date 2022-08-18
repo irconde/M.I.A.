@@ -3,6 +3,8 @@ import XmlParserUtil from './xml-parser-util';
 import { SETTINGS } from '../enums/Constants';
 import { v4 as uuidv4 } from 'uuid';
 import Utils from '../general/Utils';
+import dicomParser from 'dicom-parser';
+import Dicos from '../detections/Dicos';
 
 /**
  * Class that manages the loading and generating of files for the application
@@ -38,6 +40,10 @@ export default class FileUtils {
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
                         this.#loadCocoDetections(parsedData, zipUtil).then(
+                            (detectionData) => console.log(detectionData)
+                        );
+                    } else if (parsedData.format === SETTINGS.ANNOTATIONS.TDR) {
+                        this.#loadDicosDetections(parsedData, zipUtil).then(
                             (detectionData) => console.log(detectionData)
                         );
                     }
@@ -86,6 +92,72 @@ export default class FileUtils {
                         detectionFromFile: true,
                         imageId: image_id,
                     });
+                });
+            });
+        });
+
+        await Promise.all(allPromises);
+        return detectionData;
+    }
+
+    async #loadDicosDetections(parsedData, zipUtil) {
+        const detectionData = [];
+        const allPromises = [];
+        parsedData.views.forEach((view) => {
+            view.detectionData.forEach((detectionPath) => {
+                allPromises.push(
+                    zipUtil.file(detectionPath).async('uint8array')
+                );
+                allPromises.at(-1).then((array) => {
+                    const dataSet = dicomParser.parseDicom(array);
+                    const threatsCount = dataSet.uint16(
+                        Dicos.dictionary['NumberOfAlarmObjects'].tag
+                    );
+                    const algorithm = dataSet.string(
+                        Dicos.dictionary['ThreatDetectionAlgorithmandVersion']
+                            .tag
+                    );
+                    const threatSequence = dataSet.elements.x40101011;
+                    if (
+                        threatSequence == null ||
+                        dataSet.uint16(
+                            Dicos.dictionary['NumberOfAlarmObjects'].tag
+                        ) === 0 ||
+                        dataSet.uint16(
+                            Dicos.dictionary['NumberOfAlarmObjects'].tag
+                        ) === undefined
+                    ) {
+                        return null;
+                    } else {
+                        const boundingBox = Dicos.retrieveBoundingBoxData(
+                            threatSequence.items[0]
+                        );
+                        let className = Dicos.retrieveObjectClass(
+                            threatSequence.items[0]
+                        );
+                        const confidence = Utils.decimalToPercentage(
+                            Dicos.retrieveConfidenceLevel(
+                                threatSequence.items[0]
+                            )
+                        );
+                        const binaryMask = Dicos.retrieveMaskData(
+                            threatSequence.items[0],
+                            dataSet
+                        );
+                        detectionData.push({
+                            algorithm,
+                            className,
+                            confidence,
+                            view: view.view,
+                            boundingBox,
+                            binaryMask,
+                            polygonMask: [],
+                            detectionFromFile: true,
+                            // figure out what the ids should be
+                            uuid: null,
+                            imageId: null,
+                        });
+                    }
                 });
             });
         });
