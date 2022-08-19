@@ -37,7 +37,7 @@ export default class FileUtils {
                     const parsedData = this.#xmlParser.getParsedXmlData();
                     console.log(parsedData);
                     if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        this.#loadCocoDetections(parsedData, zipUtil).then(
+                        this.#loadCocoData(parsedData, zipUtil).then(
                             (detectionData) => console.log(detectionData)
                         );
                     }
@@ -53,9 +53,10 @@ export default class FileUtils {
      * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
      * @private
      */
-    async #loadCocoDetections(parsedData, zipUtil) {
+    async #loadCocoData(parsedData, zipUtil) {
         const detectionData = [];
         const allPromises = [];
+        const pixelData = [];
         parsedData.views.forEach((view) => {
             view.detectionData.forEach((detectionPath) => {
                 allPromises.push(zipUtil.file(detectionPath).async('string'));
@@ -88,9 +89,19 @@ export default class FileUtils {
                     });
                 });
             });
+
+            allPromises.push(zipUtil.file(view.pixelData).async('arraybuffer'));
+            allPromises.at(-1).then((arrayBuffer) => {
+                pixelData.push({
+                    view: view.view,
+                    type: SETTINGS.ANNOTATIONS.COCO,
+                    pixelData: arrayBuffer,
+                    imageId: null, // TODO: add image id from pixelData
+                });
+            });
         });
 
         await Promise.all(allPromises);
-        return detectionData;
+        return { detectionData, pixelData };
     }
 }
