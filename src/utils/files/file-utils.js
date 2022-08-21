@@ -124,9 +124,7 @@ export default class FileUtils {
      */
     #loadDicosDetections(array, detectionData, view) {
         const dataSet = dicomParser.parseDicom(array);
-        const threatsCount = dataSet.uint16(
-            Dicos.dictionary['NumberOfAlarmObjects'].tag
-        );
+
         const algorithm = dataSet.string(
             Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag
         );
@@ -155,7 +153,7 @@ export default class FileUtils {
                 algorithm,
                 className,
                 confidence,
-                view: view.view,
+                view,
                 boundingBox,
                 binaryMask,
                 polygonMask: [],
