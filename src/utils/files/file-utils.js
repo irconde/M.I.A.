@@ -141,7 +141,9 @@ export default class FileUtils {
             const boundingBox = Dicos.retrieveBoundingBoxData(
                 threatSequence.items[0]
             );
-            let className = Dicos.retrieveObjectClass(threatSequence.items[0]);
+            const className = Dicos.retrieveObjectClass(
+                threatSequence.items[0]
+            );
             const confidence = Utils.decimalToPercentage(
                 Dicos.retrieveConfidenceLevel(threatSequence.items[0])
             );
