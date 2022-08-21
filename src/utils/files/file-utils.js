@@ -38,60 +38,44 @@ export default class FileUtils {
                     this.#xmlParser = new XmlParserUtil(stackFile);
                     const parsedData = this.#xmlParser.getParsedXmlData();
                     console.log(parsedData);
-                    if (parsedData.format === SETTINGS.ANNOTATIONS.COCO) {
-                        this.#loadCocoDetections(parsedData, zipUtil).then(
-                            (detectionData) => console.log(detectionData)
-                        );
-                    } else if (parsedData.format === SETTINGS.ANNOTATIONS.TDR) {
-                        this.#loadDicosDetections(parsedData, zipUtil).then(
-                            (detectionData) => console.log(detectionData)
-                        );
-                    }
+                    this.#loadDetections(parsedData, zipUtil).then(
+                        (detectionData) => console.log(detectionData)
+                    );
                 });
         });
     }
 
     /**
-     * Returns an array of detection data parsed from the json files using JSZip
+     * Returns an array of detection data objects depending on the format of COCO, or DICOS
      *
      * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
      * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
-     * @private
      */
-    async #loadCocoDetections(parsedData, zipUtil) {
+    async #loadDetections(parsedData, zipUtil) {
+        const { COCO } = SETTINGS.ANNOTATIONS;
+        const { format } = parsedData;
         const detectionData = [];
         const allPromises = [];
         parsedData.views.forEach((view) => {
             view.detectionData.forEach((detectionPath) => {
-                allPromises.push(zipUtil.file(detectionPath).async('string'));
-                allPromises.at(-1).then((string) => {
-                    const detection = JSON.parse(string);
-                    const { annotations, info } = detection;
-                    const {
-                        className,
-                        confidence,
-                        bbox,
-                        image_id,
-                        segmentation,
-                    } = annotations[0];
-                    const boundingBox = Utils.getBoundingBox(bbox);
-                    const { binaryMask, polygonMask } = Utils.getMasks(
-                        boundingBox,
-                        segmentation
-                    );
-                    detectionData.push({
-                        algorithm: info.algorithm,
-                        className,
-                        confidence,
-                        view: view.view,
-                        boundingBox,
-                        binaryMask,
-                        polygonMask,
-                        uuid: uuidv4(),
-                        detectionFromFile: true,
-                        imageId: image_id,
-                    });
+                allPromises.push(
+                    zipUtil
+                        .file(detectionPath)
+                        .async(format === COCO ? 'string' : 'uint8array')
+                );
+                allPromises.at(-1).then((data) => {
+                    format === COCO
+                        ? this.#loadCocoDetections(
+                              data,
+                              detectionData,
+                              view.view
+                          )
+                        : this.#loadDicosDetections(
+                              data,
+                              detectionData,
+                              view.view
+                          );
                 });
             });
         });
@@ -100,69 +84,84 @@ export default class FileUtils {
         return detectionData;
     }
 
-    async #loadDicosDetections(parsedData, zipUtil) {
-        const detectionData = [];
-        const allPromises = [];
-        parsedData.views.forEach((view) => {
-            view.detectionData.forEach((detectionPath) => {
-                allPromises.push(
-                    zipUtil.file(detectionPath).async('uint8array')
-                );
-                allPromises.at(-1).then((array) => {
-                    const dataSet = dicomParser.parseDicom(array);
-                    const threatsCount = dataSet.uint16(
-                        Dicos.dictionary['NumberOfAlarmObjects'].tag
-                    );
-                    const algorithm = dataSet.string(
-                        Dicos.dictionary['ThreatDetectionAlgorithmandVersion']
-                            .tag
-                    );
-                    const threatSequence = dataSet.elements.x40101011;
-                    if (
-                        threatSequence == null ||
-                        dataSet.uint16(
-                            Dicos.dictionary['NumberOfAlarmObjects'].tag
-                        ) === 0 ||
-                        dataSet.uint16(
-                            Dicos.dictionary['NumberOfAlarmObjects'].tag
-                        ) === undefined
-                    ) {
-                        return null;
-                    } else {
-                        const boundingBox = Dicos.retrieveBoundingBoxData(
-                            threatSequence.items[0]
-                        );
-                        let className = Dicos.retrieveObjectClass(
-                            threatSequence.items[0]
-                        );
-                        const confidence = Utils.decimalToPercentage(
-                            Dicos.retrieveConfidenceLevel(
-                                threatSequence.items[0]
-                            )
-                        );
-                        const binaryMask = Dicos.retrieveMaskData(
-                            threatSequence.items[0],
-                            dataSet
-                        );
-                        detectionData.push({
-                            algorithm,
-                            className,
-                            confidence,
-                            view: view.view,
-                            boundingBox,
-                            binaryMask,
-                            polygonMask: [],
-                            detectionFromFile: true,
-                            // figure out what the ids should be
-                            uuid: null,
-                            imageId: null,
-                        });
-                    }
-                });
-            });
+    /**
+     * Parses a json string and pushes a detection object onto the passed in detection data array
+     *
+     * @param {string} string - stringified json object containing detection information recovered from COCO formatted file
+     * @param {Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>} detectionData
+     * @param {string} view - top or side view
+     */
+    #loadCocoDetections(string, detectionData, view) {
+        const detection = JSON.parse(string);
+        const { annotations, info } = detection;
+        const { className, confidence, bbox, image_id, segmentation } =
+            annotations[0];
+        const boundingBox = Utils.getBoundingBox(bbox);
+        const { binaryMask, polygonMask } = Utils.getMasks(
+            boundingBox,
+            segmentation
+        );
+        detectionData.push({
+            algorithm: info.algorithm,
+            className,
+            confidence,
+            view,
+            boundingBox,
+            binaryMask,
+            polygonMask,
+            uuid: uuidv4(),
+            detectionFromFile: true,
+            imageId: image_id,
         });
+    }
 
-        await Promise.all(allPromises);
-        return detectionData;
+    /**
+     * Parses an Uint8Array and pushes a detection object onto the passed in detection data array
+     *
+     * @param {Uint8Array} array - array containing detection information recovered from DICOS formatted file
+     * @param {Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>} detectionData
+     * @param {string} view - top or side view
+     */
+    #loadDicosDetections(array, detectionData, view) {
+        const dataSet = dicomParser.parseDicom(array);
+        const threatsCount = dataSet.uint16(
+            Dicos.dictionary['NumberOfAlarmObjects'].tag
+        );
+        const algorithm = dataSet.string(
+            Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag
+        );
+        const threatSequence = dataSet.elements.x40101011;
+        if (
+            threatSequence == null ||
+            dataSet.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) ===
+                0 ||
+            dataSet.uint16(Dicos.dictionary['NumberOfAlarmObjects'].tag) ===
+                undefined
+        ) {
+            return null;
+        } else {
+            const boundingBox = Dicos.retrieveBoundingBoxData(
+                threatSequence.items[0]
+            );
+            let className = Dicos.retrieveObjectClass(threatSequence.items[0]);
+            const confidence = Utils.decimalToPercentage(
+                Dicos.retrieveConfidenceLevel(threatSequence.items[0])
+            );
+            const binaryMask = Dicos.retrieveMaskData(
+                threatSequence.items[0],
+                dataSet
+            );
+            detectionData.push({
+                algorithm,
+                className,
+                confidence,
+                view: view.view,
+                boundingBox,
+                binaryMask,
+                polygonMask: [],
+                detectionFromFile: true,
+                uuid: uuidv4(),
+            });
+        }
     }
 }
