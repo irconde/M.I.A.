@@ -56,7 +56,7 @@ export const buildCocoDataZip = async (
         const listOfPromises = [];
         myOra.stackData.forEach((stack, index) => {
             const stackElem = stackXML.createElement('stack');
-            stackElem.setAttribute('name', `SOP Instance UID #${index + 1}`);
+            stackElem.setAttribute('name', `SOP Instance UID #${imageID}`);
             stackElem.setAttribute('view', stack.view);
             const pixelLayer = stackXML.createElement('layer');
             const images = [];

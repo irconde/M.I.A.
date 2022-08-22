@@ -48,7 +48,7 @@ export default class FileUtils {
     /**
      * Returns an array of detection data parsed from the json files using JSZip
      *
-     * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
+     * @param {{format: string; views: Array<{view: string; pixelData: string; imageId: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
      * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
      * @private
@@ -96,7 +96,7 @@ export default class FileUtils {
                     view: view.view,
                     type: SETTINGS.ANNOTATIONS.COCO,
                     pixelData: arrayBuffer,
-                    imageId: null, // TODO: add image id from pixelData
+                    imageId: view.imageId,
                 });
             });
         });

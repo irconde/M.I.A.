@@ -31,6 +31,7 @@ export default class XmlParserUtil {
         };
         [...xmlImages[0].children].forEach((stack) => {
             const view = stack.getAttribute('view');
+            const imageId = stack.getAttribute('name').replace(/^\D+/g, '');
             const firstLayer = stack.firstElementChild;
             const pixelData = firstLayer.getAttribute('src');
             if (jsonObj.format === null) {
@@ -56,7 +57,7 @@ export default class XmlParserUtil {
             ) {
                 detectionData.push(currLayer.getAttribute('src'));
             }
-            jsonObj.views.push({ view, pixelData, detectionData });
+            jsonObj.views.push({ view, pixelData, imageId, detectionData });
         });
 
         return jsonObj;
