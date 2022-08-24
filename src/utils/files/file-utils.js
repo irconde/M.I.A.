@@ -38,8 +38,8 @@ export default class FileUtils {
                     this.#xmlParser = new XmlParserUtil(stackFile);
                     const parsedData = this.#xmlParser.getParsedXmlData();
                     console.log(parsedData);
-                    this.#loadDetections(parsedData, zipUtil).then(
-                        (detectionData) => console.log(detectionData)
+                    this.#loadFilesData(parsedData, zipUtil).then((filesData) =>
+                        console.log(filesData)
                     );
                 });
         });
@@ -52,12 +52,19 @@ export default class FileUtils {
      * @param {JSZip} zipUtil
      * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
      */
-    async #loadDetections(parsedData, zipUtil) {
+    async #loadFilesData(parsedData, zipUtil) {
         const { COCO } = SETTINGS.ANNOTATIONS;
         const { format } = parsedData;
         const detectionData = [];
         const allPromises = [];
+        const imageData = {
+            view: '',
+            type: format,
+            pixelData: null,
+            imageId: uuidv4(),
+        };
         parsedData.views.forEach((view) => {
+            // load detection data
             view.detectionData.forEach((detectionPath) => {
                 allPromises.push(
                     zipUtil
@@ -78,10 +85,20 @@ export default class FileUtils {
                           );
                 });
             });
+            // load pixel data
+            allPromises.push(
+                zipUtil
+                    .file(view.pixelData)
+                    .async(format === COCO ? 'arraybuffer' : 'blob')
+            );
+            allPromises.at(-1).then((data) => {
+                imageData.view = view.view;
+                imageData.pixelData = data;
+            });
         });
 
         await Promise.all(allPromises);
-        return detectionData;
+        return { detectionData, imageData };
     }
 
     /**
