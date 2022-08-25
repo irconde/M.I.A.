@@ -46,11 +46,11 @@ export default class FileUtils {
     }
 
     /**
-     * Returns an array of detection data objects depending on the format of COCO, or DICOS
+     * Returns an object with keys for detection data, and image data based on the format of COCO, or DICOS
      *
      * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
-     * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
+     * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: {view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}}>}
      */
     async #loadFilesData(parsedData, zipUtil) {
         const { COCO } = SETTINGS.ANNOTATIONS;
