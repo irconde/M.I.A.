@@ -38,26 +38,28 @@ export default class FileUtils {
                     this.#xmlParser = new XmlParserUtil(stackFile);
                     const parsedData = this.#xmlParser.getParsedXmlData();
                     console.log(parsedData);
-                    this.#loadDetections(parsedData, zipUtil).then(
-                        (detectionData) => console.log(detectionData)
+                    this.#loadFilesData(parsedData, zipUtil).then((filesData) =>
+                        console.log(filesData)
                     );
                 });
         });
     }
 
     /**
-     * Returns an array of detection data objects depending on the format of COCO, or DICOS
+     * Returns an object with keys for detection data, and image data arrays based on the format of COCO, or DICOS
      *
      * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
-     * @returns {Promise<Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>>}
+     * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}>}>}
      */
-    async #loadDetections(parsedData, zipUtil) {
+    async #loadFilesData(parsedData, zipUtil) {
         const { COCO } = SETTINGS.ANNOTATIONS;
         const { format } = parsedData;
         const detectionData = [];
         const allPromises = [];
+        const imageData = [];
         parsedData.views.forEach((view) => {
+            // load detection data
             view.detectionData.forEach((detectionPath) => {
                 allPromises.push(
                     zipUtil
@@ -74,10 +76,24 @@ export default class FileUtils {
                           );
                 });
             });
+            // load pixel data
+            allPromises.push(
+                zipUtil
+                    .file(view.pixelData)
+                    .async(format === COCO ? 'arraybuffer' : 'blob')
+            );
+            allPromises.at(-1).then((data) => {
+                imageData.push({
+                    view: view.view,
+                    pixelData: data,
+                    imageId: uuidv4(),
+                    type: format,
+                });
+            });
         });
 
         await Promise.all(allPromises);
-        return detectionData;
+        return { detectionData, imageData };
     }
 
     /**
