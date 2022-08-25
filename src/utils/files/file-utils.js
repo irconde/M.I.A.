@@ -85,7 +85,7 @@ export default class FileUtils {
      *
      * @param {{format: string; views: Array<{view: string; pixelData: string; imageId: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
-     * @returns {Promise<{pixelData: *[], detectionData: *[]}>}
+     * @returns {Promise<{pixelData: Array<{view: string; type: string; pixelData: ArrayBuffer; imageId: string;}>, detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>}>}
      * @private
      */
     async #loadCocoData(parsedData, zipUtil) {
