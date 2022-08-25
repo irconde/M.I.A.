@@ -46,23 +46,18 @@ export default class FileUtils {
     }
 
     /**
-     * Returns an object with keys for detection data, and image data based on the format of COCO, or DICOS
+     * Returns an object with keys for detection data, and image data arrays based on the format of COCO, or DICOS
      *
      * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
-     * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: {view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}}>}
+     * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}>}>}
      */
     async #loadFilesData(parsedData, zipUtil) {
         const { COCO } = SETTINGS.ANNOTATIONS;
         const { format } = parsedData;
         const detectionData = [];
         const allPromises = [];
-        const imageData = {
-            view: '',
-            type: format,
-            pixelData: null,
-            imageId: uuidv4(),
-        };
+        const imageData = [];
         parsedData.views.forEach((view) => {
             // load detection data
             view.detectionData.forEach((detectionPath) => {
@@ -92,8 +87,12 @@ export default class FileUtils {
                     .async(format === COCO ? 'arraybuffer' : 'blob')
             );
             allPromises.at(-1).then((data) => {
-                imageData.view = view.view;
-                imageData.pixelData = data;
+                imageData.push({
+                    view: view.view,
+                    pixelData: data,
+                    imageId: uuidv4(),
+                    type: format,
+                });
             });
         });
 
