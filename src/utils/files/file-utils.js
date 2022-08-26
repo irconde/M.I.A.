@@ -48,7 +48,7 @@ export default class FileUtils {
     /**
      * Returns an object with keys for detection data, and image data arrays based on the format of COCO, or DICOS
      *
-     * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
+     * @param {{format: string; views: Array<{view: string; pixelData: string; imageId: number; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
      * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}>}>}
      */
@@ -90,7 +90,7 @@ export default class FileUtils {
                 imageData.push({
                     view: view.view,
                     pixelData: data,
-                    imageId: uuidv4(),
+                    imageId: format === COCO ? view.imageId : uuidv4(),
                     type: format,
                 });
             });
