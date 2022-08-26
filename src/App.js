@@ -148,6 +148,7 @@ class App extends Component {
         this.state = {
             configurationInfo: {},
             myOra: new ORA(),
+            imageData: [],
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
             viewport: cornerstone.getDefaultViewport(null, undefined),
@@ -177,7 +178,6 @@ class App extends Component {
         this.nextImageClick = this.nextImageClick.bind(this);
         this.onImageRendered = this.onImageRendered.bind(this);
         this.loadAndViewImage = this.loadAndViewImage.bind(this);
-        this.loadDICOSdata = this.loadDICOSdata.bind(this);
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onMouseClicked = this.onMouseClicked.bind(this);
@@ -1115,221 +1115,31 @@ class App extends Component {
         // Which creates duplicate detections. This ensures that the same file is never loaded twice
         if (fileName === this.props.currentProcessingFile) return;
         this.props.setCurrentProcessingFile(fileName);
-        const myZip = new JSZip();
-        let listOfPromises = [];
-        // This is our list of stacks we will append to the myOra object in our promise all
-        let listOfStacks = [];
-
-        let contentType;
-        if (this.props.fileLoadingFlag) {
-            // TODO
-            const fileUtils = new FileUtils(image);
-        }
-        // Let's load the compressed ORA file as base64
-        myZip.loadAsync(image, { base64: true }).then(() => {
-            //First, after loading, we need to check our stack.xml
-            myZip
-                .file('stack.xml')
-                .async('string')
-                .then(async (stackFile) => {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(
-                        stackFile,
-                        'text/xml'
-                    );
-                    const xmlStack = xmlDoc.getElementsByTagName('stack');
-                    const xmlImage = xmlDoc.getElementsByTagName('image');
-                    const xmlLayer = xmlDoc.getElementsByTagName('layer');
-
-                    const tempFile = xmlLayer[0].getAttribute('src');
-                    var fileExtension = tempFile.split('.').pop();
-
-                    const currentFileFormat =
-                        xmlImage[0].getAttribute('format');
-
-                    if (
-                        currentFileFormat ===
-                        constants.SETTINGS.ANNOTATIONS.COCO
-                    ) {
-                        this.props.setCurrentFileFormat(
-                            constants.SETTINGS.ANNOTATIONS.COCO
-                        );
-
-                        // We loop through each stack. Creating a new stack object to store our info
-                        // for now, we are just grabbing the location of the dicos file in the ora file
-                        for (let stackData of xmlStack) {
-                            let currentStack = {
-                                name: stackData.getAttribute('name'),
-                                view: stackData.getAttribute('view'),
-                                rawData: [],
-                                formattedData: [],
-                                blobData: [],
-                                arrayBuf: null,
-                            };
-                            let layerData =
-                                stackData.getElementsByTagName('layer');
-                            for (let imageSrc of layerData) {
-                                currentStack.rawData.push(
-                                    imageSrc.getAttribute('src')
-                                );
-                            }
-                            // We have finished creating the current stack's object
-                            // add it onto our holder variable for now
-                            listOfStacks.push(currentStack);
-                        }
-                        // Now we loop through the data we have collected
-                        // We know the first layer of each stack is pixel data, which we need as an array buffer
-                        // Which we got from i===0.
-                        for (let j = 0; j < listOfStacks.length; j++) {
-                            for (
-                                let i = 0;
-                                i < listOfStacks[j].rawData.length;
-                                i++
-                            ) {
-                                await myZip
-                                    .file(listOfStacks[j].rawData[i])
-                                    .async('base64')
-                                    .then((imageData) => {
-                                        i === 0
-                                            ? (contentType = 'image/png')
-                                            : (contentType =
-                                                  'application/json');
-                                        listOfStacks[j].blobData.push({
-                                            blob: Utils.b64toBlob(
-                                                imageData,
-                                                contentType
-                                            ),
-                                            uuid: uuidv4(),
-                                        });
-                                    });
-                                if (i === 0) {
-                                    await myZip
-                                        .file(listOfStacks[j].rawData[i])
-                                        .async('base64')
-                                        .then((imageData) => {
-                                            listOfStacks[j].arrayBuf =
-                                                Utils.base64ToArrayBuffer(
-                                                    imageData
-                                                );
-                                        });
-                                } else {
-                                    await myZip
-                                        .file(listOfStacks[j].rawData[i])
-                                        .async('string')
-                                        .then((jsonData) => {
-                                            const data = JSON.parse(jsonData);
-                                            var combinedData = {};
-                                            combinedData = {
-                                                algorithm:
-                                                    data['info']['algorithm'],
-                                                ...data['annotations'][0],
-                                            };
-                                            listOfStacks[j].formattedData.push(
-                                                combinedData
-                                            );
-                                        });
-                                }
-                            }
-                        }
-                        const promiseOfList = Promise.all(listOfPromises);
-                        // Once we have all the layers...
-                        promiseOfList.then(() => {
-                            const updateImageViewportTop =
-                                this.state.imageViewportTop;
-                            updateImageViewportTop.style.visibility = 'visible';
-                            this.setState({
-                                imageViewportTop: updateImageViewportTop,
-                                thumbnails,
-                            });
-                            this.state.myOra.stackData = listOfStacks;
-                            this.props.newFileReceivedUpdate({
-                                singleViewport: listOfStacks.length < 2,
-                                receiveTime: Date.now(),
-                            });
-                            this.props.setNumFilesInQueue(numberOfFiles);
-                            Utils.changeViewport(this.props.singleViewport);
-                            this.props.resetDetections();
-                            this.loadAndViewImage();
-                        });
-                    } else if (
-                        currentFileFormat ===
-                            constants.SETTINGS.ANNOTATIONS.TDR ||
-                        fileExtension === 'dcs'
-                    ) {
-                        this.props.setCurrentFileFormat(
-                            constants.SETTINGS.ANNOTATIONS.TDR
-                        );
-                        // We loop through each stack. Creating a new stack object to store our info
-                        // for now, we are just grabbing the location of the dicos file in the ora file
-                        for (let stackData of xmlStack) {
-                            let currentStack = {
-                                name: stackData.getAttribute('name'),
-                                view: stackData.getAttribute('view'),
-                                rawData: [],
-                                blobData: [],
-                                pixelData: null,
-                            };
-                            let layerData =
-                                stackData.getElementsByTagName('layer');
-                            for (let imageSrc of layerData) {
-                                currentStack.rawData.push(
-                                    imageSrc.getAttribute('src')
-                                );
-                            }
-                            // We have finished creating the current stack's object
-                            // add it onto our holder variable for now
-                            listOfStacks.push(currentStack);
-                        }
-                        // Now we loop through the data we have collected
-                        // We know the first layer of each stack is pixel data, which we need as an array buffer
-                        // Which we got from i===0.
-                        // No matter what however, every layer gets converted a blob and added to the data set
-                        for (let j = 0; j < listOfStacks.length; j++) {
-                            for (
-                                let i = 0;
-                                i < listOfStacks[j].rawData.length;
-                                i++
-                            ) {
-                                await myZip
-                                    .file(listOfStacks[j].rawData[i])
-                                    .async('base64')
-                                    .then((imageData) => {
-                                        if (i === 0)
-                                            listOfStacks[j].pixelData =
-                                                Utils.base64ToArrayBuffer(
-                                                    imageData
-                                                );
-                                        listOfStacks[j].blobData.push({
-                                            blob: Utils.b64toBlob(imageData),
-                                            uuid: uuidv4(),
-                                        });
-                                    });
-                            }
-                        }
-                        const promiseOfList = Promise.all(listOfPromises);
-                        // Once we have all the layers...
-                        promiseOfList.then(() => {
-                            const updateImageViewportTop =
-                                this.state.imageViewportTop;
-                            updateImageViewportTop.style.visibility = 'visible';
-                            this.setState({
-                                imageViewportTop: updateImageViewportTop,
-                                thumbnails,
-                            });
-                            this.state.myOra.stackData = listOfStacks;
-                            this.props.newFileReceivedUpdate({
-                                singleViewport: listOfStacks.length < 2,
-                                receiveTime: Date.now(),
-                            });
-                            this.props.setNumFilesInQueue(numberOfFiles);
-                            Utils.changeViewport(this.props.singleViewport);
-                            this.props.resetDetections();
-                            this.loadAndViewImage();
-                        });
-                    } else {
-                        return null;
-                    }
-                });
+        const fileUtils = new FileUtils(image);
+        fileUtils.loadData().then((result) => {
+            this.props.setCurrentFileFormat(result.imageData[0]?.type);
+            this.props.resetDetections();
+            result.detectionData.forEach((detection) => {
+                this.props.addDetection(detection);
+            });
+            const updateImageViewportTop = this.state.imageViewportTop;
+            updateImageViewportTop.style.visibility = 'visible';
+            this.props.newFileReceivedUpdate({
+                singleViewport: result.imageData.length === 1,
+                receiveTime: Date.now(),
+            });
+            this.props.setNumFilesInQueue(numberOfFiles);
+            Utils.changeViewport(this.props.singleViewport);
+            this.setState(
+                {
+                    imageViewportTop: updateImageViewportTop,
+                    thumbnails,
+                    imageData: result.imageData,
+                },
+                () => {
+                    this.loadAndViewImage(result.imageData[0]?.type);
+                }
+            );
         });
     }
 
@@ -1786,48 +1596,36 @@ class App extends Component {
     /**
      * Loads pixel data from a DICOS+TDR file using CornerstoneJS. It invokes the displayDICOSinfo method in order
      * to render the image and pull the detection-specific data.
+     * @param {string} type
      */
-    loadAndViewImage() {
-        let dataImagesLeft = [];
-        let dataImagesRight = [];
-        if (
-            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.TDR
-        ) {
-            this.displayDICOSimage();
-
-            // all other images do not have pixel data -- cornerstoneJS will fail and send an error
-            // if pixel data is missing in the dicom/dicos file. To parse out only the data,
-            // we use dicomParser instead. For each .dcs file found at an index spot > 1, load
-            // the file data and call loadDICOSdata() to store the data in a DetectionSet
-            if (this.state.myOra.stackData[0].blobData.length === 1) {
-                dataImagesLeft[0] = this.state.myOra.stackData[0].blobData[0];
-            } else {
-                dataImagesLeft = this.state.myOra.stackData[0].blobData;
-            }
-            if (this.props.singleViewport === false) {
-                if (this.state.myOra.stackData[1] !== undefined) {
-                    dataImagesRight = this.state.myOra.stackData[1].blobData;
-                }
-            }
-            this.loadDICOSdata(dataImagesLeft, dataImagesRight);
-        } else if (
-            this.props.currentFileFormat === constants.SETTINGS.ANNOTATIONS.COCO
-        ) {
-            this.displayCOCOimage();
-            this.loadCOCOdata();
+    loadAndViewImage(type) {
+        const topIndex = this.state.imageData.findIndex(
+            (view) => view.view === constants.viewport.TOP
+        );
+        const sideIndex = this.state.imageData.findIndex(
+            (view) => view.view === constants.viewport.SIDE
+        );
+        if (type === constants.SETTINGS.ANNOTATIONS.TDR) {
+            this.displayDICOSimage(topIndex, sideIndex);
+        } else if (type === constants.SETTINGS.ANNOTATIONS.COCO) {
+            this.displayCOCOimage(topIndex, sideIndex);
         }
     }
 
     /**
      * Renders the top and side view x-ray images when annotations are encoded as JSON files with the MS COCO format.
+     * @param {number} topIndex
+     * @param {number} sideIndex
      */
-    async displayCOCOimage() {
+    async displayCOCOimage(topIndex, sideIndex) {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
         const self = this;
-
-        let imageId = 'coco:0';
-        Utils.loadImage(imageId, self.state.myOra.stackData[0].arrayBuf).then(
-            function (image) {
+        if (topIndex !== -1) {
+            const imageIdTop = 'coco:0';
+            Utils.loadImage(
+                imageIdTop,
+                self.state.imageData[topIndex].pixelData
+            ).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportTop,
                     image
@@ -1840,24 +1638,23 @@ class App extends Component {
                 );
                 // eslint-disable-next-line react/no-direct-mutation-state
                 if (displayedArea !== undefined)
-                    self.state.myOra.stackData[0].dimensions =
-                        displayedArea.brhc;
+                    self.state.imageData[0].dimensions = displayedArea.brhc;
                 self.setState({ viewport: viewport });
                 cornerstone.displayImage(
                     self.state.imageViewportTop,
                     image,
                     viewport
                 );
-            }
-        );
-        imageId = 'coco:1';
-        if (this.props.singleViewport === false) {
+            });
+        }
+        if (this.props.singleViewport === false && sideIndex !== -1) {
+            const imageIdSide = 'coco:1';
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
             Utils.loadImage(
-                imageId,
-                self.state.myOra.stackData[1].arrayBuf
+                imageIdSide,
+                self.state.imageData[sideIndex].pixelData
             ).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     self.state.imageViewportSide,
@@ -1869,8 +1666,7 @@ class App extends Component {
                 );
                 // eslint-disable-next-line react/no-direct-mutation-state
                 if (displayedArea !== undefined)
-                    self.state.myOra.stackData[1].dimensions =
-                        displayedArea.brhc;
+                    self.state.imageData[1].dimensions = displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
                 self.setState({ viewport: viewport });
@@ -1905,43 +1701,50 @@ class App extends Component {
 
     /**
      * Renders the top and side view x-ray images when encoded in DICOS+TDR files
+     * @param {number} topIndex
+     * @param {number} sideIndex
      */
-    displayDICOSimage() {
+    displayDICOSimage(topIndex, sideIndex) {
         // the first image has the pixel data so prepare it to be displayed using cornerstoneJS
         const self = this;
-        const pixelDataTop = cornerstoneWADOImageLoader.wadouri.fileManager.add(
-            self.state.myOra.stackData[0].blobData[0].blob
-        );
 
-        cornerstone.loadImage(pixelDataTop).then(function (image) {
-            const viewport = cornerstone.getDefaultViewportForImage(
-                self.state.imageViewportTop,
-                image
-            );
-            viewport.translation.y = constants.viewportStyle.ORIGIN;
-            viewport.scale = self.props.zoomLevelTop;
-            const displayedArea = cornerstone.getDisplayedArea(
-                image,
-                self.state.imageViewportTop
-            );
-            // eslint-disable-next-line react/no-direct-mutation-state
-            if (displayedArea !== undefined)
-                self.state.myOra.stackData[0].dimensions = displayedArea.brhc;
-            self.setState({ viewport: viewport });
-            cornerstone.displayImage(
-                self.state.imageViewportTop,
-                image,
-                viewport
-            );
-        });
-        if (this.props.singleViewport === false) {
+        if (topIndex !== -1) {
+            const pixelDataTop =
+                cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                    self.state.imageData[topIndex].pixelData
+                );
+
+            cornerstone.loadImage(pixelDataTop).then(function (image) {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    self.state.imageViewportTop,
+                    image
+                );
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = self.props.zoomLevelTop;
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    self.state.imageViewportTop
+                );
+                // eslint-disable-next-line react/no-direct-mutation-state
+                if (displayedArea !== undefined)
+                    self.state.imageData[topIndex].dimensions =
+                        displayedArea.brhc;
+                self.setState({ viewport: viewport });
+                cornerstone.displayImage(
+                    self.state.imageViewportTop,
+                    image,
+                    viewport
+                );
+            });
+        }
+        if (this.props.singleViewport === false && sideIndex !== -1) {
             const updatedImageViewportSide = this.state.imageViewportSide;
             updatedImageViewportSide.style.visibility = 'visible';
             this.setState({ imageViewportSide: updatedImageViewportSide });
 
             const pixelDataSide =
                 cornerstoneWADOImageLoader.wadouri.fileManager.add(
-                    self.state.myOra.stackData[1].blobData[0].blob
+                    self.state.imageData[sideIndex].pixelData
                 );
             cornerstone.loadImage(pixelDataSide).then(function (image) {
                 const viewport = cornerstone.getDefaultViewportForImage(
@@ -1954,7 +1757,7 @@ class App extends Component {
                 );
                 // eslint-disable-next-line react/no-direct-mutation-state
                 if (displayedArea !== undefined)
-                    self.state.myOra.stackData[1].dimensions =
+                    self.state.imageData[sideIndex].dimensions =
                         displayedArea.brhc;
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = self.props.zoomLevelSide;
@@ -1986,252 +1789,6 @@ class App extends Component {
             );
         }
         this.recalculateZoomLevel();
-    }
-
-    /**
-     * Pulls all the data regarding the threat detections from a file formatted according to the MS COCO standard.
-     */
-    loadCOCOdata() {
-        const self = this;
-        const imagesLeft = self.state.myOra.stackData[0].formattedData;
-
-        for (let i = 0; i < imagesLeft.length; i++) {
-            let polygonMask = [];
-            imagesLeft[i].bbox[2] =
-                imagesLeft[i].bbox[0] + imagesLeft[i].bbox[2];
-            imagesLeft[i].bbox[3] =
-                imagesLeft[i].bbox[1] + imagesLeft[i].bbox[3];
-            let boundingBox = imagesLeft[i].bbox;
-            let binaryMask = [
-                [],
-                [boundingBox[0], boundingBox[1]],
-                [
-                    boundingBox[2] - boundingBox[0],
-                    boundingBox[3] - boundingBox[1],
-                ],
-            ];
-            if (imagesLeft[i].segmentation.length > 0) {
-                const polygonXY = Utils.coordArrayToPolygonData(
-                    imagesLeft[i].segmentation[0]
-                );
-                polygonMask = Utils.polygonDataToXYArray(
-                    polygonXY,
-                    boundingBox
-                );
-                binaryMask = Utils.polygonToBinaryMask(polygonMask);
-            }
-            let detUuid = uuidv4();
-            self.props.addDetection({
-                algorithm: imagesLeft[i].algorithm,
-                className: imagesLeft[i].className,
-                confidence: imagesLeft[i].confidence,
-                view: constants.viewport.TOP,
-                boundingBox,
-                binaryMask,
-                polygonMask,
-                uuid: detUuid,
-                detectionFromFile: true,
-            });
-            imagesLeft[i].id = detUuid;
-        }
-
-        if (this.props.singleViewport === false) {
-            const imagesRight = self.state.myOra.stackData[1].formattedData;
-
-            for (var j = 0; j < imagesRight.length; j++) {
-                let polygonMask = [];
-                imagesRight[j].bbox[2] =
-                    imagesRight[j].bbox[0] + imagesRight[j].bbox[2];
-                imagesRight[j].bbox[3] =
-                    imagesRight[j].bbox[1] + imagesRight[j].bbox[3];
-                let boundingBox = imagesRight[j].bbox;
-                let binaryMask = [
-                    [],
-                    [boundingBox[0], boundingBox[1]],
-                    [
-                        boundingBox[2] - boundingBox[0],
-                        boundingBox[3] - boundingBox[1],
-                    ],
-                ];
-                if (imagesRight[j].segmentation.length > 0) {
-                    const polygonXY = Utils.coordArrayToPolygonData(
-                        imagesRight[j].segmentation[0]
-                    );
-                    polygonMask = Utils.polygonDataToXYArray(
-                        polygonXY,
-                        boundingBox
-                    );
-                    binaryMask = Utils.polygonToBinaryMask(polygonMask);
-                }
-                let detUuid = uuidv4();
-
-                self.props.addDetection({
-                    algorithm: imagesRight[j].algorithm,
-                    className: imagesRight[j].className,
-                    confidence: imagesRight[j].confidence,
-                    view: constants.viewport.SIDE,
-                    boundingBox,
-                    binaryMask,
-                    polygonMask,
-                    uuid: detUuid,
-                    detectionFromFile: true,
-                });
-                imagesRight[j].id = detUuid;
-            }
-        }
-    }
-
-    /**
-     * Parses a DICOS+TDR file to pull all the data regarding threat detections
-     *
-     * @param {Array} imagesLeft - List of DICOS+TDR data from algorithm
-     * @param {Array} imagesRight - List of DICOS+TDR data from algorithm
-     */
-    loadDICOSdata(imagesLeft, imagesRight) {
-        const self = this;
-        const reader = new FileReader();
-        reader.addEventListener('loadend', function () {
-            const view = new Uint8Array(reader.result);
-            var image = dicomParser.parseDicom(view);
-            self.props.selectConfigInfoUpdate({
-                detectorType: image.string(
-                    Dicos.dictionary['DetectorType'].tag
-                ),
-                detectorConfigType: image.string(
-                    Dicos.dictionary['DetectorConfiguration'].tag
-                ),
-                seriesType: image.string(
-                    Dicos.dictionary['SeriesDescription'].tag
-                ),
-                studyType: image.string(
-                    Dicos.dictionary['StudyDescription'].tag
-                ),
-            });
-        });
-        reader.readAsArrayBuffer(imagesLeft[0].blob);
-        for (let i = 0; i < imagesLeft.length; i++) {
-            const readFile = new FileReader();
-            readFile.addEventListener('loadend', function () {
-                const view = new Uint8Array(readFile.result);
-                var image = dicomParser.parseDicom(view);
-
-                let threatsCount = image.uint16(
-                    Dicos.dictionary['NumberOfAlarmObjects'].tag
-                );
-                let algorithmName = image.string(
-                    Dicos.dictionary['ThreatDetectionAlgorithmandVersion'].tag
-                );
-                // Threat Sequence information
-                const threatSequence = image.elements.x40101011;
-                if (threatSequence == null) {
-                    return;
-                }
-                if (
-                    image.uint16(
-                        Dicos.dictionary['NumberOfAlarmObjects'].tag
-                    ) === 0 ||
-                    image.uint16(
-                        Dicos.dictionary['NumberOfAlarmObjects'].tag
-                    ) === undefined
-                ) {
-                    return;
-                }
-                // for every threat found, create a new Detection object and store all Detection
-                // objects in a DetectionSet object
-                for (var j = 0; j < threatsCount; j++) {
-                    const boundingBoxCoords = Dicos.retrieveBoundingBoxData(
-                        threatSequence.items[j]
-                    );
-                    let objectClass = Dicos.retrieveObjectClass(
-                        threatSequence.items[j]
-                    );
-                    const confidenceLevel = Utils.decimalToPercentage(
-                        Dicos.retrieveConfidenceLevel(threatSequence.items[j])
-                    );
-                    const maskData = Dicos.retrieveMaskData(
-                        threatSequence.items[j],
-                        image
-                    );
-                    self.props.addDetection({
-                        algorithm: algorithmName,
-                        className: objectClass,
-                        confidence: confidenceLevel,
-                        view: constants.viewport.TOP,
-                        boundingBox: boundingBoxCoords,
-                        binaryMask: maskData,
-                        polygonMask: [],
-                        uuid: imagesLeft[i].uuid,
-                        detectionFromFile: true,
-                    });
-                }
-            });
-            readFile.readAsArrayBuffer(imagesLeft[i].blob);
-        }
-
-        if (this.props.singleViewport === false) {
-            for (var k = 0; k < imagesRight.length; k++) {
-                const read = new FileReader();
-                let currentRightImage = imagesRight[k];
-                read.addEventListener('loadend', function () {
-                    const view = new Uint8Array(read.result);
-                    var image = dicomParser.parseDicom(view);
-
-                    let threatsCount = image.uint16(
-                        Dicos.dictionary['NumberOfAlarmObjects'].tag
-                    );
-                    let algorithmName = image.string(
-                        Dicos.dictionary['ThreatDetectionAlgorithmandVersion']
-                            .tag
-                    );
-                    // Threat Sequence information
-                    const threatSequence = image.elements.x40101011;
-                    if (threatSequence == null) {
-                        return;
-                    }
-                    if (
-                        image.uint16(
-                            Dicos.dictionary['NumberOfAlarmObjects'].tag
-                        ) === 0 ||
-                        image.uint16(
-                            Dicos.dictionary['NumberOfAlarmObjects'].tag
-                        ) === undefined
-                    ) {
-                        return;
-                    }
-                    // for every threat found, create a new Detection object and store all Detection
-                    // objects in a DetectionSet object
-                    for (var m = 0; m < threatsCount; m++) {
-                        const boundingBoxCoords = Dicos.retrieveBoundingBoxData(
-                            threatSequence.items[m]
-                        );
-                        const objectClass = Dicos.retrieveObjectClass(
-                            threatSequence.items[m]
-                        );
-                        const confidenceLevel = Utils.decimalToPercentage(
-                            Dicos.retrieveConfidenceLevel(
-                                threatSequence.items[m]
-                            )
-                        );
-                        const maskData = Dicos.retrieveMaskData(
-                            threatSequence.items[m],
-                            image
-                        );
-                        self.props.addDetection({
-                            algorithm: algorithmName,
-                            className: objectClass,
-                            confidence: confidenceLevel,
-                            view: constants.viewport.SIDE,
-                            boundingBox: boundingBoxCoords,
-                            binaryMask: maskData,
-                            polygonMask: [],
-                            uuid: currentRightImage.uuid,
-                            detectionFromFile: true,
-                        });
-                    }
-                });
-                read.readAsArrayBuffer(imagesRight[k].blob);
-            }
-        }
     }
 
     /**
