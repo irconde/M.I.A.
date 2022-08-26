@@ -48,7 +48,7 @@ export default class FileUtils {
     /**
      * Returns an object with keys for detection data, and image data arrays based on the format of COCO, or DICOS
      *
-     * @param {{format: string; views: Array<{view: string; pixelData: string; detectionData: Array<string>}>;}} parsedData
+     * @param {{format: string; views: Array<{view: string; pixelData: string; imageId: number; detectionData: Array<string>}>;}} parsedData
      * @param {JSZip} zipUtil
      * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}>}>}
      */
@@ -68,7 +68,11 @@ export default class FileUtils {
                 );
                 allPromises.at(-1).then((data) => {
                     format === COCO
-                        ? this.#loadCocoData(data, detectionData, view.view)
+                        ? this.#loadCocoDetections(
+                              data,
+                              detectionData,
+                              view.view
+                          )
                         : this.#loadDicosDetections(
                               data,
                               detectionData,
@@ -86,7 +90,7 @@ export default class FileUtils {
                 imageData.push({
                     view: view.view,
                     pixelData: data,
-                    imageId: uuidv4(),
+                    imageId: format === COCO ? view.imageId : uuidv4(),
                     type: format,
                 });
             });
@@ -97,63 +101,34 @@ export default class FileUtils {
     }
 
     /**
-     * Returns an array of detection data objects depending on the format of COCO, or DICOS
+     * Parses a json string and pushes a detection object onto the passed in detection data array
      *
-     * @param {{format: string; views: Array<{view: string; pixelData: string; imageId: string; detectionData: Array<string>}>;}} parsedData
-     * @param {JSZip} zipUtil
-     * @returns {Promise<{pixelData: Array<{view: string; type: string; pixelData: ArrayBuffer; imageId: string;}>, detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>}>}
-     * @private
+     * @param {string} string - stringified json object containing detection information recovered from COCO formatted file
+     * @param {Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>} detectionData
+     * @param {string} view - top or side view
      */
-    async #loadCocoData(parsedData, zipUtil) {
-        const detectionData = [];
-        const allPromises = [];
-        const pixelData = [];
-        parsedData.views.forEach((view) => {
-            view.detectionData.forEach((detectionPath) => {
-                allPromises.push(zipUtil.file(detectionPath).async('string'));
-                allPromises.at(-1).then((string) => {
-                    const detection = JSON.parse(string);
-                    const { annotations, info } = detection;
-                    const {
-                        className,
-                        confidence,
-                        bbox,
-                        image_id,
-                        segmentation,
-                    } = annotations[0];
-                    const boundingBox = Utils.getBoundingBox(bbox);
-                    const { binaryMask, polygonMask } = Utils.getMasks(
-                        boundingBox,
-                        segmentation
-                    );
-                    detectionData.push({
-                        algorithm: info.algorithm,
-                        className,
-                        confidence,
-                        view: view.view,
-                        boundingBox,
-                        binaryMask,
-                        polygonMask,
-                        uuid: uuidv4(),
-                        detectionFromFile: true,
-                        imageId: image_id,
-                    });
-                });
-            });
-
-            allPromises.push(zipUtil.file(view.pixelData).async('arraybuffer'));
-            allPromises.at(-1).then((arrayBuffer) => {
-                pixelData.push({
-                    view: view.view,
-                    type: SETTINGS.ANNOTATIONS.COCO,
-                    pixelData: arrayBuffer,
-                    imageId: view.imageId,
-                });
-            });
+    #loadCocoDetections(string, detectionData, view) {
+        const detection = JSON.parse(string);
+        const { annotations, info } = detection;
+        const { className, confidence, bbox, image_id, segmentation } =
+            annotations[0];
+        const boundingBox = Utils.getBoundingBox(bbox);
+        const { binaryMask, polygonMask } = Utils.getMasks(
+            boundingBox,
+            segmentation
+        );
+        detectionData.push({
+            algorithm: info.algorithm,
+            className,
+            confidence,
+            view,
+            boundingBox,
+            binaryMask,
+            polygonMask,
+            uuid: uuidv4(),
+            detectionFromFile: true,
+            imageId: image_id,
         });
-
-        await Promise.all(allPromises);
-        return { detectionData, pixelData };
     }
 
     /**
