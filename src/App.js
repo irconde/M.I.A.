@@ -7,7 +7,6 @@ import * as cornerstoneMath from 'cornerstone-math';
 import Hammer from 'hammerjs';
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
-import ORA from './utils/detections/ORA.js';
 import Utils from './utils/general/Utils.js';
 import Dicos from './utils/detections/Dicos.js';
 import TapDetector from './utils/general/TapDetector';
@@ -147,7 +146,6 @@ class App extends Component {
         super(props);
         this.state = {
             configurationInfo: {},
-            myOra: new ORA(),
             imageData: [],
             imageViewportTop: document.getElementById('dicomImageLeft'),
             imageViewportSide: document.getElementById('dicomImageRight'),
@@ -1152,15 +1150,23 @@ class App extends Component {
      */
     nextImageClick(e) {
         this.props.validateDetections();
+        const viewports = [
+            {
+                view: constants.viewport.TOP,
+                element: this.state.imageViewportTop,
+            },
+        ];
+        if (this.props.singleViewport === false)
+            viewports.push({
+                view: constants.viewport.SIDE,
+                element: this.state.imageViewportSide,
+            });
         if (
             this.props.annotationsFormat === constants.SETTINGS.ANNOTATIONS.COCO
         ) {
             // Convert to MS COCO
-            const viewports = [this.state.imageViewportTop];
-            if (this.props.singleViewport === false)
-                viewports.push(this.state.imageViewportSide);
             buildCocoDataZip(
-                this.state.myOra,
+                this.state.imageData,
                 this.props.detections,
                 viewports,
                 cornerstone,
@@ -1199,7 +1205,7 @@ class App extends Component {
                                     this.sendImageToLocalDirectory(file)
                                         .then(() => {
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
                                             this.props.setCurrentProcessingFile(
                                                 null
@@ -1230,7 +1236,7 @@ class App extends Component {
                                                 return;
                                             }
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
                                             this.props.setCurrentProcessingFile(
                                                 null
@@ -1264,7 +1270,7 @@ class App extends Component {
                                     })
                                         .then(() => {
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
 
                                             this.props.setCurrentProcessingFile(
@@ -1316,44 +1322,42 @@ class App extends Component {
             let annotationID = 1;
             const listOfPromises = [];
 
-            const viewports = [this.state.imageViewportTop];
-            if (this.props.singleViewport === false)
-                viewports.push(this.state.imageViewportSide);
             // Loop through each stack, being either top or side currently
-            this.state.myOra.stackData.forEach((stack) => {
+            this.state.imageData.forEach((image) => {
                 const stackElem = stackXML.createElement('stack');
                 stackElem.setAttribute(
                     'name',
                     `SOP Instance UID #${stackCounter}`
                 );
-                stackElem.setAttribute('view', stack.view);
+                stackElem.setAttribute('view', image.view);
                 const pixelLayer = stackXML.createElement('layer');
                 // We always know the first element in the stack.blob data is pixel element
                 pixelLayer.setAttribute(
                     'src',
-                    `data/${stack.view}_pixel_data.dcs`
+                    `data/${image.view}_pixel_data.dcs`
                 );
                 if (
                     this.props.currentFileFormat ===
                     constants.SETTINGS.ANNOTATIONS.TDR
                 ) {
                     newOra.file(
-                        `data/${stack.view}_pixel_data.dcs`,
-                        stack.blobData[0].blob
+                        `data/${image.view}_pixel_data.dcs`,
+                        image.pixelData
                     );
                 } else if (
                     this.props.currentFileFormat ===
                     constants.SETTINGS.ANNOTATIONS.COCO
                 ) {
+                    const currentViewportIndex = viewports.findIndex(
+                        (view) => view.view === image.view
+                    );
                     const tdrPromise = Dicos.pngToDicosPixelData(
                         cornerstone,
-                        stack.view === constants.viewport.TOP
-                            ? viewports[0]
-                            : viewports[1]
+                        viewports[currentViewportIndex].element
                     )
                         .then((blob) => {
                             newOra.file(
-                                `data/${stack.view}_pixel_data.dcs`,
+                                `data/${image.view}_pixel_data.dcs`,
                                 blob
                             );
                         })
@@ -1362,18 +1366,9 @@ class App extends Component {
                         });
                     listOfPromises.push(tdrPromise);
                 }
-                const topStackIndex = this.state.myOra.stackData.findIndex(
-                    (stack) => {
-                        return constants.viewport.TOP === stack.view;
-                    }
-                );
-                const sideStackIndex = this.state.myOra.stackData.findIndex(
-                    (stack) => {
-                        return constants.viewport.SIDE === stack.view;
-                    }
-                );
+
                 stackElem.appendChild(pixelLayer);
-                if (stack.view === 'top') {
+                if (image.view === 'top') {
                     // Loop through each detection and only the top view of the detection
                     const topDetections = getTopDetections(
                         this.props.detections
@@ -1381,8 +1376,7 @@ class App extends Component {
                     for (let j = 0; j < topDetections.length; j++) {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             topDetections[j],
-                            this.state.myOra.stackData[topStackIndex]
-                                .blobData[0].blob,
+                            image.pixelData,
                             this.props.currentFileFormat
                         )
                             .then((threatBlob) => {
@@ -1404,15 +1398,14 @@ class App extends Component {
                         listOfPromises.push(threatPromise);
                     }
                     // Loop through each detection and only the side view of the detection
-                } else if (stack.view === 'side') {
+                } else if (image.view === 'side') {
                     const sideDetections = getSideDetections(
                         this.props.detections
                     );
                     for (let i = 0; i < sideDetections.length; i++) {
                         let threatPromise = Dicos.detectionObjectToBlob(
                             sideDetections[i],
-                            this.state.myOra.stackData[sideStackIndex]
-                                .blobData[0].blob,
+                            image.pixelData,
                             this.props.currentFileFormat
                         )
                             .then((threatBlob) => {
@@ -1461,7 +1454,7 @@ class App extends Component {
                                 this.props.setCurrentProcessingFile(null);
                                 this.setState(
                                     {
-                                        myOra: new ORA(),
+                                        imageData: [],
                                     },
                                     () => this.props.resetDetections()
                                 );
@@ -1493,7 +1486,7 @@ class App extends Component {
                                     this.sendImageToLocalDirectory(file)
                                         .then(() => {
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
                                             this.props.setCurrentProcessingFile(
                                                 null
@@ -1524,7 +1517,7 @@ class App extends Component {
                                                 return;
                                             }
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
                                             this.props.setCurrentProcessingFile(
                                                 null
@@ -1558,7 +1551,7 @@ class App extends Component {
                                     })
                                         .then(() => {
                                             this.setState({
-                                                myOra: new ORA(),
+                                                imageData: [],
                                             });
 
                                             this.props.setCurrentProcessingFile(
@@ -2396,196 +2389,150 @@ class App extends Component {
                     polygonMask,
                 };
             }
-            const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
-                return newDetection.view === stack.view;
-            });
             const self = this;
 
             if (
                 this.props.currentFileFormat ===
                 constants.SETTINGS.ANNOTATIONS.TDR
             ) {
-                Dicos.detectionObjectToBlob(
-                    newDetection,
-                    self.state.myOra.stackData[stackIndex].blobData[0].blob,
-                    this.props.currentFileFormat
-                )
-                    .then((newBlob) => {
-                        if (data[0] === undefined) {
-                            self.props.emptyAreaClickUpdate();
-                            self.resetSelectedDetectionBoxes(event);
+                if (data[0] === undefined) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetSelectedDetectionBoxes(event);
+                    return;
+                }
+                // When the updating detection is false, this means we are creating a new detection
+                if (data[0].updatingDetection === false) {
+                    const uuid = uuidv4();
+                    if (
+                        boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
+                    ) {
+                        self.props.addDetection({
+                            algorithm: constants.OPERATOR,
+                            boundingBox: coords,
+                            className: data[0].class,
+                            confidence: data[0].confidence,
+                            view:
+                                viewport === self.state.imageViewportTop
+                                    ? constants.viewport.TOP
+                                    : constants.viewport.SIDE,
+
+                            binaryMask: [
+                                [],
+                                [coords[0], coords[1]],
+                                [coords[2] - coords[0], coords[3] - coords[1]],
+                            ],
+                            polygonMask: [],
+                            uuid,
+                            detectionFromFile: false,
+                        });
+                        self.appUpdateImage();
+                    } else {
+                        self.props.updateCornerstoneMode({
+                            cornerstoneMode:
+                                constants.cornerstoneMode.SELECTION,
+                        });
+                        self.resetCornerstoneTool();
+                    }
+                } else {
+                    // Updating existing Detection's bounding box
+                    const { uuid } = data[0];
+                    // Only update the Detection if the boundingBox actually changes
+                    if (
+                        hasDetectionCoordinatesChanged(
+                            self.props.detections,
+                            uuid,
+                            coords,
+                            polygonMask
+                        )
+                    ) {
+                        if (
+                            this.props.selectedDetection &&
+                            this.props.editionMode !==
+                                constants.editionMode.POLYGON
+                        ) {
+                            if (
+                                this.props.selectedDetection.polygonMask
+                                    .length > 0
+                            ) {
+                                polygonMask = Utils.calculatePolygonMask(
+                                    coords,
+                                    this.props.selectedDetection.polygonMask
+                                );
+                                binaryMask =
+                                    Utils.polygonToBinaryMask(polygonMask);
+                            } else if (
+                                this.props.selectedDetection.binaryMask.length >
+                                    0 &&
+                                this.props.selectedDetection.binaryMask[0]
+                                    .length > 0
+                            ) {
+                                binaryMask = cloneDeep(
+                                    this.props.selectedDetection.binaryMask
+                                );
+                                binaryMask[1][0] = coords[0];
+                                binaryMask[1][1] = coords[1];
+                            }
+                        }
+                        self.props.updateDetection({
+                            uuid: data[0].uuid,
+                            update: {
+                                boundingBox: coords,
+                                polygonMask: polygonMask,
+                                binaryMask,
+                            },
+                        });
+                        const viewportInfo = Utils.eventToViewportInfo(event);
+                        const contextMenuPos = self.getContextMenuPos(
+                            viewportInfo,
+                            coords
+                        );
+                        const detectionData = self.props.detections.find(
+                            (det) => det.uuid === data[0].uuid
+                        );
+                        const editLabelWidgetPosInfo =
+                            self.getEditLabelWidgetPos(detectionData, coords);
+                        let widgetPosition = {
+                            top: editLabelWidgetPosInfo.y,
+                            left: editLabelWidgetPosInfo.x,
+                        };
+                        self.props.onDragEndWidgetUpdate({
+                            detectionLabelEditWidth:
+                                editLabelWidgetPosInfo.boundingWidth,
+                            detectionLabelEditPosition: widgetPosition,
+                            contextMenuPos,
+                        });
+                        // Detection coordinates changed and we need to re-render the detection context widget
+                        if (this.props.selectedDetection) {
+                            this.renderDetectionContextMenu(event, {
+                                boundingBox: coords,
+                                view:
+                                    viewport === self.state.imageViewportTop
+                                        ? constants.viewport.TOP
+                                        : constants.viewport.SIDE,
+                            });
                             return;
                         }
-                        // When the updating detection is false, this means we are creating a new detection
-                        if (data[0].updatingDetection === false) {
-                            const uuid = uuidv4();
-                            self.state.myOra.stackData[
-                                stackIndex
-                            ].blobData.push({
-                                blob: newBlob,
-                                uuid,
-                            });
-                            const operator = constants.OPERATOR;
-                            if (
-                                boundingBoxArea >
-                                constants.BOUNDING_BOX_AREA_THRESHOLD
-                            ) {
-                                self.props.addDetection({
-                                    algorithm: operator,
-                                    boundingBox: coords,
-                                    className: data[0].class,
-                                    confidence: data[0].confidence,
-                                    view:
-                                        viewport === self.state.imageViewportTop
-                                            ? constants.viewport.TOP
-                                            : constants.viewport.SIDE,
-
-                                    binaryMask: [
-                                        [],
-                                        [coords[0], coords[1]],
-                                        [
-                                            coords[2] - coords[0],
-                                            coords[3] - coords[1],
-                                        ],
-                                    ],
-                                    polygonMask: [],
-                                    uuid,
-                                    detectionFromFile: false,
-                                });
-                                self.appUpdateImage();
-                            } else {
-                                self.props.updateCornerstoneMode({
-                                    cornerstoneMode:
-                                        constants.cornerstoneMode.SELECTION,
-                                });
-                                self.resetCornerstoneTool();
-                            }
-                        } else {
-                            // Updating existing Detection's bounding box
-                            const { uuid } = data[0];
-                            // Only update the Detection if the boundingBox actually changes
-                            if (
-                                hasDetectionCoordinatesChanged(
-                                    self.props.detections,
-                                    uuid,
-                                    coords,
-                                    polygonMask
-                                )
-                            ) {
-                                const blobIndex = self.state.myOra.stackData[
-                                    stackIndex
-                                ].blobData.findIndex(
-                                    (value) => value.uuid === uuid
-                                );
-                                if (blobIndex !== -1) {
-                                    self.state.myOra.stackData[
-                                        stackIndex
-                                    ].blobData[blobIndex] = {
-                                        blob: newBlob,
-                                        uuid,
-                                    };
-                                }
-                                if (
-                                    this.props.selectedDetection &&
-                                    this.props.editionMode !==
-                                        constants.editionMode.POLYGON
-                                ) {
-                                    if (
-                                        this.props.selectedDetection.polygonMask
-                                            .length > 0
-                                    ) {
-                                        polygonMask =
-                                            Utils.calculatePolygonMask(
-                                                coords,
-                                                this.props.selectedDetection
-                                                    .polygonMask
-                                            );
-                                        binaryMask =
-                                            Utils.polygonToBinaryMask(
-                                                polygonMask
-                                            );
-                                    } else if (
-                                        this.props.selectedDetection.binaryMask
-                                            .length > 0 &&
-                                        this.props.selectedDetection
-                                            .binaryMask[0].length > 0
-                                    ) {
-                                        binaryMask = cloneDeep(
-                                            this.props.selectedDetection
-                                                .binaryMask
-                                        );
-                                        binaryMask[1][0] = coords[0];
-                                        binaryMask[1][1] = coords[1];
-                                    }
-                                }
-                                self.props.updateDetection({
-                                    uuid: data[0].uuid,
-                                    update: {
-                                        boundingBox: coords,
-                                        polygonMask: polygonMask,
-                                        binaryMask,
-                                    },
-                                });
-                                const viewportInfo =
-                                    Utils.eventToViewportInfo(event);
-                                const contextMenuPos = self.getContextMenuPos(
-                                    viewportInfo,
-                                    coords
-                                );
-                                const detectionData =
-                                    self.props.detections.find(
-                                        (det) => det.uuid === data[0].uuid
-                                    );
-                                const editLabelWidgetPosInfo =
-                                    self.getEditLabelWidgetPos(
-                                        detectionData,
-                                        coords
-                                    );
-                                let widgetPosition = {
-                                    top: editLabelWidgetPosInfo.y,
-                                    left: editLabelWidgetPosInfo.x,
-                                };
-                                self.props.onDragEndWidgetUpdate({
-                                    detectionLabelEditWidth:
-                                        editLabelWidgetPosInfo.boundingWidth,
-                                    detectionLabelEditPosition: widgetPosition,
-                                    contextMenuPos,
-                                });
-                                // Detection coordinates changed and we need to re-render the detection context widget
-                                if (this.props.selectedDetection) {
-                                    this.renderDetectionContextMenu(event, {
-                                        boundingBox: coords,
-                                        view:
-                                            viewport ===
-                                            self.state.imageViewportTop
-                                                ? constants.viewport.TOP
-                                                : constants.viewport.SIDE,
-                                    });
-                                    return;
-                                }
-                            }
-                        }
-                        if (
-                            self.props.cornerstoneMode ===
-                            constants.cornerstoneMode.ANNOTATION
-                        ) {
-                            self.props.emptyAreaClickUpdate();
-                            self.resetCornerstoneTool();
-                            self.props.clearAllSelection();
-                            self.appUpdateImage();
-                        } else if (
-                            self.props.cornerstoneMode ===
-                            constants.cornerstoneMode.EDITION
-                        ) {
-                            self.props.updateIsDetectionContextVisible(true);
-                            self.renderDetectionContextMenu(
-                                event,
-                                this.props.selectedDetection
-                            );
-                            self.appUpdateImage();
-                        }
-                    })
-                    .catch((error) => console.log(error));
+                    }
+                }
+                if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.ANNOTATION
+                ) {
+                    self.props.emptyAreaClickUpdate();
+                    self.resetCornerstoneTool();
+                    self.props.clearAllSelection();
+                    self.appUpdateImage();
+                } else if (
+                    self.props.cornerstoneMode ===
+                    constants.cornerstoneMode.EDITION
+                ) {
+                    self.props.updateIsDetectionContextVisible(true);
+                    self.renderDetectionContextMenu(
+                        event,
+                        this.props.selectedDetection
+                    );
+                    self.appUpdateImage();
+                }
             } else if (
                 this.props.currentFileFormat ===
                 constants.SETTINGS.ANNOTATIONS.COCO
@@ -2621,9 +2568,6 @@ class App extends Component {
                             id: detUuid,
                             detectionFromFile: false,
                         };
-                        this.state.myOra.stackData[
-                            stackIndex
-                        ].formattedData.push(newDetection);
                         self.props.addDetection(newDetection);
                         self.appUpdateImage();
                     } else {
@@ -2775,36 +2719,14 @@ class App extends Component {
                 polygonMask: polygonCoords,
                 detectionFromFile: false,
             };
-            const stackIndex = this.state.myOra.stackData.findIndex((stack) => {
-                return newDetection.view === stack.view;
-            });
-            let self = this;
-            Dicos.detectionObjectToBlob(
-                newDetection,
-                self.state.myOra.stackData[stackIndex].blobData[0].blob,
-                this.props.currentFileFormat
-            ).then((newBlob) => {
-                self.state.myOra.stackData[stackIndex].blobData.push({
-                    blob: newBlob,
-                    uuid,
-                });
-                if (
-                    this.props.currentFileFormat ===
-                    constants.SETTINGS.ANNOTATIONS.COCO
-                ) {
-                    self.state.myOra.stackData[stackIndex].formattedData.push(
-                        newDetection
-                    );
-                }
-                self.props.addDetection(newDetection);
-                this.resetCornerstoneTool();
-                this.props.clearAllSelection();
-                this.appUpdateImage();
-                this.props.emptyAreaClickUpdate();
-                setTimeout(() => {
-                    this.startListeningClickEvents();
-                }, 500);
-            });
+            this.props.addDetection(newDetection);
+            this.resetCornerstoneTool();
+            this.props.clearAllSelection();
+            this.appUpdateImage();
+            this.props.emptyAreaClickUpdate();
+            setTimeout(() => {
+                this.startListeningClickEvents();
+            }, 500);
         }
     }
 
@@ -3320,33 +3242,6 @@ class App extends Component {
         // Detection is selected
         if (this.props.selectedDetection) {
             this.props.deleteDetection(this.props.selectedDetection.uuid);
-            if (this.props.selectedDetection.view === constants.viewport.TOP) {
-                if (
-                    this.props.currentFileFormat ===
-                    constants.SETTINGS.ANNOTATIONS.TDR
-                )
-                    this.state.myOra.setStackBlobData(
-                        0,
-                        this.state.myOra.stackData[0].blobData.filter(
-                            (blob) =>
-                                blob.uuid !== this.props.selectedDetection.uuid
-                        )
-                    );
-            } else if (
-                this.props.selectedDetection.view === constants.viewport.SIDE
-            ) {
-                if (
-                    this.props.currentFileFormat ===
-                    constants.SETTINGS.ANNOTATIONS.TDR
-                )
-                    this.state.myOra.setStackBlobData(
-                        1,
-                        this.state.myOra.stackData[1].blobData.filter(
-                            (blob) =>
-                                blob.uuid !== this.props.selectedDetection.uuid
-                        )
-                    );
-            }
             // Reset remaining DetectionSets to `un-selected` state
             this.props.clearAllSelection();
             this.props.deleteDetectionUpdate();

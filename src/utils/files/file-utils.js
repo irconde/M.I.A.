@@ -40,7 +40,6 @@ export default class FileUtils {
                             this.#xmlParser = new XmlParserUtil(stackFile);
                             const parsedData =
                                 this.#xmlParser.getParsedXmlData();
-                            console.log(parsedData);
                             this.#loadFilesData(parsedData, zipUtil)
                                 .then((filesData) => resolve(filesData))
                                 .catch((error) => reject(error));
