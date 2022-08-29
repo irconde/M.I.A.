@@ -10,7 +10,7 @@ import React from 'react';
  *
  * @param {Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string, dimensions: {x: number; y: number}}>} imageData - Object containing image information
  * @param {Array<{algorithm: string; className: string; confidence: number; view: string; binaryMask: Array<Array<number>>; polygonMask?: Array<number>; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation?: boolean; textColor: string; detectionType: string;}>} detections - Collection of detection objects
- * @param {Array<{view: string; element: DOMElement}>} viewports - Collection of viewport DOMElement objects
+ * @param {Array<{view: string; element: HTMLElement}>} viewports - Collection of viewport HTMLElement objects
  * @param {{"cornerstone-core": *, __esModule: *}} cornerstone - Main cornerstone object
  * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
  * @returns {JSZip} cocoZip - The zipped file
@@ -240,7 +240,7 @@ export const buildCocoDataZip = async (
  * be finally returned as a Blob of type image/png
  *
  * @param {cornerstone} cornerstone - Main cornerstone object
- * @param {DOMElement} imageViewport - Viewport DOMElement object
+ * @param {HTMLElement} imageViewport - Viewport HTMLElement object
  * @returns {Promise} - That resolves to a blob of type image/png
  */
 const dicosPixelDataToPng = async (cornerstone, imageViewport) => {

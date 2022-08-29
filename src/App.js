@@ -749,8 +749,8 @@ class App extends Component {
     /**
      * CornerstoneJS Tools are initialized
      *
-     * @param {DOMElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
-     * @param {DOMElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
+     * @param {HTMLElement} imageViewportTop - DOM element where the top-view x-ray image is rendered
+     * @param {HTMLElement} imageViewportSide - DOM element where the side-view x-ray image is rendered
      */
     setupCornerstoneJS(imageViewportTop, imageViewportSide) {
         cornerstone.enable(imageViewportTop);
@@ -1890,7 +1890,7 @@ class App extends Component {
      * That target is a DOM element that might be either the imageViewportTop or the imageViewportSide
      *
      * @param {eventData.canvasContext} context Canvas' context, used to render crosshair directly to canvas
-     * @param {DOMElement} target Targeted DOMElement caught via mouse event data
+     * @param {HTMLElement} target Targeted HTMLElement caught via mouse event data
      */
     renderCrosshair(context, target) {
         const crosshairLength = 8;
@@ -2225,7 +2225,7 @@ class App extends Component {
      * Callback invoked when user stops dragging mouse or finger on touch device.
      *
      * @param {Event} event - Mouse drag end event
-     * @param {DOMElement} viewport - The Cornerstone Viewport containing the event
+     * @param {HTMLElement} viewport - The Cornerstone Viewport containing the event
      */
     onDragEnd(event, viewport) {
         if (
@@ -2678,7 +2678,7 @@ class App extends Component {
      * Callback invoked when new polygon mask has been created.
      *
      * @param {Event} event - Event triggered when a new polygon is created
-     * @param {DOMElement} viewport - The Cornerstone Viewport receiving the event
+     * @param {HTMLElement} viewport - The Cornerstone Viewport receiving the event
      */
     onNewPolygonMaskCreated(event, viewport) {
         if (
@@ -2811,7 +2811,7 @@ class App extends Component {
     /**
      * Get position of context menu based on the associated bounding box.
      *
-     * @param {DOMElement} viewportInfo viewport info
+     * @param {HTMLElement} viewportInfo viewport info
      * @param {Array<number>} coords bounding box corners' coordinates
      * @returns {{x: number, y: number}}
      */
