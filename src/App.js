@@ -3415,7 +3415,7 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { server, detections, ui, settings, featureFlag } = state;
+    const { server, detections, ui, settings } = state;
     return {
         // Socket connection state
         numFilesInQueue: server.numFilesInQueue,
@@ -3455,8 +3455,6 @@ const mapStateToProps = (state) => {
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,
         apiPrefix: settings.apiPrefix,
-        // Feature Flags
-        fileLoadingFlag: featureFlag.fileLoadingFlag,
     };
 };
 
