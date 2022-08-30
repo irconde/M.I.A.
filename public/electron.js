@@ -26,7 +26,7 @@ let isGeneratingThumbnails = false;
 let currentAddFile = '';
 let currentDeleteFile = '';
 let currentFileIndex = 0;
-let settingsCookie = null;
+let appSettings = null;
 let watcher = null;
 let currentPath = '';
 const oraExp = /\.ora$/;
@@ -340,14 +340,14 @@ ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
-        if (settingsCookie === null) {
+        if (appSettings === null) {
             initSettings()
                 .then(() => {
-                    resolve(settingsCookie);
+                    resolve(appSettings);
                 })
                 .catch(reject);
         } else {
-            resolve(settingsCookie);
+            resolve(appSettings);
         }
     });
 });
@@ -1090,11 +1090,11 @@ const initSettings = async () => {
             if (err?.code === 'ENOENT') {
                 updateSettings(defaultSettings).then(resolve).catch(reject);
             } else if (err) {
-                settingsCookie = defaultSettings;
+                appSettings = defaultSettings;
                 reject(err);
             } else {
-                settingsCookie = JSON.parse(data);
-                resolve(settingsCookie);
+                appSettings = JSON.parse(data);
+                resolve(appSettings);
             }
         });
     });
@@ -1113,7 +1113,7 @@ const updateSettings = async (newSettings) => {
             if (err) {
                 reject(err);
             } else {
-                settingsCookie = newSettings;
+                appSettings = newSettings;
                 resolve(newSettings);
             }
         });
