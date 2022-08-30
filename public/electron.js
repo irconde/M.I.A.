@@ -26,7 +26,7 @@ let isGeneratingThumbnails = false;
 let currentAddFile = '';
 let currentDeleteFile = '';
 let currentFileIndex = 0;
-let settingsCookie = null;
+let appSettings = null;
 let watcher = null;
 let currentPath = '';
 const oraExp = /\.ora$/;
@@ -36,6 +36,9 @@ const pngExp = /\.png$/;
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
+const SETTINGS_FILE_PATH = isDev
+    ? 'settings.json'
+    : path.join(app.getPath('userData'), 'settings.json');
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -83,16 +86,7 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
-            session.defaultSession.cookies
-                .get({ name: 'settings' })
-                .then((cookies) => {
-                    if (cookies.length > 0) {
-                        settingsCookie = JSON.parse(cookies[0].value);
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            initSettings().catch(console.log);
         })
         .catch((err) => console.log(err));
 
@@ -341,54 +335,19 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 });
 
 ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
-    return new Promise((resolve, reject) => {
-        try {
-            session.defaultSession.cookies
-                .set({
-                    url: 'http://localhost:3000/',
-                    name: 'settings',
-                    value: JSON.stringify(args),
-                    expirationDate: 2093792393,
-                })
-                .then((res) => {
-                    resolve('Cookie saved');
-                })
-                .catch((error) => reject(error));
-        } catch (e) {
-            reject(e);
-        }
-    });
+    await updateSettings(args);
 });
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
-        if (settingsCookie === null) {
-            session.defaultSession.cookies
-                .get({ name: 'settings' })
-                .then((cookies) => {
-                    if (cookies.length > 0) {
-                        settingsCookie = JSON.parse(cookies[0].value);
-                        resolve(settingsCookie);
-                    } else {
-                        settingsCookie = Constants.defaultSettings;
-                        session.defaultSession.cookies
-                            .set({
-                                url: 'http://localhost:3000/',
-                                name: 'settings',
-                                value: JSON.stringify(settingsCookie),
-                                expirationDate: 2093792393,
-                            })
-                            .then(() => {
-                                resolve(settingsCookie);
-                            })
-                            .catch((error) => reject(error));
-                    }
+        if (appSettings === null) {
+            initSettings()
+                .then(() => {
+                    resolve(appSettings);
                 })
-                .catch((error) => {
-                    reject(error);
-                });
+                .catch(reject);
         } else {
-            resolve(settingsCookie);
+            resolve(appSettings);
         }
     });
 });
@@ -1115,5 +1074,48 @@ const sendNewFiles = () => {
     mainWindow.webContents.send(Constants.Channels.updateFiles, {
         thumbnails: files,
         numberOfFiles: files.length,
+    });
+};
+
+/**
+ * Initializes the global object for the settings from a json file. If the file doesn't exist,
+ * then the default settings are used to update the settings object and the json file
+ *
+ * @returns {Promise<Object>}
+ */
+const initSettings = async () => {
+    return new Promise((resolve, reject) => {
+        const { defaultSettings } = Constants;
+        fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+            if (err?.code === 'ENOENT') {
+                updateSettings(defaultSettings).then(resolve).catch(reject);
+            } else if (err) {
+                appSettings = defaultSettings;
+                reject(err);
+            } else {
+                appSettings = JSON.parse(data);
+                resolve(appSettings);
+            }
+        });
+    });
+};
+
+/**
+ * Updates the settings json file, as well as the cached global object for the settings
+ *
+ * @param {Object} newSettings - object to update the settings with
+ * @returns {Promise<Object>}
+ */
+const updateSettings = async (newSettings) => {
+    return new Promise((resolve, reject) => {
+        const settingsString = JSON.stringify(newSettings);
+        fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                appSettings = newSettings;
+                resolve(newSettings);
+            }
+        });
     });
 };
