@@ -36,6 +36,9 @@ const pngExp = /\.png$/;
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
+const SETTINGS_FILE_PATH = isDev
+    ? 'settings.json'
+    : path.join(app.getPath('userData'), 'settings.json');
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -83,6 +86,9 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
+            getSettings().then(() => {
+                console.log('It worked');
+            });
             session.defaultSession.cookies
                 .get({ name: 'settings' })
                 .then((cookies) => {
@@ -1115,5 +1121,30 @@ const sendNewFiles = () => {
     mainWindow.webContents.send(Constants.Channels.updateFiles, {
         thumbnails: files,
         numberOfFiles: files.length,
+    });
+};
+
+const getSettings = async () => {
+    return new Promise((resolve, reject) => {
+        fs.access(SETTINGS_FILE_PATH, (error) => {
+            const { defaultSettings } = Constants;
+            if (error) {
+                // TODO: set the settings here
+                console.log(error);
+                const settingsString = JSON.stringify(defaultSettings);
+                fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
+                    if (err) throw err;
+                    console.log('Data saved');
+                });
+                resolve(defaultSettings);
+            } else {
+                // TODO: read the settings here
+                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+                    if (err) throw err;
+                    settingsCookie = JSON.parse(data);
+                    console.log(data);
+                });
+            }
+        });
     });
 };
