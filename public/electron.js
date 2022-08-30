@@ -86,19 +86,7 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
-            initSettings().then(() => {
-                console.log('It worked');
-            });
-            session.defaultSession.cookies
-                .get({ name: 'settings' })
-                .then((cookies) => {
-                    if (cookies.length > 0) {
-                        settingsCookie = JSON.parse(cookies[0].value);
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            initSettings().catch(console.log);
         })
         .catch((err) => console.log(err));
 
@@ -347,52 +335,17 @@ ipcMain.handle(Constants.Channels.getThumbnail, async (event, args) => {
 });
 
 ipcMain.handle(Constants.Channels.saveSettingsCookie, async (event, args) => {
-    return new Promise((resolve, reject) => {
-        try {
-            session.defaultSession.cookies
-                .set({
-                    url: 'http://localhost:3000/',
-                    name: 'settings',
-                    value: JSON.stringify(args),
-                    expirationDate: 2093792393,
-                })
-                .then((res) => {
-                    resolve('Cookie saved');
-                })
-                .catch((error) => reject(error));
-        } catch (e) {
-            reject(e);
-        }
-    });
+    await updateSettings(args);
 });
 
 ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
     return new Promise((resolve, reject) => {
         if (settingsCookie === null) {
-            session.defaultSession.cookies
-                .get({ name: 'settings' })
-                .then((cookies) => {
-                    if (cookies.length > 0) {
-                        settingsCookie = JSON.parse(cookies[0].value);
-                        resolve(settingsCookie);
-                    } else {
-                        settingsCookie = Constants.defaultSettings;
-                        session.defaultSession.cookies
-                            .set({
-                                url: 'http://localhost:3000/',
-                                name: 'settings',
-                                value: JSON.stringify(settingsCookie),
-                                expirationDate: 2093792393,
-                            })
-                            .then(() => {
-                                resolve(settingsCookie);
-                            })
-                            .catch((error) => reject(error));
-                    }
+            initSettings()
+                .then(() => {
+                    resolve(settingsCookie);
                 })
-                .catch((error) => {
-                    reject(error);
-                });
+                .catch(reject);
         } else {
             resolve(settingsCookie);
         }
@@ -1124,19 +1077,35 @@ const sendNewFiles = () => {
     });
 };
 
+/**
+ * Initializes the global object for the settings from a json file. If the file doesn't exist,
+ * then the default settings are used to update the settings object and the json file
+ *
+ * @returns {Promise<Object>}
+ */
 const initSettings = async () => {
-    fs.readFile(SETTINGS_FILE_PATH, async (err, data) => {
-        if (err?.code === 'ENOENT') {
-            await updateSettings(Constants.defaultSettings);
-        } else if (err) {
-            settingsCookie = Constants.defaultSettings;
-            throw err;
-        } else {
-            settingsCookie = JSON.parse(data);
-        }
+    return new Promise((resolve, reject) => {
+        const { defaultSettings } = Constants;
+        fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+            if (err?.code === 'ENOENT') {
+                updateSettings(defaultSettings).then(resolve).catch(reject);
+            } else if (err) {
+                settingsCookie = defaultSettings;
+                reject(err);
+            } else {
+                settingsCookie = JSON.parse(data);
+                resolve(settingsCookie);
+            }
+        });
     });
 };
 
+/**
+ * Updates the settings json file, as well as the cached global object for the settings
+ *
+ * @param {Object} newSettings - object to update the settings with
+ * @returns {Promise<Object>}
+ */
 const updateSettings = async (newSettings) => {
     return new Promise((resolve, reject) => {
         const settingsString = JSON.stringify(newSettings);
@@ -1145,7 +1114,7 @@ const updateSettings = async (newSettings) => {
                 reject(err);
             } else {
                 settingsCookie = newSettings;
-                resolve();
+                resolve(newSettings);
             }
         });
     });
