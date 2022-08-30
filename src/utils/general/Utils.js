@@ -261,7 +261,8 @@ export default class Utils {
     }
 
     /**
-     * Edits DOMElement classes based on single or dual viewport settings (Affects CSS attributes)
+     * Edits HTMLElement classes based on single or dual viewport settings (Affects CSS attributes)
+     * @param {boolean} singleViewport
      */
     static changeViewport(singleViewport) {
         let viewportTop = document.getElementById('dicomImageLeft');

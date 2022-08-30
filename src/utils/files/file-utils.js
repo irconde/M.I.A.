@@ -21,27 +21,32 @@ export default class FileUtils {
      */
     constructor(fileData) {
         this.#fileData = fileData;
-        this.#loadData();
     }
 
     /**
      * Loads the data from the passed in file string data
-     * @private
+     * @returns {Promise<{detectionData: Array<{ algorithm: string; className: string; confidence: number; view: string; boundingBox: Array<number>; binaryMask?: Array<Array<number>>; polygonMask: Array<number>; uuid: string; detectionFromFile: true; imageId: number;}>, imageData: Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string}>}>}
      */
-    #loadData() {
-        const zipUtil = new JSZip();
-        zipUtil.loadAsync(this.#fileData, { base64: true }).then(() => {
+    async loadData() {
+        return new Promise((resolve, reject) => {
+            const zipUtil = new JSZip();
             zipUtil
-                .file('stack.xml')
-                .async('string')
-                .then((stackFile) => {
-                    this.#xmlParser = new XmlParserUtil(stackFile);
-                    const parsedData = this.#xmlParser.getParsedXmlData();
-                    console.log(parsedData);
-                    this.#loadFilesData(parsedData, zipUtil).then((filesData) =>
-                        console.log(filesData)
-                    );
-                });
+                .loadAsync(this.#fileData, { base64: true })
+                .then(() => {
+                    zipUtil
+                        .file('stack.xml')
+                        .async('string')
+                        .then((stackFile) => {
+                            this.#xmlParser = new XmlParserUtil(stackFile);
+                            const parsedData =
+                                this.#xmlParser.getParsedXmlData();
+                            this.#loadFilesData(parsedData, zipUtil)
+                                .then((filesData) => resolve(filesData))
+                                .catch((error) => reject(error));
+                        })
+                        .catch((error) => reject(error));
+                })
+                .catch((error) => reject(error));
         });
     }
 
