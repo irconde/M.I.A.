@@ -86,7 +86,7 @@ function createWindow() {
                 : `file://${path.join(__dirname, '../build/index.html')}`
         )
         .then(() => {
-            getSettings().then(() => {
+            initSettings().then(() => {
                 console.log('It worked');
             });
             session.defaultSession.cookies
@@ -1124,26 +1124,28 @@ const sendNewFiles = () => {
     });
 };
 
-const getSettings = async () => {
+const initSettings = async () => {
+    fs.readFile(SETTINGS_FILE_PATH, async (err, data) => {
+        if (err?.code === 'ENOENT') {
+            await updateSettings(Constants.defaultSettings);
+        } else if (err) {
+            settingsCookie = Constants.defaultSettings;
+            throw err;
+        } else {
+            settingsCookie = JSON.parse(data);
+        }
+    });
+};
+
+const updateSettings = async (newSettings) => {
     return new Promise((resolve, reject) => {
-        fs.access(SETTINGS_FILE_PATH, (error) => {
-            const { defaultSettings } = Constants;
-            if (error) {
-                // TODO: set the settings here
-                console.log(error);
-                const settingsString = JSON.stringify(defaultSettings);
-                fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
-                    if (err) throw err;
-                    console.log('Data saved');
-                });
-                resolve(defaultSettings);
+        const settingsString = JSON.stringify(newSettings);
+        fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
+            if (err) {
+                reject(err);
             } else {
-                // TODO: read the settings here
-                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
-                    if (err) throw err;
-                    settingsCookie = JSON.parse(data);
-                    console.log(data);
-                });
+                settingsCookie = newSettings;
+                resolve();
             }
         });
     });
