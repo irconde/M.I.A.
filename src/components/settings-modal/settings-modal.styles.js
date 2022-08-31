@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import {
-    Box,
     Button,
     createTheme,
     Divider,
@@ -346,10 +345,6 @@ export const StyledTab = styled(Tab)`
         padding-right: 5px;
         padding-bottom: 3px;
     }
-`;
-
-export const StyledBox = styled(Box)`
-    height: 100%;
 `;
 
 // ---------------- ABOUT TAB -----------------

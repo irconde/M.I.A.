@@ -34,7 +34,6 @@ import {
     SettingOptionTitle,
     SettingsRow,
     StandardFormControl,
-    StyledBox,
     StyledDivider,
     StyledFormGroup,
     StyledPaper,
@@ -327,27 +326,8 @@ const SettingsModal = (props) => {
     };
 
     const [tabIndex, setTabIndex] = React.useState(0);
-
-    const TabPanel = (props) => {
-        const { children, value, index, ...other } = props;
-
-        return (
-            <ModalTabPanel
-                role="tabpanel"
-                hidden={value !== index}
-                id={`tabpanel-${index}`}
-                aria-labelledby={`tab-${index}`}
-                {...other}>
-                {value === index && <StyledBox>{children}</StyledBox>}
-            </ModalTabPanel>
-        );
-    };
-
-    TabPanel.propTypes = {
-        children: PropTypes.node,
-        index: PropTypes.number.isRequired,
-        value: PropTypes.number.isRequired,
-    };
+    const settingsIndex = 0;
+    const aboutIndex = 1;
 
     let body = (
         <StyledPaper>
@@ -391,7 +371,13 @@ const SettingsModal = (props) => {
                             />
                         </DefaultIconWrapper>
                     </ModalTabWrapper>
-                    <TabPanel value={tabIndex} index={0}>
+                    <ModalTabPanel
+                        role="tabpanel"
+                        index={settingsIndex}
+                        value={tabIndex}
+                        hidden={tabIndex !== settingsIndex}
+                        id={`tabpanel-${settingsIndex}`}
+                        aria-labelledby={`tab-${settingsIndex}`}>
                         <StyledFormGroup>
                             <ScrollableContainer height={80}>
                                 <VisualizationModePickerComponent
@@ -752,8 +738,14 @@ const SettingsModal = (props) => {
                                 Save Settings
                             </SaveSettingsButton>
                         </StyledFormGroup>
-                    </TabPanel>
-                    <TabPanel value={tabIndex} index={1}>
+                    </ModalTabPanel>
+                    <ModalTabPanel
+                        role="tabpanel"
+                        index={aboutIndex}
+                        value={tabIndex}
+                        hidden={tabIndex !== aboutIndex}
+                        id={`tabpanel-${aboutIndex}`}
+                        aria-labelledby={`tab-${aboutIndex}`}>
                         <ScrollableContainer height={100}>
                             <AboutHeader>
                                 <AppIconWrapper>
@@ -877,7 +869,7 @@ const SettingsModal = (props) => {
                                 </TeamLibraryWrapper>
                             </TeamAndLibrary>
                         </ScrollableContainer>
-                    </TabPanel>
+                    </ModalTabPanel>
                 </ModalTabContext>
             </ModalRoot>
         </StyledPaper>
