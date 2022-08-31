@@ -326,28 +326,6 @@ const SettingsModal = (props) => {
     };
 
     const [tabIndex, setTabIndex] = React.useState(0);
-
-    // const TabPanel = (props) => {
-    //     const { children, value, index, ...other } = props;
-    //
-    //     return (
-    //         <ModalTabPanel
-    //             role="tabpanel"
-    //             hidden={value !== index}
-    //             id={`tabpanel-${index}`}
-    //             aria-labelledby={`tab-${index}`}
-    //             {...other}>
-    //             {value === index && <StyledBox>{children}</StyledBox>}
-    //         </ModalTabPanel>
-    //     );
-    // };
-    //
-    // TabPanel.propTypes = {
-    //     children: PropTypes.node,
-    //     index: PropTypes.number.isRequired,
-    //     value: PropTypes.number.isRequired,
-    // };
-
     const settingsIndex = 0;
     const aboutIndex = 1;
 
