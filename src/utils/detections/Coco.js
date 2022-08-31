@@ -8,15 +8,15 @@ import React from 'react';
  * the detections via an array and builds the needed JSON format for
  * the MS COCO dataset.
  *
- * @param {myOraObject} myOra - Ora file object
- * @param {Array<Detection>} detections - Collection of detection objects
- * @param {Array<DOMElement>} viewports - Collection of viewport DOMElement objects
+ * @param {Array<{view: string, type: string, pixelData: ArrayBuffer | Blob, imageId: string, dimensions: {x: number; y: number}}>} imageData - Object containing image information
+ * @param {Array<{algorithm: string; className: string; confidence: number; view: string; binaryMask: Array<Array<number>>; polygonMask?: Array<number>; boundingBox: Array<number>; selected: boolean; visible: boolean; uuid: string; color: string; validation?: boolean; textColor: string; detectionType: string;}>} detections - Collection of detection objects
+ * @param {Array<{view: string; element: HTMLElement}>} viewports - Collection of viewport HTMLElement objects
  * @param {{"cornerstone-core": *, __esModule: *}} cornerstone - Main cornerstone object
  * @param {string} currentFileFormat - Current file format string (MS COCO or DICOS-TDR)
- * @returns {nodebuffer} ?
+ * @returns {JSZip} cocoZip - The zipped file
  */
 export const buildCocoDataZip = async (
-    myOra,
+    imageData,
     detections,
     viewports,
     cornerstone,
@@ -54,34 +54,37 @@ export const buildCocoDataZip = async (
         let imageID = 1;
         let annotationID = 1;
         const listOfPromises = [];
-        myOra.stackData.forEach((stack, index) => {
+        imageData.forEach((image, index) => {
             const stackElem = stackXML.createElement('stack');
             stackElem.setAttribute('name', `SOP Instance UID #${imageID}`);
-            stackElem.setAttribute('view', stack.view);
+            stackElem.setAttribute('view', image.view);
             const pixelLayer = stackXML.createElement('layer');
             const images = [];
             images.push({
                 id: imageID,
                 license: licenses[0].id,
-                width: stack.dimensions.x,
-                height: stack.dimensions.y,
+                width: image.dimensions.x,
+                height: image.dimensions.y,
                 date_captured: currentDate,
-                file_name: `${stack.view}_pixel_data.png`,
+                file_name: `${image.view}_pixel_data.png`,
                 coco_url: '',
                 flickr_url: '',
             });
-            pixelLayer.setAttribute('src', `data/${stack.view}_pixel_data.png`);
+            pixelLayer.setAttribute('src', `data/${image.view}_pixel_data.png`);
             stackElem.appendChild(pixelLayer);
+            const currentDetections = detections.filter(
+                (det) => det.view === image.view
+            );
+            const viewportIndex = viewports.findIndex(
+                (view) => view.view === image.view
+            );
             if (currentFileFormat === SETTINGS.ANNOTATIONS.TDR) {
                 const pngPromise = dicosPixelDataToPng(
                     cornerstone,
-                    viewports[index]
+                    viewports[viewportIndex].element
                 ).then((blob) => {
-                    cocoZip.file(`data/${stack.view}_pixel_data.png`, blob);
-                    for (let i = 1; i < stack.blobData.length; i++) {
-                        const detection = detections.find(
-                            (det) => det.uuid === stack.blobData[i].uuid
-                        );
+                    cocoZip.file(`data/${image.view}_pixel_data.png`, blob);
+                    currentDetections.forEach((detection) => {
                         if (detection !== undefined) {
                             let annotations = [];
                             annotations.push({
@@ -129,30 +132,26 @@ export const buildCocoDataZip = async (
                                 categories,
                             };
                             cocoZip.file(
-                                `data/${stack.view}_annotation_${annotationID}.json`,
+                                `data/${image.view}_annotation_${annotationID}.json`,
                                 JSON.stringify(cocoDataset, null, 4)
                             );
                             const newLayer = stackXML.createElement('layer');
                             newLayer.setAttribute(
                                 'src',
-                                `data/${stack.view}_annotation_${annotationID}.json`
+                                `data/${image.view}_annotation_${annotationID}.json`
                             );
                             stackElem.appendChild(newLayer);
                             annotationID++;
                         }
-                    }
+                    });
                 });
                 listOfPromises.push(pngPromise);
             } else if (currentFileFormat === SETTINGS.ANNOTATIONS.COCO) {
                 cocoZip.file(
-                    `data/${stack.view}_pixel_data.png`,
-                    stack.blobData[0].blob
+                    `data/${image.view}_pixel_data.png`,
+                    image.pixelData
                 );
-                for (let i = 0; i < stack.formattedData.length; i++) {
-                    const detection = detections.find((det) => {
-                        if (det.uuid === stack.formattedData[i].id) return true;
-                        else return false;
-                    });
+                currentDetections.forEach((detection) => {
                     if (detection !== undefined) {
                         let annotations = [];
                         annotations.push({
@@ -200,18 +199,18 @@ export const buildCocoDataZip = async (
                             categories,
                         };
                         cocoZip.file(
-                            `data/${stack.view}_annotation_${annotationID}.json`,
+                            `data/${image.view}_annotation_${annotationID}.json`,
                             JSON.stringify(cocoDataset, null, 4)
                         );
                         const newLayer = stackXML.createElement('layer');
                         newLayer.setAttribute(
                             'src',
-                            `data/${stack.view}_annotation_${annotationID}.json`
+                            `data/${image.view}_annotation_${annotationID}.json`
                         );
                         stackElem.appendChild(newLayer);
                         annotationID++;
                     }
-                }
+                });
             } else {
                 return null;
             }
@@ -241,7 +240,7 @@ export const buildCocoDataZip = async (
  * be finally returned as a Blob of type image/png
  *
  * @param {cornerstone} cornerstone - Main cornerstone object
- * @param {DOMElement} imageViewport - Viewport DOMElement object
+ * @param {HTMLElement} imageViewport - Viewport HTMLElement object
  * @returns {Promise} - That resolves to a blob of type image/png
  */
 const dicosPixelDataToPng = async (cornerstone, imageViewport) => {

@@ -677,7 +677,7 @@ export default class Dicos {
      * element to be finally returned as a Blob of type image/dcs
      *
      * @param {cornerstone} cornerstone - Main cornerstone object
-     * @param {DOMElement} imageViewport - Viewport DOMElement object
+     * @param {HTMLElement} imageViewport - Viewport HTMLElement object
      * @returns {Promise} - That resolves to a blob of type image/dcs
      */
     static pngToDicosPixelData = async (cornerstone, imageViewport) => {
