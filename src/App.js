@@ -1,5 +1,6 @@
 import './App.css';
 import React, { Component } from 'react';
+import Box from '@mui/material/Box';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -71,6 +72,7 @@ import {
     setLocalFileOpen,
     setReceiveTime,
     toggleCollapsedSideMenu,
+    toggleSettingsVisibility,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -96,7 +98,7 @@ import {
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
 import fetch from 'cross-fetch';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
 
 let ipcRenderer;
@@ -273,6 +275,12 @@ class App extends Component {
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
+            nextProps.loadingSettings === false &&
+            nextProps.firstDisplaySettings === true
+        ) {
+            this.props.toggleSettingsVisibility(true);
+        }
+        if (
             isElectron() &&
             !this.props.remoteOrLocal &&
             !nextProps.remoteOrLocal &&
@@ -340,7 +348,7 @@ class App extends Component {
         ) {
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
-            return false;
+            return true;
         }
         if (this.props.firstDisplaySettings !== nextProps.firstDisplaySettings)
             return true;
@@ -381,21 +389,17 @@ class App extends Component {
     componentDidMount() {
         if (isElectron()) {
             this.props.loadElectronCookie();
+        } else if (
+            !isElectron() &&
+            !this.props.loadingSettings &&
+            this.props.firstDisplaySettings
+        ) {
+            this.props.toggleSettingsVisibility(true);
         }
         // Connect socket servers
-        if (
-            this.props.firstDisplaySettings === false ||
-            this.props.loadingElectronCookie
-        ) {
-            if (isElectron()) {
-                this.localDirectoryChangeHandler();
-            }
-            if (!this.props.loadingElectronCookie) {
-                if (this.props.remoteOrLocal === true) {
-                    this.connectToCommandServer();
-                } else if (isElectron() && this.props.localFileOutput !== '') {
-                    this.getFileFromLocalDirectory();
-                }
+        if (!isElectron() && this.props.firstDisplaySettings === false) {
+            if (this.props.remoteOrLocal) {
+                this.connectToCommandServer();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -3318,99 +3322,115 @@ class App extends Component {
     }
 
     render() {
-        return (
-            <div>
-                <Snackbar
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                    open={this.state.showSnackbar}
-                    autoHideDuration={3000}
-                    onClose={(event, reason) => {
-                        if (reason !== 'clickaway') {
-                            this.setShowSnackbar(false, '');
-                        }
+        if (this.props.loadingSettings) {
+            return (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        display: 'flex',
+                        left: '45%',
+                        top: '45%',
                     }}>
-                    <Alert
-                        severity="error"
+                    <CircularProgress size={120} />
+                </Box>
+            );
+        } else {
+            return (
+                <div>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        open={this.state.showSnackbar}
+                        autoHideDuration={3000}
                         onClose={(event, reason) => {
                             if (reason !== 'clickaway') {
                                 this.setShowSnackbar(false, '');
                             }
                         }}>
-                        {this.state.errorMessage}
-                    </Alert>
-                </Snackbar>
-                <div
-                    id="viewerContainer"
-                    style={{
-                        width: '100vw',
-                        height: '100vh',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                    }}
-                    onContextMenu={(e) => e.preventDefault()}
-                    className="disable-selection noIbar"
-                    unselectable="off"
-                    ref={(el) => {
-                        el &&
-                            el.addEventListener('selectstart', (e) => {
-                                e.preventDefault();
-                            });
-                    }}>
-                    <TopBarComponent
-                        connectToCommandServer={this.connectToCommandServer}
-                        getFileFromLocal={this.getFileFromLocal}
-                        cornerstone={cornerstone}
-                    />
-                    <SideMenuComponent
-                        nextImageClick={this.nextImageClick}
-                        resetCornerstoneTools={this.resetCornerstoneTool}
-                        renderDetectionContextMenu={
-                            this.renderDetectionContextMenu
-                        }
-                    />
-                    {this.props.remoteOrLocal === true ||
-                    (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
-                        <NextButtonComponent
-                            collapseBtn={true}
-                            nextImageClick={this.nextImageClick}
+                        <Alert
+                            severity="error"
+                            onClose={(event, reason) => {
+                                if (reason !== 'clickaway') {
+                                    this.setShowSnackbar(false, '');
+                                }
+                            }}>
+                            {this.state.errorMessage}
+                        </Alert>
+                    </Snackbar>
+                    <div
+                        id="viewerContainer"
+                        style={{
+                            width: '100vw',
+                            height: '100vh',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                        }}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="disable-selection noIbar"
+                        unselectable="off"
+                        ref={(el) => {
+                            el &&
+                                el.addEventListener('selectstart', (e) => {
+                                    e.preventDefault();
+                                });
+                        }}>
+                        <TopBarComponent
+                            connectToCommandServer={this.connectToCommandServer}
+                            getFileFromLocal={this.getFileFromLocal}
+                            cornerstone={cornerstone}
                         />
-                    ) : (
-                        <SaveButtonComponent
-                            collapseBtn={true}
+                        <SideMenuComponent
                             nextImageClick={this.nextImageClick}
-                        />
-                    )}
-                    <div id="algorithm-outputs"></div>
-                    <DetectionContextMenu
-                        setSelectedOption={this.selectEditionMode}
-                    />
-                    <ColorPicker />
-                    <EditLabel onLabelChange={this.editDetectionLabel} />
-                    <BoundPolyFAB
-                        onBoundingSelect={this.onBoundingBoxSelected}
-                        onPolygonSelect={this.onPolygonMaskSelected}
-                    />
-                    {isElectron() ? (
-                        <LazyImageMenu
-                            getSpecificFileFromLocalDirectory={
-                                this.getSpecificFileFromLocalDirectory
+                            resetCornerstoneTools={this.resetCornerstoneTool}
+                            renderDetectionContextMenu={
+                                this.renderDetectionContextMenu
                             }
-                            thumbnails={this.state.thumbnails}
                         />
-                    ) : null}
-                    <NoFileSignComponent />
-                    <MetaDataComponent />
-                </div>
-                {this.props.loadingElectronCookie === false ? (
+                        {this.props.remoteOrLocal === true ||
+                        (!this.props.remoteOrLocal &&
+                            this.props.hasFileOutput) ? (
+                            <NextButtonComponent
+                                collapseBtn={true}
+                                nextImageClick={this.nextImageClick}
+                            />
+                        ) : (
+                            <SaveButtonComponent
+                                collapseBtn={true}
+                                nextImageClick={this.nextImageClick}
+                            />
+                        )}
+                        <div id="algorithm-outputs"></div>
+                        <DetectionContextMenu
+                            setSelectedOption={this.selectEditionMode}
+                        />
+                        <ColorPicker />
+                        <EditLabel onLabelChange={this.editDetectionLabel} />
+                        <BoundPolyFAB
+                            onBoundingSelect={this.onBoundingBoxSelected}
+                            onPolygonSelect={this.onPolygonMaskSelected}
+                        />
+                        {isElectron() ? (
+                            <LazyImageMenu
+                                getSpecificFileFromLocalDirectory={
+                                    this.getSpecificFileFromLocalDirectory
+                                }
+                                thumbnails={this.state.thumbnails}
+                            />
+                        ) : null}
+                        <NoFileSignComponent />
+                        <MetaDataComponent />
+                    </div>
                     <SettingsModal
                         connectToCommandServer={this.connectToCommandServer}
                         resetCornerstoneTool={this.resetCornerstoneTool}
                         appUpdateImage={this.appUpdateImage}
                         cornerstone={cornerstone}
                     />
-                ) : null}
-            </div>
-        );
+                </div>
+            );
+        }
     }
 }
 
@@ -3455,6 +3475,7 @@ const mapStateToProps = (state) => {
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,
         apiPrefix: settings.apiPrefix,
+        loadingSettings: settings.loadingSettings,
     };
 };
 
@@ -3510,6 +3531,7 @@ const mapDispatchToProps = {
     saveSettings,
     setCollapsedSideMenu,
     invalidateDetections,
+    toggleSettingsVisibility,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

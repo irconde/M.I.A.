@@ -58,13 +58,13 @@ export const loadElectronCookie = createAsyncThunk(
     async (payload, { rejectWithValue }) => {
         return await ipcRenderer
             .invoke(Channels.getSettingsCookie)
-            .then((cookie) => {
-                return cookie;
+            .then((result) => {
+                return result;
             })
             .catch((err) => rejectWithValue(err));
     }
 );
-
+let loadingSettings = true;
 if (!isElectron()) {
     if (cookieData !== undefined) {
         settings = cookieData;
@@ -77,13 +77,17 @@ if (!isElectron()) {
                 : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
         });
     }
+    loadingSettings = false;
 } else {
     settings = defaultSettings;
 }
 
 const initialState = {
     settings,
-    apiPrefix: `http://${settings.remoteIp}:${settings.remotePort}`,
+    apiPrefix: loadingSettings
+        ? ''
+        : `http://${settings.remoteIp}:${settings.remotePort}`,
+    loadingSettings,
 };
 
 const settingsSlice = createSlice({
@@ -143,20 +147,22 @@ const settingsSlice = createSlice({
             state.settings = defaultSettings;
         },
         [loadElectronCookie.fulfilled]: (state, { payload }) => {
-            for (let key in payload) {
-                state.settings[key] = payload[key];
+            const { settings, firstDisplaySettings } = payload;
+            for (let key in settings) {
+                state.settings[key] = settings[key];
             }
             state.settings.hasFileOutput =
-                payload.localFileOutput !== '' ? true : false;
-            state.settings.firstDisplaySettings = false;
+                settings.localFileOutput !== '' ? true : false;
+            state.settings.firstDisplaySettings = firstDisplaySettings;
             state.settings.loadingElectronCookie = false;
             state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
+            state.loadingSettings = false;
         },
         [loadElectronCookie.pending]: (state) => {
-            state.settings.loadingElectronCookie = true;
+            state.loadingSettings = true;
         },
         [loadElectronCookie.rejected]: (state) => {
-            state.settings.loadingElectronCookie = false;
+            state.loadingSettings = false;
         },
     },
 });
