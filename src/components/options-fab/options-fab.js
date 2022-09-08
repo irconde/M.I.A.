@@ -1,5 +1,6 @@
 import React from 'react';
 import { OptionsButtonWrapper } from './options-fab.styles';
+import ScaleIcon from '../../icons/options-fab/scale-icon/scale.icon';
 
 const OptionsFab = () => {
     const [open, setOpen] = React.useState(false);
@@ -15,13 +16,25 @@ const OptionsFab = () => {
     //     cornerstone.setViewport(this.state.imageViewportSide, viewportSide);
     // }
 
+    // const actions = [
+    //     { icon: <FileCopyIcon />, name: 'Copy' },
+    //     { icon: <SaveIcon />, name: 'Save' },
+    //     { icon: <PrintIcon />, name: 'Print' },
+    //     { icon: <ShareIcon />, name: 'Share' },
+    // ];
+
     return (
         <OptionsButtonWrapper
             ariaLabel={'Options Button Wrapper'}
+            icon={<ScaleIcon color={'white'} width={'24px'} height={'24px'} />}
             id={'Button Wrapper'}>
-            <div id={'Speed Dial Button'}>
-                <div id={'Speed Dial Action'} />
-            </div>
+            {/*{actions.map((action) => (*/}
+            {/*    <SpeedDialAction*/}
+            {/*        key={action.name}*/}
+            {/*        icon={action.icon}*/}
+            {/*        tooltipTitle={action.name}*/}
+            {/*    />*/}
+            {/*))}*/}
         </OptionsButtonWrapper>
     );
 };
