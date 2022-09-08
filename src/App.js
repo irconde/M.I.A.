@@ -3397,6 +3397,8 @@ class App extends Component {
                             horizontal: 'right',
                         }}
                         cornerstone={cornerstone}
+                        imageViewportTop={this.state.imageViewportTop}
+                        imageViewportSide={this.state.imageViewportSide}
                     />
                     {isElectron() ? (
                         <LazyImageMenu

@@ -9,12 +9,14 @@ import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
     getSettingsVisibility,
+    getSingleViewport,
 } from '../../redux/slices/ui/uiSlice';
 import { SpeedDialAction } from '@mui/material';
 
 const OptionsFab = (props) => {
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
+    const singleViewport = useSelector(getSingleViewport);
 
     const [invert, setInvert] = useState(false);
     const handleInvert = () => {
@@ -22,17 +24,17 @@ const OptionsFab = (props) => {
         console.log('Invert: ' + invert);
 
         const viewportTop = props.cornerstone.getViewport(
-            this.state.imageViewportTop
+            props.imageViewportTop
         );
         viewportTop.invert = !viewportTop.invert;
-        props.cornerstone.setViewport(this.state.imageViewportTop, viewportTop);
-        if (!this.props.singleViewport) {
+        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
+        if (!singleViewport) {
             const viewportSide = props.cornerstone.getViewport(
-                this.state.imageViewportSide
+                props.imageViewportSide
             );
             viewportSide.invert = !viewportSide.invert;
             props.cornerstone.setViewport(
-                this.state.imageViewportSide,
+                props.imageViewportSide,
                 viewportSide
             );
         }
@@ -99,7 +101,9 @@ const OptionsFab = (props) => {
 };
 
 OptionsFab.propTypes = {
-    cornerstone: PropTypes.object,
+    cornerstone: PropTypes.object.isRequired,
+    imageViewportTop: PropTypes.object.isRequired,
+    imageViewportSide: PropTypes.object.isRequired,
 };
 
 export default OptionsFab;
