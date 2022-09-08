@@ -84,9 +84,9 @@ const OptionsFab = (props) => {
         <OptionsButtonWrapper
             ariaLabel={'Options Button Wrapper'}
             icon={<ScaleIcon color={'white'} width={'24px'} height={'24px'} />}
-            fabOpacity={fabOpacity}
-            show={show}
-            invert={invert}
+            $fabOpacity={fabOpacity}
+            $show={show}
+            $invert={invert}
             id={'Button Wrapper'}>
             {actions.map((action) => (
                 <SpeedDialAction

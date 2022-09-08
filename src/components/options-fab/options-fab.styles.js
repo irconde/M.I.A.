@@ -9,13 +9,13 @@ export const OptionsButtonWrapper = styled(SpeedDial)`
     position: absolute;
     right: 16rem;
     bottom: 5%;
-    display: ${(props) => (props.show ? 'flex' : 'none')};
+    display: ${(props) => (props.$show ? 'flex' : 'none')};
     justify-content: center;
     align-items: center;
 
-    opacity: ${(props) => (props.fabOpacity ? '100%' : '28%')};
-    animation: fadein ${(props) => (props.fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
-    pointer-events: ${(props) => (props.fabOpacity ? 'auto' : 'none')};
+    opacity: ${(props) => (props.$fabOpacity ? '100%' : '28%')};
+    animation: fadein ${(props) => (props.$fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
+    pointer-events: ${(props) => (props.$fabOpacity ? 'auto' : 'none')};
 
     -webkit-transition: all 0.3s ease-in;
     -moz-transition: all 0.3s ease-in;
@@ -28,7 +28,7 @@ export const OptionsButtonWrapper = styled(SpeedDial)`
             opacity: 0;
         }
         to {
-            opacity: ${(props) => (props.fabOpacity ? '1' : '0.28')};
+            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
         }
     }
 
