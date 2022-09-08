@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { OptionsButtonWrapper } from './options-fab.styles';
-import ScaleIcon from '../../icons/options-fab/scale-icon/scale.icon';
-import InvertIcon from '../../icons/options-fab/invert-icon/invert.icon';
-import ContrastIcon from '../../icons/options-fab/contrast-icon/contrast.icon';
-import BrightnessIcon from '../../icons/options-fab/brightness-icon/brightness.icon';
+import { ImageToolsButtonWrapper } from './image-tools-fab.styles';
+import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
+import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
+import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
+import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
 import { useSelector } from 'react-redux';
 import {
     getIsFabVisible,
@@ -13,7 +13,7 @@ import {
 } from '../../redux/slices/ui/uiSlice';
 import { SpeedDialAction } from '@mui/material';
 
-const OptionsFab = (props) => {
+const ImageToolsFab = (props) => {
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const singleViewport = useSelector(getSingleViewport);
@@ -81,7 +81,7 @@ const OptionsFab = (props) => {
     }
 
     return (
-        <OptionsButtonWrapper
+        <ImageToolsButtonWrapper
             ariaLabel={'Options Button Wrapper'}
             icon={<ScaleIcon color={'white'} width={'24px'} height={'24px'} />}
             $fabOpacity={fabOpacity}
@@ -96,14 +96,14 @@ const OptionsFab = (props) => {
                     onClick={action.action}
                 />
             ))}
-        </OptionsButtonWrapper>
+        </ImageToolsButtonWrapper>
     );
 };
 
-OptionsFab.propTypes = {
+ImageToolsFab.propTypes = {
     cornerstone: PropTypes.object.isRequired,
     imageViewportTop: PropTypes.object.isRequired,
     imageViewportSide: PropTypes.object.isRequired,
 };
 
-export default OptionsFab;
+export default ImageToolsFab;

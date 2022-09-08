@@ -4,7 +4,7 @@ import { SpeedDial } from '@mui/material';
 const noSelectGrey = '#313131';
 const selectedBlue = '#367eff';
 
-export const OptionsButtonWrapper = styled(SpeedDial)`
+export const ImageToolsButtonWrapper = styled(SpeedDial)`
     width: fit-content;
     position: absolute;
     right: 16rem;

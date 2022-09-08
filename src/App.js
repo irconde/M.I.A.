@@ -98,7 +98,7 @@ import {
 import fetch from 'cross-fetch';
 import { Alert, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
-import OptionsFab from './components/options-fab/options-fab';
+import ImageToolsFab from './components/image-tools-fab/image-tools-fab';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -3391,7 +3391,7 @@ class App extends Component {
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
                     />
-                    <OptionsFab
+                    <ImageToolsFab
                         anchorOrigin={{
                             vertical: 'bottom',
                             horizontal: 'right',
