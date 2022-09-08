@@ -3340,10 +3340,6 @@ class App extends Component {
                         {this.state.errorMessage}
                     </Alert>
                 </Snackbar>
-                <OptionsFab
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    cornerstone={cornerstone}
-                />
                 <div
                     id="viewerContainer"
                     style={{
@@ -3394,6 +3390,13 @@ class App extends Component {
                     <BoundPolyFAB
                         onBoundingSelect={this.onBoundingBoxSelected}
                         onPolygonSelect={this.onPolygonMaskSelected}
+                    />
+                    <OptionsFab
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        cornerstone={cornerstone}
                     />
                     {isElectron() ? (
                         <LazyImageMenu
