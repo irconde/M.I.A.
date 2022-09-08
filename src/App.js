@@ -98,6 +98,7 @@ import {
 import fetch from 'cross-fetch';
 import { Alert, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
+import OptionsFab from './components/options-fab/options-fab';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -3339,6 +3340,10 @@ class App extends Component {
                         {this.state.errorMessage}
                     </Alert>
                 </Snackbar>
+                <OptionsFab
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    cornerstone={cornerstone}
+                />
                 <div
                     id="viewerContainer"
                     style={{
