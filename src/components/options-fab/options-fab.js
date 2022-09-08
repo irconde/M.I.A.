@@ -1,6 +1,10 @@
 import React from 'react';
 import { OptionsButtonWrapper } from './options-fab.styles';
 import ScaleIcon from '../../icons/options-fab/scale-icon/scale.icon';
+import InvertIcon from '../../icons/options-fab/invert-icon/invert.icon';
+import ContrastIcon from '../../icons/options-fab/contrast-icon/contrast.icon';
+import BrightnessIcon from '../../icons/options-fab/brightness-icon/brightness.icon';
+import { SpeedDialAction } from '@mui/material';
 
 const OptionsFab = () => {
     const [open, setOpen] = React.useState(false);
@@ -16,25 +20,41 @@ const OptionsFab = () => {
     //     cornerstone.setViewport(this.state.imageViewportSide, viewportSide);
     // }
 
-    // const actions = [
-    //     { icon: <FileCopyIcon />, name: 'Copy' },
-    //     { icon: <SaveIcon />, name: 'Save' },
-    //     { icon: <PrintIcon />, name: 'Print' },
-    //     { icon: <ShareIcon />, name: 'Share' },
-    // ];
+    const actions = [
+        {
+            icon: <InvertIcon color={'white'} height={'24px'} width={'24px'} />,
+            name: 'Invert',
+        },
+        {
+            icon: (
+                <ContrastIcon color={'white'} height={'24px'} width={'24px'} />
+            ),
+            name: 'Contrast',
+        },
+        {
+            icon: (
+                <BrightnessIcon
+                    color={'white'}
+                    height={'24px'}
+                    width={'24px'}
+                />
+            ),
+            name: 'Brightness',
+        },
+    ];
 
     return (
         <OptionsButtonWrapper
             ariaLabel={'Options Button Wrapper'}
             icon={<ScaleIcon color={'white'} width={'24px'} height={'24px'} />}
             id={'Button Wrapper'}>
-            {/*{actions.map((action) => (*/}
-            {/*    <SpeedDialAction*/}
-            {/*        key={action.name}*/}
-            {/*        icon={action.icon}*/}
-            {/*        tooltipTitle={action.name}*/}
-            {/*    />*/}
-            {/*))}*/}
+            {actions.map((action) => (
+                <SpeedDialAction
+                    key={action.name}
+                    icon={action.icon}
+                    tooltipTitle={action.name}
+                />
+            ))}
         </OptionsButtonWrapper>
     );
 };
