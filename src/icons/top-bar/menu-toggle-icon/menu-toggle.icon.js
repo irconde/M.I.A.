@@ -9,10 +9,7 @@ import {
 import {
     getDisplaySummarizedDetections,
     getHasFileOutput,
-    getLocalFileOutput,
-    getRemoteOrLocal,
 } from '../../../redux/slices/settings/settingsSlice';
-import isElectron from 'is-electron';
 
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
@@ -21,15 +18,11 @@ const MenuToggleIcon = (props) => {
     const displaySummarizedDetections = useSelector(
         getDisplaySummarizedDetections
     );
-    const remoteOrLocal = useSelector(getRemoteOrLocal);
-    const localFileOutput = useSelector(getLocalFileOutput);
-    const desktopMode =
-        isElectron() && !remoteOrLocal && localFileOutput !== '';
     const toggleClickHandler = () => {
         dispatch(
             toggleCollapsedSideMenu({
                 cornerstone: props.cornerstone,
-                desktopMode,
+                desktopMode: true,
             })
         );
     };

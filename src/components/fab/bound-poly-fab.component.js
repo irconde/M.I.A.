@@ -8,12 +8,7 @@ import {
     getCornerstoneMode,
     getIsFabVisible,
 } from '../../redux/slices/ui/uiSlice';
-import {
-    getDeviceType,
-    getLocalFileOutput,
-    getRemoteOrLocal,
-} from '../../redux/slices/settings/settingsSlice';
-import isElectron from 'is-electron';
+import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     FABContainer,
@@ -44,10 +39,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const lazyMenuCollapsed = useSelector(getCollapsedLazyMenu);
-    const localFileOutput = useSelector(getLocalFileOutput);
-    const remoteOrLocal = useSelector(getRemoteOrLocal);
-    const desktopMode =
-        isElectron() && !remoteOrLocal && localFileOutput !== '';
+
     const deviceType = useSelector(getDeviceType);
     const handleClick = (e, cb) => {
         if (
@@ -60,18 +52,14 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
     // Calculating screen size and setting horizontal value accordingly.
     //let leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
     let leftPX;
-    if (desktopMode) {
-        if (lazyMenuCollapsed && sideMenuCollapsed) {
-            leftPX = 0;
-        } else if (!lazyMenuCollapsed && sideMenuCollapsed) {
-            leftPX = `${constants.sideMenuWidth}px`;
-        } else if (lazyMenuCollapsed && !sideMenuCollapsed) {
-            leftPX = `-${constants.sideMenuWidth}px`;
-        } else {
-            leftPX = 0;
-        }
+    if (lazyMenuCollapsed && sideMenuCollapsed) {
+        leftPX = 0;
+    } else if (!lazyMenuCollapsed && sideMenuCollapsed) {
+        leftPX = `${constants.sideMenuWidth}px`;
+    } else if (lazyMenuCollapsed && !sideMenuCollapsed) {
+        leftPX = `-${constants.sideMenuWidth}px`;
     } else {
-        leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
+        leftPX = 0;
     }
     let fabOpacity;
     let show;

@@ -49,7 +49,6 @@ module.exports.defaultSettings = {
     annotationsFormat: 'DICOS TDR',
     localFileOutput: '',
     fileSuffix: '_img',
-    remoteOrLocal: true,
     deviceType: '',
     displaySummarizedDetections: false,
 };

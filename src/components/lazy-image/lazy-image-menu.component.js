@@ -3,10 +3,6 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    getLocalFileOutput,
-    getRemoteOrLocal,
-} from '../../redux/slices/settings/settingsSlice';
-import {
     getCollapsedLazyMenu,
     getLocalFileOpen,
     setGeneratingThumbnails,
@@ -41,10 +37,6 @@ function LazyImageMenuComponent(props) {
     });
     const enableMenu = useSelector(getLocalFileOpen);
     const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
-    const fileOutputPath = useSelector(getLocalFileOutput);
-    const remoteOrLocal = useSelector(getRemoteOrLocal);
-    const desktopMode =
-        isElectron() && fileOutputPath !== '' && remoteOrLocal === false;
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
@@ -76,7 +68,7 @@ function LazyImageMenuComponent(props) {
     }
 
     if (enableMenu) {
-        if (desktopMode && collapsedLazyMenu) {
+        if (collapsedLazyMenu) {
             return (
                 <LazyImageMenuContainer
                     onScroll={handleMenuContainerScroll}
@@ -87,7 +79,7 @@ function LazyImageMenuComponent(props) {
                     />
                 </LazyImageMenuContainer>
             );
-        } else if (desktopMode && !collapsedLazyMenu) {
+        } else if (!collapsedLazyMenu) {
             return (
                 <LazyImageMenuContainer
                     onScroll={handleMenuContainerScroll}

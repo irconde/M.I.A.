@@ -29,7 +29,6 @@ const defaultSettings = {
     annotationsFormat: SETTINGS.ANNOTATIONS.TDR,
     localFileOutput: '',
     fileSuffix: '_img',
-    remoteOrLocal: true,
     firstDisplaySettings: true,
     deviceType: '',
     hasFileOutput: false,
@@ -186,13 +185,6 @@ export const getDisplaySummarizedDetections = (state) =>
  * @returns {Object<Settings>}
  */
 export const getSettings = (state) => state.settings.settings;
-/**
- * Indicates whether the connection is remote (True) or local (False)
- * @param {Object} state
- * @returns {boolean}
- */
-export const getRemoteOrLocal = (state) =>
-    state.settings.settings.remoteOrLocal;
 /**
  * Indicates whether file output is clear or not
  * @param {Object} state

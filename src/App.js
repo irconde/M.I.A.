@@ -12,7 +12,6 @@ import Utils from './utils/general/Utils.js';
 import Dicos from './utils/detections/Dicos.js';
 import TapDetector from './utils/general/TapDetector';
 import SideMenuComponent from './components/side-menu/side-menu.component';
-import NextButtonComponent from './components/side-menu/buttons/next-button.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 import TopBarComponent from './components/top-bar/top-bar.component';
 import JSZip from 'jszip';
@@ -86,7 +85,7 @@ import {
 import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
 import EditLabel from './components/edit-label/edit-label.component';
 import { buildCocoDataZip } from './utils/detections/Coco';
-import { fileOpen, fileSave } from 'browser-fs-access';
+import { fileOpen } from 'browser-fs-access';
 import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
 import isElectron from 'is-electron';
@@ -168,9 +167,6 @@ class App extends Component {
             this.getFileFromLocalDirectory.bind(this);
         this.getSpecificFileFromLocalDirectory =
             this.getSpecificFileFromLocalDirectory.bind(this);
-        this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
-        this.sendImageToCommandServer =
-            this.sendImageToCommandServer.bind(this);
         this.sendImageToLocalDirectory =
             this.sendImageToLocalDirectory.bind(this);
         this.nextImageClick = this.nextImageClick.bind(this);
@@ -243,19 +239,6 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
-        /*if (
-            isElectron() &&
-            !this.props.remoteOrLocal &&
-            !nextProps.remoteOrLocal &&
-            this.props.localFileOutput !== '' &&
-            nextProps.localFileOutput === ''
-        ) {
-            this.props.setCollapsedSideMenu({
-                cornerstone: cornerstone,
-                desktopMode: false,
-                collapsedSideMenu: false,
-            });
-        }*/
         if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
@@ -263,23 +246,11 @@ class App extends Component {
             nextProps.currentProcessingFile !== null &&
             this.props.currentProcessingFile === null
         ) {
-            if (
-                isElectron() &&
-                nextProps.remoteOrLocal &&
-                nextProps.localFileOutput !== ''
-            ) {
-                this.props.setCollapsedSideMenu({
-                    cornerstone: cornerstone,
-                    desktopMode: true,
-                    collapsedSideMenu: true,
-                });
-            } else {
-                this.props.setCollapsedSideMenu({
-                    cornerstone: cornerstone,
-                    desktopMode: false,
-                    collapsedSideMenu: true,
-                });
-            }
+            this.props.setCollapsedSideMenu({
+                cornerstone: cornerstone,
+                desktopMode: true,
+                collapsedSideMenu: true,
+            });
             return true;
         }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
@@ -290,7 +261,6 @@ class App extends Component {
             this.props.currentProcessingFile === null &&
             nextProps.currentProcessingFile === null &&
             !fetchingFromLocalDirectory &&
-            !nextProps.remoteOrLocal &&
             this.state.localWorkspaceError !== 'end-of-queue'
         ) {
             fetchingFromLocalDirectory = true;
@@ -498,34 +468,6 @@ class App extends Component {
     }
 
     /**
-     * Houses the events for connectivity with the command server.
-     */
-    async monitorConnectionEvent() {
-        if (this.state.commandServer !== null) {
-            this.state.commandServer.on('disconnect', () => {
-                this.props.setConnected(false);
-            });
-            this.state.commandServer.on('connect', () => {
-                this.props.setConnected(true);
-            });
-            try {
-                this.state.commandServer.on('connect_error', (err) => {
-                    if (
-                        err.message === 'xhr poll error' ||
-                        err.message === 'server error'
-                    ) {
-                        this.props.setConnected(false);
-                        this.state.commandServer.disconnect();
-                    }
-                });
-            } catch (error) {
-                this.props.setConnected(false);
-                this.state.commandServer.disconnect();
-            }
-        }
-    }
-
-    /**
      * Binds a click event listener to the two cornerstonejs viewports
      */
     startListeningClickEvents() {
@@ -624,25 +566,14 @@ class App extends Component {
      */
     // eslint-disable-next-line no-unused-vars
     resizeListener(e) {
-        if (
-            isElectron() &&
-            !this.props.remoteOrLocal &&
-            this.props.localFileOutput !== ''
-        ) {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu,
-                this.props.collapsedLazyMenu,
-                true
-            );
-        } else {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu
-            );
-        }
+        // TODO: Investigate device type below
+        Utils.calculateViewportDimensions(
+            cornerstone,
+            this.props.singleViewport,
+            this.props.collapsedSideMenu,
+            this.props.collapsedLazyMenu,
+            true
+        );
 
         if (this.props.selectDetection) {
             this.appUpdateImage();
@@ -952,41 +883,6 @@ class App extends Component {
     }
 
     /**
-     * Sends a post request to the file server to save the file
-     *
-     * @param {Blob} file - File sent to the server
-     */
-    async sendImageToCommandServer(file) {
-        this.props.setUpload(true);
-        return new Promise((resolve, reject) => {
-            fetch(`${this.props.apiPrefix}/files/fileFromClient`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    file: file,
-                    fileFormat: this.props.fileFormat,
-                    fileSuffix: this.props.fileSuffix,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then((response) => {
-                    response
-                        .json()
-                        .then((jsonParsed) => {
-                            if (jsonParsed.confirm === 'file-received') {
-                                resolve(jsonParsed.confirm);
-                            } else {
-                                reject(jsonParsed.confirm);
-                            }
-                        })
-                        .catch((error) => reject(error));
-                })
-                .catch((error) => reject(error));
-        });
-    }
-
-    /**
      * Sends the needed information to save the current file in the selected this.props.localFileOutput path via
      * Electron channels.
      *
@@ -1112,128 +1008,26 @@ class App extends Component {
                 this.props.currentFileFormat
             )
                 .then((cocoZip) => {
-                    if (this.props.remoteOrLocal === true) {
-                        cocoZip
-                            .generateAsync({ type: 'base64' })
-                            .then((file) => {
-                                this.sendImageToCommandServer(file)
-                                    .then(
-                                        // eslint-disable-next-line no-unused-vars
-                                        (res) => {
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.props.resetDetections();
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.setUpload(false);
-                                            this.getFileFromCommandServer(true);
-                                        }
-                                    )
-                                    .catch((error) => {
-                                        this.handleNextImageError(error);
+                    cocoZip
+                        .generateAsync({ type: 'base64' })
+                        .then((file) => {
+                            this.sendImageToLocalDirectory(file)
+                                .then(() => {
+                                    this.setState({
+                                        imageData: [],
                                     });
-                            })
-                            .catch((error) => {
-                                this.handleNextImageError(error);
-                            });
-                    } else {
-                        if (isElectron() && this.props.localFileOutput !== '') {
-                            cocoZip
-                                .generateAsync({ type: 'base64' })
-                                .then((file) => {
-                                    this.sendImageToLocalDirectory(file)
-                                        .then(() => {
-                                            this.setState({
-                                                imageData: [],
-                                            });
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setReceiveTime(null);
-                                        })
-                                        .catch((error) => {
-                                            this.handleNextImageError(error);
-                                        });
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
                                 })
                                 .catch((error) => {
                                     this.handleNextImageError(error);
                                 });
-                        } else if (isElectron()) {
-                            cocoZip
-                                .generateAsync({ type: 'base64' })
-                                .then((file) => {
-                                    ipcRenderer
-                                        .invoke(
-                                            constants.Channels.saveIndFile,
-                                            file
-                                        )
-                                        .then((dialogCanceled) => {
-                                            // if save file dialog is canceled then don't do anything
-                                            if (dialogCanceled) {
-                                                return;
-                                            }
-                                            this.setState({
-                                                imageData: [],
-                                            });
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setLocalFileOpen(false);
-                                            this.props.setReceiveTime(null);
-                                            this.onNoImageLeft();
-                                        })
-                                        .catch((error) => {
-                                            // handle the error and show snackbar
-                                            this.handleNextImageError(error);
-                                        });
-                                })
-                                .catch((error) => {
-                                    this.handleNextImageError(error);
-                                });
-                        } else {
-                            cocoZip
-                                .generateAsync({ type: 'blob' })
-                                .then((file) => {
-                                    fileSave(file, {
-                                        fileName: `1${this.props.fileSuffix}.${
-                                            this.props.fileFormat ===
-                                            constants.SETTINGS.OUTPUT_FORMATS
-                                                .ORA
-                                                ? 'ora'
-                                                : 'zip'
-                                        }`,
-                                    })
-                                        .then(() => {
-                                            this.setState({
-                                                imageData: [],
-                                            });
-
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setReceiveTime(null);
-                                            this.props.setLocalFileOpen(false);
-                                            this.onNoImageLeft();
-                                        })
-                                        .catch((error) => {
-                                            // don't show error message if the save dialog is closed
-                                            const showSnackbar =
-                                                error.message !==
-                                                'The user aborted a request.';
-                                            this.handleNextImageError(
-                                                error,
-                                                showSnackbar
-                                            );
-                                        });
-                                });
-                        }
-                    }
+                        })
+                        .catch((error) => {
+                            this.handleNextImageError(error);
+                        });
                 })
                 .catch((error) => {
                     this.handleNextImageError(error);
@@ -1386,138 +1180,26 @@ class App extends Component {
                             { type: 'application/xml ' }
                         )
                     );
-                    if (this.props.remoteOrLocal === true) {
-                        newOra
-                            .generateAsync({ type: 'base64' })
-                            .then((file) => {
-                                this.props.setCurrentProcessingFile(null);
-                                this.setState(
-                                    {
+                    newOra
+                        .generateAsync({ type: 'base64' })
+                        .then((file) => {
+                            this.sendImageToLocalDirectory(file)
+                                .then(() => {
+                                    this.setState({
                                         imageData: [],
-                                    },
-                                    () => this.props.resetDetections()
-                                );
-                                this.sendImageToCommandServer(file)
-                                    .then(
-                                        // eslint-disable-next-line no-unused-vars
-                                        (res) => {
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.props.resetDetections();
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.setUpload(false);
-                                            this.getFileFromCommandServer(true);
-                                        }
-                                    )
-                                    .catch((error) => {
-                                        this.handleNextImageError(error);
                                     });
-                            })
-                            .catch((error) => {
-                                this.handleNextImageError(error);
-                            });
-                    } else {
-                        if (isElectron() && this.props.localFileOutput !== '') {
-                            newOra
-                                .generateAsync({ type: 'base64' })
-                                .then((file) => {
-                                    this.sendImageToLocalDirectory(file)
-                                        .then(() => {
-                                            this.setState({
-                                                imageData: [],
-                                            });
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setReceiveTime(null);
-                                        })
-                                        .catch((error) => {
-                                            this.handleNextImageError(error);
-                                        });
+                                    this.props.setCurrentProcessingFile(null);
+                                    this.resetSelectedDetectionBoxes(e);
+                                    this.props.resetDetections();
+                                    this.props.setReceiveTime(null);
                                 })
                                 .catch((error) => {
                                     this.handleNextImageError(error);
                                 });
-                        } else if (isElectron()) {
-                            newOra
-                                .generateAsync({ type: 'base64' })
-                                .then((file) => {
-                                    ipcRenderer
-                                        .invoke(
-                                            constants.Channels.saveIndFile,
-                                            file
-                                        )
-                                        .then((dialogCanceled) => {
-                                            // if save file dialog is canceled then don't do anything
-                                            if (dialogCanceled) {
-                                                return;
-                                            }
-                                            this.setState({
-                                                imageData: [],
-                                            });
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setLocalFileOpen(false);
-                                            this.props.setReceiveTime(null);
-                                            this.onNoImageLeft();
-                                        })
-                                        .catch((error) => {
-                                            // handle the error and show snackbar
-                                            this.handleNextImageError(error);
-                                        });
-                                })
-                                .catch((error) => {
-                                    this.handleNextImageError(error);
-                                });
-                        } else {
-                            newOra
-                                .generateAsync({ type: 'blob' })
-                                .then((file) => {
-                                    fileSave(file, {
-                                        fileName: `1${this.props.fileSuffix}.${
-                                            this.props.fileFormat ===
-                                            constants.SETTINGS.OUTPUT_FORMATS
-                                                .ORA
-                                                ? 'ora'
-                                                : 'zip'
-                                        }`,
-                                    })
-                                        .then(() => {
-                                            this.setState({
-                                                imageData: [],
-                                            });
-
-                                            this.props.setCurrentProcessingFile(
-                                                null
-                                            );
-                                            this.resetSelectedDetectionBoxes(e);
-                                            this.props.resetDetections();
-                                            this.props.setLocalFileOpen(false);
-                                            this.props.setReceiveTime(null);
-                                            this.onNoImageLeft();
-                                        })
-                                        .catch((error) => {
-                                            // don't show error message if the save dialog is closed
-                                            const showSnackbar =
-                                                error.message !==
-                                                'The user aborted a request.';
-                                            this.handleNextImageError(
-                                                error,
-                                                showSnackbar
-                                            );
-                                        });
-                                })
-                                .catch((error) => {
-                                    this.handleNextImageError(error);
-                                });
-                        }
-                    }
+                        })
+                        .catch((error) => {
+                            this.handleNextImageError(error);
+                        });
                 })
                 .catch((error) => {
                     this.handleNextImageError(error);
@@ -1609,25 +1291,13 @@ class App extends Component {
                 );
             });
         }
-        if (
-            isElectron() &&
-            !this.props.remoteOrLocal &&
-            this.props.localFileOutput !== ''
-        ) {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu,
-                this.props.collapsedLazyMenu,
-                true
-            );
-        } else {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu
-            );
-        }
+        Utils.calculateViewportDimensions(
+            cornerstone,
+            this.props.singleViewport,
+            this.props.collapsedSideMenu,
+            this.props.collapsedLazyMenu,
+            true
+        );
         this.recalculateZoomLevel();
     }
 
@@ -1701,25 +1371,14 @@ class App extends Component {
                 );
             });
         }
-        if (
-            isElectron() &&
-            !this.props.remoteOrLocal &&
-            this.props.localFileOutput !== ''
-        ) {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu,
-                this.props.collapsedLazyMenu,
-                true
-            );
-        } else {
-            Utils.calculateViewportDimensions(
-                cornerstone,
-                this.props.singleViewport,
-                this.props.collapsedSideMenu
-            );
-        }
+
+        Utils.calculateViewportDimensions(
+            cornerstone,
+            this.props.singleViewport,
+            this.props.collapsedSideMenu,
+            this.props.collapsedLazyMenu,
+            true
+        );
         this.recalculateZoomLevel();
     }
 
@@ -3322,19 +2981,10 @@ class App extends Component {
                                 this.renderDetectionContextMenu
                             }
                         />
-                        {this.props.remoteOrLocal === true ||
-                        (!this.props.remoteOrLocal &&
-                            this.props.hasFileOutput) ? (
-                            <NextButtonComponent
-                                collapseBtn={true}
-                                nextImageClick={this.nextImageClick}
-                            />
-                        ) : (
-                            <SaveButtonComponent
-                                collapseBtn={true}
-                                nextImageClick={this.nextImageClick}
-                            />
-                        )}
+                        <SaveButtonComponent
+                            collapseBtn={true}
+                            nextImageClick={this.nextImageClick}
+                        />
                         <div id="algorithm-outputs"></div>
                         <DetectionContextMenu
                             setSelectedOption={this.selectEditionMode}
@@ -3345,14 +2995,12 @@ class App extends Component {
                             onBoundingSelect={this.onBoundingBoxSelected}
                             onPolygonSelect={this.onPolygonMaskSelected}
                         />
-                        {isElectron() ? (
-                            <LazyImageMenu
-                                getSpecificFileFromLocalDirectory={
-                                    this.getSpecificFileFromLocalDirectory
-                                }
-                                thumbnails={this.state.thumbnails}
-                            />
-                        ) : null}
+                        <LazyImageMenu
+                            getSpecificFileFromLocalDirectory={
+                                this.getSpecificFileFromLocalDirectory
+                            }
+                            thumbnails={this.state.thumbnails}
+                        />
                         <NoFileSignComponent />
                         <MetaDataComponent />
                     </div>
@@ -3391,15 +3039,6 @@ const mapStateToProps = (state) => {
         // Settings
         displaySummarizedDetections:
             settings.settings.displaySummarizedDetections,
-        remoteIp: settings.settings.remoteIp,
-        remotePort: settings.settings.remotePort,
-        autoConnect: settings.settings.autoConnect,
-        fileFormat: settings.settings.fileFormat,
-        fileSuffix: settings.settings.fileSuffix,
-        firstDisplaySettings: settings.settings.firstDisplaySettings,
-        annotationsFormat: settings.settings.annotationsFormat,
-        remoteOrLocal: settings.settings.remoteOrLocal,
-        hasFileOutput: settings.settings.hasFileOutput,
         deviceType: settings.settings.deviceType,
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import NextButtonComponent from './buttons/next-button.component';
 import { useSelector } from 'react-redux';
 import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
 import SideMenuAlgorithmComponent from './algorithm-detection/side-menu-algorithm.component';
@@ -8,10 +7,6 @@ import {
     getCollapsedSideMenu,
     getReceivedTime,
 } from '../../redux/slices/ui/uiSlice';
-import {
-    getHasFileOutput,
-    getRemoteOrLocal,
-} from '../../redux/slices/settings/settingsSlice';
 import SaveButtonComponent from './buttons/save-button.component';
 import {
     SideMenuContainer,
@@ -34,8 +29,6 @@ const SideMenuComponent = ({
     const enableMenu = useSelector(getReceivedTime);
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
-    const remoteOrLocal = useSelector(getRemoteOrLocal);
-    const hasFileOutput = useSelector(getHasFileOutput);
 
     // Checking to see if the app has a file received via local or remote using the received time from the uiSlice
     if (enableMenu === null) {
@@ -64,11 +57,8 @@ const SideMenuComponent = ({
                               })
                             : null}
                     </SideMenuList>
-                    {remoteOrLocal || hasFileOutput ? (
-                        <NextButtonComponent nextImageClick={nextImageClick} />
-                    ) : (
-                        <SaveButtonComponent nextImageClick={nextImageClick} />
-                    )}
+
+                    <SaveButtonComponent nextImageClick={nextImageClick} />
                 </SideMenuListWrapper>
             </SideMenuContainer>
         );

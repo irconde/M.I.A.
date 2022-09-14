@@ -5,14 +5,10 @@ import FileQueueIcon from '../../icons/top-bar/file-queue-icon/file-queue.icon';
 import CogWheelIcon from '../../icons/top-bar/settings-cog-icon/settings-cog.icon';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import OpenIcon from '../../icons/top-bar/open-icon/open.icon';
-import ConnectionStatusIcon from '../../icons/top-bar/connection-status-icons/connection-status.icon';
-import TrafficIcon from '../../icons/top-bar/traffic-icons/traffic.icon';
 import { getTopBarInfo } from '../../redux/slices/server/serverSlice';
 import {
-    getFirstDisplaySettings,
     getHasFileOutput,
     getLocalFileOutput,
-    getRemoteOrLocal,
 } from '../../redux/slices/settings/settingsSlice';
 import {
     ConnectionStatusIconsContainer,
@@ -38,55 +34,17 @@ import Tooltip from '@mui/material/Tooltip';
  */
 const TopBarComponent = (props) => {
     const reduxInfo = useSelector(getTopBarInfo);
-    const remoteOrLocal = useSelector(getRemoteOrLocal);
     const hasFileOutput = useSelector(getHasFileOutput);
     const localFileOutput = useSelector(getLocalFileOutput);
-    const firstDisplaySettings = useSelector(getFirstDisplaySettings);
 
-    const {
-        processingFile,
-        connectedServer,
-        numberOfFiles,
-        isDownload,
-        isUpload,
-        isConnected,
-    } = reduxInfo;
-
-    const getTrafficIconProps = (isDownload, isUpload) => {
-        if (isDownload && isUpload) {
-            return {
-                trafficIconTitle: 'Downloading and Uploading',
-                trafficIconType: 'downloadAndUpload',
-            };
-        } else if (!(isDownload && isUpload)) {
-            return {
-                trafficIconTitle: 'No Transmission',
-                trafficIconType: 'noTransmission',
-            };
-        } else if (isDownload) {
-            return {
-                trafficIconTitle: 'Downloading',
-                trafficIconType: 'downloading',
-            };
-        } else if (isUpload) {
-            return {
-                trafficIconTitle: 'Uploading',
-                trafficIconType: 'uploading',
-            };
-        }
-    };
-
-    const { trafficIconTitle, trafficIconType } = getTrafficIconProps(
-        isDownload,
-        isUpload
-    );
+    const { processingFile, connectedServer, numberOfFiles, isConnected } =
+        reduxInfo;
 
     // TODO: Future refactoring, clean up the ternary logic
     return processingFile || isConnected ? (
         <TopBarContainer>
             <TitleLabelContainer>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
+                {hasFileOutput === true ? (
                     <FragmentWrapper>
                         <InfoDivider>&#8427;</InfoDivider>
                         &nbsp;&nbsp;
@@ -118,8 +76,7 @@ const TopBarComponent = (props) => {
                 <span>{processingFile} &nbsp;</span>
             </TitleLabelContainer>
             <ConnectionStatusIconsContainer>
-                {remoteOrLocal === true ||
-                (remoteOrLocal === false && hasFileOutput === true) ? (
+                {hasFileOutput === true ? (
                     <FragmentWrapper>
                         <Tooltip title={'Number of Files'}>
                             <TopBarIconWrapper>
@@ -131,35 +88,6 @@ const TopBarComponent = (props) => {
                                 />
                             </TopBarIconWrapper>
                         </Tooltip>
-                        {remoteOrLocal === true ? (
-                            <FragmentWrapper>
-                                <Tooltip title={trafficIconTitle}>
-                                    <TopBarIconWrapper>
-                                        <TrafficIcon
-                                            color={'#ffffff'}
-                                            width={'32px'}
-                                            height={'32px'}
-                                            type={trafficIconType}
-                                        />
-                                    </TopBarIconWrapper>
-                                </Tooltip>
-                                <Tooltip
-                                    title={
-                                        isConnected
-                                            ? 'Connected'
-                                            : 'Not Connected'
-                                    }>
-                                    <TopBarIconWrapper>
-                                        <ConnectionStatusIcon
-                                            color={'#ffffff'}
-                                            width={'32px'}
-                                            height={'32px'}
-                                            isConnected={isConnected}
-                                        />
-                                    </TopBarIconWrapper>
-                                </Tooltip>
-                            </FragmentWrapper>
-                        ) : null}
                     </FragmentWrapper>
                 ) : null}
                 <VerticalDivider />
@@ -185,9 +113,7 @@ const TopBarComponent = (props) => {
     ) : (
         <TopBarContainer>
             <TitleLabelContainer>
-                {!remoteOrLocal &&
-                localFileOutput === '' &&
-                !firstDisplaySettings ? (
+                {localFileOutput === '' ? (
                     <OpenFileContainer onClick={() => props.getFileFromLocal()}>
                         <Tooltip title={'Open File'}>
                             <OpenIconWrapper>
