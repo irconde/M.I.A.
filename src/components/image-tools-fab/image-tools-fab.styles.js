@@ -1,61 +1,26 @@
 import styled from 'styled-components';
-import { Fab, SpeedDial } from '@mui/material';
-import { NEXT_BUTTON_FAB_MARGIN } from '../../utils/enums/Constants';
+import { Fab } from '@mui/material';
+import {
+    NEXT_BUTTON_FAB_MARGIN,
+    sideMenuWidth,
+} from '../../utils/enums/Constants';
 
 const noSelectGrey = '#313131';
 const selectedBlue = '#367eff';
 
-export const ImageToolsButtonWrapper = styled(SpeedDial)`
-    width: fit-content;
-    position: absolute;
-    right: 16rem;
-    bottom: 5%;
-    display: ${(props) => (props.$show ? 'flex' : 'none')};
-    justify-content: center;
-    align-items: center;
-
-    opacity: ${(props) => (props.$fabOpacity ? '100%' : '28%')};
-    animation: fadein ${(props) => (props.$fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
-    pointer-events: ${(props) => (props.$fabOpacity ? 'auto' : 'none')};
-
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
-    transition: all 0.3s ease-in;
-
-    @keyframes fadein {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
-        }
+// Determine the right position css property based on whether side menu is collapsed.
+const getRightPos = ({ $isSideMenuCollapsed }) => {
+    let right = NEXT_BUTTON_FAB_MARGIN;
+    if (!$isSideMenuCollapsed) {
+        right += sideMenuWidth;
     }
-
-    &.MuiSpeedDial-root .MuiFab-root {
-        background-color: ${noSelectGrey};
-        border: 1px solid #414141;
-
-        box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
-
-        &:hover {
-            cursor: pointer;
-        }
-
-        &&.MuiSpeedDialAction-fab {
-            background-color: ${(props) =>
-                props.invert ? selectedBlue : noSelectGrey};
-        }
-    }
-`;
-
-const getRightPos = (props) => {};
+    return right;
+};
 
 export const ImageToolsWrapper = styled.div`
     width: fit-content;
     position: absolute;
-    right: ${NEXT_BUTTON_FAB_MARGIN}px;
+    right: ${getRightPos}px;
     bottom: ${({ $isSideMenuCollapsed }) =>
         $isSideMenuCollapsed
             ? 2.35 * NEXT_BUTTON_FAB_MARGIN
@@ -65,14 +30,8 @@ export const ImageToolsWrapper = styled.div`
     align-items: center;
     flex-direction: column-reverse;
 
-    opacity: ${(props) => (props.fabOpacity ? '100%' : '28%')};
-    animation: fadein ${(props) => (props.fabOpacity ? '2s' : '0.75s')}; /* fade component in so cornerstone can load */
-    pointer-events: ${(props) => (props.fabOpacity ? 'auto' : 'none')};
-
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
+    z-index: 1;
+    pointer-events: ${(props) => (props.fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
 
     @keyframes fadein {

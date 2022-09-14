@@ -17,7 +17,8 @@ export const CollapsedButtonContainer = styled.div`
     display: flex;
     justify-content: center;
 
-    opacity: ${(props) => (props.enabled ? '100%' : '38%')};
+    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
+    pointer-events: ${(props) => props.$isFaded && 'none'};
 
     img {
         height: 2em;
@@ -49,9 +50,9 @@ export const SideMenuButtonContainer = styled.div`
     font-size: 12pt;
     height: 75px;
     gap: 0.3rem;
-    cursor: ${(props) => (props.enabled ? 'pointer' : 'normal')};
+    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
 
-    opacity: ${(props) => (props.enabled ? '100%' : '38%')};
+    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
 
     p {
         flex: 1;

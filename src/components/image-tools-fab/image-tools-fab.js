@@ -11,6 +11,7 @@ import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
+    getCornerstoneMode,
     getIsFabVisible,
     getIsImageInverted,
     getIsImageToolsOpen,
@@ -20,12 +21,14 @@ import {
     toggleImageToolsOpen,
 } from '../../redux/slices/ui/uiSlice';
 import { Tooltip } from '@mui/material';
+import * as constants from '../../utils/enums/Constants';
 
 const ImageToolsFab = (props) => {
     const isOpen = useSelector(getIsImageToolsOpen);
     const isSideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
+    const cornerstoneMode = useSelector(getCornerstoneMode);
     const singleViewport = useSelector(getSingleViewport);
     const isInverted = useSelector(getIsImageInverted);
     const dispatch = useDispatch();
@@ -54,7 +57,11 @@ const ImageToolsFab = (props) => {
      * @returns {{fabOpacity: boolean, show: boolean}}
      */
     const getFABInfo = () => {
-        if (settingsVisibility) {
+        if (
+            cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
+            cornerstoneMode === constants.cornerstoneMode.EDITION ||
+            settingsVisibility
+        ) {
             return { fabOpacity: false, show: true };
         } else {
             return { fabOpacity: isVisible, show: isVisible };
@@ -63,7 +70,6 @@ const ImageToolsFab = (props) => {
 
     return (
         <ImageToolsWrapper
-            id={'fab wrapper'}
             {...getFABInfo()}
             $isSideMenuCollapsed={isSideMenuCollapsed}
             onClick={() => dispatch(toggleImageToolsOpen())}>
@@ -73,12 +79,9 @@ const ImageToolsFab = (props) => {
                 </ImageToolsButton>
             </Tooltip>
 
-            <ToolsWrapper id={'Tools Wrapper'} $show={isOpen}>
+            <ToolsWrapper $show={isOpen}>
                 <Tooltip title={'Invert'} placement={'right'}>
-                    <InvertButton
-                        id={'Invert Button'}
-                        $invert={isInverted}
-                        onClick={handleInvert}>
+                    <InvertButton $invert={isInverted} onClick={handleInvert}>
                         <InvertIcon
                             width={'24px'}
                             height={'24px'}
