@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
     ImageToolsButton,
@@ -11,9 +11,11 @@ import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getIsFabVisible,
+    getIsImageInverted,
     getIsImageToolsOpen,
     getSettingsVisibility,
     getSingleViewport,
+    toggleImageInverted,
     toggleImageToolsOpen,
 } from '../../redux/slices/ui/uiSlice';
 import { Tooltip } from '@mui/material';
@@ -24,9 +26,8 @@ const ImageToolsFab = (props) => {
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const singleViewport = useSelector(getSingleViewport);
-    const [invert, setInvert] = useState(false);
+    const isInverted = useSelector(getIsImageInverted);
     const handleInvert = () => {
-        setInvert(!invert);
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -42,6 +43,7 @@ const ImageToolsFab = (props) => {
                 viewportSide
             );
         }
+        dispatch(toggleImageInverted());
     };
 
     /**
@@ -72,8 +74,7 @@ const ImageToolsFab = (props) => {
                 <Tooltip title={'Invert'} placement={'right'}>
                     <InvertButton
                         id={'Invert Button'}
-                        $invert={invert}
-                        className={invert ? 'blue' : 'grey'}
+                        $invert={isInverted}
                         onClick={handleInvert}>
                         <InvertIcon
                             width={'24px'}

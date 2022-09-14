@@ -49,7 +49,9 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     if (collapseBtn)
         return (
             <Tooltip title="Go to next image">
-                <CollapsedButtonContainer isCollapsed={isCollapsed}>
+                <CollapsedButtonContainer
+                    enabled={enableNextButton}
+                    isCollapsed={isCollapsed}>
                     <Fab
                         onClick={handleClick}
                         disabled={!enableNextButton}

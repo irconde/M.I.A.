@@ -102,22 +102,16 @@ export const ToolsWrapper = styled.div`
 
 export const InvertButton = styled(Fab)`
     &.MuiButtonBase-root {
-        background-color: ${(props) =>
-            props.$invert ? selectedBlue : noSelectGrey};
+        background-color: ${({ $invert }) =>
+            $invert ? selectedBlue : noSelectGrey};
         margin-bottom: 0.5rem;
         border: 1px solid #414141;
         box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
-
-            &.blue {
-                background-color: #6199fd;
-            }
-
-            &.grey {
-                background-color: #5e5e5e;
-            }
+            background-color: ${({ $invert }) =>
+                $invert ? '#6199fd' : '#5e5e5e'};
         }
     }
 `;

@@ -513,7 +513,10 @@ const uiSlice = createSlice({
          */
         toggleImageToolsOpen: (state) => {
             state.isImageToolsOpen = !state.isImageToolsOpen;
-            console.log('Called toggleImageToolsOpen');
+        },
+
+        toggleImageInverted: (state) => {
+            state.isImageInverted = !state.isImageInverted;
         },
     },
 });
@@ -539,6 +542,13 @@ export const getIsFabVisible = (state) => state.ui.isFABVisible;
  * @returns {boolean} - True when Image Tools FAB is open; False otherwise
  */
 export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
+/**
+ * Indicate whether Image is inverted or not
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when Image is inverted; False otherwise
+ */
+export const getIsImageInverted = (state) => state.ui.isImageInverted;
 /**
  * Indicates whether the display settings component is visible
  *
@@ -830,6 +840,7 @@ export const {
     setGeneratingThumbnails,
     setCollapsedSideMenu,
     toggleImageToolsOpen,
+    toggleImageInverted,
 } = uiSlice.actions;
 
 // Export the reducer for the store
