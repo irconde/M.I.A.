@@ -44,25 +44,23 @@ const ImageToolsFab = (props) => {
         }
     };
 
-    let fabOpacity;
-    let show;
-
-    if (settingsVisibility) {
-        fabOpacity = false;
-        show = true;
-    } else if (isVisible === false) {
-        fabOpacity = false;
-        show = false;
-    } else {
-        fabOpacity = true;
-        show = true;
-    }
+    /**
+     * Gets FAB info to determine the show/hide and FAB opacity
+     *
+     * @returns {{fabOpacity: boolean, show: boolean}}
+     */
+    const getFABInfo = () => {
+        if (settingsVisibility) {
+            return { fabOpacity: false, show: true };
+        } else {
+            return { fabOpacity: isVisible, show: isVisible };
+        }
+    };
 
     return (
         <ImageToolsWrapper
             id={'fab wrapper'}
-            fabOpacity={fabOpacity}
-            show={show}
+            {...getFABInfo()}
             onClick={() => dispatch(toggleImageToolsOpen())}>
             <Tooltip title={'Image Tools'}>
                 <ImageToolsButton id={'tools button'}>
