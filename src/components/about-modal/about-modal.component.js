@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
 import {
     AboutHeader,
     AboutHeaderInfo,
@@ -17,13 +16,12 @@ import {
     TeamLibraryTitle,
     TeamLibraryWrapper,
     VersionInfo,
-} from './settings-modal.styles';
+} from './about-modal.styles';
 import { Modal, ThemeProvider } from '@mui/material';
 import {
     getSettingsVisibility,
     toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
-import { getSelectedDetection } from '../../redux/slices/detections/detectionsSlice';
 import { getSettings } from '../../redux/slices/settings/settingsSlice';
 import isElectron from 'is-electron';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
@@ -42,7 +40,7 @@ if (isElectron()) {
  *
  */
 
-const SettingsModal = (props) => {
+const AboutModal = () => {
     const dispatch = useDispatch();
     const settings = useSelector(getSettings);
     const settingsVisibility = useSelector(getSettingsVisibility);
@@ -50,7 +48,6 @@ const SettingsModal = (props) => {
         settings.displaySummarizedDetections;
     const [displaySummarizedDetections, setDisplaySummarizedDetections] =
         useState(initDisplaySummarizedDetections);
-    const selectedDetection = useSelector(getSelectedDetection);
 
     /**
      * Handles when the user taps the Close X Icon or outside the modal window. Does not save settings.
@@ -231,12 +228,4 @@ const SettingsModal = (props) => {
     );
 };
 
-SettingsModal.propTypes = {
-    title: PropTypes.string,
-    connectToCommandServer: PropTypes.func,
-    resetCornerstoneTool: PropTypes.func,
-    appUpdateImage: PropTypes.func,
-    cornerstone: PropTypes.object,
-};
-
-export default SettingsModal;
+export default AboutModal;

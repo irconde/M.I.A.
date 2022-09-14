@@ -5,10 +5,7 @@ import {
     VisualizationModeIconWrapper,
     VisualizationModeLabel,
 } from './visualization-mode-picker.styles';
-import {
-    SettingDescription,
-    SettingOptionTitle,
-} from '../settings-modal.styles';
+import { Description, Title } from '../about-modal.styles';
 
 import SummarizedModeIcon from '../../../icons/settings-modal/summarized-mode-icon/summarized-mode.icon';
 import SummarizedModeCheckedIcon from '../../../icons/settings-modal/summarized-mode-checked-icon/summarized-mode-checked.icon';
@@ -28,11 +25,11 @@ const VisualizationModePickerComponent = ({
 }) => {
     return (
         <div>
-            <SettingOptionTitle>Visualization Mode</SettingOptionTitle>
-            <SettingDescription>
+            <Title>Visualization Mode</Title>
+            <Description>
                 Pick the visual granularity to use when displaying
                 multi-algorithm results.
-            </SettingDescription>
+            </Description>
             <VisualizationModeContainer>
                 <div>
                     <Tooltip title="Detailed Detections" placement="top">

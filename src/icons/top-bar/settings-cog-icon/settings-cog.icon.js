@@ -29,10 +29,6 @@ CogWheelIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
-    /**
-     * Function passed in from App.js for connecting to command server (used in testing connection in SettingsModal.)
-     */
-    connectToCommandServer: PropTypes.func,
 };
 
 export default CogWheelIcon;

@@ -24,7 +24,6 @@ import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
 import BoundPolyFAB from './components/fab/bound-poly-fab.component';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import socketIOClient from 'socket.io-client';
 import {
     setConnected,
     setCurrentProcessingFile,
@@ -92,7 +91,7 @@ import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
 import isElectron from 'is-electron';
 import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
-import SettingsModal from './components/settings-modal/settings-modal.component';
+import AboutModal from './components/about-modal/about-modal.component';
 import {
     loadElectronCookie,
     saveSettings,
@@ -170,7 +169,6 @@ class App extends Component {
         this.getSpecificFileFromLocalDirectory =
             this.getSpecificFileFromLocalDirectory.bind(this);
         this.monitorConnectionEvent = this.monitorConnectionEvent.bind(this);
-        this.connectToCommandServer = this.connectToCommandServer.bind(this);
         this.sendImageToCommandServer =
             this.sendImageToCommandServer.bind(this);
         this.sendImageToLocalDirectory =
@@ -235,35 +233,6 @@ class App extends Component {
     }
 
     /**
-     * Houses the code to connect to a server and starts listening for connection events. Lastly it
-     * is what trigger to ask for a file from the command server.
-     *
-     * @param {boolean?} update - Optional variable for when the settings change the command server
-     */
-    connectToCommandServer(update = false) {
-        this.props.setProcessingHost(
-            `http://${this.props.remoteIp}:${this.props.remotePort}`
-        );
-        if (!connectingToCommandServer) {
-            connectingToCommandServer = true;
-            this.setState(
-                {
-                    commandServer: socketIOClient(
-                        `http://${this.props.remoteIp}:${this.props.remotePort}`,
-                        { autoConnect: this.props.autoConnect }
-                    ),
-                },
-                () => {
-                    connectingToCommandServer = false;
-                    this.state.commandServer.connect();
-                    this.monitorConnectionEvent();
-                    this.getFileFromCommandServer(update);
-                }
-            );
-        }
-    }
-
-    /**
      * Gets called by an update (in changes to props or state). It is called before render(),
      * returning false means we can skip the update. Where returning true means we need to update the render().
      * Namely, this is an edge case for if a user is connected to a server, then decides to use the
@@ -274,13 +243,7 @@ class App extends Component {
      * @returns {boolean} - True, to update. False, to skip the update
      */
     shouldComponentUpdate(nextProps, nextState) {
-        if (
-            nextProps.loadingSettings === false &&
-            nextProps.firstDisplaySettings === true
-        ) {
-            this.props.toggleSettingsVisibility(true);
-        }
-        if (
+        /*if (
             isElectron() &&
             !this.props.remoteOrLocal &&
             !nextProps.remoteOrLocal &&
@@ -292,7 +255,7 @@ class App extends Component {
                 desktopMode: false,
                 collapsedSideMenu: false,
             });
-        }
+        }*/
         if (this.state.showSnackbar !== nextState.showSnackbar) return true;
         if (
             this.props.displaySummarizedDetections &&
@@ -321,22 +284,6 @@ class App extends Component {
         }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
-            this.state.commandServer === null &&
-            nextProps.remoteOrLocal === true &&
-            !nextProps.loadingElectronCookie &&
-            !nextProps.firstDisplaySettings
-        ) {
-            this.connectToCommandServer();
-            if (
-                this.props.loadingElectronCookie !==
-                nextProps.loadingElectronCookie
-            ) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        if (
             isElectron() &&
             nextProps.localFileOutput !== '' &&
             !nextProps.loadingElectronCookie &&
@@ -350,12 +297,6 @@ class App extends Component {
             this.getFileFromLocalDirectory();
             return true;
         }
-        if (this.props.firstDisplaySettings !== nextProps.firstDisplaySettings)
-            return true;
-        if (this.props.fileSuffix !== nextProps.fileSuffix) return true;
-        if (this.props.localFileOutput !== nextProps.localFileOutput)
-            return true;
-        if (this.props.remoteOrLocal !== nextProps.remoteOrLocal) return true;
         if (
             this.props.loadingElectronCookie !== nextProps.loadingElectronCookie
         ) {
@@ -395,12 +336,6 @@ class App extends Component {
             this.props.firstDisplaySettings
         ) {
             this.props.toggleSettingsVisibility(true);
-        }
-        // Connect socket servers
-        if (!isElectron() && this.props.firstDisplaySettings === false) {
-            if (this.props.remoteOrLocal) {
-                this.connectToCommandServer();
-            }
         }
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
@@ -3377,7 +3312,6 @@ class App extends Component {
                                 });
                         }}>
                         <TopBarComponent
-                            connectToCommandServer={this.connectToCommandServer}
                             getFileFromLocal={this.getFileFromLocal}
                             cornerstone={cornerstone}
                         />
@@ -3422,12 +3356,7 @@ class App extends Component {
                         <NoFileSignComponent />
                         <MetaDataComponent />
                     </div>
-                    <SettingsModal
-                        connectToCommandServer={this.connectToCommandServer}
-                        resetCornerstoneTool={this.resetCornerstoneTool}
-                        appUpdateImage={this.appUpdateImage}
-                        cornerstone={cornerstone}
-                    />
+                    <AboutModal />
                 </div>
             );
         }

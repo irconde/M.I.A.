@@ -165,7 +165,6 @@ const TopBarComponent = (props) => {
                 <VerticalDivider />
 
                 <CogWheelIcon
-                    connectToCommandServer={props.connectToCommandServer}
                     color={'#ffffff'}
                     width={'24px'}
                     height={'24px'}
@@ -206,7 +205,6 @@ const TopBarComponent = (props) => {
             </TitleLabelContainer>
             <ConnectionStatusIconsContainer>
                 <CogWheelIcon
-                    connectToCommandServer={props.connectToCommandServer}
                     color={'#ffffff'}
                     width={'24px'}
                     height={'24px'}
@@ -217,10 +215,6 @@ const TopBarComponent = (props) => {
 };
 
 TopBarComponent.propTypes = {
-    /**
-     * Function passed into the SettingsIcon component to check connection to command server
-     */
-    connectToCommandServer: PropTypes.func,
     /**
      * Main cornerstone object, used to resize viewports if needed.
      */
