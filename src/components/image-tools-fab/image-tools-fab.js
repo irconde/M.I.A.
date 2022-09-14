@@ -10,6 +10,7 @@ import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    getCollapsedSideMenu,
     getIsFabVisible,
     getIsImageInverted,
     getIsImageToolsOpen,
@@ -22,11 +23,12 @@ import { Tooltip } from '@mui/material';
 
 const ImageToolsFab = (props) => {
     const isOpen = useSelector(getIsImageToolsOpen);
-    const dispatch = useDispatch();
+    const isSideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const singleViewport = useSelector(getSingleViewport);
     const isInverted = useSelector(getIsImageInverted);
+    const dispatch = useDispatch();
     const handleInvert = () => {
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
@@ -63,6 +65,7 @@ const ImageToolsFab = (props) => {
         <ImageToolsWrapper
             id={'fab wrapper'}
             {...getFABInfo()}
+            $isSideMenuCollapsed={isSideMenuCollapsed}
             onClick={() => dispatch(toggleImageToolsOpen())}>
             <Tooltip title={'Image Tools'}>
                 <ImageToolsButton id={'tools button'}>

@@ -1,9 +1,11 @@
 import styled from 'styled-components';
-import { sideMenuWidth } from '../../../../utils/enums/Constants';
+import {
+    NEXT_BUTTON_FAB_MARGIN,
+    sideMenuWidth,
+} from '../../../../utils/enums/Constants';
 
 export const CollapsedButtonContainer = styled.div`
-    width: 75px;
-    margin: 50px;
+    margin: ${NEXT_BUTTON_FAB_MARGIN}px;
     position: absolute;
     bottom: 0;
     right: 0;

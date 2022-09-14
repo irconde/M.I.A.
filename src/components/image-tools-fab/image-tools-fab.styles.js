@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Fab, SpeedDial } from '@mui/material';
+import { NEXT_BUTTON_FAB_MARGIN } from '../../utils/enums/Constants';
 
 const noSelectGrey = '#313131';
 const selectedBlue = '#367eff';
@@ -49,11 +50,16 @@ export const ImageToolsButtonWrapper = styled(SpeedDial)`
     }
 `;
 
+const getRightPos = (props) => {};
+
 export const ImageToolsWrapper = styled.div`
     width: fit-content;
     position: absolute;
-    right: 16rem;
-    bottom: 5%;
+    right: ${NEXT_BUTTON_FAB_MARGIN}px;
+    bottom: ${({ $isSideMenuCollapsed }) =>
+        $isSideMenuCollapsed
+            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
+            : NEXT_BUTTON_FAB_MARGIN}px;
     display: ${(props) => (props.show ? 'flex' : 'none')};
     justify-content: center;
     align-items: center;
