@@ -1,4 +1,3 @@
-import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,10 +18,7 @@ import {
 } from './lazy-image-menu.styles';
 import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 
-let ipcRenderer;
-if (isElectron()) {
-    ipcRenderer = window.require('electron').ipcRenderer;
-}
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 /**
  * Component for displaying the lazy image menu.

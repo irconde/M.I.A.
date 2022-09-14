@@ -1,24 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import isElectron from 'is-electron';
-import { Cookies } from 'react-cookie';
-import { Channels, COOKIE, SETTINGS } from '../../../utils/enums/Constants';
+import { Channels, SETTINGS } from '../../../utils/enums/Constants';
 
-const myCookie = new Cookies();
-let cookieData;
-
-let ipcRenderer;
-if (isElectron()) {
-    ipcRenderer = window.require('electron').ipcRenderer;
-} else {
-    cookieData = myCookie.get('settings');
-}
-
-const storeCookieData = (settings) => {
-    myCookie.set('settings', settings, {
-        path: '/',
-        expires: new Date(Date.now() + COOKIE.WEB_TIME),
-    });
-};
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 let settings;
 const defaultSettings = {
@@ -33,7 +16,7 @@ const defaultSettings = {
     deviceType: '',
     hasFileOutput: false,
     displaySummarizedDetections: false,
-    loadingElectronCookie: isElectron(),
+    loadingElectronCookie: true,
 };
 
 export const saveElectronCookie = createAsyncThunk(
@@ -63,30 +46,11 @@ export const loadElectronCookie = createAsyncThunk(
             .catch((err) => rejectWithValue(err));
     }
 );
-let loadingSettings = true;
-if (!isElectron()) {
-    if (cookieData !== undefined) {
-        settings = cookieData;
-    } else {
-        settings = defaultSettings;
-        myCookie.set('settings', defaultSettings, {
-            path: '/',
-            expires: isElectron()
-                ? new Date(Date.now() + COOKIE.DESKTOP_TIME)
-                : new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
-        });
-    }
-    loadingSettings = false;
-} else {
-    settings = defaultSettings;
-}
+settings = defaultSettings;
 
 const initialState = {
     settings,
-    apiPrefix: loadingSettings
-        ? ''
-        : `http://${settings.remoteIp}:${settings.remotePort}`,
-    loadingSettings,
+    loadingSettings: true,
 };
 
 const settingsSlice = createSlice({
@@ -100,14 +64,6 @@ const settingsSlice = createSlice({
         toggleDisplaySummarizedDetections: (state) => {
             state.settings.displaySummarizedDetections =
                 !state.settings.displaySummarizedDetections;
-        },
-        /**
-         * Saves the current settings into a cookie
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         */
-        saveCookieData: (state) => {
-            storeCookieData(state.settings);
         },
 
         /**
@@ -123,13 +79,6 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 action.payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
-            if (!isElectron()) {
-                myCookie.set('settings', state.settings, {
-                    path: '/',
-                    expires: new Date(Date.now() + COOKIE.WEB_TIME), // Current time is 3 hours
-                });
-            }
         },
     },
     extraReducers: {
@@ -140,7 +89,6 @@ const settingsSlice = createSlice({
             state.settings.hasFileOutput =
                 payload.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = false;
-            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
         },
         [saveElectronCookie.rejected]: (state) => {
             state.settings = defaultSettings;
@@ -154,7 +102,6 @@ const settingsSlice = createSlice({
                 settings.localFileOutput !== '' ? true : false;
             state.settings.firstDisplaySettings = firstDisplaySettings;
             state.settings.loadingElectronCookie = false;
-            state.apiPrefix = `http://${state.settings.remoteIp}:${state.settings.remotePort}`;
             state.loadingSettings = false;
         },
         [loadElectronCookie.pending]: (state) => {
@@ -199,29 +146,6 @@ export const getHasFileOutput = (state) =>
  */
 export const getLocalFileOutput = (state) =>
     state.settings.settings.localFileOutput;
-/**
- * Provides the remote connection info: ip, port, auto-connect.
- * @param {Object} state
- * @returns {{remoteIp: string, remotePort: string, autoConnect: Boolean}}
- */
-export const getRemoteConnectionInfo = (state) => {
-    return {
-        remoteIp: state.settings.settings.remoteIp,
-        remotePort: state.settings.settings.remotePort,
-        autoConnect: state.settings.settings.autoConnect,
-    };
-};
-
-export const getLoadingElectronCookie = (state) =>
-    state.settings.settings.loadingElectronCookie;
-
-/**
- * Determines if the settings should be displayed on first load or not
- * @param {Object} state
- * @returns {Boolean}
- */
-export const getFirstDisplaySettings = (state) =>
-    state.settings.settings.firstDisplaySettings;
 
 /**
  * Provides information regarding the type of device, desktop, mobile, tablet
@@ -229,9 +153,5 @@ export const getFirstDisplaySettings = (state) =>
  * @returns {constants.DEVICE_TYPE}
  */
 export const getDeviceType = (state) => state.settings.settings.deviceType;
-
-export const getFileSuffix = (state) => state.settings.settings.fileSuffix;
-
-export const getApiPrefix = (state) => state.settings.apiPrefix;
 
 export default settingsSlice.reducer;

@@ -23,15 +23,8 @@ import {
     toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
 import { getSettings } from '../../redux/slices/settings/settingsSlice';
-import isElectron from 'is-electron';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
-
-let ipcRenderer;
-if (isElectron()) {
-    const electron = window.require('electron');
-    ipcRenderer = electron.ipcRenderer;
-}
 
 /**
  * Component dialog for changing settings of application.

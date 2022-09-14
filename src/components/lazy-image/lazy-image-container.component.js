@@ -5,7 +5,6 @@ import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
-import isElectron from 'is-electron';
 import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
@@ -18,10 +17,7 @@ import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon
 import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
 import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
 
-let ipcRenderer;
-if (isElectron()) {
-    ipcRenderer = window.require('electron').ipcRenderer;
-}
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 /**
  * Container component for the lazy image thumbnails

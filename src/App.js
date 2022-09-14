@@ -88,7 +88,6 @@ import { buildCocoDataZip } from './utils/detections/Coco';
 import { fileOpen } from 'browser-fs-access';
 import ColorPicker from './components/color/color-picker.component';
 import MetaDataComponent from './components/snackbars/meta-data.component';
-import isElectron from 'is-electron';
 import LazyImageMenu from './components/lazy-image/lazy-image-menu.component';
 import AboutModal from './components/about-modal/about-modal.component';
 import {
@@ -99,11 +98,8 @@ import fetch from 'cross-fetch';
 import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
 
-let ipcRenderer;
-if (isElectron()) {
-    const electron = window.require('electron');
-    ipcRenderer = electron.ipcRenderer;
-}
+const electron = window.require('electron');
+const ipcRenderer = electron.ipcRenderer;
 const cloneDeep = require('lodash.clonedeep');
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -255,7 +251,6 @@ class App extends Component {
         }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
-            isElectron() &&
             nextProps.localFileOutput !== '' &&
             !nextProps.loadingElectronCookie &&
             this.props.currentProcessingFile === null &&
@@ -298,15 +293,7 @@ class App extends Component {
      * Invoked after all elements on the page are rendered properly.
      */
     componentDidMount() {
-        if (isElectron()) {
-            this.props.loadElectronCookie();
-        } else if (
-            !isElectron() &&
-            !this.props.loadingSettings &&
-            this.props.firstDisplaySettings
-        ) {
-            this.props.toggleSettingsVisibility(true);
-        }
+        this.props.loadElectronCookie();
         this.state.imageViewportTop.addEventListener(
             'cornerstoneimagerendered',
             this.onImageRendered
@@ -774,42 +761,37 @@ class App extends Component {
      * Calls the Electron channel to invoke the next file from the selected file system folder.
      */
     getFileFromLocalDirectory() {
-        if (isElectron()) {
-            ipcRenderer
-                .invoke(
-                    constants.Channels.getNextFile,
-                    this.props.localFileOutput
-                )
-                .then((result) => {
-                    fetchingFromLocalDirectory = false;
-                    this.props.setLocalFileOpen(true);
-                    this.setState({
-                        localWorkspaceError: '',
-                    });
-                    this.loadNextImage(
-                        result.file,
-                        result.fileName,
-                        result.numberOfFiles,
-                        result.thumbnails
-                    );
-                })
-                .catch((error) => {
-                    fetchingFromLocalDirectory = false;
-                    if (
-                        error.toString() ===
-                        "Error: Error invoking remote method 'get-next-file': End of queue"
-                    ) {
-                        this.props.invalidateDetections();
-                        this.setState({
-                            localWorkspaceError: 'end-of-queue',
-                        });
-                    } else {
-                        this.props.setLocalFileOpen(false);
-                        this.props.setReceiveTime(null);
-                        this.onNoImageLeft();
-                    }
+        ipcRenderer
+            .invoke(constants.Channels.getNextFile, this.props.localFileOutput)
+            .then((result) => {
+                fetchingFromLocalDirectory = false;
+                this.props.setLocalFileOpen(true);
+                this.setState({
+                    localWorkspaceError: '',
                 });
-        }
+                this.loadNextImage(
+                    result.file,
+                    result.fileName,
+                    result.numberOfFiles,
+                    result.thumbnails
+                );
+            })
+            .catch((error) => {
+                fetchingFromLocalDirectory = false;
+                if (
+                    error.toString() ===
+                    "Error: Error invoking remote method 'get-next-file': End of queue"
+                ) {
+                    this.props.invalidateDetections();
+                    this.setState({
+                        localWorkspaceError: 'end-of-queue',
+                    });
+                } else {
+                    this.props.setLocalFileOpen(false);
+                    this.props.setReceiveTime(null);
+                    this.onNoImageLeft();
+                }
+            });
     }
 
     /**
@@ -818,37 +800,32 @@ class App extends Component {
     localDirectoryChangeHandler() {
         // handle a request to update the thumbnails state when the user modifies
         // the dir content in the file system
-        if (isElectron()) {
-            ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
-                setTimeout(() => {
-                    this.setState({ thumbnails: data.thumbnails });
-                    this.props.setNumFilesInQueue(data.numberOfFiles);
-                }, 450);
-            });
+        ipcRenderer.on(constants.Channels.updateFiles, (event, data) => {
+            setTimeout(() => {
+                this.setState({ thumbnails: data.thumbnails });
+                this.props.setNumFilesInQueue(data.numberOfFiles);
+            }, 450);
+        });
 
-            ipcRenderer.on(
-                constants.Channels.updateCurrentFile,
-                (event, data) => {
-                    // no files left
-                    if (!data) {
-                        this.props.setLocalFileOpen(false);
-                        this.props.setReceiveTime(null);
-                        this.onNoImageLeft();
-                        return;
-                    }
-                    this.resetSelectedDetectionBoxes();
-                    this.props.resetDetections();
-                    // load the next image
-                    this.props.setLocalFileOpen(true);
-                    this.loadNextImage(
-                        data.file,
-                        data.fileName,
-                        data.numberOfFiles,
-                        data.thumbnails
-                    );
-                }
+        ipcRenderer.on(constants.Channels.updateCurrentFile, (event, data) => {
+            // no files left
+            if (!data) {
+                this.props.setLocalFileOpen(false);
+                this.props.setReceiveTime(null);
+                this.onNoImageLeft();
+                return;
+            }
+            this.resetSelectedDetectionBoxes();
+            this.props.resetDetections();
+            // load the next image
+            this.props.setLocalFileOpen(true);
+            this.loadNextImage(
+                data.file,
+                data.fileName,
+                data.numberOfFiles,
+                data.thumbnails
             );
-        }
+        });
     }
 
     /**
@@ -858,28 +835,26 @@ class App extends Component {
      * @param {string} filePath - String value of specific file path
      */
     getSpecificFileFromLocalDirectory(filePath) {
-        if (isElectron()) {
-            if (this.props.selectedDetection) {
-                this.props.resetSelectedDetectionBoxesUpdate();
-                this.props.updateFABVisibility(true);
-            }
-            ipcRenderer
-                .invoke(constants.Channels.getSpecificFile, filePath)
-                .then((result) => {
-                    this.props.setLocalFileOpen(true);
-                    this.loadNextImage(
-                        result.file,
-                        result.fileName,
-                        result.numberOfFiles,
-                        result.thumbnails
-                    );
-                })
-                .catch((error) => {
-                    this.props.setLocalFileOpen(false);
-                    this.props.setReceiveTime(null);
-                    this.onNoImageLeft();
-                });
+        if (this.props.selectedDetection) {
+            this.props.resetSelectedDetectionBoxesUpdate();
+            this.props.updateFABVisibility(true);
         }
+        ipcRenderer
+            .invoke(constants.Channels.getSpecificFile, filePath)
+            .then((result) => {
+                this.props.setLocalFileOpen(true);
+                this.loadNextImage(
+                    result.file,
+                    result.fileName,
+                    result.numberOfFiles,
+                    result.thumbnails
+                );
+            })
+            .catch((error) => {
+                this.props.setLocalFileOpen(false);
+                this.props.setReceiveTime(null);
+                this.onNoImageLeft();
+            });
     }
 
     /**
@@ -891,7 +866,7 @@ class App extends Component {
      */
     async sendImageToLocalDirectory(file) {
         return new Promise((resolve, reject) => {
-            if (isElectron() && this.props.localFileOutput !== '') {
+            if (this.props.localFileOutput !== '') {
                 ipcRenderer
                     .invoke(constants.Channels.saveCurrentFile, {
                         file,
