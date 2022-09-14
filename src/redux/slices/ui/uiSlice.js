@@ -39,6 +39,8 @@ const initialState = {
     recentScroll: false,
     currentFileFormat: constants.SETTINGS.ANNOTATIONS.TDR,
     generatingThumbnails: true,
+    isImageInverted: false,
+    isImageToolsOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -504,6 +506,15 @@ const uiSlice = createSlice({
         updateRecentScroll: (state, action) => {
             state.recentScroll = action.payload;
         },
+        /**
+         * Toggles the state of the Image Tools open or closed.
+         *
+         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
+         */
+        toggleImageToolsOpen: (state) => {
+            state.isImageToolsOpen = !state.isImageToolsOpen;
+            console.log('Called toggleImageToolsOpen');
+        },
     },
 });
 
@@ -521,6 +532,13 @@ export const getInputLabel = (state) => state.ui.inputLabel;
  * @returns {boolean} - True when FAB is visible; False otherwise
  */
 export const getIsFabVisible = (state) => state.ui.isFABVisible;
+/**
+ * Indicate whether Image Tools are open
+ *
+ * @param {State} state - Passed in via useSelector/mapStateToProps
+ * @returns {boolean} - True when Image Tools FAB is open; False otherwise
+ */
+export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
 /**
  * Indicates whether the display settings component is visible
  *
@@ -811,6 +829,7 @@ export const {
     updateRecentScroll,
     setGeneratingThumbnails,
     setCollapsedSideMenu,
+    toggleImageToolsOpen,
 } = uiSlice.actions;
 
 // Export the reducer for the store

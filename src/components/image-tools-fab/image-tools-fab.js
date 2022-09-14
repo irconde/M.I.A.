@@ -8,26 +8,25 @@ import {
 } from './image-tools-fab.styles';
 import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
-import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
-import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     getIsFabVisible,
+    getIsImageToolsOpen,
     getSettingsVisibility,
     getSingleViewport,
+    toggleImageToolsOpen,
 } from '../../redux/slices/ui/uiSlice';
 import { Tooltip } from '@mui/material';
 
 const ImageToolsFab = (props) => {
+    const isOpen = useSelector(getIsImageToolsOpen);
+    const dispatch = useDispatch();
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
     const singleViewport = useSelector(getSingleViewport);
-    const [open, setOpen] = useState(false);
     const [invert, setInvert] = useState(false);
     const handleInvert = () => {
         setInvert(!invert);
-        console.log('Invert: ' + invert);
-
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -44,42 +43,6 @@ const ImageToolsFab = (props) => {
             );
         }
     };
-    const handleSelect = () => {};
-    const handleOpen = () => {
-        setOpen(!open);
-    };
-
-    const actions = [
-        {
-            icon: <InvertIcon color={'white'} height={'24px'} width={'24px'} />,
-            name: 'Invert',
-            action: handleInvert,
-            className: invert ? 'blue' : 'grey',
-        },
-        {
-            icon: (
-                <ContrastIcon color={'white'} height={'24px'} width={'24px'} />
-            ),
-            name: 'Contrast',
-            action: handleSelect,
-            className: 'slide',
-        },
-        {
-            icon: (
-                <BrightnessIcon
-                    color={'white'}
-                    height={'24px'}
-                    width={'24px'}
-                />
-            ),
-            name: 'Brightness',
-            action: handleSelect,
-            className: 'slide',
-        },
-    ];
-
-    console.log('isVisibile: ' + isVisible);
-    console.log('settingsVisibility: ' + settingsVisibility);
 
     let fabOpacity;
     let show;
@@ -95,39 +58,19 @@ const ImageToolsFab = (props) => {
         show = true;
     }
 
-    console.log('open: ' + open);
-
     return (
-        // <ImageToolsButtonWrapper
-        //     ariaLabel={'Options Button Wrapper'}
-        //     icon={<ScaleIcon color={'white'} width={'24px'} height={'24px'} />}
-        //     $fabOpacity={fabOpacity}
-        //     $show={show}
-        //     $invert={invert}
-        //     id={'Button Wrapper'}>
-        //     {actions.map((action) => (
-        //         <SpeedDialAction
-        //             key={action.name}
-        //             icon={action.icon}
-        //             tooltipTitle={action.name}
-        //             className={action.className}
-        //             onClick={action.action}
-        //         />
-        //     ))}
-        // </ImageToolsButtonWrapper>
-
         <ImageToolsWrapper
             id={'fab wrapper'}
             fabOpacity={fabOpacity}
             show={show}
-            onClick={handleOpen}>
+            onClick={() => dispatch(toggleImageToolsOpen())}>
             <Tooltip title={'Image Tools'}>
                 <ImageToolsButton id={'tools button'}>
                     <ScaleIcon width={'24px'} height={'24px'} color={'white'} />
                 </ImageToolsButton>
             </Tooltip>
 
-            <ToolsWrapper id={'Tools Wrapper'} $show={open}>
+            <ToolsWrapper id={'Tools Wrapper'} $show={isOpen}>
                 <Tooltip title={'Invert'} placement={'right'}>
                     <InvertButton
                         id={'Invert Button'}
