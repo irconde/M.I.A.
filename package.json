@@ -57,9 +57,7 @@
   },
   "scripts": {
     "start": "npm-run-all -p load-env react",
-    "start-electron": "run-script-os",
-    "start-electron:win32": "set BROWSER=none && concurrently \"npm run start\" \"npm run load-electron\"",
-    "start-electron:darwin:linux": "export BROWSER=none && concurrently \"npm run start\" \"npm run load-electron\"",
+    "start-electron": "concurrently \"npm run start\" \"npm run load-electron\"",
     "load-electron": "electron .",
     "load-env": "node -r dotenv/config",
     "react": "if-node-version \">= 17\" && react-scripts --openssl-legacy-provider start || react-scripts start",
