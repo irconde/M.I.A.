@@ -103,8 +103,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @returns {number}
      */
     const getEditLabelDiff = (diff, viewport) => {
-        const zoom = viewport === 'side' ? zoomSide : zoomTop;
-        return diff * zoom;
+        return diff * getViewportZoom(viewport);
     };
 
     /**
@@ -131,6 +130,28 @@ const EditLabelComponent = ({ onLabelChange }) => {
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
+    /**
+     * Returns the appropriate zoom amount based on the viewport (side or top)
+     *
+     * @param {string} viewport
+     * @returns {number}
+     */
+    const getViewportZoom = (viewport) =>
+        viewport === 'side' ? zoomSide : zoomTop;
+
+    /**
+     * Scales the given width by the zoom level and account for the detection border width
+     *
+     * @param {number} width
+     * @param {string} viewport
+     * @returns {number}
+     */
+    const getWidth = (width, viewport) => {
+        const zoom = getViewportZoom(viewport);
+        const DETECTION_BORDER_WIDTH = 2;
+        const scaledDetectionBorderWidth = DETECTION_BORDER_WIDTH * zoom;
+        return width * zoom + scaledDetectionBorderWidth;
+    };
     if (isVisible && !recentScroll) {
         return (
             <EditLabelWrapper
@@ -143,7 +164,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
                 }
                 top={position.top}
                 left={position.left}
-                width={width}
+                width={getWidth(width, viewport)}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>
