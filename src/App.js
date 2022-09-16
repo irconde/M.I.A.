@@ -236,19 +236,6 @@ class App extends Component {
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (this.state.showSnackbar !== nextState.showSnackbar) return true;
-        if (
-            this.props.displaySummarizedDetections &&
-            !this.props.collapsedSideMenu &&
-            nextProps.currentProcessingFile !== null &&
-            this.props.currentProcessingFile === null
-        ) {
-            this.props.setCollapsedSideMenu({
-                cornerstone: cornerstone,
-                desktopMode: true,
-                collapsedSideMenu: true,
-            });
-            return true;
-        }
         if (this.state.thumbnails !== nextState.thumbnails) return true;
         if (
             nextProps.localFileOutput !== '' &&
@@ -269,8 +256,7 @@ class App extends Component {
         }
         if (
             this.props.selectedDetection &&
-            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu &&
-            !nextProps.displaySummarizedDetections
+            this.props.collapsedSideMenu !== nextProps.collapsedSideMenu
         ) {
             setTimeout(() => {
                 this.renderDetectionContextMenu(
@@ -1368,17 +1354,9 @@ class App extends Component {
         const context = eventData.canvasContext;
         if (eventData.element.id === 'dicomImageLeft') {
             let detections = [];
-            if (!this.props.displaySummarizedDetections) {
-                this.props.detections.forEach((det) => {
-                    if (det.view === constants.viewport.TOP)
-                        detections.push(det);
-                });
-            } else {
-                this.props.summarizedDetections.forEach((det) => {
-                    if (det.view === constants.viewport.TOP)
-                        detections.push(det);
-                });
-            }
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.TOP) detections.push(det);
+            });
             if (this.props.zoomLevelTop !== eventData.viewport.scale) {
                 this.props.updateZoomLevelTop(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1411,17 +1389,9 @@ class App extends Component {
             this.props.singleViewport === false
         ) {
             let detections = [];
-            if (!this.props.displaySummarizedDetections) {
-                this.props.detections.forEach((det) => {
-                    if (det.view === constants.viewport.SIDE)
-                        detections.push(det);
-                });
-            } else {
-                this.props.summarizedDetections.forEach((det) => {
-                    if (det.view === constants.viewport.SIDE)
-                        detections.push(det);
-                });
-            }
+            this.props.detections.forEach((det) => {
+                if (det.view === constants.viewport.SIDE) detections.push(det);
+            });
             if (this.props.zoomLevelSide !== eventData.viewport.scale) {
                 this.props.updateZoomLevelSide(eventData.viewport.scale);
                 cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
@@ -1688,9 +1658,6 @@ class App extends Component {
      */
     onMouseClicked(e) {
         if (!this.props.detections) {
-            return;
-        }
-        if (this.props.displaySummarizedDetections) {
             return;
         }
         let combinedDetections;
@@ -2995,7 +2962,6 @@ const mapStateToProps = (state) => {
         // Detections and Selection state
         detections: detections.detections,
         selectedDetection: detections.selectedDetection,
-        summarizedDetections: detections.summarizedDetections,
         // UI
         cornerstoneMode: ui.cornerstoneMode,
         annotationMode: ui.annotationMode,
@@ -3012,8 +2978,6 @@ const mapStateToProps = (state) => {
         colorPickerVisible: ui.colorPickerVisible,
         currentFileFormat: ui.currentFileFormat,
         // Settings
-        displaySummarizedDetections:
-            settings.settings.displaySummarizedDetections,
         deviceType: settings.settings.deviceType,
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,

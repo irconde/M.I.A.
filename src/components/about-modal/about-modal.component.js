@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     AboutHeader,
@@ -22,7 +22,6 @@ import {
     getSettingsVisibility,
     toggleSettingsVisibility,
 } from '../../redux/slices/ui/uiSlice';
-import { getSettings } from '../../redux/slices/settings/settingsSlice';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 
@@ -35,12 +34,7 @@ import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code
 
 const AboutModal = () => {
     const dispatch = useDispatch();
-    const settings = useSelector(getSettings);
     const settingsVisibility = useSelector(getSettingsVisibility);
-    const initDisplaySummarizedDetections =
-        settings.displaySummarizedDetections;
-    const [displaySummarizedDetections, setDisplaySummarizedDetections] =
-        useState(initDisplaySummarizedDetections);
 
     /**
      * Handles when the user taps the Close X Icon or outside the modal window. Does not save settings.
@@ -48,43 +42,6 @@ const AboutModal = () => {
     const handleClose = () => {
         dispatch(toggleSettingsVisibility(false));
     };
-
-    /**
-     * It toggles between the display mode between detailed, or summarized depending on the displaySummarizedDetections
-     */
-    /*const updateVisualizationMode = () => {
-        if (selectedDetection) {
-            dispatch(clearAllSelection());
-            dispatch(resetSelectedDetectionBoxesUpdate());
-            props.resetCornerstoneTool();
-            props.appUpdateImage();
-        }
-
-        // only update the UI when a new visualization mode is selected
-        if (initDisplaySummarizedDetections === displaySummarizedDetections) {
-            return;
-        }
-
-        // close the side menu if mode is summarized
-        // open it if the app is in detailed mode
-        if (isElectron() && remoteOrLocal && localFileOutput !== '') {
-            dispatch(
-                setCollapsedSideMenu({
-                    cornerstone: props.cornerstone,
-                    desktopMode: true,
-                    collapsedSideMenu: displaySummarizedDetections,
-                })
-            );
-        } else {
-            dispatch(
-                setCollapsedSideMenu({
-                    cornerstone: props.cornerstone,
-                    desktopMode: false,
-                    collapsedSideMenu: displaySummarizedDetections,
-                })
-            );
-        }
-    };*/
 
     return (
         <ThemeProvider theme={modalTheme}>

@@ -15,7 +15,6 @@ const defaultSettings = {
     firstDisplaySettings: true,
     deviceType: '',
     hasFileOutput: false,
-    displaySummarizedDetections: false,
     loadingElectronCookie: true,
 };
 
@@ -57,15 +56,6 @@ const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
-        /**
-         * Toggles the display of summarized (wbf) or un-summarized (original) detection display
-         * @param {State} state
-         */
-        toggleDisplaySummarizedDetections: (state) => {
-            state.settings.displaySummarizedDetections =
-                !state.settings.displaySummarizedDetections;
-        },
-
         /**
          * Saves the settings passed in by action.payload
          *
@@ -114,18 +104,9 @@ const settingsSlice = createSlice({
 });
 
 // Actions
-export const { saveSettings, toggleDisplaySummarizedDetections } =
-    settingsSlice.actions;
+export const { saveSettings } = settingsSlice.actions;
 
 // Selectors
-/**
- * Indicates whether the display of summarized detections is enabled
- *
- * @param {State} state - Passed in via useSelector/mapStateToProps
- * @returns {boolean} - True when displaying summarized detections - false renders original detections
- */
-export const getDisplaySummarizedDetections = (state) =>
-    state.settings.settings.displaySummarizedDetections;
 /**
  * Provides the settings object
  * @param {Object} state

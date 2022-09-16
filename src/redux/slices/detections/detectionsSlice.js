@@ -3,11 +3,6 @@ import * as constants from '../../../utils/enums/Constants';
 import randomColor from 'randomcolor';
 import Utils from '../../../utils/general/Utils';
 import { Cookies } from 'react-cookie';
-import {
-    calculateWBF,
-    compareConfidence,
-    getIndexByViewAndClassName,
-} from '../../../utils/detections/Ensemble';
 
 // interface Detection {
 //     // Unique Identifier
@@ -58,7 +53,6 @@ if (cookieData !== undefined) {
 
 const initialState = {
     detections: [],
-    summarizedDetections: [],
     // Selection data
     /** @type string */
     selectedAlgorithm: '',
@@ -88,7 +82,6 @@ const detectionsSlice = createSlice({
             state.detections = [];
             state.detectionChanged = false;
             state.bLists = [];
-            state.summarizedDetections = [];
         },
 
         /**
@@ -151,41 +144,6 @@ const detectionsSlice = createSlice({
             if (!detectionFromFile) {
                 state.detectionChanged = true;
             }
-            /*                  Begin Ensemble                    */
-            /*                  bList sorting                    */
-            const bListRef = {
-                uuid: state.detections.at(-1).uuid,
-                confidence: state.detections.at(-1).confidence,
-            };
-            if (state.bLists.length === 0) {
-                state.bLists[0] = {
-                    view,
-                    className,
-                    items: [bListRef],
-                };
-            } else {
-                const index = getIndexByViewAndClassName(
-                    state.bLists,
-                    view,
-                    className
-                );
-                if (index !== -1) {
-                    state.bLists[index].items.push(bListRef);
-                    state.bLists[index].items.sort(compareConfidence);
-                } else {
-                    state.bLists.push({
-                        view,
-                        className,
-                        items: [bListRef],
-                    });
-                }
-            }
-            /*                  End bList sorting                    */
-            state.summarizedDetections = calculateWBF(
-                state.bLists,
-                state.detections
-            );
-            /*                  End Ensemble                    */
         },
         /**
          * Clears selection data for all detections
@@ -259,12 +217,6 @@ const detectionsSlice = createSlice({
                     }
                 }
             }
-            /*                  Begin Ensemble                    */
-            state.summarizedDetections = calculateWBF(
-                state.bLists,
-                state.detections
-            );
-            /*                  End Ensemble                    */
         },
 
         /**
@@ -307,49 +259,6 @@ const detectionsSlice = createSlice({
                     }
                 });
             });
-            /*                  Begin Ensemble                    */
-            /*                  bList sorting                    */
-            const oldIndex = getIndexByViewAndClassName(
-                state.bLists,
-                detection.view,
-                oldClassName
-            );
-            if (oldIndex !== -1) {
-                state.bLists[oldIndex].items = state.bLists[
-                    oldIndex
-                ].items.filter((det) => det.uuid !== uuid);
-                if (state.bLists[oldIndex].items.length === 0) {
-                    state.bLists.splice(oldIndex, 1);
-                }
-            }
-            let newIndex = getIndexByViewAndClassName(
-                state.bLists,
-                detection.view,
-                newClassName
-            );
-            const bListRef = {
-                uuid,
-                confidence: detection.confidence,
-            };
-            if (newIndex !== -1) {
-                state.bLists[newIndex].items.push(bListRef);
-            } else {
-                state.bLists.push({
-                    view: detection.view,
-                    className: newClassName,
-                    items: [bListRef],
-                });
-                newIndex = state.bLists.length - 1;
-            }
-            if (state.bLists[newIndex].items.length > 1) {
-                state.bLists[newIndex].items.sort(compareConfidence);
-            }
-            /*                  End bList sorting                    */
-            state.summarizedDetections = calculateWBF(
-                state.bLists,
-                state.detections
-            );
-            /*                  End Ensemble                    */
         },
 
         /**
@@ -366,27 +275,6 @@ const detectionsSlice = createSlice({
                 const detectionToDelete = state.detections[foundDetIndex];
                 state.detections.splice(foundDetIndex, 1);
                 state.detectionChanged = true;
-                /*                  Begin Ensemble                    */
-                /*                  bList sorting                    */
-                const bListIndex = state.bLists.findIndex(
-                    (list) =>
-                        list.view === detectionToDelete.view &&
-                        list.className === detectionToDelete.className
-                );
-                if (bListIndex !== -1) {
-                    state.bLists[bListIndex].items = state.bLists[
-                        bListIndex
-                    ].items.filter((det) => det.uuid !== action.payload);
-                    if (state.bLists[bListIndex].items.length === 0) {
-                        state.bLists.splice(bListIndex, 1);
-                    }
-                }
-                /*                  End bList sorting                    */
-                state.summarizedDetections = calculateWBF(
-                    state.bLists,
-                    state.detections
-                );
-                /*                  End Ensemble                    */
             }
         },
 
