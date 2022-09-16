@@ -24,6 +24,8 @@ import {
 import LabelListComponent from './label-list.component';
 import ClearIcon from '../../icons/edit-label/clear-icon/clear.icon';
 
+const INPUT_HEIGHT = 24;
+
 /**
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
@@ -97,13 +99,13 @@ const EditLabelComponent = ({ onLabelChange }) => {
     };
 
     /**
-     * Calculates the difference in height or width based on the given viewport and diff(erence)
-     * @param {number} diff
+     * Scales a value based on the given viewport's zoom level
+     * @param {number} value
      * @param {string} viewport
      * @returns {number}
      */
-    const getEditLabelDiff = (diff, viewport) => {
-        return diff * getViewportZoom(viewport);
+    const scaleByZoom = (value, viewport) => {
+        return value * getViewportZoom(viewport);
     };
 
     /**
@@ -126,7 +128,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
      */
     const handleLabelInputChange = (e) => {
         const { value } = e.target;
-        setShowClearIcon(value.length ? true : false);
+        setShowClearIcon(!!value.length);
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
@@ -147,23 +149,18 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @returns {number}
      */
     const getWidth = (width, viewport) => {
-        const zoom = getViewportZoom(viewport);
-        const DETECTION_BORDER_WIDTH = 2;
-        const scaledDetectionBorderWidth = DETECTION_BORDER_WIDTH * zoom;
-        return width * zoom + scaledDetectionBorderWidth;
+        const { BORDER_WIDTH } = constants.detectionStyle;
+        return (
+            scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
+        );
     };
+
     if (isVisible && !recentScroll) {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                positionDiff={getEditLabelDiff(1, viewport)}
-                heightDiff={
-                    getEditLabelDiff(18, viewport) < 28
-                        ? 28
-                        : getEditLabelDiff(18, viewport)
-                }
-                top={position.top}
-                left={position.left}
+                top={position.top - INPUT_HEIGHT}
+                left={position.left - getViewportZoom(viewport)}
                 width={getWidth(width, viewport)}
                 fontSize={getFontSize(font)}>
                 <InputContainer>

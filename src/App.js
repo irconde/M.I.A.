@@ -3195,32 +3195,22 @@ class App extends Component {
                 const newFont =
                     fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-                const canvas = currentViewport.children[0];
-                const ctx = canvas.getContext('2d');
-                const detectionLabel = Utils.formatDetectionLabel(
-                    label,
-                    confidence
-                );
-                const labelSize = Utils.getTextLabelSize(
-                    ctx,
-                    detectionLabel,
-                    constants.detectionStyle.LABEL_PADDING
-                );
-                const { offsetLeft } = currentViewport;
+                const { offsetLeft, offsetTop } = currentViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
+                const verticalGap = offsetTop / zoomLevel;
                 const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
                         : this.state.imageViewportTop;
+
+                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                    x: bbox[0] + horizontalGap,
+                    y: bbox[1] + verticalGap,
+                });
                 const newViewport =
                     currentViewport.id === 'dicomImageRight'
                         ? constants.viewport.SIDE
                         : constants.viewport.TOP;
-                const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
-                const { x, y } = cornerstone.pixelToCanvas(viewport, {
-                    x: bbox[0] + horizontalGap,
-                    y: bbox[1] - verticalGap - 6,
-                });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
