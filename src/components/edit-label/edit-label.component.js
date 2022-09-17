@@ -17,7 +17,8 @@ import {
 import {
     ArrowIconWrapper,
     ClearIconWrapper,
-    EditLabelWrapper, INPUT_HEIGHT,
+    EditLabelWrapper,
+    INPUT_HEIGHT,
     InputContainer,
     NewLabelInput,
 } from './edit-label.styles';
