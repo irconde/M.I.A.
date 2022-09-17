@@ -149,8 +149,8 @@ export const StyledAction = styled(SpeedDialAction)`
 `;
 
 export const SpeedDialIconWrapper = styled.div`
-    opacity: ${({ show }) => (show ? '1' : '0')};
-    width: ${({ show }) => (show ? '100%' : '0px')};
+    opacity: ${({ $show }) => ($show ? '1' : '0')};
+    width: ${({ $show }) => ($show ? '100%' : '0px')};
     aspect-ratio: 1;
     display: flex;
     align-items: center;
@@ -160,5 +160,7 @@ export const SpeedDialIconWrapper = styled.div`
 `;
 
 export const StyledTooltip = styled(Tooltip)`
-    visibility: ${({ $show }) => ($show ? 'visible' : 'hidden')};
+    &.MuiTooltip-popper {
+        opacity: ${({ $show }) => ($show ? '1' : '0')};
+    }
 `;

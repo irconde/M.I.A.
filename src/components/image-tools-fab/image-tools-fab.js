@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
     SpeedDialIconWrapper,
@@ -11,11 +11,9 @@ import {
     getCollapsedSideMenu,
     getCornerstoneMode,
     getIsFabVisible,
-    getIsImageInverted,
     getIsImageToolsOpen,
     getSettingsVisibility,
     getSingleViewport,
-    toggleImageInverted,
     toggleImageToolsOpen,
 } from '../../redux/slices/ui/uiSlice';
 import * as constants from '../../utils/enums/Constants';
@@ -31,10 +29,11 @@ const ImageToolsFab = (props) => {
     const settingsVisibility = useSelector(getSettingsVisibility);
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const singleViewport = useSelector(getSingleViewport);
-    const isInverted = useSelector(getIsImageInverted);
     const dispatch = useDispatch();
+    const [isInverted, setInverted] = useState(false);
 
     const toggleInvert = () => {
+        setInverted(!isInverted);
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -50,7 +49,6 @@ const ImageToolsFab = (props) => {
                 viewportSide
             );
         }
-        dispatch(toggleImageInverted());
     };
 
     /**
@@ -70,6 +68,11 @@ const ImageToolsFab = (props) => {
         }
     };
 
+    const handleTooltip = () => {
+        if (isOpen) return 'Invert';
+        else return 'Image Tools';
+    };
+
     return (
         <StyledSpeedDial
             {...getFABInfo()}
@@ -83,13 +86,13 @@ const ImageToolsFab = (props) => {
                 <>
                     <StyledTooltip
                         $show={!isOpen}
-                        title={'Image Tools'}
-                        placement={'left'}>
+                        placement={'left'}
+                        title={isOpen ? '' : 'Image Tools'}>
                         <SpeedDialIconWrapper
                             onClick={() => {
                                 dispatch(toggleImageToolsOpen(true));
                             }}
-                            show={!isOpen}>
+                            $show={!isOpen}>
                             <ScaleIcon
                                 width={'24px'}
                                 height={'24px'}
@@ -99,11 +102,11 @@ const ImageToolsFab = (props) => {
                     </StyledTooltip>
                     <StyledTooltip
                         $show={isOpen}
-                        title={'Invert'}
-                        placement={'left'}>
+                        placement={'left'}
+                        title={isOpen ? 'Invert' : ''}>
                         <SpeedDialIconWrapper
                             onClick={toggleInvert}
-                            show={isOpen}>
+                            $show={isOpen}>
                             <InvertIcon
                                 width={'24px'}
                                 height={'24px'}
@@ -138,8 +141,6 @@ const ImageToolsFab = (props) => {
         </StyledSpeedDial>
     );
 };
-
-// TODO: Revert isInverted from redux
 
 ImageToolsFab.propTypes = {
     cornerstone: PropTypes.object.isRequired,
