@@ -4,6 +4,7 @@ import {
     SpeedDialIconWrapper,
     StyledAction,
     StyledSpeedDial,
+    StyledTooltip,
 } from './image-tools-fab.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -80,24 +81,36 @@ const ImageToolsFab = (props) => {
             onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
             icon={
                 <>
-                    <SpeedDialIconWrapper
-                        onClick={() => {
-                            dispatch(toggleImageToolsOpen(true));
-                        }}
-                        show={!isOpen}>
-                        <ScaleIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
-                        />
-                    </SpeedDialIconWrapper>
-                    <SpeedDialIconWrapper onClick={toggleInvert} show={isOpen}>
-                        <InvertIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
-                        />
-                    </SpeedDialIconWrapper>
+                    <StyledTooltip
+                        $show={!isOpen}
+                        title={'Image Tools'}
+                        placement={'left'}>
+                        <SpeedDialIconWrapper
+                            onClick={() => {
+                                dispatch(toggleImageToolsOpen(true));
+                            }}
+                            show={!isOpen}>
+                            <ScaleIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        </SpeedDialIconWrapper>
+                    </StyledTooltip>
+                    <StyledTooltip
+                        $show={isOpen}
+                        title={'Invert'}
+                        placement={'left'}>
+                        <SpeedDialIconWrapper
+                            onClick={toggleInvert}
+                            show={isOpen}>
+                            <InvertIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        </SpeedDialIconWrapper>
+                    </StyledTooltip>
                 </>
             }>
             <StyledAction
@@ -127,7 +140,6 @@ const ImageToolsFab = (props) => {
 };
 
 // TODO: Revert isInverted from redux
-// TODO: Fix tooltips for menu/invert
 
 ImageToolsFab.propTypes = {
     cornerstone: PropTypes.object.isRequired,

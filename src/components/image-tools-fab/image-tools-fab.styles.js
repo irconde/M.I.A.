@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Fab, SpeedDial, SpeedDialAction } from '@mui/material';
+import { Fab, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
     sideMenuWidth,
@@ -157,4 +157,8 @@ export const SpeedDialIconWrapper = styled.div`
     justify-content: center;
     transition: opacity 200ms ease-in-out;
     border-radius: 50%;
+`;
+
+export const StyledTooltip = styled(Tooltip)`
+    visibility: ${({ $show }) => ($show ? 'visible' : 'hidden')};
 `;
