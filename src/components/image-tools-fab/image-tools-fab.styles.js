@@ -93,7 +93,6 @@ export const StyledSpeedDial = styled(SpeedDial)`
             ? 2.35 * NEXT_BUTTON_FAB_MARGIN
             : NEXT_BUTTON_FAB_MARGIN}px;
     display: ${(props) => (props.show ? 'flex' : 'none')};
-    flex-direction: column-reverse;
 
     z-index: 1;
     pointer-events: ${(props) => (props.fabOpacity ? 'pointer' : 'none')};
@@ -119,10 +118,21 @@ export const StyledSpeedDial = styled(SpeedDial)`
             background-color: #5e5e5e;
         }
     }
+
+    && .MuiSpeedDial-actions {
+        width: 56px;
+        padding: 0 0 2.35rem 0;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+    }
 `;
 
 export const StyledAction = styled(SpeedDialAction)`
     &.MuiButtonBase-root {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
         background-color: ${({ $invert }) =>
             $invert ? selectedBlue : noSelectGrey};
         margin-bottom: 0.5rem;

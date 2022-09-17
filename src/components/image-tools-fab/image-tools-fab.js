@@ -104,10 +104,9 @@ const ImageToolsFab = (props) => {
 };
 
 // TODO: Revert isInverted from redux
-// TODO: Make fab stay open even after clicked
+// TODO: Fix tooltips for menu/invert
 // TODO: Make invert tool replace image tools button when open
 // TODO: ^ Possibly restructure elements in dom to accomidate replacement
-// TODO: Don't hide tools, make them transition out from behind menu button
 
 ImageToolsFab.propTypes = {
     cornerstone: PropTypes.object.isRequired,
