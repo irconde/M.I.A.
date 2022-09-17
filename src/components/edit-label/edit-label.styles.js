@@ -61,3 +61,5 @@ export const ClearIconWrapper = styled.div`
     cursor: pointer;
     vertical-align: text-top;
 `;
+
+export const INPUT_HEIGHT = 24;

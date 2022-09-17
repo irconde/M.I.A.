@@ -17,14 +17,12 @@ import {
 import {
     ArrowIconWrapper,
     ClearIconWrapper,
-    EditLabelWrapper,
+    EditLabelWrapper, INPUT_HEIGHT,
     InputContainer,
     NewLabelInput,
 } from './edit-label.styles';
 import LabelListComponent from './label-list.component';
 import ClearIcon from '../../icons/edit-label/clear-icon/clear.icon';
-
-const INPUT_HEIGHT = 24;
 
 /**
  * Widget for editing a selected detection's label.

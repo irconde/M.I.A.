@@ -3207,15 +3207,11 @@ class App extends Component {
                     x: bbox[0] + horizontalGap,
                     y: bbox[1] + verticalGap,
                 });
-                const newViewport =
-                    currentViewport.id === 'dicomImageRight'
-                        ? constants.viewport.SIDE
-                        : constants.viewport.TOP;
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 });
                 this.appUpdateImage();
                 return {
@@ -3223,7 +3219,7 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 };
             }
         }
