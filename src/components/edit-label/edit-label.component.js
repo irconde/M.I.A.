@@ -18,6 +18,7 @@ import {
     ArrowIconWrapper,
     ClearIconWrapper,
     EditLabelWrapper,
+    INPUT_HEIGHT,
     InputContainer,
     NewLabelInput,
 } from './edit-label.styles';
@@ -97,14 +98,13 @@ const EditLabelComponent = ({ onLabelChange }) => {
     };
 
     /**
-     * Calculates the difference in height or width based on the given viewport and diff(erence)
-     * @param {number} diff
+     * Scales a value based on the given viewport's zoom level
+     * @param {number} value
      * @param {string} viewport
      * @returns {number}
      */
-    const getEditLabelDiff = (diff, viewport) => {
-        const zoom = viewport === 'side' ? zoomSide : zoomTop;
-        return diff * zoom;
+    const scaleByZoom = (value, viewport) => {
+        return value * getViewportZoom(viewport);
     };
 
     /**
@@ -127,23 +127,40 @@ const EditLabelComponent = ({ onLabelChange }) => {
      */
     const handleLabelInputChange = (e) => {
         const { value } = e.target;
-        setShowClearIcon(value.length ? true : false);
+        setShowClearIcon(!!value.length);
         dispatch(setInputLabel(value.toUpperCase()));
+    };
+
+    /**
+     * Returns the appropriate zoom amount based on the viewport (side or top)
+     *
+     * @param {string} viewport
+     * @returns {number}
+     */
+    const getViewportZoom = (viewport) =>
+        viewport === 'side' ? zoomSide : zoomTop;
+
+    /**
+     * Scales the given width by the zoom level and account for the detection border width
+     *
+     * @param {number} width
+     * @param {string} viewport
+     * @returns {number}
+     */
+    const getWidth = (width, viewport) => {
+        const { BORDER_WIDTH } = constants.detectionStyle;
+        return (
+            scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
+        );
     };
 
     if (isVisible && !recentScroll) {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                positionDiff={getEditLabelDiff(1, viewport)}
-                heightDiff={
-                    getEditLabelDiff(18, viewport) < 28
-                        ? 28
-                        : getEditLabelDiff(18, viewport)
-                }
-                top={position.top}
-                left={position.left}
-                width={width}
+                top={position.top - INPUT_HEIGHT}
+                left={position.left - getViewportZoom(viewport)}
+                width={getWidth(width, viewport)}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>

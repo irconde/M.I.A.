@@ -3,10 +3,10 @@ import * as constants from '../../utils/enums/Constants';
 
 export const EditLabelWrapper = styled.div`
     position: absolute;
-    width: ${(props) => `${props.width}px`};
     min-width: 120px;
     z-index: 500;
-    left: ${(props) => `${props.left - props.positionDiff}px`};
+    width: ${(props) => `${props.width}px`};
+    left: ${(props) => `${props.left}px`};
     top: ${(props) => `${props.top}px`};
     background: ${constants.colors.BLUE};
 `;
@@ -27,10 +27,9 @@ export const ArrowIconWrapper = styled.div`
 
 export const NewLabelInput = styled.input`
     background-color: transparent;
-    font-family: 'Arial';
-    font-weight: '600px';
-    font-size: ${(props) => `${props.fontSize}px`};
-    height: ${(props) => `${props.heightDiff}px`};
+    font-family: 'Arial', 'sans-serif';
+    font-weight: 500;
+
     color: ${constants.colors.WHITE};
     border: none;
     user-select: none;
@@ -62,3 +61,5 @@ export const ClearIconWrapper = styled.div`
     cursor: pointer;
     vertical-align: text-top;
 `;
+
+export const INPUT_HEIGHT = 24;

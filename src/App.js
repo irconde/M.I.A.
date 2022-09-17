@@ -3195,37 +3195,23 @@ class App extends Component {
                 const newFont =
                     fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-                const canvas = currentViewport.children[0];
-                const ctx = canvas.getContext('2d');
-                const detectionLabel = Utils.formatDetectionLabel(
-                    label,
-                    confidence
-                );
-                const labelSize = Utils.getTextLabelSize(
-                    ctx,
-                    detectionLabel,
-                    constants.detectionStyle.LABEL_PADDING
-                );
-                const { offsetLeft } = currentViewport;
+                const { offsetLeft, offsetTop } = currentViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
+                const verticalGap = offsetTop / zoomLevel;
                 const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
                         : this.state.imageViewportTop;
-                const newViewport =
-                    currentViewport.id === 'dicomImageRight'
-                        ? constants.viewport.SIDE
-                        : constants.viewport.TOP;
-                const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
+
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + horizontalGap,
-                    y: bbox[1] - verticalGap - 6,
+                    y: bbox[1] + verticalGap,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 });
                 this.appUpdateImage();
                 return {
@@ -3233,7 +3219,7 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 };
             }
         }
