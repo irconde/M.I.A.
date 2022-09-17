@@ -94,7 +94,6 @@ export const StyledSpeedDial = styled(SpeedDial)`
             : NEXT_BUTTON_FAB_MARGIN}px;
     display: ${(props) => (props.show ? 'flex' : 'none')};
 
-    z-index: 1;
     pointer-events: ${(props) => (props.fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
 
@@ -107,15 +106,17 @@ export const StyledSpeedDial = styled(SpeedDial)`
         }
     }
 
-    &.MuiButtonBase-root {
-        background-color: ${noSelectGrey};
+    & .MuiButtonBase-root {
+        background-color: ${({ $invert, $isOpen }) =>
+            $isOpen && $invert ? selectedBlue : noSelectGrey};
         border: 1px solid #414141;
-
+        z-index: 1;
         box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
-            background-color: #5e5e5e;
+            background-color: ${({ $invert, $isOpen }) =>
+                $isOpen && $invert ? '#6199fd' : '#5e5e5e'};
         }
     }
 
@@ -145,4 +146,15 @@ export const StyledAction = styled(SpeedDialAction)`
                 $invert ? '#6199fd' : '#5e5e5e'};
         }
     }
+`;
+
+export const SpeedDialIconWrapper = styled.div`
+    opacity: ${({ show }) => (show ? '1' : '0')};
+    width: ${({ show }) => (show ? '100%' : '0px')};
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 200ms ease-in-out;
+    border-radius: 50%;
 `;

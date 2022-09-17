@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledAction, StyledSpeedDial } from './image-tools-fab.styles';
+import {
+    SpeedDialIconWrapper,
+    StyledAction,
+    StyledSpeedDial,
+} from './image-tools-fab.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
@@ -17,6 +21,7 @@ import * as constants from '../../utils/enums/Constants';
 import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
+import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
 
 const ImageToolsFab = (props) => {
     const isOpen = useSelector(getIsImageToolsOpen);
@@ -28,7 +33,7 @@ const ImageToolsFab = (props) => {
     const isInverted = useSelector(getIsImageInverted);
     const dispatch = useDispatch();
 
-    const handleInvert = () => {
+    const toggleInvert = () => {
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -68,26 +73,33 @@ const ImageToolsFab = (props) => {
         <StyledSpeedDial
             {...getFABInfo()}
             $isSideMenuCollapsed={isSideMenuCollapsed}
+            $invert={isInverted}
+            $isOpen={isOpen}
             ariaLabel={'Speed Dial Button'}
-            onClick={() => {
-                dispatch(toggleImageToolsOpen(true));
-            }}
             open={isOpen}
             onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
-            icon={<ScaleIcon width={'24px'} height={'24px'} color={'white'} />}>
-            <StyledAction
-                key={'invert'}
-                $invert={isInverted}
-                onClick={handleInvert}
-                icon={
-                    <InvertIcon
-                        width={'24px'}
-                        height={'24px'}
-                        color={'white'}
-                    />
-                }
-                tooltipTitle={'Invert'}
-            />
+            icon={
+                <>
+                    <SpeedDialIconWrapper
+                        onClick={() => {
+                            dispatch(toggleImageToolsOpen(true));
+                        }}
+                        show={!isOpen}>
+                        <ScaleIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
+                        />
+                    </SpeedDialIconWrapper>
+                    <SpeedDialIconWrapper onClick={toggleInvert} show={isOpen}>
+                        <InvertIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
+                        />
+                    </SpeedDialIconWrapper>
+                </>
+            }>
             <StyledAction
                 key={'contrast'}
                 icon={
@@ -99,14 +111,23 @@ const ImageToolsFab = (props) => {
                 }
                 tooltipTitle={'Contrast'}
             />
+            <StyledAction
+                key={'brightness'}
+                icon={
+                    <BrightnessIcon
+                        width={'24px'}
+                        height={'24px'}
+                        color={'white'}
+                    />
+                }
+                tooltipTitle={'Brightness'}
+            />
         </StyledSpeedDial>
     );
 };
 
 // TODO: Revert isInverted from redux
 // TODO: Fix tooltips for menu/invert
-// TODO: Make invert tool replace image tools button when open
-// TODO: ^ Possibly restructure elements in dom to accomidate replacement
 
 ImageToolsFab.propTypes = {
     cornerstone: PropTypes.object.isRequired,
