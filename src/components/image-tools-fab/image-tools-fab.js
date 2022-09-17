@@ -27,6 +27,7 @@ const ImageToolsFab = (props) => {
     const singleViewport = useSelector(getSingleViewport);
     const isInverted = useSelector(getIsImageInverted);
     const dispatch = useDispatch();
+
     const handleInvert = () => {
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
@@ -64,37 +65,20 @@ const ImageToolsFab = (props) => {
     };
 
     return (
-        // <ImageToolsWrapper
-        //     {...getFABInfo()}
-        //     $isSideMenuCollapsed={isSideMenuCollapsed}
-        //     onClick={() => dispatch(toggleImageToolsOpen())}>
-        //     <Tooltip title={'Image Tools'}>
-        //         <ImageToolsButton id={'tools button'}>
-        //             <ScaleIcon width={'24px'} height={'24px'} color={'white'} />
-        //         </ImageToolsButton>
-        //     </Tooltip>
-        //
-        //     <ToolsWrapper $show={isOpen}>
-        //         <Tooltip title={'Invert'} placement={'right'}>
-        //             <InvertButton $invert={isInverted} onClick={handleInvert}>
-        //                 <InvertIcon
-        //                     width={'24px'}
-        //                     height={'24px'}
-        //                     color={'white'}
-        //                 />
-        //             </InvertButton>
-        //         </Tooltip>
-        //     </ToolsWrapper>
-        // </ImageToolsWrapper>
         <StyledSpeedDial
             {...getFABInfo()}
             $isSideMenuCollapsed={isSideMenuCollapsed}
             ariaLabel={'Speed Dial Button'}
-            onClick={() => dispatch(toggleImageToolsOpen())}
+            onClick={() => {
+                dispatch(toggleImageToolsOpen(true));
+            }}
             open={isOpen}
+            onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
             icon={<ScaleIcon width={'24px'} height={'24px'} color={'white'} />}>
             <StyledAction
                 key={'invert'}
+                $invert={isInverted}
+                onClick={handleInvert}
                 icon={
                     <InvertIcon
                         width={'24px'}

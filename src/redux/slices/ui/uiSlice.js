@@ -511,8 +511,8 @@ const uiSlice = createSlice({
          *
          * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
          */
-        toggleImageToolsOpen: (state) => {
-            state.isImageToolsOpen = !state.isImageToolsOpen;
+        toggleImageToolsOpen: (state, action) => {
+            state.isImageToolsOpen = action.payload;
         },
 
         toggleImageInverted: (state) => {
