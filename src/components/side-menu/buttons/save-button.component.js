@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getCollapsedSideMenu } from '../../../redux/slices/ui/uiSlice';
+import {getCollapsedSideMenu, getIsImageToolsOpen} from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Fab } from '@mui/material';
@@ -23,31 +23,31 @@ import { SaveButtonText } from './save-button.styles';
 
 const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     const isCollapsed = useSelector(getCollapsedSideMenu);
+    const isImageToolsOpen = useSelector(getIsImageToolsOpen);
     const detectionChanged = useSelector(getDetectionChanged);
     if (collapseBtn)
         return (
-            <CollapsedButtonContainer isCollapsed={isCollapsed}>
+            <CollapsedButtonContainer
+                $isFaded={isImageToolsOpen}
+                isCollapsed={isCollapsed}>
                 <Fab
-                    onClick={() => nextImageClick()}
-                    disabled={detectionChanged}
+                    onClick={nextImageClick}
+                    disabled={!detectionChanged}
                     color="primary">
-                    {detectionChanged ? (
-                        <></>
-                    ) : (
-                        <SaveArrowIcon
-                            width="24px"
-                            height="24px"
-                            color="white"
-                        />
-                    )}
+                    {detectionChanged && <SaveArrowIcon
+                        width="24px"
+                        height="24px"
+                        color="white"
+                    />}
                 </Fab>
             </CollapsedButtonContainer>
         );
     else
         return (
             <SideMenuButtonContainer
+                $isFaded={isImageToolsOpen || !detectionChanged}
                 enabled={detectionChanged}
-                onClick={() => nextImageClick()}
+                onClick={nextImageClick}
                 id="SaveButtonComponent">
                 <SaveArrowIcon width="24px" height="24px" color="white" />
                 <SaveButtonText>Save File</SaveButtonText>

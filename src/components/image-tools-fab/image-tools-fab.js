@@ -54,7 +54,7 @@ const ImageToolsFab = (props) => {
     /**
      * Gets FAB info to determine the show/hide and FAB opacity
      *
-     * @returns {{fabOpacity: boolean, show: boolean}}
+     * @returns {{$fabOpacity: boolean, $show: boolean}}
      */
     const getFABInfo = () => {
         if (
@@ -62,15 +62,10 @@ const ImageToolsFab = (props) => {
             cornerstoneMode === constants.cornerstoneMode.EDITION ||
             settingsVisibility
         ) {
-            return { fabOpacity: false, show: true };
+            return { $fabOpacity: false, $show: true };
         } else {
-            return { fabOpacity: isVisible, show: isVisible };
+            return { $fabOpacity: isVisible, $show: isVisible };
         }
-    };
-
-    const handleTooltip = () => {
-        if (isOpen) return 'Invert';
-        else return 'Image Tools';
     };
 
     return (
