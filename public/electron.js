@@ -343,11 +343,14 @@ ipcMain.handle(Constants.Channels.getSettingsCookie, async () => {
         if (appSettings === null) {
             initSettings()
                 .then(() => {
-                    resolve(appSettings);
+                    resolve({
+                        settings: appSettings,
+                        firstDisplaySettings: true,
+                    });
                 })
                 .catch(reject);
         } else {
-            resolve(appSettings);
+            resolve({ settings: appSettings, firstDisplaySettings: false });
         }
     });
 });

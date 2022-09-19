@@ -1,5 +1,6 @@
 import './App.css';
 import React, { Component } from 'react';
+import Box from '@mui/material/Box';
 import * as cornerstone from 'cornerstone-core';
 import * as cornerstoneTools from 'eac-cornerstone-tools';
 import dicomParser from 'dicom-parser';
@@ -71,6 +72,7 @@ import {
     setLocalFileOpen,
     setReceiveTime,
     toggleCollapsedSideMenu,
+    toggleSettingsVisibility,
     updateCornerstoneMode,
     updateDetectionContextPosition,
     updateEditionMode,
@@ -96,7 +98,7 @@ import {
     saveSettings,
 } from './redux/slices/settings/settingsSlice';
 import fetch from 'cross-fetch';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
 import ImageToolsFab from './components/image-tools-fab/image-tools-fab';
 
@@ -274,6 +276,12 @@ class App extends Component {
      */
     shouldComponentUpdate(nextProps, nextState) {
         if (
+            nextProps.loadingSettings === false &&
+            nextProps.firstDisplaySettings === true
+        ) {
+            this.props.toggleSettingsVisibility(true);
+        }
+        if (
             isElectron() &&
             !this.props.remoteOrLocal &&
             !nextProps.remoteOrLocal &&
@@ -341,7 +349,7 @@ class App extends Component {
         ) {
             fetchingFromLocalDirectory = true;
             this.getFileFromLocalDirectory();
-            return false;
+            return true;
         }
         if (this.props.firstDisplaySettings !== nextProps.firstDisplaySettings)
             return true;
@@ -382,21 +390,17 @@ class App extends Component {
     componentDidMount() {
         if (isElectron()) {
             this.props.loadElectronCookie();
+        } else if (
+            !isElectron() &&
+            !this.props.loadingSettings &&
+            this.props.firstDisplaySettings
+        ) {
+            this.props.toggleSettingsVisibility(true);
         }
         // Connect socket servers
-        if (
-            this.props.firstDisplaySettings === false ||
-            this.props.loadingElectronCookie
-        ) {
-            if (isElectron()) {
-                this.localDirectoryChangeHandler();
-            }
-            if (!this.props.loadingElectronCookie) {
-                if (this.props.remoteOrLocal === true) {
-                    this.connectToCommandServer();
-                } else if (isElectron() && this.props.localFileOutput !== '') {
-                    this.getFileFromLocalDirectory();
-                }
+        if (!isElectron() && this.props.firstDisplaySettings === false) {
+            if (this.props.remoteOrLocal) {
+                this.connectToCommandServer();
             }
         }
         this.state.imageViewportTop.addEventListener(
@@ -3192,37 +3196,23 @@ class App extends Component {
                 const newFont =
                     fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-                const canvas = currentViewport.children[0];
-                const ctx = canvas.getContext('2d');
-                const detectionLabel = Utils.formatDetectionLabel(
-                    label,
-                    confidence
-                );
-                const labelSize = Utils.getTextLabelSize(
-                    ctx,
-                    detectionLabel,
-                    constants.detectionStyle.LABEL_PADDING
-                );
-                const { offsetLeft } = currentViewport;
+                const { offsetLeft, offsetTop } = currentViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
+                const verticalGap = offsetTop / zoomLevel;
                 const viewport =
                     currentViewport.id === 'dicomImageRight'
                         ? this.state.imageViewportSide
                         : this.state.imageViewportTop;
-                const newViewport =
-                    currentViewport.id === 'dicomImageRight'
-                        ? constants.viewport.SIDE
-                        : constants.viewport.TOP;
-                const verticalGap = labelSize.height / Math.pow(zoomLevel, 2);
+
                 const { x, y } = cornerstone.pixelToCanvas(viewport, {
                     x: bbox[0] + horizontalGap,
-                    y: bbox[1] - verticalGap - 6,
+                    y: bbox[1] + verticalGap,
                 });
                 this.props.labelSelectedUpdate({
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 });
                 this.appUpdateImage();
                 return {
@@ -3230,7 +3220,7 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
-                    viewport: newViewport,
+                    viewport,
                 };
             }
         }
@@ -3319,108 +3309,124 @@ class App extends Component {
     }
 
     render() {
-        return (
-            <div>
-                <Snackbar
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                    open={this.state.showSnackbar}
-                    autoHideDuration={3000}
-                    onClose={(event, reason) => {
-                        if (reason !== 'clickaway') {
-                            this.setShowSnackbar(false, '');
-                        }
+        if (this.props.loadingSettings) {
+            return (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        display: 'flex',
+                        left: '45%',
+                        top: '45%',
                     }}>
-                    <Alert
-                        severity="error"
+                    <CircularProgress size={120} />
+                </Box>
+            );
+        } else {
+            return (
+                <div>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        open={this.state.showSnackbar}
+                        autoHideDuration={3000}
                         onClose={(event, reason) => {
                             if (reason !== 'clickaway') {
                                 this.setShowSnackbar(false, '');
                             }
                         }}>
-                        {this.state.errorMessage}
-                    </Alert>
-                </Snackbar>
-                <div
-                    id="viewerContainer"
-                    style={{
-                        width: '100vw',
-                        height: '100vh',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                    }}
-                    onContextMenu={(e) => e.preventDefault()}
-                    className="disable-selection noIbar"
-                    unselectable="off"
-                    ref={(el) => {
-                        el &&
-                            el.addEventListener('selectstart', (e) => {
-                                e.preventDefault();
-                            });
-                    }}>
-                    <TopBarComponent
-                        connectToCommandServer={this.connectToCommandServer}
-                        getFileFromLocal={this.getFileFromLocal}
-                        cornerstone={cornerstone}
-                    />
-                    <SideMenuComponent
-                        nextImageClick={this.nextImageClick}
-                        resetCornerstoneTools={this.resetCornerstoneTool}
-                        renderDetectionContextMenu={
-                            this.renderDetectionContextMenu
-                        }
-                    />
-                    {this.props.remoteOrLocal === true ||
-                    (!this.props.remoteOrLocal && this.props.hasFileOutput) ? (
-                        <NextButtonComponent
-                            collapseBtn={true}
-                            nextImageClick={this.nextImageClick}
-                        />
-                    ) : (
-                        <SaveButtonComponent
-                            collapseBtn={true}
-                            nextImageClick={this.nextImageClick}
-                        />
-                    )}
-                    <div id="algorithm-outputs"></div>
-                    <DetectionContextMenu
-                        setSelectedOption={this.selectEditionMode}
-                    />
-                    <ColorPicker />
-                    <EditLabel onLabelChange={this.editDetectionLabel} />
-                    <BoundPolyFAB
-                        onBoundingSelect={this.onBoundingBoxSelected}
-                        onPolygonSelect={this.onPolygonMaskSelected}
-                    />
-                    <ImageToolsFab
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
+                        <Alert
+                            severity="error"
+                            onClose={(event, reason) => {
+                                if (reason !== 'clickaway') {
+                                    this.setShowSnackbar(false, '');
+                                }
+                            }}>
+                            {this.state.errorMessage}
+                        </Alert>
+                    </Snackbar>
+                    <div
+                        id="viewerContainer"
+                        style={{
+                            width: '100vw',
+                            height: '100vh',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
                         }}
-                        cornerstone={cornerstone}
-                        imageViewportTop={this.state.imageViewportTop}
-                        imageViewportSide={this.state.imageViewportSide}
-                    />
-                    {isElectron() ? (
-                        <LazyImageMenu
-                            getSpecificFileFromLocalDirectory={
-                                this.getSpecificFileFromLocalDirectory
-                            }
-                            thumbnails={this.state.thumbnails}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="disable-selection noIbar"
+                        unselectable="off"
+                        ref={(el) => {
+                            el &&
+                                el.addEventListener('selectstart', (e) => {
+                                    e.preventDefault();
+                                });
+                        }}>
+                        <TopBarComponent
+                            connectToCommandServer={this.connectToCommandServer}
+                            getFileFromLocal={this.getFileFromLocal}
+                            cornerstone={cornerstone}
                         />
-                    ) : null}
-                    <NoFileSignComponent />
-                    <MetaDataComponent />
-                </div>
-                {this.props.loadingElectronCookie === false ? (
+                        <SideMenuComponent
+                            nextImageClick={this.nextImageClick}
+                            resetCornerstoneTools={this.resetCornerstoneTool}
+                            renderDetectionContextMenu={
+                                this.renderDetectionContextMenu
+                            }
+                        />
+                        {this.props.remoteOrLocal === true ||
+                        (!this.props.remoteOrLocal &&
+                            this.props.hasFileOutput) ? (
+                            <NextButtonComponent
+                                collapseBtn={true}
+                                nextImageClick={this.nextImageClick}
+                            />
+                        ) : (
+                            <SaveButtonComponent
+                                collapseBtn={true}
+                                nextImageClick={this.nextImageClick}
+                            />
+                        )}
+                        <div id="algorithm-outputs"></div>
+                        <DetectionContextMenu
+                            setSelectedOption={this.selectEditionMode}
+                        />
+                        <ColorPicker />
+                        <EditLabel onLabelChange={this.editDetectionLabel} />
+                        <BoundPolyFAB
+                            onBoundingSelect={this.onBoundingBoxSelected}
+                            onPolygonSelect={this.onPolygonMaskSelected}
+                        />
+                        <ImageToolsFab
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            cornerstone={cornerstone}
+                            imageViewportTop={this.state.imageViewportTop}
+                            imageViewportSide={this.state.imageViewportSide}
+                        />
+                        {isElectron() ? (
+                            <LazyImageMenu
+                                getSpecificFileFromLocalDirectory={
+                                    this.getSpecificFileFromLocalDirectory
+                                }
+                                thumbnails={this.state.thumbnails}
+                            />
+                        ) : null}
+                        <NoFileSignComponent />
+                        <MetaDataComponent />
+                    </div>
                     <SettingsModal
                         connectToCommandServer={this.connectToCommandServer}
                         resetCornerstoneTool={this.resetCornerstoneTool}
                         appUpdateImage={this.appUpdateImage}
                         cornerstone={cornerstone}
                     />
-                ) : null}
-            </div>
-        );
+                </div>
+            );
+        }
     }
 }
 
@@ -3465,6 +3471,7 @@ const mapStateToProps = (state) => {
         localFileOutput: settings.settings.localFileOutput,
         loadingElectronCookie: settings.settings.loadingElectronCookie,
         apiPrefix: settings.apiPrefix,
+        loadingSettings: settings.loadingSettings,
     };
 };
 
@@ -3520,6 +3527,7 @@ const mapDispatchToProps = {
     saveSettings,
     setCollapsedSideMenu,
     invalidateDetections,
+    toggleSettingsVisibility,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
