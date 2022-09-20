@@ -7,14 +7,13 @@ import {
 } from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
-import { Fab } from '@mui/material';
 
 import {
     CollapsedButtonContainer,
     SideMenuButtonContainer,
 } from './shared/button.styles';
 
-import { SaveButtonText } from './save-button.styles';
+import { SaveButtonFab, SaveButtonText } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 
 /**
@@ -30,23 +29,24 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     const isImageToolsOpen = useSelector(getIsImageToolsOpen);
     const detectionChanged = useSelector(getDetectionChanged);
 
-    console.log('Detection Changed: ', detectionChanged);
-
     if (collapseBtn)
         return (
             <Tooltip
-                disableHoverListener={!detectionChanged}
+                disableHoverListener={isImageToolsOpen || !detectionChanged}
                 title={'Save Image'}>
                 <CollapsedButtonContainer
                     $isFaded={isImageToolsOpen || !detectionChanged}
                     isCollapsed={isCollapsed}>
-                    <Fab onClick={nextImageClick} color="primary">
+                    <SaveButtonFab
+                        onClick={nextImageClick}
+                        $enabled={detectionChanged}
+                        color="primary">
                         <SaveArrowIcon
                             width="24px"
                             height="24px"
                             color="white"
                         />
-                    </Fab>
+                    </SaveButtonFab>
                 </CollapsedButtonContainer>
             </Tooltip>
         );
