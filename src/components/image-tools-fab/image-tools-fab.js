@@ -21,9 +21,11 @@ import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
 import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
+import { getCurrentFile } from '../../redux/slices/server/serverSlice';
 
 const ImageToolsFab = (props) => {
     const isOpen = useSelector(getIsImageToolsOpen);
+    const currentFile = useSelector(getCurrentFile);
     const isSideMenuCollapsed = useSelector(getCollapsedSideMenu);
     const isVisible = useSelector(getIsFabVisible);
     const settingsVisibility = useSelector(getSettingsVisibility);
@@ -68,73 +70,75 @@ const ImageToolsFab = (props) => {
         }
     };
 
-    return (
-        <StyledSpeedDial
-            {...getFABInfo()}
-            $isSideMenuCollapsed={isSideMenuCollapsed}
-            $invert={isInverted}
-            $isOpen={isOpen}
-            ariaLabel={'Speed Dial Button'}
-            open={isOpen}
-            onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
-            icon={
-                <>
-                    <StyledTooltip
-                        $show={!isOpen}
-                        placement={'left'}
-                        title={isOpen ? '' : 'Image Tools'}>
-                        <SpeedDialIconWrapper
-                            onClick={() => {
-                                dispatch(toggleImageToolsOpen(true));
-                            }}
-                            $show={!isOpen}>
-                            <ScaleIcon
-                                width={'24px'}
-                                height={'24px'}
-                                color={'white'}
-                            />
-                        </SpeedDialIconWrapper>
-                    </StyledTooltip>
-                    <StyledTooltip
-                        $show={isOpen}
-                        placement={'left'}
-                        title={isOpen ? 'Invert' : ''}>
-                        <SpeedDialIconWrapper
-                            onClick={toggleInvert}
-                            $show={isOpen}>
-                            <InvertIcon
-                                width={'24px'}
-                                height={'24px'}
-                                color={'white'}
-                            />
-                        </SpeedDialIconWrapper>
-                    </StyledTooltip>
-                </>
-            }>
-            <StyledAction
-                key={'contrast'}
+    if (currentFile !== null) {
+        return (
+            <StyledSpeedDial
+                {...getFABInfo()}
+                $isSideMenuCollapsed={isSideMenuCollapsed}
+                $invert={isInverted}
+                $isOpen={isOpen}
+                ariaLabel={'Speed Dial Button'}
+                open={isOpen}
+                onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
                 icon={
-                    <ContrastIcon
-                        width={'24px'}
-                        height={'24px'}
-                        color={'white'}
-                    />
-                }
-                tooltipTitle={'Contrast'}
-            />
-            <StyledAction
-                key={'brightness'}
-                icon={
-                    <BrightnessIcon
-                        width={'24px'}
-                        height={'24px'}
-                        color={'white'}
-                    />
-                }
-                tooltipTitle={'Brightness'}
-            />
-        </StyledSpeedDial>
-    );
+                    <>
+                        <StyledTooltip
+                            $show={!isOpen}
+                            placement={'left'}
+                            title={isOpen ? '' : 'Image Tools'}>
+                            <SpeedDialIconWrapper
+                                onClick={() => {
+                                    dispatch(toggleImageToolsOpen(true));
+                                }}
+                                $show={!isOpen}>
+                                <ScaleIcon
+                                    width={'24px'}
+                                    height={'24px'}
+                                    color={'white'}
+                                />
+                            </SpeedDialIconWrapper>
+                        </StyledTooltip>
+                        <StyledTooltip
+                            $show={isOpen}
+                            placement={'left'}
+                            title={isOpen ? 'Invert' : ''}>
+                            <SpeedDialIconWrapper
+                                onClick={toggleInvert}
+                                $show={isOpen}>
+                                <InvertIcon
+                                    width={'24px'}
+                                    height={'24px'}
+                                    color={'white'}
+                                />
+                            </SpeedDialIconWrapper>
+                        </StyledTooltip>
+                    </>
+                }>
+                <StyledAction
+                    key={'contrast'}
+                    icon={
+                        <ContrastIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
+                        />
+                    }
+                    tooltipTitle={'Contrast'}
+                />
+                <StyledAction
+                    key={'brightness'}
+                    icon={
+                        <BrightnessIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
+                        />
+                    }
+                    tooltipTitle={'Brightness'}
+                />
+            </StyledSpeedDial>
+        );
+    } else return null;
 };
 
 ImageToolsFab.propTypes = {
