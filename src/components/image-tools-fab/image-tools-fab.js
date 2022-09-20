@@ -60,7 +60,7 @@ const ImageToolsFab = (props) => {
         if (
             cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
             cornerstoneMode === constants.cornerstoneMode.EDITION ||
-            settingsVisibility
+            (settingsVisibility && isVisible)
         ) {
             return { $fabOpacity: false, $show: true };
         } else {
