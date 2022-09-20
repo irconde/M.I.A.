@@ -3212,7 +3212,10 @@ class App extends Component {
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
-                    viewport,
+                    viewport:
+                        currentViewport.id === 'dicomImageRight'
+                            ? constants.viewport.SIDE
+                            : constants.viewport.TOP,
                 });
                 this.appUpdateImage();
                 return {
