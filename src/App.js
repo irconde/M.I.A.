@@ -3199,12 +3199,8 @@ class App extends Component {
                 const { offsetLeft, offsetTop } = currentViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
                 const verticalGap = offsetTop / zoomLevel;
-                const viewport =
-                    currentViewport.id === 'dicomImageRight'
-                        ? this.state.imageViewportSide
-                        : this.state.imageViewportTop;
 
-                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                const { x, y } = cornerstone.pixelToCanvas(currentViewport, {
                     x: bbox[0] + horizontalGap,
                     y: bbox[1] + verticalGap,
                 });
@@ -3223,7 +3219,10 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
-                    viewport,
+                    viewport:
+                        currentViewport.id === 'dicomImageRight'
+                            ? constants.viewport.SIDE
+                            : constants.viewport.TOP,
                 };
             }
         }
