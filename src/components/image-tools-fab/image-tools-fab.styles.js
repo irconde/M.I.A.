@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Fab, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
+import { SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
     sideMenuWidth,
@@ -25,7 +25,7 @@ export const StyledSpeedDial = styled(SpeedDial)`
             ? 2.35 * NEXT_BUTTON_FAB_MARGIN
             : NEXT_BUTTON_FAB_MARGIN}px;
     display: ${(props) => (props.$show ? 'flex' : 'none')};
-
+    z-index: 1;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
 

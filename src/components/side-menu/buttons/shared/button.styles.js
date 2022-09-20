@@ -51,7 +51,7 @@ export const SideMenuButtonContainer = styled.div`
     height: 75px;
     gap: 0.3rem;
     cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-
+    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
     opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
 
     p {
