@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
+    getIsFabVisible,
     getIsImageToolsOpen,
 } from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
@@ -28,6 +29,7 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     const isCollapsed = useSelector(getCollapsedSideMenu);
     const isImageToolsOpen = useSelector(getIsImageToolsOpen);
     const detectionChanged = useSelector(getDetectionChanged);
+    const isBoundPolyVisible = useSelector(getIsFabVisible);
 
     if (collapseBtn)
         return (
@@ -40,6 +42,7 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
                     <SaveButtonFab
                         onClick={nextImageClick}
                         $enabled={detectionChanged}
+                        disabled={!isBoundPolyVisible}
                         color="primary">
                         <SaveArrowIcon
                             width="24px"
