@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import {getCollapsedSideMenu, getIsImageToolsOpen} from '../../../redux/slices/ui/uiSlice';
+import {
+    getCollapsedSideMenu,
+    getIsImageToolsOpen,
+} from '../../../redux/slices/ui/uiSlice';
 import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Fab } from '@mui/material';
@@ -12,6 +15,7 @@ import {
 } from './shared/button.styles';
 
 import { SaveButtonText } from './save-button.styles';
+import Tooltip from '@mui/material/Tooltip';
 
 /**
  * Component button that allows user to save edited detections and load next files in queue. Similar to NextButtonComponent compnent but for local files only.
@@ -25,33 +29,39 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     const isCollapsed = useSelector(getCollapsedSideMenu);
     const isImageToolsOpen = useSelector(getIsImageToolsOpen);
     const detectionChanged = useSelector(getDetectionChanged);
+
+    console.log('Detection Changed: ', detectionChanged);
+
     if (collapseBtn)
         return (
-            <CollapsedButtonContainer
-                $isFaded={isImageToolsOpen}
-                isCollapsed={isCollapsed}>
-                <Fab
-                    onClick={nextImageClick}
-                    disabled={!detectionChanged}
-                    color="primary">
-                    {detectionChanged && <SaveArrowIcon
-                        width="24px"
-                        height="24px"
-                        color="white"
-                    />}
-                </Fab>
-            </CollapsedButtonContainer>
+            <Tooltip
+                disableHoverListener={!detectionChanged}
+                title={'Save Image'}>
+                <CollapsedButtonContainer
+                    $isFaded={isImageToolsOpen || !detectionChanged}
+                    isCollapsed={isCollapsed}>
+                    <Fab onClick={nextImageClick} color="primary">
+                        <SaveArrowIcon
+                            width="24px"
+                            height="24px"
+                            color="white"
+                        />
+                    </Fab>
+                </CollapsedButtonContainer>
+            </Tooltip>
         );
     else
         return (
-            <SideMenuButtonContainer
-                $isFaded={isImageToolsOpen || !detectionChanged}
-                enabled={detectionChanged}
-                onClick={nextImageClick}
-                id="SaveButtonComponent">
-                <SaveArrowIcon width="24px" height="24px" color="white" />
-                <SaveButtonText>Save File</SaveButtonText>
-            </SideMenuButtonContainer>
+            <Tooltip title={'Save Image'}>
+                <SideMenuButtonContainer
+                    $isFaded={isImageToolsOpen || !detectionChanged}
+                    enabled={detectionChanged}
+                    onClick={nextImageClick}
+                    id="SaveButtonComponent">
+                    <SaveArrowIcon width="24px" height="24px" color="white" />
+                    <SaveButtonText>Save File</SaveButtonText>
+                </SideMenuButtonContainer>
+            </Tooltip>
         );
 };
 
