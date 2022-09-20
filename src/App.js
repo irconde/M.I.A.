@@ -100,6 +100,7 @@ import {
 import fetch from 'cross-fetch';
 import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
+import ImageToolsFab from './components/image-tools-fab/image-tools-fab';
 
 let ipcRenderer;
 if (isElectron()) {
@@ -3198,12 +3199,8 @@ class App extends Component {
                 const { offsetLeft, offsetTop } = currentViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
                 const verticalGap = offsetTop / zoomLevel;
-                const viewport =
-                    currentViewport.id === 'dicomImageRight'
-                        ? this.state.imageViewportSide
-                        : this.state.imageViewportTop;
 
-                const { x, y } = cornerstone.pixelToCanvas(viewport, {
+                const { x, y } = cornerstone.pixelToCanvas(currentViewport, {
                     x: bbox[0] + horizontalGap,
                     y: bbox[1] + verticalGap,
                 });
@@ -3211,7 +3208,10 @@ class App extends Component {
                     width: boundingWidth,
                     position: { x, y },
                     font: newFont,
-                    viewport,
+                    viewport:
+                        currentViewport.id === 'dicomImageRight'
+                            ? constants.viewport.SIDE
+                            : constants.viewport.TOP,
                 });
                 this.appUpdateImage();
                 return {
@@ -3219,7 +3219,10 @@ class App extends Component {
                     y: y,
                     boundingWidth: boundingWidth,
                     font: newFont,
-                    viewport,
+                    viewport:
+                        currentViewport.id === 'dicomImageRight'
+                            ? constants.viewport.SIDE
+                            : constants.viewport.TOP,
                 };
             }
         }
@@ -3396,6 +3399,15 @@ class App extends Component {
                         <BoundPolyFAB
                             onBoundingSelect={this.onBoundingBoxSelected}
                             onPolygonSelect={this.onPolygonMaskSelected}
+                        />
+                        <ImageToolsFab
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            cornerstone={cornerstone}
+                            imageViewportTop={this.state.imageViewportTop}
+                            imageViewportSide={this.state.imageViewportSide}
                         />
                         {isElectron() ? (
                             <LazyImageMenu

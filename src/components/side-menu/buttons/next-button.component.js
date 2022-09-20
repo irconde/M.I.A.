@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
     getCornerstoneMode,
+    getIsImageToolsOpen,
 } from '../../../redux/slices/ui/uiSlice';
 import * as constants from '../../../utils/enums/Constants';
 import { getSelectedDetection } from '../../../redux/slices/detections/detectionsSlice';
@@ -36,6 +37,7 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
     const isCollapsed = useSelector(getCollapsedSideMenu);
     const localFileOutput = useSelector(getLocalFileOutput);
     const numFilesInQueue = useSelector(getNumFilesInQueue);
+    const isImageToolsOpen = useSelector(getIsImageToolsOpen);
     const enableNextButton =
         !selectedDetection &&
         cornerstoneMode === constants.cornerstoneMode.SELECTION &&
@@ -48,8 +50,12 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
 
     if (collapseBtn)
         return (
-            <Tooltip title="Go to next image">
-                <CollapsedButtonContainer isCollapsed={isCollapsed}>
+            <Tooltip
+                disableHoverListener={!enableNextButton}
+                title="Go to next image">
+                <CollapsedButtonContainer
+                    $isFaded={isImageToolsOpen}
+                    isCollapsed={isCollapsed}>
                     <Fab
                         onClick={handleClick}
                         disabled={!enableNextButton}
@@ -69,9 +75,10 @@ const NextButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
         return (
             <Tooltip title="Go to next image">
                 <SideMenuButtonContainer
+                    disableHoverListener={!enableNextButton}
+                    $isFaded={isImageToolsOpen}
                     enabled={enableNextButton}
-                    onClick={handleClick}
-                    id="NextButtonComponent">
+                    onClick={handleClick}>
                     <p>Next</p>
                     <NextIconWrapper>
                         <NextArrowIcon

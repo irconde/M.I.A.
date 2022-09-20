@@ -134,3 +134,5 @@ export const Channels = {
     getSettingsCookie: 'get-settings-cookie',
     loadSettingsCookie: 'load-settings-cookie',
 };
+
+export const NEXT_BUTTON_FAB_MARGIN = 50;
