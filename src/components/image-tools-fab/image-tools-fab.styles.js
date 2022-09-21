@@ -21,6 +21,7 @@ export const SpeedDialWrapper = styled.div`
     display: flex;
     width: fit-content;
     height: 12rem;
+    z-index: 1;
     position: absolute;
     right: ${getRightPos}px;
     bottom: ${({ $isSideMenuCollapsed }) =>
@@ -41,7 +42,6 @@ export const SpeedDialWrapper = styled.div`
 
 export const StyledSpeedDial = styled(SpeedDial)`
     display: ${(props) => (props.$show ? 'flex' : 'none')};
-    z-index: 1;
     height: 12rem;
     justify-content: space-between;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
