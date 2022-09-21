@@ -37,9 +37,32 @@ const ImageToolsFab = (props) => {
     const singleViewport = useSelector(getSingleViewport);
     const dispatch = useDispatch();
     const [isInverted, setInverted] = useState(false);
+    const [sliderVisibility, setSliderVisibility] = useState({
+        brightnessSlider: false,
+        contrastSlider: false,
+    });
+
+    const toggleBrightnessSliderVisibility = () => {
+        setSliderVisibility({
+            brightnessSlider: !sliderVisibility.brightnessSlider,
+            contrastSlider: false,
+        });
+    };
+
+    const toggleContrastSliderVisibility = () => {
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: !sliderVisibility.contrastSlider,
+        });
+    };
 
     const toggleInvert = () => {
         setInverted(!isInverted);
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: false,
+        });
+
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -55,6 +78,14 @@ const ImageToolsFab = (props) => {
                 viewportSide
             );
         }
+    };
+
+    const handleClose = () => {
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: false,
+        });
+        dispatch(toggleImageToolsOpen(false));
     };
 
     /**
@@ -77,21 +108,19 @@ const ImageToolsFab = (props) => {
     if (currentFile !== null) {
         return (
             <SpeedDialWrapper
-                onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
+                onMouseLeave={handleClose}
                 $isSideMenuCollapsed={isSideMenuCollapsed}>
                 <SliderGroup>
-                    <SliderWrapper>
+                    <SliderWrapper $show={sliderVisibility.brightnessSlider}>
                         <StyledSlider
                             aria-label={'Brightness'}
-                            aria-valuetext={'Test'}
                             valueLabelDisplay="auto"
                             defaultValue={50}
                         />
                     </SliderWrapper>
-                    <SliderWrapper>
+                    <SliderWrapper $show={sliderVisibility.contrastSlider}>
                         <StyledSlider
                             aria-label={'Contrast'}
-                            aria-valuetext={'Test'}
                             valueLabelDisplay="auto"
                             defaultValue={50}
                         />
@@ -147,6 +176,8 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Contrast'}
+                        onClick={toggleContrastSliderVisibility}
+                        $active={sliderVisibility.contrastSlider}
                     />
                     <StyledAction
                         key={'brightness'}
@@ -158,6 +189,8 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Brightness'}
+                        onClick={toggleBrightnessSliderVisibility}
+                        $active={sliderVisibility.brightnessSlider}
                     />
                 </StyledSpeedDial>
             </SpeedDialWrapper>

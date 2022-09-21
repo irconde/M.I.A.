@@ -66,16 +66,16 @@ export const StyledAction = styled(SpeedDialAction)`
         width: 100%;
         height: auto;
         aspect-ratio: 1;
-        background-color: ${({ $invert }) =>
-            $invert ? selectedBlue : noSelectGrey};
+        background-color: ${({ $active }) =>
+            $active ? selectedBlue : noSelectGrey};
         margin: 0;
         border: 1px solid #414141;
         box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
-            background-color: ${({ $invert }) =>
-                $invert ? '#6199fd' : '#5e5e5e'};
+            background-color: ${({ $active }) =>
+                $active ? '#6199fd' : '#5e5e5e'};
         }
     }
 `;
@@ -139,4 +139,7 @@ export const SliderWrapper = styled.div`
     height: 56px;
     display: flex;
     align-items: center;
+    opacity: ${({ $show }) => Number($show)};
+    transition: opacity 0.1s ease-in;
+    pointer-events: ${({ $show }) => ($show ? 'auto' : 'none')};
 `;
