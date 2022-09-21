@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
     SpeedDialIconWrapper,
+    SpeedDialWrapper,
     StyledAction,
     StyledSpeedDial,
     StyledTooltip,
@@ -72,71 +73,72 @@ const ImageToolsFab = (props) => {
 
     if (currentFile !== null) {
         return (
-            <StyledSpeedDial
-                {...getFABInfo()}
-                $isSideMenuCollapsed={isSideMenuCollapsed}
-                $invert={isInverted}
-                $isOpen={isOpen}
-                ariaLabel={'Speed Dial Button'}
-                open={isOpen}
-                onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
-                icon={
-                    <>
-                        <StyledTooltip
-                            $show={!isOpen}
-                            placement={'left'}
-                            title={isOpen ? '' : 'Image Tools'}>
-                            <SpeedDialIconWrapper
-                                onClick={() => {
-                                    dispatch(toggleImageToolsOpen(true));
-                                }}
-                                $show={!isOpen}>
-                                <ScaleIcon
-                                    width={'24px'}
-                                    height={'24px'}
-                                    color={'white'}
-                                />
-                            </SpeedDialIconWrapper>
-                        </StyledTooltip>
-                        <StyledTooltip
-                            $show={isOpen}
-                            placement={'left'}
-                            title={isOpen ? 'Invert' : ''}>
-                            <SpeedDialIconWrapper
-                                onClick={toggleInvert}
-                                $show={isOpen}>
-                                <InvertIcon
-                                    width={'24px'}
-                                    height={'24px'}
-                                    color={'white'}
-                                />
-                            </SpeedDialIconWrapper>
-                        </StyledTooltip>
-                    </>
-                }>
-                <StyledAction
-                    key={'contrast'}
+            <SpeedDialWrapper $isSideMenuCollapsed={isSideMenuCollapsed}>
+                <StyledSpeedDial
+                    {...getFABInfo()}
+                    $invert={isInverted}
+                    $isOpen={isOpen}
+                    ariaLabel={'Speed Dial Button'}
+                    open={isOpen}
+                    onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
                     icon={
-                        <ContrastIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
-                        />
-                    }
-                    tooltipTitle={'Contrast'}
-                />
-                <StyledAction
-                    key={'brightness'}
-                    icon={
-                        <BrightnessIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
-                        />
-                    }
-                    tooltipTitle={'Brightness'}
-                />
-            </StyledSpeedDial>
+                        <>
+                            <StyledTooltip
+                                $show={!isOpen}
+                                placement={'left'}
+                                title={isOpen ? '' : 'Image Tools'}>
+                                <SpeedDialIconWrapper
+                                    onClick={() => {
+                                        dispatch(toggleImageToolsOpen(true));
+                                    }}
+                                    $show={!isOpen}>
+                                    <ScaleIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </SpeedDialIconWrapper>
+                            </StyledTooltip>
+                            <StyledTooltip
+                                $show={isOpen}
+                                placement={'left'}
+                                title={isOpen ? 'Invert' : ''}>
+                                <SpeedDialIconWrapper
+                                    onClick={toggleInvert}
+                                    $show={isOpen}>
+                                    <InvertIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </SpeedDialIconWrapper>
+                            </StyledTooltip>
+                        </>
+                    }>
+                    <StyledAction
+                        key={'contrast'}
+                        icon={
+                            <ContrastIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        }
+                        tooltipTitle={'Contrast'}
+                    />
+                    <StyledAction
+                        key={'brightness'}
+                        icon={
+                            <BrightnessIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        }
+                        tooltipTitle={'Brightness'}
+                    />
+                </StyledSpeedDial>
+            </SpeedDialWrapper>
         );
     } else return null;
 };

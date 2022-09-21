@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
+import { Slider, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
     sideMenuWidth,
@@ -18,16 +18,11 @@ const getRightPos = ({ $isSideMenuCollapsed }) => {
 };
 
 export const StyledSpeedDial = styled(SpeedDial)`
-    position: absolute;
-    right: ${getRightPos}px;
-    bottom: ${({ $isSideMenuCollapsed }) =>
-        $isSideMenuCollapsed
-            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
-            : NEXT_BUTTON_FAB_MARGIN}px;
     display: ${(props) => (props.$show ? 'flex' : 'none')};
     z-index: 1;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
+    outline: 2px dashed red;
 
     @keyframes fadein {
         from {
@@ -94,5 +89,28 @@ export const SpeedDialIconWrapper = styled.div`
 export const StyledTooltip = styled(Tooltip)`
     &.MuiTooltip-popper {
         opacity: ${({ $show }) => ($show ? '1' : '0')};
+    }
+`;
+
+export const StyledSlider = styled(Slider)``;
+
+export const SpeedDialWrapper = styled.div`
+    outline: 2px dashed yellow;
+    width: fit-content;
+    position: absolute;
+    right: ${getRightPos}px;
+    bottom: ${({ $isSideMenuCollapsed }) =>
+        $isSideMenuCollapsed
+            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
+            : NEXT_BUTTON_FAB_MARGIN}px;
+    transition: all 0.3s ease-in;
+
+    @keyframes fadein {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
+        }
     }
 `;
