@@ -83,12 +83,7 @@ const ImageToolsFab = (props) => {
      */
     const updateViewportContrast = (contrast, viewport) => {
         // convert from slider scale to cornerstone scale
-        const scaledContrast = (MAX_CONTRAST / MAX_SLIDER_VAL) * contrast;
-        // ensure the contrast is between the max and the min contrast
-        viewport.voi.windowWidth = Math.min(
-            Math.max(scaledContrast, MIN_CONTRAST),
-            MAX_CONTRAST
-        );
+        viewport.voi.windowWidth = (MAX_CONTRAST / MAX_SLIDER_VAL) * contrast;
     };
 
     const toggleBrightnessSliderVisibility = () => {
