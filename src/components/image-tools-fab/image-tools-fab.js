@@ -42,8 +42,10 @@ const ImageToolsFab = (props) => {
         contrastSlider: false,
     });
     const MAX_CONTRAST = 80000;
+    const MAX_BRIGHTNESS = 80000;
     const MAX_SLIDER_VAL = 100;
     const [contrast, setContrast] = useState(50);
+    const [brightness, setBrightness] = useState(50);
 
     /**
      * Updates the contrast of the viewports based on the value of the
@@ -73,6 +75,33 @@ const ImageToolsFab = (props) => {
     };
 
     /**
+     * Updates the brightness of the viewports based on the value of the
+     * brightness slider.
+     *
+     * @param {Event} e
+     * @param {number} value
+     */
+    const handleBrightnessChange = (e, value) => {
+        setBrightness(value);
+        const viewportTop = props.cornerstone.getViewport(
+            props.imageViewportTop
+        );
+        updateViewportBrightness(value, viewportTop);
+        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
+
+        if (!singleViewport) {
+            const viewportSide = props.cornerstone.getViewport(
+                props.imageViewportSide
+            );
+            updateViewportBrightness(value, viewportSide);
+            props.cornerstone.setViewport(
+                props.imageViewportSide,
+                viewportSide
+            );
+        }
+    };
+
+    /**
      * Scales the slider value to the corresponding cornerstone tools values
      * for contrast
      *
@@ -81,7 +110,21 @@ const ImageToolsFab = (props) => {
      */
     const updateViewportContrast = (contrast, viewport) => {
         // convert from slider scale to cornerstone scale
-        viewport.voi.windowWidth = (MAX_CONTRAST / MAX_SLIDER_VAL) * contrast;
+        viewport.voi.windowWidth =
+            (MAX_CONTRAST / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - contrast);
+    };
+
+    /**
+     * Scales the slider value to the corresponding cornerstone tools values
+     * for brightness.
+     *
+     * @param {number} brightness - between 0 and 100 value from slider
+     * @param {Object} viewport
+     */
+    const updateViewportBrightness = (brightness, viewport) => {
+        // convert from slider scale to cornerstone scale
+        viewport.voi.windowCenter =
+            (MAX_BRIGHTNESS / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - brightness);
     };
 
     const toggleBrightnessSliderVisibility = () => {
@@ -162,6 +205,8 @@ const ImageToolsFab = (props) => {
                             aria-label={'Brightness'}
                             valueLabelDisplay="auto"
                             defaultValue={50}
+                            value={brightness}
+                            onChange={handleBrightnessChange}
                         />
                     </SliderWrapper>
                     <SliderWrapper $show={sliderVisibility.contrastSlider}>
