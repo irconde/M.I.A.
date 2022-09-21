@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { Slider, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
@@ -16,6 +16,28 @@ const getRightPos = ({ $isSideMenuCollapsed }) => {
     }
     return right;
 };
+
+export const SpeedDialWrapper = styled.div`
+    display: flex;
+    width: fit-content;
+    height: 12rem;
+    position: absolute;
+    right: ${getRightPos}px;
+    bottom: ${({ $isSideMenuCollapsed }) =>
+        $isSideMenuCollapsed
+            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
+            : NEXT_BUTTON_FAB_MARGIN}px;
+    transition: all 0.3s ease-in;
+
+    @keyframes fadein {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
+        }
+    }
+`;
 
 export const StyledSpeedDial = styled(SpeedDial)`
     display: ${(props) => (props.$show ? 'flex' : 'none')};
@@ -102,42 +124,14 @@ export const StyledSlider = styled(Slider)`
     }
 `;
 
-export const SpeedDialWrapper = styled.div`
-    display: flex;
-    width: fit-content;
-    height: 12rem;
-    position: absolute;
-    right: ${getRightPos}px;
-    bottom: ${({ $isSideMenuCollapsed }) =>
-        $isSideMenuCollapsed
-            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
-            : NEXT_BUTTON_FAB_MARGIN}px;
-    transition: all 0.3s ease-in;
-
-    @keyframes fadein {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
-        }
-    }
-`;
-const sliderAnimation = keyframes`
-  from {
-    width: fit-content;
-  }
-  to {
-    width: 0;
-  }
-`;
 export const SliderGroup = styled.div`
     height: 68%;
+    width: ${({ $show }) => ($show ? '10rem' : '0')};
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     padding-right: 1rem;
-    animation: ${sliderAnimation} 0.1s;
+    transition: width 0.5s ease-in-out;
 `;
 
 export const SliderWrapper = styled.div`
@@ -145,6 +139,6 @@ export const SliderWrapper = styled.div`
     display: flex;
     align-items: center;
     opacity: ${({ $show }) => Number($show)};
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in;
     pointer-events: ${({ $show }) => ($show ? 'auto' : 'none')};
 `;

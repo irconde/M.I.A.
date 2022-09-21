@@ -180,6 +180,7 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Contrast'}
+                        placement={'left-start'}
                         onClick={toggleContrastSliderVisibility}
                         $active={sliderVisibility.contrastSlider}
                     />
@@ -193,6 +194,7 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Brightness'}
+                        placement={'left-start'}
                         onClick={toggleBrightnessSliderVisibility}
                         $active={sliderVisibility.brightnessSlider}
                     />
