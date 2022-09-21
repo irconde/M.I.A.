@@ -84,12 +84,16 @@ const ImageToolsFab = (props) => {
                         <StyledSlider
                             aria-label={'Brightness'}
                             aria-valuetext={'Test'}
+                            valueLabelDisplay="auto"
+                            defaultValue={50}
                         />
                     </SliderWrapper>
                     <SliderWrapper>
                         <StyledSlider
                             aria-label={'Contrast'}
                             aria-valuetext={'Test'}
+                            valueLabelDisplay="auto"
+                            defaultValue={50}
                         />
                     </SliderWrapper>
                 </SliderGroup>

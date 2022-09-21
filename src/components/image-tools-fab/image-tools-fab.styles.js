@@ -100,6 +100,7 @@ export const StyledTooltip = styled(Tooltip)`
 export const StyledSlider = styled(Slider)`
     &.MuiSlider-root {
         width: 200px;
+        color: ${selectedBlue};
     }
 `;
 
