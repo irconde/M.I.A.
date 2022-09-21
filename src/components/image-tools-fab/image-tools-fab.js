@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
+    SliderGroup,
+    SliderWrapper,
     SpeedDialIconWrapper,
     SpeedDialWrapper,
     StyledAction,
+    StyledSlider,
     StyledSpeedDial,
     StyledTooltip,
 } from './image-tools-fab.styles';
@@ -73,14 +76,29 @@ const ImageToolsFab = (props) => {
 
     if (currentFile !== null) {
         return (
-            <SpeedDialWrapper $isSideMenuCollapsed={isSideMenuCollapsed}>
+            <SpeedDialWrapper
+                onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
+                $isSideMenuCollapsed={isSideMenuCollapsed}>
+                <SliderGroup>
+                    <SliderWrapper>
+                        <StyledSlider
+                            aria-label={'Brightness'}
+                            aria-valuetext={'Test'}
+                        />
+                    </SliderWrapper>
+                    <SliderWrapper>
+                        <StyledSlider
+                            aria-label={'Contrast'}
+                            aria-valuetext={'Test'}
+                        />
+                    </SliderWrapper>
+                </SliderGroup>
                 <StyledSpeedDial
                     {...getFABInfo()}
                     $invert={isInverted}
                     $isOpen={isOpen}
                     ariaLabel={'Speed Dial Button'}
                     open={isOpen}
-                    onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
                     icon={
                         <>
                             <StyledTooltip

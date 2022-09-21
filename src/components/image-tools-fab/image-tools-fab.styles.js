@@ -20,6 +20,8 @@ const getRightPos = ({ $isSideMenuCollapsed }) => {
 export const StyledSpeedDial = styled(SpeedDial)`
     display: ${(props) => (props.$show ? 'flex' : 'none')};
     z-index: 1;
+    height: 12rem;
+    justify-content: space-between;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
     outline: 2px dashed red;
@@ -49,10 +51,13 @@ export const StyledSpeedDial = styled(SpeedDial)`
 
     && .MuiSpeedDial-actions {
         width: 56px;
-        padding: 0 0 2.35rem 0;
+        height: 68%;
+        justify-content: space-around;
+        padding: 0;
         display: flex;
         flex-direction: column-reverse;
         align-items: center;
+        outline: 2px dashed lime;
     }
 `;
 
@@ -63,7 +68,7 @@ export const StyledAction = styled(SpeedDialAction)`
         aspect-ratio: 1;
         background-color: ${({ $invert }) =>
             $invert ? selectedBlue : noSelectGrey};
-        margin-bottom: 0.5rem;
+        margin: 0;
         border: 1px solid #414141;
         box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
@@ -92,11 +97,17 @@ export const StyledTooltip = styled(Tooltip)`
     }
 `;
 
-export const StyledSlider = styled(Slider)``;
+export const StyledSlider = styled(Slider)`
+    &.MuiSlider-root {
+        width: 200px;
+    }
+`;
 
 export const SpeedDialWrapper = styled.div`
     outline: 2px dashed yellow;
+    display: flex;
     width: fit-content;
+    height: 12rem;
     position: absolute;
     right: ${getRightPos}px;
     bottom: ${({ $isSideMenuCollapsed }) =>
@@ -113,4 +124,18 @@ export const SpeedDialWrapper = styled.div`
             opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
         }
     }
+`;
+export const SliderGroup = styled.div`
+    outline: 2px dashed blue;
+    height: 68%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding-right: 1rem;
+`;
+
+export const SliderWrapper = styled.div`
+    height: 56px;
+    display: flex;
+    align-items: center;
 `;
