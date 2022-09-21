@@ -110,7 +110,11 @@ const ImageToolsFab = (props) => {
             <SpeedDialWrapper
                 onMouseLeave={handleClose}
                 $isSideMenuCollapsed={isSideMenuCollapsed}>
-                <SliderGroup>
+                <SliderGroup
+                    $show={
+                        sliderVisibility.contrastSlider ||
+                        sliderVisibility.brightnessSlider
+                    }>
                     <SliderWrapper $show={sliderVisibility.brightnessSlider}>
                         <StyledSlider
                             aria-label={'Brightness'}

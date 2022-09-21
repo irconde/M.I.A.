@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { Slider, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
@@ -24,7 +24,6 @@ export const StyledSpeedDial = styled(SpeedDial)`
     justify-content: space-between;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
-    outline: 2px dashed red;
 
     @keyframes fadein {
         from {
@@ -57,7 +56,6 @@ export const StyledSpeedDial = styled(SpeedDial)`
         display: flex;
         flex-direction: column-reverse;
         align-items: center;
-        outline: 2px dashed lime;
     }
 `;
 
@@ -105,7 +103,6 @@ export const StyledSlider = styled(Slider)`
 `;
 
 export const SpeedDialWrapper = styled.div`
-    outline: 2px dashed yellow;
     display: flex;
     width: fit-content;
     height: 12rem;
@@ -126,13 +123,21 @@ export const SpeedDialWrapper = styled.div`
         }
     }
 `;
+const sliderAnimation = keyframes`
+  from {
+    width: fit-content;
+  }
+  to {
+    width: 0;
+  }
+`;
 export const SliderGroup = styled.div`
-    outline: 2px dashed blue;
     height: 68%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     padding-right: 1rem;
+    animation: ${sliderAnimation} 0.1s;
 `;
 
 export const SliderWrapper = styled.div`
@@ -140,6 +145,6 @@ export const SliderWrapper = styled.div`
     display: flex;
     align-items: center;
     opacity: ${({ $show }) => Number($show)};
-    transition: opacity 0.1s ease-in;
+    transition: opacity 0.2s ease-in-out;
     pointer-events: ${({ $show }) => ($show ? 'auto' : 'none')};
 `;
