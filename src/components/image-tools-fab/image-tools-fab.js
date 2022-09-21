@@ -41,6 +41,55 @@ const ImageToolsFab = (props) => {
         brightnessSlider: false,
         contrastSlider: false,
     });
+    const MIN_CONTRAST = 0;
+    const MAX_CONTRAST = 80000;
+    const DEFAULT_CONTRAST = 59588;
+    const MAX_SLIDER_VAL = 100;
+    const [contrast, setContrast] = useState(50);
+
+    /**
+     * Updates the contrast of the viewports based on the value of the
+     * contrast slide
+     *
+     * @param {Event} e
+     * @param {number} value - between 0 and 100
+     */
+    const handleContrastChange = (e, value) => {
+        setContrast(value);
+        const viewportTop = props.cornerstone.getViewport(
+            props.imageViewportTop
+        );
+        updateViewportContrast(value, viewportTop);
+        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
+
+        if (!singleViewport) {
+            const viewportSide = props.cornerstone.getViewport(
+                props.imageViewportSide
+            );
+            updateViewportContrast(value, viewportSide);
+            props.cornerstone.setViewport(
+                props.imageViewportSide,
+                viewportSide
+            );
+        }
+    };
+
+    /**
+     * Scales the slider value to the corresponding cornerstone tools values
+     * for contrast
+     *
+     * @param {number} contrast - between 0 and 100 value from the slider
+     * @param {Object} viewport
+     */
+    const updateViewportContrast = (contrast, viewport) => {
+        // convert from slider scale to cornerstone scale
+        const scaledContrast = (MAX_CONTRAST / MAX_SLIDER_VAL) * contrast;
+        // ensure the contrast is between the max and the min contrast
+        viewport.voi.windowWidth = Math.min(
+            Math.max(scaledContrast, MIN_CONTRAST),
+            MAX_CONTRAST
+        );
+    };
 
     const toggleBrightnessSliderVisibility = () => {
         setSliderVisibility({
@@ -127,6 +176,8 @@ const ImageToolsFab = (props) => {
                             aria-label={'Contrast'}
                             valueLabelDisplay="auto"
                             defaultValue={50}
+                            value={contrast}
+                            onChange={handleContrastChange}
                         />
                     </SliderWrapper>
                 </SliderGroup>
