@@ -41,9 +41,7 @@ const ImageToolsFab = (props) => {
         brightnessSlider: false,
         contrastSlider: false,
     });
-    const MIN_CONTRAST = 0;
     const MAX_CONTRAST = 80000;
-    const DEFAULT_CONTRAST = 59588;
     const MAX_SLIDER_VAL = 100;
     const [contrast, setContrast] = useState(50);
 
