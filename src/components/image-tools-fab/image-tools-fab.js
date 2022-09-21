@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
+    SliderGroup,
+    SliderWrapper,
     SpeedDialIconWrapper,
+    SpeedDialWrapper,
     StyledAction,
+    StyledSlider,
     StyledSpeedDial,
     StyledTooltip,
 } from './image-tools-fab.styles';
@@ -33,9 +37,74 @@ const ImageToolsFab = (props) => {
     const singleViewport = useSelector(getSingleViewport);
     const dispatch = useDispatch();
     const [isInverted, setInverted] = useState(false);
+    const [sliderVisibility, setSliderVisibility] = useState({
+        brightnessSlider: false,
+        contrastSlider: false,
+    });
+    const MAX_CONTRAST = 80000;
+    const MAX_SLIDER_VAL = 100;
+    const [contrast, setContrast] = useState(50);
+
+    /**
+     * Updates the contrast of the viewports based on the value of the
+     * contrast slide
+     *
+     * @param {Event} e
+     * @param {number} value - between 0 and 100
+     */
+    const handleContrastChange = (e, value) => {
+        setContrast(value);
+        const viewportTop = props.cornerstone.getViewport(
+            props.imageViewportTop
+        );
+        updateViewportContrast(value, viewportTop);
+        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
+
+        if (!singleViewport) {
+            const viewportSide = props.cornerstone.getViewport(
+                props.imageViewportSide
+            );
+            updateViewportContrast(value, viewportSide);
+            props.cornerstone.setViewport(
+                props.imageViewportSide,
+                viewportSide
+            );
+        }
+    };
+
+    /**
+     * Scales the slider value to the corresponding cornerstone tools values
+     * for contrast
+     *
+     * @param {number} contrast - between 0 and 100 value from the slider
+     * @param {Object} viewport
+     */
+    const updateViewportContrast = (contrast, viewport) => {
+        // convert from slider scale to cornerstone scale
+        viewport.voi.windowWidth = (MAX_CONTRAST / MAX_SLIDER_VAL) * contrast;
+    };
+
+    const toggleBrightnessSliderVisibility = () => {
+        setSliderVisibility({
+            brightnessSlider: !sliderVisibility.brightnessSlider,
+            contrastSlider: false,
+        });
+    };
+
+    const toggleContrastSliderVisibility = () => {
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: !sliderVisibility.contrastSlider,
+        });
+    };
 
     const toggleInvert = () => {
         setInverted(!isInverted);
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: false,
+        });
+
         const viewportTop = props.cornerstone.getViewport(
             props.imageViewportTop
         );
@@ -51,6 +120,14 @@ const ImageToolsFab = (props) => {
                 viewportSide
             );
         }
+    };
+
+    const handleClose = () => {
+        setSliderVisibility({
+            brightnessSlider: false,
+            contrastSlider: false,
+        });
+        dispatch(toggleImageToolsOpen(false));
     };
 
     /**
@@ -72,71 +149,101 @@ const ImageToolsFab = (props) => {
 
     if (currentFile !== null) {
         return (
-            <StyledSpeedDial
-                {...getFABInfo()}
-                $isSideMenuCollapsed={isSideMenuCollapsed}
-                $invert={isInverted}
-                $isOpen={isOpen}
-                ariaLabel={'Speed Dial Button'}
-                open={isOpen}
-                onMouseLeave={() => dispatch(toggleImageToolsOpen(false))}
-                icon={
-                    <>
-                        <StyledTooltip
-                            $show={!isOpen}
-                            placement={'left'}
-                            title={isOpen ? '' : 'Image Tools'}>
-                            <SpeedDialIconWrapper
-                                onClick={() => {
-                                    dispatch(toggleImageToolsOpen(true));
-                                }}
-                                $show={!isOpen}>
-                                <ScaleIcon
-                                    width={'24px'}
-                                    height={'24px'}
-                                    color={'white'}
-                                />
-                            </SpeedDialIconWrapper>
-                        </StyledTooltip>
-                        <StyledTooltip
-                            $show={isOpen}
-                            placement={'left'}
-                            title={isOpen ? 'Invert' : ''}>
-                            <SpeedDialIconWrapper
-                                onClick={toggleInvert}
-                                $show={isOpen}>
-                                <InvertIcon
-                                    width={'24px'}
-                                    height={'24px'}
-                                    color={'white'}
-                                />
-                            </SpeedDialIconWrapper>
-                        </StyledTooltip>
-                    </>
-                }>
-                <StyledAction
-                    key={'contrast'}
-                    icon={
-                        <ContrastIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
+            <SpeedDialWrapper
+                onMouseLeave={handleClose}
+                $isSideMenuCollapsed={isSideMenuCollapsed}>
+                <SliderGroup
+                    $show={
+                        sliderVisibility.contrastSlider ||
+                        sliderVisibility.brightnessSlider
+                    }>
+                    <SliderWrapper $show={sliderVisibility.brightnessSlider}>
+                        <StyledSlider
+                            aria-label={'Brightness'}
+                            valueLabelDisplay="auto"
+                            defaultValue={50}
                         />
-                    }
-                    tooltipTitle={'Contrast'}
-                />
-                <StyledAction
-                    key={'brightness'}
-                    icon={
-                        <BrightnessIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
+                    </SliderWrapper>
+                    <SliderWrapper $show={sliderVisibility.contrastSlider}>
+                        <StyledSlider
+                            aria-label={'Contrast'}
+                            valueLabelDisplay="auto"
+                            defaultValue={50}
+                            value={contrast}
+                            onChange={handleContrastChange}
                         />
-                    }
-                    tooltipTitle={'Brightness'}
-                />
-            </StyledSpeedDial>
+                    </SliderWrapper>
+                </SliderGroup>
+                <StyledSpeedDial
+                    {...getFABInfo()}
+                    $invert={isInverted}
+                    $isOpen={isOpen}
+                    ariaLabel={'Speed Dial Button'}
+                    open={isOpen}
+                    icon={
+                        <>
+                            <StyledTooltip
+                                $show={!isOpen}
+                                placement={'left'}
+                                title={isOpen ? '' : 'Image Tools'}>
+                                <SpeedDialIconWrapper
+                                    onClick={() => {
+                                        dispatch(toggleImageToolsOpen(true));
+                                    }}
+                                    $show={!isOpen}>
+                                    <ScaleIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </SpeedDialIconWrapper>
+                            </StyledTooltip>
+                            <StyledTooltip
+                                $show={isOpen}
+                                placement={'left'}
+                                title={isOpen ? 'Invert' : ''}>
+                                <SpeedDialIconWrapper
+                                    onClick={toggleInvert}
+                                    $show={isOpen}>
+                                    <InvertIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </SpeedDialIconWrapper>
+                            </StyledTooltip>
+                        </>
+                    }>
+                    <StyledAction
+                        key={'contrast'}
+                        icon={
+                            <ContrastIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        }
+                        tooltipTitle={'Contrast'}
+                        placement={'left-start'}
+                        onClick={toggleContrastSliderVisibility}
+                        $active={sliderVisibility.contrastSlider}
+                    />
+                    <StyledAction
+                        key={'brightness'}
+                        icon={
+                            <BrightnessIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        }
+                        tooltipTitle={'Brightness'}
+                        placement={'left-start'}
+                        onClick={toggleBrightnessSliderVisibility}
+                        $active={sliderVisibility.brightnessSlider}
+                    />
+                </StyledSpeedDial>
+            </SpeedDialWrapper>
         );
     } else return null;
 };

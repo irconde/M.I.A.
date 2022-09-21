@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
+import { Slider, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
 import {
     NEXT_BUTTON_FAB_MARGIN,
     sideMenuWidth,
@@ -17,15 +17,33 @@ const getRightPos = ({ $isSideMenuCollapsed }) => {
     return right;
 };
 
-export const StyledSpeedDial = styled(SpeedDial)`
+export const SpeedDialWrapper = styled.div`
+    display: flex;
+    width: fit-content;
+    height: 12rem;
+    z-index: 1;
     position: absolute;
     right: ${getRightPos}px;
     bottom: ${({ $isSideMenuCollapsed }) =>
         $isSideMenuCollapsed
             ? 2.35 * NEXT_BUTTON_FAB_MARGIN
             : NEXT_BUTTON_FAB_MARGIN}px;
+    transition: all 0.3s ease-in;
+
+    @keyframes fadein {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: ${(props) => (props.$fabOpacity ? '1' : '0.28')};
+        }
+    }
+`;
+
+export const StyledSpeedDial = styled(SpeedDial)`
     display: ${(props) => (props.$show ? 'flex' : 'none')};
-    z-index: 1;
+    height: 12rem;
+    justify-content: space-between;
     pointer-events: ${(props) => (props.$fabOpacity ? 'pointer' : 'none')};
     transition: all 0.3s ease-in;
 
@@ -54,7 +72,9 @@ export const StyledSpeedDial = styled(SpeedDial)`
 
     && .MuiSpeedDial-actions {
         width: 56px;
-        padding: 0 0 2.35rem 0;
+        height: 68%;
+        justify-content: space-around;
+        padding: 0;
         display: flex;
         flex-direction: column-reverse;
         align-items: center;
@@ -66,16 +86,16 @@ export const StyledAction = styled(SpeedDialAction)`
         width: 100%;
         height: auto;
         aspect-ratio: 1;
-        background-color: ${({ $invert }) =>
-            $invert ? selectedBlue : noSelectGrey};
-        margin-bottom: 0.5rem;
+        background-color: ${({ $active }) =>
+            $active ? selectedBlue : noSelectGrey};
+        margin: 0;
         border: 1px solid #414141;
         box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
-            background-color: ${({ $invert }) =>
-                $invert ? '#6199fd' : '#5e5e5e'};
+            background-color: ${({ $active }) =>
+                $active ? '#6199fd' : '#5e5e5e'};
         }
     }
 `;
@@ -95,4 +115,30 @@ export const StyledTooltip = styled(Tooltip)`
     &.MuiTooltip-popper {
         opacity: ${({ $show }) => ($show ? '1' : '0')};
     }
+`;
+
+export const StyledSlider = styled(Slider)`
+    &.MuiSlider-root {
+        width: 200px;
+        color: ${selectedBlue};
+    }
+`;
+
+export const SliderGroup = styled.div`
+    height: 68%;
+    width: ${({ $show }) => ($show ? '10rem' : '0')};
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding-right: 1rem;
+    transition: width 0.5s ease-in-out;
+`;
+
+export const SliderWrapper = styled.div`
+    height: 56px;
+    display: flex;
+    align-items: center;
+    opacity: ${({ $show }) => Number($show)};
+    transition: opacity 0.2s ease-in;
+    pointer-events: ${({ $show }) => ($show ? 'auto' : 'none')};
 `;
