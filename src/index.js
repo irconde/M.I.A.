@@ -1,19 +1,16 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { Provider } from 'react-redux';
 import store from './redux/store/store';
-import { CookiesProvider } from 'react-cookie';
+import AppNew from './AppNew';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
     <Provider store={store}>
-        <CookiesProvider>
-            <App />
-        </CookiesProvider>
+        <AppNew />
     </Provider>
 );
 
