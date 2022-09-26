@@ -9,11 +9,11 @@ import {
     getInputLabel,
     getRecentScroll,
     setInputLabel,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import {
     getDetectionLabels,
     getSelectedDetection,
-} from '../../redux/slices/detections/detectionsSlice';
+} from '../../redux/slices-old/detections/detectionsSlice';
 import {
     ArrowIconWrapper,
     ClearIconWrapper,

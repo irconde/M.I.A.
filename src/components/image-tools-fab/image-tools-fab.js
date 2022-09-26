@@ -19,13 +19,13 @@ import {
     getSettingsVisibility,
     getSingleViewport,
     toggleImageToolsOpen,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import * as constants from '../../utils/enums/Constants';
 import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
 import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
-import { getCurrentFile } from '../../redux/slices/server/serverSlice';
+import { getCurrentFile } from '../../redux/slices-old/server/serverSlice';
 
 const ImageToolsFab = (props) => {
     const isOpen = useSelector(getIsImageToolsOpen);

@@ -9,8 +9,8 @@ import {
     getSelectedAlgorithm,
     selectDetectionSet,
     updateDetectionSetVisibility,
-} from '../../../redux/slices/detections/detectionsSlice';
-import { menuDetectionSelectedUpdate } from '../../../redux/slices/ui/uiSlice';
+} from '../../../redux/slices-old/detections/detectionsSlice';
+import { menuDetectionSelectedUpdate } from '../../../redux/slices-old/ui/uiSlice';
 import {
     CollapsableArrowIconContainer,
     SideMenuAlgorithm,

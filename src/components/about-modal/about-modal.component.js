@@ -21,7 +21,7 @@ import { Modal, ThemeProvider } from '@mui/material';
 import {
     getSettingsVisibility,
     toggleSettingsVisibility,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 

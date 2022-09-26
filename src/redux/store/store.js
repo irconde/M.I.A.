@@ -1,26 +1,6 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import serverReducer from '../slices/server/serverSlice';
-import detectionsReducer from '../slices/detections/detectionsSlice';
-import settingsReducer from '../slices/settings/settingsSlice';
-import uiReducer from '../slices/ui/uiSlice';
+import { configureStore } from '@reduxjs/toolkit';
 
+// TODO
 export default configureStore({
-    reducer: {
-        server: serverReducer,
-        detections: detectionsReducer,
-        ui: uiReducer,
-        settings: settingsReducer,
-    },
-    middleware: getDefaultMiddleware({
-        serializableCheck: {
-            // Ignore these action types
-            ignoredActions: [
-                'server/setCommandServerConnection',
-                'server/setFileServerConnection',
-                'ui/toggleCollapsedSideMenu',
-                'ui/setCollapsedSideMenu',
-                'ui/toggleCollapsedLazyMenu',
-            ],
-        },
-    }),
+    reducer: {},
 });

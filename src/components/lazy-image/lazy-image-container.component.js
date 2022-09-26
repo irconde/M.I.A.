@@ -1,10 +1,10 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getCurrentFile } from '../../redux/slices/server/serverSlice';
+import { getCurrentFile } from '../../redux/slices-old/server/serverSlice';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
-import { getGeneratingThumbnails } from '../../redux/slices/ui/uiSlice';
+import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,

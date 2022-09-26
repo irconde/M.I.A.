@@ -30,7 +30,7 @@ import {
     setNumFilesInQueue,
     setProcessingHost,
     setUpload,
-} from './redux/slices/server/serverSlice';
+} from './redux/slices-old/server/serverSlice';
 import {
     addDetection,
     clearAllSelection,
@@ -48,7 +48,7 @@ import {
     updateDetectionVisibility,
     updateMissMatchedClassName,
     validateDetections,
-} from './redux/slices/detections/detectionsSlice';
+} from './redux/slices-old/detections/detectionsSlice';
 import {
     colorPickerToggle,
     deleteDetectionUpdate,
@@ -81,7 +81,7 @@ import {
     updateZoomLevels,
     updateZoomLevelSide,
     updateZoomLevelTop,
-} from './redux/slices/ui/uiSlice';
+} from './redux/slices-old/ui/uiSlice';
 import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
 import EditLabel from './components/edit-label/edit-label.component';
 import { buildCocoDataZip } from './utils/detections/Coco';
@@ -93,7 +93,7 @@ import AboutModal from './components/about-modal/about-modal.component';
 import {
     loadElectronCookie,
     saveSettings,
-} from './redux/slices/settings/settingsSlice';
+} from './redux/slices-old/settings/settingsSlice';
 import fetch from 'cross-fetch';
 import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';

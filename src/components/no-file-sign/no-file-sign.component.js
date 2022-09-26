@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { getNumFilesInQueue } from '../../redux/slices/server/serverSlice';
+import { getNumFilesInQueue } from '../../redux/slices-old/server/serverSlice';
 import { NoFileSignLabel, NoFileSignWrapper } from './no-file-sign.styles';
 import NoFileIcon from '../../icons/no-file-sign/no-file-icon/no-file.icon';
 

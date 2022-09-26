@@ -5,15 +5,15 @@ import {
     getCollapsedSideMenu,
     getCornerstoneMode,
     getIsImageToolsOpen,
-} from '../../../redux/slices/ui/uiSlice';
+} from '../../../redux/slices-old/ui/uiSlice';
 import * as constants from '../../../utils/enums/Constants';
-import { getSelectedDetection } from '../../../redux/slices/detections/detectionsSlice';
+import { getSelectedDetection } from '../../../redux/slices-old/detections/detectionsSlice';
 import {
     getConnected,
     getNumFilesInQueue,
-} from '../../../redux/slices/server/serverSlice';
+} from '../../../redux/slices-old/server/serverSlice';
 import { Fab } from '@mui/material';
-import { getLocalFileOutput } from '../../../redux/slices/settings/settingsSlice';
+import { getLocalFileOutput } from '../../../redux/slices-old/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     CollapsedButtonContainer,

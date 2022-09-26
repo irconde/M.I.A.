@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getDetectionsByAlgorithm } from '../../redux/slices/detections/detectionsSlice';
+import { getDetectionsByAlgorithm } from '../../redux/slices-old/detections/detectionsSlice';
 import SideMenuAlgorithmComponent from './algorithm-detection/side-menu-algorithm.component';
 import {
     getCollapsedSideMenu,
     getReceivedTime,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import SaveButtonComponent from './buttons/save-button.component';
 import {
     SideMenuContainer,

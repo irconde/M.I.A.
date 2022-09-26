@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import {
     getCollapsedSideMenu,
     getConfigInfo,
-} from '../../redux/slices/ui/uiSlice';
-import { getSelectedAlgorithm } from '../../redux/slices/detections/detectionsSlice';
+} from '../../redux/slices-old/ui/uiSlice';
+import { getSelectedAlgorithm } from '../../redux/slices-old/detections/detectionsSlice';
 import {
     InlineSlash,
     MetaDataGroup,

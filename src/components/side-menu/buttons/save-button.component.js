@@ -5,8 +5,8 @@ import {
     getCollapsedSideMenu,
     getIsFabVisible,
     getIsImageToolsOpen,
-} from '../../../redux/slices/ui/uiSlice';
-import { getDetectionChanged } from '../../../redux/slices/detections/detectionsSlice';
+} from '../../../redux/slices-old/ui/uiSlice';
+import { getDetectionChanged } from '../../../redux/slices-old/detections/detectionsSlice';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
 import {

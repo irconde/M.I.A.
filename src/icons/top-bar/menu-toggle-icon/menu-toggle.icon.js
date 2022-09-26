@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getReceivedTime,
     toggleCollapsedSideMenu,
-} from '../../../redux/slices/ui/uiSlice';
-import { getHasFileOutput } from '../../../redux/slices/settings/settingsSlice';
+} from '../../../redux/slices-old/ui/uiSlice';
+import { getHasFileOutput } from '../../../redux/slices-old/settings/settingsSlice';
 
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();

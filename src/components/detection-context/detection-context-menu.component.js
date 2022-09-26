@@ -13,11 +13,11 @@ import {
     getEditionMode,
     getIsDetectionContextVisible,
     getRecentScroll,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import {
     getSelectedDetectionColor,
     getSelectedDetectionType,
-} from '../../redux/slices/detections/detectionsSlice';
+} from '../../redux/slices-old/detections/detectionsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DeleteWidget,

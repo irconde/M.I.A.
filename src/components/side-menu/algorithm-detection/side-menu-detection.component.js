@@ -8,11 +8,11 @@ import {
     getSelectedAlgorithm,
     selectDetection,
     updateDetectionVisibility,
-} from '../../../redux/slices/detections/detectionsSlice';
+} from '../../../redux/slices-old/detections/detectionsSlice';
 import {
     detectionSelectedUpdate,
     hideContextMenuUpdate,
-} from '../../../redux/slices/ui/uiSlice';
+} from '../../../redux/slices-old/ui/uiSlice';
 import {
     DetectionColorBox,
     SideMenuDetection,

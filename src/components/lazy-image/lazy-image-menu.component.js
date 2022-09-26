@@ -5,7 +5,7 @@ import {
     getCollapsedLazyMenu,
     getLocalFileOpen,
     setGeneratingThumbnails,
-} from '../../redux/slices/ui/uiSlice';
+} from '../../redux/slices-old/ui/uiSlice';
 import * as constants from '../../utils/enums/Constants';
 import Utils from '../../utils/general/Utils';
 import LazyImageContainer from './lazy-image-container.component';

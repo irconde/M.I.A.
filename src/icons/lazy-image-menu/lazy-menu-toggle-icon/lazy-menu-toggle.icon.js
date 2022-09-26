@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { StyledLazyMenuToggleIcon } from './lazy-menu-toggle.icon.styles';
 import Tooltip from '@mui/material/Tooltip';
 import { useDispatch } from 'react-redux';
-import { toggleCollapsedLazyMenu } from '../../../redux/slices/ui/uiSlice';
+import { toggleCollapsedLazyMenu } from '../../../redux/slices-old/ui/uiSlice';
 
 /**
  * Lazy menu toggle icon in TopBar component used to toggle lazy menu component visibility.

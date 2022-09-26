@@ -7,8 +7,8 @@ import {
     getCollapsedSideMenu,
     getCornerstoneMode,
     getIsFabVisible,
-} from '../../redux/slices/ui/uiSlice';
-import { getDeviceType } from '../../redux/slices/settings/settingsSlice';
+} from '../../redux/slices-old/ui/uiSlice';
+import { getDeviceType } from '../../redux/slices-old/settings/settingsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     FABContainer,
