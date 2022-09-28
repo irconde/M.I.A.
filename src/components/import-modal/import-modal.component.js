@@ -1,10 +1,12 @@
 import React from 'react';
-import { Button, Input, Modal } from '@mui/material';
+import { Button, Modal } from '@mui/material';
 import {
     ConfirmButton,
     ModalBody,
     ModalSection,
     ModalTitle,
+    OutlinedButton,
+    StyledInput,
     StyledModal,
 } from './import-modal.styles';
 import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
@@ -32,8 +34,11 @@ const ImportModalComponent = (props) => {
                                 height={'24px'}
                                 color={'white'}
                             />
-                            <Input />
-                            <Button>Import Images</Button>
+                            <StyledInput
+                                placeholder={'Path to folder with images'}
+                                helperText={''}
+                            />
+                            <OutlinedButton>Import Images</OutlinedButton>
                         </ModalSection>
                         <ModalSection>
                             <AnnotationsIcon
@@ -41,10 +46,16 @@ const ImportModalComponent = (props) => {
                                 height={'24px'}
                                 color={'white'}
                             />
-                            <Input />
-                            <Button>Import Annotations</Button>
+                            <StyledInput
+                                placeholder={'Path to folder with annotations'}
+                                helperText={'This field is mandatory'}
+                                error
+                            />
+                            <OutlinedButton>Import Annotations</OutlinedButton>
                         </ModalSection>
-                        <ConfirmButton>CONFIRM DATA IMPORT</ConfirmButton>
+                        <ConfirmButton disabled={false}>
+                            CONFIRM DATA IMPORT
+                        </ConfirmButton>
                     </ModalBody>
                 </StyledModal>
             </Modal>
