@@ -1,8 +1,5 @@
 const electron = require('electron');
-const ipcMain = electron.ipcMain;
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
-const screen = electron.screen;
+const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -114,6 +111,27 @@ app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
     }
+});
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * This returns a string with the selected directory name, or null if the event is cancelled
+ * @returns {string | null}
+ */
+ipcMain.handle(Constants.Channels.selectDirectory, async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
+    });
+
+    // if the event is cancelled by the user
+    if (result.canceled) return null;
+
+    // send the dir path to the React process and update the settings
+    await updateSettings({
+        ...appSettings,
+        selectedImagesDirPath: result.filePaths[0],
+    });
+    return result.filePaths[0];
 });
 
 /**

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     ConfirmButton,
     ModalBody,
@@ -15,12 +15,40 @@ import { Button, Modal } from '@mui/material';
 import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
 import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
 import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
+import { Channels } from '../../utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
+
+const TYPE = {
+    IMAGES: 'images',
+    ANNOTATIONS: 'annotations',
+};
 
 const ImportModalComponent = (props) => {
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = useState(true);
+    const [paths, setPaths] = useState({ images: '', annotations: '' });
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    const handleImportImages = async (e) => {
+        const path = await ipcRenderer.invoke(Channels.selectDirectory, null);
+        updatePaths(path || '', TYPE.IMAGES);
+    };
+
+    const handleImportAnnotations = (e) => {
+        console.log('Click');
+    };
+
+    const updatePaths = (value, type) => {
+        switch (type) {
+            case TYPE.IMAGES:
+                return setPaths({ ...paths, images: value });
+            case TYPE.ANNOTATIONS:
+                return setPaths({ ...paths, annotations: value });
+            default:
+                throw new Error(`Event of type ${type} is unhandled`);
+        }
+    };
     return (
         <ThemeProvider theme={modalTheme}>
             <div>
@@ -42,8 +70,14 @@ const ImportModalComponent = (props) => {
                                 <StyledInput
                                     placeholder={'Path to folder with images'}
                                     helperText={''}
+                                    value={paths.images}
+                                    onChange={({ target }) =>
+                                        updatePaths(target.value, TYPE.IMAGES)
+                                    }
                                 />
-                                <OutlinedButton>Import Images</OutlinedButton>
+                                <OutlinedButton onClick={handleImportImages}>
+                                    Import Images
+                                </OutlinedButton>
                             </ModalSection>
                             <ModalSection>
                                 <AnnotationsIcon
@@ -56,9 +90,17 @@ const ImportModalComponent = (props) => {
                                         'Path to folder with annotations'
                                     }
                                     helperText={'This field is mandatory'}
+                                    value={paths.annotations}
+                                    onChange={({ target }) =>
+                                        updatePaths(
+                                            target.value,
+                                            TYPE.ANNOTATIONS
+                                        )
+                                    }
                                     error
                                 />
-                                <OutlinedButton>
+                                <OutlinedButton
+                                    onClick={handleImportAnnotations}>
                                     Import Annotations
                                 </OutlinedButton>
                             </ModalSection>

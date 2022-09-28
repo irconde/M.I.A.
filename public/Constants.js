@@ -50,4 +50,5 @@ module.exports.defaultSettings = {
     localFileOutput: '',
     fileSuffix: '_img',
     deviceType: '',
+    selectedImagesDirPath: null,
 };
