@@ -12,6 +12,7 @@ module.exports.Channels = {
     saveSettingsCookie: 'save-settings-cookie',
     getSettingsCookie: 'get-settings-cookie',
     loadSettingsCookie: 'load-settings-cookie',
+    showFolderPicker: 'show-folder-picker',
 };
 
 module.exports.FileWatcher = {
@@ -51,4 +52,5 @@ module.exports.defaultSettings = {
     fileSuffix: '_img',
     deviceType: '',
     selectedImagesDirPath: null,
+    selectedAnnotationsDirPath: null,
 };

@@ -30,13 +30,9 @@ const ImportModalComponent = (props) => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const handleImportImages = async (e) => {
-        const path = await ipcRenderer.invoke(Channels.selectDirectory, null);
-        updatePaths(path || '', TYPE.IMAGES);
-    };
-
-    const handleImportAnnotations = (e) => {
-        console.log('Click');
+    const handleDirPathSelection = async (type) => {
+        const path = await ipcRenderer.invoke(Channels.showFolderPicker, null);
+        updatePaths(path || '', type);
     };
 
     const updatePaths = (value, type) => {
@@ -49,6 +45,17 @@ const ImportModalComponent = (props) => {
                 throw new Error(`Event of type ${type} is unhandled`);
         }
     };
+
+    const handleConfirmBtnClick = async (e) => {
+        await ipcRenderer.invoke(Channels.selectDirectory, {
+            selectedImagesDirPath: paths.images,
+            selectedAnnotationsDirPath: paths.annotations,
+        });
+    };
+
+    const getHelperText = (value) =>
+        value.trim() === '' ? 'This field is mandatory' : '';
+
     return (
         <ThemeProvider theme={modalTheme}>
             <div>
@@ -69,13 +76,17 @@ const ImportModalComponent = (props) => {
                                 />
                                 <StyledInput
                                     placeholder={'Path to folder with images'}
-                                    helperText={''}
+                                    helperText={getHelperText(paths.images)}
                                     value={paths.images}
                                     onChange={({ target }) =>
                                         updatePaths(target.value, TYPE.IMAGES)
                                     }
+                                    error={paths.images === ''}
                                 />
-                                <OutlinedButton onClick={handleImportImages}>
+                                <OutlinedButton
+                                    onClick={() =>
+                                        handleDirPathSelection(TYPE.IMAGES)
+                                    }>
                                     Import Images
                                 </OutlinedButton>
                             </ModalSection>
@@ -89,7 +100,9 @@ const ImportModalComponent = (props) => {
                                     placeholder={
                                         'Path to folder with annotations'
                                     }
-                                    helperText={'This field is mandatory'}
+                                    helperText={getHelperText(
+                                        paths.annotations
+                                    )}
                                     value={paths.annotations}
                                     onChange={({ target }) =>
                                         updatePaths(
@@ -97,14 +110,18 @@ const ImportModalComponent = (props) => {
                                             TYPE.ANNOTATIONS
                                         )
                                     }
-                                    error
+                                    error={paths.annotations === ''}
                                 />
                                 <OutlinedButton
-                                    onClick={handleImportAnnotations}>
+                                    onClick={() =>
+                                        handleDirPathSelection(TYPE.ANNOTATIONS)
+                                    }>
                                     Import Annotations
                                 </OutlinedButton>
                             </ModalSection>
-                            <ConfirmButton disabled={false}>
+                            <ConfirmButton
+                                onClick={handleConfirmBtnClick}
+                                disabled={false}>
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
                                     <SaveArrowIcon

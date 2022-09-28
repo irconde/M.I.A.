@@ -118,7 +118,7 @@ app.on('activate', () => {
  * This returns a string with the selected directory name, or null if the event is cancelled
  * @returns {string | null}
  */
-ipcMain.handle(Constants.Channels.selectDirectory, async () => {
+ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
     });
@@ -126,13 +126,21 @@ ipcMain.handle(Constants.Channels.selectDirectory, async () => {
     // if the event is cancelled by the user
     if (result.canceled) return null;
 
-    // send the dir path to the React process and update the settings
-    await updateSettings({
-        ...appSettings,
-        selectedImagesDirPath: result.filePaths[0],
-    });
     return result.filePaths[0];
 });
+
+ipcMain.handle(
+    Constants.Channels.selectDirectory,
+    async (event, { selectedImagesDirPath, selectedAnnotationsDirPath }) => {
+        console.log(Constants.Channels.selectDirectory);
+        console.log(selectedAnnotationsDirPath, selectedImagesDirPath);
+        // await updateSettings({
+        //     ...appSettings,
+        //     selectedImagesDirPath,
+        //     selectedAnnotationsDirPath,
+        // });
+    }
+);
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,

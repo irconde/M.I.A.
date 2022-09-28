@@ -133,6 +133,7 @@ export const Channels = {
     saveSettingsCookie: 'save-settings-cookie',
     getSettingsCookie: 'get-settings-cookie',
     loadSettingsCookie: 'load-settings-cookie',
+    showFolderPicker: 'show-folder-picker',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;
