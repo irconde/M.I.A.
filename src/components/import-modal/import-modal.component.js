@@ -6,11 +6,13 @@ import {
     ModalSection,
     ModalTitle,
     OutlinedButton,
+    SaveIconWrapper,
     StyledInput,
     StyledModal,
 } from './import-modal.styles';
 import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
 import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
+import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
 const ImportModalComponent = (props) => {
     const [open, setOpen] = React.useState(true);
@@ -55,6 +57,13 @@ const ImportModalComponent = (props) => {
                         </ModalSection>
                         <ConfirmButton disabled={false}>
                             CONFIRM DATA IMPORT
+                            <SaveIconWrapper>
+                                <SaveArrowIcon
+                                    width={'24px'}
+                                    height={'24px'}
+                                    color={'white'}
+                                />
+                            </SaveIconWrapper>
                         </ConfirmButton>
                     </ModalBody>
                 </StyledModal>

@@ -44,6 +44,7 @@ export const ConfirmButton = styled(Button).attrs(() => ({
 }))`
     align-self: flex-end;
     margin-top: 3rem;
+    width: 60%;
 `;
 
 export const StyledInput = styled(TextField).attrs(() => ({
@@ -72,4 +73,9 @@ export const OutlinedButton = styled(Button).attrs(() => ({
     border: solid 1px #4e4e4e;
     text-transform: none;
     width: 38%;
+`;
+
+export const SaveIconWrapper = styled.span`
+    display: flex;
+    padding-left: 0.5rem;
 `;
