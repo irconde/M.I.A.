@@ -1,5 +1,23 @@
 import styled from 'styled-components';
 import { Button, TextField } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
+
+export const modalTheme = createTheme({
+    palette: {
+        primary: {
+            light: '#5e97ff',
+            main: '#367eff',
+            dark: '#2558b2',
+            contrastText: '#9d9d9d',
+        },
+        secondary: {
+            light: '#ffffff',
+            main: '#fafafa',
+            dark: '#9d9d9d',
+            contrastText: '#000000',
+        },
+    },
+});
 
 export const StyledModal = styled.div`
     position: absolute;
@@ -49,8 +67,23 @@ export const ConfirmButton = styled(Button).attrs(() => ({
 
 export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
+    color: 'secondary',
 }))`
     margin-left: 1rem;
+
+    & .MuiInput-input {
+        color: #fafafa;
+    }
+
+    & .MuiInput-root::before {
+        border-bottom: 2px solid #939393;
+    }
+
+    &:hover {
+        & .MuiInput-root::before {
+            border-bottom: 2px solid #939393;
+        }
+    }
 
     & .MuiInput-input::placeholder {
         font-family: NotoSansJP, sans-serif;
