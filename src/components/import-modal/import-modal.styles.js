@@ -62,7 +62,18 @@ export const ConfirmButton = styled(Button).attrs(() => ({
 }))`
     align-self: flex-end;
     margin-top: 3rem;
-    width: 60%;
+    width: 66%;
+    font-family: Noto Sans JP, sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: justify;
+    color: #fff;
+    padding-block: 0.5rem;
+    white-space: nowrap;
 `;
 
 export const StyledInput = styled(TextField).attrs(() => ({

@@ -66,8 +66,8 @@ const ImportModalComponent = (props) => {
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
                                     <SaveArrowIcon
-                                        width={'24px'}
-                                        height={'24px'}
+                                        width={'36px'}
+                                        height={'36px'}
                                         color={'white'}
                                     />
                                 </SaveIconWrapper>
