@@ -74,6 +74,11 @@ export const ConfirmButton = styled(Button).attrs(() => ({
     color: #fff;
     padding-block: 0.5rem;
     white-space: nowrap;
+
+    & svg {
+        fill: ${({ disabled }) => (disabled ? 'rgba(0, 0, 0, 0.26)' : 'white')};
+        transition: fill 250ms;
+    }
 `;
 
 export const StyledInput = styled(TextField).attrs(() => ({

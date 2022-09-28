@@ -27,6 +27,7 @@ const TYPE = {
 const ImportModalComponent = (props) => {
     const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({ images: '', annotations: '' });
+    const [triedSubmitting, setTriedSubmitting] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
@@ -51,10 +52,14 @@ const ImportModalComponent = (props) => {
             selectedImagesDirPath: paths.images,
             selectedAnnotationsDirPath: paths.annotations,
         });
+        setTriedSubmitting(true);
     };
 
     const getHelperText = (value) =>
-        value.trim() === '' ? 'This field is mandatory' : '';
+        value.trim() === '' && triedSubmitting ? 'This field is mandatory' : '';
+
+    const shouldDisableSubmit = () =>
+        !(paths.annotations.trim() && paths.images.trim());
 
     return (
         <ThemeProvider theme={modalTheme}>
@@ -81,7 +86,9 @@ const ImportModalComponent = (props) => {
                                     onChange={({ target }) =>
                                         updatePaths(target.value, TYPE.IMAGES)
                                     }
-                                    error={paths.images === ''}
+                                    error={
+                                        paths.images === '' && triedSubmitting
+                                    }
                                 />
                                 <OutlinedButton
                                     onClick={() =>
@@ -110,7 +117,10 @@ const ImportModalComponent = (props) => {
                                             TYPE.ANNOTATIONS
                                         )
                                     }
-                                    error={paths.annotations === ''}
+                                    error={
+                                        paths.annotations === '' &&
+                                        triedSubmitting
+                                    }
                                 />
                                 <OutlinedButton
                                     onClick={() =>
@@ -121,7 +131,7 @@ const ImportModalComponent = (props) => {
                             </ModalSection>
                             <ConfirmButton
                                 onClick={handleConfirmBtnClick}
-                                disabled={false}>
+                                disabled={shouldDisableSubmit()}>
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
                                     <SaveArrowIcon
