@@ -26,12 +26,17 @@ const TYPE = {
 
 const ImportModalComponent = (props) => {
     const [open, setOpen] = useState(true);
-    const [paths, setPaths] = useState({ images: '', annotations: '' });
+    const [paths, setPaths] = useState({
+        images: '',
+        annotations: '',
+        isLoading: false,
+    });
     const [triedSubmitting, setTriedSubmitting] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const handleDirPathSelection = async (type) => {
+        setPaths({ ...paths, isLoading: true });
         const path = await ipcRenderer.invoke(Channels.showFolderPicker, null);
         updatePaths(path || '', type);
     };
@@ -39,9 +44,13 @@ const ImportModalComponent = (props) => {
     const updatePaths = (value, type) => {
         switch (type) {
             case TYPE.IMAGES:
-                return setPaths({ ...paths, images: value });
+                return setPaths({ ...paths, images: value, isLoading: false });
             case TYPE.ANNOTATIONS:
-                return setPaths({ ...paths, annotations: value });
+                return setPaths({
+                    ...paths,
+                    annotations: value,
+                    isLoading: false,
+                });
             default:
                 throw new Error(`Event of type ${type} is unhandled`);
         }
@@ -52,6 +61,7 @@ const ImportModalComponent = (props) => {
             selectedImagesDirPath: paths.images,
             selectedAnnotationsDirPath: paths.annotations,
         });
+
         setTriedSubmitting(true);
     };
 
@@ -80,6 +90,7 @@ const ImportModalComponent = (props) => {
                                     color={'white'}
                                 />
                                 <StyledInput
+                                    disabled={paths.isLoading}
                                     placeholder={'Path to folder with images'}
                                     helperText={getHelperText(paths.images)}
                                     value={paths.images}
@@ -91,6 +102,7 @@ const ImportModalComponent = (props) => {
                                     }
                                 />
                                 <OutlinedButton
+                                    disabled={paths.isLoading}
                                     onClick={() =>
                                         handleDirPathSelection(TYPE.IMAGES)
                                     }>
@@ -104,6 +116,7 @@ const ImportModalComponent = (props) => {
                                     color={'white'}
                                 />
                                 <StyledInput
+                                    disabled={paths.isLoading}
                                     placeholder={
                                         'Path to folder with annotations'
                                     }
@@ -123,6 +136,7 @@ const ImportModalComponent = (props) => {
                                     }
                                 />
                                 <OutlinedButton
+                                    disabled={paths.isLoading}
                                     onClick={() =>
                                         handleDirPathSelection(TYPE.ANNOTATIONS)
                                     }>
@@ -131,7 +145,9 @@ const ImportModalComponent = (props) => {
                             </ModalSection>
                             <ConfirmButton
                                 onClick={handleConfirmBtnClick}
-                                disabled={shouldDisableSubmit()}>
+                                disabled={
+                                    shouldDisableSubmit() || paths.isLoading
+                                }>
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
                                     <SaveArrowIcon
