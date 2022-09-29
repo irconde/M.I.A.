@@ -129,18 +129,39 @@ ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
     return result.filePaths[0];
 });
 
-ipcMain.handle(
-    Constants.Channels.selectDirectory,
-    async (event, { selectedImagesDirPath, selectedAnnotationsDirPath }) => {
-        console.log(Constants.Channels.selectDirectory);
-        console.log(selectedAnnotationsDirPath, selectedImagesDirPath);
-        // await updateSettings({
-        //     ...appSettings,
-        //     selectedImagesDirPath,
-        //     selectedAnnotationsDirPath,
-        // });
+ipcMain.handle(Constants.Channels.selectDirectory, async (event, pathsObj) => {
+    const promises = [];
+    for (const key in pathsObj) {
+        promises.push(checkIfPathExists(pathsObj[key]));
     }
-);
+    const response = await Promise.allSettled(promises);
+    const result = {};
+    const keys = Object.keys(pathsObj);
+    for (let i = 0; i < keys.length; i++) {
+        result[keys[i]] = response[i].status === 'fulfilled';
+    }
+
+    return result;
+    // await updateSettings({
+    //     ...appSettings,
+    //     selectedImagesDirPath,
+    //     selectedAnnotationsDirPath,
+    // });
+});
+
+/**
+ * Checks if a path exists
+ *
+ * @param {string} path
+ * @returns {Promise<undefined>}
+ */
+const checkIfPathExists = async (path) => {
+    return new Promise((resolve, reject) => {
+        fs.access(path, (err) => {
+            err ? reject() : resolve();
+        });
+    });
+};
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,

@@ -24,14 +24,21 @@ const TYPE = {
     ANNOTATIONS: 'annotations',
 };
 
+const ERROR = {
+    MANDATORY: 'Field is mandatory',
+    INVALID: 'Directory path is invalid',
+    BLANK: '',
+};
+
 const ImportModalComponent = (props) => {
     const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
         images: '',
         annotations: '',
         isLoading: false,
+        imagesError: '',
+        annotationsError: '',
     });
-    const [triedSubmitting, setTriedSubmitting] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
@@ -57,19 +64,33 @@ const ImportModalComponent = (props) => {
     };
 
     const handleConfirmBtnClick = async (e) => {
-        await ipcRenderer.invoke(Channels.selectDirectory, {
+        const { MANDATORY, INVALID } = ERROR;
+        // don't allow importing if no images' dir is selected
+        if (paths.images.trim() === '') {
+            setPaths({ ...paths, imagesError: MANDATORY });
+            return;
+        }
+
+        // construct an object of paths to be verified by electron
+        const data = {
             selectedImagesDirPath: paths.images,
-            selectedAnnotationsDirPath: paths.annotations,
+        };
+        const onlyImagesPath = paths.annotations.trim() === '';
+        if (!onlyImagesPath) {
+            data.selectedAnnotationsDirPath = paths.annotations;
+        }
+        const result = await ipcRenderer.invoke(Channels.selectDirectory, data);
+
+        // set errors for input fields if either path is invalid
+        setPaths({
+            ...paths,
+            imagesError: result.selectedImagesDirPath ? '' : INVALID,
+            annotationsError:
+                result.selectedAnnotationsDirPath || onlyImagesPath
+                    ? ''
+                    : INVALID,
         });
-
-        setTriedSubmitting(true);
     };
-
-    const getHelperText = (value) =>
-        value.trim() === '' && triedSubmitting ? 'This field is mandatory' : '';
-
-    const shouldDisableSubmit = () =>
-        !(paths.annotations.trim() && paths.images.trim());
 
     return (
         <ThemeProvider theme={modalTheme}>
@@ -92,14 +113,12 @@ const ImportModalComponent = (props) => {
                                 <StyledInput
                                     disabled={paths.isLoading}
                                     placeholder={'Path to folder with images'}
-                                    helperText={getHelperText(paths.images)}
+                                    helperText={paths.imagesError}
                                     value={paths.images}
                                     onChange={({ target }) =>
                                         updatePaths(target.value, TYPE.IMAGES)
                                     }
-                                    error={
-                                        paths.images === '' && triedSubmitting
-                                    }
+                                    error={!!paths.imagesError}
                                 />
                                 <OutlinedButton
                                     disabled={paths.isLoading}
@@ -120,9 +139,7 @@ const ImportModalComponent = (props) => {
                                     placeholder={
                                         'Path to folder with annotations'
                                     }
-                                    helperText={getHelperText(
-                                        paths.annotations
-                                    )}
+                                    helperText={paths.annotationsError}
                                     value={paths.annotations}
                                     onChange={({ target }) =>
                                         updatePaths(
@@ -130,10 +147,7 @@ const ImportModalComponent = (props) => {
                                             TYPE.ANNOTATIONS
                                         )
                                     }
-                                    error={
-                                        paths.annotations === '' &&
-                                        triedSubmitting
-                                    }
+                                    error={!!paths.annotationsError}
                                 />
                                 <OutlinedButton
                                     disabled={paths.isLoading}
@@ -146,7 +160,7 @@ const ImportModalComponent = (props) => {
                             <ConfirmButton
                                 onClick={handleConfirmBtnClick}
                                 disabled={
-                                    shouldDisableSubmit() || paths.isLoading
+                                    !paths.images.trim() || paths.isLoading
                                 }>
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
