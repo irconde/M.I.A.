@@ -51,12 +51,18 @@ const ImportModalComponent = (props) => {
     const updatePaths = (value, type) => {
         switch (type) {
             case TYPE.IMAGES:
-                return setPaths({ ...paths, images: value, isLoading: false });
+                return setPaths({
+                    ...paths,
+                    images: value,
+                    isLoading: false,
+                    imagesError: '',
+                });
             case TYPE.ANNOTATIONS:
                 return setPaths({
                     ...paths,
                     annotations: value,
                     isLoading: false,
+                    annotationsError: '',
                 });
             default:
                 throw new Error(`Event of type ${type} is unhandled`);
