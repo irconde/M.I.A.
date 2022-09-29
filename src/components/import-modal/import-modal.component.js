@@ -166,7 +166,10 @@ const ImportModalComponent = (props) => {
                             <ConfirmButton
                                 onClick={handleConfirmBtnClick}
                                 disabled={
-                                    !paths.images.trim() || paths.isLoading
+                                    !paths.images.trim() ||
+                                    paths.isLoading ||
+                                    !!paths.annotationsError ||
+                                    !!paths.imagesError
                                 }>
                                 CONFIRM DATA IMPORT
                                 <SaveIconWrapper>
