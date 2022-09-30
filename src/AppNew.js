@@ -1,17 +1,29 @@
 import React, { useEffect } from 'react';
 import ImportModalComponent from './components/import-modal/import-modal.component';
-import { initSettings } from './redux/slices/settings/settings.slice';
+import {
+    getSettingsLoadingState,
+    initSettings,
+} from './redux/slices/settings/settings.slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const AppNew = () => {
+    const dispatch = useDispatch();
+    const areSettingsLoading = useSelector(getSettingsLoadingState);
+
     useEffect(() => {
-        console.log('useEffect');
-        console.log(initSettings());
+        dispatch(initSettings());
     }, []);
 
     return (
         <div>
-            <h1>New App JS!</h1>
-            <ImportModalComponent />
+            {areSettingsLoading ? (
+                <h2>Loading...</h2>
+            ) : (
+                <>
+                    <h1>New App JS!</h1>
+                    <ImportModalComponent />
+                </>
+            )}
         </div>
     );
 };

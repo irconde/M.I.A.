@@ -16,42 +16,28 @@ const defaultSettings = {
     selectedAnnotationsDirPath: null,
 };
 
-export const saveElectronCookie = createAsyncThunk(
-    'settings/saveElectronCookie',
-    async (payload, { rejectWithValue }) => {
-        await ipcRenderer
-            .invoke(Channels.saveSettings, payload)
-            .then(() => {
-                return payload;
-            })
-            .catch((error) => {
-                console.log(error);
-                rejectWithValue(error);
-            });
-        return payload;
-    }
-);
+const delay = async (time) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, time);
+    });
+};
 
 export const initSettings = createAsyncThunk(
     'settings/initSettings',
     async (payload, { rejectWithValue }) => {
-        console.log('InitSettings');
-        return await ipcRenderer
-            .invoke(Channels.getSettings)
-            .then((result) => {
-                console.log('Success');
-                return result;
-            })
-            .catch((err) => {
-                console.log('Failure');
-                rejectWithValue(err);
-            });
+        try {
+            // TODO: remove this. Just for testing
+            await delay(1000);
+            return await ipcRenderer.invoke(Channels.getSettings);
+        } catch (e) {
+            rejectWithValue(e);
+        }
     }
 );
 
 const initialState = {
-    defaultSettings,
-    loadingSettings: true,
+    settings: {},
+    isLoading: true,
 };
 
 const settingsSlice = createSlice({
@@ -68,40 +54,26 @@ const settingsSlice = createSlice({
             for (let key in action.payload) {
                 state.settings[key] = action.payload[key];
             }
-            state.settings.hasFileOutput =
-                action.payload.localFileOutput !== '';
-            state.settings.firstDisplaySettings = false;
         },
     },
     extraReducers: {
-        [saveElectronCookie.fulfilled]: (state, { payload }) => {
+        [initSettings.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
                 state.settings[key] = payload[key];
             }
-            state.settings.hasFileOutput = payload.localFileOutput !== '';
-            state.settings.firstDisplaySettings = false;
-        },
-        [saveElectronCookie.rejected]: (state) => {
-            state.settings = defaultSettings;
-        },
-        [initSettings.fulfilled]: (state, { payload }) => {
-            const { settings, firstDisplaySettings } = payload;
-            for (let key in settings) {
-                state.settings[key] = settings[key];
-            }
-            state.settings.hasFileOutput = settings.localFileOutput !== '';
-            state.settings.firstDisplaySettings = firstDisplaySettings;
-            state.settings.loadingElectronCookie = false;
-            state.loadingSettings = false;
+            state.isLoading = false;
         },
         [initSettings.pending]: (state) => {
-            state.loadingSettings = true;
+            state.isLoading = true;
         },
         [initSettings.rejected]: (state) => {
-            state.loadingSettings = false;
+            state = { isLoading: false, settings: defaultSettings };
         },
     },
 });
+
+// Selectors
+export const getSettingsLoadingState = (state) => state.settings.isLoading;
 
 // Actions
 export const { saveSettings } = settingsSlice.actions;
