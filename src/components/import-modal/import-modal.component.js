@@ -27,6 +27,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 const TYPE = {
     IMAGES: 'images',
     ANNOTATIONS: 'annotations',
+    CANCEL: 'cancel',
 };
 
 const ERROR = {
@@ -53,7 +54,8 @@ const ImportModalComponent = (props) => {
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
         const path = await ipcRenderer.invoke(Channels.showFolderPicker, null);
-        updatePaths(path, type);
+        // if event is cancelled, then the path is null
+        updatePaths(path, path === null ? TYPE.CANCEL : type);
     };
 
     const updatePaths = (value, type) => {
@@ -72,6 +74,8 @@ const ImportModalComponent = (props) => {
                     isLoading: false,
                     annotationsError: '',
                 });
+            case TYPE.CANCEL:
+                return setPaths({ ...paths, isLoading: false });
             default:
                 throw new Error(`Event of type ${type} is unhandled`);
         }

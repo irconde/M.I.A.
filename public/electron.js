@@ -149,16 +149,15 @@ ipcMain.handle(
             result[keys[i]] = response[i].status === 'fulfilled';
         }
 
-        // await updateSettings({
-        //     ...appSettings,
-        //     selectedImagesDirPath,
-        //     selectedAnnotationsDirPath,
-        // });
-
         return result;
     }
 );
 
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Receives an object containing keys of settings updated values. The callback updates
+ * the settings file and returns a promise
+ */
 ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
@@ -166,6 +165,10 @@ ipcMain.handle(
     }
 );
 
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Sends the settings variable to the React process
+ */
 ipcMain.handle(Constants.Channels.getSettings, async (event) => {
     return appSettings;
 });
