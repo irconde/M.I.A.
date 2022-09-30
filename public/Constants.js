@@ -1,5 +1,5 @@
 module.exports.Channels = {
-    selectDirectory: 'select-directory',
+    verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
     getSpecificFile: 'get-specific-file',

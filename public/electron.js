@@ -129,26 +129,35 @@ ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
     return result.filePaths[0];
 });
 
-ipcMain.handle(Constants.Channels.selectDirectory, async (event, pathsObj) => {
-    const promises = [];
-    for (const key in pathsObj) {
-        promises.push(checkIfPathExists(pathsObj[key]));
-    }
-    const response = await Promise.allSettled(promises);
-    const result = {};
-    const keys = Object.keys(pathsObj);
-    for (let i = 0; i < keys.length; i++) {
-        result[keys[i]] = response[i].status === 'fulfilled';
-    }
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * This accepts an object with each property holding a string path to be validated by electron
+ * It will return an object with same given keys as pathsObj with a boolean value representing if
+ * the particular path exists or not. An example of a returned value is: {imagesPath: true, annotationsPath: false}
+ */
+ipcMain.handle(
+    Constants.Channels.verifyDirectories,
+    async (event, pathsObj) => {
+        const promises = [];
+        for (const key in pathsObj) {
+            promises.push(checkIfPathExists(pathsObj[key]));
+        }
+        const response = await Promise.allSettled(promises);
+        const result = {};
+        const keys = Object.keys(pathsObj);
+        for (let i = 0; i < keys.length; i++) {
+            result[keys[i]] = response[i].status === 'fulfilled';
+        }
 
-    // await updateSettings({
-    //     ...appSettings,
-    //     selectedImagesDirPath,
-    //     selectedAnnotationsDirPath,
-    // });
+        // await updateSettings({
+        //     ...appSettings,
+        //     selectedImagesDirPath,
+        //     selectedAnnotationsDirPath,
+        // });
 
-    return result;
-});
+        return result;
+    }
+);
 
 ipcMain.handle(Constants.Channels.getSettings, async (event) => {
     return appSettings;

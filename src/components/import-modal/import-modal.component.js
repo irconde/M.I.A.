@@ -93,7 +93,10 @@ const ImportModalComponent = (props) => {
         if (!onlyImagesPath) {
             data.selectedAnnotationsDirPath = paths.annotations;
         }
-        const result = await ipcRenderer.invoke(Channels.selectDirectory, data);
+        const result = await ipcRenderer.invoke(
+            Channels.verifyDirectories,
+            data
+        );
 
         // set errors for input fields if either path is invalid
         setPaths({
