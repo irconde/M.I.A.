@@ -12,8 +12,8 @@ const defaultSettings = {
     localFileOutput: '',
     fileSuffix: '_img',
     deviceType: '',
-    selectedImagesDirPath: null,
-    selectedAnnotationsDirPath: null,
+    selectedImagesDirPath: '',
+    selectedAnnotationsDirPath: '',
 };
 
 const delay = async (time) => {
@@ -74,6 +74,12 @@ const settingsSlice = createSlice({
 
 // Selectors
 export const getSettingsLoadingState = (state) => state.settings.isLoading;
+
+export const getAssetsDirPaths = (state) => ({
+    selectedImagesDirPath: state.settings.settings.selectedImagesDirPath,
+    selectedAnnotationsDirPath:
+        state.settings.settings.selectedAnnotationsDirPath,
+});
 
 // Actions
 export const { saveSettings } = settingsSlice.actions;

@@ -16,6 +16,8 @@ import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
 import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
 import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Channels } from '../../utils/enums/Constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAssetsDirPaths } from '../../redux/slices/settings/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -31,10 +33,13 @@ const ERROR = {
 };
 
 const ImportModalComponent = (props) => {
+    const dispatch = useDispatch();
+    const { selectedImagesDirPath, selectedAnnotationsDirPath } =
+        useSelector(getAssetsDirPaths);
     const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
-        images: '',
-        annotations: '',
+        images: selectedImagesDirPath,
+        annotations: selectedAnnotationsDirPath,
         isLoading: false,
         imagesError: '',
         annotationsError: '',
@@ -69,7 +74,7 @@ const ImportModalComponent = (props) => {
         }
     };
 
-    const handleConfirmBtnClick = async (e) => {
+    const handleConfirmBtnClick = async () => {
         const { MANDATORY, INVALID } = ERROR;
         // don't allow importing if no images' dir is selected
         if (paths.images.trim() === '') {
@@ -96,6 +101,14 @@ const ImportModalComponent = (props) => {
                     ? ''
                     : INVALID,
         });
+
+        // update the redux store and close the modal if no errors
+        if (
+            result.selectedImagesDirPath &&
+            (result.selectedAnnotationsDirPath || onlyImagesPath)
+        ) {
+            handleClose();
+        }
     };
 
     return (

@@ -141,16 +141,16 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, pathsObj) => {
         result[keys[i]] = response[i].status === 'fulfilled';
     }
 
-    return result;
     // await updateSettings({
     //     ...appSettings,
     //     selectedImagesDirPath,
     //     selectedAnnotationsDirPath,
     // });
+
+    return result;
 });
 
 ipcMain.handle(Constants.Channels.getSettings, async (event) => {
-    console.log(Constants.Channels.getSettings);
     return appSettings;
 });
 
