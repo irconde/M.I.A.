@@ -17,7 +17,10 @@ import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotatio
 import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Channels } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAssetsDirPaths } from '../../redux/slices/settings/settings.slice';
+import {
+    getAssetsDirPaths,
+    saveSettings,
+} from '../../redux/slices/settings/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -50,7 +53,7 @@ const ImportModalComponent = (props) => {
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
         const path = await ipcRenderer.invoke(Channels.showFolderPicker, null);
-        updatePaths(path || '', type);
+        updatePaths(path, type);
     };
 
     const updatePaths = (value, type) => {
@@ -107,6 +110,12 @@ const ImportModalComponent = (props) => {
             result.selectedImagesDirPath &&
             (result.selectedAnnotationsDirPath || onlyImagesPath)
         ) {
+            dispatch(
+                saveSettings({
+                    selectedImagesDirPath: paths.images,
+                    selectedAnnotationsDirPath: paths.annotations,
+                })
+            );
             handleClose();
         }
     };
