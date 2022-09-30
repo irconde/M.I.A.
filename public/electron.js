@@ -149,6 +149,11 @@ ipcMain.handle(Constants.Channels.selectDirectory, async (event, pathsObj) => {
     // });
 });
 
+ipcMain.handle(Constants.Channels.getSettings, async (event) => {
+    console.log(Constants.Channels.getSettings);
+    return appSettings;
+});
+
 /**
  * Checks if a path exists
  *
