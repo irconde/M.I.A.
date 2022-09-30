@@ -19,7 +19,7 @@ import { Channels } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAssetsDirPaths,
-    saveSettings,
+    updateSettings,
 } from '../../redux/slices/settings/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
@@ -114,11 +114,12 @@ const ImportModalComponent = (props) => {
             (result.selectedAnnotationsDirPath || onlyImagesPath)
         ) {
             dispatch(
-                saveSettings({
+                updateSettings({
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationsDirPath: paths.annotations,
                 })
             );
+
             handleClose();
         }
     };

@@ -16,6 +16,7 @@ const defaultSettings = {
     selectedAnnotationsDirPath: '',
 };
 
+// TODO: remove this it's just for testing
 const delay = async (time) => {
     return new Promise((resolve) => {
         setTimeout(resolve, time);
@@ -35,6 +36,20 @@ export const initSettings = createAsyncThunk(
     }
 );
 
+export const updateSettings = createAsyncThunk(
+    'settings/updateSettings',
+    async (settingsToUpdate, { rejectedWithValue }) => {
+        try {
+            return await ipcRenderer.invoke(
+                Channels.saveSettings,
+                settingsToUpdate
+            );
+        } catch (e) {
+            rejectedWithValue(e);
+        }
+    }
+);
+
 const initialState = {
     settings: {},
     isLoading: true,
@@ -43,19 +58,7 @@ const initialState = {
 const settingsSlice = createSlice({
     name: 'settings',
     initialState,
-    reducers: {
-        /**
-         * Saves the settings passed in by action.payload
-         *
-         * @param {State} state - Store state information automatically passed in via dispatch/mapDispatchToProps.
-         * @param {Object} action Object containing key values for settings to be set in the settings
-         */
-        saveSettings: (state, action) => {
-            for (let key in action.payload) {
-                state.settings[key] = action.payload[key];
-            }
-        },
-    },
+    reducers: {},
     extraReducers: {
         [initSettings.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
@@ -69,6 +72,14 @@ const settingsSlice = createSlice({
         [initSettings.rejected]: (state) => {
             state = { isLoading: false, settings: defaultSettings };
         },
+        [updateSettings.fulfilled]: (state, { payload }) => {
+            for (let key in payload) {
+                state.settings[key] = payload[key];
+            }
+        },
+        [updateSettings.rejected]: (state, { payload }) => {
+            // TODO: handle saving settings rejection
+        },
     },
 });
 
@@ -80,8 +91,5 @@ export const getAssetsDirPaths = (state) => ({
     selectedAnnotationsDirPath:
         state.settings.settings.selectedAnnotationsDirPath,
 });
-
-// Actions
-export const { saveSettings } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

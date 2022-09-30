@@ -159,6 +159,13 @@ ipcMain.handle(
     }
 );
 
+ipcMain.handle(
+    Constants.Channels.saveSettings,
+    async (event, settingsToUpdate) => {
+        return updateSettings({ ...appSettings, ...settingsToUpdate });
+    }
+);
+
 ipcMain.handle(Constants.Channels.getSettings, async (event) => {
     return appSettings;
 });
