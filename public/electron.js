@@ -26,6 +26,7 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
+            ignore: ['settings.json', 'monitorConfig.json'],
         });
     } catch (e) {
         console.log(e);

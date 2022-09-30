@@ -16,19 +16,10 @@ const defaultSettings = {
     selectedAnnotationsDirPath: '',
 };
 
-// TODO: remove this it's just for testing
-const delay = async (time) => {
-    return new Promise((resolve) => {
-        setTimeout(resolve, time);
-    });
-};
-
 export const initSettings = createAsyncThunk(
     'settings/initSettings',
     async (payload, { rejectWithValue }) => {
         try {
-            // TODO: remove this. Just for testing
-            await delay(1000);
             return await ipcRenderer.invoke(Channels.getSettings);
         } catch (e) {
             rejectWithValue(e);

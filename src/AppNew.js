@@ -16,9 +16,7 @@ const AppNew = () => {
 
     return (
         <div>
-            {areSettingsLoading ? (
-                <h2>Loading...</h2>
-            ) : (
+            {!areSettingsLoading && (
                 <>
                     <h1>New App JS!</h1>
                     <ImportModalComponent />
