@@ -42,8 +42,8 @@ const ImportModalComponent = (props) => {
         useSelector(getAssetsDirPaths);
     const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
-        images: selectedImagesDirPath,
-        annotations: selectedAnnotationsDirPath,
+        images: selectedImagesDirPath || '',
+        annotations: selectedAnnotationsDirPath || '',
         isLoading: false,
         imagesError: '',
         annotationsError: '',
