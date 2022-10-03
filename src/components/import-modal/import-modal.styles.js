@@ -29,6 +29,10 @@ export const StyledModal = styled.div`
     padding: 1.5rem;
     box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
     border: solid 1px #464646;
+
+    :focus-visible {
+        outline: none;
+    }
 `;
 
 export const ModalTitle = styled.h2`
@@ -60,20 +64,22 @@ export const ModalSection = styled.div`
 export const ConfirmButton = styled(Button).attrs(() => ({
     variant: 'contained',
 }))`
-    align-self: flex-end;
-    margin-top: 3rem;
-    width: 66%;
-    font-family: Noto Sans JP, sans-serif;
-    font-size: 17px;
-    font-weight: 500;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: normal;
-    text-align: justify;
-    color: #fff;
-    padding-block: 0.5rem;
-    white-space: nowrap;
+    &.MuiButton-root.MuiButton-contained {
+        align-self: flex-end;
+        margin-top: 3rem;
+        width: 66%;
+        font-family: Noto Sans JP, sans-serif;
+        font-size: 17px;
+        font-weight: 500;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: justify;
+        color: ${({ disabled }) => !disabled && '#fff'};
+        padding-block: 0.5rem;
+        white-space: nowrap;
+    }
 
     & svg {
         fill: ${({ disabled }) => (disabled ? 'rgba(0, 0, 0, 0.26)' : 'white')};
@@ -85,7 +91,9 @@ export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
 }))`
-    margin-left: 1rem;
+    &.MuiFormControl-root {
+        margin-left: 1rem;
+    }
 
     & .MuiInput-input {
         color: #fafafa;
@@ -95,10 +103,8 @@ export const StyledInput = styled(TextField).attrs(() => ({
         border-bottom: 2px solid #939393;
     }
 
-    &:hover {
-        & .MuiInput-root::before {
-            border-bottom: 2px solid #939393;
-        }
+    & .MuiInput-root:hover:not(.Mui-disabled)::before {
+        border-bottom: 2px solid #939393;
     }
 
     & .MuiInput-input::placeholder {
@@ -117,11 +123,13 @@ export const StyledInput = styled(TextField).attrs(() => ({
 export const OutlinedButton = styled(Button).attrs(() => ({
     variant: 'outlined',
 }))`
-    margin-left: auto;
-    color: white;
-    border: solid 1px #4e4e4e;
-    text-transform: none;
-    width: 38%;
+    &.MuiButton-root {
+        margin-left: auto;
+        color: white;
+        border: solid 1px #4e4e4e;
+        text-transform: none;
+        width: 38%;
+    }
 `;
 
 export const SaveIconWrapper = styled.span`
