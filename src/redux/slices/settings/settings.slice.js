@@ -4,14 +4,6 @@ import { Channels } from '../../../utils/enums/Constants';
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 const defaultSettings = {
-    remoteIp: '127.0.0.1',
-    remotePort: '4001',
-    autoConnect: true,
-    fileFormat: 'Open Raster',
-    annotationsFormat: 'DICOS TDR',
-    localFileOutput: '',
-    fileSuffix: '_img',
-    deviceType: '',
     selectedImagesDirPath: '',
     selectedAnnotationsDirPath: '',
 };
