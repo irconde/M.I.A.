@@ -11,7 +11,7 @@ import {
     StyledModal,
 } from './import-modal.styles';
 import { ThemeProvider } from '@mui/material/styles';
-import { Button, Modal } from '@mui/material';
+import { Modal } from '@mui/material';
 import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
 import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
 import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
@@ -131,7 +131,6 @@ const ImportModalComponent = (props) => {
     return (
         <ThemeProvider theme={modalTheme}>
             <div>
-                <Button onClick={handleOpen}>Open modal</Button>
                 <Modal
                     open={open}
                     onClose={handleClose}

@@ -14,16 +14,7 @@ const AppNew = () => {
         dispatch(initSettings());
     }, []);
 
-    return (
-        <div>
-            {!areSettingsLoading && (
-                <>
-                    <h1>New App JS!</h1>
-                    <ImportModalComponent />
-                </>
-            )}
-        </div>
-    );
+    return <div>{!areSettingsLoading && <ImportModalComponent />}</div>;
 };
 
 export default AppNew;
