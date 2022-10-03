@@ -1,8 +1,5 @@
 const electron = require('electron');
-const ipcMain = electron.ipcMain;
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
-const screen = electron.screen;
+const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -29,6 +26,7 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
+            ignore: ['settings.json', 'monitorConfig.json'],
         });
     } catch (e) {
         console.log(e);
@@ -115,6 +113,80 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * This returns a string with the selected directory name, or null if the event is cancelled
+ * @returns {string | null}
+ */
+ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
+    });
+
+    // if the event is cancelled by the user
+    if (result.canceled) return null;
+
+    return result.filePaths[0];
+});
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * This accepts an object with each property holding a string path to be validated by electron
+ * It will return an object with same given keys as pathsObj with a boolean value representing if
+ * the particular path exists or not. An example of a returned value is: {imagesPath: true, annotationsPath: false}
+ */
+ipcMain.handle(
+    Constants.Channels.verifyDirectories,
+    async (event, pathsObj) => {
+        const promises = [];
+        for (const key in pathsObj) {
+            promises.push(checkIfPathExists(pathsObj[key]));
+        }
+        const response = await Promise.allSettled(promises);
+        const result = {};
+        const keys = Object.keys(pathsObj);
+        for (let i = 0; i < keys.length; i++) {
+            result[keys[i]] = response[i].status === 'fulfilled';
+        }
+
+        return result;
+    }
+);
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Receives an object containing keys of settings updated values. The callback updates
+ * the settings file and returns a promise
+ */
+ipcMain.handle(
+    Constants.Channels.saveSettings,
+    async (event, settingsToUpdate) => {
+        return updateSettings({ ...appSettings, ...settingsToUpdate });
+    }
+);
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Sends the settings variable to the React process
+ */
+ipcMain.handle(Constants.Channels.getSettings, async (event) => {
+    return appSettings;
+});
+
+/**
+ * Checks if a path exists
+ *
+ * @param {string} path
+ * @returns {Promise<undefined>}
+ */
+const checkIfPathExists = async (path) => {
+    return new Promise((resolve, reject) => {
+        fs.access(path, (err) => {
+            err ? reject() : resolve();
+        });
+    });
+};
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,

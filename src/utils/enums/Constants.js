@@ -120,7 +120,7 @@ export const DEVICE_TYPE = {
 };
 
 export const Channels = {
-    selectDirectory: 'select-directory',
+    verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
     getSpecificFile: 'get-specific-file',
@@ -130,9 +130,10 @@ export const Channels = {
     thumbnailStatus: 'thumbnail-status',
     updateFiles: 'update-files',
     updateCurrentFile: 'update-current-file',
-    saveSettingsCookie: 'save-settings-cookie',
-    getSettingsCookie: 'get-settings-cookie',
-    loadSettingsCookie: 'load-settings-cookie',
+    saveSettings: 'save-settings',
+    getSettings: 'get-settings',
+    initSettings: 'init-settings',
+    showFolderPicker: 'show-folder-picker',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;

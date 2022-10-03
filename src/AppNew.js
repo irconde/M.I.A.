@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import ImportModalComponent from './components/import-modal/import-modal.component';
+import {
+    getSettingsLoadingState,
+    initSettings,
+} from './redux/slices/settings/settings.slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const AppNew = () => {
-    return (
-        <div>
-            <h1>New App JS!</h1>
-        </div>
-    );
+    const dispatch = useDispatch();
+    const areSettingsLoading = useSelector(getSettingsLoadingState);
+
+    useEffect(() => {
+        dispatch(initSettings());
+    }, []);
+
+    return <div>{!areSettingsLoading && <ImportModalComponent />}</div>;
 };
 
 export default AppNew;
