@@ -21,7 +21,7 @@ body {
     display: none !important;
 }
 
-.singleViewportTop {
+.imageViewport {
     height: 100vh;
     top: 0;
     left: 0;
