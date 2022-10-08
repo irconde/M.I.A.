@@ -33,6 +33,47 @@ if (isDev) {
     }
 }
 
+const files = {
+    fileNames: [],
+    currentFileIndex: -1,
+    /**
+     * Updates the fileNames array with new image names
+     * @param dirPath
+     * @returns {Promise<void>}
+     */
+    updateFileNames: async function (dirPath) {
+        const foundFiles = await fs.promises.readdir(dirPath);
+        this.fileNames = foundFiles.filter((file) => {
+            const fileExtension = path.extname(file);
+            return (
+                fileExtension === '.png' ||
+                fileExtension === '.jpg' ||
+                fileExtension === '.jpeg'
+            );
+        });
+    },
+    /**
+     * Reads the next file data if there is one and increments the current index
+     * @returns {Promise<Buffer>}
+     */
+    getNextFile: async function () {
+        this.currentFileIndex++;
+        if (
+            this.currentFileIndex >= this.fileNames.length ||
+            !this.fileNames.length
+        ) {
+            throw new Error('No more files');
+        }
+
+        return fs.promises.readFile(
+            path.join(
+                appSettings.selectedImagesDirPath,
+                this.fileNames[this.currentFileIndex]
+            )
+        );
+    },
+};
+
 function createWindow() {
     let display;
     // check for file containing information about last window location and dimensions
@@ -162,9 +203,18 @@ ipcMain.handle(
 ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
-        return updateSettings({ ...appSettings, ...settingsToUpdate });
+        await updateSettings({ ...appSettings, ...settingsToUpdate });
+        await files.updateFileNames(settingsToUpdate.selectedImagesDirPath);
     }
 );
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Sends next file data
+ */
+ipcMain.handle(Constants.Channels.getNextFile, () => {
+    return files.getNextFile();
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
