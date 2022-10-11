@@ -5,7 +5,7 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import dicomParser from 'dicom-parser';
 import Utils from '../../utils/general/Utils';
-import React, { createRef } from 'react';
+import React, { createRef, useEffect } from 'react';
 import * as cornerstoneMath from 'cornerstone-math';
 
 cornerstoneTools.external.cornerstone = cornerstone;
@@ -34,7 +34,7 @@ cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 const ImageDisplayComponent = () => {
     const viewportRef = createRef();
     const setupCornerstoneJS = () => {
-        cornerstone.enable(viewportRef);
+        cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
         cornerstoneTools.addTool(PanTool);
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
@@ -45,7 +45,10 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     };
-    setupCornerstoneJS();
+
+    useEffect(() => {
+        setupCornerstoneJS();
+    }, []);
 
     return (
         <div className="imageViewport" id="imageContainer" ref={viewportRef}>
