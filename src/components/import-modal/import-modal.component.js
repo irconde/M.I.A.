@@ -122,9 +122,7 @@ const ImportModalComponent = (props) => {
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationsDirPath: paths.annotations,
                 })
-            );
-
-            handleClose();
+            ).then(handleClose);
         }
     };
 
