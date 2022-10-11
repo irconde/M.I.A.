@@ -9,6 +9,7 @@ import React, { createRef, useEffect, useState } from 'react';
 import * as cornerstoneMath from 'cornerstone-math';
 import * as constants from '../../utils/enums/Constants';
 import { Channels } from '../../utils/enums/Constants';
+import { ImageViewport } from './image-display.styles';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -52,8 +53,8 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(() => {
-        console.log('IMAGE DISPLAY MOUNTED');
         setupCornerstoneJS();
+        displayImage();
     }, []);
 
     const getNextFile = async () => {
@@ -88,15 +89,9 @@ const ImageDisplayComponent = () => {
     };
 
     return (
-        <div className="imageViewport" id="imageContainer" ref={viewportRef}>
+        <ImageViewport ref={viewportRef}>
             <div
                 id="viewerContainer"
-                style={{
-                    width: '100vw',
-                    height: '100vh',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                }}
                 onContextMenu={(e) => e.preventDefault()}
                 className="disable-selection noIbar"
                 unselectable="off"
@@ -105,10 +100,8 @@ const ImageDisplayComponent = () => {
                         el.addEventListener('selectstart', (e) => {
                             e.preventDefault();
                         });
-                }}>
-                <button onClick={displayImage}>NEXT</button>
-            </div>
-        </div>
+                }}></div>
+        </ImageViewport>
     );
 };
 
