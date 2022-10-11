@@ -122,19 +122,9 @@ const ImportModalComponent = (props) => {
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationsDirPath: paths.annotations,
                 })
-            ).then(getNextFile);
+            );
 
             handleClose();
-        }
-    };
-
-    const getNextFile = async () => {
-        try {
-            const fileData = await ipcRenderer.invoke(Channels.getNextFile);
-            console.log(fileData);
-        } catch (e) {
-            // TODO: no file
-            console.log(e);
         }
     };
 

@@ -18,6 +18,8 @@ const AppNew = () => {
         dispatch(initSettings());
     }, []);
 
+    console.log(selectedImagesDirPath);
+
     return (
         <div>
             {!areSettingsLoading &&

@@ -5,8 +5,12 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import dicomParser from 'dicom-parser';
 import Utils from '../../utils/general/Utils';
-import React, { createRef, useEffect } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import * as cornerstoneMath from 'cornerstone-math';
+import * as constants from '../../utils/enums/Constants';
+import { Channels } from '../../utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.Hammer = Hammer;
@@ -33,6 +37,7 @@ cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 const ImageDisplayComponent = () => {
     const viewportRef = createRef();
+    const [viewport, setViewport] = useState(null);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -47,8 +52,40 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(() => {
+        console.log('IMAGE DISPLAY MOUNTED');
         setupCornerstoneJS();
     }, []);
+
+    const getNextFile = async () => {
+        try {
+            return ipcRenderer.invoke(Channels.getNextFile);
+        } catch (e) {
+            // TODO: no file
+            console.log(e);
+        }
+    };
+
+    const displayImage = async () => {
+        const pixelData = await getNextFile();
+        const imageIdTop = 'coco:0';
+        Utils.loadImage(imageIdTop, pixelData).then((image) => {
+            const viewport = cornerstone.getDefaultViewportForImage(
+                viewportRef.current,
+                image
+            );
+            viewport.translation.y = constants.viewportStyle.ORIGIN;
+            viewport.scale = 1.2;
+            const displayedArea = cornerstone.getDisplayedArea(
+                image,
+                viewportRef.current
+            );
+            // eslint-disable-next-line react/no-direct-mutation-state
+            // if (displayedArea !== undefined)
+            // self.state.imageData[0].dimensions = displayedArea.brhc;
+            setViewport(viewport);
+            cornerstone.displayImage(viewportRef.current, image, viewport);
+        });
+    };
 
     return (
         <div className="imageViewport" id="imageContainer" ref={viewportRef}>
@@ -68,7 +105,9 @@ const ImageDisplayComponent = () => {
                         el.addEventListener('selectstart', (e) => {
                             e.preventDefault();
                         });
-                }}></div>
+                }}>
+                <button onClick={displayImage}>NEXT</button>
+            </div>
         </div>
     );
 };
