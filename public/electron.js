@@ -212,7 +212,7 @@ ipcMain.handle(
 ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
-        await updateSettings({ ...appSettings, ...settingsToUpdate });
+        await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
         await files.updateFileNames(settingsToUpdate.selectedImagesDirPath);
     }
 );
@@ -258,12 +258,14 @@ const initSettings = async () => {
         const { defaultSettings } = Constants;
         fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
             if (err?.code === 'ENOENT') {
-                updateSettings(defaultSettings).then(resolve).catch(reject);
+                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
             } else if (err) {
                 appSettings = defaultSettings;
                 reject(err);
             } else {
+                // if settings already exist
                 appSettings = JSON.parse(data);
+                files.updateFileNames(appSettings.selectedImagesDirPath);
                 resolve(appSettings);
             }
         });
@@ -276,7 +278,7 @@ const initSettings = async () => {
  * @param {Object} newSettings - object to update the settings with
  * @returns {Promise<Object>}
  */
-const updateSettings = async (newSettings) => {
+const updateSettingsJSON = async (newSettings) => {
     return new Promise((resolve, reject) => {
         const settingsString = JSON.stringify(newSettings);
         fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
