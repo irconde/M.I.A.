@@ -39,6 +39,7 @@ cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 const ImageDisplayComponent = () => {
     const viewportRef = createRef();
     const [viewport, setViewport] = useState(null);
+    const [error, setError] = useState('');
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -67,28 +68,34 @@ const ImageDisplayComponent = () => {
     };
 
     const displayImage = async () => {
-        const pixelData = await getNextFile();
-        const imageIdTop = 'coco:0';
-        Utils.loadImage(imageIdTop, pixelData).then((image) => {
-            const viewport = cornerstone.getDefaultViewportForImage(
-                viewportRef.current,
-                image
-            );
-            viewport.translation.y = constants.viewportStyle.ORIGIN;
-            viewport.scale = 1.2;
-            const displayedArea = cornerstone.getDisplayedArea(
-                image,
-                viewportRef.current
-            );
-            // eslint-disable-next-line react/no-direct-mutation-state
-            // if (displayedArea !== undefined)
-            // self.state.imageData[0].dimensions = displayedArea.brhc;
-            setViewport(viewport);
-            cornerstone.displayImage(viewportRef.current, image, viewport);
-        });
+        try {
+            const pixelData = await getNextFile();
+            const imageIdTop = 'coco:0';
+            Utils.loadImage(imageIdTop, pixelData).then((image) => {
+                const viewport = cornerstone.getDefaultViewportForImage(
+                    viewportRef.current,
+                    image
+                );
+                viewport.translation.y = constants.viewportStyle.ORIGIN;
+                viewport.scale = 1.2;
+                const displayedArea = cornerstone.getDisplayedArea(
+                    image,
+                    viewportRef.current
+                );
+                // eslint-disable-next-line react/no-direct-mutation-state
+                // if (displayedArea !== undefined)
+                // self.state.imageData[0].dimensions = displayedArea.brhc;
+                setViewport(viewport);
+                cornerstone.displayImage(viewportRef.current, image, viewport);
+            });
+        } catch (e) {
+            setError(e.message);
+        }
     };
 
-    return (
+    return error ? (
+        <p>No more files...</p>
+    ) : (
         <ImageViewport ref={viewportRef}>
             <div
                 id="viewerContainer"
