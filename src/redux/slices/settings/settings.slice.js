@@ -23,10 +23,8 @@ export const updateSettings = createAsyncThunk(
     'settings/updateSettings',
     async (settingsToUpdate, { rejectedWithValue }) => {
         try {
-            return await ipcRenderer.invoke(
-                Channels.saveSettings,
-                settingsToUpdate
-            );
+            await ipcRenderer.invoke(Channels.saveSettings, settingsToUpdate);
+            return settingsToUpdate;
         } catch (e) {
             rejectedWithValue(e);
         }

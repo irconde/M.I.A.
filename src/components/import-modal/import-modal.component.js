@@ -48,6 +48,7 @@ const ImportModalComponent = (props) => {
         imagesError: '',
         annotationsError: '',
     });
+
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
@@ -122,9 +123,7 @@ const ImportModalComponent = (props) => {
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationsDirPath: paths.annotations,
                 })
-            );
-
-            handleClose();
+            ).then(handleClose);
         }
     };
 

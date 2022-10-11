@@ -33,6 +33,48 @@ if (isDev) {
     }
 }
 
+const files = {
+    fileNames: [],
+    currentFileIndex: -1,
+    /**
+     * Updates the fileNames array with new image names
+     * @param dirPath
+     * @returns {Promise<void>}
+     */
+    updateFileNames: async function (dirPath) {
+        const foundFiles = await fs.promises.readdir(dirPath);
+        this.fileNames = foundFiles.filter((file) => {
+            const fileExtension = path.extname(file);
+            return (
+                fileExtension === '.png' ||
+                fileExtension === '.jpg' ||
+                fileExtension === '.jpeg'
+            );
+        });
+    },
+    /**
+     * Reads the next file data if there is one and increments the current index
+     * @returns {Promise<Buffer>}
+     */
+    getNextFile: async function () {
+        this.currentFileIndex++;
+        console.log(this.fileNames);
+        if (!this.fileNames.length) {
+            throw new Error('Directory contains no images');
+        } else if (this.currentFileIndex >= this.fileNames.length) {
+            throw new Error('No more files');
+        }
+
+        return fs.promises.readFile(
+            path.join(
+                appSettings.selectedImagesDirPath,
+
+                this.fileNames[this.currentFileIndex]
+            )
+        );
+    },
+};
+
 function createWindow() {
     let display;
     // check for file containing information about last window location and dimensions
@@ -55,49 +97,57 @@ function createWindow() {
             devTools: isDev,
         },
     });
-    mainWindow
-        .loadURL(
-            isDev
-                ? 'http://localhost:3000'
-                : `file://${path.join(__dirname, '../build/index.html')}`
-        )
-        .then(() => {
-            initSettings().catch(console.log);
-        })
-        .catch((err) => console.log(err));
+    initSettings()
+        .catch(console.log)
+        .finally(() => {
+            mainWindow
+                .loadURL(
+                    isDev
+                        ? 'http://localhost:3000'
+                        : `file://${path.join(
+                              __dirname,
+                              '../build/index.html'
+                          )}`
+                )
+                .catch((err) => console.log(err));
 
-    mainWindow.maximize();
-    mainWindow.on('close', async () => {
-        const rectangle = mainWindow.getBounds();
-        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
-            if (err) throw err;
-        });
-    });
-    mainWindow.on('closed', async () => {
-        await watcher?.unwatch(currentPath);
-        await watcher?.close();
-        mainWindow = null;
-    });
-    if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log('An error occurred: ', err));
-
-        // Open the DevTools.
-        mainWindow.webContents.on('did-frame-finish-load', () => {
-            // We close the DevTools so that it can be reopened and redux reconnected.
-            // This is a workaround for a bug in redux devtools.
-            mainWindow.webContents.closeDevTools();
-
-            mainWindow.webContents.once('devtools-opened', () => {
-                mainWindow.focus();
+            mainWindow.maximize();
+            mainWindow.on('close', async () => {
+                const rectangle = mainWindow.getBounds();
+                fs.writeFile(
+                    MONITOR_FILE_PATH,
+                    JSON.stringify(rectangle),
+                    (err) => {
+                        if (err) throw err;
+                    }
+                );
             });
+            mainWindow.on('closed', async () => {
+                await watcher?.unwatch(currentPath);
+                await watcher?.close();
+                mainWindow = null;
+            });
+            if (isDev) {
+                installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+                    .then((name) => console.log(`Added Extension:  ${name}`))
+                    .catch((err) => console.log('An error occurred: ', err));
 
-            mainWindow.webContents.openDevTools();
+                // Open the DevTools.
+                mainWindow.webContents.on('did-frame-finish-load', () => {
+                    // We close the DevTools so that it can be reopened and redux reconnected.
+                    // This is a workaround for a bug in redux devtools.
+                    mainWindow.webContents.closeDevTools();
+
+                    mainWindow.webContents.once('devtools-opened', () => {
+                        mainWindow.focus();
+                    });
+
+                    mainWindow.webContents.openDevTools();
+                });
+            } else {
+                mainWindow.removeMenu();
+            }
         });
-    } else {
-        mainWindow.removeMenu();
-    }
 }
 
 app.on('ready', createWindow);
@@ -162,9 +212,18 @@ ipcMain.handle(
 ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
-        return updateSettings({ ...appSettings, ...settingsToUpdate });
+        await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
+        await files.updateFileNames(settingsToUpdate.selectedImagesDirPath);
     }
 );
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Sends next file data
+ */
+ipcMain.handle(Constants.Channels.getNextFile, () => {
+    return files.getNextFile();
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
@@ -199,12 +258,14 @@ const initSettings = async () => {
         const { defaultSettings } = Constants;
         fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
             if (err?.code === 'ENOENT') {
-                updateSettings(defaultSettings).then(resolve).catch(reject);
+                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
             } else if (err) {
                 appSettings = defaultSettings;
                 reject(err);
             } else {
+                // if settings already exist
                 appSettings = JSON.parse(data);
+                files.updateFileNames(appSettings.selectedImagesDirPath);
                 resolve(appSettings);
             }
         });
@@ -217,7 +278,7 @@ const initSettings = async () => {
  * @param {Object} newSettings - object to update the settings with
  * @returns {Promise<Object>}
  */
-const updateSettings = async (newSettings) => {
+const updateSettingsJSON = async (newSettings) => {
     return new Promise((resolve, reject) => {
         const settingsString = JSON.stringify(newSettings);
         fs.writeFile(SETTINGS_FILE_PATH, settingsString, (err) => {
