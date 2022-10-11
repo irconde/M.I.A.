@@ -21,10 +21,10 @@ const AppNew = () => {
     return (
         <div>
             {!areSettingsLoading &&
-                (selectedImagesDirPath === '' ? (
-                    <ImportModalComponent />
-                ) : (
+                (selectedImagesDirPath ? (
                     <ImageDisplayComponent />
+                ) : (
+                    <ImportModalComponent />
                 ))}
         </div>
     );
