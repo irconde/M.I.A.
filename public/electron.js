@@ -58,16 +58,17 @@ const files = {
      */
     getNextFile: async function () {
         this.currentFileIndex++;
-        if (
-            this.currentFileIndex >= this.fileNames.length ||
-            !this.fileNames.length
-        ) {
+        console.log(this.fileNames);
+        if (!this.fileNames.length) {
+            throw new Error('Directory contains no images');
+        } else if (this.currentFileIndex >= this.fileNames.length) {
             throw new Error('No more files');
         }
 
         return fs.promises.readFile(
             path.join(
                 appSettings.selectedImagesDirPath,
+
                 this.fileNames[this.currentFileIndex]
             )
         );
@@ -96,49 +97,57 @@ function createWindow() {
             devTools: isDev,
         },
     });
-    mainWindow
-        .loadURL(
-            isDev
-                ? 'http://localhost:3000'
-                : `file://${path.join(__dirname, '../build/index.html')}`
-        )
-        .then(() => {
-            initSettings().catch(console.log);
-        })
-        .catch((err) => console.log(err));
+    initSettings()
+        .catch(console.log)
+        .finally(() => {
+            mainWindow
+                .loadURL(
+                    isDev
+                        ? 'http://localhost:3000'
+                        : `file://${path.join(
+                              __dirname,
+                              '../build/index.html'
+                          )}`
+                )
+                .catch((err) => console.log(err));
 
-    mainWindow.maximize();
-    mainWindow.on('close', async () => {
-        const rectangle = mainWindow.getBounds();
-        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
-            if (err) throw err;
-        });
-    });
-    mainWindow.on('closed', async () => {
-        await watcher?.unwatch(currentPath);
-        await watcher?.close();
-        mainWindow = null;
-    });
-    if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log('An error occurred: ', err));
-
-        // Open the DevTools.
-        mainWindow.webContents.on('did-frame-finish-load', () => {
-            // We close the DevTools so that it can be reopened and redux reconnected.
-            // This is a workaround for a bug in redux devtools.
-            mainWindow.webContents.closeDevTools();
-
-            mainWindow.webContents.once('devtools-opened', () => {
-                mainWindow.focus();
+            mainWindow.maximize();
+            mainWindow.on('close', async () => {
+                const rectangle = mainWindow.getBounds();
+                fs.writeFile(
+                    MONITOR_FILE_PATH,
+                    JSON.stringify(rectangle),
+                    (err) => {
+                        if (err) throw err;
+                    }
+                );
             });
+            mainWindow.on('closed', async () => {
+                await watcher?.unwatch(currentPath);
+                await watcher?.close();
+                mainWindow = null;
+            });
+            if (isDev) {
+                installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+                    .then((name) => console.log(`Added Extension:  ${name}`))
+                    .catch((err) => console.log('An error occurred: ', err));
 
-            mainWindow.webContents.openDevTools();
+                // Open the DevTools.
+                mainWindow.webContents.on('did-frame-finish-load', () => {
+                    // We close the DevTools so that it can be reopened and redux reconnected.
+                    // This is a workaround for a bug in redux devtools.
+                    mainWindow.webContents.closeDevTools();
+
+                    mainWindow.webContents.once('devtools-opened', () => {
+                        mainWindow.focus();
+                    });
+
+                    mainWindow.webContents.openDevTools();
+                });
+            } else {
+                mainWindow.removeMenu();
+            }
         });
-    } else {
-        mainWindow.removeMenu();
-    }
 }
 
 app.on('ready', createWindow);
