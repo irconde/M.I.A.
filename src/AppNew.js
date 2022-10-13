@@ -7,6 +7,7 @@ import {
 } from './redux/slices/settings/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import ImageDisplayComponent from './components/image-display/image-display.component';
+import TopBarComponent from './components/top-bar/top-bar.component';
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const AppNew = () => {
                 ) : (
                     <ImportModalComponent />
                 ))}
+            <TopBarComponent />
         </div>
     );
 };
