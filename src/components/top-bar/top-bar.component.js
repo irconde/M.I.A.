@@ -64,7 +64,7 @@ const TopBarComponent = (props) => {
 
             <ConnectionStatusIconsContainer>
                 <VerticalDivider />
-                <TopBarIconWrapper>
+                <TopBarIconWrapper onClick={props.openAboutModal}>
                     <InfoIcon
                         color={'#ffffff'}
                         width={'32px'}
@@ -97,6 +97,8 @@ TopBarComponent.propTypes = {
     getFileFromLocal: PropTypes.func,
 
     openImportModal: PropTypes.func.isRequired,
+
+    openAboutModal: PropTypes.func.isRequired,
 };
 
 export default TopBarComponent;

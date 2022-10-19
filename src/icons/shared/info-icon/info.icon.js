@@ -30,7 +30,7 @@ import { TopBarIconWrapper } from '../../../components/top-bar/top-bar.styles';
 const InfoIcon = (props) => {
     const dispatch = useDispatch();
     // const handleOpen = () => {
-    //     dispatch(toggleSettingsLoadingState(true));
+    //     dispatch(toggleAboutModal(true);
     // };
 
     return (
