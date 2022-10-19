@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ImportModalComponent from './components/import-modal/import-modal.component';
 import {
     getAssetsDirPaths,
@@ -14,20 +14,27 @@ const AppNew = () => {
     const areSettingsLoading = useSelector(getSettingsLoadingState);
     const { selectedImagesDirPath, selectedAnnotationsDirPath } =
         useSelector(getAssetsDirPaths);
+    const [importModalOpen, setImportModalOpen] = useState(
+        !!selectedImagesDirPath
+    );
 
     useEffect(() => {
         dispatch(initSettings());
     }, []);
+    useEffect(() => {}, [importModalOpen]);
 
     return (
         <div>
-            {!areSettingsLoading &&
-                (selectedImagesDirPath ? (
+            {!areSettingsLoading && (
+                <>
+                    <ImportModalComponent
+                        open={importModalOpen}
+                        setOpen={setImportModalOpen}
+                    />
                     <ImageDisplayComponent />
-                ) : (
-                    <ImportModalComponent />
-                ))}
-            <TopBarComponent />
+                </>
+            )}
+            <TopBarComponent openImportModal={() => setImportModalOpen(true)} />
         </div>
     );
 };

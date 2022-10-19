@@ -73,6 +73,9 @@ const files = {
             )
         );
     },
+    getFileName: function () {
+        return this.fileNames[this.currentFileIndex];
+    },
 };
 
 function createWindow() {
@@ -223,6 +226,14 @@ ipcMain.handle(
  */
 ipcMain.handle(Constants.Channels.getNextFile, () => {
     return files.getNextFile();
+});
+
+/**
+ * A channel between the main process (electron) and the renderer process (react).
+ * Sends current file name
+ */
+ipcMain.handle(Constants.Channels.getFileName, () => {
+    return files.getFileName();
 });
 
 /**

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
     ConfirmButton,
     ModalBody,
@@ -36,11 +37,11 @@ const ERROR = {
     BLANK: '',
 };
 
-const ImportModalComponent = (props) => {
+const ImportModalComponent = ({ open, setOpen }) => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationsDirPath } =
         useSelector(getAssetsDirPaths);
-    const [open, setOpen] = useState(true);
+    //const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
         images: selectedImagesDirPath || '',
         annotations: selectedAnnotationsDirPath || '',
@@ -214,6 +215,11 @@ const ImportModalComponent = (props) => {
             </div>
         </ThemeProvider>
     );
+};
+
+ImportModalComponent.propTypes = {
+    open: PropTypes.bool.isRequired,
+    setOpen: PropTypes.func.isRequired,
 };
 
 export default ImportModalComponent;

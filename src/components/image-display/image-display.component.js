@@ -5,11 +5,13 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import dicomParser from 'dicom-parser';
 import Utils from '../../utils/general/Utils';
-import React, { createRef, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as cornerstoneMath from 'cornerstone-math';
 import * as constants from '../../utils/enums/Constants';
 import { Channels } from '../../utils/enums/Constants';
 import { ImageViewport } from './image-display.styles';
+import { useSelector } from 'react-redux';
+import { getAssetsDirPaths } from '../../redux/slices/settings/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -37,7 +39,8 @@ cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 const ImageDisplayComponent = () => {
-    const viewportRef = createRef();
+    const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
+    const viewportRef = useRef(null);
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
     const setupCornerstoneJS = () => {
@@ -54,9 +57,17 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(() => {
+        console.log('1');
+        console.log(viewportRef);
         setupCornerstoneJS();
-        displayImage();
     }, []);
+
+    useEffect(() => {
+        console.log('2');
+        console.log(viewportRef);
+        displayImage().catch(console.log);
+        console.log(selectedImagesDirPath);
+    }, [selectedImagesDirPath, viewportRef.current]);
 
     const getNextFile = async () => {
         try {
@@ -71,6 +82,7 @@ const ImageDisplayComponent = () => {
         try {
             const pixelData = await getNextFile();
             const imageIdTop = 'coco:0';
+            console.log(viewportRef);
             Utils.loadImage(imageIdTop, pixelData).then((image) => {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     viewportRef.current,
@@ -94,7 +106,7 @@ const ImageDisplayComponent = () => {
     };
 
     return error ? (
-        <p>No more files...</p>
+        <p style={{ paddingTop: '5rem' }}>No more files...</p>
     ) : (
         <ImageViewport ref={viewportRef}>
             <div

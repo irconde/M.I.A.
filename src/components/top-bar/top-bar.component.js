@@ -35,7 +35,7 @@ const TopBarComponent = (props) => {
     return (
         <TopBarContainer>
             <TitleLabelContainer>
-                <ImportDataContainer>
+                <ImportDataContainer onClick={props.openImportModal}>
                     <ImportDataText>IMPORT DATA</ImportDataText>
                     <Tooltip title={'Import Data'}>
                         <ImportIconWrapper>
@@ -64,15 +64,13 @@ const TopBarComponent = (props) => {
 
             <ConnectionStatusIconsContainer>
                 <VerticalDivider />
-                <Tooltip title={'About'}>
-                    <TopBarIconWrapper>
-                        <InfoIcon
-                            color={'#ffffff'}
-                            width={'32px'}
-                            height={'32px'}
-                        />
-                    </TopBarIconWrapper>
-                </Tooltip>
+                <TopBarIconWrapper>
+                    <InfoIcon
+                        color={'#ffffff'}
+                        width={'32px'}
+                        height={'32px'}
+                    />
+                </TopBarIconWrapper>
                 <Tooltip title={'Fold/unfold menu'}>
                     <MenuIconWrapper>
                         <MenuToggleIcon
@@ -97,6 +95,8 @@ TopBarComponent.propTypes = {
      * Getter function for getting local file if remote connection is off.
      */
     getFileFromLocal: PropTypes.func,
+
+    openImportModal: PropTypes.func.isRequired,
 };
 
 export default TopBarComponent;
