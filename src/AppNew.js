@@ -14,14 +14,16 @@ const AppNew = () => {
     const areSettingsLoading = useSelector(getSettingsLoadingState);
     const { selectedImagesDirPath, selectedAnnotationsDirPath } =
         useSelector(getAssetsDirPaths);
-    const [importModalOpen, setImportModalOpen] = useState(
-        !!selectedImagesDirPath
-    );
+    const [importModalOpen, setImportModalOpen] = useState(false);
 
     useEffect(() => {
         dispatch(initSettings());
     }, []);
-    useEffect(() => {}, [importModalOpen]);
+
+    useEffect(() => {
+        // only open the modal if there is no selected images' dir path
+        selectedImagesDirPath === '' && setImportModalOpen(true);
+    }, [selectedImagesDirPath]);
 
     return (
         <div>

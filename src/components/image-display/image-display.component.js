@@ -56,24 +56,16 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     };
 
-    useEffect(() => {
-        console.log('1');
-        console.log(viewportRef);
-        setupCornerstoneJS();
-    }, []);
+    useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
-        console.log('2');
-        console.log(viewportRef);
         displayImage().catch(console.log);
-        console.log(selectedImagesDirPath);
-    }, [selectedImagesDirPath, viewportRef.current]);
+    }, [selectedImagesDirPath]);
 
     const getNextFile = async () => {
         try {
             return ipcRenderer.invoke(Channels.getNextFile);
         } catch (e) {
-            // TODO: no file
             console.log(e);
         }
     };
@@ -82,7 +74,6 @@ const ImageDisplayComponent = () => {
         try {
             const pixelData = await getNextFile();
             const imageIdTop = 'coco:0';
-            console.log(viewportRef);
             Utils.loadImage(imageIdTop, pixelData).then((image) => {
                 const viewport = cornerstone.getDefaultViewportForImage(
                     viewportRef.current,
@@ -100,37 +91,54 @@ const ImageDisplayComponent = () => {
                 setViewport(viewport);
                 cornerstone.displayImage(viewportRef.current, image, viewport);
             });
+            // clear error if there is one
+            error && setError('');
         } catch (e) {
+            // TODO: clear the viewport when there's no more files
             setError(e.message);
         }
     };
 
-    return error ? (
-        <p style={{ paddingTop: '5rem' }}>No more files...</p>
-    ) : (
+    return (
         <ImageViewport ref={viewportRef}>
-            <div
-                id="viewerContainer"
-                onContextMenu={(e) => e.preventDefault()}
-                className="disable-selection noIbar"
-                unselectable="off"
-                ref={(el) => {
-                    el &&
-                        el.addEventListener('selectstart', (e) => {
-                            e.preventDefault();
-                        });
-                }}></div>
-            {/*TODO: remove this button*/}
-            <button
-                style={{
-                    position: 'absolute',
-                    bottom: '25px',
-                    right: '25px',
-                    padding: '1rem',
-                }}
-                onClick={displayImage}>
-                NEXT IMAGE
-            </button>
+            {error ? (
+                // TODO: replace error component with styled component
+                <p
+                    style={{
+                        paddingTop: '5rem',
+                        position: 'absolute',
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                    }}>
+                    {error}
+                </p>
+            ) : (
+                <>
+                    <div
+                        id="viewerContainer"
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="disable-selection noIbar"
+                        unselectable="off"
+                        ref={(el) => {
+                            el &&
+                                el.addEventListener('selectstart', (e) => {
+                                    e.preventDefault();
+                                });
+                        }}></div>
+                    {/*TODO: remove this button*/}
+                    <button
+                        style={{
+                            position: 'absolute',
+                            bottom: '25px',
+                            right: '25px',
+                            padding: '1rem',
+                        }}
+                        onClick={displayImage}>
+                        NEXT IMAGE
+                    </button>
+                </>
+            )}
         </ImageViewport>
     );
 };
