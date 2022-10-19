@@ -64,6 +64,7 @@ const files = {
         } else if (this.currentFileIndex >= this.fileNames.length) {
             throw new Error('No more files');
         }
+        this.sendFileInfo();
 
         return fs.promises.readFile(
             path.join(
@@ -73,8 +74,11 @@ const files = {
             )
         );
     },
-    getFileName: function () {
-        return this.fileNames[this.currentFileIndex];
+    sendFileInfo: function () {
+        mainWindow.webContents.send('newFileUpdate', {
+            currentFileName: this.fileNames[this.currentFileIndex],
+            filesNum: this.fileNames.length,
+        });
     },
 };
 
@@ -226,14 +230,6 @@ ipcMain.handle(
  */
 ipcMain.handle(Constants.Channels.getNextFile, () => {
     return files.getNextFile();
-});
-
-/**
- * A channel between the main process (electron) and the renderer process (react).
- * Sends current file name
- */
-ipcMain.handle(Constants.Channels.getFileName, () => {
-    return files.getFileName();
 });
 
 /**

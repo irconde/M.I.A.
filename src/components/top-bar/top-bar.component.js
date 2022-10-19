@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
@@ -21,6 +21,7 @@ import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.ico
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 
+const ipcRenderer = window.require('electron').ipcRenderer;
 /**
  * Component for GUI's top bar display.
  *
@@ -30,7 +31,15 @@ import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 const TopBarComponent = (props) => {
     const { selectedImagesDirPath, selectedAnnotationsDirPath } =
         useSelector(getAssetsDirPaths);
-    //const currentFileName = ipcRenderer.invoke(Channels.getFileName, null);
+    const [filesState, setFilesState] = useState({
+        currentFileName: '',
+        numberOfFiles: 0,
+    });
+    useEffect(() => {
+        ipcRenderer.on('newFileUpdate', (e, args) => {
+            setFilesState(args);
+        });
+    }, []);
 
     return (
         <TopBarContainer>
@@ -58,8 +67,7 @@ const TopBarComponent = (props) => {
                     <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
                     &nbsp;&nbsp;
                 </FragmentWrapper>
-                {/*// TODO: add file name*/}
-                <span>{''} &nbsp;</span>
+                <span>{filesState.currentFileName} &nbsp;</span>
             </TitleLabelContainer>
 
             <ConnectionStatusIconsContainer>
