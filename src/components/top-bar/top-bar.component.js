@@ -31,13 +31,13 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 const TopBarComponent = (props) => {
     const { selectedImagesDirPath, selectedAnnotationsDirPath } =
         useSelector(getAssetsDirPaths);
-    const [filesState, setFilesState] = useState({
+    const [fileState, setFileState] = useState({
         currentFileName: '',
         numberOfFiles: 0,
     });
     useEffect(() => {
         ipcRenderer.on('newFileUpdate', (e, args) => {
-            setFilesState(args);
+            setFileState(args);
         });
     }, []);
 
@@ -63,11 +63,16 @@ const TopBarComponent = (props) => {
                     <ConnectionTypeInfo>Connected to </ConnectionTypeInfo>
                     &nbsp;&nbsp;
                     {selectedImagesDirPath} &nbsp;
-                    <InfoDivider>/</InfoDivider>&nbsp;
-                    <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
+                    {fileState.currentFileName && (
+                        <>
+                            <InfoDivider>/</InfoDivider>
+                            &nbsp;
+                            <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
+                        </>
+                    )}
                     &nbsp;&nbsp;
                 </FragmentWrapper>
-                <span>{filesState.currentFileName} &nbsp;</span>
+                <span>{fileState.currentFileName} &nbsp;</span>
             </TitleLabelContainer>
 
             <ConnectionStatusIconsContainer>

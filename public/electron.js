@@ -59,12 +59,12 @@ const files = {
     getNextFile: async function () {
         this.currentFileIndex++;
         console.log(this.fileNames);
+        this.sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
         } else if (this.currentFileIndex >= this.fileNames.length) {
             throw new Error('No more files');
         }
-        this.sendFileInfo();
 
         return fs.promises.readFile(
             path.join(
@@ -76,7 +76,7 @@ const files = {
     },
     sendFileInfo: function () {
         mainWindow.webContents.send('newFileUpdate', {
-            currentFileName: this.fileNames[this.currentFileIndex],
+            currentFileName: this.fileNames[this.currentFileIndex] || '',
             filesNum: this.fileNames.length,
         });
     },

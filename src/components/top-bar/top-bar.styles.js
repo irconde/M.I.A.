@@ -12,6 +12,8 @@ export const TopBarContainer = styled.div`
     justify-content: flex-end;
     color: white;
     box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
+    font-family: 'Noto Sans', sans-serif;
+    white-space: nowrap;
 `;
 
 export const LazyMenuToggleContainer = styled.div`
@@ -80,7 +82,6 @@ export const ImportDataText = styled.div`
     margin-left: 1rem;
     font-weight: 500;
     font-size: medium;
-    font-family: 'Noto Sans', sans-serif;
 `;
 
 export const FragmentWrapper = styled.div`
