@@ -20,6 +20,7 @@ const {
     REDUX_DEVTOOLS,
     REACT_DEVELOPER_TOOLS,
 } = require('electron-devtools-installer');
+const fsWin = require('fswin');
 
 // If development environment
 if (isDev) {
@@ -36,6 +37,18 @@ if (isDev) {
 const files = {
     fileNames: [],
     currentFileIndex: -1,
+    thumbnailsPath: '',
+
+    /**
+     * Called when a new path is provided by the user to update the files and thumbnails
+     * @param dirPath {string}
+     * @returns {Promise<void>}
+     */
+    init: async function (dirPath) {
+        await this.updateFileNames(dirPath);
+        await this.setThumbnailsPath(dirPath);
+    },
+
     /**
      * Updates the fileNames array with new image names
      * @param dirPath
@@ -58,7 +71,6 @@ const files = {
      */
     getNextFile: async function () {
         this.currentFileIndex++;
-        console.log(this.fileNames);
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
         } else if (this.currentFileIndex >= this.fileNames.length) {
@@ -72,6 +84,32 @@ const files = {
                 this.fileNames[this.currentFileIndex]
             )
         );
+    },
+    /**
+     * Creates the thumbnails path if not created and returns that path
+     * @param {string} path
+     * @returns {Promise<string>}
+     */
+    setThumbnailsPath: async function (path) {
+        if (process.platform === 'win32') {
+            this.thumbnailsPath = `${path}\\.thumbnails`;
+            try {
+                await checkIfPathExists(this.thumbnailsPath);
+            } catch (e) {
+                await fs.promises.mkdir(this.thumbnailsPath);
+                fsWin.setAttributesSync(this.thumbnailsPath, {
+                    IS_HIDDEN: true,
+                });
+            }
+        } else {
+            this.thumbnailsPath = `${path}/.thumbnails`;
+            try {
+                await checkIfPathExists(this.thumbnailsPath);
+            } catch (e) {
+                await fs.promises.mkdir(this.thumbnailsPath);
+            }
+        }
+        return this.thumbnailsPath;
     },
 };
 
@@ -213,7 +251,7 @@ ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
         await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
-        await files.updateFileNames(settingsToUpdate.selectedImagesDirPath);
+        await files.init(settingsToUpdate.selectedImagesDirPath);
     }
 );
 
@@ -265,7 +303,7 @@ const initSettings = async () => {
             } else {
                 // if settings already exist
                 appSettings = JSON.parse(data);
-                files.updateFileNames(appSettings.selectedImagesDirPath);
+                files.init(appSettings.selectedImagesDirPath);
                 resolve(appSettings);
             }
         });
