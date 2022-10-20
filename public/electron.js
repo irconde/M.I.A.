@@ -88,7 +88,7 @@ const files = {
         );
     },
     /**
-     * Creates the thumbnails path if not created and returns that path
+     * Creates the thumbnails' path if not created and returns that path
      * @param {string} path
      * @returns {Promise<string>}
      */
@@ -119,22 +119,33 @@ const files = {
      * @returns {Promise<Awaited<void>[]>}
      */
     generateThumbnails: async function () {
-        const promises = [];
-        this.fileNames.forEach((fileName) => {
-            fs.promises
-                .readFile(
-                    path.join(appSettings.selectedImagesDirPath, fileName)
-                )
-                .then((pixelData) => {
-                    promises.push(
-                        sharp(pixelData)
-                            .resize(Constants.Thumbnail.width)
-                            .toFile(path.join(this.thumbnailsPath, fileName))
-                    );
-                });
+        const thumbnails = {};
+
+        const promises = this.fileNames.map(async (fileName) => {
+            const pixelData = await fs.promises.readFile(
+                path.join(appSettings.selectedImagesDirPath, fileName)
+            );
+            const thumbnailPath = path.join(this.thumbnailsPath, fileName);
+            await sharp(pixelData)
+                .resize(Constants.Thumbnail.width)
+                .toFile(thumbnailPath);
+
+            thumbnails[fileName] = thumbnailPath;
         });
 
-        return Promise.allSettled(promises);
+        await Promise.allSettled(promises);
+        await this.saveThumbnailsToStorage(thumbnails);
+    },
+    /**
+     * Saves the thumbnails object to a json file
+     * @param object {Object}
+     * @returns {Promise<void>}
+     */
+    saveThumbnailsToStorage: async function (object) {
+        await fs.promises.writeFile(
+            path.join(this.thumbnailsPath, 'thumbnails.json'),
+            JSON.stringify(object)
+        );
     },
 };
 
