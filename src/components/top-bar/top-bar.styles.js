@@ -12,6 +12,8 @@ export const TopBarContainer = styled.div`
     justify-content: flex-end;
     color: white;
     box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
+    font-family: 'Noto Sans', sans-serif;
+    white-space: nowrap;
 `;
 
 export const LazyMenuToggleContainer = styled.div`
@@ -64,7 +66,7 @@ export const VerticalDivider = styled.div`
     height: 50%;
 `;
 
-export const OpenFileContainer = styled.div`
+export const ImportDataContainer = styled.div`
     cursor: pointer;
     display: flex;
     height: inherit;
@@ -72,24 +74,27 @@ export const OpenFileContainer = styled.div`
     position: fixed;
     float: left;
     left: 0;
+    background-color: #484848;
 `;
 
-export const OpenFileText = styled.div`
-    margin-right: 1.5rem;
-    font-weight: 400;
+export const ImportDataText = styled.div`
+    margin-right: 0.75rem;
+    margin-left: 1rem;
+    font-weight: 500;
     font-size: medium;
 `;
 
 export const FragmentWrapper = styled.div`
     display: flex;
+    align-items: end;
 `;
 
 export const TopBarIconWrapper = styled(FragmentWrapper)`
     margin: 0.75rem;
 `;
-export const OpenIconWrapper = styled.div`
-    margin-right: 0.75rem;
-    margin-left: 1.5rem;
+export const ImportIconWrapper = styled.div`
+    margin-right: 1rem;
+    margin-left: 0;
     display: inherit;
 `;
 

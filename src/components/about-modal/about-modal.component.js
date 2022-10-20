@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 import {
     AboutHeader,
     AboutHeaderInfo,
@@ -18,10 +18,6 @@ import {
     VersionInfo,
 } from './about-modal.styles';
 import { Modal, ThemeProvider } from '@mui/material';
-import {
-    getSettingsVisibility,
-    toggleSettingsVisibility,
-} from '../../redux/slices-old/ui/uiSlice';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 
@@ -32,21 +28,18 @@ import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code
  *
  */
 
-const AboutModal = () => {
-    const dispatch = useDispatch();
-    const settingsVisibility = useSelector(getSettingsVisibility);
-
+const AboutModal = ({ open, setOpen }) => {
     /**
      * Handles when the user taps the Close X Icon or outside the modal window. Does not save settings.
      */
     const handleClose = () => {
-        dispatch(toggleSettingsVisibility(false));
+        setOpen(false);
     };
 
     return (
         <ThemeProvider theme={modalTheme}>
             <Modal
-                open={settingsVisibility}
+                open={open}
                 onClose={handleClose}
                 aria-labelledby="settings-window"
                 aria-describedby="control the apps remote and local settings">
@@ -176,6 +169,11 @@ const AboutModal = () => {
             </Modal>
         </ThemeProvider>
     );
+};
+
+AboutModal.propTypes = {
+    open: PropTypes.bool.isRequired,
+    setOpen: PropTypes.func.isRequired,
 };
 
 export default AboutModal;

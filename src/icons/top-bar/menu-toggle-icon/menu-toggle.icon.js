@@ -1,36 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { StyledMenuToggleIcon } from './menu-toggle.icon.styles';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    getReceivedTime,
-    toggleCollapsedSideMenu,
-} from '../../../redux/slices-old/ui/uiSlice';
-import { getHasFileOutput } from '../../../redux/slices-old/settings/settingsSlice';
+import { useDispatch } from 'react-redux';
 
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
-    const visible = useSelector(getReceivedTime);
-    const hasFileOutput = useSelector(getHasFileOutput);
-    const toggleClickHandler = () => {
-        dispatch(
-            toggleCollapsedSideMenu({
-                cornerstone: props.cornerstone,
-                desktopMode: true,
-            })
-        );
-    };
-    if (visible !== null || hasFileOutput) {
-        return (
-            <span onClick={toggleClickHandler}>
-                <StyledMenuToggleIcon
-                    width={props.width}
-                    height={props.height}
-                    color={props.color}
-                />
-            </span>
-        );
-    } else return null;
+    // const visible = useSelector(getReceivedTime);
+    // const hasFileOutput = useSelector(getHasFileOutput);
+    // const toggleClickHandler = () => {
+    //     dispatch(
+    //         toggleCollapsedSideMenu({
+    //             cornerstone: props.cornerstone,
+    //             desktopMode: true,
+    //         })
+    //     );
+    // };
+    // if (visible !== null || hasFileOutput) {
+    return (
+        <span
+        // onClick={toggleClickHandler}
+        >
+            <StyledMenuToggleIcon
+                width={props.width}
+                height={props.height}
+                color={props.color}
+            />
+        </span>
+    );
+    // } else return null;
 };
 
 MenuToggleIcon.propTypes = {

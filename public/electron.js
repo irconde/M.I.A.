@@ -73,6 +73,8 @@ const files = {
      */
     getNextFile: async function () {
         this.currentFileIndex++;
+
+        this.sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
         } else if (this.currentFileIndex >= this.fileNames.length) {
@@ -87,6 +89,7 @@ const files = {
             )
         );
     },
+
     /**
      * Creates the thumbnails' path if not created and returns that path
      * @param {string} path
@@ -146,6 +149,12 @@ const files = {
             path.join(this.thumbnailsPath, 'thumbnails.json'),
             JSON.stringify(object)
         );
+    },
+    sendFileInfo: function () {
+        mainWindow.webContents.send('newFileUpdate', {
+            currentFileName: this.fileNames[this.currentFileIndex] || '',
+            filesNum: this.fileNames.length,
+        });
     },
 };
 
