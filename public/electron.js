@@ -59,6 +59,7 @@ const files = {
     getNextFile: async function () {
         this.currentFileIndex++;
         console.log(this.fileNames);
+        this.sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
         } else if (this.currentFileIndex >= this.fileNames.length) {
@@ -72,6 +73,12 @@ const files = {
                 this.fileNames[this.currentFileIndex]
             )
         );
+    },
+    sendFileInfo: function () {
+        mainWindow.webContents.send('newFileUpdate', {
+            currentFileName: this.fileNames[this.currentFileIndex] || '',
+            filesNum: this.fileNames.length,
+        });
     },
 };
 

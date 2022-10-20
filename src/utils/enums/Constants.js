@@ -134,6 +134,8 @@ export const Channels = {
     getSettings: 'get-settings',
     initSettings: 'init-settings',
     showFolderPicker: 'show-folder-picker',
+    getFileName: 'get-file-name',
+    getNumberOfFiles: 'get-number-of-files',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;
