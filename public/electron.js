@@ -21,6 +21,7 @@ const {
     REACT_DEVELOPER_TOOLS,
 } = require('electron-devtools-installer');
 const fsWin = require('fswin');
+const sharp = require('sharp');
 
 // If development environment
 if (isDev) {
@@ -47,6 +48,7 @@ const files = {
     init: async function (dirPath) {
         await this.updateFileNames(dirPath);
         await this.setThumbnailsPath(dirPath);
+        await this.generateThumbnails();
     },
 
     /**
@@ -110,6 +112,29 @@ const files = {
             }
         }
         return this.thumbnailsPath;
+    },
+
+    /**
+     * Generates the thumbnails and saves them to the .thumbnails dir
+     * @returns {Promise<Awaited<void>[]>}
+     */
+    generateThumbnails: async function () {
+        const promises = [];
+        this.fileNames.forEach((fileName) => {
+            fs.promises
+                .readFile(
+                    path.join(appSettings.selectedImagesDirPath, fileName)
+                )
+                .then((pixelData) => {
+                    promises.push(
+                        sharp(pixelData)
+                            .resize(Constants.Thumbnail.width)
+                            .toFile(path.join(this.thumbnailsPath, fileName))
+                    );
+                });
+        });
+
+        return Promise.allSettled(promises);
     },
 };
 
