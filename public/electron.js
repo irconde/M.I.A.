@@ -3,7 +3,6 @@ const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
-const util = require('util');
 const Constants = require('./Constants');
 let mainWindow;
 let appSettings = null;
@@ -20,8 +19,9 @@ const {
     REDUX_DEVTOOLS,
     REACT_DEVELOPER_TOOLS,
 } = require('electron-devtools-installer');
-const fsWin = require('fswin');
-const sharp = require('sharp');
+
+const { checkIfPathExists } = require('./Utils');
+const { ClientFilesManager } = require('./ClientFilesManager');
 
 // If development environment
 if (isDev) {
@@ -35,165 +35,7 @@ if (isDev) {
     }
 }
 
-const files = {
-    fileNames: [],
-    currentFileIndex: -1,
-    thumbnailsPath: '',
-    STORAGE_FILE_NAME: 'thumbnails.json',
-
-    /**
-     * Called when a new path is provided by the user to update the files and thumbnails
-     * @param dirPath {string}
-     * @returns {Promise<void>}
-     */
-    init: async function (dirPath) {
-        await this.updateFileNames(dirPath);
-        await this.setThumbnailsPath(dirPath);
-        await this.generateThumbnails();
-    },
-
-    /**
-     * Updates the fileNames array with new image names
-     * @param dirPath
-     * @returns {Promise<void>}
-     */
-    updateFileNames: async function (dirPath) {
-        const foundFiles = await fs.promises.readdir(dirPath);
-        this.fileNames = foundFiles.filter((file) => {
-            const fileExtension = path.extname(file);
-            return (
-                fileExtension === '.png' ||
-                fileExtension === '.jpg' ||
-                fileExtension === '.jpeg'
-            );
-        });
-    },
-    /**
-     * Reads the next file data if there is one and increments the current index
-     * @returns {Promise<Buffer>}
-     */
-    getNextFile: async function () {
-        this.currentFileIndex++;
-
-        this.sendFileInfo();
-        if (!this.fileNames.length) {
-            throw new Error('Directory contains no images');
-        } else if (this.currentFileIndex >= this.fileNames.length) {
-            throw new Error('No more files');
-        }
-
-        return fs.promises.readFile(
-            path.join(
-                appSettings.selectedImagesDirPath,
-
-                this.fileNames[this.currentFileIndex]
-            )
-        );
-    },
-
-    /**
-     * Creates the thumbnails' path if not created and returns that path
-     * @param {string} path
-     * @returns {Promise<string>}
-     */
-    setThumbnailsPath: async function (path) {
-        if (process.platform === 'win32') {
-            this.thumbnailsPath = `${path}\\.thumbnails`;
-            try {
-                await checkIfPathExists(this.thumbnailsPath);
-            } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
-                fsWin.setAttributesSync(this.thumbnailsPath, {
-                    IS_HIDDEN: true,
-                });
-            }
-        } else {
-            this.thumbnailsPath = `${path}/.thumbnails`;
-            try {
-                await checkIfPathExists(this.thumbnailsPath);
-            } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
-            }
-        }
-        return this.thumbnailsPath;
-    },
-
-    /**
-     * Generates the thumbnails and saves them to the .thumbnails dir
-     * @returns {Promise<>}
-     */
-    generateThumbnails: async function () {
-        const newThumbnails = {};
-        const storedThumbnails = await this.getThumbnailsFromStorage();
-        this.sendThumbnailsList(storedThumbnails, true);
-        const promises = this.fileNames.map(async (fileName) => {
-            // skip creating a thumbnail if there's already one
-            if (storedThumbnails?.hasOwnProperty(fileName)) return;
-
-            const pixelData = await fs.promises.readFile(
-                path.join(appSettings.selectedImagesDirPath, fileName)
-            );
-            const thumbnailPath = path.join(this.thumbnailsPath, fileName);
-            await sharp(pixelData)
-                .resize(Constants.Thumbnail.width)
-                .toFile(thumbnailPath);
-
-            newThumbnails[fileName] = thumbnailPath;
-        });
-
-        await Promise.allSettled(promises);
-        // don't update storage if there are no new thumbnails
-        if (!Object.keys(newThumbnails).length) return;
-        await this.saveThumbnailsToStorage({
-            ...storedThumbnails,
-            ...newThumbnails,
-        });
-        this.sendThumbnailsList(newThumbnails, false);
-    },
-    /**
-     * Saves the thumbnails object to a json file
-     * @param object {Object}
-     * @returns {Promise<void>}
-     */
-    saveThumbnailsToStorage: async function (object) {
-        await fs.promises.writeFile(
-            path.join(this.thumbnailsPath, this.STORAGE_FILE_NAME),
-            JSON.stringify(object)
-        );
-    },
-    /**
-     * Gets the thumbnails object from storage
-     * @returns {Promise<Object | null>}
-     */
-    getThumbnailsFromStorage: async function () {
-        try {
-            const string = await fs.promises.readFile(
-                path.join(this.thumbnailsPath, this.STORAGE_FILE_NAME)
-            );
-            return JSON.parse(string);
-        } catch (e) {
-            return null;
-        }
-    },
-    sendFileInfo: function () {
-        mainWindow.webContents.send(Constants.Channels.newFileUpdate, {
-            currentFileName: this.fileNames[this.currentFileIndex] || '',
-            filesNum: this.fileNames.length,
-        });
-    },
-    /**
-     * A channel with the React process to update the list of thumbnails
-     * pass true to override the current thumbnails
-     * @param thumbnails {object | null}
-     * @param overrideCurrentThumbnails {boolean}
-     */
-    sendThumbnailsList: function (thumbnails, overrideCurrentThumbnails) {
-        if (!thumbnails) return;
-        mainWindow.webContents.send(Constants.Channels.sendThumbnailsList, {
-            overrideCurrentThumbnails,
-        });
-    },
-};
+let files;
 
 function createWindow() {
     let display;
@@ -217,6 +59,8 @@ function createWindow() {
             devTools: isDev,
         },
     });
+
+    files = new ClientFilesManager(mainWindow);
     initSettings()
         .catch(console.log)
         .finally(() => {
@@ -352,20 +196,6 @@ ipcMain.handle(Constants.Channels.getNextFile, () => {
 ipcMain.handle(Constants.Channels.getSettings, async (event) => {
     return appSettings;
 });
-
-/**
- * Checks if a path exists
- *
- * @param {string} path
- * @returns {Promise<undefined>}
- */
-const checkIfPathExists = async (path) => {
-    return new Promise((resolve, reject) => {
-        fs.access(path, (err) => {
-            err ? reject() : resolve();
-        });
-    });
-};
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,
