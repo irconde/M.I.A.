@@ -39,6 +39,7 @@ const files = {
     fileNames: [],
     currentFileIndex: -1,
     thumbnailsPath: '',
+    STORAGE_FILE_NAME: 'thumbnails.json',
 
     /**
      * Called when a new path is provided by the user to update the files and thumbnails
@@ -123,8 +124,12 @@ const files = {
      */
     generateThumbnails: async function () {
         const thumbnails = {};
+        const storedThumbnails = await this.getThumbnailsFromStorage();
 
         const promises = this.fileNames.map(async (fileName) => {
+            // skip creating a thumbnail if there's already one
+            if (storedThumbnails?.hasOwnProperty(fileName)) return;
+
             const pixelData = await fs.promises.readFile(
                 path.join(appSettings.selectedImagesDirPath, fileName)
             );
@@ -137,7 +142,10 @@ const files = {
         });
 
         await Promise.allSettled(promises);
-        await this.saveThumbnailsToStorage(thumbnails);
+        await this.saveThumbnailsToStorage({
+            ...storedThumbnails,
+            ...thumbnails,
+        });
     },
     /**
      * Saves the thumbnails object to a json file
@@ -146,9 +154,23 @@ const files = {
      */
     saveThumbnailsToStorage: async function (object) {
         await fs.promises.writeFile(
-            path.join(this.thumbnailsPath, 'thumbnails.json'),
+            path.join(this.thumbnailsPath, this.STORAGE_FILE_NAME),
             JSON.stringify(object)
         );
+    },
+    /**
+     * Gets the thumbnails object from storage
+     * @returns {Promise<Object | null>}
+     */
+    getThumbnailsFromStorage: async function () {
+        try {
+            const string = await fs.promises.readFile(
+                path.join(this.thumbnailsPath, this.STORAGE_FILE_NAME)
+            );
+            return JSON.parse(string);
+        } catch (e) {
+            return null;
+        }
     },
     sendFileInfo: function () {
         mainWindow.webContents.send('newFileUpdate', {
