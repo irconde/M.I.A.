@@ -15,6 +15,8 @@ module.exports.Channels = {
     showFolderPicker: 'show-folder-picker',
     getFileName: 'get-file-name',
     getNumberOfFiles: 'get-number-of-files',
+    sendThumbnailsList: 'send-thumbnails-list',
+    newFileUpdate: 'new-file-update',
 };
 
 module.exports.FileWatcher = {

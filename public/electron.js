@@ -120,12 +120,12 @@ const files = {
 
     /**
      * Generates the thumbnails and saves them to the .thumbnails dir
-     * @returns {Promise<Awaited<void>[]>}
+     * @returns {Promise<>}
      */
     generateThumbnails: async function () {
-        const thumbnails = {};
+        const newThumbnails = {};
         const storedThumbnails = await this.getThumbnailsFromStorage();
-
+        this.sendThumbnailsList(storedThumbnails, true);
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
@@ -138,14 +138,17 @@ const files = {
                 .resize(Constants.Thumbnail.width)
                 .toFile(thumbnailPath);
 
-            thumbnails[fileName] = thumbnailPath;
+            newThumbnails[fileName] = thumbnailPath;
         });
 
         await Promise.allSettled(promises);
+        // don't update storage if there are no new thumbnails
+        if (!Object.keys(newThumbnails).length) return;
         await this.saveThumbnailsToStorage({
             ...storedThumbnails,
-            ...thumbnails,
+            ...newThumbnails,
         });
+        this.sendThumbnailsList(newThumbnails, false);
     },
     /**
      * Saves the thumbnails object to a json file
@@ -173,9 +176,21 @@ const files = {
         }
     },
     sendFileInfo: function () {
-        mainWindow.webContents.send('newFileUpdate', {
+        mainWindow.webContents.send(Constants.Channels.newFileUpdate, {
             currentFileName: this.fileNames[this.currentFileIndex] || '',
             filesNum: this.fileNames.length,
+        });
+    },
+    /**
+     * A channel with the React process to update the list of thumbnails
+     * pass true to override the current thumbnails
+     * @param thumbnails {object | null}
+     * @param overrideCurrentThumbnails {boolean}
+     */
+    sendThumbnailsList: function (thumbnails, overrideCurrentThumbnails) {
+        if (!thumbnails) return;
+        mainWindow.webContents.send(Constants.Channels.sendThumbnailsList, {
+            overrideCurrentThumbnails,
         });
     },
 };
