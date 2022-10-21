@@ -34,7 +34,9 @@ if (isDev) {
         console.log(e);
     }
 }
-
+/**
+ * @type ClientFilesManager
+ */
 let files;
 
 function createWindow() {
@@ -60,61 +62,57 @@ function createWindow() {
         },
     });
 
+    mainWindow
+        .loadURL(
+            isDev
+                ? 'http://localhost:3000'
+                : `file://${path.join(__dirname, '../build/index.html')}`
+        )
+        .catch((err) => console.log(err));
+
+    mainWindow.maximize();
+    mainWindow.on('close', async () => {
+        const rectangle = mainWindow.getBounds();
+        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
+            if (err) throw err;
+        });
+    });
+    mainWindow.on('closed', async () => {
+        await watcher?.unwatch(currentPath);
+        await watcher?.close();
+        mainWindow = null;
+    });
+    if (isDev) {
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+            .then((name) => console.log(`Added Extension:  ${name}`))
+            .catch((err) => console.log('An error occurred: ', err));
+
+        // Open the DevTools.
+        mainWindow.webContents.on('did-frame-finish-load', () => {
+            // We close the DevTools so that it can be reopened and redux reconnected.
+            // This is a workaround for a bug in redux devtools.
+            mainWindow.webContents.closeDevTools();
+
+            mainWindow.webContents.once('devtools-opened', () => {
+                mainWindow.focus();
+            });
+
+            mainWindow.webContents.openDevTools();
+        });
+    } else {
+        mainWindow.removeMenu();
+    }
+}
+
+app.whenReady().then(() => {
     files = new ClientFilesManager(mainWindow);
     initSettings()
         .catch(console.log)
         .finally(() => {
-            mainWindow
-                .loadURL(
-                    isDev
-                        ? 'http://localhost:3000'
-                        : `file://${path.join(
-                              __dirname,
-                              '../build/index.html'
-                          )}`
-                )
-                .catch((err) => console.log(err));
-
-            mainWindow.maximize();
-            mainWindow.on('close', async () => {
-                const rectangle = mainWindow.getBounds();
-                fs.writeFile(
-                    MONITOR_FILE_PATH,
-                    JSON.stringify(rectangle),
-                    (err) => {
-                        if (err) throw err;
-                    }
-                );
-            });
-            mainWindow.on('closed', async () => {
-                await watcher?.unwatch(currentPath);
-                await watcher?.close();
-                mainWindow = null;
-            });
-            if (isDev) {
-                installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-                    .then((name) => console.log(`Added Extension:  ${name}`))
-                    .catch((err) => console.log('An error occurred: ', err));
-
-                // Open the DevTools.
-                mainWindow.webContents.on('did-frame-finish-load', () => {
-                    // We close the DevTools so that it can be reopened and redux reconnected.
-                    // This is a workaround for a bug in redux devtools.
-                    mainWindow.webContents.closeDevTools();
-
-                    mainWindow.webContents.once('devtools-opened', () => {
-                        mainWindow.focus();
-                    });
-
-                    mainWindow.webContents.openDevTools();
-                });
-            } else {
-                mainWindow.removeMenu();
-            }
+            createWindow();
+            files.init(appSettings.selectedImagesDirPath);
         });
-}
-
-app.on('ready', createWindow);
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -177,7 +175,7 @@ ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
         await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
-        await files.init(settingsToUpdate.selectedImagesDirPath);
+        files.init(settingsToUpdate.selectedImagesDirPath).catch(console.log);
     }
 );
 
@@ -215,7 +213,6 @@ const initSettings = async () => {
             } else {
                 // if settings already exist
                 appSettings = JSON.parse(data);
-                files.init(appSettings.selectedImagesDirPath);
                 resolve(appSettings);
             }
         });

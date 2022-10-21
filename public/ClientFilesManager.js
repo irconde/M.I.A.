@@ -4,6 +4,7 @@ const sharp = require('sharp');
 const fsWin = require('fswin');
 const { checkIfPathExists } = require('./Utils');
 const Constants = require('./Constants');
+const { ipcMain } = require('electron');
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
@@ -14,6 +15,7 @@ class ClientFilesManager {
 
     constructor(mainWindow) {
         this.mainWindow = mainWindow;
+        ipcMain.once('giveMeThumbnails', (e) => {});
     }
 
     /**
@@ -22,6 +24,7 @@ class ClientFilesManager {
      * @returns {Promise<void>}
      */
     async init(dirPath) {
+        if (dirPath === '') return;
         this.selectedImagesDirPath = dirPath;
         await this.#updateFileNames(dirPath);
         await this.#setThumbnailsPath(dirPath);
@@ -180,6 +183,7 @@ class ClientFilesManager {
             Constants.Channels.sendThumbnailsList,
             {
                 overrideCurrentThumbnails,
+                thumbnails,
             }
         );
     }
