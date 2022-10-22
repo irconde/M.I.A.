@@ -7,6 +7,29 @@ const Constants = require('./Constants');
 const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
 
+class CustomPromise {
+    isSettled = false;
+
+    constructor() {
+        this.promise = new Promise((_resolve, _reject) => {
+            this.resolve = function (value) {
+                this.isSettled = true;
+                return _resolve(value);
+            };
+            this.reject = function (value) {
+                this.isSettled = true;
+                return _reject(value);
+            };
+        });
+    }
+
+    destruct() {
+        this.promise = null;
+        this.resolve = null;
+        this.reject = null;
+    }
+}
+
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
     fileNames = [];
@@ -19,19 +42,14 @@ class ClientFilesManager {
         // we create a promise for the thumbnails that will be resolved later
         // once the thumbnails have been generated. If there are further updates
         // to the files then Electron will send more thumbnails to React
-        this.thumbnailsPromise = new Promise((resolve, reject) => {
-            this.resolveThumbnailsPromise = resolve;
-            this.rejectThumbnailsPromise = reject;
-        });
-        this.isThumbnailsPromiseSettled = false;
+        this.thumbnailsPromise = new CustomPromise();
         ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
             try {
-                const thumbnails = await this.thumbnailsPromise;
-                return thumbnails;
+                return await this.thumbnailsPromise.promise;
             } catch (e) {
                 throw new Error('No initial thumbnails');
             } finally {
-                this.thumbnailsPromise = null;
+                this.thumbnailsPromise.destruct();
             }
         });
     }
@@ -44,8 +62,7 @@ class ClientFilesManager {
     async updateSelectedImagesDir(dirPath) {
         // if the default settings are used the path will be an empty string so the promise is rejected
         if (dirPath === '') {
-            this.rejectThumbnailsPromise();
-            this.isThumbnailsPromiseSettled = true;
+            this.thumbnailsPromise.reject();
         }
 
         this.selectedImagesDirPath = dirPath;
@@ -53,10 +70,9 @@ class ClientFilesManager {
         if (dirContainsAnyImages) {
             await this.#setThumbnailsPath(dirPath);
             await this.#generateThumbnails();
-        } else if (!this.isThumbnailsPromiseSettled) {
+        } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
-            this.rejectThumbnailsPromise();
-            this.isThumbnailsPromiseSettled = true;
+            this.thumbnailsPromise.reject();
         }
     }
 
@@ -77,7 +93,6 @@ class ClientFilesManager {
         return fs.promises.readFile(
             path.join(
                 this.selectedImagesDirPath,
-
                 this.fileNames[this.currentFileIndex]
             )
         );
@@ -158,10 +173,9 @@ class ClientFilesManager {
         };
         // if the promise has not been resolved before, then resolve it once
         // TODO: figure out if you should resolve to all thumbnails here or just the new ones
-        if (!this.isThumbnailsPromiseSettled) {
-            this.resolveThumbnailsPromise(allThumbnails);
-            this.isThumbnailsPromiseSettled = true;
-        }
+        if (!this.thumbnailsPromise.isSettled)
+            this.thumbnailsPromise.resolve(allThumbnails);
+
         // don't update storage if there are no new thumbnails
         if (!Object.keys(newThumbnails).length) return;
         await this.#saveThumbnailsToStorage(allThumbnails);
