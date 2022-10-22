@@ -17,6 +17,7 @@ module.exports.Channels = {
     getNumberOfFiles: 'get-number-of-files',
     sendThumbnailsList: 'send-thumbnails-list',
     newFileUpdate: 'new-file-update',
+    requestInitialThumbnailsList: 'request-initial-thumbnails-list',
 };
 
 module.exports.FileWatcher = {

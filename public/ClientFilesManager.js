@@ -5,6 +5,7 @@ const fsWin = require('fswin');
 const { checkIfPathExists } = require('./Utils');
 const Constants = require('./Constants');
 const { ipcMain } = require('electron');
+const { Channels } = require('./Constants');
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
@@ -15,7 +16,17 @@ class ClientFilesManager {
 
     constructor(mainWindow) {
         this.mainWindow = mainWindow;
-        ipcMain.once('giveMeThumbnails', (e) => {});
+        // we create a promise for the thumbnails that will be resolved later
+        // once the thumbnails have been generated. If there are further updates
+        // to the files then Electron will send more thumbnails to React
+        this.thumbnailsPromise = new Promise((resolve) => {
+            this.resolveThumbnails = resolve;
+        });
+        this.isThumbnailsPromiseResolved = false;
+        ipcMain.handleOnce(
+            Channels.requestInitialThumbnailsList,
+            () => this.thumbnailsPromise
+        );
     }
 
     /**
@@ -23,7 +34,7 @@ class ClientFilesManager {
      * @param dirPath {string}
      * @returns {Promise<void>}
      */
-    async init(dirPath) {
+    async updateSelectedImagesDir(dirPath) {
         if (dirPath === '') return;
         this.selectedImagesDirPath = dirPath;
         await this.#updateFileNames(dirPath);
@@ -122,12 +133,19 @@ class ClientFilesManager {
         });
 
         await Promise.allSettled(promises);
-        // don't update storage if there are no new thumbnails
-        if (!Object.keys(newThumbnails).length) return;
-        await this.#saveThumbnailsToStorage({
+        const allThumbnails = {
             ...storedThumbnails,
             ...newThumbnails,
-        });
+        };
+        // if the promise has not been resolved before, then resolve it once
+        // TODO: figure out if you should resolve to all thumbnails here or just the new ones
+        if (!this.isThumbnailsPromiseResolved) {
+            this.resolveThumbnails(allThumbnails);
+            this.isThumbnailsPromiseResolved = true;
+        }
+        // don't update storage if there are no new thumbnails
+        if (!Object.keys(newThumbnails).length) return;
+        await this.#saveThumbnailsToStorage(allThumbnails);
         this.#sendThumbnailsList(newThumbnails, false);
     }
 

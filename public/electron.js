@@ -62,6 +62,8 @@ function createWindow() {
         },
     });
 
+    files = new ClientFilesManager(mainWindow);
+
     mainWindow
         .loadURL(
             isDev
@@ -105,12 +107,11 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    files = new ClientFilesManager(mainWindow);
     initSettings()
         .catch(console.log)
         .finally(() => {
             createWindow();
-            files.init(appSettings.selectedImagesDirPath);
+            files.updateSelectedImagesDir(appSettings.selectedImagesDirPath);
         });
 });
 
@@ -175,7 +176,9 @@ ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
         await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
-        files.init(settingsToUpdate.selectedImagesDirPath).catch(console.log);
+        files
+            .updateSelectedImagesDir(settingsToUpdate.selectedImagesDirPath)
+            .catch(console.log);
     }
 );
 

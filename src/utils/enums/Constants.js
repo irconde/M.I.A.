@@ -138,6 +138,7 @@ export const Channels = {
     getNumberOfFiles: 'get-number-of-files',
     sendThumbnailsList: 'send-thumbnails-list',
     newFileUpdate: 'new-file-update',
+    requestInitialThumbnailsList: 'request-initial-thumbnails-list',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;

@@ -29,9 +29,11 @@ const AppNew = () => {
                 console.log({ overrideCurrentThumbnails, thumbnails });
             }
         );
-        ipcRenderer.invoke('giveMeThumbnails').then((thumbnails) => {
-            console.log(thumbnails);
-        });
+        ipcRenderer
+            .invoke(Channels.requestInitialThumbnailsList)
+            .then((thumbnails) => {
+                console.log(thumbnails);
+            });
         dispatch(initSettings());
     }, []);
 
