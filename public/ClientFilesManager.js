@@ -23,11 +23,16 @@ class ClientFilesManager {
             this.resolveThumbnailsPromise = resolve;
             this.rejectThumbnailsPromise = reject;
         });
-        this.isThumbnailsPromiseResolved = false;
+        this.isThumbnailsPromiseSettled = false;
         ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
-            const thumbnails = await this.thumbnailsPromise;
-            this.thumbnailsPromise = null;
-            return thumbnails;
+            try {
+                const thumbnails = await this.thumbnailsPromise;
+                return thumbnails;
+            } catch (e) {
+                throw new Error('No initial thumbnails');
+            } finally {
+                this.thumbnailsPromise = null;
+            }
         });
     }
 
@@ -38,12 +43,21 @@ class ClientFilesManager {
      */
     async updateSelectedImagesDir(dirPath) {
         // if the default settings are used the path will be an empty string so the promise is rejected
-        if (dirPath === '') return this.rejectThumbnailsPromise();
+        if (dirPath === '') {
+            this.rejectThumbnailsPromise();
+            this.isThumbnailsPromiseSettled = true;
+        }
 
         this.selectedImagesDirPath = dirPath;
-        await this.#updateFileNames(dirPath);
-        await this.#setThumbnailsPath(dirPath);
-        await this.#generateThumbnails();
+        const dirContainsAnyImages = await this.#updateFileNames(dirPath);
+        if (dirContainsAnyImages) {
+            await this.#setThumbnailsPath(dirPath);
+            await this.#generateThumbnails();
+        } else if (!this.isThumbnailsPromiseSettled) {
+            // if the directory path from the settings contains no images then reject the promise
+            this.rejectThumbnailsPromise();
+            this.isThumbnailsPromiseSettled = true;
+        }
     }
 
     /**
@@ -72,7 +86,7 @@ class ClientFilesManager {
     /**
      * Updates the fileNames array with new image names
      * @param dirPath
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} - returns false if the dir contains no images, otherwise it returns true
      */
     async #updateFileNames(dirPath) {
         const foundFiles = await fs.promises.readdir(dirPath);
@@ -84,6 +98,7 @@ class ClientFilesManager {
                 fileExtension === '.jpeg'
             );
         });
+        return !!this.fileNames.length;
     }
 
     /**
@@ -143,9 +158,9 @@ class ClientFilesManager {
         };
         // if the promise has not been resolved before, then resolve it once
         // TODO: figure out if you should resolve to all thumbnails here or just the new ones
-        if (!this.isThumbnailsPromiseResolved) {
+        if (!this.isThumbnailsPromiseSettled) {
             this.resolveThumbnailsPromise(allThumbnails);
-            this.isThumbnailsPromiseResolved = true;
+            this.isThumbnailsPromiseSettled = true;
         }
         // don't update storage if there are no new thumbnails
         if (!Object.keys(newThumbnails).length) return;
