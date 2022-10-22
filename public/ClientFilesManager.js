@@ -19,14 +19,16 @@ class ClientFilesManager {
         // we create a promise for the thumbnails that will be resolved later
         // once the thumbnails have been generated. If there are further updates
         // to the files then Electron will send more thumbnails to React
-        this.thumbnailsPromise = new Promise((resolve) => {
-            this.resolveThumbnails = resolve;
+        this.thumbnailsPromise = new Promise((resolve, reject) => {
+            this.resolveThumbnailsPromise = resolve;
+            this.rejectThumbnailsPromise = reject;
         });
         this.isThumbnailsPromiseResolved = false;
-        ipcMain.handleOnce(
-            Channels.requestInitialThumbnailsList,
-            () => this.thumbnailsPromise
-        );
+        ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
+            const thumbnails = await this.thumbnailsPromise;
+            this.thumbnailsPromise = null;
+            return thumbnails;
+        });
     }
 
     /**
@@ -35,7 +37,9 @@ class ClientFilesManager {
      * @returns {Promise<void>}
      */
     async updateSelectedImagesDir(dirPath) {
-        if (dirPath === '') return;
+        // if the default settings are used the path will be an empty string so the promise is rejected
+        if (dirPath === '') return this.rejectThumbnailsPromise();
+
         this.selectedImagesDirPath = dirPath;
         await this.#updateFileNames(dirPath);
         await this.#setThumbnailsPath(dirPath);
@@ -140,7 +144,7 @@ class ClientFilesManager {
         // if the promise has not been resolved before, then resolve it once
         // TODO: figure out if you should resolve to all thumbnails here or just the new ones
         if (!this.isThumbnailsPromiseResolved) {
-            this.resolveThumbnails(allThumbnails);
+            this.resolveThumbnailsPromise(allThumbnails);
             this.isThumbnailsPromiseResolved = true;
         }
         // don't update storage if there are no new thumbnails

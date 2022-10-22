@@ -33,6 +33,9 @@ const AppNew = () => {
             .invoke(Channels.requestInitialThumbnailsList)
             .then((thumbnails) => {
                 console.log(thumbnails);
+            })
+            .catch(() => {
+                console.log('no thumbnails to begin with');
             });
         dispatch(initSettings());
     }, []);
