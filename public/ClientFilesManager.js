@@ -62,7 +62,7 @@ class ClientFilesManager {
     async updateSelectedImagesDir(dirPath) {
         // if the default settings are used the path will be an empty string so the promise is rejected
         if (dirPath === '') {
-            this.thumbnailsPromise.reject();
+            return this.thumbnailsPromise.reject();
         }
 
         this.selectedImagesDirPath = dirPath;
