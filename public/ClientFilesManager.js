@@ -2,10 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const fsWin = require('fswin');
-const { checkIfPathExists } = require('./Utils');
+const { checkIfPathExists, getFileNameFromPath } = require('./Utils');
 const Constants = require('./Constants');
 const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
+const chokidar = require('chokidar');
 
 class CustomPromise {
     isSettled = false;
@@ -32,10 +33,12 @@ class CustomPromise {
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
+    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', 'jpeg'];
     fileNames = [];
     currentFileIndex = -1;
     thumbnailsPath = '';
     selectedImagesDirPath = null;
+    #watcher = null;
 
     constructor(mainWindow) {
         this.mainWindow = mainWindow;
@@ -55,17 +58,16 @@ class ClientFilesManager {
     }
 
     /**
-     * Called when a new path is provided by the user to update the files and thumbnails
+     * Called when the app is first launched with the images' dir path from the settings
      * @param dirPath {string}
      * @returns {Promise<void>}
      */
-    async updateSelectedImagesDir(dirPath) {
-        // if the default settings are used the path will be an empty string so the promise is rejected
-        if (dirPath === '') {
-            return this.thumbnailsPromise.reject();
-        }
+    async initSelectedImagesDir(dirPath) {
+        // if no path exits in the settings then reject the React promise
+        if (dirPath === '') return this.thumbnailsPromise.reject();
 
         this.selectedImagesDirPath = dirPath;
+        await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(dirPath);
         if (dirContainsAnyImages) {
             await this.#setThumbnailsPath(dirPath);
@@ -74,6 +76,20 @@ class ClientFilesManager {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
         }
+    }
+
+    /**
+     * Called when a new path is provided by the user to update the files and thumbnails
+     * @param dirPath {string}
+     * @returns {Promise<void>}
+     */
+    async updateSelectedImagesDir(dirPath) {
+        this.selectedImagesDirPath = dirPath;
+        await this.#setDirWatcher();
+        const dirContainsAnyImages = await this.#updateFileNames(dirPath);
+        if (!dirContainsAnyImages) return;
+        await this.#setThumbnailsPath(dirPath);
+        await this.#generateThumbnails();
     }
 
     /**
@@ -105,14 +121,9 @@ class ClientFilesManager {
      */
     async #updateFileNames(dirPath) {
         const foundFiles = await fs.promises.readdir(dirPath);
-        this.fileNames = foundFiles.filter((file) => {
-            const fileExtension = path.extname(file);
-            return (
-                fileExtension === '.png' ||
-                fileExtension === '.jpg' ||
-                fileExtension === '.jpeg'
-            );
-        });
+        this.fileNames = foundFiles.filter((file) =>
+            this.#isFileTypeAllowed(file)
+        );
         return !!this.fileNames.length;
     }
 
@@ -236,6 +247,29 @@ class ClientFilesManager {
                 overrideCurrentThumbnails,
                 thumbnails,
             }
+        );
+    }
+
+    async #setDirWatcher() {
+        // create a directory watcher, making sure it ignores json files
+        // it also doesn't fire the first time
+        this.#watcher = chokidar.watch(this.selectedImagesDirPath, {
+            ignored: Constants.FileWatcher.all_json_files,
+            depth: 0,
+            ignoreInitial: true,
+        });
+
+        this.#watcher.on(Constants.FileWatcher.add, (addedFilePath) => {
+            const addedFilename = getFileNameFromPath(addedFilePath);
+            if (!this.#isFileTypeAllowed(addedFilename)) return;
+
+            console.log(addedFilename);
+        });
+    }
+
+    #isFileTypeAllowed(fileName) {
+        return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
+            path.extname(fileName)
         );
     }
 }

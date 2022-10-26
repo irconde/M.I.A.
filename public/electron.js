@@ -111,7 +111,7 @@ app.whenReady().then(() => {
         .catch(console.log)
         .finally(() => {
             createWindow();
-            files.updateSelectedImagesDir(appSettings.selectedImagesDirPath);
+            files.initSelectedImagesDir(appSettings.selectedImagesDirPath);
         });
 });
 

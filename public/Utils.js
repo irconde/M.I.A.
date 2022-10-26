@@ -54,6 +54,16 @@ const checkIfPathExists = async (path) => {
     });
 };
 
+/**
+ * Returns the name of the file including the extension from a given path
+ * @param {string} path
+ * @returns {string}
+ */
+const getFileNameFromPath = (path) => {
+    return path.split('\\').pop().split('/').pop();
+};
+
 module.exports.buildIntervals = buildIntervals;
 module.exports.findGrayValue = findGrayValue;
 module.exports.checkIfPathExists = checkIfPathExists;
+module.exports.getFileNameFromPath = getFileNameFromPath;
