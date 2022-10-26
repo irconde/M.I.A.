@@ -82,8 +82,21 @@ class Thumbnails {
      */
     async addThumbnail(filename, path) {
         const newObj = { [filename]: path };
-        await this.setThumbnails({ ...this.#thumbnailsObj, newObj });
+        await this.setThumbnails({ ...this.#thumbnailsObj, ...newObj });
         return newObj;
+    }
+
+    /**
+     * Removes the thumbnail from the json storage and the associated .png file with it
+     * @param filename {string}
+     * @returns {Promise<void>}
+     */
+    async removeThumbnail(filename) {
+        const path = this.#thumbnailsObj[filename];
+        if (!path) return;
+        delete this.#thumbnailsObj[filename];
+        await this.setThumbnails(this.#thumbnailsObj);
+        await fs.promises.unlink(path);
     }
 
     /**
@@ -294,29 +307,44 @@ class ClientFilesManager {
             awaitWriteFinish: true,
         });
 
-        this.#watcher.on(Constants.FileWatcher.add, async (addedFilePath) => {
-            const addedFilename = getFileNameFromPath(addedFilePath);
-            if (!this.#isFileTypeAllowed(addedFilename)) return;
-            console.log(addedFilename, ' added!');
-            this.fileNames.push(addedFilename);
-            await this.#thumbnails.setThumbnailsPath(
-                this.selectedImagesDirPath
-            );
-            try {
-                const newThumbnailPath =
-                    await this.#thumbnails.generateThumbnail(
-                        this.selectedImagesDirPath,
-                        addedFilename
-                    );
-                const thumbnailObj = await this.#thumbnails.addThumbnail(
-                    addedFilename,
-                    newThumbnailPath
+        this.#watcher
+            .on(Constants.FileWatcher.add, async (addedFilePath) => {
+                const addedFilename = getFileNameFromPath(addedFilePath);
+                if (!this.#isFileTypeAllowed(addedFilename)) return;
+                console.log(addedFilename, ' added!');
+                this.fileNames.push(addedFilename);
+                await this.#thumbnails.setThumbnailsPath(
+                    this.selectedImagesDirPath
                 );
-                this.#sendThumbnailsList(thumbnailObj, false);
-            } catch (e) {
-                console.log(e);
-            }
-        });
+                try {
+                    const newThumbnailPath =
+                        await this.#thumbnails.generateThumbnail(
+                            this.selectedImagesDirPath,
+                            addedFilename
+                        );
+                    const thumbnailObj = await this.#thumbnails.addThumbnail(
+                        addedFilename,
+                        newThumbnailPath
+                    );
+                    this.#sendThumbnailsList(thumbnailObj, false);
+                } catch (e) {
+                    console.log(e);
+                }
+            })
+            .on(Constants.FileWatcher.unlink, async (removedFilePath) => {
+                const removedFileName = getFileNameFromPath(removedFilePath);
+                if (!this.#isFileTypeAllowed(removedFileName)) return;
+                console.log(removedFileName, ' removed!');
+                const removedFileIndex = this.fileNames.findIndex(
+                    (fileName) => fileName === removedFileName
+                );
+                if (removedFileIndex <= -1) {
+                    throw new Error('Error with removed file index');
+                }
+                this.fileNames.splice(removedFileIndex, 1);
+                await this.#thumbnails.removeThumbnail(removedFileName);
+                this.#sendThumbnailsList(removedFileName, false);
+            });
     }
 
     #isFileTypeAllowed(fileName) {
