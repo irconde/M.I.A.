@@ -31,14 +31,114 @@ class CustomPromise {
     }
 }
 
+class Thumbnails {
+    #thumbnailsObj = null;
+    thumbnailsPath = '';
+
+    /**
+     * Saves the thumbnails object to a json file and updates the cached value in memory
+     * @param object {Object}
+     * @returns {Promise<void>}
+     */
+    async setThumbnails(object) {
+        await fs.promises.writeFile(
+            path.join(
+                this.thumbnailsPath,
+                ClientFilesManager.STORAGE_FILE_NAME
+            ),
+            JSON.stringify(object)
+        );
+        this.#thumbnailsObj = object;
+    }
+
+    /**
+     * Gets the thumbnails object from storage and updates the private class member
+     * If value already exists in memory, then we just return it
+     * @returns {Promise<Object | null>}
+     */
+    async getThumbnails() {
+        try {
+            if (this.#thumbnailsObj) return this.#thumbnailsObj;
+
+            const string = await fs.promises.readFile(
+                path.join(
+                    this.thumbnailsPath,
+                    ClientFilesManager.STORAGE_FILE_NAME
+                )
+            );
+
+            this.#thumbnailsObj = JSON.parse(string);
+            return this.#thumbnailsObj;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Adds a thumbnail to storage
+     * @param filename {string}
+     * @param path {string}
+     * @returns {Promise<object>}
+     */
+    async addThumbnail(filename, path) {
+        const newObj = { [filename]: path };
+        await this.setThumbnails({ ...this.#thumbnailsObj, newObj });
+        return newObj;
+    }
+
+    /**
+     * Creates the thumbnails' path if not created and returns that path
+     * @param {string} path
+     * @returns {Promise<string>}
+     */
+    async setThumbnailsPath(path) {
+        if (process.platform === 'win32') {
+            this.thumbnailsPath = `${path}\\.thumbnails`;
+            try {
+                await checkIfPathExists(this.thumbnailsPath);
+            } catch (e) {
+                await fs.promises.mkdir(this.thumbnailsPath);
+                fsWin.setAttributesSync(this.thumbnailsPath, {
+                    IS_HIDDEN: true,
+                });
+            }
+        } else {
+            this.thumbnailsPath = `${path}/.thumbnails`;
+            try {
+                await checkIfPathExists(this.thumbnailsPath);
+            } catch (e) {
+                await fs.promises.mkdir(this.thumbnailsPath);
+            }
+        }
+        return this.thumbnailsPath;
+    }
+
+    /**
+     * Creates and saves a png image and returns a promise that resolves to the path of the image thumbnail created
+     * @param selectedImagesDirPath {string}
+     * @param fileName {string}
+     * @returns {Promise<string>}
+     */
+    async generateThumbnail(selectedImagesDirPath, fileName) {
+        const pixelData = await fs.promises.readFile(
+            path.join(selectedImagesDirPath, fileName)
+        );
+        const thumbnailPath = path.join(this.thumbnailsPath, fileName);
+        await sharp(pixelData)
+            .resize(Constants.Thumbnail.width)
+            .toFile(thumbnailPath);
+        return thumbnailPath;
+    }
+}
+
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
     static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', 'jpeg'];
     fileNames = [];
     currentFileIndex = -1;
-    thumbnailsPath = '';
-    selectedImagesDirPath = null;
+    selectedImagesDirPath = '';
     #watcher = null;
+    #thumbnails = new Thumbnails();
 
     constructor(mainWindow) {
         this.mainWindow = mainWindow;
@@ -70,7 +170,7 @@ class ClientFilesManager {
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(dirPath);
         if (dirContainsAnyImages) {
-            await this.#setThumbnailsPath(dirPath);
+            await this.#thumbnails.setThumbnailsPath(dirPath);
             await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
@@ -88,7 +188,7 @@ class ClientFilesManager {
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(dirPath);
         if (!dirContainsAnyImages) return;
-        await this.#setThumbnailsPath(dirPath);
+        await this.#thumbnails.setThumbnailsPath(dirPath);
         await this.#generateThumbnails();
     }
 
@@ -128,53 +228,20 @@ class ClientFilesManager {
     }
 
     /**
-     * Creates the thumbnails' path if not created and returns that path
-     * @param {string} path
-     * @returns {Promise<string>}
-     */
-    async #setThumbnailsPath(path) {
-        if (process.platform === 'win32') {
-            this.thumbnailsPath = `${path}\\.thumbnails`;
-            try {
-                await checkIfPathExists(this.thumbnailsPath);
-            } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
-                fsWin.setAttributesSync(this.thumbnailsPath, {
-                    IS_HIDDEN: true,
-                });
-            }
-        } else {
-            this.thumbnailsPath = `${path}/.thumbnails`;
-            try {
-                await checkIfPathExists(this.thumbnailsPath);
-            } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
-            }
-        }
-        return this.thumbnailsPath;
-    }
-
-    /**
      * Generates the thumbnails and saves them to the .thumbnails dir
      * @returns {Promise<>}
      */
     async #generateThumbnails() {
         const newThumbnails = {};
-        const storedThumbnails = await this.#getThumbnailsFromStorage();
+        const storedThumbnails = await this.#thumbnails.getThumbnails();
         this.#sendThumbnailsList(storedThumbnails, true);
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
-
-            const pixelData = await fs.promises.readFile(
-                path.join(this.selectedImagesDirPath, fileName)
+            newThumbnails[fileName] = await this.#thumbnails.generateThumbnail(
+                this.selectedImagesDirPath,
+                fileName
             );
-            const thumbnailPath = path.join(this.thumbnailsPath, fileName);
-            await sharp(pixelData)
-                .resize(Constants.Thumbnail.width)
-                .toFile(thumbnailPath);
-
-            newThumbnails[fileName] = thumbnailPath;
         });
 
         await Promise.allSettled(promises);
@@ -189,41 +256,8 @@ class ClientFilesManager {
 
         // don't update storage if there are no new thumbnails
         if (!Object.keys(newThumbnails).length) return;
-        await this.#saveThumbnailsToStorage(allThumbnails);
+        await this.#thumbnails.setThumbnails(allThumbnails);
         this.#sendThumbnailsList(newThumbnails, false);
-    }
-
-    /**
-     * Saves the thumbnails object to a json file
-     * @param object {Object}
-     * @returns {Promise<void>}
-     */
-    async #saveThumbnailsToStorage(object) {
-        await fs.promises.writeFile(
-            path.join(
-                this.thumbnailsPath,
-                ClientFilesManager.STORAGE_FILE_NAME
-            ),
-            JSON.stringify(object)
-        );
-    }
-
-    /**
-     * Gets the thumbnails object from storage
-     * @returns {Promise<Object | null>}
-     */
-    async #getThumbnailsFromStorage() {
-        try {
-            const string = await fs.promises.readFile(
-                path.join(
-                    this.thumbnailsPath,
-                    ClientFilesManager.STORAGE_FILE_NAME
-                )
-            );
-            return JSON.parse(string);
-        } catch (e) {
-            return null;
-        }
     }
 
     #sendFileInfo() {
@@ -252,18 +286,36 @@ class ClientFilesManager {
 
     async #setDirWatcher() {
         // create a directory watcher, making sure it ignores json files
-        // it also doesn't fire the first time
+        // it also doesn't fire the first time. And we wait for the file to fully write
         this.#watcher = chokidar.watch(this.selectedImagesDirPath, {
             ignored: Constants.FileWatcher.all_json_files,
             depth: 0,
             ignoreInitial: true,
+            awaitWriteFinish: true,
         });
 
-        this.#watcher.on(Constants.FileWatcher.add, (addedFilePath) => {
+        this.#watcher.on(Constants.FileWatcher.add, async (addedFilePath) => {
             const addedFilename = getFileNameFromPath(addedFilePath);
             if (!this.#isFileTypeAllowed(addedFilename)) return;
-
-            console.log(addedFilename);
+            console.log(addedFilename, ' added!');
+            this.fileNames.push(addedFilename);
+            await this.#thumbnails.setThumbnailsPath(
+                this.selectedImagesDirPath
+            );
+            try {
+                const newThumbnailPath =
+                    await this.#thumbnails.generateThumbnail(
+                        this.selectedImagesDirPath,
+                        addedFilename
+                    );
+                const thumbnailObj = await this.#thumbnails.addThumbnail(
+                    addedFilename,
+                    newThumbnailPath
+                );
+                this.#sendThumbnailsList(thumbnailObj, false);
+            } catch (e) {
+                console.log(e);
+            }
         });
     }
 
