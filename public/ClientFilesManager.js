@@ -48,6 +48,8 @@ class Thumbnails {
             ),
             JSON.stringify(object)
         );
+        console.log('STORAGE UPDATE');
+        console.log(object);
         this.#thumbnailsObj = object;
     }
 
@@ -94,9 +96,9 @@ class Thumbnails {
     async removeThumbnail(filename) {
         const path = this.#thumbnailsObj[filename];
         if (!path) return;
+        await fs.promises.unlink(path);
         delete this.#thumbnailsObj[filename];
         await this.setThumbnails(this.#thumbnailsObj);
-        await fs.promises.unlink(path);
     }
 
     /**
@@ -247,7 +249,6 @@ class ClientFilesManager {
     async #generateThumbnails() {
         const newThumbnails = {};
         const storedThumbnails = await this.#thumbnails.getThumbnails();
-        this.#sendThumbnailsList(storedThumbnails, true);
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
@@ -263,14 +264,11 @@ class ClientFilesManager {
             ...newThumbnails,
         };
         // if the promise has not been resolved before, then resolve it once
-        // TODO: figure out if you should resolve to all thumbnails here or just the new ones
         if (!this.thumbnailsPromise.isSettled)
             this.thumbnailsPromise.resolve(allThumbnails);
 
-        // don't update storage if there are no new thumbnails
-        if (!Object.keys(newThumbnails).length) return;
         await this.#thumbnails.setThumbnails(allThumbnails);
-        this.#sendThumbnailsList(newThumbnails, false);
+        this.#sendThumbnailsUpdate(Channels.updateThumbnails, allThumbnails);
     }
 
     #sendFileInfo() {
@@ -282,22 +280,20 @@ class ClientFilesManager {
 
     /**
      * A channel with the React process to update the list of thumbnails
-     * pass true to override the current thumbnails
-     * @param thumbnails {object | null}
-     * @param overrideCurrentThumbnails {boolean}
+     * on the UI side.
+     * @param channel {string}
+     * @param payload {object}
      */
-    #sendThumbnailsList(thumbnails, overrideCurrentThumbnails) {
-        if (!thumbnails) return;
-        this.mainWindow.webContents.send(
-            Constants.Channels.sendThumbnailsList,
-            {
-                overrideCurrentThumbnails,
-                thumbnails,
-            }
-        );
+    #sendThumbnailsUpdate(channel, payload) {
+        this.mainWindow.webContents.send(channel, payload);
     }
 
+    /**
+     * Sets up a file watcher on the images' directory to manage the thumbnails for the images
+     * @returns {Promise<void>}
+     */
     async #setDirWatcher() {
+        await this.removeFileWatcher();
         // create a directory watcher, making sure it ignores json files
         // it also doesn't fire the first time. And we wait for the file to fully write
         this.#watcher = chokidar.watch(this.selectedImagesDirPath, {
@@ -326,7 +322,10 @@ class ClientFilesManager {
                         addedFilename,
                         newThumbnailPath
                     );
-                    this.#sendThumbnailsList(thumbnailObj, false);
+                    this.#sendThumbnailsUpdate(
+                        Channels.addThumbnail,
+                        thumbnailObj
+                    );
                 } catch (e) {
                     console.log(e);
                 }
@@ -343,10 +342,23 @@ class ClientFilesManager {
                 }
                 this.fileNames.splice(removedFileIndex, 1);
                 await this.#thumbnails.removeThumbnail(removedFileName);
-                this.#sendThumbnailsList(removedFileName, false);
+                this.#sendThumbnailsUpdate(
+                    Channels.removeThumbnail,
+                    removedFileName
+                );
             });
     }
 
+    async removeFileWatcher() {
+        await this.#watcher?.unwatch(this.selectedImagesDirPath);
+        await this.#watcher?.close();
+    }
+
+    /**
+     * Checks if the provided file name is an acceptable image format
+     * @param fileName {string}
+     * @returns {boolean}
+     */
     #isFileTypeAllowed(fileName) {
         return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
             path.extname(fileName)

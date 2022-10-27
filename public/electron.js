@@ -80,8 +80,7 @@ function createWindow() {
         });
     });
     mainWindow.on('closed', async () => {
-        await watcher?.unwatch(currentPath);
-        await watcher?.close();
+        await files.removeFileWatcher();
         mainWindow = null;
     });
     if (isDev) {

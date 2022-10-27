@@ -136,9 +136,11 @@ export const Channels = {
     showFolderPicker: 'show-folder-picker',
     getFileName: 'get-file-name',
     getNumberOfFiles: 'get-number-of-files',
-    sendThumbnailsList: 'send-thumbnails-list',
     newFileUpdate: 'new-file-update',
     requestInitialThumbnailsList: 'request-initial-thumbnails-list',
+    addThumbnail: 'add-thumbnail',
+    removeThumbnail: 'remove-thumbnail',
+    updateThumbnails: 'update-thumbnails',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;

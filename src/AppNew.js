@@ -23,20 +23,7 @@ const AppNew = () => {
 
     useEffect(() => {
         // TODO: move this to lazy image component
-        ipcRenderer.on(
-            Channels.sendThumbnailsList,
-            (e, { overrideCurrentThumbnails, thumbnails }) => {
-                console.log({ overrideCurrentThumbnails, thumbnails });
-            }
-        );
-        ipcRenderer
-            .invoke(Channels.requestInitialThumbnailsList)
-            .then((thumbnails) => {
-                console.log(thumbnails);
-            })
-            .catch(() => {
-                console.log('no thumbnails to begin with');
-            });
+        addElectronChannels();
         dispatch(initSettings());
     }, []);
 
@@ -44,6 +31,36 @@ const AppNew = () => {
         // only open the modal if there is no selected images' dir path
         selectedImagesDirPath === '' && setImportModalOpen(true);
     }, [selectedImagesDirPath]);
+
+    const addElectronChannels = () => {
+        const {
+            removeThumbnail,
+            addThumbnail,
+            updateThumbnails,
+            requestInitialThumbnailsList,
+        } = Channels;
+        ipcRenderer.on(removeThumbnail, (e, removedThumbnail) => {
+            console.log('REMOVE');
+            console.log(removedThumbnail);
+        });
+        ipcRenderer.on(addThumbnail, (e, addedThumbnail) => {
+            console.log('ADDED');
+            console.log(addedThumbnail);
+        });
+        ipcRenderer.on(updateThumbnails, (e, thumbnailsObj) => {
+            console.log('UPDATE');
+            console.log(thumbnailsObj);
+        });
+        ipcRenderer
+            .invoke(requestInitialThumbnailsList)
+            .then((thumbnails) => {
+                console.log('INIT');
+                console.log(thumbnails);
+            })
+            .catch(() => {
+                console.log('no thumbnails to begin with');
+            });
+    };
 
     return (
         <div>
