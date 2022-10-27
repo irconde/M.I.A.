@@ -35,6 +35,28 @@ class Thumbnails {
     #thumbnailsObj = null;
     thumbnailsPath = '';
 
+    // task executor
+    /**
+     * Function that keeps track of the last promise it returned, and doesn't execute
+     * the next call until the previous is resolved. This is used to update the json file
+     * for the thumbnails one request after another without blocking program execution
+     * @type {function(*): Promise<void|undefined>}
+     */
+    scheduleRemoval = (() => {
+        let pending = Promise.resolve();
+
+        const run = async (fileName) => {
+            try {
+                await pending;
+            } finally {
+                return this.#removeThumbnail(fileName);
+            }
+        };
+
+        // update pending promise so that next task could await for it
+        return (fileName) => (pending = run(fileName));
+    })();
+
     /**
      * Saves the thumbnails object to a json file and updates the cached value in memory
      * @param object {Object}
@@ -48,8 +70,6 @@ class Thumbnails {
             ),
             JSON.stringify(object)
         );
-        console.log('STORAGE UPDATE');
-        console.log(object);
         this.#thumbnailsObj = object;
     }
 
@@ -93,7 +113,7 @@ class Thumbnails {
      * @param filename {string}
      * @returns {Promise<void>}
      */
-    async removeThumbnail(filename) {
+    async #removeThumbnail(filename) {
         const path = this.#thumbnailsObj[filename];
         if (!path) return;
         await fs.promises.unlink(path);
@@ -341,7 +361,8 @@ class ClientFilesManager {
                     throw new Error('Error with removed file index');
                 }
                 this.fileNames.splice(removedFileIndex, 1);
-                await this.#thumbnails.removeThumbnail(removedFileName);
+                // await this.#thumbnails.removeThumbnail(removedFileName);
+                await this.#thumbnails.scheduleRemoval(removedFileName);
                 this.#sendThumbnailsUpdate(
                     Channels.removeThumbnail,
                     removedFileName
