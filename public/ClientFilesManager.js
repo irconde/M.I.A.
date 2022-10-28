@@ -7,6 +7,7 @@ const Constants = require('./Constants');
 const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
 const chokidar = require('chokidar');
+const async = require('async');
 
 class CustomPromise {
     isSettled = false;
@@ -32,49 +33,83 @@ class CustomPromise {
 }
 
 class Thumbnails {
+    static ACTION = {
+        ADD: 'add-thumbnail',
+        REMOVE: 'remove-thumbnail',
+        UPDATE_ALL: 'update-all-thumbnails',
+    };
+    // Determines how long the program should wait for another task to start before we start saving
+    // the thumbnails to the json file again
+    static #STORAGE_SAVE_DELAY = 100;
     #thumbnailsObj = null;
-    thumbnailsPath = '';
+    #thumbnailsPath = '';
+    // Keeps track of the scheduled updates to the thumbnails and update the json file when
+    // the queue is empty. This avoids having to save to the file on every single update
+    #queue;
 
-    // task executor
+    constructor() {
+        this.#queue = async.queue(({ type, payload }, done) => {
+            this.#updateThumbnails(type, payload);
+
+            // Delay saving if there are no future tasks, otherwise call done immediately to save to the json file
+            this.#queue.length() === 0
+                ? setTimeout(done, Thumbnails.#STORAGE_SAVE_DELAY)
+                : done();
+        }, 1);
+        // runs when the queue is empty with no tasks to complete
+        this.#queue.drain(() => {
+            // TODO: remove logs
+            console.log('Finished all queued tasks');
+            this.#saveThumbnailsToStorage().then(() => {
+                console.log('SAVED IN DRAIN', this.#thumbnailsObj);
+            });
+        });
+    }
+
     /**
-     * Function that keeps track of the last promise it returned, and doesn't execute
-     * the next call until the previous is resolved. This is used to update the json file
-     * for the thumbnails one request after another without blocking program execution
-     * @type {function(*): Promise<void|undefined>}
+     * Pushes an update to the thumbnails queue. The callback is invoked when the task is completed
+     * which is when the 'done' callback is invoked by the queue
+     * @param type
+     * @param payload
      */
-    scheduleThumbnailsAsyncUpdate = (() => {
-        let previousPromise = Promise.resolve();
+    scheduleStorageUpdate(type, payload) {
+        this.#queue.push({ type, payload }, (error) => {
+            console.log(`${type} operation completed!`);
+        });
+    }
 
-        const run = async (thumbnails) => {
-            try {
-                await previousPromise;
-            } catch (e) {
-                console.log(e);
-            } finally {
-                return this.setThumbnails(thumbnails);
-            }
-        };
-
-        // update last pending promise so that next task could await for it
-        return (thumbnails) => (previousPromise = run(thumbnails));
-    })();
+    /**
+     * Sets the private member for the thumbnails depending on the action type
+     * @param type {string} - provided as a static member in the class definition
+     * @param payload {object | string} - file name to be removed, object to be added, or object to override all current thumbnails
+     * @returns {*}
+     */
+    #updateThumbnails(type, payload) {
+        switch (type) {
+            case Thumbnails.ACTION.ADD:
+                return (this.#thumbnailsObj = {
+                    ...this.#thumbnailsObj,
+                    ...payload,
+                });
+            case Thumbnails.ACTION.REMOVE:
+                return delete this.#thumbnailsObj[payload];
+            case Thumbnails.ACTION.UPDATE_ALL:
+                return (this.#thumbnailsObj = payload);
+        }
+    }
 
     /**
      * Saves the thumbnails object to a json file and updates the cached value in memory
-     * @param object {Object}
      * @returns {Promise<void>}
      */
-    async setThumbnails(object) {
-        this.#thumbnailsObj = object;
+    async #saveThumbnailsToStorage() {
         await fs.promises.writeFile(
             path.join(
-                this.thumbnailsPath,
+                this.#thumbnailsPath,
                 ClientFilesManager.STORAGE_FILE_NAME
             ),
-            JSON.stringify(object, null, 4)
+            JSON.stringify(this.#thumbnailsObj, null, 4)
         );
-        console.log('--------------SAVED TO JSON FILE--------------');
-        console.log(object);
     }
 
     /**
@@ -88,7 +123,7 @@ class Thumbnails {
 
             const string = await fs.promises.readFile(
                 path.join(
-                    this.thumbnailsPath,
+                    this.#thumbnailsPath,
                     ClientFilesManager.STORAGE_FILE_NAME
                 )
             );
@@ -115,10 +150,7 @@ class Thumbnails {
      */
     async addThumbnail(filename, path) {
         const newObj = { [filename]: path };
-        await this.scheduleThumbnailsAsyncUpdate({
-            ...this.#thumbnailsObj,
-            ...newObj,
-        });
+        this.scheduleStorageUpdate(Thumbnails.ACTION.ADD, newObj);
         return newObj;
     }
 
@@ -131,8 +163,7 @@ class Thumbnails {
         const path = this.#thumbnailsObj[filename];
         if (!path) return;
         await fs.promises.unlink(path);
-        delete this.#thumbnailsObj[filename];
-        await this.scheduleThumbnailsAsyncUpdate(this.#thumbnailsObj);
+        this.scheduleStorageUpdate(Thumbnails.ACTION.REMOVE, filename);
     }
 
     /**
@@ -142,24 +173,24 @@ class Thumbnails {
      */
     async setThumbnailsPath(path) {
         if (process.platform === 'win32') {
-            this.thumbnailsPath = `${path}\\.thumbnails`;
+            this.#thumbnailsPath = `${path}\\.thumbnails`;
             try {
-                await checkIfPathExists(this.thumbnailsPath);
+                await checkIfPathExists(this.#thumbnailsPath);
             } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
-                fsWin.setAttributesSync(this.thumbnailsPath, {
+                await fs.promises.mkdir(this.#thumbnailsPath);
+                fsWin.setAttributesSync(this.#thumbnailsPath, {
                     IS_HIDDEN: true,
                 });
             }
         } else {
-            this.thumbnailsPath = `${path}/.thumbnails`;
+            this.#thumbnailsPath = `${path}/.thumbnails`;
             try {
-                await checkIfPathExists(this.thumbnailsPath);
+                await checkIfPathExists(this.#thumbnailsPath);
             } catch (e) {
-                await fs.promises.mkdir(this.thumbnailsPath);
+                await fs.promises.mkdir(this.#thumbnailsPath);
             }
         }
-        return this.thumbnailsPath;
+        return this.#thumbnailsPath;
     }
 
     /**
@@ -172,7 +203,7 @@ class Thumbnails {
         const pixelData = await fs.promises.readFile(
             path.join(selectedImagesDirPath, fileName)
         );
-        const thumbnailPath = path.join(this.thumbnailsPath, fileName);
+        const thumbnailPath = path.join(this.#thumbnailsPath, fileName);
         await sharp(pixelData)
             .resize(Constants.Thumbnail.width)
             .toFile(thumbnailPath);
@@ -313,7 +344,10 @@ class ClientFilesManager {
         if (!this.thumbnailsPromise.isSettled)
             this.thumbnailsPromise.resolve(allThumbnails);
 
-        await this.#thumbnails.setThumbnails(allThumbnails);
+        this.#thumbnails.scheduleStorageUpdate(
+            Thumbnails.ACTION.UPDATE_ALL,
+            allThumbnails
+        );
         this.#sendThumbnailsUpdate(Channels.updateThumbnails, allThumbnails);
     }
 

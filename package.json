@@ -15,6 +15,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^14.1.1",
+    "async": "^3.2.4",
     "babel-preset-react": "^6.24.1",
     "browser-fs-access": "^0.29.4",
     "browserify": "^17.0.0",
