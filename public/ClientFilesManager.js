@@ -42,19 +42,21 @@ class Thumbnails {
      * for the thumbnails one request after another without blocking program execution
      * @type {function(*): Promise<void|undefined>}
      */
-    scheduleRemoval = (() => {
-        let pending = Promise.resolve();
+    scheduleThumbnailsAsyncUpdate = (() => {
+        let previousPromise = Promise.resolve();
 
-        const run = async (fileName) => {
+        const run = async (thumbnails) => {
             try {
-                await pending;
+                await previousPromise;
+            } catch (e) {
+                console.log(e);
             } finally {
-                return this.#removeThumbnail(fileName);
+                return this.setThumbnails(thumbnails);
             }
         };
 
-        // update pending promise so that next task could await for it
-        return (fileName) => (pending = run(fileName));
+        // update last pending promise so that next task could await for it
+        return (thumbnails) => (previousPromise = run(thumbnails));
     })();
 
     /**
@@ -63,14 +65,16 @@ class Thumbnails {
      * @returns {Promise<void>}
      */
     async setThumbnails(object) {
+        this.#thumbnailsObj = object;
         await fs.promises.writeFile(
             path.join(
                 this.thumbnailsPath,
                 ClientFilesManager.STORAGE_FILE_NAME
             ),
-            JSON.stringify(object)
+            JSON.stringify(object, null, 4)
         );
-        this.#thumbnailsObj = object;
+        console.log('--------------SAVED TO JSON FILE--------------');
+        console.log(object);
     }
 
     /**
@@ -97,6 +101,13 @@ class Thumbnails {
     }
 
     /**
+     * Used to reset the cached thumbnails when the images' directory is changed
+     */
+    clearCurrentThumbnails() {
+        this.#thumbnailsObj = null;
+    }
+
+    /**
      * Adds a thumbnail to storage
      * @param filename {string}
      * @param path {string}
@@ -104,7 +115,10 @@ class Thumbnails {
      */
     async addThumbnail(filename, path) {
         const newObj = { [filename]: path };
-        await this.setThumbnails({ ...this.#thumbnailsObj, ...newObj });
+        await this.scheduleThumbnailsAsyncUpdate({
+            ...this.#thumbnailsObj,
+            ...newObj,
+        });
         return newObj;
     }
 
@@ -113,12 +127,12 @@ class Thumbnails {
      * @param filename {string}
      * @returns {Promise<void>}
      */
-    async #removeThumbnail(filename) {
+    async removeThumbnail(filename) {
         const path = this.#thumbnailsObj[filename];
         if (!path) return;
         await fs.promises.unlink(path);
         delete this.#thumbnailsObj[filename];
-        await this.setThumbnails(this.#thumbnailsObj);
+        await this.scheduleThumbnailsAsyncUpdate(this.#thumbnailsObj);
     }
 
     /**
@@ -193,6 +207,17 @@ class ClientFilesManager {
     }
 
     /**
+     * Checks if the provided file name is an acceptable image format
+     * @param fileName {string}
+     * @returns {boolean}
+     */
+    static #isFileTypeAllowed(fileName) {
+        return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
+            path.extname(fileName)
+        );
+    }
+
+    /**
      * Called when the app is first launched with the images' dir path from the settings
      * @param dirPath {string}
      * @returns {Promise<void>}
@@ -223,6 +248,7 @@ class ClientFilesManager {
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(dirPath);
         if (!dirContainsAnyImages) return;
+        this.#thumbnails.clearCurrentThumbnails();
         await this.#thumbnails.setThumbnailsPath(dirPath);
         await this.#generateThumbnails();
     }
@@ -257,7 +283,7 @@ class ClientFilesManager {
     async #updateFileNames(dirPath) {
         const foundFiles = await fs.promises.readdir(dirPath);
         this.fileNames = foundFiles.filter((file) =>
-            this.#isFileTypeAllowed(file)
+            ClientFilesManager.#isFileTypeAllowed(file)
         );
         return !!this.fileNames.length;
     }
@@ -326,7 +352,8 @@ class ClientFilesManager {
         this.#watcher
             .on(Constants.FileWatcher.add, async (addedFilePath) => {
                 const addedFilename = getFileNameFromPath(addedFilePath);
-                if (!this.#isFileTypeAllowed(addedFilename)) return;
+                if (!ClientFilesManager.#isFileTypeAllowed(addedFilename))
+                    return;
                 console.log(addedFilename, ' added!');
                 this.fileNames.push(addedFilename);
                 await this.#thumbnails.setThumbnailsPath(
@@ -352,7 +379,8 @@ class ClientFilesManager {
             })
             .on(Constants.FileWatcher.unlink, async (removedFilePath) => {
                 const removedFileName = getFileNameFromPath(removedFilePath);
-                if (!this.#isFileTypeAllowed(removedFileName)) return;
+                if (!ClientFilesManager.#isFileTypeAllowed(removedFileName))
+                    return;
                 console.log(removedFileName, ' removed!');
                 const removedFileIndex = this.fileNames.findIndex(
                     (fileName) => fileName === removedFileName
@@ -361,8 +389,7 @@ class ClientFilesManager {
                     throw new Error('Error with removed file index');
                 }
                 this.fileNames.splice(removedFileIndex, 1);
-                // await this.#thumbnails.removeThumbnail(removedFileName);
-                await this.#thumbnails.scheduleRemoval(removedFileName);
+                await this.#thumbnails.removeThumbnail(removedFileName);
                 this.#sendThumbnailsUpdate(
                     Channels.removeThumbnail,
                     removedFileName
@@ -373,17 +400,6 @@ class ClientFilesManager {
     async removeFileWatcher() {
         await this.#watcher?.unwatch(this.selectedImagesDirPath);
         await this.#watcher?.close();
-    }
-
-    /**
-     * Checks if the provided file name is an acceptable image format
-     * @param fileName {string}
-     * @returns {boolean}
-     */
-    #isFileTypeAllowed(fileName) {
-        return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
-            path.extname(fileName)
-        );
     }
 }
 
