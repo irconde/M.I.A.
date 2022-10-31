@@ -4,7 +4,7 @@ import {
     getAssetsDirPaths,
     getSettingsLoadingState,
     initSettings,
-} from './redux/slices/settings/settings.slice';
+} from './redux/slices/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import ImageDisplayComponent from './components/image-display/image-display.component';
 import TopBarComponent from './components/top-bar/top-bar.component';
@@ -13,7 +13,7 @@ import AboutModal from './components/about-modal/about-modal.component';
 const AppNew = () => {
     const dispatch = useDispatch();
     const areSettingsLoading = useSelector(getSettingsLoadingState);
-    const { selectedImagesDirPath, selectedAnnotationsDirPath } =
+    const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);

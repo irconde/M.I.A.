@@ -54,25 +54,59 @@ const files = {
     },
     /**
      * Reads the next file data if there is one and increments the current index
-     * @returns {Promise<Buffer>}
+     * @returns {pixelData: <Buffer>, annotationInformation: Array}
      */
     getNextFile: async function () {
         this.currentFileIndex++;
-        console.log(this.fileNames);
         this.sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
         } else if (this.currentFileIndex >= this.fileNames.length) {
             throw new Error('No more files');
         }
-
-        return fs.promises.readFile(
+        let annotationInformation = [];
+        if (appSettings?.selectedAnnotationFile) {
+            annotationInformation = await this.getAnnotationsForFile();
+        }
+        const pixelData = await fs.promises.readFile(
             path.join(
                 appSettings.selectedImagesDirPath,
-
                 this.fileNames[this.currentFileIndex]
             )
         );
+        return { pixelData, annotationInformation };
+    },
+    getAnnotationsForFile: async function () {
+        return new Promise((resolve, reject) => {
+            fs.readFile(appSettings.selectedAnnotationFile, (error, data) => {
+                if (error) reject(error);
+                let annotations = [],
+                    categories = [];
+                const allAnnotations = JSON.parse(data);
+                const imageInformation = allAnnotations.images.find(
+                    (image) =>
+                        image.file_name ===
+                        this.fileNames[this.currentFileIndex]
+                );
+                if (imageInformation !== undefined) {
+                    const imageId = imageInformation.id;
+                    annotations = allAnnotations.annotations.filter(
+                        (annotation) => annotation.image_id === imageId
+                    );
+                    if (annotations?.length > 0) {
+                        const unique = [
+                            ...new Set(
+                                annotations.map((item) => item.category_id)
+                            ),
+                        ];
+                        categories = allAnnotations.categories.filter(
+                            (category) => unique.includes(category.id)
+                        );
+                    }
+                }
+                resolve({ annotations, categories });
+            });
+        });
     },
     sendFileInfo: function () {
         mainWindow.webContents.send('newFileUpdate', {
@@ -176,15 +210,26 @@ app.on('activate', () => {
  * This returns a string with the selected directory name, or null if the event is cancelled
  * @returns {string | null}
  */
-ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
-    const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-    });
+ipcMain.handle(Constants.Channels.showFolderPicker, async (event, args) => {
+    if (args === Constants.fileType.IMAGES) {
+        const result = await dialog.showOpenDialog({
+            properties: ['openDirectory'],
+        });
 
-    // if the event is cancelled by the user
-    if (result.canceled) return null;
+        // if the event is cancelled by the user
+        if (result.canceled) return null;
 
-    return result.filePaths[0];
+        return result.filePaths[0];
+    } else if (args === Constants.fileType.ANNOTATIONS) {
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+        });
+
+        // if the event is cancelled by the user
+        if (result.canceled) return null;
+
+        return result.filePaths[0];
+    }
 });
 
 /**

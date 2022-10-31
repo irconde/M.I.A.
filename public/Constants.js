@@ -46,5 +46,11 @@ module.exports.Thumbnail = {
 
 module.exports.defaultSettings = {
     selectedImagesDirPath: '',
-    selectedAnnotationsDirPath: '',
+    selectedAnnotationFile: '',
+};
+
+module.exports.fileType = {
+    IMAGES: 'images',
+    ANNOTATIONS: 'annotations',
+    CANCEL: 'cancel',
 };

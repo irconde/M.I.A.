@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { Channels } from '../../../utils/enums/Constants';
+import { Channels } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 const defaultSettings = {
     selectedImagesDirPath: '',
-    selectedAnnotationsDirPath: '',
+    selectedAnnotationFile: '',
 };
 
 export const initSettings = createAsyncThunk(
@@ -69,8 +69,7 @@ export const getSettingsLoadingState = (state) => state.settings.isLoading;
 
 export const getAssetsDirPaths = (state) => ({
     selectedImagesDirPath: state.settings.settings.selectedImagesDirPath,
-    selectedAnnotationsDirPath:
-        state.settings.settings.selectedAnnotationsDirPath,
+    selectedAnnotationFile: state.settings.settings.selectedAnnotationFile,
 });
 
 export default settingsSlice.reducer;
