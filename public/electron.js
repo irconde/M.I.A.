@@ -6,8 +6,6 @@ const fs = require('fs');
 const Constants = require('./Constants');
 let mainWindow;
 let appSettings = null;
-let watcher = null;
-let currentPath = '';
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
@@ -110,7 +108,10 @@ app.whenReady().then(() => {
         .catch(console.log)
         .finally(() => {
             createWindow();
-            files.initSelectedImagesDir(appSettings.selectedImagesDirPath);
+            files.initSelectedPaths(
+                appSettings.selectedImagesDirPath,
+                appSettings.selectedAnnotationFile
+            );
         });
 });
 
@@ -187,7 +188,10 @@ ipcMain.handle(
     async (event, settingsToUpdate) => {
         await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
         files
-            .updateSelectedImagesDir(settingsToUpdate.selectedImagesDirPath)
+            .updateSelectedPaths(
+                settingsToUpdate.selectedImagesDirPath,
+                settingsToUpdate.selectedAnnotationFile
+            )
             .catch(console.log);
     }
 );

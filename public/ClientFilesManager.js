@@ -217,6 +217,7 @@ class ClientFilesManager {
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
+    selectedAnnotationFile = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
 
@@ -250,18 +251,20 @@ class ClientFilesManager {
 
     /**
      * Called when the app is first launched with the images' dir path from the settings
-     * @param dirPath {string}
+     * @param imagesDirPath {string}
+     * @param annotationFilePath {string}
      * @returns {Promise<void>}
      */
-    async initSelectedImagesDir(dirPath) {
+    async initSelectedPaths(imagesDirPath, annotationFilePath) {
+        this.selectedAnnotationFile = annotationFilePath;
         // if no path exits in the settings then reject the React promise
-        if (dirPath === '') return this.thumbnailsPromise.reject();
+        if (imagesDirPath === '') return this.thumbnailsPromise.reject();
 
-        this.selectedImagesDirPath = dirPath;
+        this.selectedImagesDirPath = imagesDirPath;
         await this.#setDirWatcher();
-        const dirContainsAnyImages = await this.#updateFileNames(dirPath);
+        const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {
-            await this.#thumbnails.setThumbnailsPath(dirPath);
+            await this.#thumbnails.setThumbnailsPath(imagesDirPath);
             await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
@@ -271,22 +274,24 @@ class ClientFilesManager {
 
     /**
      * Called when a new path is provided by the user to update the files and thumbnails
-     * @param dirPath {string}
+     * @param imagesDirPath {string}
+     * @param annotationFilePath {string}
      * @returns {Promise<void>}
      */
-    async updateSelectedImagesDir(dirPath) {
-        this.selectedImagesDirPath = dirPath;
+    async updateSelectedPaths(imagesDirPath, annotationFilePath) {
+        this.selectedAnnotationFile = annotationFilePath;
+        this.selectedImagesDirPath = imagesDirPath;
         await this.#setDirWatcher();
-        const dirContainsAnyImages = await this.#updateFileNames(dirPath);
+        const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (!dirContainsAnyImages) return;
         this.#thumbnails.clearCurrentThumbnails();
-        await this.#thumbnails.setThumbnailsPath(dirPath);
+        await this.#thumbnails.setThumbnailsPath(imagesDirPath);
         await this.#generateThumbnails();
     }
 
     /**
      * Reads the next file data if there is one and increments the current index
-     * @returns {Promise<Buffer>}
+     * @returns {pixelData: <Buffer>, annotationInformation: Array}
      */
     async getNextFile() {
         this.currentFileIndex++;
@@ -298,12 +303,51 @@ class ClientFilesManager {
             throw new Error('No more files');
         }
 
-        return fs.promises.readFile(
+        let annotationInformation = [];
+        if (this.selectedAnnotationFile) {
+            annotationInformation = await this.getAnnotationsForFile();
+        }
+        const pixelData = await fs.promises.readFile(
             path.join(
                 this.selectedImagesDirPath,
                 this.fileNames[this.currentFileIndex]
             )
         );
+
+        return { pixelData, annotationInformation };
+    }
+
+    async getAnnotationsForFile() {
+        return new Promise((resolve, reject) => {
+            fs.readFile(this.selectedAnnotationFile, (error, data) => {
+                if (error) reject(error);
+                let annotations = [],
+                    categories = [];
+                const allAnnotations = JSON.parse(data);
+                const imageInformation = allAnnotations.images.find(
+                    (image) =>
+                        image.file_name ===
+                        this.fileNames[this.currentFileIndex]
+                );
+                if (imageInformation !== undefined) {
+                    const imageId = imageInformation.id;
+                    annotations = allAnnotations.annotations.filter(
+                        (annotation) => annotation.image_id === imageId
+                    );
+                    if (annotations?.length > 0) {
+                        const unique = [
+                            ...new Set(
+                                annotations.map((item) => item.category_id)
+                            ),
+                        ];
+                        categories = allAnnotations.categories.filter(
+                            (category) => unique.includes(category.id)
+                        );
+                    }
+                }
+                resolve({ annotations, categories });
+            });
+        });
     }
 
     /**
