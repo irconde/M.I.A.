@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getAssetsDirPaths,
     updateSettings,
-} from '../../redux/slices/settings/settings.slice';
+} from '../../redux/slices/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -39,12 +39,12 @@ const ERROR = {
 
 const ImportModalComponent = ({ open, setOpen }) => {
     const dispatch = useDispatch();
-    const { selectedImagesDirPath, selectedAnnotationsDirPath } =
+    const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     //const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
         images: selectedImagesDirPath || '',
-        annotations: selectedAnnotationsDirPath || '',
+        annotations: selectedAnnotationFile || '',
         isLoading: false,
         imagesError: '',
         annotationsError: '',
@@ -55,7 +55,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
-        const path = await ipcRenderer.invoke(Channels.showFolderPicker, null);
+        const path = await ipcRenderer.invoke(Channels.showFolderPicker, type);
         // if event is cancelled, then the path is null
         updatePaths(path, path === null ? TYPE.CANCEL : type);
     };
@@ -95,9 +95,9 @@ const ImportModalComponent = ({ open, setOpen }) => {
         const data = {
             selectedImagesDirPath: paths.images,
         };
-        const onlyImagesPath = paths.annotations.trim() === '';
+        const onlyImagesPath = paths.annotations === '';
         if (!onlyImagesPath) {
-            data.selectedAnnotationsDirPath = paths.annotations;
+            data.selectedAnnotationFile = paths.annotations;
         }
         const result = await ipcRenderer.invoke(
             Channels.verifyDirectories,
@@ -108,21 +108,15 @@ const ImportModalComponent = ({ open, setOpen }) => {
         setPaths({
             ...paths,
             imagesError: result.selectedImagesDirPath ? '' : INVALID,
-            annotationsError:
-                result.selectedAnnotationsDirPath || onlyImagesPath
-                    ? ''
-                    : INVALID,
+            annotationsError: false,
         });
 
         // update the redux store and close the modal if no errors
-        if (
-            result.selectedImagesDirPath &&
-            (result.selectedAnnotationsDirPath || onlyImagesPath)
-        ) {
+        if (result.selectedImagesDirPath) {
             dispatch(
                 updateSettings({
                     selectedImagesDirPath: paths.images,
-                    selectedAnnotationsDirPath: paths.annotations,
+                    selectedAnnotationFile: paths.annotations,
                 })
             ).then(handleClose);
         }

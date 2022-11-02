@@ -10,8 +10,9 @@ import * as cornerstoneMath from 'cornerstone-math';
 import * as constants from '../../utils/enums/Constants';
 import { Channels } from '../../utils/enums/Constants';
 import { ImageViewport } from './image-display.styles';
-import { useSelector } from 'react-redux';
-import { getAssetsDirPaths } from '../../redux/slices/settings/settings.slice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
+import { addAnnotationArray } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -39,6 +40,7 @@ cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
 const ImageDisplayComponent = () => {
+    const dispatch = useDispatch();
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
     const viewportRef = useRef(null);
     const [viewport, setViewport] = useState(null);
@@ -72,7 +74,8 @@ const ImageDisplayComponent = () => {
 
     const displayImage = async () => {
         try {
-            const pixelData = await getNextFile();
+            const { pixelData, annotationInformation } = await getNextFile();
+            dispatch(addAnnotationArray(annotationInformation));
             const imageIdTop = 'coco:0';
             Utils.loadImage(imageIdTop, pixelData).then((image) => {
                 const viewport = cornerstone.getDefaultViewportForImage(

@@ -15,7 +15,7 @@ import {
     TopBarIconWrapper,
     VerticalDivider,
 } from './top-bar.styles';
-import { getAssetsDirPaths } from '../../redux/slices/settings/settings.slice';
+import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import Tooltip from '@mui/material/Tooltip';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
@@ -30,7 +30,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  *
  */
 const TopBarComponent = (props) => {
-    const { selectedImagesDirPath, selectedAnnotationsDirPath } =
+    const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     const [fileState, setFileState] = useState({
         currentFileName: '',

@@ -24,7 +24,7 @@ export const StyledModal = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 430px;
+    width: 35vw;
     background-color: #303030;
     padding: 1.5rem;
     box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
@@ -67,7 +67,7 @@ export const ConfirmButton = styled(Button).attrs(() => ({
     &.MuiButton-root.MuiButton-contained {
         align-self: flex-end;
         margin-top: 3rem;
-        width: 66%;
+        width: 45%;
         font-family: Noto Sans JP, sans-serif;
         font-size: 17px;
         font-weight: 500;
@@ -91,6 +91,8 @@ export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
 }))`
+    width: 50%;
+
     &.MuiFormControl-root {
         margin-left: 1rem;
     }

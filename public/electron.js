@@ -131,15 +131,26 @@ app.on('activate', () => {
  * This returns a string with the selected directory name, or null if the event is cancelled
  * @returns {string | null}
  */
-ipcMain.handle(Constants.Channels.showFolderPicker, async () => {
-    const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-    });
+ipcMain.handle(Constants.Channels.showFolderPicker, async (event, args) => {
+    if (args === Constants.fileType.IMAGES) {
+        const result = await dialog.showOpenDialog({
+            properties: ['openDirectory'],
+        });
 
-    // if the event is cancelled by the user
-    if (result.canceled) return null;
+        // if the event is cancelled by the user
+        if (result.canceled) return null;
 
-    return result.filePaths[0];
+        return result.filePaths[0];
+    } else if (args === Constants.fileType.ANNOTATIONS) {
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+        });
+
+        // if the event is cancelled by the user
+        if (result.canceled) return null;
+
+        return result.filePaths[0];
+    }
 });
 
 /**
