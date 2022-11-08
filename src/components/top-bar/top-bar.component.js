@@ -20,6 +20,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
+import { Channels } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 /**
@@ -36,7 +37,7 @@ const TopBarComponent = (props) => {
         numberOfFiles: 0,
     });
     useEffect(() => {
-        ipcRenderer.on('newFileUpdate', (e, args) => {
+        ipcRenderer.on(Channels.newFileUpdate, (e, args) => {
             setFileState(args);
         });
     }, []);

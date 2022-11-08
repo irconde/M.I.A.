@@ -61,7 +61,7 @@ const ImageDisplayComponent = () => {
     useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
-        displayImage().catch(console.log);
+        selectedImagesDirPath && displayImage().catch(console.log);
     }, [selectedImagesDirPath]);
 
     const getNextFile = async () => {

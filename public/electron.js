@@ -3,12 +3,9 @@ const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
-const util = require('util');
 const Constants = require('./Constants');
 let mainWindow;
 let appSettings = null;
-let watcher = null;
-let currentPath = '';
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
@@ -21,6 +18,9 @@ const {
     REACT_DEVELOPER_TOOLS,
 } = require('electron-devtools-installer');
 
+const { checkIfPathExists } = require('./Utils');
+const { ClientFilesManager } = require('./ClientFilesManager');
+
 // If development environment
 if (isDev) {
     try {
@@ -32,89 +32,10 @@ if (isDev) {
         console.log(e);
     }
 }
-
-const files = {
-    fileNames: [],
-    currentFileIndex: -1,
-    /**
-     * Updates the fileNames array with new image names
-     * @param dirPath
-     * @returns {Promise<void>}
-     */
-    updateFileNames: async function (dirPath) {
-        const foundFiles = await fs.promises.readdir(dirPath);
-        this.fileNames = foundFiles.filter((file) => {
-            const fileExtension = path.extname(file);
-            return (
-                fileExtension === '.png' ||
-                fileExtension === '.jpg' ||
-                fileExtension === '.jpeg'
-            );
-        });
-    },
-    /**
-     * Reads the next file data if there is one and increments the current index
-     * @returns {pixelData: <Buffer>, annotationInformation: Array}
-     */
-    getNextFile: async function () {
-        this.currentFileIndex++;
-        this.sendFileInfo();
-        if (!this.fileNames.length) {
-            throw new Error('Directory contains no images');
-        } else if (this.currentFileIndex >= this.fileNames.length) {
-            throw new Error('No more files');
-        }
-        let annotationInformation = [];
-        if (appSettings?.selectedAnnotationFile) {
-            annotationInformation = await this.getAnnotationsForFile();
-        }
-        const pixelData = await fs.promises.readFile(
-            path.join(
-                appSettings.selectedImagesDirPath,
-                this.fileNames[this.currentFileIndex]
-            )
-        );
-        return { pixelData, annotationInformation };
-    },
-    getAnnotationsForFile: async function () {
-        return new Promise((resolve, reject) => {
-            fs.readFile(appSettings.selectedAnnotationFile, (error, data) => {
-                if (error) reject(error);
-                let annotations = [],
-                    categories = [];
-                const allAnnotations = JSON.parse(data);
-                const imageInformation = allAnnotations.images.find(
-                    (image) =>
-                        image.file_name ===
-                        this.fileNames[this.currentFileIndex]
-                );
-                if (imageInformation !== undefined) {
-                    const imageId = imageInformation.id;
-                    annotations = allAnnotations.annotations.filter(
-                        (annotation) => annotation.image_id === imageId
-                    );
-                    if (annotations?.length > 0) {
-                        const unique = [
-                            ...new Set(
-                                annotations.map((item) => item.category_id)
-                            ),
-                        ];
-                        categories = allAnnotations.categories.filter(
-                            (category) => unique.includes(category.id)
-                        );
-                    }
-                }
-                resolve({ annotations, categories });
-            });
-        });
-    },
-    sendFileInfo: function () {
-        mainWindow.webContents.send('newFileUpdate', {
-            currentFileName: this.fileNames[this.currentFileIndex] || '',
-            filesNum: this.fileNames.length,
-        });
-    },
-};
+/**
+ * @type ClientFilesManager
+ */
+let files;
 
 function createWindow() {
     let display;
@@ -138,60 +59,61 @@ function createWindow() {
             devTools: isDev,
         },
     });
+
+    files = new ClientFilesManager(mainWindow);
+
+    mainWindow
+        .loadURL(
+            isDev
+                ? 'http://localhost:3000'
+                : `file://${path.join(__dirname, '../build/index.html')}`
+        )
+        .catch((err) => console.log(err));
+
+    mainWindow.maximize();
+    mainWindow.on('close', async () => {
+        const rectangle = mainWindow.getBounds();
+        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
+            if (err) throw err;
+        });
+    });
+    mainWindow.on('closed', async () => {
+        await files.removeFileWatcher();
+        mainWindow = null;
+    });
+    if (isDev) {
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+            .then((name) => console.log(`Added Extension:  ${name}`))
+            .catch((err) => console.log('An error occurred: ', err));
+
+        // Open the DevTools.
+        mainWindow.webContents.on('did-frame-finish-load', () => {
+            // We close the DevTools so that it can be reopened and redux reconnected.
+            // This is a workaround for a bug in redux devtools.
+            mainWindow.webContents.closeDevTools();
+
+            mainWindow.webContents.once('devtools-opened', () => {
+                mainWindow.focus();
+            });
+
+            mainWindow.webContents.openDevTools();
+        });
+    } else {
+        mainWindow.removeMenu();
+    }
+}
+
+app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            mainWindow
-                .loadURL(
-                    isDev
-                        ? 'http://localhost:3000'
-                        : `file://${path.join(
-                              __dirname,
-                              '../build/index.html'
-                          )}`
-                )
-                .catch((err) => console.log(err));
-
-            mainWindow.maximize();
-            mainWindow.on('close', async () => {
-                const rectangle = mainWindow.getBounds();
-                fs.writeFile(
-                    MONITOR_FILE_PATH,
-                    JSON.stringify(rectangle),
-                    (err) => {
-                        if (err) throw err;
-                    }
-                );
-            });
-            mainWindow.on('closed', async () => {
-                await watcher?.unwatch(currentPath);
-                await watcher?.close();
-                mainWindow = null;
-            });
-            if (isDev) {
-                installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-                    .then((name) => console.log(`Added Extension:  ${name}`))
-                    .catch((err) => console.log('An error occurred: ', err));
-
-                // Open the DevTools.
-                mainWindow.webContents.on('did-frame-finish-load', () => {
-                    // We close the DevTools so that it can be reopened and redux reconnected.
-                    // This is a workaround for a bug in redux devtools.
-                    mainWindow.webContents.closeDevTools();
-
-                    mainWindow.webContents.once('devtools-opened', () => {
-                        mainWindow.focus();
-                    });
-
-                    mainWindow.webContents.openDevTools();
-                });
-            } else {
-                mainWindow.removeMenu();
-            }
+            createWindow();
+            files.initSelectedPaths(
+                appSettings.selectedImagesDirPath,
+                appSettings.selectedAnnotationFile
+            );
         });
-}
-
-app.on('ready', createWindow);
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -265,7 +187,12 @@ ipcMain.handle(
     Constants.Channels.saveSettings,
     async (event, settingsToUpdate) => {
         await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
-        await files.updateFileNames(settingsToUpdate.selectedImagesDirPath);
+        files
+            .updateSelectedPaths(
+                settingsToUpdate.selectedImagesDirPath,
+                settingsToUpdate.selectedAnnotationFile
+            )
+            .catch(console.log);
     }
 );
 
@@ -286,20 +213,6 @@ ipcMain.handle(Constants.Channels.getSettings, async (event) => {
 });
 
 /**
- * Checks if a path exists
- *
- * @param {string} path
- * @returns {Promise<undefined>}
- */
-const checkIfPathExists = async (path) => {
-    return new Promise((resolve, reject) => {
-        fs.access(path, (err) => {
-            err ? reject() : resolve();
-        });
-    });
-};
-
-/**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,
  * then the default settings are used to update the settings object and the json file
  *
@@ -317,7 +230,6 @@ const initSettings = async () => {
             } else {
                 // if settings already exist
                 appSettings = JSON.parse(data);
-                files.updateFileNames(appSettings.selectedImagesDirPath);
                 resolve(appSettings);
             }
         });

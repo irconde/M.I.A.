@@ -1,3 +1,4 @@
+const fs = require('fs');
 /**
  * Checks if the current passed in value is inside the specified
  * min and max range.
@@ -39,5 +40,30 @@ const buildIntervals = () => {
     return intervals;
 };
 
+/**
+ * Checks if a path exists
+ *
+ * @param {string} path
+ * @returns {Promise<undefined>}
+ */
+const checkIfPathExists = async (path) => {
+    return new Promise((resolve, reject) => {
+        fs.access(path, (err) => {
+            err ? reject() : resolve();
+        });
+    });
+};
+
+/**
+ * Returns the name of the file including the extension from a given path
+ * @param {string} path
+ * @returns {string}
+ */
+const getFileNameFromPath = (path) => {
+    return path.split('\\').pop().split('/').pop();
+};
+
 module.exports.buildIntervals = buildIntervals;
 module.exports.findGrayValue = findGrayValue;
+module.exports.checkIfPathExists = checkIfPathExists;
+module.exports.getFileNameFromPath = getFileNameFromPath;
