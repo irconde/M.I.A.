@@ -10,6 +10,7 @@ import ImageDisplayComponent from './components/image-display/image-display.comp
 import TopBarComponent from './components/top-bar/top-bar.component';
 import AboutModal from './components/about-modal/about-modal.component';
 import { Channels } from './utils/enums/Constants';
+import SideMenuComponent from './components/side-menu/side-menu.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -78,6 +79,7 @@ const AppNew = () => {
                 openAboutModal={() => setAboutModalOpen(true)}
             />
             <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
+            <SideMenuComponent />
         </div>
     );
 };

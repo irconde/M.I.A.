@@ -19,4 +19,7 @@ const annotationSlice = createSlice({
 
 export const { addAnnotationArray } = annotationSlice.actions;
 
+export const getCategories = (state) => state.annotation.categories;
+export const getAnnotations = (state) => state.annotation.annotations;
+
 export default annotationSlice.reducer;
