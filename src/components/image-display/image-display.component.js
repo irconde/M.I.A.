@@ -12,7 +12,10 @@ import { Channels } from '../../utils/enums/Constants';
 import { ImageViewport } from './image-display.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
-import { addAnnotationArray } from '../../redux/slices/annotation.slice';
+import {
+    addAnnotationArray,
+    getAnnotations,
+} from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -43,6 +46,8 @@ const ImageDisplayComponent = () => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
     const viewportRef = useRef(null);
+    const annotations = useSelector(getAnnotations);
+    const [pixelData, setPixelData] = useState(null);
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
     const setupCornerstoneJS = () => {
@@ -61,8 +66,33 @@ const ImageDisplayComponent = () => {
     useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
-        selectedImagesDirPath && displayImage().catch(console.log);
-    }, [selectedImagesDirPath]);
+        const imageElement = viewportRef.current;
+        selectedImagesDirPath &&
+            displayImage(pixelData)
+                .then(() => {
+                    imageElement.addEventListener(
+                        'cornerstoneimagerendered',
+                        onImageRenderedHandler
+                    );
+                })
+                .catch(console.log);
+        return () => {
+            imageElement.removeEventListener(
+                'cornerstoneimagerendered',
+                onImageRenderedHandler
+            );
+        };
+    }, [selectedImagesDirPath, pixelData, annotations]);
+
+    useEffect(() => {
+        getNextFile()
+            .then((data) => {
+                const { pixelData, annotationInformation } = data;
+                dispatch(addAnnotationArray(annotationInformation));
+                setPixelData(pixelData);
+            })
+            .catch((error) => {});
+    }, []);
 
     const getNextFile = async () => {
         try {
@@ -72,10 +102,73 @@ const ImageDisplayComponent = () => {
         }
     };
 
-    const displayImage = async () => {
+    const onImageRenderedHandler = (event) => {
+        const eventData = event.detail;
+        const context = eventData.canvasContext;
+        renderAnnotations(context);
+    };
+
+    const renderAnnotations = (context) => {
+        context.font = constants.detectionStyle.LABEL_FONT;
+        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        console.log('render');
+        console.log(annotations);
+
+        for (let j = 0; j < annotations.length; j++) {
+            context.strokeStyle = constants.detectionStyle.NORMAL_COLOR;
+            context.fillStyle = constants.detectionStyle.NORMAL_COLOR;
+
+            const labelSize = Utils.getTextLabelSize(
+                context,
+                annotations[j].category_id,
+                constants.detectionStyle.LABEL_PADDING
+            );
+            context.strokeRect(
+                annotations[j].bbox[0],
+                annotations[j].bbox[1],
+                annotations[j].bbox[2],
+                annotations[j].bbox[3]
+            );
+
+            context.globalAlpha = 0.5;
+            /*if (data[j].polygonMask.length > 0) {
+                // Polygon mask rendering
+                this.renderPolygonMasks(data[j].polygonMask, context);
+            } else {
+                // Binary mask rendering
+                if (
+                    this.props.currentFileFormat !==
+                    constants.SETTINGS.ANNOTATIONS.COCO
+                )
+                    Utils.renderBinaryMasks(data[j].binaryMask, context);
+            }*/
+
+            context.globalAlpha = 1.0;
+
+            // Label rendering
+            context.fillRect(
+                annotations[j].bbox[0],
+                annotations[j].bbox[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.strokeRect(
+                annotations[j].bbox[0],
+                annotations[j].bbox[1] - labelSize['height'],
+                labelSize['width'],
+                labelSize['height']
+            );
+            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillText(
+                annotations[j].category_id,
+                annotations[j].bbox[0] + constants.detectionStyle.LABEL_PADDING,
+                annotations[j].bbox[1] - constants.detectionStyle.LABEL_PADDING
+            );
+        }
+    };
+
+    const displayImage = async (pixelData) => {
         try {
-            const { pixelData, annotationInformation } = await getNextFile();
-            dispatch(addAnnotationArray(annotationInformation));
             const imageIdTop = 'coco:0';
             Utils.loadImage(imageIdTop, pixelData).then((image) => {
                 const viewport = cornerstone.getDefaultViewportForImage(
