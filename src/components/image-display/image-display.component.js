@@ -103,6 +103,9 @@ const ImageDisplayComponent = () => {
     };
 
     const onImageRenderedHandler = (event) => {
+        if (!event) {
+            return;
+        }
         const eventData = event.detail;
         const context = eventData.canvasContext;
         renderAnnotations(context);
@@ -111,16 +114,14 @@ const ImageDisplayComponent = () => {
     const renderAnnotations = (context) => {
         context.font = constants.detectionStyle.LABEL_FONT;
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
-        console.log('render');
-        console.log(annotations);
 
         for (let j = 0; j < annotations.length; j++) {
-            context.strokeStyle = constants.detectionStyle.NORMAL_COLOR;
-            context.fillStyle = constants.detectionStyle.NORMAL_COLOR;
+            context.strokeStyle = annotations[j].color;
+            context.fillStyle = annotations[j].color;
 
             const labelSize = Utils.getTextLabelSize(
                 context,
-                annotations[j].category_id,
+                annotations[j].categoryName,
                 constants.detectionStyle.LABEL_PADDING
             );
             context.strokeRect(
@@ -160,7 +161,7 @@ const ImageDisplayComponent = () => {
             );
             context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
             context.fillText(
-                annotations[j].category_id,
+                annotations[j].categoryName,
                 annotations[j].bbox[0] + constants.detectionStyle.LABEL_PADDING,
                 annotations[j].bbox[1] - constants.detectionStyle.LABEL_PADDING
             );
@@ -177,13 +178,6 @@ const ImageDisplayComponent = () => {
                 );
                 viewport.translation.y = constants.viewportStyle.ORIGIN;
                 viewport.scale = 1.2;
-                const displayedArea = cornerstone.getDisplayedArea(
-                    image,
-                    viewportRef.current
-                );
-                // eslint-disable-next-line react/no-direct-mutation-state
-                // if (displayedArea !== undefined)
-                // self.state.imageData[0].dimensions = displayedArea.brhc;
                 setViewport(viewport);
                 cornerstone.displayImage(viewportRef.current, image, viewport);
             });

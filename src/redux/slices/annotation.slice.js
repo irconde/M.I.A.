@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import randomColor from 'randomcolor';
 
 const initialState = {
     annotations: [],
@@ -11,7 +12,24 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotations, categories } = action.payload;
-            state.annotations = annotations;
+            annotations.forEach((annotation) => {
+                const categoryNameIdx = categories.findIndex(
+                    (el) => el.id === annotation.category_id
+                );
+                state.annotations.push({
+                    ...annotation,
+                    color: randomColor({
+                        seed: annotation.category_id,
+                        hue: 'random',
+                        luminosity: 'bright',
+                    }),
+                    categoryName:
+                        categoryNameIdx !== -1
+                            ? categories[categoryNameIdx].name
+                            : '',
+                });
+            });
+
             state.categories = categories;
         },
     },

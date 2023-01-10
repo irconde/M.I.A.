@@ -5,10 +5,7 @@ import {
     SideMenuList,
     SideMenuListWrapper,
 } from './side-menu.styles';
-import {
-    getAnnotations,
-    getCategories,
-} from '../../redux/slices/annotation.slice';
+import { getAnnotations } from '../../redux/slices/annotation.slice';
 import {
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
@@ -23,23 +20,22 @@ import {
 
 const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
-    const categories = useSelector(getCategories);
     /*const enableMenu = useSelector(getReceivedTime);
     const algorithms = useSelector(getDetectionsByAlgorithm);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);*/
 
-    if (categories.length > 0) {
+    if (annotations.length > 0) {
         return (
             <SideMenuContainer collapsedSideMenu={false}>
                 <SideMenuListWrapper
                     height={document.documentElement.clientHeight}>
                     {/* How we create the trees and their nodes is using map */}
                     <SideMenuList>
-                        {categories.map((category, index) => {
+                        {annotations.map((annotation, index) => {
                             return (
                                 <SideMenuAlgorithm key={index}>
                                     <SideMenuAlgorithmName>
-                                        {category.name.toUpperCase()}
+                                        {annotation.categoryName.toUpperCase()}
                                     </SideMenuAlgorithmName>
                                 </SideMenuAlgorithm>
                             );
