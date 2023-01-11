@@ -137,11 +137,13 @@ export default class Utils {
      * @returns {boolean} - True if the point is inside the rectangle; false otherwise
      */
     static pointInRect(point, rect) {
+        // [x0, y0, width, height]
+        // [0, 1, 2, 3]
         return (
             point.x >= rect[0] &&
-            point.x <= rect[2] &&
+            point.x <= rect[0] + rect[2] &&
             point.y >= rect[1] &&
-            point.y <= rect[3]
+            point.y <= rect[1] + rect[3]
         );
     }
 

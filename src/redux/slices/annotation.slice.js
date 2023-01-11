@@ -32,10 +32,26 @@ const annotationSlice = createSlice({
 
             state.categories = categories;
         },
+        selectAnnotation: (state, action) => {
+            state.annotations.forEach((annotation) => {
+                if (annotation.id === action.payload) {
+                    annotation.selected = true;
+                }
+            });
+        },
+        clearAnnotationSelection: (state, action) => {
+            state.annotations.forEach((annotation) => {
+                annotation.selected = false;
+            });
+        },
     },
 });
 
-export const { addAnnotationArray } = annotationSlice.actions;
+export const {
+    addAnnotationArray,
+    selectAnnotation,
+    clearAnnotationSelection,
+} = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
 export const getAnnotations = (state) => state.annotation.annotations;

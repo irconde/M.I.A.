@@ -14,7 +14,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
     addAnnotationArray,
+    clearAnnotationSelection,
     getAnnotations,
+    selectAnnotation,
 } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
@@ -50,6 +52,7 @@ const ImageDisplayComponent = () => {
     const [pixelData, setPixelData] = useState(null);
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
+    let isClickEventsActive = false;
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -109,6 +112,40 @@ const ImageDisplayComponent = () => {
         const eventData = event.detail;
         const context = eventData.canvasContext;
         renderAnnotations(context);
+        if (!isClickEventsActive) {
+            isClickEventsActive = true;
+            startListeningClickEvents();
+        }
+    };
+
+    const startListeningClickEvents = () => {
+        viewportRef.current.addEventListener(
+            'cornerstonetoolsmouseclick',
+            onMouseClicked
+        );
+    };
+
+    const onMouseClicked = (event) => {
+        if (annotations.length > 0) {
+            const mousePos = cornerstone.canvasToPixel(event.target, {
+                x: event.detail.currentPoints.canvas.x,
+                y: event.detail.currentPoints.canvas.y,
+            });
+            let clickedPos = constants.selection.NO_SELECTION;
+            for (let j = annotations.length - 1; j > -1; j--) {
+                // if (annotations[j].visible === false) continue;
+                if (Utils.pointInRect(mousePos, annotations[j].bbox)) {
+                    clickedPos = j;
+                    break;
+                }
+            }
+            if (clickedPos !== constants.selection.NO_SELECTION) {
+                dispatch(selectAnnotation(annotations[clickedPos].id));
+            } else {
+                dispatch(clearAnnotationSelection);
+                cornerstone.updateImage(viewportRef.current, true);
+            }
+        }
     };
 
     const renderAnnotations = (context) => {
@@ -116,8 +153,12 @@ const ImageDisplayComponent = () => {
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
 
         for (let j = 0; j < annotations.length; j++) {
-            context.strokeStyle = annotations[j].color;
-            context.fillStyle = annotations[j].color;
+            context.strokeStyle = annotations[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : annotations[j].color;
+            context.fillStyle = annotations[j].selected
+                ? constants.detectionStyle.SELECTED_COLOR
+                : annotations[j].color;
 
             const labelSize = Utils.getTextLabelSize(
                 context,
