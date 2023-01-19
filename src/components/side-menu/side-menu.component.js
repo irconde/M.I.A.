@@ -10,6 +10,7 @@ import {
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
 } from './algorithm-detection/side-menu-algorithm.styles';
+import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 
 /**
  * Component menu that displays all detection objects, seperated by algorithm.
@@ -21,12 +22,14 @@ import {
 const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     /*const enableMenu = useSelector(getReceivedTime);
-    const algorithms = useSelector(getDetectionsByAlgorithm);
-    const collapsedSideMenu = useSelector(getCollapsedSideMenu);*/
+	 const algorithms = useSelector(getDetectionsByAlgorithm);*/
+    const collapsedSideMenu = useSelector(getCollapsedSideMenu);
+
+    console.log(collapsedSideMenu);
 
     if (annotations.length > 0) {
         return (
-            <SideMenuContainer collapsedSideMenu={false}>
+            <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
                 <SideMenuListWrapper
                     height={document.documentElement.clientHeight}>
                     {/* How we create the trees and their nodes is using map */}
