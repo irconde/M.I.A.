@@ -87,7 +87,6 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         getNextFile()
             .then((data) => {
-                console.log(data);
                 const { pixelData, annotationInformation } = data;
                 dispatch(addAnnotationArray(annotationInformation));
                 setPixelData(pixelData);
