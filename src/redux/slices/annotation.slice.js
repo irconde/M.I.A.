@@ -12,25 +12,27 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotations, categories } = action.payload;
-            annotations.forEach((annotation) => {
-                const categoryNameIdx = categories.findIndex(
-                    (el) => el.id === annotation.category_id
-                );
-                state.annotations.push({
-                    ...annotation,
-                    color: randomColor({
-                        seed: annotation.category_id,
-                        hue: 'random',
-                        luminosity: 'bright',
-                    }),
-                    categoryName:
-                        categoryNameIdx !== -1
-                            ? categories[categoryNameIdx].name
-                            : '',
+            if (annotations?.length > 0) {
+                annotations.forEach((annotation) => {
+                    const categoryNameIdx = categories.findIndex(
+                        (el) => el.id === annotation.category_id
+                    );
+                    state.annotations.push({
+                        ...annotation,
+                        color: randomColor({
+                            seed: annotation.category_id,
+                            hue: 'random',
+                            luminosity: 'bright',
+                        }),
+                        categoryName:
+                            categoryNameIdx !== -1
+                                ? categories[categoryNameIdx].name
+                                : '',
+                    });
                 });
-            });
 
-            state.categories = categories;
+                state.categories = categories;
+            }
         },
         selectAnnotation: (state, action) => {
             state.annotations.forEach((annotation) => {
