@@ -103,9 +103,7 @@ function createWindow() {
         mainWindow = null;
     });
     if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log('An error occurred: ', err));
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).finally();
 
         // Open the DevTools.
         mainWindow.webContents.on('did-frame-finish-load', () => {

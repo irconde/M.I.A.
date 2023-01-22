@@ -4,6 +4,7 @@ import randomColor from 'randomcolor';
 const initialState = {
     annotations: [],
     categories: [],
+    selectedAnnotation: null,
 };
 
 const annotationSlice = createSlice({
@@ -28,6 +29,8 @@ const annotationSlice = createSlice({
                             categoryNameIdx !== -1
                                 ? categories[categoryNameIdx].name
                                 : '',
+                        selected: false,
+                        visible: true,
                     });
                 });
 
@@ -38,6 +41,9 @@ const annotationSlice = createSlice({
             state.annotations.forEach((annotation) => {
                 if (annotation.id === action.payload) {
                     annotation.selected = true;
+                    state.selectedAnnotation = annotation;
+                } else {
+                    annotation.selected = false;
                 }
             });
         },
@@ -45,6 +51,7 @@ const annotationSlice = createSlice({
             state.annotations.forEach((annotation) => {
                 annotation.selected = false;
             });
+            state.selectedAnnotation = null;
         },
     },
 });

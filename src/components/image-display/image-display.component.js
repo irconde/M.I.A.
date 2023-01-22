@@ -52,7 +52,7 @@ const ImageDisplayComponent = () => {
     const [pixelData, setPixelData] = useState(null);
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
-    let isClickEventsActive = false;
+    const annotationRef = useRef(annotations);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -67,6 +67,10 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        annotationRef.current = annotations;
+    }, [annotations]);
 
     useEffect(() => {
         const imageElement = viewportRef.current;
@@ -111,20 +115,11 @@ const ImageDisplayComponent = () => {
         if (!event) {
             return;
         }
+
         const eventData = event.detail;
         const context = eventData.canvasContext;
-        renderAnnotations(context);
-        if (!isClickEventsActive) {
-            isClickEventsActive = true;
-            startListeningClickEvents();
-        }
-    };
-
-    const startListeningClickEvents = () => {
-        viewportRef.current.addEventListener(
-            'cornerstonetoolsmouseclick',
-            onMouseClicked
-        );
+        renderAnnotations(context, annotationRef.current);
+        startListeningClickEvents();
     };
 
     const onMouseClicked = (event) => {
@@ -135,7 +130,7 @@ const ImageDisplayComponent = () => {
             });
             let clickedPos = constants.selection.NO_SELECTION;
             for (let j = annotations.length - 1; j > -1; j--) {
-                // if (annotations[j].visible === false) continue;
+                if (!annotations[j].visible) continue;
                 if (Utils.pointInRect(mousePos, annotations[j].bbox)) {
                     clickedPos = j;
                     break;
@@ -144,17 +139,32 @@ const ImageDisplayComponent = () => {
             if (clickedPos !== constants.selection.NO_SELECTION) {
                 dispatch(selectAnnotation(annotations[clickedPos].id));
             } else {
-                dispatch(clearAnnotationSelection);
-                cornerstone.updateImage(viewportRef.current, true);
+                dispatch(clearAnnotationSelection());
             }
+            cornerstone.updateImage(viewportRef.current, true);
         }
     };
 
-    const renderAnnotations = (context) => {
+    const stopListeningClickEvents = () => {
+        viewportRef.current.addEventListener(
+            'cornerstonetoolsmouseclick',
+            onMouseClicked
+        );
+    };
+
+    const startListeningClickEvents = () => {
+        viewportRef.current.addEventListener(
+            'cornerstonetoolsmouseclick',
+            onMouseClicked
+        );
+    };
+
+    const renderAnnotations = (context, annotations) => {
         context.font = constants.detectionStyle.LABEL_FONT;
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
 
         for (let j = 0; j < annotations.length; j++) {
+            if (!annotations[j].visible) continue;
             context.strokeStyle = annotations[j].selected
                 ? constants.detectionStyle.SELECTED_COLOR
                 : annotations[j].color;
