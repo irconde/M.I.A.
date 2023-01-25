@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 import {
-    AlgorithmButtonWrapper,
     AlgorithmContainer,
+    AlgorithmWrapper,
     CollapsableArrowIconContainer,
     EyeIconWrapper,
     SideMenuAlgorithm,
@@ -69,10 +69,7 @@ const SideMenuComponent = () => {
                             (categoryName) => (
                                 <div key={categoryName}>
                                     <AlgorithmContainer>
-                                        <SideMenuAlgorithmName>
-                                            {categoryName.toUpperCase()}
-                                        </SideMenuAlgorithmName>
-                                        <AlgorithmButtonWrapper>
+                                        <AlgorithmWrapper>
                                             <CollapsableArrowIconContainer
                                                 onClick={() =>
                                                     setExpandedCategories(
@@ -102,21 +99,26 @@ const SideMenuComponent = () => {
                                                     color="white"
                                                 />
                                             </CollapsableArrowIconContainer>
-                                            <EyeIconWrapper>
-                                                <VisibilityOnIcon
-                                                    height="20px"
-                                                    width="20px"
-                                                    color="#b9b9b9"
-                                                />
-                                            </EyeIconWrapper>
-                                        </AlgorithmButtonWrapper>
+                                            <SideMenuAlgorithmName>
+                                                {categoryName.toUpperCase()}
+                                            </SideMenuAlgorithmName>
+                                        </AlgorithmWrapper>
+
+                                        <EyeIconWrapper>
+                                            <VisibilityOnIcon
+                                                height="20px"
+                                                width="20px"
+                                                color="#b9b9b9"
+                                            />
+                                        </EyeIconWrapper>
                                     </AlgorithmContainer>
                                     {expandedCategories[categoryName] &&
                                         annotationsByCategory[categoryName].map(
                                             (annotation, index) => (
                                                 <SideMenuAlgorithm key={index}>
                                                     <SideMenuAlgorithmName>
-                                                        {annotation.categoryName.toUpperCase()}
+                                                        {annotation.categoryName.toUpperCase()}{' '}
+                                                        0{index + 1}
                                                     </SideMenuAlgorithmName>
                                                 </SideMenuAlgorithm>
                                             )
