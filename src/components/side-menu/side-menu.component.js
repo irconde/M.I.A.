@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 import {
+    AlgorithmContainer,
     CollapsableArrowIconContainer,
     SideMenuAlgorithm,
     SideMenuAlgorithmName,
@@ -11,31 +12,6 @@ import {
     SideMenuListWrapper,
 } from './side-menu.styles';
 import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
-
-// <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
-//     <SideMenuListWrapper
-//         height={document.documentElement.clientHeight}>
-//         {/* How we create the trees and their nodes is using map */}
-//         <SideMenuList>
-//             {annotations.map((annotation, index) => {
-//                 return (
-//                     <SideMenuAlgorithm key={index}>
-//                         <SideMenuAlgorithmName>
-//                             {annotation.categoryName.toUpperCase()}
-//                         </SideMenuAlgorithmName>
-//                     </SideMenuAlgorithm>
-//                 );
-//             })}
-//         </SideMenuList>
-//     </SideMenuListWrapper>
-// </SideMenuContainer>
-
-/**
- * Component menu that displays all detection objects, seperated by algorithm.
- *
- * @component
- *
- */
 
 // const SideMenuComponent = () => {
 //     const annotations = useSelector(getAnnotations);
@@ -103,6 +79,30 @@ import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 //     } else return null;
 // };
 
+// <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
+//     <SideMenuListWrapper
+//         height={document.documentElement.clientHeight}>
+//         {/* How we create the trees and their nodes is using map */}
+//         <SideMenuList>
+//             {annotations.map((annotation, index) => {
+//                 return (
+//                     <SideMenuAlgorithm key={index}>
+//                         <SideMenuAlgorithmName>
+//                             {annotation.categoryName.toUpperCase()}
+//                         </SideMenuAlgorithmName>
+//                     </SideMenuAlgorithm>
+//                 );
+//             })}
+//         </SideMenuList>
+//     </SideMenuListWrapper>
+// </SideMenuContainer>
+
+/**
+ * Component menu that displays all detection objects, seperated by algorithm.
+ *
+ * @component
+ *
+ */
 const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
@@ -130,27 +130,27 @@ const SideMenuComponent = () => {
                     <SideMenuList id={'side-menu-list'}>
                         {Object.keys(annotationsByCategory).map(
                             (categoryName) => (
-                                <div key={categoryName}>
-                                    <div className={'algorithm-title'}>
+                                <div
+                                    key={categoryName}
+                                    id={'algorithm-container'}
+                                    onClick={() =>
+                                        setExpandedCategories(
+                                            (prevExpandedCategories) => {
+                                                return {
+                                                    ...prevExpandedCategories,
+                                                    [categoryName]:
+                                                        !prevExpandedCategories[
+                                                            categoryName
+                                                        ],
+                                                };
+                                            }
+                                        )
+                                    }>
+                                    <AlgorithmContainer>
                                         <SideMenuAlgorithmName>
                                             {categoryName.toUpperCase()}
                                         </SideMenuAlgorithmName>
-                                        <CollapsableArrowIconContainer
-                                            onClick={() =>
-                                                setExpandedCategories(
-                                                    (
-                                                        prevExpandedCategories
-                                                    ) => {
-                                                        return {
-                                                            ...prevExpandedCategories,
-                                                            [categoryName]:
-                                                                !prevExpandedCategories[
-                                                                    categoryName
-                                                                ],
-                                                        };
-                                                    }
-                                                )
-                                            }>
+                                        <CollapsableArrowIconContainer>
                                             <ArrowIcon
                                                 direction={
                                                     expandedCategories[
@@ -164,7 +164,7 @@ const SideMenuComponent = () => {
                                                 color="white"
                                             />
                                         </CollapsableArrowIconContainer>
-                                    </div>
+                                    </AlgorithmContainer>
                                     <div className={'dropdown-container'}>
                                         {expandedCategories[categoryName] &&
                                             annotationsByCategory[

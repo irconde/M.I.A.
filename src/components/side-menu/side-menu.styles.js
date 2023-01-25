@@ -50,11 +50,18 @@ export const EyeIconWrapper = styled.span`
     cursor: pointer;
 `;
 
+export const AlgorithmContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0 0 1.5rem;
+    cursor: pointer;
+`;
+
 export const CollapsableArrowIconContainer = styled.span`
     height: 1.5rem;
     width: 1.5rem;
     margin-inline: 0.5rem;
-    cursor: pointer;
 `;
 
 export const SideMenuAlgorithm = styled.div`
