@@ -1,13 +1,17 @@
 import styled from 'styled-components';
-import { sideMenuPaddingTop, sideMenuWidth } from '../../utils/enums/Constants';
+import {
+    detectionStyle,
+    sideMenuPaddingTop,
+    sideMenuWidth,
+} from '../../utils/enums/Constants';
 
 export const SideMenuContainer = styled.div`
     -webkit-transition: all 0.3s ease-in;
     -moz-transition: all 0.3s ease-in;
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
-    transition: ${(props) =>
-        props.collapsedSideMenu ? 'none' : 'all 0.3s ease-in'};
+    transition: ${({ collapsedSideMenu }) =>
+        collapsedSideMenu ? 'none' : 'all 0.3s ease-in'};
     transform: translate(
         ${(props) => (props.collapsedSideMenu ? sideMenuWidth : 0)}px
     );
@@ -44,4 +48,26 @@ export const EyeIconWrapper = styled.span`
     margin-right: 1rem;
     margin-left: auto;
     cursor: pointer;
+`;
+
+export const CollapsableArrowIconContainer = styled.span`
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-inline: 0.5rem;
+    cursor: pointer;
+`;
+
+export const SideMenuAlgorithm = styled.div`
+    padding-block: 1rem;
+    padding-left: 3rem;
+    display: flex;
+    align-items: center;
+    background-color: ${({ selected }) =>
+        selected ? detectionStyle.SELECTED_COLOR : ''};
+`;
+export const SideMenuAlgorithmName = styled.div`
+    vertical-align: top;
+    font-family: Noto Sans JP;
+    cursor: default;
+    color: white;
 `;
