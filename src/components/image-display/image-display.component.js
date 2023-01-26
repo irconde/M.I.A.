@@ -82,7 +82,7 @@ const ImageDisplayComponent = () => {
                 onImageRenderedHandler
             );
         };
-    }, [selectedImagesDirPath, pixelData, annotations]);
+    }, [selectedImagesDirPath, pixelData]);
 
     useEffect(() => {
         getNextFile()
@@ -91,7 +91,9 @@ const ImageDisplayComponent = () => {
                 dispatch(addAnnotationArray(annotationInformation));
                 setPixelData(pixelData);
             })
-            .catch((error) => {});
+            .catch((error) => {
+                console.log(error);
+            });
     }, []);
 
     const getNextFile = async () => {
@@ -171,16 +173,24 @@ const ImageDisplayComponent = () => {
     const displayImage = async (pixelData) => {
         try {
             const imageIdTop = 'coco:0';
-            Utils.loadImage(imageIdTop, pixelData).then((image) => {
-                const viewport = cornerstone.getDefaultViewportForImage(
-                    viewportRef.current,
-                    image
-                );
-                viewport.translation.y = constants.viewportStyle.ORIGIN;
-                viewport.scale = 1.2;
-                setViewport(viewport);
-                cornerstone.displayImage(viewportRef.current, image, viewport);
-            });
+            Utils.loadImage(imageIdTop, pixelData)
+                .then((image) => {
+                    const viewport = cornerstone.getDefaultViewportForImage(
+                        viewportRef.current,
+                        image
+                    );
+                    viewport.translation.y = constants.viewportStyle.ORIGIN;
+                    viewport.scale = 1.2;
+                    setViewport(viewport);
+                    cornerstone.displayImage(
+                        viewportRef.current,
+                        image,
+                        viewport
+                    );
+                })
+                .catch((err) => {
+                    setError(err.message);
+                });
             // clear error if there is one
             error && setError('');
         } catch (e) {
