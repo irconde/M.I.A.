@@ -87,9 +87,11 @@ const TopBarComponent = (props) => {
                 <TopBarIconWrapper onClick={props.openAboutModal}>
                     <InfoIcon {...iconProps} />
                 </TopBarIconWrapper>
-                <TopBarIconWrapper onClick={props.openContactModal}>
-                    <ChatIcon {...iconProps} />
-                </TopBarIconWrapper>
+                <Tooltip title={'Contact Us'}>
+                    <TopBarIconWrapper onClick={props.openContactModal}>
+                        <ChatIcon {...iconProps} />
+                    </TopBarIconWrapper>
+                </Tooltip>
                 <VerticalDivider />
                 <Tooltip title={'Fold/unfold menu'}>
                     <MenuIconWrapper>

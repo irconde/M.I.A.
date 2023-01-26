@@ -51,6 +51,7 @@ export const ConnectionStatusIconsContainer = styled.div`
     justify-content: flex-end;
     color: white;
     gap: 1rem;
+    cursor: pointer;
 `;
 
 export const ConnectionTypeInfo = styled.div`
