@@ -1,10 +1,4 @@
-import {
-    Button,
-    FormControl,
-    Modal,
-    TextField,
-    ThemeProvider,
-} from '@mui/material';
+import { Modal, TextField, ThemeProvider } from '@mui/material';
 import {
     ModalRoot,
     modalTheme,
@@ -17,16 +11,19 @@ import {
     ContactHeaderInfo,
     ContactHeaderParagraph,
     ContactTitle,
+    FormContainer,
+    FormFieldFull,
+    FormFieldShort,
+    SubmitButton,
 } from './contact-modal.styles';
-import Box from '@mui/material/Box';
-import { colors } from '../../utils/enums/Constants';
+import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 
 const FORM_URL =
     'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
-        success: undefined,
+        success: null,
         submitting: false,
     });
     const handleSubmit = async (e) => {
@@ -34,7 +31,7 @@ const ContactModal = ({ open, closeModal }) => {
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
-            success: undefined,
+            success: null,
             submitting: true,
         });
         try {
@@ -46,13 +43,16 @@ const ContactModal = ({ open, closeModal }) => {
                 },
                 body: formData,
             });
+            const success = result.status === 200;
             setStatus({
+                success,
                 submitting: false,
-                success: true,
             });
-            setTimeout(closeModal, 1000);
+            if (success) {
+                e.target.reset();
+                setTimeout(closeModal, 1000);
+            }
         } catch (e) {
-            console.log(e);
             setStatus({
                 success: false,
                 submitting: false,
@@ -79,32 +79,24 @@ const ContactModal = ({ open, closeModal }) => {
                             </ContactHeaderInfo>
                         </ContactHeader>
                         <form onSubmit={handleSubmit}>
-                            <Box
-                                style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    justifyContent: 'end',
-                                }}>
-                                <FormControl
-                                    style={{ width: '48%', padding: '1%' }}>
+                            <FormContainer>
+                                <FormFieldShort>
                                     <TextField
                                         required={true}
                                         name={'First Name'}
                                         variant={'outlined'}
                                         placeholder={'First Name'}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    style={{ width: '48%', padding: '1%' }}>
+                                </FormFieldShort>
+                                <FormFieldShort>
                                     <TextField
                                         required={true}
                                         name={'Last Name'}
                                         variant={'outlined'}
                                         placeholder={'Last Name'}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    style={{ width: '100%', padding: '1%' }}>
+                                </FormFieldShort>
+                                <FormFieldFull>
                                     <TextField
                                         type={'email'}
                                         required={true}
@@ -112,27 +104,24 @@ const ContactModal = ({ open, closeModal }) => {
                                         variant={'outlined'}
                                         placeholder={'Email'}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    style={{ width: '100%', padding: '1%' }}>
+                                </FormFieldFull>
+                                <FormFieldFull>
                                     <TextField
                                         required={true}
                                         name={'Institution Name'}
                                         variant={'outlined'}
                                         placeholder={'Institution Name'}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    style={{ width: '100%', padding: '1%' }}>
+                                </FormFieldFull>
+                                <FormFieldFull>
                                     <TextField
                                         required={true}
                                         name={'Institution Website'}
                                         variant={'outlined'}
                                         placeholder={'Institution Website'}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    style={{ width: '100%', padding: '1%' }}>
+                                </FormFieldFull>
+                                <FormFieldFull>
                                     <TextField
                                         required={true}
                                         name={'Description'}
@@ -141,27 +130,27 @@ const ContactModal = ({ open, closeModal }) => {
                                         multiline={true}
                                         rows={4}
                                     />
-                                </FormControl>
-                                <Button
+                                </FormFieldFull>
+                                <SubmitButton
+                                    $success={status.success}
+                                    $submitting={status.submitting}
                                     type={'submit'}
-                                    variant="contained"
-                                    sx={{
-                                        margin: '1%',
-                                        width: '10rem',
-                                        height: '3rem',
-                                        background: colors.BLUE,
-                                        color: colors.WHITE,
-                                        mt: '7%',
-                                    }}>
-                                    {status.submitting
-                                        ? 'Loading...'
-                                        : status.success === undefined
-                                        ? 'Submit'
-                                        : status.success
-                                        ? 'Successful'
-                                        : 'Error'}
-                                </Button>
-                            </Box>
+                                    variant="contained">
+                                    {status.submitting ? (
+                                        <LoadingIcon
+                                            width={'24px'}
+                                            height={'24px'}
+                                            color={'white'}
+                                        />
+                                    ) : status.success === null ? (
+                                        'SUBMIT'
+                                    ) : status.success ? (
+                                        'SENT'
+                                    ) : (
+                                        'FAILED'
+                                    )}
+                                </SubmitButton>
+                            </FormContainer>
                         </form>
                     </ModalRoot>
                 </StyledPaper>
