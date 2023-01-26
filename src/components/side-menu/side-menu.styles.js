@@ -42,7 +42,7 @@ export const SideMenuListWrapper = styled.div`
     height: ${(props) => props.height};
 `;
 
-export const AlgorithmContainer = styled.div`
+export const AnnotationContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: end;
@@ -50,13 +50,13 @@ export const AlgorithmContainer = styled.div`
     margin-top: 0.5rem;
 `;
 
-export const AlgorithmColor = styled.div`
+export const AnnotationColor = styled.div`
     background: ${({ color }) => color};
     width: 0.6rem;
     height: 2.5rem;
 `;
 
-export const AlgorithmWrapper = styled.div`
+export const AnnotationWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
@@ -80,13 +80,13 @@ export const CollapsableArrowIconContainer = styled.span`
     cursor: pointer;
 `;
 
-export const SideMenuAlgorithm = styled.div`
+export const SideMenuAnnotation = styled.div`
     display: flex;
     align-items: center;
     background-color: ${({ selected }) =>
         selected ? detectionStyle.SELECTED_COLOR : ''};
 `;
-export const SideMenuAlgorithmName = styled.div`
+export const SideMenuAnnotationName = styled.div`
     vertical-align: top;
     font-family: Noto Sans JP;
     cursor: default;

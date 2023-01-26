@@ -3,13 +3,13 @@ import { useSelector } from 'react-redux';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 import {
-    AlgorithmColor,
-    AlgorithmContainer,
-    AlgorithmWrapper,
+    AnnotationColor,
+    AnnotationContainer,
+    AnnotationWrapper,
     CollapsableArrowIconContainer,
     EyeIconWrapper,
-    SideMenuAlgorithm,
-    SideMenuAlgorithmName,
+    SideMenuAnnotation,
+    SideMenuAnnotationName,
     SideMenuContainer,
     SideMenuList,
     SideMenuListWrapper,
@@ -17,23 +17,11 @@ import {
 import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibility-on.icon';
 
-// <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
-//     <SideMenuListWrapper
-//         height={document.documentElement.clientHeight}>
-//         {/* How we create the trees and their nodes is using map */}
-//         <SideMenuList>
-//             {annotations.map((annotation, index) => {
-//                 return (
-//                     <SideMenuAlgorithm key={index}>
-//                         <SideMenuAlgorithmName>
-//                             {annotation.categoryName.toUpperCase()}
-//                         </SideMenuAlgorithmName>
-//                     </SideMenuAlgorithm>
-//                 );
-//             })}
-//         </SideMenuList>
-//     </SideMenuListWrapper>
-// </SideMenuContainer>
+const iconProps = {
+    width: '20px',
+    height: '20px',
+    color: '#b9b9b9',
+};
 
 /**
  * Component menu that displays all detection objects, seperated by algorithm.
@@ -60,6 +48,12 @@ const SideMenuComponent = () => {
         }, {});
     });
 
+    const handleCollapse = (categoryName) =>
+        setExpandedCategories((prevExpandedCategories) => ({
+            ...prevExpandedCategories,
+            [categoryName]: !prevExpandedCategories[categoryName],
+        }));
+
     if (annotations.length > 0) {
         return (
             <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
@@ -69,28 +63,18 @@ const SideMenuComponent = () => {
                         {Object.keys(annotationsByCategory).map(
                             (categoryName) => (
                                 <div key={categoryName}>
-                                    <AlgorithmContainer>
-                                        <AlgorithmColor
+                                    <AnnotationContainer>
+                                        <AnnotationColor
                                             color={
                                                 annotationsByCategory[
                                                     categoryName
                                                 ][0].color
                                             }
                                         />
-                                        <AlgorithmWrapper>
+                                        <AnnotationWrapper>
                                             <CollapsableArrowIconContainer
                                                 onClick={() =>
-                                                    setExpandedCategories(
-                                                        (
-                                                            prevExpandedCategories
-                                                        ) => ({
-                                                            ...prevExpandedCategories,
-                                                            [categoryName]:
-                                                                !prevExpandedCategories[
-                                                                    categoryName
-                                                                ],
-                                                        })
-                                                    )
+                                                    handleCollapse(categoryName)
                                                 }>
                                                 <ArrowIcon
                                                     direction={
@@ -105,43 +89,36 @@ const SideMenuComponent = () => {
                                                     color="white"
                                                 />
                                             </CollapsableArrowIconContainer>
-                                            <SideMenuAlgorithmName>
+                                            <SideMenuAnnotationName>
                                                 {categoryName.toUpperCase()}
-                                            </SideMenuAlgorithmName>
-                                        </AlgorithmWrapper>
-
+                                            </SideMenuAnnotationName>
+                                        </AnnotationWrapper>
                                         <EyeIconWrapper>
-                                            <VisibilityOnIcon
-                                                height="20px"
-                                                width="20px"
-                                                color="#b9b9b9"
-                                            />
+                                            <VisibilityOnIcon {...iconProps} />
                                         </EyeIconWrapper>
-                                    </AlgorithmContainer>
+                                    </AnnotationContainer>
                                     {expandedCategories[categoryName] &&
                                         annotationsByCategory[categoryName].map(
                                             (annotation, index) => (
-                                                <SideMenuAlgorithm key={index}>
-                                                    <AlgorithmColor
+                                                <SideMenuAnnotation key={index}>
+                                                    <AnnotationColor
                                                         color={annotation.color}
                                                         style={{ opacity: 0.6 }}
                                                     />
-                                                    <SideMenuAlgorithmName
+                                                    <SideMenuAnnotationName
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',
                                                         }}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
-                                                    </SideMenuAlgorithmName>
+                                                    </SideMenuAnnotationName>
                                                     <EyeIconWrapper>
                                                         <VisibilityOnIcon
-                                                            height="20px"
-                                                            width="20px"
-                                                            color="#b9b9b9"
+                                                            {...iconProps}
                                                         />
                                                     </EyeIconWrapper>
-                                                </SideMenuAlgorithm>
+                                                </SideMenuAnnotation>
                                             )
                                         )}
                                 </div>
