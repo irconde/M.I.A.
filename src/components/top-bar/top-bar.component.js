@@ -87,7 +87,7 @@ const TopBarComponent = (props) => {
                 <TopBarIconWrapper onClick={props.openAboutModal}>
                     <InfoIcon {...iconProps} />
                 </TopBarIconWrapper>
-                <TopBarIconWrapper>
+                <TopBarIconWrapper onClick={props.openContactModal}>
                     <ChatIcon {...iconProps} />
                 </TopBarIconWrapper>
                 <VerticalDivider />
@@ -117,6 +117,8 @@ TopBarComponent.propTypes = {
     openImportModal: PropTypes.func.isRequired,
 
     openAboutModal: PropTypes.func.isRequired,
+
+    openContactModal: PropTypes.func.isRequired,
 };
 
 export default TopBarComponent;
