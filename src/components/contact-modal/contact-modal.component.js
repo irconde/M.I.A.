@@ -21,7 +21,30 @@ import {
 import Box from '@mui/material/Box';
 import { colors } from '../../utils/enums/Constants';
 
+const FORM_URL =
+    'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
+
 const ContactModal = ({ open, closeModal }) => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const form = new FormData(e.target);
+        const formData = new URLSearchParams(form).toString();
+        try {
+            const result = await fetch(FORM_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    Accept: 'application/json',
+                },
+                body: formData,
+            });
+        } catch (e) {
+            console.log(e);
+        } finally {
+            console.log('complete');
+        }
+    };
+
     return (
         <ThemeProvider theme={modalTheme}>
             <Modal
@@ -40,75 +63,78 @@ const ContactModal = ({ open, closeModal }) => {
                                 </ContactHeaderParagraph>
                             </ContactHeaderInfo>
                         </ContactHeader>
-                        <Box
-                            style={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                justifyContent: 'end',
-                            }}>
-                            <FormControl
-                                style={{ width: '48%', padding: '1%' }}>
-                                <TextField
-                                    name={'First Name'}
-                                    variant={'outlined'}
-                                    placeholder={'First Name'}
-                                />
-                            </FormControl>
-                            <FormControl
-                                style={{ width: '48%', padding: '1%' }}>
-                                <TextField
-                                    name={'Last Name'}
-                                    variant={'outlined'}
-                                    placeholder={'Last Name'}
-                                />
-                            </FormControl>
-                            <FormControl
-                                style={{ width: '100%', padding: '1%' }}>
-                                <TextField
-                                    name={'Email'}
-                                    variant={'outlined'}
-                                    placeholder={'Email'}
-                                />
-                            </FormControl>
-                            <FormControl
-                                style={{ width: '100%', padding: '1%' }}>
-                                <TextField
-                                    name={'Institution Name'}
-                                    variant={'outlined'}
-                                    placeholder={'Institution Name'}
-                                />
-                            </FormControl>
-                            <FormControl
-                                style={{ width: '100%', padding: '1%' }}>
-                                <TextField
-                                    name={'Institution Website'}
-                                    variant={'outlined'}
-                                    placeholder={'Institution Website'}
-                                />
-                            </FormControl>
-                            <FormControl
-                                style={{ width: '100%', padding: '1%' }}>
-                                <TextField
-                                    name={'Placeholder'}
-                                    variant={'outlined'}
-                                    placeholder={'Placeholder'}
-                                    multiline={true}
-                                    rows={4}
-                                />
-                            </FormControl>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    margin: '1%',
-                                    width: '10rem',
-                                    height: '3rem',
-                                    background: colors.BLUE,
-                                    color: colors.WHITE,
-                                    mt: '7%',
+                        <form onSubmit={handleSubmit}>
+                            <Box
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    justifyContent: 'end',
                                 }}>
-                                Submit
-                            </Button>
-                        </Box>
+                                <FormControl
+                                    style={{ width: '48%', padding: '1%' }}>
+                                    <TextField
+                                        name={'First Name'}
+                                        variant={'outlined'}
+                                        placeholder={'First Name'}
+                                    />
+                                </FormControl>
+                                <FormControl
+                                    style={{ width: '48%', padding: '1%' }}>
+                                    <TextField
+                                        name={'Last Name'}
+                                        variant={'outlined'}
+                                        placeholder={'Last Name'}
+                                    />
+                                </FormControl>
+                                <FormControl
+                                    style={{ width: '100%', padding: '1%' }}>
+                                    <TextField
+                                        name={'Email'}
+                                        variant={'outlined'}
+                                        placeholder={'Email'}
+                                    />
+                                </FormControl>
+                                <FormControl
+                                    style={{ width: '100%', padding: '1%' }}>
+                                    <TextField
+                                        name={'Institution Name'}
+                                        variant={'outlined'}
+                                        placeholder={'Institution Name'}
+                                    />
+                                </FormControl>
+                                <FormControl
+                                    style={{ width: '100%', padding: '1%' }}>
+                                    <TextField
+                                        name={'Institution Website'}
+                                        variant={'outlined'}
+                                        placeholder={'Institution Website'}
+                                    />
+                                </FormControl>
+                                <FormControl
+                                    style={{ width: '100%', padding: '1%' }}>
+                                    <TextField
+                                        name={'Description'}
+                                        variant={'outlined'}
+                                        placeholder={'Description'}
+                                        multiline={true}
+                                        rows={4}
+                                    />
+                                </FormControl>
+                                <Button
+                                    type={'submit'}
+                                    variant="contained"
+                                    sx={{
+                                        margin: '1%',
+                                        width: '10rem',
+                                        height: '3rem',
+                                        background: colors.BLUE,
+                                        color: colors.WHITE,
+                                        mt: '7%',
+                                    }}>
+                                    Submit
+                                </Button>
+                            </Box>
+                        </form>
                     </ModalRoot>
                 </StyledPaper>
             </Modal>
