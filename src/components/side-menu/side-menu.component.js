@@ -14,8 +14,8 @@ import {
     SideMenuList,
     SideMenuListWrapper,
 } from './side-menu.styles';
-import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibility-on.icon';
+import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
 
 const iconProps = {
     width: '20px',
@@ -76,7 +76,7 @@ const SideMenuComponent = () => {
                                                 onClick={() =>
                                                     handleCollapse(categoryName)
                                                 }>
-                                                <ArrowIcon
+                                                <ExpandIcon
                                                     direction={
                                                         expandedCategories[
                                                             categoryName
