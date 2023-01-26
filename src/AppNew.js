@@ -22,7 +22,7 @@ const AppNew = () => {
         useSelector(getAssetsDirPaths);
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
-    const [contactModalOpen, setContactModalOpen] = useState(false);
+    const [contactModalOpen, setContactModalOpen] = useState(true);
 
     useEffect(() => {
         // TODO: move this to lazy image component
