@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 import {
+    AlgorithmColor,
     AlgorithmContainer,
     AlgorithmWrapper,
     CollapsableArrowIconContainer,
@@ -44,18 +45,18 @@ const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
 
-    const annotationsByCategory = annotations.reduce((acc, annotation) => {
-        if (!acc[annotation.categoryName]) {
-            acc[annotation.categoryName] = [];
+    const annotationsByCategory = annotations.reduce((object, annotation) => {
+        if (!object[annotation.categoryName]) {
+            object[annotation.categoryName] = [];
         }
-        acc[annotation.categoryName].push(annotation);
-        return acc;
+        object[annotation.categoryName].push(annotation);
+        return object;
     }, {});
 
     const [expandedCategories, setExpandedCategories] = useState(() => {
-        return Object.keys(annotationsByCategory).reduce((acc, key) => {
-            acc[key] = true;
-            return acc;
+        return Object.keys(annotationsByCategory).reduce((object, key) => {
+            object[key] = true;
+            return object;
         }, {});
     });
 
@@ -69,6 +70,13 @@ const SideMenuComponent = () => {
                             (categoryName) => (
                                 <div key={categoryName}>
                                     <AlgorithmContainer>
+                                        <AlgorithmColor
+                                            color={
+                                                annotationsByCategory[
+                                                    categoryName
+                                                ][0].color
+                                            }
+                                        />
                                         <AlgorithmWrapper>
                                             <CollapsableArrowIconContainer
                                                 onClick={() =>
@@ -116,7 +124,15 @@ const SideMenuComponent = () => {
                                         annotationsByCategory[categoryName].map(
                                             (annotation, index) => (
                                                 <SideMenuAlgorithm key={index}>
-                                                    <SideMenuAlgorithmName>
+                                                    <AlgorithmColor
+                                                        color={annotation.color}
+                                                        style={{ opacity: 0.6 }}
+                                                    />
+                                                    <SideMenuAlgorithmName
+                                                        style={{
+                                                            marginLeft:
+                                                                '2.5rem',
+                                                        }}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
                                                     </SideMenuAlgorithmName>

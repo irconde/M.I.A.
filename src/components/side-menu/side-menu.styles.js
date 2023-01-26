@@ -46,21 +46,31 @@ export const AlgorithmContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: end;
+    min-height: 2.5rem;
+    margin-top: 0.5rem;
+`;
+
+export const AlgorithmColor = styled.div`
+    background: ${({ color }) => color};
+    width: 0.6rem;
+    height: 2.5rem;
 `;
 
 export const AlgorithmWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: 1rem;
+    height: 2.5rem;
 `;
 
 export const EyeIconWrapper = styled.span`
-    height: 20px;
     width: 20px;
     margin-right: 1rem;
     margin-left: auto;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 2.5rem;
 `;
 
 export const CollapsableArrowIconContainer = styled.span`
@@ -71,8 +81,6 @@ export const CollapsableArrowIconContainer = styled.span`
 `;
 
 export const SideMenuAlgorithm = styled.div`
-    padding-block: 1rem;
-    padding-left: 3rem;
     display: flex;
     align-items: center;
     background-color: ${({ selected }) =>
