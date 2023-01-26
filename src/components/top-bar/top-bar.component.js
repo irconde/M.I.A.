@@ -21,8 +21,15 @@ import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.ico
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 import { Channels } from '../../utils/enums/Constants';
+import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const iconProps = {
+    width: '32px',
+    height: '32px',
+    color: '#ffffff',
+};
+
 /**
  * Component for GUI's top bar display.
  *
@@ -77,20 +84,17 @@ const TopBarComponent = (props) => {
             </TitleLabelContainer>
 
             <ConnectionStatusIconsContainer>
-                <VerticalDivider />
                 <TopBarIconWrapper onClick={props.openAboutModal}>
-                    <InfoIcon
-                        color={'#ffffff'}
-                        width={'32px'}
-                        height={'32px'}
-                    />
+                    <InfoIcon {...iconProps} />
                 </TopBarIconWrapper>
+                <TopBarIconWrapper>
+                    <ChatIcon {...iconProps} />
+                </TopBarIconWrapper>
+                <VerticalDivider />
                 <Tooltip title={'Fold/unfold menu'}>
                     <MenuIconWrapper>
                         <MenuToggleIcon
-                            color={'#ffffff'}
-                            width={'32px'}
-                            height={'32px'}
+                            {...iconProps}
                             cornerstone={props.cornerstone}
                         />
                     </MenuIconWrapper>
