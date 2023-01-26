@@ -83,15 +83,13 @@ const SideMenuComponent = () => {
                                                     setExpandedCategories(
                                                         (
                                                             prevExpandedCategories
-                                                        ) => {
-                                                            return {
-                                                                ...prevExpandedCategories,
-                                                                [categoryName]:
-                                                                    !prevExpandedCategories[
-                                                                        categoryName
-                                                                    ],
-                                                            };
-                                                        }
+                                                        ) => ({
+                                                            ...prevExpandedCategories,
+                                                            [categoryName]:
+                                                                !prevExpandedCategories[
+                                                                    categoryName
+                                                                ],
+                                                        })
                                                     )
                                                 }>
                                                 <ArrowIcon
@@ -136,6 +134,13 @@ const SideMenuComponent = () => {
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
                                                     </SideMenuAlgorithmName>
+                                                    <EyeIconWrapper>
+                                                        <VisibilityOnIcon
+                                                            height="20px"
+                                                            width="20px"
+                                                            color="#b9b9b9"
+                                                        />
+                                                    </EyeIconWrapper>
                                                 </SideMenuAlgorithm>
                                             )
                                         )}
