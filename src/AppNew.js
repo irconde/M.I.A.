@@ -11,6 +11,7 @@ import TopBarComponent from './components/top-bar/top-bar.component';
 import AboutModal from './components/about-modal/about-modal.component';
 import { Channels } from './utils/enums/Constants';
 import SideMenuComponent from './components/side-menu/side-menu.component';
+import ContactModal from './components/contact-modal/contact-modal.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -21,6 +22,7 @@ const AppNew = () => {
         useSelector(getAssetsDirPaths);
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
+    const [contactModalOpen, setContactModalOpen] = useState(false);
 
     useEffect(() => {
         // TODO: move this to lazy image component
@@ -76,9 +78,14 @@ const AppNew = () => {
             )}
             <TopBarComponent
                 openImportModal={() => setImportModalOpen(true)}
+                openContactModal={() => setContactModalOpen(true)}
                 openAboutModal={() => setAboutModalOpen(true)}
             />
             <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
+            <ContactModal
+                closeModal={() => setContactModalOpen(false)}
+                open={contactModalOpen}
+            />
             <SideMenuComponent />
         </div>
     );
