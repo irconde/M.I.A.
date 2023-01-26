@@ -1,13 +1,17 @@
 import styled from 'styled-components';
-import { sideMenuPaddingTop, sideMenuWidth } from '../../utils/enums/Constants';
+import {
+    detectionStyle,
+    sideMenuPaddingTop,
+    sideMenuWidth,
+} from '../../utils/enums/Constants';
 
 export const SideMenuContainer = styled.div`
     -webkit-transition: all 0.3s ease-in;
     -moz-transition: all 0.3s ease-in;
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
-    transition: ${(props) =>
-        props.collapsedSideMenu ? 'none' : 'all 0.3s ease-in'};
+    transition: ${({ collapsedSideMenu }) =>
+        collapsedSideMenu ? 'none' : 'all 0.3s ease-in'};
     transform: translate(
         ${(props) => (props.collapsedSideMenu ? sideMenuWidth : 0)}px
     );
@@ -38,10 +42,54 @@ export const SideMenuListWrapper = styled.div`
     height: ${(props) => props.height};
 `;
 
+export const AnnotationContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    min-height: 2.5rem;
+    margin-top: 0.5rem;
+`;
+
+export const AnnotationColor = styled.div`
+    background: ${({ color }) => color};
+    width: 0.6rem;
+    height: 2.5rem;
+`;
+
+export const AnnotationWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2.5rem;
+`;
+
 export const EyeIconWrapper = styled.span`
-    height: 20px;
     width: 20px;
     margin-right: 1rem;
     margin-left: auto;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 2.5rem;
+`;
+
+export const CollapsableArrowIconContainer = styled.span`
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-inline: 0.5rem;
+    cursor: pointer;
+`;
+
+export const SideMenuAnnotation = styled.div`
+    display: flex;
+    align-items: center;
+    background-color: ${({ selected }) =>
+        selected ? detectionStyle.SELECTED_COLOR : ''};
+`;
+export const SideMenuAnnotationName = styled.div`
+    vertical-align: top;
+    font-family: Noto Sans JP;
+    cursor: default;
+    color: white;
+    user-select: none;
 `;

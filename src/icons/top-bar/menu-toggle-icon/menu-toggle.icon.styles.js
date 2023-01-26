@@ -7,3 +7,9 @@ export const StyledMenuToggleIcon = styled(MenuToggleIconComponent).attrs(
 )`
     ${iconColor}
 `;
+
+export const IconButtonWrapper = styled.button`
+    background: none;
+    border: none;
+    cursor: pointer;
+`;

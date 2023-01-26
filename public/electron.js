@@ -57,6 +57,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             devTools: isDev,
+            webSecurity: false,
         },
     });
 

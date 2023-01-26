@@ -50,6 +50,8 @@ export const ConnectionStatusIconsContainer = styled.div`
     align-items: center;
     justify-content: flex-end;
     color: white;
+    gap: 1rem;
+    cursor: pointer;
 `;
 
 export const ConnectionTypeInfo = styled.div`
@@ -89,9 +91,7 @@ export const FragmentWrapper = styled.div`
     align-items: end;
 `;
 
-export const TopBarIconWrapper = styled(FragmentWrapper)`
-    margin: 0.75rem;
-`;
+export const TopBarIconWrapper = styled(FragmentWrapper)``;
 export const ImportIconWrapper = styled.div`
     margin-right: 1rem;
     margin-left: 0;

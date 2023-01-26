@@ -1,33 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyledMenuToggleIcon } from './menu-toggle.icon.styles';
+import {
+    IconButtonWrapper,
+    StyledMenuToggleIcon,
+} from './menu-toggle.icon.styles';
 import { useDispatch } from 'react-redux';
+import { toggleSideMenu } from '../../../redux/slices/ui.slice';
 
 const MenuToggleIcon = (props) => {
     const dispatch = useDispatch();
     // const visible = useSelector(getReceivedTime);
     // const hasFileOutput = useSelector(getHasFileOutput);
-    // const toggleClickHandler = () => {
-    //     dispatch(
-    //         toggleCollapsedSideMenu({
-    //             cornerstone: props.cornerstone,
-    //             desktopMode: true,
-    //         })
-    //     );
-    // };
     // if (visible !== null || hasFileOutput) {
+    // } else return null;
+    const toggleClickHandler = () => {
+        dispatch(toggleSideMenu());
+    };
     return (
-        <span
-        // onClick={toggleClickHandler}
-        >
+        <IconButtonWrapper onClick={toggleClickHandler}>
             <StyledMenuToggleIcon
                 width={props.width}
                 height={props.height}
                 color={props.color}
             />
-        </span>
+        </IconButtonWrapper>
     );
-    // } else return null;
 };
 
 MenuToggleIcon.propTypes = {
