@@ -61,26 +61,10 @@ const SideMenuComponent = () => {
             [categoryName]: !prevExpandedCategories[categoryName],
         }));
 
-    const visibilityToggleHandler = (id) => {
+    const dispatchAndUpdateImage = (action, args) => {
         const element = document.getElementById('imageContainer');
         if (element !== null) {
-            dispatch(toggleVisibility(id));
-            cornerstone.updateImage(element, true);
-        }
-    };
-
-    const visibilityCategoryToggleHandler = (categoryName) => {
-        const element = document.getElementById('imageContainer');
-        if (element !== null) {
-            dispatch(toggleCategoryVisibility(categoryName));
-            cornerstone.updateImage(element, true);
-        }
-    };
-
-    const annotationSelectionHandler = (id) => {
-        const element = document.getElementById('imageContainer');
-        if (element !== null) {
-            dispatch(selectAnnotation(id));
+            dispatch(action(args));
             cornerstone.updateImage(element, true);
         }
     };
@@ -137,7 +121,8 @@ const SideMenuComponent = () => {
                                         </AnnotationWrapper>
                                         <EyeIconWrapper
                                             onClick={() =>
-                                                visibilityCategoryToggleHandler(
+                                                dispatchAndUpdateImage(
+                                                    toggleCategoryVisibility,
                                                     categoryName
                                                 )
                                             }>
@@ -179,7 +164,8 @@ const SideMenuComponent = () => {
                                                                 : 'gray'
                                                         }
                                                         onClick={() =>
-                                                            annotationSelectionHandler(
+                                                            dispatchAndUpdateImage(
+                                                                selectAnnotation,
                                                                 annotation.id
                                                             )
                                                         }
@@ -192,7 +178,8 @@ const SideMenuComponent = () => {
                                                     </SideMenuAnnotationName>
                                                     <EyeIconWrapper
                                                         onClick={() =>
-                                                            visibilityToggleHandler(
+                                                            dispatchAndUpdateImage(
+                                                                toggleVisibility,
                                                                 annotation.id
                                                             )
                                                         }>
