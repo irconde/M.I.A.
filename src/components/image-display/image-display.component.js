@@ -279,17 +279,6 @@ const ImageDisplayComponent = () => {
                                     e.preventDefault();
                                 });
                         }}></div>
-                    {/*TODO: remove this button*/}
-                    <button
-                        style={{
-                            position: 'absolute',
-                            bottom: '25px',
-                            right: '25px',
-                            padding: '1rem',
-                        }}
-                        onClick={displayImage}>
-                        NEXT IMAGE
-                    </button>
                 </>
             )}
         </ImageViewport>

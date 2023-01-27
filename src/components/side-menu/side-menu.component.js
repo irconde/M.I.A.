@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    selectAnnotation,
     toggleCategoryVisibility,
     toggleVisibility,
 } from '../../redux/slices/annotation.slice';
@@ -72,6 +73,14 @@ const SideMenuComponent = () => {
         const element = document.getElementById('imageContainer');
         if (element !== null) {
             dispatch(toggleCategoryVisibility(categoryName));
+            cornerstone.updateImage(element, true);
+        }
+    };
+
+    const annotationSelectionHandler = (id) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            dispatch(selectAnnotation(id));
             cornerstone.updateImage(element, true);
         }
     };
@@ -151,7 +160,6 @@ const SideMenuComponent = () => {
                                         annotationsByCategory[categoryName].map(
                                             (annotation, index) => (
                                                 <SideMenuAnnotation
-                                                    color={annotation.color}
                                                     selected={
                                                         annotation.selected
                                                     }
@@ -169,6 +177,11 @@ const SideMenuComponent = () => {
                                                             annotation.visible
                                                                 ? 'white'
                                                                 : 'gray'
+                                                        }
+                                                        onClick={() =>
+                                                            annotationSelectionHandler(
+                                                                annotation.id
+                                                            )
                                                         }
                                                         style={{
                                                             marginLeft:

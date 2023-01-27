@@ -31,7 +31,6 @@ MenuToggleIcon.propTypes = {
     width: PropTypes.string.isRequired,
     height: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
-    cornerstone: PropTypes.object,
 };
 
 export default MenuToggleIcon;

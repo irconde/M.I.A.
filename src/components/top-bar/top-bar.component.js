@@ -95,10 +95,7 @@ const TopBarComponent = (props) => {
                 <VerticalDivider />
                 <Tooltip title={'Fold/unfold menu'}>
                     <MenuIconWrapper>
-                        <MenuToggleIcon
-                            {...iconProps}
-                            cornerstone={props.cornerstone}
-                        />
+                        <MenuToggleIcon {...iconProps} />
                     </MenuIconWrapper>
                 </Tooltip>
             </ConnectionStatusIconsContainer>
@@ -107,10 +104,6 @@ const TopBarComponent = (props) => {
 };
 
 TopBarComponent.propTypes = {
-    /**
-     * Main cornerstone object, used to resize viewports if needed.
-     */
-    cornerstone: PropTypes.object,
     /**
      * Getter function for getting local file if remote connection is off.
      */

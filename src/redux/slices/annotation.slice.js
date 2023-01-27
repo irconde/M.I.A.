@@ -41,8 +41,10 @@ const annotationSlice = createSlice({
         selectAnnotation: (state, action) => {
             state.annotations.forEach((annotation) => {
                 if (annotation.id === action.payload) {
-                    annotation.selected = true;
-                    state.selectedAnnotation = annotation;
+                    annotation.selected = !annotation.selected;
+                    if (annotation.selected) {
+                        state.selectedAnnotation = annotation;
+                    }
                 } else {
                     annotation.selected = false;
                 }
