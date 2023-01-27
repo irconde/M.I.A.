@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { getAnnotations } from '../../redux/slices/annotation.slice';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    getAnnotations,
+    toggleCategoryVisibility,
+    toggleVisibility,
+} from '../../redux/slices/annotation.slice';
 import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
 import {
     AnnotationColor,
@@ -16,11 +20,12 @@ import {
 } from './side-menu.styles';
 import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibility-on.icon';
 import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
+import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
+import { cornerstone } from '../image-display/image-display.component';
 
 const iconProps = {
     width: '20px',
     height: '20px',
-    color: '#b9b9b9',
 };
 
 /**
@@ -32,6 +37,7 @@ const iconProps = {
 const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
+    const dispatch = useDispatch();
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
         if (!object[annotation.categoryName]) {
@@ -54,6 +60,22 @@ const SideMenuComponent = () => {
             [categoryName]: !prevExpandedCategories[categoryName],
         }));
 
+    const visibilityToggleHandler = (id) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            dispatch(toggleVisibility(id));
+            cornerstone.updateImage(element, true);
+        }
+    };
+
+    const visibilityCategoryToggleHandler = (categoryName) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            dispatch(toggleCategoryVisibility(categoryName));
+            cornerstone.updateImage(element, true);
+        }
+    };
+
     if (annotations.length > 0) {
         return (
             <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
@@ -68,7 +90,11 @@ const SideMenuComponent = () => {
                                             color={
                                                 annotationsByCategory[
                                                     categoryName
-                                                ][0].color
+                                                ][0].categoryVisible
+                                                    ? annotationsByCategory[
+                                                          categoryName
+                                                      ][0].color
+                                                    : 'gray'
                                             }
                                         />
                                         <AnnotationWrapper>
@@ -89,23 +115,61 @@ const SideMenuComponent = () => {
                                                     color="white"
                                                 />
                                             </CollapsableArrowIconContainer>
-                                            <SideMenuAnnotationName>
+                                            <SideMenuAnnotationName
+                                                color={
+                                                    annotationsByCategory[
+                                                        categoryName
+                                                    ][0].categoryVisible
+                                                        ? 'white'
+                                                        : 'gray'
+                                                }>
                                                 {categoryName.toUpperCase()}
                                             </SideMenuAnnotationName>
                                         </AnnotationWrapper>
-                                        <EyeIconWrapper>
-                                            <VisibilityOnIcon {...iconProps} />
+                                        <EyeIconWrapper
+                                            onClick={() =>
+                                                visibilityCategoryToggleHandler(
+                                                    categoryName
+                                                )
+                                            }>
+                                            {annotationsByCategory[
+                                                categoryName
+                                            ][0].categoryVisible ? (
+                                                <VisibilityOnIcon
+                                                    color={'#b9b9b9'}
+                                                    {...iconProps}
+                                                />
+                                            ) : (
+                                                <VisibilityOffIcon
+                                                    color={'#808080'}
+                                                    {...iconProps}
+                                                />
+                                            )}
                                         </EyeIconWrapper>
                                     </AnnotationContainer>
                                     {expandedCategories[categoryName] &&
                                         annotationsByCategory[categoryName].map(
                                             (annotation, index) => (
-                                                <SideMenuAnnotation key={index}>
+                                                <SideMenuAnnotation
+                                                    color={annotation.color}
+                                                    selected={
+                                                        annotation.selected
+                                                    }
+                                                    key={index}>
                                                     <AnnotationColor
-                                                        color={annotation.color}
+                                                        color={
+                                                            annotation.categoryVisible
+                                                                ? annotation.color
+                                                                : 'gray'
+                                                        }
                                                         style={{ opacity: 0.6 }}
                                                     />
                                                     <SideMenuAnnotationName
+                                                        color={
+                                                            annotation.visible
+                                                                ? 'white'
+                                                                : 'gray'
+                                                        }
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',
@@ -113,10 +177,27 @@ const SideMenuComponent = () => {
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
                                                     </SideMenuAnnotationName>
-                                                    <EyeIconWrapper>
-                                                        <VisibilityOnIcon
-                                                            {...iconProps}
-                                                        />
+                                                    <EyeIconWrapper
+                                                        onClick={() =>
+                                                            visibilityToggleHandler(
+                                                                annotation.id
+                                                            )
+                                                        }>
+                                                        {annotation.visible ? (
+                                                            <VisibilityOnIcon
+                                                                color={
+                                                                    '#b9b9b9'
+                                                                }
+                                                                {...iconProps}
+                                                            />
+                                                        ) : (
+                                                            <VisibilityOffIcon
+                                                                color={
+                                                                    '#808080'
+                                                                }
+                                                                {...iconProps}
+                                                            />
+                                                        )}
                                                     </EyeIconWrapper>
                                                 </SideMenuAnnotation>
                                             )

@@ -44,6 +44,8 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
+export { cornerstone };
+
 const ImageDisplayComponent = () => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);

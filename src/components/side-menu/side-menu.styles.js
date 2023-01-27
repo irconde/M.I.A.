@@ -1,9 +1,5 @@
 import styled from 'styled-components';
-import {
-    detectionStyle,
-    sideMenuPaddingTop,
-    sideMenuWidth,
-} from '../../utils/enums/Constants';
+import { sideMenuPaddingTop, sideMenuWidth } from '../../utils/enums/Constants';
 
 export const SideMenuContainer = styled.div`
     -webkit-transition: all 0.3s ease-in;
@@ -83,13 +79,12 @@ export const CollapsableArrowIconContainer = styled.span`
 export const SideMenuAnnotation = styled.div`
     display: flex;
     align-items: center;
-    background-color: ${({ selected }) =>
-        selected ? detectionStyle.SELECTED_COLOR : ''};
+    background-color: ${({ selected, color }) => (selected ? color : '')};
 `;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;
     font-family: Noto Sans JP;
     cursor: default;
-    color: white;
+    color: ${({ color }) => color};
     user-select: none;
 `;

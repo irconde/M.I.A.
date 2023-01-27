@@ -31,6 +31,7 @@ const annotationSlice = createSlice({
                                 : '',
                         selected: false,
                         visible: true,
+                        categoryVisible: true,
                     });
                 });
 
@@ -53,6 +54,43 @@ const annotationSlice = createSlice({
             });
             state.selectedAnnotation = null;
         },
+        toggleVisibility: (state, action) => {
+            const foundAnnotation = state.annotations.find(
+                (annotation) => annotation.id === action.payload
+            );
+            if (foundAnnotation !== undefined) {
+                if (foundAnnotation.visible && foundAnnotation.selected) {
+                    foundAnnotation.selected = false;
+                    state.selectedAnnotation = null;
+                }
+                foundAnnotation.visible = !foundAnnotation.visible;
+                if (
+                    foundAnnotation.visible &&
+                    !foundAnnotation.categoryVisible
+                ) {
+                    state.annotations.forEach((annotation) => {
+                        if (
+                            annotation.categoryName ===
+                            foundAnnotation.categoryName
+                        ) {
+                            annotation.categoryVisible = true;
+                        }
+                    });
+                }
+            }
+        },
+        toggleCategoryVisibility: (state, action) => {
+            state.annotations.forEach((annotation) => {
+                if (annotation.categoryName === action.payload) {
+                    annotation.categoryVisible = !annotation.categoryVisible;
+                    annotation.visible = annotation.categoryVisible;
+                    if (!annotation.visible && annotation.selected) {
+                        annotation.selected = false;
+                        state.selectedAnnotation = null;
+                    }
+                }
+            });
+        },
     },
 });
 
@@ -60,6 +98,8 @@ export const {
     addAnnotationArray,
     selectAnnotation,
     clearAnnotationSelection,
+    toggleVisibility,
+    toggleCategoryVisibility,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
