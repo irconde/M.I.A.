@@ -12,6 +12,7 @@ import AboutModal from './components/about-modal/about-modal.component';
 import { Channels } from './utils/enums/Constants';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import ContactModal from './components/contact-modal/contact-modal.component';
+import AnnotationContextMenuComponent from './components/detection-context/annotation-context-menu.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -87,6 +88,7 @@ const AppNew = () => {
                 open={contactModalOpen}
             />
             <SideMenuComponent />
+            <AnnotationContextMenuComponent />
         </div>
     );
 };

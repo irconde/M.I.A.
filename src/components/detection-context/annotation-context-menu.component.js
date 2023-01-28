@@ -1,23 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
-import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 import MovementIcon from '../../icons/detection-context-menu/movement-icon/movement.icon';
 import * as constants from '../../utils/enums/Constants';
 import { editionMode } from '../../utils/enums/Constants';
 import { useSelector } from 'react-redux';
-import {
-    getDetectionContextPosition,
-    getEditionMode,
-    getIsDetectionContextVisible,
-    getRecentScroll,
-} from '../../redux/slices-old/ui/uiSlice';
-import {
-    getSelectedDetectionColor,
-    getSelectedDetectionType,
-} from '../../redux/slices-old/detections/detectionsSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DeleteWidget,
@@ -26,22 +14,28 @@ import {
     MainWidget,
     Positioner,
     StyledSelectedDetection,
-} from './detection-context-menu.styles';
+} from './annotation-context-menu.styles';
+import {
+    getAnnotationContextPosition,
+    getAnnotationContextVisible,
+    getEditionMode,
+} from '../../redux/slices/ui.slice';
+import { getSelectedAnnotationColor } from '../../redux/slices/annotation.slice';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
  *
  * @component
  */
-const DetectionContextMenuComponent = ({ setSelectedOption }) => {
-    const selectedDetectionColor = useSelector(getSelectedDetectionColor);
+const AnnotationContextMenuComponent = () => {
+    const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
-    const isVisible = useSelector(getIsDetectionContextVisible);
-    const position = useSelector(getDetectionContextPosition);
-    const recentScroll = useSelector(getRecentScroll);
+    const isVisible = useSelector(getAnnotationContextVisible);
+    const position = useSelector(getAnnotationContextPosition);
+    /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
         if ([...Object.values(constants.editionMode)].includes(type)) {
-            setSelectedOption(type);
+            console.log(`type: ${type}`);
         } else {
             throw new Error(
                 `${type} is not a valid option for DetectionContextMenu click`
@@ -49,8 +43,8 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
         }
     };
 
-    const detectionType = useSelector(getSelectedDetectionType);
-    if (isVisible === true && !recentScroll) {
+    /*if (isVisible === true && !recentScroll)*/
+    if (isVisible === true) {
         return (
             <Positioner position={position}>
                 <FlexContainer>
@@ -77,51 +71,27 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
                                 selected={selectedOption === editionMode.COLOR}>
                                 <StyledSelectedDetection
                                     selectedDetectionColor={
-                                        selectedDetectionColor
+                                        selectedAnnotationColor
                                     }
                                 />
                             </IconContainer>
                         </Tooltip>
-                        {detectionType !== constants.detectionType.BINARY && (
-                            <Tooltip
-                                title="Edit box annotation"
-                                placement="bottom">
-                                <IconContainer
-                                    onClick={() =>
-                                        handleClick(editionMode.BOUNDING)
-                                    }
-                                    selected={
-                                        selectedOption === editionMode.BOUNDING
-                                    }>
-                                    <RectangleIcon
-                                        color={'#464646'}
-                                        border={'#464646'}
-                                        width={'31px'}
-                                        height={'31px'}
-                                    />
-                                </IconContainer>
-                            </Tooltip>
-                        )}
-                        {detectionType === constants.detectionType.POLYGON && (
-                            <Tooltip
-                                title="Edit mask annotation"
-                                placement="bottom">
-                                <IconContainer
-                                    onClick={() =>
-                                        handleClick(editionMode.POLYGON)
-                                    }
-                                    selected={
-                                        selectedOption === editionMode.POLYGON
-                                    }>
-                                    <PolygonIcon
-                                        color={'#464646'}
-                                        border={'#464646'}
-                                        width={'31px'}
-                                        height={'31px'}
-                                    />
-                                </IconContainer>
-                            </Tooltip>
-                        )}
+                        <Tooltip
+                            title="Edit mask annotation"
+                            placement="bottom">
+                            <IconContainer
+                                onClick={() => handleClick(editionMode.POLYGON)}
+                                selected={
+                                    selectedOption === editionMode.POLYGON
+                                }>
+                                <PolygonIcon
+                                    color={'#464646'}
+                                    border={'#464646'}
+                                    width={'31px'}
+                                    height={'31px'}
+                                />
+                            </IconContainer>
+                        </Tooltip>
                         <Tooltip
                             title="Translate annotation"
                             placement="bottom">
@@ -155,11 +125,4 @@ const DetectionContextMenuComponent = ({ setSelectedOption }) => {
     }
 };
 
-DetectionContextMenuComponent.propTypes = {
-    /**
-     * Cornerstone selectEditionMode function passed when setting cornerstone tool to new option.
-     */
-    setSelectedOption: PropTypes.func.isRequired,
-};
-
-export default DetectionContextMenuComponent;
+export default AnnotationContextMenuComponent;

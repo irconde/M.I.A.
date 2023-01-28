@@ -106,5 +106,20 @@ export const {
 
 export const getCategories = (state) => state.annotation.categories;
 export const getAnnotations = (state) => state.annotation.annotations;
+export const getSelectedAnnotation = (state) =>
+    state.annotations.selectedAnnotation;
+export const getSelectedAnnotationColor = (state) => {
+    if (state === undefined || state.annotations === undefined) {
+        return;
+    }
+    if (
+        state.annotations.selectedAnnotation !== null &&
+        state.annotations.selectedAnnotation !== undefined
+    ) {
+        return state.annotations.selectedAnnotation.color;
+    } else {
+        return '';
+    }
+};
 
 export default annotationSlice.reducer;

@@ -82,7 +82,7 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices-old/ui/uiSlice';
-import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
+import DetectionContextMenu from './components/detection-context/annotation-context-menu.component';
 import EditLabel from './components/edit-label/edit-label.component';
 import { buildCocoDataZip } from './utils/detections/Coco';
 import { fileOpen } from 'browser-fs-access';

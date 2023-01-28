@@ -18,6 +18,7 @@ import {
     getAnnotations,
     selectAnnotation,
 } from '../../redux/slices/annotation.slice';
+import { updateAnnotationContextPosition } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -55,6 +56,7 @@ const ImageDisplayComponent = () => {
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
     const annotationRef = useRef(annotations);
+    const zoomLevel = useRef();
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -119,6 +121,7 @@ const ImageDisplayComponent = () => {
         }
 
         const eventData = event.detail;
+        zoomLevel.current = eventData.viewport.scale;
         const context = eventData.canvasContext;
         renderAnnotations(context, annotationRef.current);
         startListeningClickEvents();
@@ -140,10 +143,42 @@ const ImageDisplayComponent = () => {
             }
             if (clickedPos !== constants.selection.NO_SELECTION) {
                 dispatch(selectAnnotation(annotations[clickedPos].id));
+                renderAnnotationContextMenu(event, annotations[clickedPos]);
             } else {
                 dispatch(clearAnnotationSelection());
+                dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
             }
             cornerstone.updateImage(viewportRef.current, true);
+        }
+    };
+
+    const renderAnnotationContextMenu = (
+        event,
+        annotation,
+        updatedZoomLevel = null
+    ) => {
+        if (annotation !== null && annotation !== undefined) {
+            const viewportInfo = Utils.eventToViewportInfo(
+                Utils.mockCornerstoneEvent(event, viewportRef.current)
+            );
+            let inputZoomLevel;
+            if (updatedZoomLevel !== null) {
+                inputZoomLevel = updatedZoomLevel;
+            } else {
+                inputZoomLevel = zoomLevel.current;
+            }
+            let annotationContextGap = 0;
+            let originCoordX;
+            originCoordX = 2;
+            annotationContextGap =
+                viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
+
+            const { x, y } = cornerstone.pixelToCanvas(viewportRef.current, {
+                x: annotation.bbox[originCoordX] + annotationContextGap,
+                y: annotation.bbox[1] + annotation.bbox[3] + 4,
+            });
+            console.log(`x: ${x} | y: ${y}`);
+            dispatch(updateAnnotationContextPosition({ top: x, left: y }));
         }
     };
 
