@@ -99,6 +99,17 @@ const annotationSlice = createSlice({
             );
             state.selectedAnnotation = null;
         },
+        updateAnnotationColor: (state, action) => {
+            const { categoryName, color } = action.payload;
+            state.annotations.forEach((annotation) => {
+                if (annotation.categoryName === categoryName) {
+                    annotation.color = color;
+                }
+            });
+            if (state.selectedAnnotation?.categoryName === categoryName) {
+                state.selectedAnnotation.color = color;
+            }
+        },
     },
 });
 
@@ -109,6 +120,7 @@ export const {
     toggleVisibility,
     toggleCategoryVisibility,
     deleteSelectedAnnotation,
+    updateAnnotationColor,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;

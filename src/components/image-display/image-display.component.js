@@ -18,7 +18,10 @@ import {
     getAnnotations,
     selectAnnotation,
 } from '../../redux/slices/annotation.slice';
-import { updateAnnotationContextPosition } from '../../redux/slices/ui.slice';
+import {
+    updateAnnotationContextPosition,
+    updateZoomLevel,
+} from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -120,8 +123,10 @@ const ImageDisplayComponent = () => {
             return;
         }
 
+        console.log('image render');
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
+        dispatch(updateZoomLevel(zoomLevel.current));
         const context = eventData.canvasContext;
         renderAnnotations(context, annotationRef.current);
         startListeningClickEvents();

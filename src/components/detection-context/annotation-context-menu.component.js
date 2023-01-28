@@ -20,6 +20,8 @@ import {
     getAnnotationContextVisible,
     getEditionMode,
     updateAnnotationContextPosition,
+    updateAnnotationContextVisibility,
+    updateColorPickerVisibility,
 } from '../../redux/slices/ui.slice';
 import {
     deleteSelectedAnnotation,
@@ -45,7 +47,8 @@ const AnnotationContextMenuComponent = () => {
                 console.log('moving');
                 break;
             case constants.editionMode.COLOR:
-                console.log('coloring');
+                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateColorPickerVisibility(true));
                 break;
             case constants.editionMode.LABEL:
                 console.log('labeling');

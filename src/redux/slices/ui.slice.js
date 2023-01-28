@@ -9,6 +9,8 @@ const initialState = {
     },
     annotationContextVisible: false,
     editionMode: constants.editionMode.NO_TOOL,
+    colorPickerVisible: false,
+    zoomLevel: 0,
 };
 
 const uiSlice = createSlice({
@@ -24,11 +26,25 @@ const uiSlice = createSlice({
             state.annotationContextPosition.left = left;
             state.annotationContextVisible = top !== 0 && left !== 0;
         },
+        updateAnnotationContextVisibility: (state, action) => {
+            state.annotationContextVisible = action.payload;
+        },
+        updateColorPickerVisibility: (state, action) => {
+            state.colorPickerVisible = action.payload;
+        },
+        updateZoomLevel: (state, action) => {
+            state.zoomLevel = action.payload;
+        },
     },
 });
 
-export const { toggleSideMenu, updateAnnotationContextPosition } =
-    uiSlice.actions;
+export const {
+    toggleSideMenu,
+    updateAnnotationContextPosition,
+    updateZoomLevel,
+    updateColorPickerVisibility,
+    updateAnnotationContextVisibility,
+} = uiSlice.actions;
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getAnnotationContextPosition = (state) =>
@@ -36,5 +52,7 @@ export const getAnnotationContextPosition = (state) =>
 export const getAnnotationContextVisible = (state) =>
     state.ui.annotationContextVisible;
 export const getEditionMode = (state) => state.ui.editionMode;
+export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
+export const getZoomLevel = (state) => state.ui.zoomLevel;
 
 export default uiSlice.reducer;

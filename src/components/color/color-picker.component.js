@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { TwitterPicker } from 'react-color';
 import { useDispatch, useSelector } from 'react-redux';
-import * as constants from '../../utils/enums/Constants';
 import { detectionContextStyle } from '../../utils/enums/Constants';
-import {
-    addMissMatchedClassName,
-    getSelectedDetectionClassName,
-    getSelectedDetectionViewport,
-    getSelectedDetectionWidthAndHeight,
-} from '../../redux/slices-old/detections/detectionsSlice';
-import {
-    getColorPickerVisible,
-    getDetectionContextPosition,
-    getZoomLevels,
-} from '../../redux/slices-old/ui/uiSlice';
 import { ColorPickerContainer } from './color-picker.styles';
+import {
+    getAnnotationContextPosition,
+    getColorPickerVisible,
+    getZoomLevel,
+    updateAnnotationContextVisibility,
+    updateColorPickerVisibility,
+} from '../../redux/slices/ui.slice';
+import {
+    getSelectedAnnotation,
+    updateAnnotationColor,
+} from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Component within DetectionContextMenu component for editing colors of detection bounding box.
@@ -24,56 +24,37 @@ import { ColorPickerContainer } from './color-picker.styles';
 
 const ColorPickerComponent = () => {
     const isVisible = useSelector(getColorPickerVisible);
-    const detectionContextPosition = useSelector(getDetectionContextPosition);
-    const zoomLevels = useSelector(getZoomLevels);
-    const selectedViewport = useSelector(getSelectedDetectionViewport);
-    const widthAndHeight = useSelector(getSelectedDetectionWidthAndHeight);
+    const annotationContextPosition = useSelector(getAnnotationContextPosition);
+    const zoomLevel = useSelector(getZoomLevel);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const [topPosition, setTopPosition] = useState();
     const [leftPosition, setLeftPosition] = useState();
-    useEffect(() => {
-        if (widthAndHeight !== null) {
-            const menuOffset = 37;
-            if (selectedViewport === constants.viewport.TOP) {
-                setTopPosition(
-                    detectionContextPosition.top +
-                        zoomLevels.zoomLevelTop +
-                        detectionContextStyle.HEIGHT +
-                        10
-                );
-                setLeftPosition(
-                    detectionContextPosition.left +
-                        zoomLevels.zoomLevelTop +
-                        menuOffset
-                );
-            } else if (selectedViewport === constants.viewport.SIDE) {
-                setTopPosition(
-                    detectionContextPosition.top +
-                        zoomLevels.zoomLevelSide +
-                        detectionContextStyle.HEIGHT +
-                        11
-                );
-                setLeftPosition(
-                    detectionContextPosition.left +
-                        zoomLevels.zoomLevelSide +
-                        menuOffset
-                );
-            }
-        }
-    }, [widthAndHeight]);
-    const selectedDetectionClassName = useSelector(
-        getSelectedDetectionClassName
-    );
     const dispatch = useDispatch();
     const [color, setColor] = useState();
 
+    useEffect(() => {
+        if (selectedAnnotation !== null) {
+            const menuOffset = 37;
+            setTopPosition(
+                annotationContextPosition.top +
+                    zoomLevel +
+                    detectionContextStyle.HEIGHT +
+                    10
+            );
+            setLeftPosition(
+                annotationContextPosition.left + zoomLevel + menuOffset
+            );
+        }
+    }, [selectedAnnotation]);
+
     const colorChangeComplete = (color) => {
         setColor(color);
-        dispatch(
-            addMissMatchedClassName({
-                className: selectedDetectionClassName,
-                color: color.hex,
-            })
-        );
+        dispatch(updateColorPickerVisibility(false));
+        dispatch(updateAnnotationContextVisibility(true));
+        Utils.dispatchAndUpdateImage(dispatch, updateAnnotationColor, {
+            categoryName: selectedAnnotation.categoryName,
+            color: color.hex,
+        });
     };
     if (isVisible === true) {
         return (
