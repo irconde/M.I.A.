@@ -101,9 +101,10 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         getCurrentFile()
             .then((data) => {
-                const { pixelData, annotationInformation } = data;
+                const { pixelData, annotationInformation, colors } = data;
                 dispatch(addAnnotationArray(annotationInformation));
                 setPixelData(pixelData);
+                console.log(data);
             })
             .catch((error) => {
                 console.log(error);

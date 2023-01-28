@@ -321,7 +321,7 @@ class ClientFilesManager {
         return { pixelData, annotationInformation };
     }
 
-    async getCurrentFile() {
+    async getCurrentFile(colors) {
         this.#sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');
@@ -340,7 +340,7 @@ class ClientFilesManager {
             )
         );
 
-        return { pixelData, annotationInformation };
+        return { pixelData, annotationInformation, colors };
     }
 
     async getAnnotationsForFile() {

@@ -208,7 +208,7 @@ ipcMain.handle(Constants.Channels.getNextFile, () => {
 });
 
 ipcMain.handle(Constants.Channels.getCurrentFile, () => {
-    return files.getCurrentFile();
+    return files.getCurrentFile(annotationColors);
 });
 
 /**
@@ -251,7 +251,7 @@ const initSettings = async () => {
     allPromises.push(
         new Promise((resolve, reject) => {
             if (fs.existsSync(COLORS_FILE_PATH)) {
-                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+                fs.readFile(COLORS_FILE_PATH, (err, data) => {
                     if (err) {
                         reject(err);
                     } else {
