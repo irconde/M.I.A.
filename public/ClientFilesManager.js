@@ -217,6 +217,7 @@ class ClientFilesManager {
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
+    colorFilePath = '';
     selectedAnnotationFile = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
@@ -253,14 +254,16 @@ class ClientFilesManager {
      * Called when the app is first launched with the images' dir path from the settings
      * @param imagesDirPath {string}
      * @param annotationFilePath {string}
+     * @param colorFilePath {string}
      * @returns {Promise<void>}
      */
-    async initSelectedPaths(imagesDirPath, annotationFilePath) {
+    async initSelectedPaths(imagesDirPath, annotationFilePath, colorFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
         // if no path exits in the settings then reject the React promise
         if (imagesDirPath === '') return this.thumbnailsPromise.reject();
 
         this.selectedImagesDirPath = imagesDirPath;
+        this.colorFilePath = colorFilePath;
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {

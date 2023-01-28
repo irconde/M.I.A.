@@ -6,12 +6,16 @@ const fs = require('fs');
 const Constants = require('./Constants');
 let mainWindow;
 let appSettings = null;
+let annotationColors = [];
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
 const SETTINGS_FILE_PATH = isDev
     ? 'settings.json'
     : path.join(app.getPath('userData'), 'settings.json');
+const COLORS_FILE_PATH = isDev
+    ? 'colors.json'
+    : path.join(app.getPath('userData'), 'colors.json');
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -222,21 +226,47 @@ ipcMain.handle(Constants.Channels.getSettings, async (event) => {
  * @returns {Promise<Object>}
  */
 const initSettings = async () => {
-    return new Promise((resolve, reject) => {
-        const { defaultSettings } = Constants;
-        fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
-            if (err?.code === 'ENOENT') {
-                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
-            } else if (err) {
-                appSettings = defaultSettings;
-                reject(err);
+    const allPromises = [];
+    allPromises.push(
+        new Promise((resolve, reject) => {
+            const { defaultSettings } = Constants;
+
+            if (fs.existsSync(SETTINGS_FILE_PATH)) {
+                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+                    if (err) {
+                        appSettings = defaultSettings;
+                        reject(err);
+                    } else {
+                        // if settings already exist
+                        appSettings = JSON.parse(data);
+                        resolve(appSettings);
+                    }
+                });
             } else {
-                // if settings already exist
-                appSettings = JSON.parse(data);
-                resolve(appSettings);
+                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
             }
-        });
-    });
+        })
+    );
+
+    allPromises.push(
+        new Promise((resolve, reject) => {
+            if (fs.existsSync(COLORS_FILE_PATH)) {
+                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        // if colors already exist
+                        annotationColors = JSON.parse(data);
+                        resolve();
+                    }
+                });
+            } else {
+                updateColorssJSON(annotationColors).then(resolve).catch(reject);
+            }
+        })
+    );
+
+    return await Promise.all(allPromises);
 };
 
 /**
@@ -254,6 +284,20 @@ const updateSettingsJSON = async (newSettings) => {
             } else {
                 appSettings = newSettings;
                 resolve(newSettings);
+            }
+        });
+    });
+};
+
+const updateColorssJSON = async (newColors) => {
+    return new Promise((resolve, reject) => {
+        const colorsString = JSON.stringify(newColors);
+        fs.writeFile(COLORS_FILE_PATH, colorsString, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                annotationColors = newColors;
+                resolve();
             }
         });
     });
