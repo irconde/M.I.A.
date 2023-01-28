@@ -264,6 +264,7 @@ class ClientFilesManager {
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {
+            this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
             await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
@@ -296,6 +297,28 @@ class ClientFilesManager {
     async getNextFile() {
         this.currentFileIndex++;
 
+        this.#sendFileInfo();
+        if (!this.fileNames.length) {
+            throw new Error('Directory contains no images');
+        } else if (this.currentFileIndex >= this.fileNames.length) {
+            throw new Error('No more files');
+        }
+
+        let annotationInformation = [];
+        if (this.selectedAnnotationFile) {
+            annotationInformation = await this.getAnnotationsForFile();
+        }
+        const pixelData = await fs.promises.readFile(
+            path.join(
+                this.selectedImagesDirPath,
+                this.fileNames[this.currentFileIndex]
+            )
+        );
+
+        return { pixelData, annotationInformation };
+    }
+
+    async getCurrentFile() {
         this.#sendFileInfo();
         if (!this.fileNames.length) {
             throw new Error('Directory contains no images');

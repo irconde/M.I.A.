@@ -203,6 +203,10 @@ ipcMain.handle(Constants.Channels.getNextFile, () => {
     return files.getNextFile();
 });
 
+ipcMain.handle(Constants.Channels.getCurrentFile, () => {
+    return files.getCurrentFile();
+});
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends the settings variable to the React process

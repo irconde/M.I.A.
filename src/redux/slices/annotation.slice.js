@@ -107,16 +107,13 @@ export const {
 export const getCategories = (state) => state.annotation.categories;
 export const getAnnotations = (state) => state.annotation.annotations;
 export const getSelectedAnnotation = (state) =>
-    state.annotations.selectedAnnotation;
+    state.annotation.selectedAnnotation;
 export const getSelectedAnnotationColor = (state) => {
-    if (state === undefined || state.annotations === undefined) {
-        return;
-    }
     if (
-        state.annotations.selectedAnnotation !== null &&
-        state.annotations.selectedAnnotation !== undefined
+        state.annotation.selectedAnnotation !== null &&
+        state.annotation.selectedAnnotation !== undefined
     ) {
-        return state.annotations.selectedAnnotation.color;
+        return state.annotation.selectedAnnotation.color;
     } else {
         return '';
     }

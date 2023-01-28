@@ -2,6 +2,7 @@ module.exports.Channels = {
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
+    getCurrentFile: 'get-current-file',
     getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
     saveIndFile: 'save-individual-file',

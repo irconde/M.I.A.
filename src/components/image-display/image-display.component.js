@@ -96,7 +96,7 @@ const ImageDisplayComponent = () => {
     }, [selectedImagesDirPath, pixelData]);
 
     useEffect(() => {
-        getNextFile()
+        getCurrentFile()
             .then((data) => {
                 const { pixelData, annotationInformation } = data;
                 dispatch(addAnnotationArray(annotationInformation));
@@ -107,9 +107,9 @@ const ImageDisplayComponent = () => {
             });
     }, []);
 
-    const getNextFile = async () => {
+    const getCurrentFile = async () => {
         try {
-            return ipcRenderer.invoke(Channels.getNextFile);
+            return ipcRenderer.invoke(Channels.getCurrentFile);
         } catch (e) {
             console.log(e);
         }
@@ -168,14 +168,12 @@ const ImageDisplayComponent = () => {
                 inputZoomLevel = zoomLevel.current;
             }
             let annotationContextGap = 0;
-            let originCoordX;
-            originCoordX = 2;
             annotationContextGap =
                 viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
 
             const { x, y } = cornerstone.pixelToCanvas(viewportRef.current, {
-                x: annotation.bbox[originCoordX] + annotationContextGap,
-                y: annotation.bbox[1] + annotation.bbox[3] + 4,
+                x: annotation.bbox[0],
+                y: annotation.bbox[1],
             });
             console.log(`x: ${x} | y: ${y}`);
             dispatch(updateAnnotationContextPosition({ top: x, left: y }));

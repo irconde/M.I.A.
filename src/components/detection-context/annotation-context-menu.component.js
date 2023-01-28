@@ -28,9 +28,9 @@ import { getSelectedAnnotationColor } from '../../redux/slices/annotation.slice'
  * @component
  */
 const AnnotationContextMenuComponent = () => {
+    const isVisible = useSelector(getAnnotationContextVisible);
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
-    const isVisible = useSelector(getAnnotationContextVisible);
     const position = useSelector(getAnnotationContextPosition);
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
