@@ -12,6 +12,7 @@ import {
 } from '../../redux/slices/ui.slice';
 import {
     getSelectedAnnotation,
+    saveColorsFile,
     updateAnnotationColor,
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
@@ -48,13 +49,15 @@ const ColorPickerComponent = () => {
     }, [selectedAnnotation]);
 
     const colorChangeComplete = (color) => {
+        const newColor = {
+            categoryName: selectedAnnotation.categoryName,
+            color: color.hex,
+        };
         setColor(color);
         dispatch(updateColorPickerVisibility(false));
         dispatch(updateAnnotationContextVisibility(true));
-        Utils.dispatchAndUpdateImage(dispatch, updateAnnotationColor, {
-            categoryName: selectedAnnotation.categoryName,
-            color: color.hex,
-        });
+        dispatch(saveColorsFile(newColor));
+        Utils.dispatchAndUpdateImage(dispatch, updateAnnotationColor, newColor);
     };
     if (isVisible === true) {
         return (

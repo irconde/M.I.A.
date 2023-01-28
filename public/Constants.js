@@ -1,4 +1,5 @@
 module.exports.Channels = {
+    saveColorsFile: 'save-colors-file',
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',

@@ -102,9 +102,8 @@ const ImageDisplayComponent = () => {
         getCurrentFile()
             .then((data) => {
                 const { pixelData, annotationInformation, colors } = data;
-                dispatch(addAnnotationArray(annotationInformation));
+                dispatch(addAnnotationArray({ annotationInformation, colors }));
                 setPixelData(pixelData);
-                console.log(data);
             })
             .catch((error) => {
                 console.log(error);

@@ -30,7 +30,7 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
-            ignore: ['settings.json', 'monitorConfig.json'],
+            ignore: ['settings.json', 'monitorConfig.json', 'colors.json'],
         });
     } catch (e) {
         console.log(e);
@@ -199,6 +199,13 @@ ipcMain.handle(
     }
 );
 
+ipcMain.handle(
+    Constants.Channels.saveColorsFile,
+    async (event, colorUpdate) => {
+        return await updateColorsJSON(colorUpdate);
+    }
+);
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data
@@ -261,7 +268,7 @@ const initSettings = async () => {
                     }
                 });
             } else {
-                updateColorssJSON(annotationColors).then(resolve).catch(reject);
+                updateColorsJSON(annotationColors).then(resolve).catch(reject);
             }
         })
     );
@@ -289,7 +296,7 @@ const updateSettingsJSON = async (newSettings) => {
     });
 };
 
-const updateColorssJSON = async (newColors) => {
+const updateColorsJSON = async (newColors) => {
     return new Promise((resolve, reject) => {
         const colorsString = JSON.stringify(newColors);
         fs.writeFile(COLORS_FILE_PATH, colorsString, (err) => {

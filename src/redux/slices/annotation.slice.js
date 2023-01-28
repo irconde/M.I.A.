@@ -1,10 +1,52 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import randomColor from 'randomcolor';
+import { Channels } from '../../utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
+
+export const saveColorsFile = createAsyncThunk(
+    'annotations/saveColors',
+    async (payload, { getState, rejectWithValue }) => {
+        const { categoryName, color } = payload;
+        const state = getState();
+        const { annotation } = state;
+        let colorUpdate = [];
+        if (annotation.colors.length > 0) {
+            const foundIndex = annotation.colors.findIndex(
+                (color) => color.categoryName === categoryName
+            );
+            if (foundIndex === -1) {
+                colorUpdate = JSON.parse(JSON.stringify(annotation.colors));
+                colorUpdate.push(payload);
+            } else {
+                if (annotation.colors[foundIndex].color !== color) {
+                    colorUpdate = JSON.parse(JSON.stringify(annotation.colors));
+                    colorUpdate[foundIndex].color = color;
+                }
+            }
+        } else {
+            colorUpdate.push(payload);
+        }
+
+        await ipcRenderer
+            .invoke(Channels.saveColorsFile, colorUpdate)
+            .then(() => {
+                return colorUpdate;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+
+        return colorUpdate;
+    }
+);
 
 const initialState = {
     annotations: [],
     categories: [],
     selectedAnnotation: null,
+    colors: [],
 };
 
 const annotationSlice = createSlice({
@@ -12,19 +54,34 @@ const annotationSlice = createSlice({
     initialState,
     reducers: {
         addAnnotationArray: (state, action) => {
-            const { annotations, categories } = action.payload;
+            const { annotationInformation, colors } = action.payload;
+            const { annotations, categories } = annotationInformation;
+            state.colors = colors;
             if (annotations?.length > 0) {
                 annotations.forEach((annotation) => {
                     const categoryNameIdx = categories.findIndex(
                         (el) => el.id === annotation.category_id
                     );
+
+                    let annotationColor = randomColor({
+                        seed: annotation.category_id,
+                        hue: 'random',
+                        luminosity: 'bright',
+                    });
+                    if (categoryNameIdx !== -1) {
+                        const foundColorIdx = colors.findIndex(
+                            (color) =>
+                                color.categoryName ===
+                                categories[categoryNameIdx].name
+                        );
+
+                        if (foundColorIdx !== -1) {
+                            annotationColor = colors[foundColorIdx].color;
+                        }
+                    }
                     state.annotations.push({
                         ...annotation,
-                        color: randomColor({
-                            seed: annotation.category_id,
-                            hue: 'random',
-                            luminosity: 'bright',
-                        }),
+                        color: annotationColor,
                         categoryName:
                             categoryNameIdx !== -1
                                 ? categories[categoryNameIdx].name
@@ -109,6 +166,18 @@ const annotationSlice = createSlice({
             if (state.selectedAnnotation?.categoryName === categoryName) {
                 state.selectedAnnotation.color = color;
             }
+        },
+    },
+    extraReducers: {
+        [saveColorsFile.fulfilled]: (state, { payload }) => {
+            state.colors = payload;
+        },
+        [saveColorsFile.pending]: (state, { payload }) => {
+            //
+        },
+        [saveColorsFile.rejected]: (state, { payload }) => {
+            console.log('rejected');
+            console.log(payload);
         },
     },
 });

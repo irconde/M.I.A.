@@ -120,6 +120,7 @@ export const DEVICE_TYPE = {
 };
 
 export const Channels = {
+    saveColorsFile: 'save-colors-file',
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
