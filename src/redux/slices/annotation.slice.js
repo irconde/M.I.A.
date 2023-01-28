@@ -93,6 +93,12 @@ const annotationSlice = createSlice({
                 }
             });
         },
+        deleteSelectedAnnotation: (state, action) => {
+            state.annotations = state.annotations.filter(
+                (annotation) => annotation.id !== state.selectedAnnotation.id
+            );
+            state.selectedAnnotation = null;
+        },
     },
 });
 
@@ -102,6 +108,7 @@ export const {
     clearAnnotationSelection,
     toggleVisibility,
     toggleCategoryVisibility,
+    deleteSelectedAnnotation,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;

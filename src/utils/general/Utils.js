@@ -5,6 +5,7 @@ import * as constants from '../enums/Constants';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
+import { cornerstone } from '../../components/image-display/image-display.component';
 
 const cloneDeep = require('lodash.clonedeep');
 
@@ -911,6 +912,14 @@ export default class Utils {
                 Math.pow(position1.y - position2.y, 2)
         );
     }
+
+    static dispatchAndUpdateImage = (dispatch, action, args) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            dispatch(action(args));
+            cornerstone.updateImage(element, true);
+        }
+    };
 
     /**
      * Indicates if a point lies on a line segment defined by two other points

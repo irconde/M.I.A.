@@ -5,7 +5,7 @@ import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
 import MovementIcon from '../../icons/detection-context-menu/movement-icon/movement.icon';
 import * as constants from '../../utils/enums/Constants';
 import { editionMode } from '../../utils/enums/Constants';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DeleteWidget,
@@ -19,8 +19,13 @@ import {
     getAnnotationContextPosition,
     getAnnotationContextVisible,
     getEditionMode,
+    updateAnnotationContextPosition,
 } from '../../redux/slices/ui.slice';
-import { getSelectedAnnotationColor } from '../../redux/slices/annotation.slice';
+import {
+    deleteSelectedAnnotation,
+    getSelectedAnnotationColor,
+} from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
@@ -32,14 +37,34 @@ const AnnotationContextMenuComponent = () => {
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
     const position = useSelector(getAnnotationContextPosition);
+    const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
-        if ([...Object.values(constants.editionMode)].includes(type)) {
-            console.log(`type: ${type}`);
-        } else {
-            throw new Error(
-                `${type} is not a valid option for DetectionContextMenu click`
-            );
+        switch (type) {
+            case constants.editionMode.MOVE:
+                console.log('moving');
+                break;
+            case constants.editionMode.COLOR:
+                console.log('coloring');
+                break;
+            case constants.editionMode.LABEL:
+                console.log('labeling');
+                break;
+            case constants.editionMode.POLYGON:
+                console.log('polying');
+                break;
+            case constants.editionMode.BOUNDING:
+                console.log('bounding');
+                break;
+            case constants.editionMode.DELETE:
+                dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    deleteSelectedAnnotation
+                );
+                break;
+            default:
+                console.log('NIHIL');
         }
     };
 
