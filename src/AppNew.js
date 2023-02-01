@@ -14,6 +14,7 @@ import SideMenuComponent from './components/side-menu/side-menu.component';
 import ContactModal from './components/contact-modal/contact-modal.component';
 import AnnotationContextMenuComponent from './components/detection-context/annotation-context-menu.component';
 import ColorPickerComponent from './components/color/color-picker.component';
+import EditLabelComponent from './components/edit-label/edit-label.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -91,6 +92,7 @@ const AppNew = () => {
             <SideMenuComponent />
             <AnnotationContextMenuComponent />
             <ColorPickerComponent />
+            <EditLabelComponent />
         </div>
     );
 };

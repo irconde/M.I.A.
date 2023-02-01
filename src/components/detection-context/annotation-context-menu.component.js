@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -22,6 +22,7 @@ import {
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateColorPickerVisibility,
+    updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import {
     deleteSelectedAnnotation,
@@ -42,10 +43,6 @@ const AnnotationContextMenuComponent = () => {
     const selectedOption = useSelector(getEditionMode);
     const position = useSelector(getAnnotationContextPosition);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
-    const selectedAnnotationRef = useRef(selectedAnnotation);
-    useEffect(() => {
-        selectedAnnotationRef.current = selectedAnnotation;
-    }, [selectedAnnotation]);
     const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
@@ -58,7 +55,8 @@ const AnnotationContextMenuComponent = () => {
                 dispatch(updateColorPickerVisibility(true));
                 break;
             case constants.editionMode.LABEL:
-                console.log('labeling');
+                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateEditLabelVisibility(true));
                 break;
             case constants.editionMode.POLYGON:
                 console.log('polying');

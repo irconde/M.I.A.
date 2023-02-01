@@ -206,4 +206,13 @@ export const getSelectedAnnotationColor = (state) => {
     }
 };
 
+export const getAnnotationCategories = (state) => {
+    if (state.annotation.categories.length > 0) {
+        const result = [];
+        state.annotation.categories.forEach((category) => {
+            result.push(category.name);
+        });
+    } else return [];
+};
+
 export default annotationSlice.reducer;

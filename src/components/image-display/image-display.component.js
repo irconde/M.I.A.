@@ -19,6 +19,7 @@ import {
     selectAnnotation,
 } from '../../redux/slices/annotation.slice';
 import {
+    clearAnnotationWidgets,
     updateAnnotationContextPosition,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
@@ -151,7 +152,7 @@ const ImageDisplayComponent = () => {
                 renderAnnotationContextMenu(event, annotations[clickedPos]);
             } else {
                 dispatch(clearAnnotationSelection());
-                dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
+                dispatch(clearAnnotationWidgets());
             }
             cornerstone.updateImage(viewportRef.current, true);
         }
