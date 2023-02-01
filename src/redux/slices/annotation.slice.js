@@ -176,7 +176,6 @@ const annotationSlice = createSlice({
             //
         },
         [saveColorsFile.rejected]: (state, { payload }) => {
-            console.log('rejected');
             console.log(payload);
         },
     },

@@ -699,7 +699,7 @@ export default class Utils {
      * @returns {Array<{x: number, y: number}>} - List of handles, i.e., the vertices, of a polygon
      */
     static coordArrayToPolygonData(coordArray) {
-        let data = {};
+        let data = [];
         let count = 0;
         for (let i = 0; i < coordArray.length; i += 2) {
             let x = coordArray[i];
@@ -823,14 +823,18 @@ export default class Utils {
      * @param {Array<{x: number, y: number}>} polygonCoords - Array of polygon mask coordinates
      */
     static renderPolygonMasks(context, polygonCoords) {
-        let index = 0;
-        context.beginPath();
-        context.moveTo(polygonCoords[index].x, polygonCoords[index].y);
-        for (let i = index; i < polygonCoords.length; i++) {
-            context.lineTo(polygonCoords[i].x, polygonCoords[i].y);
+        try {
+            let index = 0;
+            context.beginPath();
+            context.moveTo(polygonCoords[index].x, polygonCoords[index].y);
+            for (let i = index; i < polygonCoords.length; i++) {
+                context.lineTo(polygonCoords[i].x, polygonCoords[i].y);
+            }
+            context.closePath();
+            context.fill();
+        } catch (e) {
+            console.log(e);
         }
-        context.closePath();
-        context.fill();
     }
 
     /**

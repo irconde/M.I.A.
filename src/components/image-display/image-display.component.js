@@ -225,17 +225,14 @@ const ImageDisplayComponent = () => {
             );
 
             context.globalAlpha = 0.5;
-            /*if (data[j].polygonMask.length > 0) {
-                // Polygon mask rendering
-                this.renderPolygonMasks(data[j].polygonMask, context);
-            } else {
-                // Binary mask rendering
-                if (
-                    this.props.currentFileFormat !==
-                    constants.SETTINGS.ANNOTATIONS.COCO
-                )
-                    Utils.renderBinaryMasks(data[j].binaryMask, context);
-            }*/
+            if (annotations[j].segmentation.length > 0) {
+                annotations[j].segmentation.forEach((segment) => {
+                    Utils.renderPolygonMasks(
+                        context,
+                        Utils.coordArrayToPolygonData(segment)
+                    );
+                });
+            }
 
             context.globalAlpha = 1.0;
 

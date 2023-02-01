@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -25,9 +25,11 @@ import {
 } from '../../redux/slices/ui.slice';
 import {
     deleteSelectedAnnotation,
+    getSelectedAnnotation,
     getSelectedAnnotationColor,
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
+import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
@@ -39,6 +41,11 @@ const AnnotationContextMenuComponent = () => {
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
     const position = useSelector(getAnnotationContextPosition);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
+    const selectedAnnotationRef = useRef(selectedAnnotation);
+    useEffect(() => {
+        selectedAnnotationRef.current = selectedAnnotation;
+    }, [selectedAnnotation]);
     const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
@@ -104,22 +111,46 @@ const AnnotationContextMenuComponent = () => {
                                 />
                             </IconContainer>
                         </Tooltip>
-                        <Tooltip
-                            title="Edit mask annotation"
-                            placement="bottom">
-                            <IconContainer
-                                onClick={() => handleClick(editionMode.POLYGON)}
-                                selected={
-                                    selectedOption === editionMode.POLYGON
-                                }>
-                                <PolygonIcon
-                                    color={'#464646'}
-                                    border={'#464646'}
-                                    width={'31px'}
-                                    height={'31px'}
-                                />
-                            </IconContainer>
-                        </Tooltip>
+                        {selectedAnnotation?.bbox?.length > 0 ? (
+                            <Tooltip
+                                title="Edit box annotation"
+                                placement="bottom">
+                                <IconContainer
+                                    onClick={() =>
+                                        handleClick(editionMode.BOUNDING)
+                                    }
+                                    selected={
+                                        selectedOption === editionMode.BOUNDING
+                                    }>
+                                    <RectangleIcon
+                                        color={'#464646'}
+                                        border={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
+                                </IconContainer>
+                            </Tooltip>
+                        ) : null}
+                        {selectedAnnotation?.segmentation?.length > 0 ? (
+                            <Tooltip
+                                title="Edit mask annotation"
+                                placement="bottom">
+                                <IconContainer
+                                    onClick={() =>
+                                        handleClick(editionMode.POLYGON)
+                                    }
+                                    selected={
+                                        selectedOption === editionMode.POLYGON
+                                    }>
+                                    <PolygonIcon
+                                        color={'#464646'}
+                                        border={'#464646'}
+                                        width={'31px'}
+                                        height={'31px'}
+                                    />
+                                </IconContainer>
+                            </Tooltip>
+                        ) : null}
                         <Tooltip
                             title="Translate annotation"
                             placement="bottom">
