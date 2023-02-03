@@ -12,7 +12,7 @@ export const ImageContainer = styled.div`
     justify-content: center;
     width: 197px;
     height: ${(props) =>
-        props.loading === 'true' ? '145px' : `${props.thumbnailHeight}px`};
+        props.loading ? '145px' : `${props.thumbnailHeight}px`};
 `;
 
 export const LazyImageTextContainer = styled.div`

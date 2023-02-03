@@ -64,6 +64,29 @@ class Thumbnails {
                 console.log('SAVED IN DRAIN', this.#thumbnailsObj);
             });
         });
+
+        /**
+         * Loads the specified thumbnail if the file name provided exists. If so it will
+         * load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
+         * @param {string} args File path sent from react
+         * @returns {string}
+         */
+        ipcMain.handle(
+            Channels.getThumbnail,
+            async (event, { fileName, filePath }) => {
+                if (!this.#thumbnailsObj[fileName]) {
+                    throw new Error('Thumbnail does not exist for that file');
+                } else {
+                    const fileData = fs.readFileSync(filePath);
+                    return {
+                        fileName,
+                        fileData: Buffer.from(fileData).toString('base64'),
+                        // TODO: figure out what goes here
+                        isDetections: true,
+                    };
+                }
+            }
+        );
     }
 
     /**

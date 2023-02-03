@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
-import { getCollapsedLazyMenu } from '../../redux/slices-old/ui/uiSlice';
+import { useDispatch } from 'react-redux';
 import { Channels } from '../../utils/enums/Constants';
-import Utils from '../../utils/general/Utils';
 import {
     FolderIconWrapper,
     ImagesInWorkspace,
@@ -37,24 +35,25 @@ function LazyImageMenuComponent(props) {
     // });
     // const enableMenu = useSelector(getLocalFileOpen);
     const enableMenu = true;
-    const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
+    const collapsedLazyMenu = false;
+    // const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
-    const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
-    useEffect(() => {
-        if (prevIsMenuCollapsed !== collapsedLazyMenu) {
-            if (collapsedLazyMenu === true) {
-                setTranslateStyle({
-                    transform: `translate(${-Math.abs(256 + 10)}px)`,
-                });
-            } else {
-                setTranslateStyle({
-                    transform: `translate(0)`,
-                });
-            }
-        }
-    });
+    // const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
+    // useEffect(() => {
+    //     if (prevIsMenuCollapsed !== collapsedLazyMenu) {
+    //         if (collapsedLazyMenu === true) {
+    //             setTranslateStyle({
+    //                 transform: `translate(${-Math.abs(256 + 10)}px)`,
+    //             });
+    //         } else {
+    //             setTranslateStyle({
+    //                 transform: `translate(0)`,
+    //             });
+    //         }
+    //     }
+    // });
 
     const addElectronChannels = () => {
         const {
@@ -111,7 +110,7 @@ function LazyImageMenuComponent(props) {
                 <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu} />
             </LazyImageMenuContainer>
         );
-    } else if (!collapsedLazyMenu) {
+    } else {
         return (
             <LazyImageMenuContainer
                 onScroll={handleMenuContainerScroll}
@@ -131,7 +130,7 @@ function LazyImageMenuComponent(props) {
                     {Object.keys(thumbnails).map((fileName) => (
                         <LazyImageContainerComponent
                             key={fileName}
-                            file={fileName}
+                            fileName={fileName}
                             filePath={thumbnails[fileName]}
                         />
                     ))}

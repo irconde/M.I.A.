@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { getCurrentFile } from '../../redux/slices-old/server/serverSlice';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
@@ -25,7 +24,11 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  * @component
  *
  */
-function LazyImageContainerComponent(props) {
+function LazyImageContainerComponent({
+    filePath,
+    fileName,
+    getSpecificFileFromLocalDirectory,
+}) {
     const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState('auto');
@@ -69,7 +72,7 @@ function LazyImageContainerComponent(props) {
         if (!generatingThumbnails) {
             if (isOnScreen && thumbnailSrc === null) {
                 ipcRenderer
-                    .invoke(Channels.getThumbnail, props.file)
+                    .invoke(Channels.getThumbnail, { fileName, filePath })
                     .then((result) => {
                         const blobData = Utils.b64toBlob(
                             result.fileData,
@@ -90,25 +93,27 @@ function LazyImageContainerComponent(props) {
             }
         }
     });
-    const currentFileName = useSelector(getCurrentFile);
-    let splitPath;
-    if (navigator.platform === 'Win32') {
-        splitPath = props.file.split('\\');
-    } else {
-        splitPath = props.file.split('/');
-    }
-    const thisFileName = splitPath[splitPath.length - 1];
-    const selected = currentFileName === thisFileName;
+    const currentFileName = '';
+    // const currentFileName = useSelector(getCurrentFile);
+    // let splitPath;
+    // if (navigator.platform === 'Win32') {
+    //     splitPath = props.file.split('\\');
+    // } else {
+    //     splitPath = props.file.split('/');
+    // }
+    // const thisFileName = splitPath[splitPath.length - 1];
+    // const selected = currentFileName === thisFileName;
     return (
         <ImageContainer
             ref={containerElement}
-            selected={selected}
+            selected={fileName === currentFileName}
             thumbnailHeight={thumbnailHeight}
-            loading={generatingThumbnails.toString()}>
+            loading={generatingThumbnails}>
             {thumbnailSrc !== null ? (
                 <ThumbnailContainer
                     onClick={() =>
-                        props.getSpecificFileFromLocalDirectory(props.file)
+                        // TODO: figure out what goes here
+                        getSpecificFileFromLocalDirectory(filePath)
                     }>
                     <img
                         onLoad={() => {
@@ -117,13 +122,13 @@ function LazyImageContainerComponent(props) {
                             );
                         }}
                         src={thumbnailSrc}
-                        alt={thisFileName}
+                        alt={fileName}
                     />
                 </ThumbnailContainer>
             ) : null}
             <LazyImageTextContainer>
-                <Tooltip title={props.file}>
-                    <LazyImageText>{thisFileName}</LazyImageText>
+                <Tooltip title={fileName}>
+                    <LazyImageText>{fileName}</LazyImageText>
                 </Tooltip>
                 <LazyImageIconWrapper>
                     {numOfViews > 1 ? (
@@ -155,10 +160,8 @@ function LazyImageContainerComponent(props) {
 }
 
 LazyImageContainerComponent.propTypes = {
-    /**
-     * Name of file
-     */
-    file: PropTypes.string,
+    fileName: PropTypes.string,
+    filePath: PropTypes.string,
     /**
      * Calls the Electron channel to invoke a specific file from the selected file system folder.
      */
