@@ -62,27 +62,32 @@ function LazyImageMenuComponent(props) {
             updateThumbnails,
             requestInitialThumbnailsList,
         } = Channels;
-        ipcRenderer.on(removeThumbnail, (e, removedThumbnail) => {
-            console.log('REMOVE');
-            console.log(removedThumbnail);
-        });
-        ipcRenderer.on(addThumbnail, (e, addedThumbnail) => {
-            console.log('ADDED');
-            console.log(addedThumbnail);
-        });
-        ipcRenderer.on(updateThumbnails, (e, thumbnailsObj) => {
-            console.log('UPDATE');
-            console.log(thumbnailsObj);
-        });
+        ipcRenderer
+            .on(removeThumbnail, (e, removedThumbnailName) => {
+                // must use a function here to get the most up-to-date state
+                setThumbnails((thumbnails) => {
+                    const updatedThumbnails = { ...thumbnails };
+                    delete updatedThumbnails[removedThumbnailName];
+                    return updatedThumbnails;
+                });
+            })
+            .on(addThumbnail, (e, addedThumbnail) => {
+                // must use a function here to get the most up-to-date state
+                setThumbnails((thumbnails) => ({
+                    ...thumbnails,
+                    ...addedThumbnail,
+                }));
+            })
+            .on(updateThumbnails, (e, thumbnailsObj) => {
+                setThumbnails(thumbnailsObj);
+            });
         ipcRenderer
             .invoke(requestInitialThumbnailsList)
             .then((thumbnails) => {
                 console.log('INIT');
-                console.log(thumbnails);
                 setThumbnails(thumbnails);
             })
-            .catch((e) => {
-                console.log(e);
+            .catch(() => {
                 console.log('no thumbnails to begin with');
             });
     };

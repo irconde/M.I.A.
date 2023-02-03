@@ -12,8 +12,6 @@ import {
     LazyImageTextContainer,
     ThumbnailContainer,
 } from './lazy-image-container.styles';
-import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
-import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
 import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
@@ -36,116 +34,92 @@ function LazyImageContainerComponent({
      * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
      * using this handler. Which sets the thumbnail height passed into the container element of the image.
      * This is namely so that when an image goes offscreen, we keep the container the same size of that image.
-     * @param {number} height
      */
-    const thumbnailHeightHandler = (height) => {
+    const thumbnailHeightHandler = () => {
+        const height = containerElement.current.clientHeight;
         if (height !== thumbnailHeight) setThumbnailHeight(height);
     };
     const isOnScreen = Utils.useOnScreen(containerElement);
-    const [thumbnailSrc, setThumbnailSrc] = useState(null);
-    const [numOfViews, SetNumOfViews] = useState();
-    const [isDetections, SetIsDetections] = useState();
+    const [thumbnailSrc, setThumbnailSrc] = useState('');
+    const [isAnnotations, setIsAnnotations] = useState();
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
      * @param {Blob} [blobData=null]
-     * @param {Number} views
-     * @param {Boolean} detections
+     * @param {Boolean} annotation
      */
-    const thumbnailHandler = (blobData = null, views, detections) => {
+    const thumbnailHandler = (blobData = null, annotation) => {
         setThumbnailSrc(URL.createObjectURL(blobData));
-        if (numOfViews !== views) SetNumOfViews(views);
-        if (isDetections !== detections) SetIsDetections(detections);
+        if (isAnnotations !== annotation) setIsAnnotations(annotation);
     };
 
     /**
      * Clears/revokes the current display thumbnail blob to free up memory
      */
     const clearThumbnail = () => {
-        if (thumbnailSrc !== null) {
+        if (thumbnailSrc) {
             URL.revokeObjectURL(thumbnailSrc);
             setThumbnailSrc(null);
         }
     };
 
     useLayoutEffect(() => {
-        if (!generatingThumbnails) {
-            if (isOnScreen && thumbnailSrc === null) {
-                ipcRenderer
-                    .invoke(Channels.getThumbnail, { fileName, filePath })
-                    .then((result) => {
-                        const blobData = Utils.b64toBlob(
-                            result.fileData,
-                            'image/png'
-                        );
-                        thumbnailHandler(
-                            blobData,
-                            result.numOfViews,
-                            result.isDetections
-                        );
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            }
-            if (!isOnScreen && thumbnailSrc !== null) {
-                clearThumbnail();
-            }
+        if (isOnScreen && !thumbnailSrc) {
+            ipcRenderer
+                .invoke(Channels.getThumbnail, { fileName, filePath })
+                .then(({ fileData, isAnnotations }) => {
+                    const blobData = Utils.b64toBlob(fileData, 'image/png');
+                    thumbnailHandler(blobData, isAnnotations);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else if (!isOnScreen) {
+            clearThumbnail();
         }
-    });
+    }, [isOnScreen]);
+
+    // TODO: get this from Redux
     const currentFileName = '';
-    // const currentFileName = useSelector(getCurrentFile);
-    // let splitPath;
-    // if (navigator.platform === 'Win32') {
-    //     splitPath = props.file.split('\\');
-    // } else {
-    //     splitPath = props.file.split('/');
-    // }
-    // const thisFileName = splitPath[splitPath.length - 1];
-    // const selected = currentFileName === thisFileName;
     return (
         <ImageContainer
             ref={containerElement}
             selected={fileName === currentFileName}
             thumbnailHeight={thumbnailHeight}
             loading={generatingThumbnails}>
-            {thumbnailSrc !== null ? (
+            {thumbnailSrc && (
                 <ThumbnailContainer
                     onClick={() =>
                         // TODO: figure out what goes here
                         getSpecificFileFromLocalDirectory(filePath)
                     }>
                     <img
-                        onLoad={() => {
-                            thumbnailHeightHandler(
-                                containerElement.current.clientHeight
-                            );
-                        }}
+                        onLoad={thumbnailHeightHandler}
                         src={thumbnailSrc}
                         alt={fileName}
                     />
                 </ThumbnailContainer>
-            ) : null}
+            )}
             <LazyImageTextContainer>
                 <Tooltip title={fileName}>
                     <LazyImageText>{fileName}</LazyImageText>
                 </Tooltip>
-                <LazyImageIconWrapper>
-                    {numOfViews > 1 ? (
-                        <TwoViewIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
-                        />
-                    ) : (
-                        <SingleViewIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
-                        />
-                    )}
-                </LazyImageIconWrapper>
-                {isDetections === true ? (
+                {/*<LazyImageIconWrapper>*/}
+                {/*    {numOfViews > 1 ? (*/}
+                {/*        <TwoViewIcon*/}
+                {/*            width={'20px'}*/}
+                {/*            height={'20px'}*/}
+                {/*            color={'#E3E3E3'}*/}
+                {/*        />*/}
+                {/*    ) : (*/}
+                {/*        <SingleViewIcon*/}
+                {/*            width={'20px'}*/}
+                {/*            height={'20px'}*/}
+                {/*            color={'#E3E3E3'}*/}
+                {/*        />*/}
+                {/*    )}*/}
+                {/*</LazyImageIconWrapper>*/}
+                {isAnnotations === true ? (
                     <LazyImageIconWrapper>
                         <AnnotationsIcon
                             width={'20px'}

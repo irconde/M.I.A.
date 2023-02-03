@@ -77,12 +77,12 @@ class Thumbnails {
                 if (!this.#thumbnailsObj[fileName]) {
                     throw new Error('Thumbnail does not exist for that file');
                 } else {
-                    const fileData = fs.readFileSync(filePath);
+                    // const fileData = fs.readFileSync(filePath);
+                    const fileData = await fs.promises.readFile(filePath);
                     return {
-                        fileName,
                         fileData: Buffer.from(fileData).toString('base64'),
                         // TODO: figure out what goes here
-                        isDetections: true,
+                        isAnnotations: true,
                     };
                 }
             }
