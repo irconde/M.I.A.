@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCollapsedLazyMenu } from '../../redux/slices-old/ui/uiSlice';
 import { Channels } from '../../utils/enums/Constants';
 import Utils from '../../utils/general/Utils';
-import LazyImageContainer from './lazy-image-container.component';
 import {
     FolderIconWrapper,
     ImagesInWorkspace,
@@ -14,6 +13,7 @@ import {
 } from './lazy-image-menu.styles';
 import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import { initSettings } from '../../redux/slices/settings.slice';
+import LazyImageContainerComponent from './lazy-image-container.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -24,7 +24,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  *
  */
 function LazyImageMenuComponent(props) {
-    const [thumbnails, setThumbnails] = useState([]);
+    const [thumbnails, setThumbnails] = useState({});
 
     useEffect(() => {
         // TODO: move this to lazy image component
@@ -82,7 +82,8 @@ function LazyImageMenuComponent(props) {
                 console.log(thumbnails);
                 setThumbnails(thumbnails);
             })
-            .catch(() => {
+            .catch((e) => {
+                console.log(e);
                 console.log('no thumbnails to begin with');
             });
     };
@@ -125,29 +126,13 @@ function LazyImageMenuComponent(props) {
                     </FolderIconWrapper>
                     Images in Workspace
                 </ImagesInWorkspace>
-                {/*<LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>*/}
-                {/*    {props.thumbnails !== null*/}
-                {/*        ? props.thumbnails.map((file, index) => {*/}
-                {/*              return (*/}
-                {/*                  <LazyImageContainer*/}
-                {/*                      getSpecificFileFromLocalDirectory={*/}
-                {/*                          props.getSpecificFileFromLocalDirectory*/}
-                {/*                      }*/}
-                {/*                      key={index}*/}
-                {/*                      file={file}*/}
-                {/*                  />*/}
-                {/*              );*/}
-                {/*          })*/}
-                {/*        : null}*/}
-                {/*</LazyImagesContainer>*/}
+
                 <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
-                    {thumbnails.map((file, index) => (
-                        <LazyImageContainer
-                            getSpecificFileFromLocalDirectory={
-                                props.getSpecificFileFromLocalDirectory
-                            }
-                            key={index}
-                            file={file}
+                    {Object.keys(thumbnails).map((fileName) => (
+                        <LazyImageContainerComponent
+                            key={fileName}
+                            file={fileName}
+                            filePath={thumbnails[fileName]}
                         />
                     ))}
                 </LazyImagesContainer>

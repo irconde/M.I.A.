@@ -6,8 +6,8 @@ const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
 export const LazyImageMenuContainer = styled.div`
     position: fixed;
     left: 0;
-    top: 0;
-    height: 100%;
+    bottom: 0;
+    height: calc(100% - 3.375rem);
     overflow-x: hidden;
     overflow-y: visible;
     background-color: #292929;
