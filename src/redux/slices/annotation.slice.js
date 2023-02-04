@@ -223,6 +223,7 @@ export const getAnnotationCategories = (state) => {
         state.annotation.categories.forEach((category) => {
             result.push(category.name);
         });
+        return result;
     } else return [];
 };
 
