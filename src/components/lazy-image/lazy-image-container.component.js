@@ -7,10 +7,12 @@ import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
+    LazyImageIconWrapper,
     LazyImageText,
     LazyImageTextContainer,
     ThumbnailContainer,
 } from './lazy-image-container.styles';
+import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -96,6 +98,15 @@ function LazyImageContainerComponent({
                         src={thumbnailSrc}
                         alt={fileName}
                     />
+                    {isAnnotations && (
+                        <LazyImageIconWrapper>
+                            <AnnotationIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        </LazyImageIconWrapper>
+                    )}
                 </ThumbnailContainer>
             )}
             <LazyImageTextContainer>

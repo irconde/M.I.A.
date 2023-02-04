@@ -26,7 +26,7 @@ export const LazyImageMenuContainer = styled.div`
     }
 
     ::-webkit-scrollbar-thumb {
-        background-color: yellow;
+        background-color: white;
     }
 `;
 

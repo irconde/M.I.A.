@@ -1,25 +1,26 @@
 import styled from 'styled-components';
-import React from 'react';
 import { LAZY_SIDE_MENU_WIDTH } from './lazy-image-menu.styles';
+import { colors } from '../../utils/enums/Constants';
 
-const TEXT_BOX_HEIGHT = '2rem';
 export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
     border: ${({ selected }) =>
         selected ? '4px solid #367eff' : '1px solid fff'};
     overflow-x: hidden;
-    margin-bottom: 60px;
     justify-content: center;
+    margin-bottom: 0.2rem;
+    align-items: center;
     width: ${LAZY_SIDE_MENU_WIDTH};
     height: ${(props) =>
         props.loading ? '145px' : `${props.thumbnailHeight}px`};
 `;
 
 export const LazyImageTextContainer = styled.div`
-    height: ${TEXT_BOX_HEIGHT};
+    height: 2.5rem;
     display: flex;
     align-items: center;
+    width: 197px;
 `;
 
 export const LazyImageText = styled.span`
@@ -37,16 +38,28 @@ export const LazyImageText = styled.span`
     text-overflow: ellipsis;
     max-width: 117px;
     margin-right: 4px;
+    font-family: 'Noto Sans JP', serif;
 `;
 
 export const ThumbnailContainer = styled.div`
     display: flex;
     cursor: pointer;
     border-radius: 6px;
+    position: relative;
 `;
 
 export const LazyImageIconWrapper = styled.div`
-    margin-right: 4px;
-    margin-left: 4px;
+    position: absolute;
     display: flex;
+    width: 2rem;
+    aspect-ratio: 1;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: ${colors.BLUE};
+    padding: 0.2rem;
+    bottom: 0;
+    right: 0;
+    transform: translate(30%, 30%);
+    box-shadow: -1px -1px 13px 1px rgba(0, 0, 0, 0.3);
 `;
