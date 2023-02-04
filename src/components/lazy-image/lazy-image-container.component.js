@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
 import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
-import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
     LazyImageIconWrapper,
@@ -27,9 +26,16 @@ function LazyImageContainerComponent({
     fileName,
     getSpecificFileFromLocalDirectory,
 }) {
+    // TODO 1: get this from Redux
+    const currentFileName = '';
     const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState('auto');
+
+    const isOnScreen = Utils.useOnScreen(containerElement);
+    const [thumbnailSrc, setThumbnailSrc] = useState('');
+    const [isAnnotations, setIsAnnotations] = useState(false);
+
     /**
      * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
      * using this handler. Which sets the thumbnail height passed into the container element of the image.
@@ -39,9 +45,7 @@ function LazyImageContainerComponent({
         const height = containerElement.current.clientHeight;
         if (height !== thumbnailHeight) setThumbnailHeight(height);
     };
-    const isOnScreen = Utils.useOnScreen(containerElement);
-    const [thumbnailSrc, setThumbnailSrc] = useState('');
-    const [isAnnotations, setIsAnnotations] = useState();
+
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
@@ -79,8 +83,6 @@ function LazyImageContainerComponent({
         }
     }, [isOnScreen]);
 
-    // TODO: get this from Redux
-    const currentFileName = '';
     return (
         <ImageContainer
             ref={containerElement}
@@ -90,7 +92,7 @@ function LazyImageContainerComponent({
             {thumbnailSrc && (
                 <ThumbnailContainer
                     onClick={() =>
-                        // TODO: figure out what goes here
+                        // TODO 2: figure out what goes here
                         getSpecificFileFromLocalDirectory(filePath)
                     }>
                     <img
@@ -110,9 +112,7 @@ function LazyImageContainerComponent({
                 </ThumbnailContainer>
             )}
             <LazyImageTextContainer>
-                <Tooltip title={fileName}>
-                    <LazyImageText>{fileName}</LazyImageText>
-                </Tooltip>
+                <LazyImageText>{fileName}</LazyImageText>
             </LazyImageTextContainer>
         </ImageContainer>
     );
