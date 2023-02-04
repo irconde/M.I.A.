@@ -236,7 +236,7 @@ class Thumbnails {
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
-    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', 'jpeg'];
+    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';

@@ -7,12 +7,10 @@ import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
-    LazyImageIconWrapper,
     LazyImageText,
     LazyImageTextContainer,
     ThumbnailContainer,
 } from './lazy-image-container.styles';
-import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -104,30 +102,6 @@ function LazyImageContainerComponent({
                 <Tooltip title={fileName}>
                     <LazyImageText>{fileName}</LazyImageText>
                 </Tooltip>
-                {/*<LazyImageIconWrapper>*/}
-                {/*    {numOfViews > 1 ? (*/}
-                {/*        <TwoViewIcon*/}
-                {/*            width={'20px'}*/}
-                {/*            height={'20px'}*/}
-                {/*            color={'#E3E3E3'}*/}
-                {/*        />*/}
-                {/*    ) : (*/}
-                {/*        <SingleViewIcon*/}
-                {/*            width={'20px'}*/}
-                {/*            height={'20px'}*/}
-                {/*            color={'#E3E3E3'}*/}
-                {/*        />*/}
-                {/*    )}*/}
-                {/*</LazyImageIconWrapper>*/}
-                {isAnnotations === true ? (
-                    <LazyImageIconWrapper>
-                        <AnnotationsIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
-                        />
-                    </LazyImageIconWrapper>
-                ) : null}
             </LazyImageTextContainer>
         </ImageContainer>
     );

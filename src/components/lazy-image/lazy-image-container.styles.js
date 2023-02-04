@@ -1,30 +1,25 @@
 import styled from 'styled-components';
 import React from 'react';
+import { LAZY_SIDE_MENU_WIDTH } from './lazy-image-menu.styles';
 
+const TEXT_BOX_HEIGHT = '2rem';
 export const ImageContainer = styled.div`
     display: flex;
-    border: ${(props) =>
-        props.selected ? '4px solid #367eff' : '1px solid fff'};
+    flex-direction: column;
+    border: ${({ selected }) =>
+        selected ? '4px solid #367eff' : '1px solid fff'};
     overflow-x: hidden;
-    margin: 0 16px 60px 0;
-    border-radius: 6px;
-    background-color: #242424;
+    margin-bottom: 60px;
     justify-content: center;
-    width: 197px;
+    width: ${LAZY_SIDE_MENU_WIDTH};
     height: ${(props) =>
         props.loading ? '145px' : `${props.thumbnailHeight}px`};
 `;
 
 export const LazyImageTextContainer = styled.div`
+    height: ${TEXT_BOX_HEIGHT};
     display: flex;
-    position: absolute;
-    margin-top: 93%;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-content: center;
-    justify-content: flex-start;
-    width: 80%;
-    cursor: default;
+    align-items: center;
 `;
 
 export const LazyImageText = styled.span`

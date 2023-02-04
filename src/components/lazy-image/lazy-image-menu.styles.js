@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
-const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
+export const LAZY_SIDE_MENU_WIDTH = 256 + constants.RESOLUTION_UNIT;
 
 export const LazyImageMenuContainer = styled.div`
     position: fixed;
@@ -20,6 +20,14 @@ export const LazyImageMenuContainer = styled.div`
     z-index: 2;
     width: 256px;
     transform: ${(props) => props.translateStyle};
+
+    ::-webkit-scrollbar {
+        width: 0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: yellow;
+    }
 `;
 
 export const LazyImageMenuPadding = styled.div`
@@ -32,7 +40,7 @@ export const LazyImagesContainer = styled.div`
     flex-flow: row wrap;
     justify-content: center;
     align-items: flex-start;
-    width: ${sideMenuWidth};
+    width: ${LAZY_SIDE_MENU_WIDTH};
     height: ${(props) =>
         props.collapsedLazyMenu === true
             ? document.documentElement.clientHeight
