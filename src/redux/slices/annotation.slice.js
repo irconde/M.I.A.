@@ -199,6 +199,15 @@ const annotationSlice = createSlice({
                 }
             }
         },
+        updateAnnotationBbox: (state, action) => {
+            const { bbox, id } = action.payload;
+            const foundAnnotation = state.annotations.find(
+                (annotation) => annotation.id === id
+            );
+            if (foundAnnotation !== undefined) {
+                foundAnnotation.bbox = bbox;
+            }
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -222,6 +231,7 @@ export const {
     deleteSelectedAnnotation,
     updateAnnotationColor,
     updateAnnotationCategory,
+    updateAnnotationBbox,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;

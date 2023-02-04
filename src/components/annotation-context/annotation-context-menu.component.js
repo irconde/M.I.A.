@@ -45,7 +45,6 @@ const AnnotationContextMenuComponent = () => {
     const position = useSelector(getAnnotationContextPosition);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const dispatch = useDispatch();
-    let toolData = {};
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
         switch (type) {
@@ -93,10 +92,10 @@ const AnnotationContextMenuComponent = () => {
                             y: selectedAnnotation.bbox[1],
                         },
                     },
-                    uuid: selectedAnnotation.id,
+                    id: selectedAnnotation.id,
                     categoryName: selectedAnnotation.categoryName,
                     renderColor: constants.detectionStyle.SELECTED_COLOR,
-                    updatingDetection: true,
+                    updatingAnnotation: true,
                 });
                 Utils.setToolOptions('BoundingBoxDrawing', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,

@@ -169,7 +169,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
                 if (
                     this.options.editionMode == constants.editionMode.NO_TOOL &&
-                    data.updatingDetection === true
+                    data.updatingAnnotation === true
                 ) {
                     if (
                         !data.handles.start.moving &&
@@ -365,7 +365,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 },
             },
             categoryName: constants.commonDetections.UNKNOWN,
-            updatingDetection: false,
+            updatingAnnotation: false,
         };
     }
 }
