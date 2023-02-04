@@ -167,6 +167,16 @@ const annotationSlice = createSlice({
                 state.selectedAnnotation.color = color;
             }
         },
+        updateAnnotationCategory: (state, action) => {
+            // TODO: Check if the new category exists in categories or not
+            const { id, newCategory } = action.payload;
+            const foundAnnotation = state.annotations.find(
+                (annotation) => annotation.id === id
+            );
+            if (foundAnnotation !== undefined) {
+                foundAnnotation.categoryName = newCategory;
+            }
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -189,6 +199,7 @@ export const {
     toggleCategoryVisibility,
     deleteSelectedAnnotation,
     updateAnnotationColor,
+    updateAnnotationCategory,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;

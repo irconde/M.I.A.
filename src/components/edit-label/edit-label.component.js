@@ -17,12 +17,16 @@ import {
     getInputLabel,
     getZoomLevel,
     setInputLabel,
+    updateAnnotationContextVisibility,
+    updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import { cornerstone } from '../image-display/image-display.component';
 import {
     getAnnotationCategories,
     getSelectedAnnotation,
+    updateAnnotationCategory,
 } from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Widget for editing a selected detection's label.
@@ -121,12 +125,13 @@ const EditLabelComponent = () => {
      */
     const submitFromInput = (e) => {
         if (e.key === 'Enter' && e.target.value !== '') {
-            /*
-            onLabelChange(
-                Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
-            );
-
-            dispatch(setInputLabel(''));*/
+            dispatch(updateEditLabelVisibility(false));
+            dispatch(updateAnnotationContextVisibility(true));
+            dispatch(setInputLabel(''));
+            Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
+                id: selectedAnnotation.id,
+                newCategory: newLabel,
+            });
         }
     };
 
