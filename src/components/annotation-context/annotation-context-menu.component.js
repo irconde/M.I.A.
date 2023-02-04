@@ -22,6 +22,7 @@ import {
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateColorPickerVisibility,
+    updateEditionMode,
     updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import {
@@ -44,6 +45,7 @@ const AnnotationContextMenuComponent = () => {
     const position = useSelector(getAnnotationContextPosition);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const dispatch = useDispatch();
+    let toolData = {};
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
         switch (type) {
@@ -63,6 +65,49 @@ const AnnotationContextMenuComponent = () => {
                 break;
             case constants.editionMode.BOUNDING:
                 console.log('bounding');
+                dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState('BoundingBoxDrawing', {
+                    handles: {
+                        start: {
+                            x: selectedAnnotation.bbox[0],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                        end: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                        start_prima: {
+                            x: selectedAnnotation.bbox[0],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                        end_prima: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                    },
+                    uuid: selectedAnnotation.id,
+                    categoryName: selectedAnnotation.categoryName,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    updatingDetection: true,
+                });
+                Utils.setToolOptions('BoundingBoxDrawing', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.BOUNDING,
+                });
+                Utils.setToolActive('BoundingBoxDrawing');
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.BOUNDING
+                );
                 break;
             case constants.editionMode.DELETE:
                 dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));

@@ -5,7 +5,10 @@ import * as constants from '../enums/Constants';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
-import { cornerstone } from '../../components/image-display/image-display.component';
+import {
+    cornerstone,
+    cornerstoneTools,
+} from '../../components/image-display/image-display.component';
 
 const cloneDeep = require('lodash.clonedeep');
 
@@ -922,6 +925,36 @@ export default class Utils {
         if (element !== null) {
             dispatch(action(args));
             cornerstone.updateImage(element, true);
+        }
+    };
+
+    static updateToolState = (toolName, state) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.addToolState(element, toolName, state);
+        }
+    };
+
+    static setToolActive = (toolName) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolActive(toolName, {
+                mouseButtonMask: 1,
+            });
+        }
+    };
+
+    static setToolDisabled = (toolName) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolDisabled(toolName);
+        }
+    };
+
+    static setToolOptions = (toolName, options) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolOptions(toolName, options);
         }
     };
 

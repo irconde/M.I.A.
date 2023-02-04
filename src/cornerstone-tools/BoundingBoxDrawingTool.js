@@ -86,10 +86,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
-        const zoom =
-            element.id === 'dicomImageRight'
-                ? this.options.zoomLevelSide
-                : this.options.zoomLevelTop;
+        const zoom = this.options.zoomLevel;
         const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
@@ -222,17 +219,10 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             constants.detectionStyle.BORDER_WIDTH;
                         context.strokeStyle = data.renderColor;
                         context.fillStyle = data.renderColor;
-                        const className =
-                            this.options.temporaryLabel !== undefined
-                                ? this.options.temporaryLabel
-                                : data.class;
-                        const detectionLabel = Utils.formatDetectionLabel(
-                            className,
-                            data.confidence
-                        );
+                        const categoryName = data.categoryName;
                         const labelSize = Utils.getTextLabelSize(
                             context,
-                            detectionLabel,
+                            categoryName,
                             constants.detectionStyle.LABEL_PADDING * zoom
                         );
                         context.fillRect(
@@ -244,7 +234,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         context.fillStyle =
                             constants.detectionStyle.LABEL_TEXT_COLOR;
                         context.fillText(
-                            detectionLabel,
+                            categoryName,
                             myCoords.x +
                                 constants.detectionStyle.LABEL_PADDING * zoom,
                             myCoords.y -
@@ -254,7 +244,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
                 // Polygon Mask Rendering
                 // First check if it exists, new detections may not have this field built yet
-                if (data.polygonCoords) {
+                /*if (data.polygonCoords) {
                     // Make sure it is non-empty, not all detections will have a mask
                     if (data.polygonCoords.length > 0) {
                         const pixelStart = cornerstone.pixelToCanvas(element, {
@@ -311,7 +301,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         Utils.renderPolygonMasks(context, data.polygonCoords);
                         context.globalAlpha = 1.0;
                     }
-                }
+                }*/
             }
         });
     }
@@ -374,9 +364,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
-            algorithm: constants.OPERATOR,
-            class: constants.commonDetections.UNKNOWN,
-            confidence: 100,
+            categoryName: constants.commonDetections.UNKNOWN,
             updatingDetection: false,
         };
     }
@@ -401,16 +389,15 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
 /**
  *
  * @param {EventData.Context} context
- * @param {{className: string, score: string}}
+ * @param {{categoryName: string}}
  * @param {Array<string>} [options={}]
  * @returns {Array<string>}
  */
 
 // eslint-disable-next-line no-unused-vars
-function _createTextBoxContent(context, { className, score }, options = {}) {
+function _createTextBoxContent(context, { categoryName }, options = {}) {
     const textLines = [];
-    const classInfoString = `${className} - ${score}%`;
-    textLines.push(classInfoString);
+    textLines.push(categoryName);
     return textLines;
 }
 

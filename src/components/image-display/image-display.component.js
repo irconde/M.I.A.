@@ -20,9 +20,11 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
+    getEditionMode,
     updateAnnotationContextPosition,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
+import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -49,7 +51,7 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
-export { cornerstone };
+export { cornerstone, cornerstoneTools };
 
 const ImageDisplayComponent = () => {
     const dispatch = useDispatch();
@@ -61,6 +63,8 @@ const ImageDisplayComponent = () => {
     const [error, setError] = useState('');
     const annotationRef = useRef(annotations);
     const zoomLevel = useRef();
+    const editionMode = useSelector(getEditionMode);
+    const editionModeRef = useRef(editionMode);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -72,6 +76,7 @@ const ImageDisplayComponent = () => {
         const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+        cornerstoneTools.addTool(BoundingBoxDrawingTool);
     };
 
     useEffect(setupCornerstoneJS, []);
@@ -79,6 +84,10 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         annotationRef.current = annotations;
     }, [annotations]);
+
+    useEffect(() => {
+        editionModeRef.current = editionMode;
+    }, [editionMode]);
 
     useEffect(() => {
         const imageElement = viewportRef.current;
@@ -128,6 +137,9 @@ const ImageDisplayComponent = () => {
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
+        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+            zoomLevel: zoomLevel.current,
+        });
         const context = eventData.canvasContext;
         renderAnnotations(context, annotationRef.current);
         startListeningClickEvents();
@@ -153,6 +165,7 @@ const ImageDisplayComponent = () => {
             } else {
                 dispatch(clearAnnotationSelection());
                 dispatch(clearAnnotationWidgets());
+                Utils.setToolDisabled('BoundingBoxDrawing');
             }
             cornerstone.updateImage(viewportRef.current, true);
         }
@@ -205,7 +218,12 @@ const ImageDisplayComponent = () => {
         context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
 
         for (let j = 0; j < annotations.length; j++) {
-            if (!annotations[j].visible) continue;
+            if (
+                !annotations[j].visible ||
+                (annotations[j].selected &&
+                    editionModeRef.current !== constants.editionMode.NO_TOOL)
+            )
+                continue;
             context.strokeStyle = annotations[j].selected
                 ? constants.detectionStyle.SELECTED_COLOR
                 : annotations[j].color;
