@@ -174,7 +174,7 @@ const annotationSlice = createSlice({
                 (annotation) => annotation.id === id
             );
             if (foundAnnotation !== undefined) {
-                foundAnnotation.categoryName = newCategory;
+                foundAnnotation.categoryName = newCategory.toLowerCase();
             }
             const foundCategory = state.categories.find(
                 (category) =>
