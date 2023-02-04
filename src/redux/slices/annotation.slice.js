@@ -176,6 +176,28 @@ const annotationSlice = createSlice({
             if (foundAnnotation !== undefined) {
                 foundAnnotation.categoryName = newCategory;
             }
+            const foundCategory = state.categories.find(
+                (category) =>
+                    category.name.toLowerCase() === newCategory.toLowerCase()
+            );
+            if (foundCategory === undefined) {
+                state.categories.push({
+                    supercategory: 'operator',
+                    name: newCategory.toLowerCase(),
+                });
+            } else {
+                const sameCategoryAnnotation = state.annotations.find(
+                    (annotation) =>
+                        annotation.categoryName.toLowerCase() ===
+                            newCategory.toLowerCase() && annotation.id !== id
+                );
+                if (
+                    sameCategoryAnnotation !== undefined &&
+                    foundAnnotation !== undefined
+                ) {
+                    foundAnnotation.color = sameCategoryAnnotation.color;
+                }
+            }
         },
     },
     extraReducers: {
