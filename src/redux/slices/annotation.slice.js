@@ -79,6 +79,48 @@ const annotationSlice = createSlice({
                             annotationColor = colors[foundColorIdx].color;
                         }
                     }
+                    const coordArrayToPolygonData = (coordArray) => {
+                        let data = [];
+                        let count = 0;
+                        for (let i = 0; i < coordArray.length; i += 2) {
+                            let x = coordArray[i];
+                            let y = coordArray[i + 1];
+                            data[count] = { x: x, y: y };
+                            count++;
+                        }
+                        return data;
+                    };
+                    const calculateMaskAnchorPoints = (
+                        boundingBox,
+                        polygonCoords
+                    ) => {
+                        // og: [x_0, y_0, x_f, y_f]
+                        // new: [x_0, y_0, width, height]
+                        const xDist = boundingBox[2];
+                        const yDist = boundingBox[3];
+                        const x_f = boundingBox[0] + boundingBox[2];
+                        const y_f = boundingBox[1] + boundingBox[3];
+                        polygonCoords.forEach((point) => {
+                            point.anchor = {
+                                top: ((y_f - point.y) / yDist) * 100,
+                                bottom:
+                                    ((point.y - boundingBox[1]) / yDist) * 100,
+                                left:
+                                    ((point.x - boundingBox[0]) / xDist) * 100,
+                                right: ((x_f - point.x) / xDist) * 100,
+                            };
+                        });
+                        return polygonCoords;
+                    };
+                    for (let j = 0; j < annotation.segmentation.length; j++) {
+                        const dataArray = coordArrayToPolygonData(
+                            annotation.segmentation[j]
+                        );
+                        annotation.segmentation[j] = calculateMaskAnchorPoints(
+                            annotation.bbox,
+                            dataArray
+                        );
+                    }
                     state.annotations.push({
                         ...annotation,
                         color: annotationColor,

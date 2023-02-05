@@ -107,7 +107,6 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         if (editionModeRef.current !== editionMode) {
             if (editionMode === constants.editionMode.BOUNDING) {
-                console.log('adding');
                 viewportRef.current.addEventListener(
                     'mouseup',
                     onDragEnd,
@@ -163,7 +162,8 @@ const ImageDisplayComponent = () => {
                 );
                 if (toolState !== undefined && toolState.data.length > 0) {
                     const { data } = toolState;
-                    const { handles, updatingAnnotation, id } = data[0];
+                    const { handles, updatingAnnotation, id, segmentation } =
+                        data[0];
                     let coords = [];
                     if (updatingAnnotation === true) {
                         const { start, end } = handles;
@@ -177,6 +177,11 @@ const ImageDisplayComponent = () => {
                         } else {
                             coords = [start.x, start.y, end.x, end.y];
                         }
+                        const newSegmentation = [];
+                        segmentation.forEach((segment) => {
+                            /*newSegmentation.push(Utils.calculatePolygonMask())*/
+                            console.log('todo');
+                        });
                         // Converting from
                         // [x_0, y_0, x_f, y_f]
                         // to
@@ -336,10 +341,7 @@ const ImageDisplayComponent = () => {
             context.globalAlpha = 0.5;
             if (annotations[j].segmentation.length > 0) {
                 annotations[j].segmentation.forEach((segment) => {
-                    Utils.renderPolygonMasks(
-                        context,
-                        Utils.coordArrayToPolygonData(segment)
-                    );
+                    Utils.renderPolygonMasks(context, segment);
                 });
             }
 

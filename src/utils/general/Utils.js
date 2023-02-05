@@ -774,13 +774,17 @@ export default class Utils {
      * @returns {{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}}
      */
     static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
-        const xDist = boundingBox[2] - boundingBox[0];
-        const yDist = boundingBox[3] - boundingBox[1];
+        // og: [x_0, y_0, x_f, y_f]
+        // new: [x_0, y_0, width, height]
+        const xDist = boundingBox[2];
+        const yDist = boundingBox[3];
+        const x_f = boundingBox[0] + boundingBox[2];
+        const y_f = boundingBox[1] + boundingBox[3];
         polygonCoords.forEach((point) => {
-            point.anchor.top = ((boundingBox[3] - point.y) / yDist) * 100;
+            point.anchor.top = ((y_f - point.y) / yDist) * 100;
             point.anchor.bottom = ((point.y - boundingBox[1]) / yDist) * 100;
             point.anchor.left = ((point.x - boundingBox[0]) / xDist) * 100;
-            point.anchor.right = ((boundingBox[2] - point.x) / xDist) * 100;
+            point.anchor.right = ((x_f - point.x) / xDist) * 100;
         });
         return polygonCoords;
     }
