@@ -68,6 +68,7 @@ const AnnotationContextMenuComponent = () => {
                     },
                     id: selectedAnnotation.id,
                     renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    updatingAnnotation: true,
                 });
                 Utils.setToolOptions('PolygonDrawingTool', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,

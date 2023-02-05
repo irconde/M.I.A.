@@ -102,6 +102,7 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.setToolOptions('PolygonDrawingTool', {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             temporaryLabel: undefined,
+            updatingAnnotation: false,
         });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
         cornerstoneTools.setToolDisabled('PolygonDrawingTool');
@@ -233,7 +234,37 @@ const ImageDisplayComponent = () => {
             } else if (
                 editionModeRef.current === constants.editionMode.POLYGON
             ) {
-                // TODO
+                toolState = cornerstoneTools.getToolState(
+                    viewportRef.current,
+                    'PolygonDrawingTool'
+                );
+                if (toolState !== undefined && toolState.data.length > 0) {
+                    const { data } = toolState;
+                    const { handles, updatingAnnotation, id } = data[0];
+                    if (updatingAnnotation === true) {
+                        const coords = Utils.calculateBoundingBox(
+                            handles.points
+                        );
+                        const newSegmentation = [
+                            Utils.polygonDataToXYArray(
+                                data[0].handles.points,
+                                coords
+                            ),
+                        ];
+                        dispatch(
+                            updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox: coords, segmentation: newSegmentation }
+                        );
+                        resetCornerstoneTools();
+                    } else {
+                        // TODO
+                    }
+                }
             }
         },
         [editionMode]
@@ -249,7 +280,6 @@ const ImageDisplayComponent = () => {
 
     const onImageRenderedHandler = (event) => {
         if (!event) {
-            console.log('bad event');
             return;
         }
 

@@ -251,6 +251,9 @@ const annotationSlice = createSlice({
                 if (segmentation && segmentation.length > 0) {
                     foundAnnotation.segmentation = segmentation;
                 }
+                if (foundAnnotation.id === state.selectedAnnotation.id) {
+                    state.selectedAnnotation = foundAnnotation;
+                }
             }
         },
     },

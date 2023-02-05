@@ -761,7 +761,7 @@ export default class Utils {
         const y_max = Math.max(...y_values);
         const x_max = Math.max(...x_values);
         const y_min = Math.min(...y_values);
-        return [x_min, y_min, x_max, y_max];
+        return [x_min, y_min, x_max - x_min, y_max - y_min];
     }
 
     /**
