@@ -13,6 +13,7 @@ const initialState = {
     editLabelVisibility: false,
     inputLabel: '',
     zoomLevel: 0,
+    isLazyMenuCollapsed: false,
 };
 
 const uiSlice = createSlice({
@@ -21,6 +22,9 @@ const uiSlice = createSlice({
     reducers: {
         toggleSideMenu: (state, action) => {
             state.collapsedSideMenu = !state.collapsedSideMenu;
+        },
+        toggleLazySideMenu: (state, action) => {
+            state.isLazyMenuCollapsed = !state.isLazyMenuCollapsed;
         },
         updateAnnotationContextPosition: (state, action) => {
             const { top, left } = action.payload;
@@ -55,6 +59,7 @@ const uiSlice = createSlice({
 
 export const {
     toggleSideMenu,
+    toggleLazySideMenu,
     updateAnnotationContextPosition,
     updateZoomLevel,
     updateColorPickerVisibility,
@@ -65,6 +70,7 @@ export const {
 } = uiSlice.actions;
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
+export const getIsLazyMenuCollapsed = (state) => state.ui.isLazyMenuCollapsed;
 export const getAnnotationContextPosition = (state) =>
     state.ui.annotationContextPosition;
 export const getAnnotationContextVisible = (state) =>

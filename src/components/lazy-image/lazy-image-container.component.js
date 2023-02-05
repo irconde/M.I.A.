@@ -92,7 +92,7 @@ function LazyImageContainerComponent({
             {thumbnailSrc && (
                 <ThumbnailContainer
                     onClick={() =>
-                        // TODO 2: figure out what goes here
+                        // TODO 2: enable selecting an image
                         getSpecificFileFromLocalDirectory(filePath)
                     }>
                     <img

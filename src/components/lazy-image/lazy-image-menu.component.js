@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Channels } from '../../utils/enums/Constants';
 import {
     LazyImageMenuContainer,
-    LazyImageMenuPadding,
     LazyImagesContainer,
 } from './lazy-image-menu.styles';
-import { initSettings } from '../../redux/slices/settings.slice';
 import LazyImageContainerComponent from './lazy-image-container.component';
+import { getIsLazyMenuCollapsed } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -19,32 +18,11 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  */
 function LazyImageMenuComponent() {
     const [thumbnails, setThumbnails] = useState({});
+    const isLazyMenuCollapsed = useSelector(getIsLazyMenuCollapsed);
 
     useEffect(() => {
-        // TODO: move this to lazy image component
         addElectronChannels();
-        dispatch(initSettings());
     }, []);
-    const dispatch = useDispatch();
-    const enableMenu = true;
-    const collapsedLazyMenu = false;
-    const [translateStyle, setTranslateStyle] = useState({
-        transform: `translate(0)`,
-    });
-    // const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
-    // useEffect(() => {
-    //     if (prevIsMenuCollapsed !== collapsedLazyMenu) {
-    //         if (collapsedLazyMenu === true) {
-    //             setTranslateStyle({
-    //                 transform: `translate(${-Math.abs(256 + 10)}px)`,
-    //             });
-    //         } else {
-    //             setTranslateStyle({
-    //                 transform: `translate(0)`,
-    //             });
-    //         }
-    //     }
-    // });
 
     const addElectronChannels = () => {
         const {
@@ -80,30 +58,19 @@ function LazyImageMenuComponent() {
             });
     };
 
-    if (!enableMenu) return;
-
-    if (collapsedLazyMenu) {
-        return (
-            <LazyImageMenuContainer translateStyle={translateStyle}>
-                <LazyImageMenuPadding />
-                <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu} />
-            </LazyImageMenuContainer>
-        );
-    } else {
-        return (
-            <LazyImageMenuContainer translateStyle={translateStyle}>
-                <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
-                    {Object.keys(thumbnails).map((fileName) => (
-                        <LazyImageContainerComponent
-                            key={fileName}
-                            fileName={fileName}
-                            filePath={thumbnails[fileName]}
-                        />
-                    ))}
-                </LazyImagesContainer>
-            </LazyImageMenuContainer>
-        );
-    }
+    return (
+        <LazyImageMenuContainer>
+            <LazyImagesContainer collapsedLazyMenu={isLazyMenuCollapsed}>
+                {Object.keys(thumbnails).map((fileName) => (
+                    <LazyImageContainerComponent
+                        key={fileName}
+                        fileName={fileName}
+                        filePath={thumbnails[fileName]}
+                    />
+                ))}
+            </LazyImagesContainer>
+        </LazyImageMenuContainer>
+    );
 }
 
 LazyImageMenuComponent.propTypes = {};
