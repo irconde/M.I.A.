@@ -476,7 +476,7 @@ export default class Utils {
     /**
      * Provides information about the viewport where a mouse event was detected
      *
-     * @param {Event} e - Mouse event data
+     * @param {CornerstoneEvent} e - Mouse event data
      * @returns {{viewport: string, offset: number}} - Viewport-specific information: viewport name and offset
      */
     static eventToViewportInfo(e) {
@@ -525,6 +525,18 @@ export default class Utils {
         fakeEvent.detail = { ...fakeEvent.detail, element: element };
         fakeEvent.target = element;
         return fakeEvent;
+    }
+
+    static calculateAnnotationContextPosition(
+        cornerstone,
+        annotation,
+        viewport
+    ) {
+        const { x, y } = cornerstone.pixelToCanvas(viewport, {
+            x: annotation.bbox[0],
+            y: annotation.bbox[1],
+        });
+        return { x, y };
     }
 
     /**

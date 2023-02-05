@@ -405,10 +405,11 @@ const ImageDisplayComponent = () => {
             annotationContextGap =
                 viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
 
-            const { x, y } = cornerstone.pixelToCanvas(viewportRef.current, {
-                x: annotation.bbox[0],
-                y: annotation.bbox[1],
-            });
+            const { x, y } = Utils.calculateAnnotationContextPosition(
+                cornerstone,
+                annotation,
+                viewportRef.current
+            );
             console.log(`x: ${x} | y: ${y}`);
             dispatch(updateAnnotationContextPosition({ top: x, left: y }));
         }

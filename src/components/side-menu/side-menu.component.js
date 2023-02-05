@@ -8,7 +8,11 @@ import {
     toggleCategoryVisibility,
     toggleVisibility,
 } from '../../redux/slices/annotation.slice';
-import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
+import {
+    getCollapsedSideMenu,
+    getZoomLevel,
+    updateAnnotationContextPosition,
+} from '../../redux/slices/ui.slice';
 import {
     AnnotationColor,
     AnnotationContainer,
@@ -25,6 +29,7 @@ import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibilit
 import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
 import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 import Utils from '../../utils/general/Utils';
+import { cornerstone } from '../image-display/image-display.component';
 
 const iconProps = {
     width: '20px',
@@ -41,6 +46,7 @@ const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const dispatch = useDispatch();
+    const zoomLevel = useSelector(getZoomLevel);
     const selectedCategory = useSelector(getSelectedCategory);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
@@ -180,13 +186,46 @@ const SideMenuComponent = () => {
                                                                 ? 'white'
                                                                 : 'gray'
                                                         }
-                                                        onClick={() =>
+                                                        onClick={() => {
+                                                            if (
+                                                                annotation.selected ===
+                                                                false
+                                                            ) {
+                                                                const viewport =
+                                                                    document.getElementById(
+                                                                        'imageContainer'
+                                                                    );
+                                                                if (
+                                                                    viewport !==
+                                                                    null
+                                                                ) {
+                                                                    const {
+                                                                        x,
+                                                                        y,
+                                                                    } = Utils.calculateAnnotationContextPosition(
+                                                                        cornerstone,
+                                                                        annotation,
+                                                                        viewport
+                                                                    );
+                                                                    console.log(
+                                                                        `x: ${x} | y: ${y}`
+                                                                    );
+                                                                    dispatch(
+                                                                        updateAnnotationContextPosition(
+                                                                            {
+                                                                                top: x,
+                                                                                left: y,
+                                                                            }
+                                                                        )
+                                                                    );
+                                                                }
+                                                            }
                                                             Utils.dispatchAndUpdateImage(
                                                                 dispatch,
                                                                 selectAnnotation,
                                                                 annotation.id
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',
