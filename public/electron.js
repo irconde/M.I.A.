@@ -90,15 +90,7 @@ function createWindow() {
         installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).finally();
 
         // Open the DevTools.
-        mainWindow.webContents.on('did-frame-finish-load', () => {
-            // We close the DevTools so that it can be reopened and redux reconnected.
-            // This is a workaround for a bug in redux devtools.
-            mainWindow.webContents.closeDevTools();
-
-            mainWindow.webContents.once('devtools-opened', () => {
-                mainWindow.focus();
-            });
-
+        mainWindow.webContents.on('dom-ready', () => {
             mainWindow.webContents.openDevTools();
         });
     } else {

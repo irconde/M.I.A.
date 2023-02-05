@@ -722,22 +722,22 @@ export default class Utils {
      * @returns {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
-        const xDist = boundingBox[2] - boundingBox[0];
-        const yDist = boundingBox[3] - boundingBox[1];
+        const xDist = boundingBox[2];
+        const yDist = boundingBox[3];
+        const x_f = boundingBox[0] + boundingBox[2];
+        const y_f = boundingBox[1] + boundingBox[3];
         let points = [];
         for (let index in polygonData) {
             points.push({
                 x: polygonData[index].x,
                 y: polygonData[index].y,
                 anchor: {
-                    top:
-                        ((boundingBox[3] - polygonData[index].y) / yDist) * 100,
+                    top: ((y_f - polygonData[index].y) / yDist) * 100,
                     bottom:
                         ((polygonData[index].y - boundingBox[1]) / yDist) * 100,
                     left:
                         ((polygonData[index].x - boundingBox[0]) / xDist) * 100,
-                    right:
-                        ((boundingBox[2] - polygonData[index].x) / xDist) * 100,
+                    right: ((x_f - polygonData[index].x) / xDist) * 100,
                 },
             });
         }

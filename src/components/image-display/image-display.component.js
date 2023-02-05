@@ -16,6 +16,7 @@ import {
     addAnnotationArray,
     clearAnnotationSelection,
     getAnnotations,
+    getSelectedAnnotation,
     selectAnnotation,
     updateAnnotationPosition,
 } from '../../redux/slices/annotation.slice';
@@ -69,6 +70,7 @@ const ImageDisplayComponent = () => {
     const zoomLevel = useRef();
     const editionMode = useSelector(getEditionMode);
     const editionModeRef = useRef(editionMode);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -227,6 +229,7 @@ const ImageDisplayComponent = () => {
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
+                        console.log('bounding update');
                     } else {
                         // TODO: in creating annotations
                     }
@@ -261,6 +264,7 @@ const ImageDisplayComponent = () => {
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
+                        console.log('poly update');
                     } else {
                         // TODO
                     }
