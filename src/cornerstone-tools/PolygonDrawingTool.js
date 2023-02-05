@@ -257,7 +257,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                             options
                         );
                     } else {
-                        if (data.updatingDetection) {
+                        if (data.updatingAnnotation) {
                             drawJoinedLines(
                                 context,
                                 element,
@@ -285,7 +285,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 if (
                     config.alwaysShowHandles ||
                     (data.active && data.polyBoundingBox) ||
-                    data.updatingDetection
+                    data.updatingAnnotation
                 ) {
                     // Render all handles
                     options.handleRadius = config.activeHandleRadius;
@@ -330,7 +330,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                     this.updateCachedStats(image, element, data);
                 }
 
-                if (data.updatingDetection) {
+                if (data.updatingAnnotation) {
                     let polygonCoords = [];
                     for (let i = 0; i < data.handles.points.length; i++) {
                         const point = cornerstone.pixelToCanvas(element, {
@@ -353,7 +353,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
 
     addNewMeasurement(evt) {
         const eventData = evt.detail;
-        if (this._options.updatingDetection === false) {
+        if (this._options.updatingAnnotation === false) {
             this._startDrawing(evt);
             this._addPoint(eventData);
             preventPropagation(evt);
@@ -470,10 +470,6 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         if (this._drawing) {
             this._deactivateDraw(element);
         }
-
-        data.algorithm = constants.OPERATOR;
-        data.class = constants.commonDetections.UNKNOWN;
-        data.confidence = 100;
 
         this.fireModifiedEvent(element, data);
         this.fireCompletedEvent(element, data);

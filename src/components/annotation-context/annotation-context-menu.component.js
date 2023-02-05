@@ -61,6 +61,25 @@ const AnnotationContextMenuComponent = () => {
                 break;
             case constants.editionMode.POLYGON:
                 console.log('polying');
+                dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState('PolygonDrawingTool', {
+                    handles: {
+                        points: [...selectedAnnotation.segmentation[0]],
+                    },
+                    id: selectedAnnotation.id,
+                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                });
+                Utils.setToolOptions('PolygonDrawingTool', {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.POLYGON,
+                    updatingDetection: true,
+                });
+                Utils.setToolActive('PolygonDrawingTool');
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.POLYGON
+                );
                 break;
             case constants.editionMode.BOUNDING:
                 console.log('bounding');

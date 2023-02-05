@@ -10,8 +10,6 @@ import {
     cornerstoneTools,
 } from '../../components/image-display/image-display.component';
 
-const cloneDeep = require('lodash.clonedeep');
-
 export default class Utils {
     /**
      * Custom cornerstone image loader. Takes arrayBuffer provided to utilize arrayBufferToImage from

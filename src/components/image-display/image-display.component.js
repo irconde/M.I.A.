@@ -17,7 +17,7 @@ import {
     clearAnnotationSelection,
     getAnnotations,
     selectAnnotation,
-    updateAnnotationBbox,
+    updateAnnotationPosition,
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
@@ -28,6 +28,7 @@ import {
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
+import PolygonDrawingTool from '../../cornerstone-tools/PolygonDrawingTool';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -80,19 +81,30 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
+        cornerstoneTools.addTool(PolygonDrawingTool);
     };
 
     const resetCornerstoneTools = () => {
         Utils.setToolDisabled('BoundingBoxDrawing');
+        Utils.setToolDisabled('PolygonDrawingTool');
         cornerstoneTools.clearToolState(
             viewportRef.current,
             'BoundingBoxDrawing'
+        );
+        cornerstoneTools.clearToolState(
+            viewportRef.current,
+            'PolygonDrawingTool'
         );
         cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             temporaryLabel: undefined,
         });
+        cornerstoneTools.setToolOptions('PolygonDrawingTool', {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+        });
         cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
+        cornerstoneTools.setToolDisabled('PolygonDrawingTool');
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
@@ -106,17 +118,19 @@ const ImageDisplayComponent = () => {
 
     useEffect(() => {
         if (editionModeRef.current !== editionMode) {
-            if (editionMode === constants.editionMode.BOUNDING) {
+            if (editionMode !== constants.editionMode.NO_TOOL) {
                 viewportRef.current.addEventListener(
                     'mouseup',
                     onDragEnd,
                     false
                 );
+                stopListeningClickEvents();
             }
         }
         editionModeRef.current = editionMode;
         return () => {
             viewportRef.current.removeEventListener('mouseup', onDragEnd);
+            startListeningClickEvents();
         };
     }, [editionMode]);
 
@@ -195,7 +209,7 @@ const ImageDisplayComponent = () => {
                         dispatch(updateAnnotationContextVisibility(true));
                         Utils.dispatchAndUpdateImage(
                             dispatch,
-                            updateAnnotationBbox,
+                            updateAnnotationPosition,
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
@@ -203,6 +217,10 @@ const ImageDisplayComponent = () => {
                         // TODO: in creating annotations
                     }
                 }
+            } else if (
+                editionModeRef.current === constants.editionMode.POLYGON
+            ) {
+                // TODO
             }
         },
         [editionMode]
@@ -226,6 +244,9 @@ const ImageDisplayComponent = () => {
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
         Utils.setToolOptions('BoundingBoxDrawing', {
+            zoomLevel: zoomLevel.current,
+        });
+        Utils.setToolOptions('PolygonDrawingTool', {
             zoomLevel: zoomLevel.current,
         });
         const context = eventData.canvasContext;

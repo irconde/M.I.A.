@@ -241,7 +241,7 @@ const annotationSlice = createSlice({
                 }
             }
         },
-        updateAnnotationBbox: (state, action) => {
+        updateAnnotationPosition: (state, action) => {
             const { bbox, id, segmentation } = action.payload;
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
@@ -276,7 +276,7 @@ export const {
     deleteSelectedAnnotation,
     updateAnnotationColor,
     updateAnnotationCategory,
-    updateAnnotationBbox,
+    updateAnnotationPosition,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
