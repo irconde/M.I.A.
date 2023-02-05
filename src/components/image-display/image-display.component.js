@@ -120,10 +120,12 @@ const ImageDisplayComponent = () => {
         if (editionModeRef.current !== editionMode) {
             if (editionMode !== constants.editionMode.NO_TOOL) {
                 viewportRef.current.addEventListener('mouseup', onDragEnd);
-                viewportRef.current.addEventListener(
-                    'cornerstonetoolsmousedrag',
-                    polygonRenderingCallback
-                );
+                if (editionMode === constants.editionMode.POLYGON) {
+                    viewportRef.current.addEventListener(
+                        'cornerstonetoolsmousedrag',
+                        polygonRenderingCallback
+                    );
+                }
                 stopListeningClickEvents();
             }
         }
