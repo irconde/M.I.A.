@@ -179,8 +179,9 @@ const ImageDisplayComponent = () => {
                         }
                         const newSegmentation = [];
                         segmentation.forEach((segment) => {
-                            /*newSegmentation.push(Utils.calculatePolygonMask())*/
-                            console.log('todo');
+                            newSegmentation.push(
+                                Utils.calculatePolygonMask(coords, segment)
+                            );
                         });
                         // Converting from
                         // [x_0, y_0, x_f, y_f]
@@ -195,7 +196,7 @@ const ImageDisplayComponent = () => {
                         Utils.dispatchAndUpdateImage(
                             dispatch,
                             updateAnnotationBbox,
-                            { id, bbox: coords }
+                            { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
                     } else {

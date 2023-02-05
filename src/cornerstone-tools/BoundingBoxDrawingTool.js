@@ -244,9 +244,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                 }
                 // Polygon Mask Rendering
                 // First check if it exists, new detections may not have this field built yet
-                /*if (data.polygonCoords) {
+                if (data.segmentation) {
                     // Make sure it is non-empty, not all detections will have a mask
-                    if (data.polygonCoords.length > 0) {
+                    for (let z = 0; z < data.segmentation.length; z++) {
                         const pixelStart = cornerstone.pixelToCanvas(element, {
                             x: data.handles.start.x,
                             y: data.handles.start.y,
@@ -289,19 +289,19 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 pixelEnd.y,
                             ];
                         }
-                        data.polygonCoords = Utils.calculatePolygonMask(
+                        data.segmentation[z] = Utils.calculatePolygonMask(
                             flippedCoords,
-                            data.polygonCoords
+                            data.segmentation[z]
                         );
                         context.strokeStyle =
                             constants.detectionStyle.SELECTED_COLOR;
                         context.fillStyle =
                             constants.detectionStyle.SELECTED_COLOR;
                         context.globalAlpha = 0.5;
-                        Utils.renderPolygonMasks(context, data.polygonCoords);
+                        Utils.renderPolygonMasks(context, data.segmentation[z]);
                         context.globalAlpha = 1.0;
                     }
-                }*/
+                }
             }
         });
     }

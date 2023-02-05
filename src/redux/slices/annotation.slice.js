@@ -242,12 +242,15 @@ const annotationSlice = createSlice({
             }
         },
         updateAnnotationBbox: (state, action) => {
-            const { bbox, id } = action.payload;
+            const { bbox, id, segmentation } = action.payload;
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
             );
             if (foundAnnotation !== undefined) {
                 foundAnnotation.bbox = bbox;
+                if (segmentation && segmentation.length > 0) {
+                    foundAnnotation.segmentation = segmentation;
+                }
             }
         },
     },

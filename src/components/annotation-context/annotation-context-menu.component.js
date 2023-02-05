@@ -96,7 +96,9 @@ const AnnotationContextMenuComponent = () => {
                     categoryName: selectedAnnotation.categoryName,
                     renderColor: constants.detectionStyle.SELECTED_COLOR,
                     updatingAnnotation: true,
-                    segmentation: selectedAnnotation.segmentation,
+                    segmentation: JSON.parse(
+                        JSON.stringify(selectedAnnotation.segmentation)
+                    ),
                 });
                 Utils.setToolOptions('BoundingBoxDrawing', {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
