@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    getSelectedAnnotation,
     getSelectedCategory,
     selectAnnotation,
     selectAnnotationCategory,
@@ -10,8 +11,8 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     getCollapsedSideMenu,
-    getZoomLevel,
     updateAnnotationContextPosition,
+    updateAnnotationContextVisibility,
 } from '../../redux/slices/ui.slice';
 import {
     AnnotationColor,
@@ -46,7 +47,7 @@ const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const dispatch = useDispatch();
-    const zoomLevel = useSelector(getZoomLevel);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
@@ -89,6 +90,15 @@ const SideMenuComponent = () => {
                                                     'category'
                                                 )
                                             ) {
+                                                if (
+                                                    selectedAnnotation !== null
+                                                ) {
+                                                    dispatch(
+                                                        updateAnnotationContextVisibility(
+                                                            false
+                                                        )
+                                                    );
+                                                }
                                                 Utils.dispatchAndUpdateImage(
                                                     dispatch,
                                                     selectAnnotationCategory,

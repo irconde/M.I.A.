@@ -149,12 +149,18 @@ const annotationSlice = createSlice({
                 } else {
                     annotation.selected = false;
                 }
+                annotation.categorySelected = false;
             });
+
+            state.selectedCategory = '';
         },
         selectAnnotationCategory: (state, action) => {
             state.annotations.forEach((annotation) => {
                 if (annotation.categoryName === action.payload) {
                     annotation.categorySelected = !annotation.categorySelected;
+                    if (annotation.categorySelected && annotation.selected) {
+                        annotation.selected = false;
+                    }
                 } else if (annotation.categorySelected === true) {
                     annotation.categorySelected = false;
                 }
