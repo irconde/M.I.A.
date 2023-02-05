@@ -148,7 +148,7 @@ export const Channels = {
 export const toolNames = {
     boundingBox: 'BoundingBoxDrawing',
     segmentation: 'SegmentationDrawingTool',
-    movement: 'MovementDrawingTool',
+    movement: 'AnnotationMovementTool',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;

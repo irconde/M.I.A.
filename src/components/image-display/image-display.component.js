@@ -89,6 +89,7 @@ const ImageDisplayComponent = () => {
     const resetCornerstoneTools = () => {
         Utils.setToolDisabled(constants.toolNames.boundingBox);
         Utils.setToolDisabled(constants.toolNames.segmentation);
+        Utils.setToolDisabled(constants.toolNames.movement);
         cornerstoneTools.clearToolState(
             viewportRef.current,
             constants.toolNames.boundingBox
@@ -96,6 +97,10 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.clearToolState(
             viewportRef.current,
             constants.toolNames.segmentation
+        );
+        cornerstoneTools.clearToolState(
+            viewportRef.current,
+            constants.toolNames.movement
         );
         cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
@@ -106,8 +111,13 @@ const ImageDisplayComponent = () => {
             temporaryLabel: undefined,
             updatingAnnotation: false,
         });
+        cornerstoneTools.setToolOptions(constants.toolNames.movement, {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            temporaryLabel: undefined,
+        });
         cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
         cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
+        cornerstoneTools.setToolDisabled(constants.toolNames.movement);
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
@@ -267,6 +277,32 @@ const ImageDisplayComponent = () => {
                         // TODO
                     }
                 }
+            } else if (editionModeRef.current === constants.editionMode.MOVE) {
+                console.log('moving');
+                toolState = cornerstoneTools.getToolState(
+                    viewportRef.current,
+                    constants.toolNames.movement
+                );
+                if (toolState !== undefined && toolState.data.length > 0) {
+                    const { handles, id, polygonCoords, updatingAnnotation } =
+                        toolState.data[0];
+                    if (updatingAnnotation === true) {
+                        const bbox = [
+                            handles.start.x,
+                            handles.start.y,
+                            handles.end.x - handles.start.x,
+                            handles.end.y - handles.start.y,
+                        ];
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox, segmentation: polygonCoords }
+                        );
+                    }
+                }
+                dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+                resetCornerstoneTools();
             }
         },
         [editionMode]
@@ -293,6 +329,9 @@ const ImageDisplayComponent = () => {
             zoomLevel: zoomLevel.current,
         });
         Utils.setToolOptions(constants.toolNames.segmentation, {
+            zoomLevel: zoomLevel.current,
+        });
+        Utils.setToolOptions(constants.toolNames.movement, {
             zoomLevel: zoomLevel.current,
         });
         const context = eventData.canvasContext;

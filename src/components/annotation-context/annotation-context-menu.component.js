@@ -50,6 +50,39 @@ const AnnotationContextMenuComponent = () => {
         switch (type) {
             case constants.editionMode.MOVE:
                 dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState(constants.toolNames.movement, {
+                    handles: {
+                        start: {
+                            x: selectedAnnotation.bbox[0],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                        end: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                    },
+                    id: selectedAnnotation.id,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
+                    categoryName: selectedAnnotation.categoryName,
+                    updatingAnnotation: true,
+                    polygonCoords: JSON.parse(
+                        JSON.stringify(selectedAnnotation.segmentation)
+                    ),
+                });
+                Utils.setToolOptions(constants.toolNames.movement, {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.MOVE,
+                });
+                Utils.setToolActive(constants.toolNames.movement);
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.MOVE
+                );
                 break;
             case constants.editionMode.COLOR:
                 dispatch(updateAnnotationContextVisibility(false));
