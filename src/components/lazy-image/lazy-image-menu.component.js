@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { Channels } from '../../utils/enums/Constants';
 import {
-    FolderIconWrapper,
-    ImagesInWorkspace,
     LazyImageMenuContainer,
     LazyImageMenuPadding,
     LazyImagesContainer,
 } from './lazy-image-menu.styles';
-import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
 import { initSettings } from '../../redux/slices/settings.slice';
 import LazyImageContainerComponent from './lazy-image-container.component';
 
@@ -21,7 +17,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  * @component
  *
  */
-function LazyImageMenuComponent(props) {
+function LazyImageMenuComponent() {
     const [thumbnails, setThumbnails] = useState({});
 
     useEffect(() => {
@@ -30,13 +26,8 @@ function LazyImageMenuComponent(props) {
         dispatch(initSettings());
     }, []);
     const dispatch = useDispatch();
-    // ipcRenderer.on(constants.Channels.thumbnailStatus, (event, status) => {
-    //     dispatch(setGeneratingThumbnails(status));
-    // });
-    // const enableMenu = useSelector(getLocalFileOpen);
     const enableMenu = true;
     const collapsedLazyMenu = false;
-    // const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
     const [translateStyle, setTranslateStyle] = useState({
         transform: `translate(0)`,
     });
@@ -83,54 +74,24 @@ function LazyImageMenuComponent(props) {
             });
         ipcRenderer
             .invoke(requestInitialThumbnailsList)
-            .then((thumbnails) => {
-                console.log('INIT');
-                setThumbnails(thumbnails);
-            })
+            .then(setThumbnails)
             .catch(() => {
                 console.log('no thumbnails to begin with');
             });
     };
 
-    // change piece of state when the user scrolls. Used for adding box-shadow to header
-    const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
-
-    function handleMenuContainerScroll(event) {
-        const element = event.target;
-        if (element.scrollTop > 0) {
-            setShouldAddBoxShadow(true);
-        } else {
-            setShouldAddBoxShadow(false);
-        }
-    }
-
     if (!enableMenu) return;
 
     if (collapsedLazyMenu) {
         return (
-            <LazyImageMenuContainer
-                onScroll={handleMenuContainerScroll}
-                translateStyle={translateStyle}>
+            <LazyImageMenuContainer translateStyle={translateStyle}>
                 <LazyImageMenuPadding />
                 <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu} />
             </LazyImageMenuContainer>
         );
     } else {
         return (
-            <LazyImageMenuContainer
-                onScroll={handleMenuContainerScroll}
-                translateStyle={translateStyle}>
-                <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
-                    <FolderIconWrapper>
-                        <FolderIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'white'}
-                        />
-                    </FolderIconWrapper>
-                    Images in Workspace
-                </ImagesInWorkspace>
-
+            <LazyImageMenuContainer translateStyle={translateStyle}>
                 <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
                     {Object.keys(thumbnails).map((fileName) => (
                         <LazyImageContainerComponent
@@ -145,16 +106,6 @@ function LazyImageMenuComponent(props) {
     }
 }
 
-LazyImageMenuComponent.propTypes = {
-    /**
-     * Array with string values to the file path of thumbnails,
-     * IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png', ...]
-     */
-    thumbnails: PropTypes.array,
-    /**
-     * Calls the Electron channel to invoke a specific file from the selected file system folder.
-     */
-    getSpecificFileFromLocalDirectory: PropTypes.func,
-};
+LazyImageMenuComponent.propTypes = {};
 
 export default LazyImageMenuComponent;

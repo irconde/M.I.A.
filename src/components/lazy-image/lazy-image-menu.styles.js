@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
 export const LAZY_SIDE_MENU_WIDTH = 256 + constants.RESOLUTION_UNIT;
+export const DEFAULT_IMAGE_WIDTH = '197px';
 
 export const LazyImageMenuContainer = styled.div`
     position: fixed;
@@ -20,6 +21,8 @@ export const LazyImageMenuContainer = styled.div`
     z-index: 2;
     width: 256px;
     transform: ${(props) => props.translateStyle};
+    padding-top: calc((${LAZY_SIDE_MENU_WIDTH} - ${DEFAULT_IMAGE_WIDTH}) / 2);
+    box-sizing: border-box;
 
     ::-webkit-scrollbar {
         width: 0;
@@ -45,30 +48,6 @@ export const LazyImagesContainer = styled.div`
         props.collapsedLazyMenu === true
             ? document.documentElement.clientHeight
             : 'none'};
-`;
-
-export const ImagesInWorkspace = styled.div`
-    width: 100%;
-    height: 20px;
-    margin-top: 0;
-    font-size: 14px;
-    font-weight: normal;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: -0.58px;
-    text-align: center;
-    color: #e3e3e3;
-    display: flex;
-    justify-content: flex-start;
-    position: sticky;
-    top: 0px;
-    background-color: #292929;
-    z-index: 1;
-    padding: 1rem 0 1rem 1rem;
-    box-shadow: ${(props) =>
-        props.shouldAddBoxShadow &&
-        '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'};
 `;
 
 export const FolderIconWrapper = styled.div`
