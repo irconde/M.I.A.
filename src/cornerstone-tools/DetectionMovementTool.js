@@ -152,30 +152,21 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                         data.handles.start
                     );
                 }
-                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
-                var fontSizeArr = fontArr[1].split('px');
-                var fontSize = fontSizeArr[0];
+                const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                const fontSizeArr = fontArr[1].split('px');
+                let fontSize = fontSizeArr[0];
                 fontSize *= zoom;
                 fontSizeArr[0] = fontSize;
-                var newFontSize = fontSizeArr.join('px');
-                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
-
-                context.font = newFont;
+                const newFontSize = fontSizeArr.join('px');
+                context.font =
+                    fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
                 context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
                 context.strokeStyle = data.renderColor;
                 context.fillStyle = data.renderColor;
-                const className =
-                    this.options.temporaryLabel !== undefined
-                        ? this.options.temporaryLabel
-                        : data.class;
-                const detectionLabel = Utils.formatDetectionLabel(
-                    className,
-                    data.confidence
-                );
                 const labelSize = Utils.getTextLabelSize(
                     context,
-                    detectionLabel,
+                    data.categoryName,
                     constants.detectionStyle.LABEL_PADDING * zoom
                 );
                 context.fillRect(
@@ -186,7 +177,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                 );
                 context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
                 context.fillText(
-                    detectionLabel,
+                    data.categoryName,
                     myCoords.x + constants.detectionStyle.LABEL_PADDING * zoom,
                     myCoords.y - constants.detectionStyle.LABEL_PADDING * zoom
                 );
@@ -214,22 +205,6 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
                     Utils.renderPolygonMasks(context, data.polygonCoords);
-                    context.globalAlpha = 1.0;
-                } else if (
-                    data.binaryMask.length > 0 &&
-                    data.binaryMask[0].length > 0
-                ) {
-                    context.globalAlpha = 0.5;
-                    context.strokeStyle =
-                        constants.detectionStyle.SELECTED_COLOR;
-                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
-                    const base = cornerstone.pixelToCanvas(element, {
-                        x: data.handles.start.x,
-                        y: data.handles.start.y,
-                    });
-                    data.binaryMask[1][0] = base.x;
-                    data.binaryMask[1][1] = base.y;
-                    Utils.renderBinaryMasks(data.binaryMask, context, zoom);
                     context.globalAlpha = 1.0;
                 }
             }
@@ -282,10 +257,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
-            algorithm: constants.OPERATOR,
-            class: constants.commonDetections.UNKNOWN,
-            confidence: 100,
-            updatingDetection: false,
+            updatingAnnotation: false,
         };
     }
 }
@@ -315,10 +287,9 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
  */
 
 // eslint-disable-next-line no-unused-vars
-function _createTextBoxContent(context, { className, score }, options = {}) {
+function _createTextBoxContent(context, { className }, options = {}) {
     const textLines = [];
-    const classInfoString = `${className} - ${score}%`;
-    textLines.push(classInfoString);
+    textLines.push(className);
     return textLines;
 }
 
