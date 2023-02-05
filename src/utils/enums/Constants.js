@@ -25,7 +25,7 @@ export const buttonStyle = {
     LINE_GAP: 40,
 };
 
-export const detectionStyle = {
+export const annotationStyle = {
     NORMAL_COLOR: colors.BLUE,
     SELECTED_COLOR: colors.BLUE,
     VALID_COLOR: colors.GREEN,
@@ -143,6 +143,12 @@ export const Channels = {
     addThumbnail: 'add-thumbnail',
     removeThumbnail: 'remove-thumbnail',
     updateThumbnails: 'update-thumbnails',
+};
+
+export const toolNames = {
+    boundingBox: 'BoundingBoxDrawing',
+    segmentation: 'SegmentationDrawingTool',
+    movement: 'MovementDrawingTool',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;

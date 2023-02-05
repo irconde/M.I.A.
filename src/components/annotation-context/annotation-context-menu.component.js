@@ -49,7 +49,7 @@ const AnnotationContextMenuComponent = () => {
     const handleClick = (type) => {
         switch (type) {
             case constants.editionMode.MOVE:
-                console.log('moving');
+                dispatch(updateAnnotationContextVisibility(false));
                 break;
             case constants.editionMode.COLOR:
                 dispatch(updateAnnotationContextVisibility(false));
@@ -60,22 +60,21 @@ const AnnotationContextMenuComponent = () => {
                 dispatch(updateEditLabelVisibility(true));
                 break;
             case constants.editionMode.POLYGON:
-                console.log('polying');
                 dispatch(updateAnnotationContextVisibility(false));
-                Utils.updateToolState('PolygonDrawingTool', {
+                Utils.updateToolState(constants.toolNames.segmentation, {
                     handles: {
                         points: [...selectedAnnotation.segmentation[0]],
                     },
                     id: selectedAnnotation.id,
-                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
                     updatingAnnotation: true,
                 });
-                Utils.setToolOptions('PolygonDrawingTool', {
+                Utils.setToolOptions(constants.toolNames.segmentation, {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
                     editionMode: constants.editionMode.POLYGON,
                     updatingDetection: true,
                 });
-                Utils.setToolActive('PolygonDrawingTool');
+                Utils.setToolActive(constants.toolNames.segmentation);
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     updateEditionMode,
@@ -83,9 +82,8 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             case constants.editionMode.BOUNDING:
-                console.log('bounding');
                 dispatch(updateAnnotationContextVisibility(false));
-                Utils.updateToolState('BoundingBoxDrawing', {
+                Utils.updateToolState(constants.toolNames.boundingBox, {
                     handles: {
                         start: {
                             x: selectedAnnotation.bbox[0],
@@ -114,17 +112,17 @@ const AnnotationContextMenuComponent = () => {
                     },
                     id: selectedAnnotation.id,
                     categoryName: selectedAnnotation.categoryName,
-                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
                     updatingAnnotation: true,
                     segmentation: JSON.parse(
                         JSON.stringify(selectedAnnotation.segmentation)
                     ),
                 });
-                Utils.setToolOptions('BoundingBoxDrawing', {
+                Utils.setToolOptions(constants.toolNames.boundingBox, {
                     cornerstoneMode: constants.cornerstoneMode.EDITION,
                     editionMode: constants.editionMode.BOUNDING,
                 });
-                Utils.setToolActive('BoundingBoxDrawing');
+                Utils.setToolActive(constants.toolNames.boundingBox);
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     updateEditionMode,

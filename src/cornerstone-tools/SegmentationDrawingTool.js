@@ -21,16 +21,16 @@ const { freehandArea, freehandIntersect, FreehandHandleData } = freehandUtils;
 
 /**
  * @public
- * @class PolygonDrawingTool
+ * @class SegmentationDrawingTool
  * @memberof Tools.Annotation
- * @classdesc Tool for drawing arbitrary polygonal regions of interest, and
+ * @classdesc Tool for drawing arbitrary Segmentation regions of interest, and
  * measuring the statistics of the enclosed pixels.
  * @extends Tools.Base.BaseAnnotationTool
  */
-export default class PolygonDrawingTool extends BaseAnnotationTool {
+export default class SegmentationDrawingTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'PolygonDrawingTool',
+            name: constants.toolNames.segmentation,
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: defaultFreehandConfiguration(),
         };
@@ -219,18 +219,18 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                 continue;
             }
             draw(context, (context) => {
-                let color = constants.detectionStyle.NORMAL_COLOR;
+                let color = constants.annotationStyle.NORMAL_COLOR;
                 let fillColor;
                 if (data.active) {
                     if (data.handles.invalidHandlePlacement) {
                         color = config.invalidColor;
                         fillColor = config.invalidColor;
                     } else {
-                        color = constants.detectionStyle.NORMAL_COLOR;
-                        fillColor = constants.detectionStyle.NORMAL_COLOR;
+                        color = constants.annotationStyle.NORMAL_COLOR;
+                        fillColor = constants.annotationStyle.NORMAL_COLOR;
                     }
                 } else {
-                    fillColor = constants.detectionStyle.NORMAL_COLOR;
+                    fillColor = constants.annotationStyle.NORMAL_COLOR;
                 }
 
                 let options = { color };
@@ -325,26 +325,27 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
                         drawHandles(context, eventData, [firstHandle], options);
                     }
                 }
-                // Invoked when a closed polygon is created
+                // Invoked when a closed Segmentation is created
                 if (data.invalidated === true && !data.active) {
                     this.updateCachedStats(image, element, data);
                 }
 
                 if (data.updatingAnnotation) {
-                    let polygonCoords = [];
+                    let segmentationCoords = [];
                     for (let i = 0; i < data.handles.points.length; i++) {
                         const point = cornerstone.pixelToCanvas(element, {
                             x: data.handles.points[i].x,
                             y: data.handles.points[i].y,
                         });
-                        polygonCoords.push(point);
+                        segmentationCoords.push(point);
                     }
                     context.strokeStyle =
-                        constants.detectionStyle.SELECTED_COLOR;
-                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
+                        constants.annotationStyle.SELECTED_COLOR;
+                    context.fillStyle =
+                        constants.annotationStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
-                    if (polygonCoords !== undefined)
-                        Utils.renderPolygonMasks(context, polygonCoords);
+                    if (segmentationCoords !== undefined)
+                        Utils.renderPolygonMasks(context, segmentationCoords);
                     context.globalAlpha = 1.0;
                 }
             });
@@ -435,7 +436,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * Ends the active drawing loop and completes the polygon.
+     * Ends the active drawing loop and completes the Segmentation.
      *
      * @private
      * @param {Object} element - The element on which the roi is being drawn.
@@ -661,7 +662,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * Adds a point on mouse click in polygon mode.
+     * Adds a point on mouse click in Segmentation mode.
      *
      * @private
      * @param {Object} eventData - data object associated with an event.
@@ -671,7 +672,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         const { currentPoints, element } = eventData;
         const toolState = csTools.getToolState(element, this.name);
 
-        // Get the toolState from the last-drawn polygon
+        // Get the toolState from the last-drawn Segmentation
         const config = this.configuration;
         const data = toolState.data[config.currentTool];
 
@@ -719,7 +720,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         this._getMouseLocation(eventData);
         this._checkInvalidHandleLocation(data, eventData);
 
-        // Mouse move -> Polygon Mode
+        // Mouse move -> Segmentation Mode
         const handleNearby = this._pointNearHandle(element, data, coords);
         const points = data.handles.points;
         // If there is a handle nearby to snap to
@@ -797,7 +798,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         preventPropagation(evt);
     }
 
-    /** Ends the active drawing loop and completes the polygon.
+    /** Ends the active drawing loop and completes the Segmentation.
      *
      * @public
      * @param {Object} element - The element on which the roi is being drawn.
@@ -1045,7 +1046,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         this._drawingInteractionType = interactionType;
         state.isMultiPartToolActive = true;
 
-        // Polygonal Mode
+        // Segmentation Mode
         element.addEventListener(
             EVENTS.MOUSE_DOWN,
             this._drawingMouseDownCallback
@@ -1099,7 +1100,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
         if (data.handles.points.length < 2) {
             return true;
         }
-        let invalidHandlePlacement = this._checkHandlesPolygonMode(
+        let invalidHandlePlacement = this._checkHandlesSegmentationMode(
             data,
             eventData
         );
@@ -1135,7 +1136,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
     }
 
     /**
-     * Returns true if the proposed location of a new handle is invalid (in polygon mode).
+     * Returns true if the proposed location of a new handle is invalid (in Segmentation mode).
      *
      * @private
      *
@@ -1143,7 +1144,7 @@ export default class PolygonDrawingTool extends BaseAnnotationTool {
      * @param {Object} eventData The data associated with the event.
      * @returns {Boolean}
      */
-    _checkHandlesPolygonMode(data, eventData) {
+    _checkHandlesSegmentationMode(data, eventData) {
         const config = this.configuration;
         const { element } = eventData;
         const mousePoint = config.mouseLocation.handles.start;

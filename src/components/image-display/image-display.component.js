@@ -16,7 +16,6 @@ import {
     addAnnotationArray,
     clearAnnotationSelection,
     getAnnotations,
-    getSelectedAnnotation,
     selectAnnotation,
     updateAnnotationPosition,
 } from '../../redux/slices/annotation.slice';
@@ -29,7 +28,8 @@ import {
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
-import PolygonDrawingTool from '../../cornerstone-tools/PolygonDrawingTool';
+import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
+import AnnotationMovementTool from '../../cornerstone-tools/AnnotationMovementTool';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -70,7 +70,6 @@ const ImageDisplayComponent = () => {
     const zoomLevel = useRef();
     const editionMode = useSelector(getEditionMode);
     const editionModeRef = useRef(editionMode);
-    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -83,31 +82,32 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
-        cornerstoneTools.addTool(PolygonDrawingTool);
+        cornerstoneTools.addTool(SegmentationDrawingTool);
+        cornerstoneTools.addTool(AnnotationMovementTool);
     };
 
     const resetCornerstoneTools = () => {
-        Utils.setToolDisabled('BoundingBoxDrawing');
-        Utils.setToolDisabled('PolygonDrawingTool');
+        Utils.setToolDisabled(constants.toolNames.boundingBox);
+        Utils.setToolDisabled(constants.toolNames.segmentation);
         cornerstoneTools.clearToolState(
             viewportRef.current,
-            'BoundingBoxDrawing'
+            constants.toolNames.boundingBox
         );
         cornerstoneTools.clearToolState(
             viewportRef.current,
-            'PolygonDrawingTool'
+            constants.toolNames.segmentation
         );
-        cornerstoneTools.setToolOptions('BoundingBoxDrawing', {
+        cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             temporaryLabel: undefined,
         });
-        cornerstoneTools.setToolOptions('PolygonDrawingTool', {
+        cornerstoneTools.setToolOptions(constants.toolNames.segmentation, {
             cornerstoneMode: constants.cornerstoneMode.SELECTION,
             temporaryLabel: undefined,
             updatingAnnotation: false,
         });
-        cornerstoneTools.setToolDisabled('BoundingBoxDrawing');
-        cornerstoneTools.setToolDisabled('PolygonDrawingTool');
+        cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
+        cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
@@ -188,7 +188,7 @@ const ImageDisplayComponent = () => {
             if (editionModeRef.current === constants.editionMode.BOUNDING) {
                 toolState = cornerstoneTools.getToolState(
                     viewportRef.current,
-                    'BoundingBoxDrawing'
+                    constants.toolNames.boundingBox
                 );
                 if (toolState !== undefined && toolState.data.length > 0) {
                     const { data } = toolState;
@@ -229,7 +229,6 @@ const ImageDisplayComponent = () => {
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
-                        console.log('bounding update');
                     } else {
                         // TODO: in creating annotations
                     }
@@ -239,7 +238,7 @@ const ImageDisplayComponent = () => {
             ) {
                 toolState = cornerstoneTools.getToolState(
                     viewportRef.current,
-                    'PolygonDrawingTool'
+                    constants.toolNames.segmentation
                 );
                 if (toolState !== undefined && toolState.data.length > 0) {
                     const { data } = toolState;
@@ -264,7 +263,6 @@ const ImageDisplayComponent = () => {
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
                         resetCornerstoneTools();
-                        console.log('poly update');
                     } else {
                         // TODO
                     }
@@ -291,10 +289,10 @@ const ImageDisplayComponent = () => {
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
-        Utils.setToolOptions('BoundingBoxDrawing', {
+        Utils.setToolOptions(constants.toolNames.boundingBox, {
             zoomLevel: zoomLevel.current,
         });
-        Utils.setToolOptions('PolygonDrawingTool', {
+        Utils.setToolOptions(constants.toolNames.segmentation, {
             zoomLevel: zoomLevel.current,
         });
         const context = eventData.canvasContext;
@@ -379,8 +377,8 @@ const ImageDisplayComponent = () => {
     };
 
     const renderAnnotations = (context, annotations) => {
-        context.font = constants.detectionStyle.LABEL_FONT;
-        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        context.font = constants.annotationStyle.LABEL_FONT;
+        context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
 
         for (let j = 0; j < annotations.length; j++) {
             if (
@@ -390,16 +388,16 @@ const ImageDisplayComponent = () => {
             )
                 continue;
             context.strokeStyle = annotations[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
+                ? constants.annotationStyle.SELECTED_COLOR
                 : annotations[j].color;
             context.fillStyle = annotations[j].selected
-                ? constants.detectionStyle.SELECTED_COLOR
+                ? constants.annotationStyle.SELECTED_COLOR
                 : annotations[j].color;
 
             const labelSize = Utils.getTextLabelSize(
                 context,
                 annotations[j].categoryName,
-                constants.detectionStyle.LABEL_PADDING
+                constants.annotationStyle.LABEL_PADDING
             );
             context.strokeRect(
                 annotations[j].bbox[0],
@@ -430,11 +428,12 @@ const ImageDisplayComponent = () => {
                 labelSize['width'],
                 labelSize['height']
             );
-            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 annotations[j].categoryName,
-                annotations[j].bbox[0] + constants.detectionStyle.LABEL_PADDING,
-                annotations[j].bbox[1] - constants.detectionStyle.LABEL_PADDING
+                annotations[j].bbox[0] +
+                    constants.annotationStyle.LABEL_PADDING,
+                annotations[j].bbox[1] - constants.annotationStyle.LABEL_PADDING
             );
         }
     };

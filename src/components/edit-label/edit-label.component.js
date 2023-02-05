@@ -73,7 +73,7 @@ const EditLabelComponent = () => {
     const inputField = useRef(null);
     const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
-    const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+    const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
     const fontSizeArr = fontArr[1].split('px');
     fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
     const newFontSize = fontSizeArr.join('px');
@@ -177,7 +177,7 @@ const EditLabelComponent = () => {
      * @returns {number}
      */
     const getWidth = (width, viewport) => {
-        const { BORDER_WIDTH } = constants.detectionStyle;
+        const { BORDER_WIDTH } = constants.annotationStyle;
         return (
             scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
         );

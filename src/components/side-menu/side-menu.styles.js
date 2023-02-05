@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {
-    detectionStyle,
+    annotationStyle,
     sideMenuPaddingTop,
     sideMenuWidth,
 } from '../../utils/enums/Constants';
@@ -84,7 +84,7 @@ export const SideMenuAnnotation = styled.div`
     display: flex;
     align-items: center;
     background-color: ${({ selected }) =>
-        selected ? detectionStyle.SELECTED_COLOR : ''};
+        selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;

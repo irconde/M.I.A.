@@ -20,7 +20,7 @@ const drawRect = csTools.importInternal('drawing/drawRect');
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'BoundingBoxDrawing',
+            name: constants.toolNames.boundingBox,
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
@@ -87,7 +87,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
         const zoom = this.options.zoomLevel;
-        const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
+        const lineWidth = constants.annotationStyle.BORDER_WIDTH * zoom;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -100,7 +100,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
         const context = getNewContext(eventData.canvasContext.canvas);
 
-        const color = constants.detectionStyle.NORMAL_COLOR;
+        const color = constants.annotationStyle.NORMAL_COLOR;
         const handleOptions = {
             color,
             handleRadius: 8,
@@ -204,7 +204,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             );
                         }
                         var fontArr =
-                            constants.detectionStyle.LABEL_FONT.split(' ');
+                            constants.annotationStyle.LABEL_FONT.split(' ');
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;
@@ -216,14 +216,14 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         context.font = newFont;
 
                         context.lineWidth =
-                            constants.detectionStyle.BORDER_WIDTH;
+                            constants.annotationStyle.BORDER_WIDTH;
                         context.strokeStyle = data.renderColor;
                         context.fillStyle = data.renderColor;
                         const categoryName = data.categoryName;
                         const labelSize = Utils.getTextLabelSize(
                             context,
                             categoryName,
-                            constants.detectionStyle.LABEL_PADDING * zoom
+                            constants.annotationStyle.LABEL_PADDING * zoom
                         );
                         context.fillRect(
                             myCoords.x - 1 * zoom,
@@ -232,13 +232,13 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             labelSize['height']
                         );
                         context.fillStyle =
-                            constants.detectionStyle.LABEL_TEXT_COLOR;
+                            constants.annotationStyle.LABEL_TEXT_COLOR;
                         context.fillText(
                             categoryName,
                             myCoords.x +
-                                constants.detectionStyle.LABEL_PADDING * zoom,
+                                constants.annotationStyle.LABEL_PADDING * zoom,
                             myCoords.y -
-                                constants.detectionStyle.LABEL_PADDING * zoom
+                                constants.annotationStyle.LABEL_PADDING * zoom
                         );
                     }
                 }
@@ -294,9 +294,9 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             data.segmentation[z]
                         );
                         context.strokeStyle =
-                            constants.detectionStyle.SELECTED_COLOR;
+                            constants.annotationStyle.SELECTED_COLOR;
                         context.fillStyle =
-                            constants.detectionStyle.SELECTED_COLOR;
+                            constants.annotationStyle.SELECTED_COLOR;
                         context.globalAlpha = 0.5;
                         Utils.renderPolygonMasks(context, data.segmentation[z]);
                         context.globalAlpha = 1.0;

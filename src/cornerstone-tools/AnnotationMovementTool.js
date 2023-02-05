@@ -11,14 +11,14 @@ const drawRect = csTools.importInternal('drawing/drawRect');
 
 /**
  * @public
- * @class DetectionMovementTool
+ * @class AnnotationMovementTool
  * @classdesc Tool for drawing rectangular regions of interest
  * @extends Tools.Base.BaseAnnotationTool
  */
-export default class DetectionMovementTool extends BaseAnnotationTool {
+export default class AnnotationMovementTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'DetectionMovementTool',
+            name: 'AnnotationMovementTool',
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
@@ -72,7 +72,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
 
     /**
      * Method that overrides the original abstract method in the cornerstone-tools library
-     * Automatically invoked to render all the widgets that comprise a detection
+     * Automatically invoked to render all the widgets that comprise a Annotation
      * @param {*} evt Event object containing necessary event/canvas data
      */
     renderToolData(evt) {
@@ -88,7 +88,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
             element.id === 'dicomImageRight'
                 ? this.options.zoomLevelSide
                 : this.options.zoomLevelTop;
-        const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
+        const lineWidth = constants.annotationStyle.BORDER_WIDTH * zoom;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -96,7 +96,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
 
         const context = getNewContext(eventData.canvasContext.canvas);
 
-        const color = constants.detectionStyle.NORMAL_COLOR;
+        const color = constants.annotationStyle.NORMAL_COLOR;
 
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
@@ -152,7 +152,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                         data.handles.start
                     );
                 }
-                const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
                 const fontSizeArr = fontArr[1].split('px');
                 let fontSize = fontSizeArr[0];
                 fontSize *= zoom;
@@ -161,13 +161,13 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                 context.font =
                     fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-                context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+                context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
                 context.strokeStyle = data.renderColor;
                 context.fillStyle = data.renderColor;
                 const labelSize = Utils.getTextLabelSize(
                     context,
                     data.categoryName,
-                    constants.detectionStyle.LABEL_PADDING * zoom
+                    constants.annotationStyle.LABEL_PADDING * zoom
                 );
                 context.fillRect(
                     myCoords.x - 1 * zoom,
@@ -175,11 +175,11 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     labelSize['width'],
                     labelSize['height']
                 );
-                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
                 context.fillText(
                     data.categoryName,
-                    myCoords.x + constants.detectionStyle.LABEL_PADDING * zoom,
-                    myCoords.y - constants.detectionStyle.LABEL_PADDING * zoom
+                    myCoords.x + constants.annotationStyle.LABEL_PADDING * zoom,
+                    myCoords.y - constants.annotationStyle.LABEL_PADDING * zoom
                 );
                 // Polygon Mask Rendering
                 if (data.polygonCoords.length > 0) {
@@ -201,8 +201,9 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                         data.polygonCoords
                     );
                     context.strokeStyle =
-                        constants.detectionStyle.SELECTED_COLOR;
-                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
+                        constants.annotationStyle.SELECTED_COLOR;
+                    context.fillStyle =
+                        constants.annotationStyle.SELECTED_COLOR;
                     context.globalAlpha = 0.5;
                     Utils.renderPolygonMasks(context, data.polygonCoords);
                     context.globalAlpha = 1.0;
