@@ -278,7 +278,6 @@ const ImageDisplayComponent = () => {
                     }
                 }
             } else if (editionModeRef.current === constants.editionMode.MOVE) {
-                console.log('moving');
                 toolState = cornerstoneTools.getToolState(
                     viewportRef.current,
                     constants.toolNames.movement
@@ -293,11 +292,25 @@ const ImageDisplayComponent = () => {
                             handles.end.x - handles.start.x,
                             handles.end.y - handles.start.y,
                         ];
+                        const newSegmentation = [];
+                        polygonCoords.forEach((segment) => {
+                            newSegmentation.push(
+                                Utils.calculatePolygonMask(
+                                    [
+                                        handles.start.x,
+                                        handles.start.y,
+                                        handles.end.x,
+                                        handles.end.y,
+                                    ],
+                                    segment
+                                )
+                            );
+                        });
                         dispatch(updateAnnotationContextVisibility(true));
                         Utils.dispatchAndUpdateImage(
                             dispatch,
                             updateAnnotationPosition,
-                            { id, bbox, segmentation: polygonCoords }
+                            { id, bbox, segmentation: newSegmentation }
                         );
                     }
                 }
