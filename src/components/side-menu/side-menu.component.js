@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    getSelectedCategory,
     selectAnnotation,
+    selectAnnotationCategory,
     toggleCategoryVisibility,
     toggleVisibility,
 } from '../../redux/slices/annotation.slice';
@@ -39,6 +41,7 @@ const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const dispatch = useDispatch();
+    const selectedCategory = useSelector(getSelectedCategory);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
         if (!object[annotation.categoryName]) {
@@ -68,9 +71,26 @@ const SideMenuComponent = () => {
                     height={document.documentElement.clientHeight}>
                     <SideMenuList id={'side-menu-list'}>
                         {Object.keys(annotationsByCategory).map(
-                            (categoryName) => (
-                                <div key={categoryName}>
-                                    <AnnotationContainer>
+                            (categoryName, index) => (
+                                <div key={index}>
+                                    <AnnotationContainer
+                                        selected={
+                                            selectedCategory === categoryName
+                                        }
+                                        onClick={(event) => {
+                                            if (
+                                                event.target.id.includes(
+                                                    'category'
+                                                )
+                                            ) {
+                                                Utils.dispatchAndUpdateImage(
+                                                    dispatch,
+                                                    selectAnnotationCategory,
+                                                    categoryName
+                                                );
+                                            }
+                                        }}
+                                        id={'category-container'}>
                                         <AnnotationColor
                                             color={
                                                 annotationsByCategory[
@@ -107,7 +127,8 @@ const SideMenuComponent = () => {
                                                     ][0].categoryVisible
                                                         ? 'white'
                                                         : 'gray'
-                                                }>
+                                                }
+                                                id={'category-text'}>
                                                 {categoryName.toUpperCase()}
                                             </SideMenuAnnotationName>
                                         </AnnotationWrapper>
@@ -118,17 +139,20 @@ const SideMenuComponent = () => {
                                                     toggleCategoryVisibility,
                                                     categoryName
                                                 )
-                                            }>
+                                            }
+                                            id={`${categoryName}-visible-icon-${index}`}>
                                             {annotationsByCategory[
                                                 categoryName
                                             ][0].categoryVisible ? (
                                                 <VisibilityOnIcon
                                                     color={'#b9b9b9'}
+                                                    id={`${categoryName}-visible-on-icon-${index}`}
                                                     {...iconProps}
                                                 />
                                             ) : (
                                                 <VisibilityOffIcon
                                                     color={'#808080'}
+                                                    id={`${categoryName}-visible-off-icon-${index}`}
                                                     {...iconProps}
                                                 />
                                             )}
@@ -166,7 +190,8 @@ const SideMenuComponent = () => {
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',
-                                                        }}>
+                                                        }}
+                                                        id={`annotation.categoryName-${index}`}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
                                                     </SideMenuAnnotationName>
@@ -177,12 +202,14 @@ const SideMenuComponent = () => {
                                                                 toggleVisibility,
                                                                 annotation.id
                                                             )
-                                                        }>
+                                                        }
+                                                        id={`${annotation.categoryName}-visible-icon-${index}`}>
                                                         {annotation.visible ? (
                                                             <VisibilityOnIcon
                                                                 color={
                                                                     '#b9b9b9'
                                                                 }
+                                                                id={`${annotation.categoryName}-visible-on-icon-${index}`}
                                                                 {...iconProps}
                                                             />
                                                         ) : (
@@ -190,6 +217,7 @@ const SideMenuComponent = () => {
                                                                 color={
                                                                     '#808080'
                                                                 }
+                                                                id={`${annotation.categoryName}-visible-off-icon-${index}`}
                                                                 {...iconProps}
                                                             />
                                                         )}

@@ -48,6 +48,8 @@ export const AnnotationContainer = styled.div`
     align-items: end;
     min-height: 2.5rem;
     margin-top: 0.5rem;
+    background-color: ${({ selected }) =>
+        selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 
 export const AnnotationColor = styled.div`

@@ -47,6 +47,7 @@ const initialState = {
     categories: [],
     selectedAnnotation: null,
     colors: [],
+    selectedCategory: '',
 };
 
 const annotationSlice = createSlice({
@@ -131,6 +132,7 @@ const annotationSlice = createSlice({
                         selected: false,
                         visible: true,
                         categoryVisible: true,
+                        categorySelected: false,
                     });
                 });
 
@@ -149,11 +151,32 @@ const annotationSlice = createSlice({
                 }
             });
         },
+        selectAnnotationCategory: (state, action) => {
+            state.annotations.forEach((annotation) => {
+                if (annotation.categoryName === action.payload) {
+                    annotation.categorySelected = !annotation.categorySelected;
+                } else if (annotation.categorySelected === true) {
+                    annotation.categorySelected = false;
+                }
+            });
+            if (
+                (action.payload !== '' ||
+                    action.payload !== null ||
+                    action.payload !== undefined) &&
+                action.payload !== state.selectedCategory
+            ) {
+                state.selectedCategory = action.payload;
+            } else {
+                state.selectedCategory = '';
+            }
+        },
         clearAnnotationSelection: (state, action) => {
             state.annotations.forEach((annotation) => {
                 annotation.selected = false;
+                annotation.categorySelected = false;
             });
             state.selectedAnnotation = null;
+            state.selectedCategory = '';
         },
         toggleVisibility: (state, action) => {
             const foundAnnotation = state.annotations.find(
@@ -185,9 +208,14 @@ const annotationSlice = createSlice({
                 if (annotation.categoryName === action.payload) {
                     annotation.categoryVisible = !annotation.categoryVisible;
                     annotation.visible = annotation.categoryVisible;
-                    if (!annotation.visible && annotation.selected) {
+                    if (
+                        !annotation.visible &&
+                        (annotation.selected || annotation.categorySelected)
+                    ) {
                         annotation.selected = false;
+                        annotation.categorySelected = false;
                         state.selectedAnnotation = null;
+                        state.selectedCategory = '';
                     }
                 }
             });
@@ -280,6 +308,7 @@ export const {
     updateAnnotationColor,
     updateAnnotationCategory,
     updateAnnotationPosition,
+    selectAnnotationCategory,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -306,5 +335,7 @@ export const getAnnotationCategories = (state) => {
         return result;
     } else return [];
 };
+
+export const getSelectedCategory = (state) => state.annotation.selectedCategory;
 
 export default annotationSlice.reducer;

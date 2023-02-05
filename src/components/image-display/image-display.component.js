@@ -439,12 +439,14 @@ const ImageDisplayComponent = () => {
                     editionModeRef.current !== constants.editionMode.NO_TOOL)
             )
                 continue;
-            context.strokeStyle = annotations[j].selected
-                ? constants.annotationStyle.SELECTED_COLOR
-                : annotations[j].color;
-            context.fillStyle = annotations[j].selected
-                ? constants.annotationStyle.SELECTED_COLOR
-                : annotations[j].color;
+            context.strokeStyle =
+                annotations[j].selected || annotations[j].categorySelected
+                    ? constants.annotationStyle.SELECTED_COLOR
+                    : annotations[j].color;
+            context.fillStyle =
+                annotations[j].selected || annotations[j].categorySelected
+                    ? constants.annotationStyle.SELECTED_COLOR
+                    : annotations[j].color;
 
             const labelSize = Utils.getTextLabelSize(
                 context,

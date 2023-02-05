@@ -61,7 +61,6 @@ const AppNew = () => {
             .invoke(requestInitialThumbnailsList)
             .then((thumbnails) => {
                 console.log('INIT');
-                console.log(thumbnails);
             })
             .catch(() => {
                 console.log('no thumbnails to begin with');
