@@ -119,10 +119,10 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         if (editionModeRef.current !== editionMode) {
             if (editionMode !== constants.editionMode.NO_TOOL) {
+                viewportRef.current.addEventListener('mouseup', onDragEnd);
                 viewportRef.current.addEventListener(
-                    'mouseup',
-                    onDragEnd,
-                    false
+                    'cornerstonetoolsmousedrag',
+                    polygonRenderingCallback
                 );
                 stopListeningClickEvents();
             }
@@ -130,6 +130,10 @@ const ImageDisplayComponent = () => {
         editionModeRef.current = editionMode;
         return () => {
             viewportRef.current.removeEventListener('mouseup', onDragEnd);
+            viewportRef.current.removeEventListener(
+                'cornerstonetoolsmousedrag',
+                polygonRenderingCallback
+            );
             startListeningClickEvents();
         };
     }, [editionMode]);
@@ -164,6 +168,13 @@ const ImageDisplayComponent = () => {
                 console.log(error);
             });
     }, []);
+
+    const polygonRenderingCallback = useCallback(
+        (event) => {
+            cornerstone.updateImage(viewportRef.current, true);
+        },
+        [editionMode]
+    );
 
     const onDragEnd = useCallback(
         (event) => {
@@ -236,6 +247,7 @@ const ImageDisplayComponent = () => {
 
     const onImageRenderedHandler = (event) => {
         if (!event) {
+            console.log('bad event');
             return;
         }
 
