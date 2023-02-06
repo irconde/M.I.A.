@@ -182,7 +182,7 @@ const ImageDisplayComponent = () => {
                 y: annotation.bbox[1],
             });
             console.log(`x: ${x} | y: ${y}`);
-            dispatch(updateAnnotationContextPosition({ top: x, left: y }));
+            dispatch(updateAnnotationContextPosition({ top: y, left: x }));
         }
     };
 
