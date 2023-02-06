@@ -11,14 +11,14 @@ const drawRect = csTools.importInternal('drawing/drawRect');
 
 /**
  * @public
- * @class DetectionMovementTool
+ * @class AnnotationMovementTool
  * @classdesc Tool for drawing rectangular regions of interest
  * @extends Tools.Base.BaseAnnotationTool
  */
-export default class DetectionMovementTool extends BaseAnnotationTool {
+export default class AnnotationMovementTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'DetectionMovementTool',
+            name: constants.toolNames.movement,
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
@@ -72,7 +72,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
 
     /**
      * Method that overrides the original abstract method in the cornerstone-tools library
-     * Automatically invoked to render all the widgets that comprise a detection
+     * Automatically invoked to render all the widgets that comprise a Annotation
      * @param {*} evt Event object containing necessary event/canvas data
      */
     renderToolData(evt) {
@@ -84,11 +84,8 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
-        const zoom =
-            element.id === 'dicomImageRight'
-                ? this.options.zoomLevelSide
-                : this.options.zoomLevelTop;
-        const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
+        const lineWidth =
+            constants.annotationStyle.BORDER_WIDTH * this.options.zoomLevel;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -96,7 +93,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
 
         const context = getNewContext(eventData.canvasContext.canvas);
 
-        const color = constants.detectionStyle.NORMAL_COLOR;
+        const color = constants.annotationStyle.NORMAL_COLOR;
 
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
@@ -152,85 +149,71 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                         data.handles.start
                     );
                 }
-                var fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
-                var fontSizeArr = fontArr[1].split('px');
-                var fontSize = fontSizeArr[0];
-                fontSize *= zoom;
+                const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
+                const fontSizeArr = fontArr[1].split('px');
+                let fontSize = fontSizeArr[0];
+                fontSize *= this.options.zoomLevel;
                 fontSizeArr[0] = fontSize;
-                var newFontSize = fontSizeArr.join('px');
-                var newFont = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+                const newFontSize = fontSizeArr.join('px');
+                context.font =
+                    fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-                context.font = newFont;
-
-                context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+                context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
                 context.strokeStyle = data.renderColor;
                 context.fillStyle = data.renderColor;
-                const className =
-                    this.options.temporaryLabel !== undefined
-                        ? this.options.temporaryLabel
-                        : data.class;
-                const detectionLabel = Utils.formatDetectionLabel(
-                    className,
-                    data.confidence
-                );
                 const labelSize = Utils.getTextLabelSize(
                     context,
-                    detectionLabel,
-                    constants.detectionStyle.LABEL_PADDING * zoom
+                    data.categoryName,
+                    constants.annotationStyle.LABEL_PADDING *
+                        this.options.zoomLevel
                 );
                 context.fillRect(
-                    myCoords.x - 1 * zoom,
+                    myCoords.x - 1 * this.options.zoomLevel,
                     myCoords.y - labelSize['height'],
                     labelSize['width'],
                     labelSize['height']
                 );
-                context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+                context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
                 context.fillText(
-                    detectionLabel,
-                    myCoords.x + constants.detectionStyle.LABEL_PADDING * zoom,
-                    myCoords.y - constants.detectionStyle.LABEL_PADDING * zoom
+                    data.categoryName,
+                    myCoords.x +
+                        constants.annotationStyle.LABEL_PADDING *
+                            this.options.zoomLevel,
+                    myCoords.y -
+                        constants.annotationStyle.LABEL_PADDING *
+                            this.options.zoomLevel
                 );
                 // Polygon Mask Rendering
                 if (data.polygonCoords.length > 0) {
-                    const pixelStart = cornerstone.pixelToCanvas(element, {
-                        x: data.handles.start.x,
-                        y: data.handles.start.y,
-                    });
-                    const pixelEnd = cornerstone.pixelToCanvas(element, {
-                        x: data.handles.end.x,
-                        y: data.handles.end.y,
-                    });
-                    data.polygonCoords = Utils.calculatePolygonMask(
-                        [
-                            Math.abs(pixelStart.x),
-                            Math.abs(pixelStart.y),
-                            Math.abs(pixelEnd.x),
-                            Math.abs(pixelEnd.y),
-                        ],
-                        data.polygonCoords
-                    );
-                    context.strokeStyle =
-                        constants.detectionStyle.SELECTED_COLOR;
-                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
-                    context.globalAlpha = 0.5;
-                    Utils.renderPolygonMasks(context, data.polygonCoords);
-                    context.globalAlpha = 1.0;
-                } else if (
-                    data.binaryMask.length > 0 &&
-                    data.binaryMask[0].length > 0
-                ) {
-                    context.globalAlpha = 0.5;
-                    context.strokeStyle =
-                        constants.detectionStyle.SELECTED_COLOR;
-                    context.fillStyle = constants.detectionStyle.SELECTED_COLOR;
-                    const base = cornerstone.pixelToCanvas(element, {
-                        x: data.handles.start.x,
-                        y: data.handles.start.y,
-                    });
-                    data.binaryMask[1][0] = base.x;
-                    data.binaryMask[1][1] = base.y;
-                    Utils.renderBinaryMasks(data.binaryMask, context, zoom);
-                    context.globalAlpha = 1.0;
+                    for (let k = 0; k < data.polygonCoords.length; k++) {
+                        const pixelStart = cornerstone.pixelToCanvas(element, {
+                            x: data.handles.start.x,
+                            y: data.handles.start.y,
+                        });
+                        const pixelEnd = cornerstone.pixelToCanvas(element, {
+                            x: data.handles.end.x,
+                            y: data.handles.end.y,
+                        });
+                        data.polygonCoords[k] = Utils.calculatePolygonMask(
+                            [
+                                Math.abs(pixelStart.x),
+                                Math.abs(pixelStart.y),
+                                Math.abs(pixelEnd.x),
+                                Math.abs(pixelEnd.y),
+                            ],
+                            data.polygonCoords[k]
+                        );
+                        context.strokeStyle =
+                            constants.annotationStyle.SELECTED_COLOR;
+                        context.fillStyle =
+                            constants.annotationStyle.SELECTED_COLOR;
+                        context.globalAlpha = 0.5;
+                        Utils.renderPolygonMasks(
+                            context,
+                            data.polygonCoords[k]
+                        );
+                        context.globalAlpha = 1.0;
+                    }
                 }
             }
         });
@@ -282,10 +265,7 @@ export default class DetectionMovementTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
-            algorithm: constants.OPERATOR,
-            class: constants.commonDetections.UNKNOWN,
-            confidence: 100,
-            updatingDetection: false,
+            updatingAnnotation: false,
         };
     }
 }
@@ -315,10 +295,9 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
  */
 
 // eslint-disable-next-line no-unused-vars
-function _createTextBoxContent(context, { className, score }, options = {}) {
+function _createTextBoxContent(context, { className }, options = {}) {
     const textLines = [];
-    const classInfoString = `${className} - ${score}%`;
-    textLines.push(classInfoString);
+    textLines.push(className);
     return textLines;
 }
 

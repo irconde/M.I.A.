@@ -1,12 +1,12 @@
 import styled from 'styled-components';
-import { detectionStyle } from '../../../utils/enums/Constants';
+import { annotationStyle } from '../../../utils/enums/Constants';
 
 export const SideMenuDetection = styled.div`
     padding-block: 0.45rem;
     display: flex;
     align-items: center;
     background-color: ${(props) =>
-        props.selected ? detectionStyle.SELECTED_COLOR : ''};
+        props.selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 
 export const DetectionColorBox = styled.div`

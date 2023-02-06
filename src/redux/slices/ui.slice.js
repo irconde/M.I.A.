@@ -53,6 +53,10 @@ const uiSlice = createSlice({
             state.annotationContextVisible = false;
             state.editLabelVisibility = false;
             state.colorPickerVisible = false;
+            state.editionMode = constants.editionMode.NO_TOOL;
+        },
+        updateEditionMode: (state, action) => {
+            state.editionMode = action.payload;
         },
     },
 });
@@ -67,6 +71,7 @@ export const {
     updateEditLabelVisibility,
     setInputLabel,
     clearAnnotationWidgets,
+    updateEditionMode,
 } = uiSlice.actions;
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;

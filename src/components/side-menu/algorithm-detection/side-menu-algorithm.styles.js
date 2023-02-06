@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { detectionStyle } from '../../../utils/enums/Constants';
+import { annotationStyle } from '../../../utils/enums/Constants';
 
 export const SideMenuAlgorithm = styled.div`
     padding-block: 1rem;
@@ -7,7 +7,7 @@ export const SideMenuAlgorithm = styled.div`
     display: flex;
     align-items: center;
     background-color: ${(props) =>
-        props.selected ? detectionStyle.SELECTED_COLOR : ''};
+        props.selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 export const SideMenuAlgorithmName = styled.div`
     vertical-align: top;

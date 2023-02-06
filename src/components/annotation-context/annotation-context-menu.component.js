@@ -22,6 +22,7 @@ import {
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateColorPickerVisibility,
+    updateEditionMode,
     updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import {
@@ -48,7 +49,40 @@ const AnnotationContextMenuComponent = () => {
     const handleClick = (type) => {
         switch (type) {
             case constants.editionMode.MOVE:
-                console.log('moving');
+                dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState(constants.toolNames.movement, {
+                    handles: {
+                        start: {
+                            x: selectedAnnotation.bbox[0],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                        end: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                    },
+                    id: selectedAnnotation.id,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
+                    categoryName: selectedAnnotation.categoryName,
+                    updatingAnnotation: true,
+                    polygonCoords: JSON.parse(
+                        JSON.stringify(selectedAnnotation.segmentation)
+                    ),
+                });
+                Utils.setToolOptions(constants.toolNames.movement, {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.MOVE,
+                });
+                Utils.setToolActive(constants.toolNames.movement);
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.MOVE
+                );
                 break;
             case constants.editionMode.COLOR:
                 dispatch(updateAnnotationContextVisibility(false));
@@ -59,10 +93,74 @@ const AnnotationContextMenuComponent = () => {
                 dispatch(updateEditLabelVisibility(true));
                 break;
             case constants.editionMode.POLYGON:
-                console.log('polying');
+                dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState(constants.toolNames.segmentation, {
+                    handles: {
+                        points: [...selectedAnnotation.segmentation[0]],
+                    },
+                    id: selectedAnnotation.id,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
+                    updatingAnnotation: true,
+                });
+                Utils.setToolOptions(constants.toolNames.segmentation, {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.POLYGON,
+                    updatingDetection: true,
+                });
+                Utils.setToolActive(constants.toolNames.segmentation);
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.POLYGON
+                );
                 break;
             case constants.editionMode.BOUNDING:
-                console.log('bounding');
+                dispatch(updateAnnotationContextVisibility(false));
+                Utils.updateToolState(constants.toolNames.boundingBox, {
+                    handles: {
+                        start: {
+                            x: selectedAnnotation.bbox[0],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                        end: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                        start_prima: {
+                            x: selectedAnnotation.bbox[0],
+                            y:
+                                selectedAnnotation.bbox[1] +
+                                selectedAnnotation.bbox[3],
+                        },
+                        end_prima: {
+                            x:
+                                selectedAnnotation.bbox[0] +
+                                selectedAnnotation.bbox[2],
+                            y: selectedAnnotation.bbox[1],
+                        },
+                    },
+                    id: selectedAnnotation.id,
+                    categoryName: selectedAnnotation.categoryName,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
+                    updatingAnnotation: true,
+                    segmentation: JSON.parse(
+                        JSON.stringify(selectedAnnotation.segmentation)
+                    ),
+                });
+                Utils.setToolOptions(constants.toolNames.boundingBox, {
+                    cornerstoneMode: constants.cornerstoneMode.EDITION,
+                    editionMode: constants.editionMode.BOUNDING,
+                });
+                Utils.setToolActive(constants.toolNames.boundingBox);
+                Utils.dispatchAndUpdateImage(
+                    dispatch,
+                    updateEditionMode,
+                    constants.editionMode.BOUNDING
+                );
                 break;
             case constants.editionMode.DELETE:
                 dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));

@@ -2,11 +2,18 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    getSelectedAnnotation,
+    getSelectedCategory,
     selectAnnotation,
+    selectAnnotationCategory,
     toggleCategoryVisibility,
     toggleVisibility,
 } from '../../redux/slices/annotation.slice';
-import { getCollapsedSideMenu } from '../../redux/slices/ui.slice';
+import {
+    getCollapsedSideMenu,
+    updateAnnotationContextPosition,
+    updateAnnotationContextVisibility,
+} from '../../redux/slices/ui.slice';
 import {
     AnnotationColor,
     AnnotationContainer,
@@ -23,6 +30,7 @@ import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibilit
 import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
 import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 import Utils from '../../utils/general/Utils';
+import { cornerstone } from '../image-display/image-display.component';
 
 const iconProps = {
     width: '20px',
@@ -39,6 +47,8 @@ const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
     const collapsedSideMenu = useSelector(getCollapsedSideMenu);
     const dispatch = useDispatch();
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
+    const selectedCategory = useSelector(getSelectedCategory);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
         if (!object[annotation.categoryName]) {
@@ -68,9 +78,35 @@ const SideMenuComponent = () => {
                     height={document.documentElement.clientHeight}>
                     <SideMenuList id={'side-menu-list'}>
                         {Object.keys(annotationsByCategory).map(
-                            (categoryName) => (
-                                <div key={categoryName}>
-                                    <AnnotationContainer>
+                            (categoryName, index) => (
+                                <div key={index}>
+                                    <AnnotationContainer
+                                        selected={
+                                            selectedCategory === categoryName
+                                        }
+                                        onClick={(event) => {
+                                            if (
+                                                event.target.id.includes(
+                                                    'category'
+                                                )
+                                            ) {
+                                                if (
+                                                    selectedAnnotation !== null
+                                                ) {
+                                                    dispatch(
+                                                        updateAnnotationContextVisibility(
+                                                            false
+                                                        )
+                                                    );
+                                                }
+                                                Utils.dispatchAndUpdateImage(
+                                                    dispatch,
+                                                    selectAnnotationCategory,
+                                                    categoryName
+                                                );
+                                            }
+                                        }}
+                                        id={'category-container'}>
                                         <AnnotationColor
                                             color={
                                                 annotationsByCategory[
@@ -107,7 +143,8 @@ const SideMenuComponent = () => {
                                                     ][0].categoryVisible
                                                         ? 'white'
                                                         : 'gray'
-                                                }>
+                                                }
+                                                id={'category-text'}>
                                                 {categoryName.toUpperCase()}
                                             </SideMenuAnnotationName>
                                         </AnnotationWrapper>
@@ -118,17 +155,20 @@ const SideMenuComponent = () => {
                                                     toggleCategoryVisibility,
                                                     categoryName
                                                 )
-                                            }>
+                                            }
+                                            id={`${categoryName}-visible-icon-${index}`}>
                                             {annotationsByCategory[
                                                 categoryName
                                             ][0].categoryVisible ? (
                                                 <VisibilityOnIcon
                                                     color={'#b9b9b9'}
+                                                    id={`${categoryName}-visible-on-icon-${index}`}
                                                     {...iconProps}
                                                 />
                                             ) : (
                                                 <VisibilityOffIcon
                                                     color={'#808080'}
+                                                    id={`${categoryName}-visible-off-icon-${index}`}
                                                     {...iconProps}
                                                 />
                                             )}
@@ -156,17 +196,51 @@ const SideMenuComponent = () => {
                                                                 ? 'white'
                                                                 : 'gray'
                                                         }
-                                                        onClick={() =>
+                                                        onClick={() => {
+                                                            if (
+                                                                annotation.selected ===
+                                                                false
+                                                            ) {
+                                                                const viewport =
+                                                                    document.getElementById(
+                                                                        'imageContainer'
+                                                                    );
+                                                                if (
+                                                                    viewport !==
+                                                                    null
+                                                                ) {
+                                                                    const {
+                                                                        x,
+                                                                        y,
+                                                                    } = Utils.calculateAnnotationContextPosition(
+                                                                        cornerstone,
+                                                                        annotation,
+                                                                        viewport
+                                                                    );
+                                                                    console.log(
+                                                                        `x: ${x} | y: ${y}`
+                                                                    );
+                                                                    dispatch(
+                                                                        updateAnnotationContextPosition(
+                                                                            {
+                                                                                top: x,
+                                                                                left: y,
+                                                                            }
+                                                                        )
+                                                                    );
+                                                                }
+                                                            }
                                                             Utils.dispatchAndUpdateImage(
                                                                 dispatch,
                                                                 selectAnnotation,
                                                                 annotation.id
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',
-                                                        }}>
+                                                        }}
+                                                        id={`annotation.categoryName-${index}`}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
                                                         0{index + 1}
                                                     </SideMenuAnnotationName>
@@ -177,12 +251,14 @@ const SideMenuComponent = () => {
                                                                 toggleVisibility,
                                                                 annotation.id
                                                             )
-                                                        }>
+                                                        }
+                                                        id={`${annotation.categoryName}-visible-icon-${index}`}>
                                                         {annotation.visible ? (
                                                             <VisibilityOnIcon
                                                                 color={
                                                                     '#b9b9b9'
                                                                 }
+                                                                id={`${annotation.categoryName}-visible-on-icon-${index}`}
                                                                 {...iconProps}
                                                             />
                                                         ) : (
@@ -190,6 +266,7 @@ const SideMenuComponent = () => {
                                                                 color={
                                                                     '#808080'
                                                                 }
+                                                                id={`${annotation.categoryName}-visible-off-icon-${index}`}
                                                                 {...iconProps}
                                                             />
                                                         )}

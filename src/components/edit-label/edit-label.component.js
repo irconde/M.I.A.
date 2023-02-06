@@ -17,18 +17,21 @@ import {
     getInputLabel,
     getZoomLevel,
     setInputLabel,
+    updateAnnotationContextVisibility,
+    updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import { cornerstone } from '../image-display/image-display.component';
 import {
     getAnnotationCategories,
     getSelectedAnnotation,
+    updateAnnotationCategory,
 } from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabelComponent = () => {
     const dispatch = useDispatch();
@@ -69,7 +72,7 @@ const EditLabelComponent = () => {
     const inputField = useRef(null);
     const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
-    const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+    const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
     const fontSizeArr = fontArr[1].split('px');
     fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
     const newFontSize = fontSizeArr.join('px');
@@ -92,9 +95,9 @@ const EditLabelComponent = () => {
             setShowClearIcon(true);
             // set the value of the text input to the current detection class name
             if (inputField.current.value === '') {
-                /*const currentClassName =
-                    selectedDetection?.className.toUpperCase();
-                dispatch(setInputLabel(currentClassName));*/
+                dispatch(
+                    setInputLabel(selectedAnnotation.categoryName.toUpperCase())
+                );
             }
         }
 
@@ -110,8 +113,8 @@ const EditLabelComponent = () => {
      * @param {string} label New label passed up from `LabelList` component
      */
     const submitFromList = (label) => {
-        //onLabelChange(label);
         setIsListOpen(false);
+        dispatch(setInputLabel(label.toUpperCase()));
     };
     /**
      * Called on every keydown in label input field.
@@ -121,22 +124,22 @@ const EditLabelComponent = () => {
      */
     const submitFromInput = (e) => {
         if (e.key === 'Enter' && e.target.value !== '') {
-            /*
-            onLabelChange(
-                Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
-            );
-
-            dispatch(setInputLabel(''));*/
+            dispatch(updateEditLabelVisibility(false));
+            dispatch(updateAnnotationContextVisibility(true));
+            dispatch(setInputLabel(''));
+            Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
+                id: selectedAnnotation.id,
+                newCategory: newLabel,
+            });
         }
     };
 
     /**
      * Scales a value based on the given viewport's zoom level
      * @param {number} value
-     * @param {string} viewport
      * @returns {number}
      */
-    const scaleByZoom = (value, viewport) => {
+    const scaleByZoom = (value) => {
         return value * zoomLevel;
     };
 
@@ -172,7 +175,7 @@ const EditLabelComponent = () => {
      * @returns {number}
      */
     const getWidth = (width, viewport) => {
-        const { BORDER_WIDTH } = constants.detectionStyle;
+        const { BORDER_WIDTH } = constants.annotationStyle;
         return (
             scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
         );

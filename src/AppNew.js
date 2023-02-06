@@ -11,7 +11,7 @@ import TopBarComponent from './components/top-bar/top-bar.component';
 import AboutModal from './components/about-modal/about-modal.component';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import ContactModal from './components/contact-modal/contact-modal.component';
-import AnnotationContextMenuComponent from './components/detection-context/annotation-context-menu.component';
+import AnnotationContextMenuComponent from './components/annotation-context/annotation-context-menu.component';
 import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';

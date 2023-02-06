@@ -5,9 +5,10 @@ import * as constants from '../enums/Constants';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arrayBufferToImage, createImage } from 'cornerstone-web-image-loader';
 import randomColor from 'randomcolor';
-import { cornerstone } from '../../components/image-display/image-display.component';
-
-const cloneDeep = require('lodash.clonedeep');
+import {
+    cornerstone,
+    cornerstoneTools,
+} from '../../components/image-display/image-display.component';
 
 export default class Utils {
     /**
@@ -475,7 +476,7 @@ export default class Utils {
     /**
      * Provides information about the viewport where a mouse event was detected
      *
-     * @param {Event} e - Mouse event data
+     * @param {CornerstoneEvent} e - Mouse event data
      * @returns {{viewport: string, offset: number}} - Viewport-specific information: viewport name and offset
      */
     static eventToViewportInfo(e) {
@@ -524,6 +525,18 @@ export default class Utils {
         fakeEvent.detail = { ...fakeEvent.detail, element: element };
         fakeEvent.target = element;
         return fakeEvent;
+    }
+
+    static calculateAnnotationContextPosition(
+        cornerstone,
+        annotation,
+        viewport
+    ) {
+        const { x, y } = cornerstone.pixelToCanvas(viewport, {
+            x: annotation.bbox[0],
+            y: annotation.bbox[1],
+        });
+        return { x, y };
     }
 
     /**
@@ -721,22 +734,22 @@ export default class Utils {
      * @returns {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>}
      */
     static polygonDataToXYArray(polygonData, boundingBox) {
-        const xDist = boundingBox[2] - boundingBox[0];
-        const yDist = boundingBox[3] - boundingBox[1];
+        const xDist = boundingBox[2];
+        const yDist = boundingBox[3];
+        const x_f = boundingBox[0] + boundingBox[2];
+        const y_f = boundingBox[1] + boundingBox[3];
         let points = [];
         for (let index in polygonData) {
             points.push({
                 x: polygonData[index].x,
                 y: polygonData[index].y,
                 anchor: {
-                    top:
-                        ((boundingBox[3] - polygonData[index].y) / yDist) * 100,
+                    top: ((y_f - polygonData[index].y) / yDist) * 100,
                     bottom:
                         ((polygonData[index].y - boundingBox[1]) / yDist) * 100,
                     left:
                         ((polygonData[index].x - boundingBox[0]) / xDist) * 100,
-                    right:
-                        ((boundingBox[2] - polygonData[index].x) / xDist) * 100,
+                    right: ((x_f - polygonData[index].x) / xDist) * 100,
                 },
             });
         }
@@ -760,7 +773,7 @@ export default class Utils {
         const y_max = Math.max(...y_values);
         const x_max = Math.max(...x_values);
         const y_min = Math.min(...y_values);
-        return [x_min, y_min, x_max, y_max];
+        return [x_min, y_min, x_max - x_min, y_max - y_min];
     }
 
     /**
@@ -790,7 +803,7 @@ export default class Utils {
      * @returns {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>} - newPolygonData with updated points based on anchor points
      */
     static calculatePolygonMask(boundingBox, polygonData) {
-        let newPolygonData = cloneDeep(polygonData);
+        let newPolygonData = JSON.parse(JSON.stringify(polygonData));
         const xDist = boundingBox[2] - boundingBox[0];
         const yDist = boundingBox[3] - boundingBox[1];
         newPolygonData.forEach((point) => {
@@ -922,6 +935,36 @@ export default class Utils {
         if (element !== null) {
             dispatch(action(args));
             cornerstone.updateImage(element, true);
+        }
+    };
+
+    static updateToolState = (toolName, state) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.addToolState(element, toolName, state);
+        }
+    };
+
+    static setToolActive = (toolName) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolActive(toolName, {
+                mouseButtonMask: 1,
+            });
+        }
+    };
+
+    static setToolDisabled = (toolName) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolDisabled(toolName);
+        }
+    };
+
+    static setToolOptions = (toolName, options) => {
+        const element = document.getElementById('imageContainer');
+        if (element !== null) {
+            cornerstoneTools.setToolOptions(toolName, options);
         }
     };
 
