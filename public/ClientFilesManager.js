@@ -61,7 +61,7 @@ class Thumbnails {
             // TODO: remove logs
             console.log('Finished all queued tasks');
             this.#saveThumbnailsToStorage().then(() => {
-                console.log('SAVED IN DRAIN', this.#thumbnailsObj);
+                console.log('SAVED IN DRAIN');
             });
         });
     }
@@ -217,6 +217,7 @@ class ClientFilesManager {
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
+    colorFilePath = '';
     selectedAnnotationFile = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
@@ -253,17 +254,20 @@ class ClientFilesManager {
      * Called when the app is first launched with the images' dir path from the settings
      * @param imagesDirPath {string}
      * @param annotationFilePath {string}
+     * @param colorFilePath {string}
      * @returns {Promise<void>}
      */
-    async initSelectedPaths(imagesDirPath, annotationFilePath) {
+    async initSelectedPaths(imagesDirPath, annotationFilePath, colorFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
         // if no path exits in the settings then reject the React promise
         if (imagesDirPath === '') return this.thumbnailsPromise.reject();
 
         this.selectedImagesDirPath = imagesDirPath;
+        this.colorFilePath = colorFilePath;
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {
+            this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
             await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
@@ -315,6 +319,28 @@ class ClientFilesManager {
         );
 
         return { pixelData, annotationInformation };
+    }
+
+    async getCurrentFile(colors) {
+        this.#sendFileInfo();
+        if (!this.fileNames.length) {
+            throw new Error('Directory contains no images');
+        } else if (this.currentFileIndex >= this.fileNames.length) {
+            throw new Error('No more files');
+        }
+
+        let annotationInformation = [];
+        if (this.selectedAnnotationFile) {
+            annotationInformation = await this.getAnnotationsForFile();
+        }
+        const pixelData = await fs.promises.readFile(
+            path.join(
+                this.selectedImagesDirPath,
+                this.fileNames[this.currentFileIndex]
+            )
+        );
+
+        return { pixelData, annotationInformation, colors };
     }
 
     async getAnnotationsForFile() {

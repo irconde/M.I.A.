@@ -12,6 +12,9 @@ import AboutModal from './components/about-modal/about-modal.component';
 import { Channels } from './utils/enums/Constants';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import ContactModal from './components/contact-modal/contact-modal.component';
+import AnnotationContextMenuComponent from './components/annotation-context/annotation-context-menu.component';
+import ColorPickerComponent from './components/color/color-picker.component';
+import EditLabelComponent from './components/edit-label/edit-label.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -58,7 +61,6 @@ const AppNew = () => {
             .invoke(requestInitialThumbnailsList)
             .then((thumbnails) => {
                 console.log('INIT');
-                console.log(thumbnails);
             })
             .catch(() => {
                 console.log('no thumbnails to begin with');
@@ -87,6 +89,9 @@ const AppNew = () => {
                 open={contactModalOpen}
             />
             <SideMenuComponent />
+            <AnnotationContextMenuComponent />
+            <ColorPickerComponent />
+            <EditLabelComponent />
         </div>
     );
 };

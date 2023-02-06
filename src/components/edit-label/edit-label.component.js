@@ -1,19 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
 import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import * as constants from '../../utils/enums/Constants';
-import Utils from '../../utils/general/Utils.js';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    getDetectionContextInfo,
-    getInputLabel,
-    getRecentScroll,
-    setInputLabel,
-} from '../../redux/slices-old/ui/uiSlice';
-import {
-    getDetectionLabels,
-    getSelectedDetection,
-} from '../../redux/slices-old/detections/detectionsSlice';
 import {
     ArrowIconWrapper,
     ClearIconWrapper,
@@ -24,27 +12,73 @@ import {
 } from './edit-label.styles';
 import LabelListComponent from './label-list.component';
 import ClearIcon from '../../icons/edit-label/clear-icon/clear.icon';
+import {
+    getEditLabelVisible,
+    getInputLabel,
+    getZoomLevel,
+    setInputLabel,
+    updateAnnotationContextVisibility,
+    updateEditLabelVisibility,
+} from '../../redux/slices/ui.slice';
+import { cornerstone } from '../image-display/image-display.component';
+import {
+    getAnnotationCategories,
+    getSelectedAnnotation,
+    updateAnnotationCategory,
+} from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {function} onLabelChange Function to call when new label is created
  */
-const EditLabelComponent = ({ onLabelChange }) => {
+const EditLabelComponent = () => {
     const dispatch = useDispatch();
-    const reduxInfo = useSelector(getDetectionContextInfo);
-    const { zoomSide, zoomTop, viewport, position, width, font, isVisible } =
-        reduxInfo;
-    const labels = useSelector(getDetectionLabels);
-    const recentScroll = useSelector(getRecentScroll);
+    const zoomLevel = useSelector(getZoomLevel);
+    const isVisible = useSelector(getEditLabelVisible);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const newLabel = useSelector(getInputLabel);
-    const selectedDetection = useSelector(getSelectedDetection);
+    const viewport = document.getElementById('imageContainer');
+    const [x, setX] = useState(0);
+    const [y, setY] = useState(0);
+    useEffect(() => {
+        if (isVisible) {
+            const newViewport = document.getElementById('imageContainer');
+            if (newViewport !== null) {
+                console.log('calc label');
+                const { offsetLeft, offsetTop } = newViewport;
+                const horizontalGap = offsetLeft / zoomLevel;
+                const verticalGap = offsetTop / zoomLevel;
+
+                try {
+                    const { xData, yData } = cornerstone.pixelToCanvas(
+                        newViewport,
+                        {
+                            x: selectedAnnotation?.bbox[0] + horizontalGap,
+                            y: selectedAnnotation?.bbox[1] + verticalGap,
+                        }
+                    );
+                    setX(xData);
+                    setY(yData);
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+    }, [isVisible, selectedAnnotation]);
+
+    const labels = useSelector(getAnnotationCategories);
     const inputField = useRef(null);
     const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
+    const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
+    const fontSizeArr = fontArr[1].split('px');
+    fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
+    const newFontSize = fontSizeArr.join('px');
+    const font = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
 
-    const formattedLabels = labels.filter((label) => label !== 'unknown');
+    const formattedLabels = labels?.filter((label) => label !== 'unknown');
 
     const placeholder = 'Input text';
 
@@ -61,9 +95,9 @@ const EditLabelComponent = ({ onLabelChange }) => {
             setShowClearIcon(true);
             // set the value of the text input to the current detection class name
             if (inputField.current.value === '') {
-                const currentClassName =
-                    selectedDetection.className.toUpperCase();
-                dispatch(setInputLabel(currentClassName));
+                dispatch(
+                    setInputLabel(selectedAnnotation.categoryName.toUpperCase())
+                );
             }
         }
 
@@ -79,8 +113,8 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @param {string} label New label passed up from `LabelList` component
      */
     const submitFromList = (label) => {
-        onLabelChange(label);
         setIsListOpen(false);
+        dispatch(setInputLabel(label.toUpperCase()));
     };
     /**
      * Called on every keydown in label input field.
@@ -90,21 +124,23 @@ const EditLabelComponent = ({ onLabelChange }) => {
      */
     const submitFromInput = (e) => {
         if (e.key === 'Enter' && e.target.value !== '') {
-            onLabelChange(
-                Utils.truncateString(newLabel, constants.MAX_LABEL_LENGTH)
-            );
+            dispatch(updateEditLabelVisibility(false));
+            dispatch(updateAnnotationContextVisibility(true));
             dispatch(setInputLabel(''));
+            Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
+                id: selectedAnnotation.id,
+                newCategory: newLabel,
+            });
         }
     };
 
     /**
      * Scales a value based on the given viewport's zoom level
      * @param {number} value
-     * @param {string} viewport
      * @returns {number}
      */
-    const scaleByZoom = (value, viewport) => {
-        return value * getViewportZoom(viewport);
+    const scaleByZoom = (value) => {
+        return value * zoomLevel;
     };
 
     /**
@@ -132,15 +168,6 @@ const EditLabelComponent = ({ onLabelChange }) => {
     };
 
     /**
-     * Returns the appropriate zoom amount based on the viewport (side or top)
-     *
-     * @param {string} viewport
-     * @returns {number}
-     */
-    const getViewportZoom = (viewport) =>
-        viewport === 'side' ? zoomSide : zoomTop;
-
-    /**
      * Scales the given width by the zoom level and account for the detection border width
      *
      * @param {number} width
@@ -148,19 +175,19 @@ const EditLabelComponent = ({ onLabelChange }) => {
      * @returns {number}
      */
     const getWidth = (width, viewport) => {
-        const { BORDER_WIDTH } = constants.detectionStyle;
+        const { BORDER_WIDTH } = constants.annotationStyle;
         return (
             scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
         );
     };
 
-    if (isVisible && !recentScroll) {
+    if (isVisible) {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                top={position.top - INPUT_HEIGHT}
-                left={position.left - getViewportZoom(viewport)}
-                width={getWidth(width, viewport)}
+                top={y - INPUT_HEIGHT}
+                left={x - scaleByZoom(zoomLevel)}
+                width={getWidth(selectedAnnotation?.bbox[2], viewport)}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>
@@ -201,7 +228,7 @@ const EditLabelComponent = ({ onLabelChange }) => {
                 </InputContainer>
                 {isListOpen && (
                     <LabelListComponent
-                        width={width}
+                        width={selectedAnnotation?.bbox[2]}
                         labels={formattedLabels}
                         onLabelSelect={submitFromList}
                     />
@@ -211,7 +238,4 @@ const EditLabelComponent = ({ onLabelChange }) => {
     } else return null;
 };
 
-EditLabelComponent.propTypes = {
-    onLabelChange: PropTypes.func.isRequired,
-};
 export default EditLabelComponent;

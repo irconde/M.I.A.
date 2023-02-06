@@ -18,8 +18,8 @@ import JSZip from 'jszip';
 import NoFileSignComponent from './components/no-file-sign/no-file-sign.component';
 import * as constants from './utils/enums/Constants';
 import BoundingBoxDrawingTool from './cornerstone-tools/BoundingBoxDrawingTool';
-import DetectionMovementTool from './cornerstone-tools/DetectionMovementTool';
-import PolygonDrawingTool from './cornerstone-tools/PolygonDrawingTool';
+import AnnotationMovementTool from './cornerstone-tools/AnnotationMovementTool';
+import SegmentationDrawingTool from './cornerstone-tools/SegmentationDrawingTool';
 import BoundPolyFAB from './components/fab/bound-poly-fab.component';
 import { connect } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
@@ -82,7 +82,7 @@ import {
     updateZoomLevelSide,
     updateZoomLevelTop,
 } from './redux/slices-old/ui/uiSlice';
-import DetectionContextMenu from './components/detection-context/detection-context-menu.component';
+import DetectionContextMenu from './components/annotation-context/annotation-context-menu.component';
 import EditLabel from './components/edit-label/edit-label.component';
 import { buildCocoDataZip } from './utils/detections/Coco';
 import { fileOpen } from 'browser-fs-access';
@@ -609,8 +609,8 @@ class App extends Component {
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
         cornerstoneTools.addTool(BoundingBoxDrawingTool);
-        cornerstoneTools.addTool(DetectionMovementTool);
-        cornerstoneTools.addTool(PolygonDrawingTool);
+        cornerstoneTools.addTool(AnnotationMovementTool);
+        cornerstoneTools.addTool(SegmentationDrawingTool);
         if (
             this.props.cornerstoneMode === constants.cornerstoneMode.ANNOTATION
         ) {
@@ -1514,8 +1514,8 @@ class App extends Component {
             return;
         }
         const B_BOX_COORDS = 4;
-        context.font = constants.detectionStyle.LABEL_FONT;
-        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+        context.font = constants.annotationStyle.LABEL_FONT;
+        context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
         // eslint-disable-next-line no-unused-vars
         for (let j = 0; j < data.length; j++) {
             if (
@@ -1540,7 +1540,7 @@ class App extends Component {
                     const rgb = Utils.hexToRgb(data[j].color);
                     boundingBoxColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
                 } else {
-                    boundingBoxColor = constants.detectionStyle.SELECTED_COLOR;
+                    boundingBoxColor = constants.annotationStyle.SELECTED_COLOR;
                 }
             }
             context.strokeStyle = boundingBoxColor;
@@ -1561,7 +1561,7 @@ class App extends Component {
             const labelSize = Utils.getTextLabelSize(
                 context,
                 detectionLabel,
-                constants.detectionStyle.LABEL_PADDING
+                constants.annotationStyle.LABEL_PADDING
             );
             context.strokeRect(
                 boundingBoxCoords[0],
@@ -1603,11 +1603,11 @@ class App extends Component {
                 labelSize['width'],
                 labelSize['height']
             );
-            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 detectionLabel,
-                boundingBoxCoords[0] + constants.detectionStyle.LABEL_PADDING,
-                boundingBoxCoords[1] - constants.detectionStyle.LABEL_PADDING
+                boundingBoxCoords[0] + constants.annotationStyle.LABEL_PADDING,
+                boundingBoxCoords[1] - constants.annotationStyle.LABEL_PADDING
             );
         }
     }
@@ -2519,7 +2519,7 @@ class App extends Component {
                     uuid: this.props.selectedDetection.uuid,
                     algorithm: this.props.selectedDetection.algorithm,
                     class: this.props.selectedDetection.className,
-                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
@@ -2570,7 +2570,7 @@ class App extends Component {
                     uuid: this.props.selectedDetection.uuid,
                     algorithm: this.props.selectedDetection.algorithm,
                     class: this.props.selectedDetection.className,
-                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
@@ -2623,7 +2623,7 @@ class App extends Component {
                     uuid: this.props.selectedDetection.uuid,
                     algorithm: this.props.selectedDetection.algorithm,
                     class: this.props.selectedDetection.className,
-                    renderColor: constants.detectionStyle.SELECTED_COLOR,
+                    renderColor: constants.annotationStyle.SELECTED_COLOR,
                     confidence: this.props.selectedDetection.confidence,
                     updatingDetection: true,
                     view: this.props.selectedDetection.view,
@@ -2725,7 +2725,7 @@ class App extends Component {
                 }
 
                 // TODO: Future refactoring of how the label to be rendered is calculated. The size calculation at certain zoom levels needs to be taken into account
-                const fontArr = constants.detectionStyle.LABEL_FONT.split(' ');
+                const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
                 const fontSizeArr = fontArr[1].split('px');
                 fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
                 const newFontSize = fontSizeArr.join('px');

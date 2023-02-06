@@ -6,12 +6,16 @@ const fs = require('fs');
 const Constants = require('./Constants');
 let mainWindow;
 let appSettings = null;
+let annotationColors = [];
 const MONITOR_FILE_PATH = isDev
     ? 'monitorConfig.json'
     : path.join(app.getPath('userData'), 'monitorConfig.json');
 const SETTINGS_FILE_PATH = isDev
     ? 'settings.json'
     : path.join(app.getPath('userData'), 'settings.json');
+const COLORS_FILE_PATH = isDev
+    ? 'colors.json'
+    : path.join(app.getPath('userData'), 'colors.json');
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -26,7 +30,7 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
-            ignore: ['settings.json', 'monitorConfig.json'],
+            ignore: ['settings.json', 'monitorConfig.json', 'colors.json'],
         });
     } catch (e) {
         console.log(e);
@@ -83,20 +87,10 @@ function createWindow() {
         mainWindow = null;
     });
     if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log('An error occurred: ', err));
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).finally();
 
         // Open the DevTools.
-        mainWindow.webContents.on('did-frame-finish-load', () => {
-            // We close the DevTools so that it can be reopened and redux reconnected.
-            // This is a workaround for a bug in redux devtools.
-            mainWindow.webContents.closeDevTools();
-
-            mainWindow.webContents.once('devtools-opened', () => {
-                mainWindow.focus();
-            });
-
+        mainWindow.webContents.on('dom-ready', () => {
             mainWindow.webContents.openDevTools();
         });
     } else {
@@ -197,12 +191,23 @@ ipcMain.handle(
     }
 );
 
+ipcMain.handle(
+    Constants.Channels.saveColorsFile,
+    async (event, colorUpdate) => {
+        return await updateColorsJSON(colorUpdate);
+    }
+);
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data
  */
 ipcMain.handle(Constants.Channels.getNextFile, () => {
     return files.getNextFile();
+});
+
+ipcMain.handle(Constants.Channels.getCurrentFile, () => {
+    return files.getCurrentFile(annotationColors);
 });
 
 /**
@@ -220,21 +225,47 @@ ipcMain.handle(Constants.Channels.getSettings, async (event) => {
  * @returns {Promise<Object>}
  */
 const initSettings = async () => {
-    return new Promise((resolve, reject) => {
-        const { defaultSettings } = Constants;
-        fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
-            if (err?.code === 'ENOENT') {
-                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
-            } else if (err) {
-                appSettings = defaultSettings;
-                reject(err);
+    const allPromises = [];
+    allPromises.push(
+        new Promise((resolve, reject) => {
+            const { defaultSettings } = Constants;
+
+            if (fs.existsSync(SETTINGS_FILE_PATH)) {
+                fs.readFile(SETTINGS_FILE_PATH, (err, data) => {
+                    if (err) {
+                        appSettings = defaultSettings;
+                        reject(err);
+                    } else {
+                        // if settings already exist
+                        appSettings = JSON.parse(data);
+                        resolve(appSettings);
+                    }
+                });
             } else {
-                // if settings already exist
-                appSettings = JSON.parse(data);
-                resolve(appSettings);
+                updateSettingsJSON(defaultSettings).then(resolve).catch(reject);
             }
-        });
-    });
+        })
+    );
+
+    allPromises.push(
+        new Promise((resolve, reject) => {
+            if (fs.existsSync(COLORS_FILE_PATH)) {
+                fs.readFile(COLORS_FILE_PATH, (err, data) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        // if colors already exist
+                        annotationColors = JSON.parse(data);
+                        resolve();
+                    }
+                });
+            } else {
+                updateColorsJSON(annotationColors).then(resolve).catch(reject);
+            }
+        })
+    );
+
+    return await Promise.all(allPromises);
 };
 
 /**
@@ -252,6 +283,20 @@ const updateSettingsJSON = async (newSettings) => {
             } else {
                 appSettings = newSettings;
                 resolve(newSettings);
+            }
+        });
+    });
+};
+
+const updateColorsJSON = async (newColors) => {
+    return new Promise((resolve, reject) => {
+        const colorsString = JSON.stringify(newColors);
+        fs.writeFile(COLORS_FILE_PATH, colorsString, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                annotationColors = newColors;
+                resolve();
             }
         });
     });

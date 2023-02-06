@@ -5,7 +5,7 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as cornerstoneWebImageLoader from 'cornerstone-web-image-loader';
 import dicomParser from 'dicom-parser';
 import Utils from '../../utils/general/Utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as cornerstoneMath from 'cornerstone-math';
 import * as constants from '../../utils/enums/Constants';
 import { Channels } from '../../utils/enums/Constants';
@@ -14,8 +14,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
     addAnnotationArray,
+    clearAnnotationSelection,
     getAnnotations,
+    getSelectedAnnotation,
+    getSelectedCategory,
+    selectAnnotation,
+    updateAnnotationPosition,
 } from '../../redux/slices/annotation.slice';
+import {
+    clearAnnotationWidgets,
+    getEditionMode,
+    updateAnnotationContextPosition,
+    updateAnnotationContextVisibility,
+    updateEditionMode,
+    updateZoomLevel,
+} from '../../redux/slices/ui.slice';
+import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
+import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
+import AnnotationMovementTool from '../../cornerstone-tools/AnnotationMovementTool';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -42,6 +58,8 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize({
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
 cornerstone.registerImageLoader('myCustomLoader', Utils.loadImage);
 
+export { cornerstone, cornerstoneTools };
+
 const ImageDisplayComponent = () => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
@@ -50,6 +68,14 @@ const ImageDisplayComponent = () => {
     const [pixelData, setPixelData] = useState(null);
     const [viewport, setViewport] = useState(null);
     const [error, setError] = useState('');
+    const annotationRef = useRef(annotations);
+    const zoomLevel = useRef();
+    const editionMode = useSelector(getEditionMode);
+    const editionModeRef = useRef(editionMode);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
+    const selectedAnnotationRef = useRef(selectedAnnotation);
+    const selectedCategory = useSelector(getSelectedCategory);
+    const selectedCategoryRef = useRef(selectedCategory);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -61,9 +87,85 @@ const ImageDisplayComponent = () => {
         const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+        cornerstoneTools.addTool(BoundingBoxDrawingTool);
+        cornerstoneTools.addTool(SegmentationDrawingTool);
+        cornerstoneTools.addTool(AnnotationMovementTool);
+    };
+
+    const resetCornerstoneTools = () => {
+        Utils.setToolDisabled(constants.toolNames.boundingBox);
+        Utils.setToolDisabled(constants.toolNames.segmentation);
+        Utils.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.clearToolState(
+            viewportRef.current,
+            constants.toolNames.boundingBox
+        );
+        cornerstoneTools.clearToolState(
+            viewportRef.current,
+            constants.toolNames.segmentation
+        );
+        cornerstoneTools.clearToolState(
+            viewportRef.current,
+            constants.toolNames.movement
+        );
+        cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.segmentation, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+            updatingAnnotation: false,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.movement, {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
+        cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
+        cornerstoneTools.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+        cornerstoneTools.setToolActive('ZoomMouseWheel', {});
+        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        annotationRef.current = annotations;
+    }, [annotations]);
+
+    useEffect(() => {
+        selectedAnnotationRef.current = selectedAnnotation;
+    }, [selectedAnnotation]);
+
+    useEffect(() => {
+        selectedCategoryRef.current = selectedCategory;
+    }, [selectedCategory]);
+
+    useEffect(() => {
+        if (editionModeRef.current !== editionMode) {
+            if (editionMode !== constants.editionMode.NO_TOOL) {
+                viewportRef.current.addEventListener('mouseup', onDragEnd);
+                if (editionMode === constants.editionMode.POLYGON) {
+                    viewportRef.current.addEventListener(
+                        'cornerstonetoolsmousedrag',
+                        polygonRenderingCallback
+                    );
+                }
+                stopListeningClickEvents();
+            }
+        }
+        editionModeRef.current = editionMode;
+        return () => {
+            viewportRef.current.removeEventListener('mouseup', onDragEnd);
+            viewportRef.current.removeEventListener(
+                'cornerstonetoolsmousedrag',
+                polygonRenderingCallback
+            );
+            startListeningClickEvents();
+        };
+    }, [editionMode]);
 
     useEffect(() => {
         const imageElement = viewportRef.current;
@@ -85,10 +187,10 @@ const ImageDisplayComponent = () => {
     }, [selectedImagesDirPath, pixelData]);
 
     useEffect(() => {
-        getNextFile()
+        getCurrentFile()
             .then((data) => {
-                const { pixelData, annotationInformation } = data;
-                dispatch(addAnnotationArray(annotationInformation));
+                const { pixelData, annotationInformation, colors } = data;
+                dispatch(addAnnotationArray({ annotationInformation, colors }));
                 setPixelData(pixelData);
             })
             .catch((error) => {
@@ -96,9 +198,146 @@ const ImageDisplayComponent = () => {
             });
     }, []);
 
-    const getNextFile = async () => {
+    const polygonRenderingCallback = useCallback(
+        (event) => {
+            cornerstone.updateImage(viewportRef.current, true);
+        },
+        [editionMode]
+    );
+
+    const onDragEnd = useCallback(
+        (event) => {
+            console.log(event);
+            let toolState = null;
+            if (editionModeRef.current === constants.editionMode.BOUNDING) {
+                toolState = cornerstoneTools.getToolState(
+                    viewportRef.current,
+                    constants.toolNames.boundingBox
+                );
+                if (toolState !== undefined && toolState.data.length > 0) {
+                    const { data } = toolState;
+                    const { handles, updatingAnnotation, id, segmentation } =
+                        data[0];
+                    let coords = [];
+                    if (updatingAnnotation === true) {
+                        const { start, end } = handles;
+                        // Fix flipped rectangle issues
+                        if (start.x > end.x && start.y > end.y) {
+                            coords = [end.x, end.y, start.x, start.y];
+                        } else if (start.x > end.x) {
+                            coords = [end.x, start.y, start.x, end.y];
+                        } else if (start.y > end.y) {
+                            coords = [start.x, end.y, end.x, start.y];
+                        } else {
+                            coords = [start.x, start.y, end.x, end.y];
+                        }
+                        const newSegmentation = [];
+                        segmentation.forEach((segment) => {
+                            newSegmentation.push(
+                                Utils.calculatePolygonMask(coords, segment)
+                            );
+                        });
+                        // Converting from
+                        // [x_0, y_0, x_f, y_f]
+                        // to
+                        // [x_0, y_0, width, height]
+                        coords[2] = coords[2] - coords[0];
+                        coords[3] = coords[3] - coords[1];
+                        dispatch(
+                            updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox: coords, segmentation: newSegmentation }
+                        );
+                        resetCornerstoneTools();
+                    } else {
+                        // TODO: in creating annotations
+                    }
+                }
+            } else if (
+                editionModeRef.current === constants.editionMode.POLYGON
+            ) {
+                toolState = cornerstoneTools.getToolState(
+                    viewportRef.current,
+                    constants.toolNames.segmentation
+                );
+                if (toolState !== undefined && toolState.data.length > 0) {
+                    const { data } = toolState;
+                    const { handles, updatingAnnotation, id } = data[0];
+                    if (updatingAnnotation === true) {
+                        const coords = Utils.calculateBoundingBox(
+                            handles.points
+                        );
+                        const newSegmentation = [
+                            Utils.polygonDataToXYArray(
+                                data[0].handles.points,
+                                coords
+                            ),
+                        ];
+                        dispatch(
+                            updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox: coords, segmentation: newSegmentation }
+                        );
+                        resetCornerstoneTools();
+                    } else {
+                        // TODO
+                    }
+                }
+            } else if (editionModeRef.current === constants.editionMode.MOVE) {
+                toolState = cornerstoneTools.getToolState(
+                    viewportRef.current,
+                    constants.toolNames.movement
+                );
+                if (toolState !== undefined && toolState.data.length > 0) {
+                    const { handles, id, polygonCoords, updatingAnnotation } =
+                        toolState.data[0];
+                    if (updatingAnnotation === true) {
+                        const bbox = [
+                            handles.start.x,
+                            handles.start.y,
+                            handles.end.x - handles.start.x,
+                            handles.end.y - handles.start.y,
+                        ];
+                        const newSegmentation = [];
+                        polygonCoords.forEach((segment) => {
+                            newSegmentation.push(
+                                Utils.calculatePolygonMask(
+                                    [
+                                        handles.start.x,
+                                        handles.start.y,
+                                        handles.end.x,
+                                        handles.end.y,
+                                    ],
+                                    segment
+                                )
+                            );
+                        });
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox, segmentation: newSegmentation }
+                        );
+                    }
+                }
+                dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+                resetCornerstoneTools();
+            }
+        },
+        [editionMode]
+    );
+
+    const getCurrentFile = async () => {
         try {
-            return ipcRenderer.invoke(Channels.getNextFile);
+            return ipcRenderer.invoke(Channels.getCurrentFile);
         } catch (e) {
             console.log(e);
         }
@@ -108,23 +347,137 @@ const ImageDisplayComponent = () => {
         if (!event) {
             return;
         }
+
+        console.log('image render');
         const eventData = event.detail;
+        zoomLevel.current = eventData.viewport.scale;
+        dispatch(updateZoomLevel(zoomLevel.current));
+        Utils.setToolOptions(constants.toolNames.boundingBox, {
+            zoomLevel: zoomLevel.current,
+        });
+        Utils.setToolOptions(constants.toolNames.segmentation, {
+            zoomLevel: zoomLevel.current,
+        });
+        Utils.setToolOptions(constants.toolNames.movement, {
+            zoomLevel: zoomLevel.current,
+        });
         const context = eventData.canvasContext;
-        renderAnnotations(context);
+        renderAnnotations(context, annotationRef.current);
+        startListeningClickEvents();
     };
 
-    const renderAnnotations = (context) => {
-        context.font = constants.detectionStyle.LABEL_FONT;
-        context.lineWidth = constants.detectionStyle.BORDER_WIDTH;
+    const onMouseClicked = (event) => {
+        if (annotationRef.current.length > 0) {
+            const mousePos = cornerstone.canvasToPixel(event.target, {
+                x: event.detail.currentPoints.canvas.x,
+                y: event.detail.currentPoints.canvas.y,
+            });
+            let clickedPos = constants.selection.NO_SELECTION;
+            for (let j = annotationRef.current.length - 1; j > -1; j--) {
+                if (!annotationRef.current[j].visible) continue;
+                if (
+                    Utils.pointInRect(mousePos, annotationRef.current[j].bbox)
+                ) {
+                    clickedPos = j;
+                    break;
+                }
+            }
+            if (clickedPos !== constants.selection.NO_SELECTION) {
+                dispatch(
+                    selectAnnotation(annotationRef.current[clickedPos].id)
+                );
+                renderAnnotationContextMenu(
+                    event,
+                    annotationRef.current[clickedPos]
+                );
+            } else {
+                dispatch(clearAnnotationSelection());
+                dispatch(clearAnnotationWidgets());
+
+                resetCornerstoneTools();
+            }
+            cornerstone.updateImage(viewportRef.current, true);
+        }
+    };
+
+    const renderAnnotationContextMenu = (
+        event,
+        annotation,
+        updatedZoomLevel = null
+    ) => {
+        if (annotation !== null && annotation !== undefined) {
+            const viewportInfo = Utils.eventToViewportInfo(
+                Utils.mockCornerstoneEvent(event, viewportRef.current)
+            );
+            let inputZoomLevel;
+            if (updatedZoomLevel !== null) {
+                inputZoomLevel = updatedZoomLevel;
+            } else {
+                inputZoomLevel = zoomLevel.current;
+            }
+            let annotationContextGap = 0;
+            annotationContextGap =
+                viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
+
+            const { x, y } = Utils.calculateAnnotationContextPosition(
+                cornerstone,
+                annotation,
+                viewportRef.current
+            );
+            console.log(`x: ${x} | y: ${y}`);
+            dispatch(updateAnnotationContextPosition({ top: x, left: y }));
+        }
+    };
+
+    const stopListeningClickEvents = () => {
+        viewportRef.current.addEventListener(
+            'cornerstonetoolsmouseclick',
+            onMouseClicked
+        );
+    };
+
+    const startListeningClickEvents = () => {
+        viewportRef.current.addEventListener(
+            'cornerstonetoolsmouseclick',
+            onMouseClicked
+        );
+    };
+
+    const renderAnnotations = (context, annotations) => {
+        context.font = constants.annotationStyle.LABEL_FONT;
+        context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
 
         for (let j = 0; j < annotations.length; j++) {
-            context.strokeStyle = annotations[j].color;
-            context.fillStyle = annotations[j].color;
+            if (
+                !annotations[j].visible ||
+                (annotations[j].selected &&
+                    editionModeRef.current !== constants.editionMode.NO_TOOL)
+            )
+                continue;
+            let renderColor = annotations[j].color;
+            if (annotations[j].selected || annotations[j].categorySelected) {
+                renderColor = constants.annotationStyle.SELECTED_COLOR;
+            }
+            if (selectedAnnotationRef.current !== null) {
+                if (selectedAnnotationRef.current.id !== annotations[j].id) {
+                    const rgb = Utils.hexToRgb(annotations[j].color);
+                    renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`;
+                }
+            }
+            if (
+                selectedCategoryRef.current !== '' &&
+                selectedCategoryRef.current !== annotations[j].categoryName
+            ) {
+                const rgb = Utils.hexToRgb(annotations[j].color);
+                renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`;
+            }
+            context.strokeStyle = renderColor;
+            context.fillStyle = renderColor;
 
             const labelSize = Utils.getTextLabelSize(
                 context,
                 annotations[j].categoryName,
-                constants.detectionStyle.LABEL_PADDING
+                constants.annotationStyle.LABEL_PADDING
             );
             context.strokeRect(
                 annotations[j].bbox[0],
@@ -134,17 +487,11 @@ const ImageDisplayComponent = () => {
             );
 
             context.globalAlpha = 0.5;
-            /*if (data[j].polygonMask.length > 0) {
-                // Polygon mask rendering
-                this.renderPolygonMasks(data[j].polygonMask, context);
-            } else {
-                // Binary mask rendering
-                if (
-                    this.props.currentFileFormat !==
-                    constants.SETTINGS.ANNOTATIONS.COCO
-                )
-                    Utils.renderBinaryMasks(data[j].binaryMask, context);
-            }*/
+            if (annotations[j].segmentation.length > 0) {
+                annotations[j].segmentation.forEach((segment) => {
+                    Utils.renderPolygonMasks(context, segment);
+                });
+            }
 
             context.globalAlpha = 1.0;
 
@@ -161,11 +508,12 @@ const ImageDisplayComponent = () => {
                 labelSize['width'],
                 labelSize['height']
             );
-            context.fillStyle = constants.detectionStyle.LABEL_TEXT_COLOR;
+            context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 annotations[j].categoryName,
-                annotations[j].bbox[0] + constants.detectionStyle.LABEL_PADDING,
-                annotations[j].bbox[1] - constants.detectionStyle.LABEL_PADDING
+                annotations[j].bbox[0] +
+                    constants.annotationStyle.LABEL_PADDING,
+                annotations[j].bbox[1] - constants.annotationStyle.LABEL_PADDING
             );
         }
     };
@@ -226,17 +574,6 @@ const ImageDisplayComponent = () => {
                                     e.preventDefault();
                                 });
                         }}></div>
-                    {/*TODO: remove this button*/}
-                    <button
-                        style={{
-                            position: 'absolute',
-                            bottom: '25px',
-                            right: '25px',
-                            padding: '1rem',
-                        }}
-                        onClick={displayImage}>
-                        NEXT IMAGE
-                    </button>
                 </>
             )}
         </ImageViewport>

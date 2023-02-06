@@ -20,7 +20,7 @@ const drawRect = csTools.importInternal('drawing/drawRect');
 export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
     constructor(props = {}) {
         const defaultProps = {
-            name: 'BoundingBoxDrawing',
+            name: constants.toolNames.boundingBox,
             supportedInteractionTypes: ['Mouse', 'Touch'],
             configuration: {
                 drawHandles: true,
@@ -86,11 +86,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
-        const zoom =
-            element.id === 'dicomImageRight'
-                ? this.options.zoomLevelSide
-                : this.options.zoomLevelTop;
-        const lineWidth = constants.detectionStyle.BORDER_WIDTH * zoom;
+        const zoom = this.options.zoomLevel;
+        const lineWidth = constants.annotationStyle.BORDER_WIDTH * zoom;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -103,7 +100,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
         const context = getNewContext(eventData.canvasContext.canvas);
 
-        const color = constants.detectionStyle.NORMAL_COLOR;
+        const color = constants.annotationStyle.NORMAL_COLOR;
         const handleOptions = {
             color,
             handleRadius: 8,
@@ -172,7 +169,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
 
                 if (
                     this.options.editionMode == constants.editionMode.NO_TOOL &&
-                    data.updatingDetection === true
+                    data.updatingAnnotation === true
                 ) {
                     if (
                         !data.handles.start.moving &&
@@ -207,7 +204,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             );
                         }
                         var fontArr =
-                            constants.detectionStyle.LABEL_FONT.split(' ');
+                            constants.annotationStyle.LABEL_FONT.split(' ');
                         var fontSizeArr = fontArr[1].split('px');
                         var fontSize = fontSizeArr[0];
                         fontSize *= zoom;
@@ -219,21 +216,14 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         context.font = newFont;
 
                         context.lineWidth =
-                            constants.detectionStyle.BORDER_WIDTH;
+                            constants.annotationStyle.BORDER_WIDTH;
                         context.strokeStyle = data.renderColor;
                         context.fillStyle = data.renderColor;
-                        const className =
-                            this.options.temporaryLabel !== undefined
-                                ? this.options.temporaryLabel
-                                : data.class;
-                        const detectionLabel = Utils.formatDetectionLabel(
-                            className,
-                            data.confidence
-                        );
+                        const categoryName = data.categoryName;
                         const labelSize = Utils.getTextLabelSize(
                             context,
-                            detectionLabel,
-                            constants.detectionStyle.LABEL_PADDING * zoom
+                            categoryName,
+                            constants.annotationStyle.LABEL_PADDING * zoom
                         );
                         context.fillRect(
                             myCoords.x - 1 * zoom,
@@ -242,21 +232,21 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                             labelSize['height']
                         );
                         context.fillStyle =
-                            constants.detectionStyle.LABEL_TEXT_COLOR;
+                            constants.annotationStyle.LABEL_TEXT_COLOR;
                         context.fillText(
-                            detectionLabel,
+                            categoryName,
                             myCoords.x +
-                                constants.detectionStyle.LABEL_PADDING * zoom,
+                                constants.annotationStyle.LABEL_PADDING * zoom,
                             myCoords.y -
-                                constants.detectionStyle.LABEL_PADDING * zoom
+                                constants.annotationStyle.LABEL_PADDING * zoom
                         );
                     }
                 }
                 // Polygon Mask Rendering
                 // First check if it exists, new detections may not have this field built yet
-                if (data.polygonCoords) {
+                if (data.segmentation) {
                     // Make sure it is non-empty, not all detections will have a mask
-                    if (data.polygonCoords.length > 0) {
+                    for (let z = 0; z < data.segmentation.length; z++) {
                         const pixelStart = cornerstone.pixelToCanvas(element, {
                             x: data.handles.start.x,
                             y: data.handles.start.y,
@@ -299,16 +289,16 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                                 pixelEnd.y,
                             ];
                         }
-                        data.polygonCoords = Utils.calculatePolygonMask(
+                        data.segmentation[z] = Utils.calculatePolygonMask(
                             flippedCoords,
-                            data.polygonCoords
+                            data.segmentation[z]
                         );
                         context.strokeStyle =
-                            constants.detectionStyle.SELECTED_COLOR;
+                            constants.annotationStyle.SELECTED_COLOR;
                         context.fillStyle =
-                            constants.detectionStyle.SELECTED_COLOR;
+                            constants.annotationStyle.SELECTED_COLOR;
                         context.globalAlpha = 0.5;
-                        Utils.renderPolygonMasks(context, data.polygonCoords);
+                        Utils.renderPolygonMasks(context, data.segmentation[z]);
                         context.globalAlpha = 1.0;
                     }
                 }
@@ -374,10 +364,8 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                     hasBoundingBox: true,
                 },
             },
-            algorithm: constants.OPERATOR,
-            class: constants.commonDetections.UNKNOWN,
-            confidence: 100,
-            updatingDetection: false,
+            categoryName: constants.commonDetections.UNKNOWN,
+            updatingAnnotation: false,
         };
     }
 }
@@ -401,16 +389,15 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
 /**
  *
  * @param {EventData.Context} context
- * @param {{className: string, score: string}}
+ * @param {{categoryName: string}}
  * @param {Array<string>} [options={}]
  * @returns {Array<string>}
  */
 
 // eslint-disable-next-line no-unused-vars
-function _createTextBoxContent(context, { className, score }, options = {}) {
+function _createTextBoxContent(context, { categoryName }, options = {}) {
     const textLines = [];
-    const classInfoString = `${className} - ${score}%`;
-    textLines.push(classInfoString);
+    textLines.push(categoryName);
     return textLines;
 }
 

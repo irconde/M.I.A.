@@ -286,7 +286,7 @@ const detectionsSlice = createSlice({
         validateDetections: (state) => {
             state.detections.forEach((det) => {
                 det.validation = true;
-                det.textColor = constants.detectionStyle.VALID_COLOR;
+                det.textColor = constants.annotationStyle.VALID_COLOR;
             });
         },
         /**
@@ -600,16 +600,16 @@ export const getSelectedAlgorithm = (state) =>
  * @returns {string} - color in string form
  */
 const getDetectionColor = (detection, uuid) => {
-    if (detection.selected) return constants.detectionStyle.SELECTED_COLOR;
+    if (detection.selected) return constants.annotationStyle.SELECTED_COLOR;
     if (detection.uuid !== uuid && uuid !== undefined) {
         const rgb = Utils.hexToRgb(detection.color);
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
     }
     if (detection.validation !== null) {
         if (detection.validation) {
-            return constants.detectionStyle.VALID_COLOR;
+            return constants.annotationStyle.VALID_COLOR;
         }
-        return constants.detectionStyle.INVALID_COLOR;
+        return constants.annotationStyle.INVALID_COLOR;
     }
     return detection.color;
 };

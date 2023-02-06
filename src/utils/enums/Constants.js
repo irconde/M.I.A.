@@ -25,7 +25,7 @@ export const buttonStyle = {
     LINE_GAP: 40,
 };
 
-export const detectionStyle = {
+export const annotationStyle = {
     NORMAL_COLOR: colors.BLUE,
     SELECTED_COLOR: colors.BLUE,
     VALID_COLOR: colors.GREEN,
@@ -120,9 +120,11 @@ export const DEVICE_TYPE = {
 };
 
 export const Channels = {
+    saveColorsFile: 'save-colors-file',
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',
     getNextFile: 'get-next-file',
+    getCurrentFile: 'get-current-file',
     getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
     saveIndFile: 'save-individual-file',
@@ -141,6 +143,12 @@ export const Channels = {
     addThumbnail: 'add-thumbnail',
     removeThumbnail: 'remove-thumbnail',
     updateThumbnails: 'update-thumbnails',
+};
+
+export const toolNames = {
+    boundingBox: 'BoundingBoxDrawing',
+    segmentation: 'SegmentationDrawingTool',
+    movement: 'AnnotationMovementTool',
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;
