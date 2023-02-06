@@ -16,6 +16,8 @@ import {
     addAnnotationArray,
     clearAnnotationSelection,
     getAnnotations,
+    getSelectedAnnotation,
+    getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
 } from '../../redux/slices/annotation.slice';
@@ -70,6 +72,10 @@ const ImageDisplayComponent = () => {
     const zoomLevel = useRef();
     const editionMode = useSelector(getEditionMode);
     const editionModeRef = useRef(editionMode);
+    const selectedAnnotation = useSelector(getSelectedAnnotation);
+    const selectedAnnotationRef = useRef(selectedAnnotation);
+    const selectedCategory = useSelector(getSelectedCategory);
+    const selectedCategoryRef = useRef(selectedCategory);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -128,6 +134,14 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         annotationRef.current = annotations;
     }, [annotations]);
+
+    useEffect(() => {
+        selectedAnnotationRef.current = selectedAnnotation;
+    }, [selectedAnnotation]);
+
+    useEffect(() => {
+        selectedCategoryRef.current = selectedCategory;
+    }, [selectedCategory]);
 
     useEffect(() => {
         if (editionModeRef.current !== editionMode) {
@@ -440,14 +454,25 @@ const ImageDisplayComponent = () => {
                     editionModeRef.current !== constants.editionMode.NO_TOOL)
             )
                 continue;
-            context.strokeStyle =
-                annotations[j].selected || annotations[j].categorySelected
-                    ? constants.annotationStyle.SELECTED_COLOR
-                    : annotations[j].color;
-            context.fillStyle =
-                annotations[j].selected || annotations[j].categorySelected
-                    ? constants.annotationStyle.SELECTED_COLOR
-                    : annotations[j].color;
+            let renderColor = annotations[j].color;
+            if (annotations[j].selected || annotations[j].categorySelected) {
+                renderColor = constants.annotationStyle.SELECTED_COLOR;
+            }
+            if (selectedAnnotationRef.current !== null) {
+                if (selectedAnnotationRef.current.id !== annotations[j].id) {
+                    const rgb = Utils.hexToRgb(annotations[j].color);
+                    renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                }
+            }
+            if (
+                selectedCategoryRef.current !== '' &&
+                selectedCategoryRef.current !== annotations[j].categoryName
+            ) {
+                const rgb = Utils.hexToRgb(annotations[j].color);
+                renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+            }
+            context.strokeStyle = renderColor;
+            context.fillStyle = renderColor;
 
             const labelSize = Utils.getTextLabelSize(
                 context,
