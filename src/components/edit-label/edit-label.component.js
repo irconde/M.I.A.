@@ -32,7 +32,6 @@ import Utils from '../../utils/general/Utils';
  * Widget for editing a selected detection's label.
  * Contains text input box and list of existing labels.
  * List of labels is visible when toggled by arrow button.
- * @param {function} onLabelChange Function to call when new label is created
  */
 const EditLabelComponent = () => {
     const dispatch = useDispatch();
@@ -96,9 +95,9 @@ const EditLabelComponent = () => {
             setShowClearIcon(true);
             // set the value of the text input to the current detection class name
             if (inputField.current.value === '') {
-                /*const currentClassName =
-                    selectedDetection?.className.toUpperCase();
-                dispatch(setInputLabel(currentClassName));*/
+                dispatch(
+                    setInputLabel(selectedAnnotation.categoryName.toUpperCase())
+                );
             }
         }
 
@@ -114,8 +113,8 @@ const EditLabelComponent = () => {
      * @param {string} label New label passed up from `LabelList` component
      */
     const submitFromList = (label) => {
-        //onLabelChange(label);
         setIsListOpen(false);
+        dispatch(setInputLabel(label.toUpperCase()));
     };
     /**
      * Called on every keydown in label input field.
@@ -138,10 +137,9 @@ const EditLabelComponent = () => {
     /**
      * Scales a value based on the given viewport's zoom level
      * @param {number} value
-     * @param {string} viewport
      * @returns {number}
      */
-    const scaleByZoom = (value, viewport) => {
+    const scaleByZoom = (value) => {
         return value * zoomLevel;
     };
 
