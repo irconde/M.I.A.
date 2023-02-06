@@ -14,7 +14,7 @@ const initialState = {
         left: 0,
     },
     detectionLabelEditWidth: '0px',
-    detectionLabelEditFont: constants.detectionStyle.LABEL_FONT,
+    detectionLabelEditFont: constants.annotationStyle.LABEL_FONT,
     detectionLabelEditViewport: constants.viewport.SIDE,
     detectionLabelEditPosition: {
         top: 0,

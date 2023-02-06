@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {
-    detectionStyle,
+    annotationStyle,
     sideMenuPaddingTop,
     sideMenuWidth,
 } from '../../utils/enums/Constants';
@@ -48,6 +48,8 @@ export const AnnotationContainer = styled.div`
     align-items: end;
     min-height: 2.5rem;
     margin-top: 0.5rem;
+    background-color: ${({ selected }) =>
+        selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 
 export const AnnotationColor = styled.div`
@@ -84,7 +86,7 @@ export const SideMenuAnnotation = styled.div`
     display: flex;
     align-items: center;
     background-color: ${({ selected }) =>
-        selected ? detectionStyle.SELECTED_COLOR : ''};
+        selected ? annotationStyle.SELECTED_COLOR : ''};
 `;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;

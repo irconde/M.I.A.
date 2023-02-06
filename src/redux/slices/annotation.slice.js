@@ -47,6 +47,7 @@ const initialState = {
     categories: [],
     selectedAnnotation: null,
     colors: [],
+    selectedCategory: '',
 };
 
 const annotationSlice = createSlice({
@@ -79,6 +80,48 @@ const annotationSlice = createSlice({
                             annotationColor = colors[foundColorIdx].color;
                         }
                     }
+                    const coordArrayToPolygonData = (coordArray) => {
+                        let data = [];
+                        let count = 0;
+                        for (let i = 0; i < coordArray.length; i += 2) {
+                            let x = coordArray[i];
+                            let y = coordArray[i + 1];
+                            data[count] = { x: x, y: y };
+                            count++;
+                        }
+                        return data;
+                    };
+                    const calculateMaskAnchorPoints = (
+                        boundingBox,
+                        polygonCoords
+                    ) => {
+                        // og: [x_0, y_0, x_f, y_f]
+                        // new: [x_0, y_0, width, height]
+                        const xDist = boundingBox[2];
+                        const yDist = boundingBox[3];
+                        const x_f = boundingBox[0] + boundingBox[2];
+                        const y_f = boundingBox[1] + boundingBox[3];
+                        polygonCoords.forEach((point) => {
+                            point.anchor = {
+                                top: ((y_f - point.y) / yDist) * 100,
+                                bottom:
+                                    ((point.y - boundingBox[1]) / yDist) * 100,
+                                left:
+                                    ((point.x - boundingBox[0]) / xDist) * 100,
+                                right: ((x_f - point.x) / xDist) * 100,
+                            };
+                        });
+                        return polygonCoords;
+                    };
+                    for (let j = 0; j < annotation.segmentation.length; j++) {
+                        const dataArray = coordArrayToPolygonData(
+                            annotation.segmentation[j]
+                        );
+                        annotation.segmentation[j] = calculateMaskAnchorPoints(
+                            annotation.bbox,
+                            dataArray
+                        );
+                    }
                     state.annotations.push({
                         ...annotation,
                         color: annotationColor,
@@ -89,6 +132,7 @@ const annotationSlice = createSlice({
                         selected: false,
                         visible: true,
                         categoryVisible: true,
+                        categorySelected: false,
                     });
                 });
 
@@ -105,13 +149,40 @@ const annotationSlice = createSlice({
                 } else {
                     annotation.selected = false;
                 }
+                annotation.categorySelected = false;
             });
+
+            state.selectedCategory = '';
+        },
+        selectAnnotationCategory: (state, action) => {
+            state.annotations.forEach((annotation) => {
+                if (annotation.categoryName === action.payload) {
+                    annotation.categorySelected = !annotation.categorySelected;
+                    if (annotation.categorySelected && annotation.selected) {
+                        annotation.selected = false;
+                    }
+                } else if (annotation.categorySelected === true) {
+                    annotation.categorySelected = false;
+                }
+            });
+            if (
+                (action.payload !== '' ||
+                    action.payload !== null ||
+                    action.payload !== undefined) &&
+                action.payload !== state.selectedCategory
+            ) {
+                state.selectedCategory = action.payload;
+            } else {
+                state.selectedCategory = '';
+            }
         },
         clearAnnotationSelection: (state, action) => {
             state.annotations.forEach((annotation) => {
                 annotation.selected = false;
+                annotation.categorySelected = false;
             });
             state.selectedAnnotation = null;
+            state.selectedCategory = '';
         },
         toggleVisibility: (state, action) => {
             const foundAnnotation = state.annotations.find(
@@ -143,9 +214,14 @@ const annotationSlice = createSlice({
                 if (annotation.categoryName === action.payload) {
                     annotation.categoryVisible = !annotation.categoryVisible;
                     annotation.visible = annotation.categoryVisible;
-                    if (!annotation.visible && annotation.selected) {
+                    if (
+                        !annotation.visible &&
+                        (annotation.selected || annotation.categorySelected)
+                    ) {
                         annotation.selected = false;
+                        annotation.categorySelected = false;
                         state.selectedAnnotation = null;
+                        state.selectedCategory = '';
                     }
                 }
             });
@@ -165,6 +241,53 @@ const annotationSlice = createSlice({
             });
             if (state.selectedAnnotation?.categoryName === categoryName) {
                 state.selectedAnnotation.color = color;
+            }
+        },
+        updateAnnotationCategory: (state, action) => {
+            // TODO: Check if the new category exists in categories or not
+            const { id, newCategory } = action.payload;
+            const foundAnnotation = state.annotations.find(
+                (annotation) => annotation.id === id
+            );
+            if (foundAnnotation !== undefined) {
+                foundAnnotation.categoryName = newCategory.toLowerCase();
+            }
+            const foundCategory = state.categories.find(
+                (category) =>
+                    category.name.toLowerCase() === newCategory.toLowerCase()
+            );
+            if (foundCategory === undefined) {
+                state.categories.push({
+                    supercategory: 'operator',
+                    name: newCategory.toLowerCase(),
+                });
+            } else {
+                const sameCategoryAnnotation = state.annotations.find(
+                    (annotation) =>
+                        annotation.categoryName.toLowerCase() ===
+                            newCategory.toLowerCase() && annotation.id !== id
+                );
+                if (
+                    sameCategoryAnnotation !== undefined &&
+                    foundAnnotation !== undefined
+                ) {
+                    foundAnnotation.color = sameCategoryAnnotation.color;
+                }
+            }
+        },
+        updateAnnotationPosition: (state, action) => {
+            const { bbox, id, segmentation } = action.payload;
+            const foundAnnotation = state.annotations.find(
+                (annotation) => annotation.id === id
+            );
+            if (foundAnnotation !== undefined) {
+                foundAnnotation.bbox = bbox;
+                if (segmentation && segmentation.length > 0) {
+                    foundAnnotation.segmentation = segmentation;
+                }
+                if (foundAnnotation.id === state.selectedAnnotation.id) {
+                    state.selectedAnnotation = foundAnnotation;
+                }
             }
         },
     },
@@ -189,6 +312,9 @@ export const {
     toggleCategoryVisibility,
     deleteSelectedAnnotation,
     updateAnnotationColor,
+    updateAnnotationCategory,
+    updateAnnotationPosition,
+    selectAnnotationCategory,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -212,7 +338,10 @@ export const getAnnotationCategories = (state) => {
         state.annotation.categories.forEach((category) => {
             result.push(category.name);
         });
+        return result;
     } else return [];
 };
+
+export const getSelectedCategory = (state) => state.annotation.selectedCategory;
 
 export default annotationSlice.reducer;

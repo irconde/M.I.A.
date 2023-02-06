@@ -61,7 +61,7 @@ class Thumbnails {
             // TODO: remove logs
             console.log('Finished all queued tasks');
             this.#saveThumbnailsToStorage().then(() => {
-                console.log('SAVED IN DRAIN', this.#thumbnailsObj);
+                console.log('SAVED IN DRAIN');
             });
         });
     }
