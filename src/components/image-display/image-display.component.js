@@ -461,7 +461,7 @@ const ImageDisplayComponent = () => {
             if (selectedAnnotationRef.current !== null) {
                 if (selectedAnnotationRef.current.id !== annotations[j].id) {
                     const rgb = Utils.hexToRgb(annotations[j].color);
-                    renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                    renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`;
                 }
             }
             if (
@@ -469,7 +469,7 @@ const ImageDisplayComponent = () => {
                 selectedCategoryRef.current !== annotations[j].categoryName
             ) {
                 const rgb = Utils.hexToRgb(annotations[j].color);
-                renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`;
+                renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`;
             }
             context.strokeStyle = renderColor;
             context.fillStyle = renderColor;
