@@ -43,6 +43,7 @@ class Thumbnails {
     static #STORAGE_SAVE_DELAY = 100;
     #thumbnailsObj = null;
     #thumbnailsPath = '';
+    #annotationFilePath = '';
     // Keeps track of the scheduled updates to the thumbnails and update the json file when
     // the queue is empty. This avoids having to save to the file on every single update
     #queue;
@@ -57,13 +58,7 @@ class Thumbnails {
                 : done();
         }, 1);
         // runs when the queue is empty with no tasks to complete
-        this.#queue.drain(() => {
-            // TODO: remove logs
-            console.log('Finished all queued tasks');
-            this.#saveThumbnailsToStorage().then(() => {
-                console.log('SAVED IN DRAIN', this.#thumbnailsObj);
-            });
-        });
+        this.#queue.drain(this.#saveThumbnailsToStorage);
 
         /**
          * Loads the specified thumbnail if the file name provided exists. If so it will
@@ -81,12 +76,30 @@ class Thumbnails {
                     const fileData = await fs.promises.readFile(filePath);
                     return {
                         fileData: Buffer.from(fileData).toString('base64'),
-                        // TODO: figure out what goes here
-                        isAnnotations: true,
+                        isAnnotations: await this.#hasAnnotations(fileName),
                     };
                 }
             }
         );
+    }
+
+    /**
+     * Check if a given file name has any annotations associated with it
+     * @param fileName {string}
+     * @returns {Promise<boolean>}
+     */
+    async #hasAnnotations(fileName) {
+        try {
+            const data = await fs.promises.readFile(this.#annotationFilePath);
+            const { images } = JSON.parse(data);
+            return images.some((image) => image.file_name === fileName);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    setAnnotationFilePath(path) {
+        this.#annotationFilePath = path;
     }
 
     /**
@@ -282,6 +295,7 @@ class ClientFilesManager {
      */
     async initSelectedPaths(imagesDirPath, annotationFilePath, colorFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
+        this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         // if no path exits in the settings then reject the React promise
         if (imagesDirPath === '') return this.thumbnailsPromise.reject();
 
@@ -307,6 +321,7 @@ class ClientFilesManager {
      */
     async updateSelectedPaths(imagesDirPath, annotationFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
+        this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         this.selectedImagesDirPath = imagesDirPath;
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
@@ -481,7 +496,6 @@ class ClientFilesManager {
                 const addedFilename = getFileNameFromPath(addedFilePath);
                 if (!ClientFilesManager.#isFileTypeAllowed(addedFilename))
                     return;
-                console.log(addedFilename, ' added!');
                 this.fileNames.push(addedFilename);
                 await this.#thumbnails.setThumbnailsPath(
                     this.selectedImagesDirPath
@@ -508,7 +522,6 @@ class ClientFilesManager {
                 const removedFileName = getFileNameFromPath(removedFilePath);
                 if (!ClientFilesManager.#isFileTypeAllowed(removedFileName))
                     return;
-                console.log(removedFileName, ' removed!');
                 const removedFileIndex = this.fileNames.findIndex(
                     (fileName) => fileName === removedFileName
                 );
