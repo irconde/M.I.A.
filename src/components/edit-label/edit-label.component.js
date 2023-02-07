@@ -104,6 +104,7 @@ const EditLabelComponent = () => {
         if (!isVisible) {
             setIsListOpen(false);
             setShowClearIcon(false);
+            dispatch(setInputLabel(''));
         }
     }, [isVisible, isListOpen]);
 
