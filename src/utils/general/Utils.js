@@ -135,7 +135,8 @@ export default class Utils {
      *
      * @static
      * @param {Array<number>} point - 2D point defined as a pair of coordinates (x,y)
-     * @param {Array<number>} rect - Array that hold four float values representing the two end-points of a rectangle's diagonal
+     * @param {Array<number>} rect - Array that hold four float values representing the two end-points of a rectangle's
+     *     diagonal
      * @returns {boolean} - True if the point is inside the rectangle; false otherwise
      */
     static pointInRect(point, rect) {
@@ -153,8 +154,10 @@ export default class Utils {
      * Indicates whether two given rectangles are the equals or not
      *
      * @static
-     * @param {Array<number>} rectA - Rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
-     * @param {Array<number>} rectB - Rectangle defined as a float array of size 4. Includes the coordinates of the two end-points of the rectangle diagonal
+     * @param {Array<number>} rectA - Rectangle defined as a float array of size 4. Includes the coordinates of the two
+     *     end-points of the rectangle diagonal
+     * @param {Array<number>} rectB - Rectangle defined as a float array of size 4. Includes the coordinates of the two
+     *     end-points of the rectangle diagonal
      * @return {boolean} - True if the corner points of the two rectangles have the same coordinates. False, otherwise.
      */
     static rectAreEquals(rectA, rectB) {
@@ -429,7 +432,8 @@ export default class Utils {
                 singleViewport.style.left = constants.sideMenuWidth + 'px';
             }
         }
-        // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the image
+        // Sometimes the Canvas elements are not enabled yet and will cause an error, but the App can still render the
+        // image
         try {
             viewports.forEach((viewport) => {
                 cornerstone.resize(viewport);
@@ -532,15 +536,20 @@ export default class Utils {
         annotation,
         viewport
     ) {
+        const contextWidth = 237.19;
+        const width = annotation.bbox[2];
+        const height = annotation.bbox[3];
         const { x, y } = cornerstone.pixelToCanvas(viewport, {
-            x: annotation.bbox[0],
-            y: annotation.bbox[1],
+            x: annotation.bbox[0] + width / 2,
+            y: annotation.bbox[1] + height,
         });
+
         return { x, y };
     }
 
     /**
-     * Custom hook for use in functional components to compare a current value with the next value in a useEffect in the functional component.
+     * Custom hook for use in functional components to compare a current value with the next value in a useEffect in
+     * the functional component.
      *
      * @see {@link https://usehooks.com/usePrevious/} for detailed explanation
      *
@@ -654,7 +663,8 @@ export default class Utils {
     /**
      * Recalculates the four corners of a rectangle based on the coordinates of the corner being moved
      *
-     * @param {{start: number, end: number, start_prima: number, end_prima: number}} cornerList - Rectangle corners' coordinates
+     * @param {{start: number, end: number, start_prima: number, end_prima: number}} cornerList - Rectangle corners'
+     *     coordinates
      * @returns {{start: number, end: number, start_prima: number, end_prima: number}} - Recalculated coordinates
      */
     static recalculateRectangle(cornerList) {
@@ -780,7 +790,8 @@ export default class Utils {
      * Recalculates the anchor points of a polygon mask
      *
      * @param {Array<number>} boundingBox - Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}} polygonCoords - List of handles, i.e., the vertices, of a polygon
+     * @param {{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}}
+     *     polygonCoords - List of handles, i.e., the vertices, of a polygon
      * @returns {{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}}
      */
     static calculateMaskAnchorPoints(boundingBox, polygonCoords) {
@@ -799,8 +810,10 @@ export default class Utils {
      * Calculates the coordinates of the bounding box for a given polygon
      *
      * @param {Array<number>} boundingBox Bounding box data formatted as [x_start, y_start, x_end, y_end]
-     * @param {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>} polygonData - List of handles, i.e., the vertices, of a polygon
-     * @returns {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>} - newPolygonData with updated points based on anchor points
+     * @param {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>}
+     *     polygonData - List of handles, i.e., the vertices, of a polygon
+     * @returns {Array<{x: number, y: number, anchor: {top: number, bottom: number, left: number, right: number}}>} -
+     *     newPolygonData with updated points based on anchor points
      */
     static calculatePolygonMask(boundingBox, polygonData) {
         let newPolygonData = JSON.parse(JSON.stringify(polygonData));
@@ -1078,9 +1091,11 @@ export default class Utils {
             i = 0;
         do {
             let next = (i + 1) % n;
-            // Check if the line segment from 'p' to 'extreme' intersects with the line segment from 'polygon[i]' to 'polygon[next]'
+            // Check if the line segment from 'p' to 'extreme' intersects with the line segment from 'polygon[i]' to
+            // 'polygon[next]'
             if (this.doIntersect(polygon[i], polygon[next], p, extreme)) {
-                // If the point 'p' is colinear with line segment 'i-next', then check if it lies on segment. If it lies, return true, otherwise false
+                // If the point 'p' is colinear with line segment 'i-next', then check if it lies on segment. If it
+                // lies, return true, otherwise false
                 if (this.orientation(polygon[i], p, polygon[next]) == 0) {
                     return this.onSegment(polygon[i], p, polygon[next]);
                 }

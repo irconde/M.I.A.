@@ -34,7 +34,8 @@ import Utils from '../../utils/general/Utils';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 
 /**
- * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
+ * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific
+ * detections.
  *
  * @component
  */
@@ -85,11 +86,11 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             case constants.editionMode.COLOR:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 dispatch(updateColorPickerVisibility(true));
                 break;
             case constants.editionMode.LABEL:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 dispatch(updateEditLabelVisibility(true));
                 break;
             case constants.editionMode.POLYGON:

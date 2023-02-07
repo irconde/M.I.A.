@@ -3,8 +3,11 @@ import { detectionContextStyle } from '../../utils/enums/Constants';
 
 export const Positioner = styled.div`
     position: absolute;
-    top: ${(props) => `${props.position.top}px`};
-    left: ${(props) => `${props.position.left}px`};
+    ${({ position: { left, top } }) => `
+    left: ${left}px;
+    top: ${top}px;
+  `}
+    transform: translateX(-42%);
     z-index: 500;
 `;
 
