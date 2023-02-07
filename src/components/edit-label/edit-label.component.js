@@ -50,7 +50,6 @@ const EditLabelComponent = () => {
             if (newViewport !== null) {
                 console.log('calc label');
                 const { offsetLeft, offsetTop } = newViewport;
-                console.log(offsetLeft, offsetTop);
                 const horizontalGap = offsetLeft / zoomLevel;
                 const verticalGap = offsetTop / zoomLevel;
 
@@ -171,14 +170,11 @@ const EditLabelComponent = () => {
      * Scales the given width by the zoom level and account for the detection border width
      *
      * @param {number} width
-     * @param {string} viewport
      * @returns {number}
      */
-    const getWidth = (width, viewport) => {
+    const getWidth = (width) => {
         const { BORDER_WIDTH } = constants.annotationStyle;
-        return (
-            scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
-        );
+        return scaleByZoom(width) + scaleByZoom(BORDER_WIDTH);
     };
 
     if (isVisible) {
@@ -186,8 +182,8 @@ const EditLabelComponent = () => {
             <EditLabelWrapper
                 viewport={viewport}
                 top={position.y - INPUT_HEIGHT}
-                left={position.x - scaleByZoom(zoomLevel)}
-                width={getWidth(selectedAnnotation?.bbox[2], viewport)}
+                left={position.x - zoomLevel}
+                width={getWidth(selectedAnnotation?.bbox[2])}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>
