@@ -40,27 +40,26 @@ const EditLabelComponent = () => {
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const newLabel = useSelector(getInputLabel);
     const viewport = document.getElementById('imageContainer');
-    const [x, setX] = useState(0);
-    const [y, setY] = useState(0);
+    const [position, setPosition] = useState({
+        x: 0,
+        y: 0,
+    });
     useEffect(() => {
         if (isVisible) {
             const newViewport = document.getElementById('imageContainer');
             if (newViewport !== null) {
                 console.log('calc label');
                 const { offsetLeft, offsetTop } = newViewport;
+                console.log(offsetLeft, offsetTop);
                 const horizontalGap = offsetLeft / zoomLevel;
                 const verticalGap = offsetTop / zoomLevel;
 
                 try {
-                    const { xData, yData } = cornerstone.pixelToCanvas(
-                        newViewport,
-                        {
-                            x: selectedAnnotation?.bbox[0] + horizontalGap,
-                            y: selectedAnnotation?.bbox[1] + verticalGap,
-                        }
-                    );
-                    setX(xData);
-                    setY(yData);
+                    const coordinates = cornerstone.pixelToCanvas(newViewport, {
+                        x: selectedAnnotation?.bbox[0] + horizontalGap,
+                        y: selectedAnnotation?.bbox[1] + verticalGap,
+                    });
+                    setPosition(coordinates);
                 } catch (e) {
                     console.log(e);
                 }
@@ -89,7 +88,8 @@ const EditLabelComponent = () => {
         }
     }, [isListOpen]);
     useEffect(() => {
-        // When component is updated to be visible or the label list is closed, focus the text input field for user input
+        // When component is updated to be visible or the label list is closed, focus the text input field for user
+        // input
         if (isVisible && !isListOpen) {
             inputField.current.focus();
             setShowClearIcon(true);
@@ -149,7 +149,7 @@ const EditLabelComponent = () => {
      * @returns {number} fontSize
      */
     const getFontSize = (str) => {
-        var fontArr = str.split(' ');
+        let fontArr = str.split(' ');
         let floatNum = parseFloat(fontArr[1]);
         Math.floor(floatNum);
         let fontSize = parseInt(floatNum);
@@ -185,8 +185,8 @@ const EditLabelComponent = () => {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                top={y - INPUT_HEIGHT}
-                left={x - scaleByZoom(zoomLevel)}
+                top={position.y - INPUT_HEIGHT}
+                left={position.x - scaleByZoom(zoomLevel)}
                 width={getWidth(selectedAnnotation?.bbox[2], viewport)}
                 fontSize={getFontSize(font)}>
                 <InputContainer>

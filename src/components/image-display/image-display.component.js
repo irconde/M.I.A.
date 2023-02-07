@@ -424,7 +424,6 @@ const ImageDisplayComponent = () => {
                 annotation,
                 viewportRef.current
             );
-            console.log(`x: ${x} | y: ${y}`);
             dispatch(updateAnnotationContextPosition({ top: y, left: x }));
         }
     };
