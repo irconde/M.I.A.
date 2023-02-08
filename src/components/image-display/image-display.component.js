@@ -358,13 +358,13 @@ const ImageDisplayComponent = () => {
         );
 
         if (selectedAnnotation) {
-            const { x, y } = Utils.calculateAnnotationContextPosition(
+            const { top, left } = Utils.calculateAnnotationContextPosition(
                 cornerstone,
                 selectedAnnotation,
-                viewportRef.current
+                viewportRef.current,
+                zoomLevel.current
             );
-            console.log({ x, y });
-            dispatch(updateAnnotationContextPosition({ top: y, left: x }));
+            dispatch(updateAnnotationContextPosition({ top, left }));
         } else {
             dispatch(updateAnnotationContextVisibility(false));
         }
@@ -437,12 +437,18 @@ const ImageDisplayComponent = () => {
             annotationContextGap =
                 viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
 
-            const { x, y } = Utils.calculateAnnotationContextPosition(
+            const { top, left } = Utils.calculateAnnotationContextPosition(
                 cornerstone,
                 annotation,
-                viewportRef.current
+                viewportRef.current,
+                zoomLevel.current
             );
-            dispatch(updateAnnotationContextPosition({ top: y, left: x }));
+            dispatch(
+                updateAnnotationContextPosition({
+                    top,
+                    left,
+                })
+            );
         }
     };
 

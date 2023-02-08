@@ -534,17 +534,18 @@ export default class Utils {
     static calculateAnnotationContextPosition(
         cornerstone,
         annotation,
-        viewport
+        viewport,
+        zoomLevel
     ) {
-        const contextWidth = 237.19;
+        const gap = 5;
         const width = annotation.bbox[2];
         const height = annotation.bbox[3];
         const { x, y } = cornerstone.pixelToCanvas(viewport, {
             x: annotation.bbox[0] + width / 2,
-            y: annotation.bbox[1] + height,
+            y: annotation.bbox[1] + height + gap,
         });
 
-        return { x, y };
+        return { left: x, top: y };
     }
 
     /**
