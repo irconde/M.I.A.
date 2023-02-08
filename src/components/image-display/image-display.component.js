@@ -26,6 +26,7 @@ import {
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
+    updateCornerstoneMode,
     updateEditionMode,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
@@ -246,6 +247,11 @@ const ImageDisplayComponent = () => {
                         dispatch(
                             updateEditionMode(constants.editionMode.NO_TOOL)
                         );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.EDITION
+                            )
+                        );
                         dispatch(updateAnnotationContextVisibility(true));
                         Utils.dispatchAndUpdateImage(
                             dispatch,
@@ -279,6 +285,11 @@ const ImageDisplayComponent = () => {
                         ];
                         dispatch(
                             updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.EDITION
+                            )
                         );
                         dispatch(updateAnnotationContextVisibility(true));
                         Utils.dispatchAndUpdateImage(
@@ -329,6 +340,9 @@ const ImageDisplayComponent = () => {
                     }
                 }
                 dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
                 resetCornerstoneTools();
             }
         },
@@ -386,6 +400,9 @@ const ImageDisplayComponent = () => {
                 dispatch(
                     selectAnnotation(annotationRef.current[clickedPos].id)
                 );
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
                 renderAnnotationContextMenu(
                     event,
                     annotationRef.current[clickedPos]
@@ -393,7 +410,9 @@ const ImageDisplayComponent = () => {
             } else {
                 dispatch(clearAnnotationSelection());
                 dispatch(clearAnnotationWidgets());
-
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
+                );
                 resetCornerstoneTools();
             }
             cornerstone.updateImage(viewportRef.current, true);

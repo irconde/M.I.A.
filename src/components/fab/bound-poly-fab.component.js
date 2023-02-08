@@ -1,14 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import * as constants from '../../utils/enums/Constants';
 import { useSelector } from 'react-redux';
-import {
-    getCollapsedLazyMenu,
-    getCollapsedSideMenu,
-    getCornerstoneMode,
-    getIsFabVisible,
-} from '../../redux/slices-old/ui/uiSlice';
-import { getDeviceType } from '../../redux/slices-old/settings/settingsSlice';
+import { getCornerstoneMode } from '../../redux/slices-old/ui/uiSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
     FABContainer,
@@ -18,6 +11,11 @@ import {
 } from './bound-poly-fab.styles';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
+import {
+    getIsFABVisible,
+    getLazyImageMenuVisible,
+    getSideMenuVisible,
+} from '../../redux/slices/ui.slice';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
@@ -34,13 +32,12 @@ import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
  *
  *
  */
-const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
-    const isVisible = useSelector(getIsFabVisible);
+const BoundPolyFABComponent = () => {
+    const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
-    const sideMenuCollapsed = useSelector(getCollapsedSideMenu);
-    const lazyMenuCollapsed = useSelector(getCollapsedLazyMenu);
+    const sideMenuCollapsed = useSelector(getSideMenuVisible);
+    const lazyMenuCollapsed = useSelector(getLazyImageMenuVisible);
 
-    const deviceType = useSelector(getDeviceType);
     const handleClick = (e, cb) => {
         if (
             isVisible &&
@@ -92,13 +89,12 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
     }
 
     return (
-        <FABContainer
-            leftPX={leftPX}
-            fabOpacity={fabOpacity}
-            show={show}
-            deviceType={deviceType}>
+        <FABContainer leftPX={leftPX} fabOpacity={fabOpacity} show={show}>
             <Tooltip title="Create box annotation" placement="bottom">
-                <FABoption onClick={(e) => handleClick(e, onBoundingSelect)}>
+                <FABoption
+                    onClick={(e) => {
+                        console.log('create bounding');
+                    }}>
                     <FabIconWrapper>
                         <RectangleIcon
                             width={'31px'}
@@ -114,7 +110,7 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
             <Tooltip title="Create mask annotation" placement="bottom">
                 <FABoption
                     onClick={(e) => {
-                        handleClick(e, onPolygonSelect);
+                        console.log('create segmentation');
                     }}>
                     <FabIconWrapper>
                         <PolygonIcon
@@ -130,16 +126,4 @@ const BoundPolyFABComponent = ({ onBoundingSelect, onPolygonSelect }) => {
         </FABContainer>
     );
 };
-
-BoundPolyFABComponent.propTypes = {
-    /**
-     * Callback for bounding box selection
-     */
-    onBoundingSelect: PropTypes.func.isRequired,
-    /**
-     * Callback for polygon mask selection
-     */
-    onPolygonSelect: PropTypes.func.isRequired,
-};
-
 export default BoundPolyFABComponent;
