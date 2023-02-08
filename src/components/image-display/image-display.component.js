@@ -208,6 +208,7 @@ const ImageDisplayComponent = () => {
     const onDragEnd = useCallback(
         (event) => {
             console.log(event);
+            console.log('On Drag End');
             let toolState = null;
             if (editionModeRef.current === constants.editionMode.BOUNDING) {
                 toolState = cornerstoneTools.getToolState(
@@ -347,11 +348,27 @@ const ImageDisplayComponent = () => {
         if (!event) {
             return;
         }
-
         console.log('image render');
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
+
+        const selectedAnnotation = annotationRef.current.find(
+            (annotation) => annotation.selected
+        );
+
+        if (selectedAnnotation) {
+            const { x, y } = Utils.calculateAnnotationContextPosition(
+                cornerstone,
+                selectedAnnotation,
+                viewportRef.current
+            );
+            console.log({ x, y });
+            dispatch(updateAnnotationContextPosition({ top: y, left: x }));
+        } else {
+            dispatch(updateAnnotationContextVisibility(false));
+        }
+
         Utils.setToolOptions(constants.toolNames.boundingBox, {
             zoomLevel: zoomLevel.current,
         });
@@ -368,6 +385,7 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = (event) => {
         if (annotationRef.current.length > 0) {
+            console.log('On Mouse Clicked');
             const mousePos = cornerstone.canvasToPixel(event.target, {
                 x: event.detail.currentPoints.canvas.x,
                 y: event.detail.currentPoints.canvas.y,
