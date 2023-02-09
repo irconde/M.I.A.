@@ -90,30 +90,32 @@ function LazyImageContainerComponent({
             thumbnailHeight={thumbnailHeight}
             loading={generatingThumbnails}>
             {thumbnailSrc && (
-                <ThumbnailContainer
-                    onClick={() =>
-                        // TODO 2: enable selecting an image
-                        getSpecificFileFromLocalDirectory(filePath)
-                    }>
-                    <img
-                        onLoad={thumbnailHeightHandler}
-                        src={thumbnailSrc}
-                        alt={fileName}
-                    />
-                    {isAnnotations && (
-                        <LazyImageIconWrapper>
-                            <AnnotationIcon
-                                width={'24px'}
-                                height={'24px'}
-                                color={'white'}
-                            />
-                        </LazyImageIconWrapper>
-                    )}
-                </ThumbnailContainer>
+                <>
+                    <ThumbnailContainer
+                        onClick={() =>
+                            // TODO 2: enable selecting an image
+                            getSpecificFileFromLocalDirectory(filePath)
+                        }>
+                        <img
+                            onLoad={thumbnailHeightHandler}
+                            src={thumbnailSrc}
+                            alt={fileName}
+                        />
+                        {isAnnotations && (
+                            <LazyImageIconWrapper>
+                                <AnnotationIcon
+                                    width={'24px'}
+                                    height={'24px'}
+                                    color={'white'}
+                                />
+                            </LazyImageIconWrapper>
+                        )}
+                    </ThumbnailContainer>
+                    <LazyImageTextContainer>
+                        <LazyImageText>{fileName}</LazyImageText>
+                    </LazyImageTextContainer>
+                </>
             )}
-            <LazyImageTextContainer>
-                <LazyImageText>{fileName}</LazyImageText>
-            </LazyImageTextContainer>
         </ImageContainer>
     );
 }
