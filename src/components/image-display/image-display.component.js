@@ -23,6 +23,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
+    getAnnotationContextVisible,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
@@ -76,6 +77,7 @@ const ImageDisplayComponent = () => {
     const selectedAnnotationRef = useRef(selectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
     const selectedCategoryRef = useRef(selectedCategory);
+    const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -215,6 +217,7 @@ const ImageDisplayComponent = () => {
                     viewportRef.current,
                     constants.toolNames.boundingBox
                 );
+                console.log(toolState);
                 if (toolState !== undefined && toolState.data.length > 0) {
                     const { data } = toolState;
                     const { handles, updatingAnnotation, id, segmentation } =
@@ -353,20 +356,18 @@ const ImageDisplayComponent = () => {
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
 
-        const selectedAnnotation = annotationRef.current.find(
-            (annotation) => annotation.selected
-        );
-
-        if (selectedAnnotation) {
+        if (selectedAnnotationRef.current !== null) {
             const { top, left } = Utils.calculateAnnotationContextPosition(
                 cornerstone,
-                selectedAnnotation,
+                selectedAnnotationRef.current,
                 viewportRef.current,
                 zoomLevel.current
             );
             dispatch(updateAnnotationContextPosition({ top, left }));
         } else {
-            dispatch(updateAnnotationContextVisibility(false));
+            if (isAnnotationContextVisible) {
+                dispatch(updateAnnotationContextVisibility(false));
+            }
         }
 
         Utils.setToolOptions(constants.toolNames.boundingBox, {
