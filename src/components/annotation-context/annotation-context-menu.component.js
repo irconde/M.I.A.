@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -44,6 +44,10 @@ const AnnotationContextMenuComponent = () => {
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
     const position = useSelector(getAnnotationContextPosition);
+    const positionRef = useRef(position);
+    useEffect(() => {
+        positionRef.current = position;
+    }, [position]);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
