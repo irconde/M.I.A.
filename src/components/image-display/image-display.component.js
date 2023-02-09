@@ -94,43 +94,6 @@ const ImageDisplayComponent = () => {
         cornerstoneTools.addTool(AnnotationMovementTool);
     };
 
-    const resetCornerstoneTools = () => {
-        Utils.setToolDisabled(constants.toolNames.boundingBox);
-        Utils.setToolDisabled(constants.toolNames.segmentation);
-        Utils.setToolDisabled(constants.toolNames.movement);
-        cornerstoneTools.clearToolState(
-            viewportRef.current,
-            constants.toolNames.boundingBox
-        );
-        cornerstoneTools.clearToolState(
-            viewportRef.current,
-            constants.toolNames.segmentation
-        );
-        cornerstoneTools.clearToolState(
-            viewportRef.current,
-            constants.toolNames.movement
-        );
-        cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
-            cornerstoneMode: constants.cornerstoneMode.SELECTION,
-            temporaryLabel: undefined,
-        });
-        cornerstoneTools.setToolOptions(constants.toolNames.segmentation, {
-            cornerstoneMode: constants.cornerstoneMode.SELECTION,
-            temporaryLabel: undefined,
-            updatingAnnotation: false,
-        });
-        cornerstoneTools.setToolOptions(constants.toolNames.movement, {
-            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
-            temporaryLabel: undefined,
-        });
-        cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
-        cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
-        cornerstoneTools.setToolDisabled(constants.toolNames.movement);
-        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
-        cornerstoneTools.setToolActive('ZoomMouseWheel', {});
-        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
-    };
-
     useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
@@ -256,7 +219,7 @@ const ImageDisplayComponent = () => {
                             updateAnnotationPosition,
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
-                        resetCornerstoneTools();
+                        Utils.resetCornerstoneTools();
                     } else {
                         // TODO: in creating annotations
                     }
@@ -290,7 +253,7 @@ const ImageDisplayComponent = () => {
                             updateAnnotationPosition,
                             { id, bbox: coords, segmentation: newSegmentation }
                         );
-                        resetCornerstoneTools();
+                        Utils.resetCornerstoneTools();
                     } else {
                         // TODO
                     }
@@ -333,7 +296,7 @@ const ImageDisplayComponent = () => {
                     }
                 }
                 dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
-                resetCornerstoneTools();
+                Utils.resetCornerstoneTools();
             }
         },
         [editionMode]
@@ -504,7 +467,7 @@ const ImageDisplayComponent = () => {
                 dispatch(clearAnnotationSelection());
                 dispatch(clearAnnotationWidgets());
 
-                resetCornerstoneTools();
+                Utils.resetCornerstoneTools();
             }
             cornerstone.updateImage(viewportRef.current, true);
         }

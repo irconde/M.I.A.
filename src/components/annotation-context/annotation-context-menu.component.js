@@ -52,6 +52,7 @@ const AnnotationContextMenuComponent = () => {
     const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
+        Utils.resetCornerstoneTools();
         switch (type) {
             case constants.editionMode.MOVE:
                 dispatch(updateAnnotationContextVisibility(false));
