@@ -1,9 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
-import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
 import {
     ImageContainer,
     LazyImageIconWrapper,
@@ -14,6 +12,7 @@ import {
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const DEFAULT_HEIGHT = 145.22;
 
 /**
  * Container component for the lazy image thumbnails
@@ -28,22 +27,36 @@ function LazyImageContainerComponent({
 }) {
     // TODO 1: get this from Redux
     const currentFileName = '';
-    const generatingThumbnails = useSelector(getGeneratingThumbnails);
     const containerElement = useRef();
-    const [thumbnailHeight, setThumbnailHeight] = useState('auto');
+    const [thumbnailHeight, setThumbnailHeight] = useState(DEFAULT_HEIGHT);
 
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
     const [isAnnotations, setIsAnnotations] = useState(false);
 
     /**
-     * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
-     * using this handler. Which sets the thumbnail height passed into the container element of the image.
-     * This is namely so that when an image goes offscreen, we keep the container the same size of that image.
+     * Given an image URL, it returns the height of the image
+     *
+     * @param url {string}
+     * @returns {Promise<number>}
      */
-    const thumbnailHeightHandler = () => {
-        const height = containerElement.current.clientHeight;
-        if (height !== thumbnailHeight) setThumbnailHeight(height);
+    const getImageHeight = async (url) => {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        return img.naturalHeight;
+    };
+
+    /**
+     * The image starts at the default height, then when it's loaded we change the height of the container to the
+     * height of the image
+     * @returns {Promise<void>}
+     */
+    const thumbnailHeightHandler = async () => {
+        if (thumbnailHeight === DEFAULT_HEIGHT) {
+            const height = await getImageHeight(thumbnailSrc);
+            setThumbnailHeight(height);
+        }
     };
 
     /**
@@ -87,8 +100,7 @@ function LazyImageContainerComponent({
         <ImageContainer
             ref={containerElement}
             selected={fileName === currentFileName}
-            thumbnailHeight={thumbnailHeight}
-            loading={generatingThumbnails}>
+            thumbnailHeight={thumbnailHeight}>
             {thumbnailSrc && (
                 <>
                     <ThumbnailContainer

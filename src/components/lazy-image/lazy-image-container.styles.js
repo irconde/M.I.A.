@@ -2,6 +2,8 @@ import styled from 'styled-components';
 import { LAZY_SIDE_MENU_WIDTH } from './lazy-image-menu.styles';
 import { colors } from '../../utils/enums/Constants';
 
+const TEXT_CONTAINER_HEIGHT = '2.5rem';
+
 export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -12,12 +14,12 @@ export const ImageContainer = styled.div`
     margin-bottom: 0.2rem;
     align-items: center;
     width: ${LAZY_SIDE_MENU_WIDTH};
-    height: ${(props) =>
-        props.loading ? '145px' : `${props.thumbnailHeight}px`};
+    height: ${({ thumbnailHeight }) =>
+        `calc(${thumbnailHeight}px + ${TEXT_CONTAINER_HEIGHT})`};
 `;
 
 export const LazyImageTextContainer = styled.div`
-    height: 2.5rem;
+    height: ${TEXT_CONTAINER_HEIGHT};
     display: flex;
     align-items: center;
     width: 197px;
