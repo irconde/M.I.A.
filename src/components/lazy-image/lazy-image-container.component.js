@@ -20,12 +20,7 @@ const DEFAULT_HEIGHT = 145.22;
  * @component
  *
  */
-function LazyImageContainerComponent({
-    filePath,
-    fileName,
-    selected,
-    getSpecificFileFromLocalDirectory,
-}) {
+function LazyImageContainerComponent({ filePath, fileName, selected }) {
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState(DEFAULT_HEIGHT);
 
@@ -44,6 +39,14 @@ function LazyImageContainerComponent({
         img.src = url;
         await img.decode();
         return img.naturalHeight;
+    };
+
+    const handleThumbnailClick = async (event) => {
+        try {
+            await ipcRenderer.invoke(Channels.selectFile, fileName);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     /**
@@ -103,10 +106,7 @@ function LazyImageContainerComponent({
                 <>
                     <ThumbnailContainer
                         selected={selected}
-                        onClick={() =>
-                            // TODO 2: enable selecting an image
-                            getSpecificFileFromLocalDirectory(filePath)
-                        }>
+                        onClick={handleThumbnailClick}>
                         <img
                             onLoad={thumbnailHeightHandler}
                             src={thumbnailSrc}
@@ -135,10 +135,6 @@ LazyImageContainerComponent.propTypes = {
     fileName: PropTypes.string,
     filePath: PropTypes.string,
     selected: PropTypes.bool,
-    /**
-     * Calls the Electron channel to invoke a specific file from the selected file system folder.
-     */
-    getSpecificFileFromLocalDirectory: PropTypes.func,
 };
 
 export default LazyImageContainerComponent;

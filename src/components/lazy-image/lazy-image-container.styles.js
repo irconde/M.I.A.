@@ -44,9 +44,14 @@ export const LazyImageText = styled.span`
 
 export const ThumbnailContainer = styled.div`
     display: flex;
+    border-radius: 6px;
     cursor: pointer;
     position: relative;
     border: ${({ selected }) => selected && '4px solid #367eff'};
+
+    img {
+        border-radius: inherit;
+    }
 `;
 
 export const LazyImageIconWrapper = styled.div`

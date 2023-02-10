@@ -4,6 +4,7 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const Constants = require('./Constants');
+const { Channels } = Constants;
 let mainWindow;
 let appSettings = null;
 let annotationColors = [];
@@ -127,7 +128,7 @@ app.on('activate', () => {
  * This returns a string with the selected directory name, or null if the event is cancelled
  * @returns {string | null}
  */
-ipcMain.handle(Constants.Channels.showFolderPicker, async (event, args) => {
+ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
     if (args === Constants.fileType.IMAGES) {
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
@@ -155,68 +156,59 @@ ipcMain.handle(Constants.Channels.showFolderPicker, async (event, args) => {
  * It will return an object with same given keys as pathsObj with a boolean value representing if
  * the particular path exists or not. An example of a returned value is: {imagesPath: true, annotationsPath: false}
  */
-ipcMain.handle(
-    Constants.Channels.verifyDirectories,
-    async (event, pathsObj) => {
-        const promises = [];
-        for (const key in pathsObj) {
-            promises.push(checkIfPathExists(pathsObj[key]));
-        }
-        const response = await Promise.allSettled(promises);
-        const result = {};
-        const keys = Object.keys(pathsObj);
-        for (let i = 0; i < keys.length; i++) {
-            result[keys[i]] = response[i].status === 'fulfilled';
-        }
-
-        return result;
+ipcMain.handle(Channels.verifyDirectories, async (event, pathsObj) => {
+    const promises = [];
+    for (const key in pathsObj) {
+        promises.push(checkIfPathExists(pathsObj[key]));
     }
-);
+    const response = await Promise.allSettled(promises);
+    const result = {};
+    const keys = Object.keys(pathsObj);
+    for (let i = 0; i < keys.length; i++) {
+        result[keys[i]] = response[i].status === 'fulfilled';
+    }
+
+    return result;
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Receives an object containing keys of settings updated values. The callback updates
  * the settings file and returns a promise
  */
-ipcMain.handle(
-    Constants.Channels.saveSettings,
-    async (event, settingsToUpdate) => {
-        await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
-        files
-            .updateSelectedPaths(
-                settingsToUpdate.selectedImagesDirPath,
-                settingsToUpdate.selectedAnnotationFile
-            )
-            .catch(console.log);
-    }
-);
+ipcMain.handle(Channels.saveSettings, async (event, settingsToUpdate) => {
+    await updateSettingsJSON({ ...appSettings, ...settingsToUpdate });
+    files
+        .updateSelectedPaths(
+            settingsToUpdate.selectedImagesDirPath,
+            settingsToUpdate.selectedAnnotationFile
+        )
+        .catch(console.log);
+});
 
-ipcMain.handle(
-    Constants.Channels.saveColorsFile,
-    async (event, colorUpdate) => {
-        return await updateColorsJSON(colorUpdate);
-    }
-);
+ipcMain.handle(Channels.saveColorsFile, async (event, colorUpdate) => {
+    return await updateColorsJSON(colorUpdate);
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data
  */
-ipcMain.handle(Constants.Channels.getNextFile, () => {
-    return files.getNextFile();
-});
+ipcMain.handle(Channels.getNextFile, () => files.getNextFile());
 
-ipcMain.handle(Constants.Channels.getCurrentFile, () => {
-    return files.getCurrentFile(annotationColors);
-});
+ipcMain.handle(Channels.getCurrentFile, () =>
+    files.getCurrentFile(annotationColors)
+);
+
+ipcMain.handle(Channels.selectFile, (e, fileName) =>
+    files.selectFile(fileName)
+);
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends the settings variable to the React process
  */
-ipcMain.handle(Constants.Channels.getSettings, async (event) => {
-    return appSettings;
-});
+ipcMain.handle(Channels.getSettings, async () => appSettings);
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,

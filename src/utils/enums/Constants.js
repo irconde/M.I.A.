@@ -143,6 +143,7 @@ export const Channels = {
     addThumbnail: 'add-thumbnail',
     removeThumbnail: 'remove-thumbnail',
     updateThumbnails: 'update-thumbnails',
+    selectFile: 'select-file',
 };
 
 export const toolNames = {

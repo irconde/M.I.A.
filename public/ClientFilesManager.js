@@ -381,6 +381,13 @@ class ClientFilesManager {
         return { pixelData, annotationInformation, colors };
     }
 
+    async selectFile(filename) {
+        const index = this.fileNames.findIndex((name) => name === filename);
+        if (index === -1) throw new Error("File name doesn't exists");
+        this.currentFileIndex = index;
+        this.#sendFileInfo();
+    }
+
     async getAnnotationsForFile() {
         return new Promise((resolve, reject) => {
             fs.readFile(this.selectedAnnotationFile, (error, data) => {
