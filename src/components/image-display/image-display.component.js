@@ -23,6 +23,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
+    getCurrFileName,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
@@ -76,6 +77,7 @@ const ImageDisplayComponent = () => {
     const selectedAnnotationRef = useRef(selectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
     const selectedCategoryRef = useRef(selectedCategory);
+    const currentFileName = useSelector(getCurrFileName);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -196,7 +198,7 @@ const ImageDisplayComponent = () => {
             .catch((error) => {
                 console.log(error);
             });
-    }, []);
+    }, [currentFileName]);
 
     const polygonRenderingCallback = useCallback(
         (event) => {

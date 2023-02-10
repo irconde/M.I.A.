@@ -59,6 +59,7 @@ const annotationSlice = createSlice({
             const { annotations, categories } = annotationInformation;
             state.colors = colors;
             if (annotations?.length > 0) {
+                state.annotations = [];
                 annotations.forEach((annotation) => {
                     const categoryNameIdx = categories.findIndex(
                         (el) => el.id === annotation.category_id
@@ -122,6 +123,7 @@ const annotationSlice = createSlice({
                             dataArray
                         );
                     }
+
                     state.annotations.push({
                         ...annotation,
                         color: annotationColor,
