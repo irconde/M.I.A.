@@ -14,6 +14,7 @@ const initialState = {
     inputLabel: '',
     zoomLevel: 0,
     isLazyMenuCollapsed: false,
+    currentFileName: '',
 };
 
 const uiSlice = createSlice({
@@ -58,6 +59,9 @@ const uiSlice = createSlice({
         updateEditionMode: (state, action) => {
             state.editionMode = action.payload;
         },
+        updateCurrFileName: (state, action) => {
+            state.currentFileName = action.payload;
+        },
     },
 });
 
@@ -72,6 +76,7 @@ export const {
     setInputLabel,
     clearAnnotationWidgets,
     updateEditionMode,
+    updateCurrFileName,
 } = uiSlice.actions;
 
 export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
@@ -85,5 +90,6 @@ export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getEditLabelVisible = (state) => state.ui.editLabelVisibility;
 export const getZoomLevel = (state) => state.ui.zoomLevel;
 export const getInputLabel = (state) => state.ui.inputLabel;
+export const getCurrFileName = (state) => state.ui.currentFileName;
 
 export default uiSlice.reducer;

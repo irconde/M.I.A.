@@ -23,10 +23,9 @@ const DEFAULT_HEIGHT = 145.22;
 function LazyImageContainerComponent({
     filePath,
     fileName,
+    selected,
     getSpecificFileFromLocalDirectory,
 }) {
-    // TODO 1: get this from Redux
-    const currentFileName = '';
     const containerElement = useRef();
     const [thumbnailHeight, setThumbnailHeight] = useState(DEFAULT_HEIGHT);
 
@@ -99,11 +98,11 @@ function LazyImageContainerComponent({
     return (
         <ImageContainer
             ref={containerElement}
-            selected={fileName === currentFileName}
             thumbnailHeight={thumbnailHeight}>
             {thumbnailSrc && (
                 <>
                     <ThumbnailContainer
+                        selected={selected}
                         onClick={() =>
                             // TODO 2: enable selecting an image
                             getSpecificFileFromLocalDirectory(filePath)
@@ -135,6 +134,7 @@ function LazyImageContainerComponent({
 LazyImageContainerComponent.propTypes = {
     fileName: PropTypes.string,
     filePath: PropTypes.string,
+    selected: PropTypes.bool,
     /**
      * Calls the Electron channel to invoke a specific file from the selected file system folder.
      */

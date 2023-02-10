@@ -7,8 +7,7 @@ const TEXT_CONTAINER_HEIGHT = '2.5rem';
 export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    border: ${({ selected }) =>
-        selected ? '4px solid #367eff' : '1px solid fff'};
+
     overflow-x: hidden;
     justify-content: center;
     margin-bottom: 0.2rem;
@@ -46,8 +45,8 @@ export const LazyImageText = styled.span`
 export const ThumbnailContainer = styled.div`
     display: flex;
     cursor: pointer;
-    border-radius: 6px;
     position: relative;
+    border: ${({ selected }) => selected && '4px solid #367eff'};
 `;
 
 export const LazyImageIconWrapper = styled.div`
