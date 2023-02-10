@@ -3,18 +3,35 @@ import { LAZY_SIDE_MENU_WIDTH } from './lazy-image-menu.styles';
 import { colors } from '../../utils/enums/Constants';
 
 const TEXT_CONTAINER_HEIGHT = '2.5rem';
+const IMAGE_HEIGHT = '149px';
+const IMAGE_WIDTH = '197px';
+const IMAGE_PLACEHOLDER_COLOR = 'grey';
 
 export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
-
     overflow: hidden;
     justify-content: center;
     margin-bottom: 0.2rem;
     align-items: center;
     width: ${LAZY_SIDE_MENU_WIDTH};
-    height: ${({ thumbnailHeight }) =>
-        `calc(${thumbnailHeight}px + ${TEXT_CONTAINER_HEIGHT})`};
+    height: auto;
+`;
+
+export const ThumbnailContainer = styled.div`
+    display: flex;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    border: ${({ selected }) => selected && '4px solid #367eff'};
+    height: ${IMAGE_HEIGHT};
+    width: ${IMAGE_WIDTH};
+    background-color: ${IMAGE_PLACEHOLDER_COLOR};
+
+    img {
+        border-radius: ${({ selected }) => !selected && 'inherit'};
+        object-fit: cover;
+    }
 `;
 
 export const LazyImageTextContainer = styled.div`
@@ -40,18 +57,6 @@ export const LazyImageText = styled.span`
     max-width: 117px;
     margin-right: 4px;
     font-family: 'Noto Sans JP', serif;
-`;
-
-export const ThumbnailContainer = styled.div`
-    display: flex;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    border: ${({ selected }) => selected && '4px solid #367eff'};
-
-    img {
-        border-radius: ${({ selected }) => !selected && 'inherit'};
-    }
 `;
 
 export const LazyImageIconWrapper = styled.div`

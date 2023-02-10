@@ -12,7 +12,6 @@ import {
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
-const DEFAULT_HEIGHT = 145.22;
 
 /**
  * Container component for the lazy image thumbnails
@@ -22,42 +21,16 @@ const DEFAULT_HEIGHT = 145.22;
  */
 function LazyImageContainerComponent({ filePath, fileName, selected }) {
     const containerElement = useRef();
-    const [thumbnailHeight, setThumbnailHeight] = useState(DEFAULT_HEIGHT);
 
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
     const [isAnnotations, setIsAnnotations] = useState(false);
 
-    /**
-     * Given an image URL, it returns the height of the image
-     *
-     * @param url {string}
-     * @returns {Promise<number>}
-     */
-    const getImageHeight = async (url) => {
-        const img = new Image();
-        img.src = url;
-        await img.decode();
-        return img.naturalHeight;
-    };
-
-    const handleThumbnailClick = async (event) => {
+    const handleThumbnailClick = async () => {
         try {
             await ipcRenderer.invoke(Channels.selectFile, fileName);
         } catch (error) {
             console.log(error);
-        }
-    };
-
-    /**
-     * The image starts at the default height, then when it's loaded we change the height of the container to the
-     * height of the image
-     * @returns {Promise<void>}
-     */
-    const thumbnailHeightHandler = async () => {
-        if (thumbnailHeight === DEFAULT_HEIGHT) {
-            const height = await getImageHeight(thumbnailSrc);
-            setThumbnailHeight(height);
         }
     };
 
@@ -99,19 +72,13 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
     }, [isOnScreen]);
 
     return (
-        <ImageContainer
-            ref={containerElement}
-            thumbnailHeight={thumbnailHeight}>
+        <ImageContainer ref={containerElement}>
             {thumbnailSrc && (
                 <>
                     <ThumbnailContainer
                         selected={selected}
                         onClick={handleThumbnailClick}>
-                        <img
-                            onLoad={thumbnailHeightHandler}
-                            src={thumbnailSrc}
-                            alt={fileName}
-                        />
+                        <img src={thumbnailSrc} alt={fileName} />
                         {isAnnotations && (
                             <LazyImageIconWrapper>
                                 <AnnotationIcon
