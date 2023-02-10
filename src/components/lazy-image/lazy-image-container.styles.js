@@ -8,7 +8,7 @@ export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
 
-    overflow-x: hidden;
+    overflow: hidden;
     justify-content: center;
     margin-bottom: 0.2rem;
     align-items: center;
@@ -50,7 +50,7 @@ export const ThumbnailContainer = styled.div`
     border: ${({ selected }) => selected && '4px solid #367eff'};
 
     img {
-        border-radius: inherit;
+        border-radius: ${({ selected }) => !selected && 'inherit'};
     }
 `;
 

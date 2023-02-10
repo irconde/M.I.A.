@@ -140,7 +140,7 @@ class Thumbnails {
      */
     async #saveThumbnailsToStorage() {
         try {
-            if (!this.#thumbnailsObj) return;
+            if (!this.#thumbnailsPath) return;
             await fs.promises.writeFile(
                 path.join(
                     this.#thumbnailsPath,
@@ -465,13 +465,30 @@ class ClientFilesManager {
         };
         // if the promise has not been resolved before, then resolve it once
         if (!this.thumbnailsPromise.isSettled)
-            this.thumbnailsPromise.resolve(allThumbnails);
+            this.thumbnailsPromise.resolve(this.#objToArray(allThumbnails));
 
         this.#thumbnails.scheduleStorageUpdate(
             Thumbnails.ACTION.UPDATE_ALL,
             allThumbnails
         );
-        this.#sendThumbnailsUpdate(Channels.updateThumbnails, allThumbnails);
+        this.#sendThumbnailsUpdate(
+            Channels.updateThumbnails,
+            this.#objToArray(allThumbnails)
+        );
+    }
+
+    /**
+     * Takes an object of thumbnails and returns an array of the thumbnails
+     * in the original order of the files
+     * @param thumbnails {object}
+     * @returns {[]}
+     */
+    #objToArray(thumbnails) {
+        const _thumbnails = [];
+        this.fileNames.forEach((fileName) =>
+            _thumbnails.push({ fileName, filePath: thumbnails[fileName] })
+        );
+        return _thumbnails;
     }
 
     #sendFileInfo() {
@@ -525,10 +542,10 @@ class ClientFilesManager {
                         addedFilename,
                         newThumbnailPath
                     );
-                    this.#sendThumbnailsUpdate(
-                        Channels.addThumbnail,
-                        thumbnailObj
-                    );
+                    this.#sendThumbnailsUpdate(Channels.addThumbnail, {
+                        fileName: addedFilename,
+                        filePath: newThumbnailPath,
+                    });
                 } catch (e) {
                     console.log(e);
                 }

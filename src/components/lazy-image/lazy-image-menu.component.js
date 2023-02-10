@@ -20,7 +20,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  *
  */
 function LazyImageMenuComponent() {
-    const [thumbnails, setThumbnails] = useState({});
+    const [thumbnails, setThumbnails] = useState([]);
     const isLazyMenuCollapsed = useSelector(getIsLazyMenuCollapsed);
     const currentFileName = useSelector(getCurrFileName);
 
@@ -38,21 +38,21 @@ function LazyImageMenuComponent() {
         ipcRenderer
             .on(removeThumbnail, (e, removedThumbnailName) => {
                 // must use a function here to get the most up-to-date state
-                setThumbnails((thumbnails) => {
-                    const updatedThumbnails = { ...thumbnails };
-                    delete updatedThumbnails[removedThumbnailName];
-                    return updatedThumbnails;
-                });
+                setThumbnails((thumbnails) =>
+                    thumbnails.filter(
+                        (thumbnail) => thumbnail !== removedThumbnailName
+                    )
+                );
             })
             .on(addThumbnail, (e, addedThumbnail) => {
                 // must use a function here to get the most up-to-date state
-                setThumbnails((thumbnails) => ({
+                setThumbnails((thumbnails) => [
                     ...thumbnails,
                     ...addedThumbnail,
-                }));
+                ]);
             })
-            .on(updateThumbnails, (e, thumbnailsObj) => {
-                setThumbnails(thumbnailsObj);
+            .on(updateThumbnails, (e, thumbnails) => {
+                setThumbnails(thumbnails);
             });
         ipcRenderer
             .invoke(requestInitialThumbnailsList)
@@ -65,12 +65,12 @@ function LazyImageMenuComponent() {
     return (
         <LazyImageMenuContainer>
             <LazyImagesContainer collapsedLazyMenu={isLazyMenuCollapsed}>
-                {Object.keys(thumbnails).map((fileName) => (
+                {thumbnails.map(({ fileName, filePath }) => (
                     <LazyImageContainerComponent
                         key={fileName}
                         selected={fileName === currentFileName}
                         fileName={fileName}
-                        filePath={thumbnails[fileName]}
+                        filePath={filePath}
                     />
                 ))}
             </LazyImagesContainer>
