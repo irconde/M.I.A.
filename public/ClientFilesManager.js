@@ -139,13 +139,18 @@ class Thumbnails {
      * @returns {Promise<void>}
      */
     async #saveThumbnailsToStorage() {
-        await fs.promises.writeFile(
-            path.join(
-                this.#thumbnailsPath,
-                ClientFilesManager.STORAGE_FILE_NAME
-            ),
-            JSON.stringify(this.#thumbnailsObj, null, 4)
-        );
+        try {
+            if (!this.#thumbnailsObj) return;
+            await fs.promises.writeFile(
+                path.join(
+                    this.#thumbnailsPath,
+                    ClientFilesManager.STORAGE_FILE_NAME
+                ),
+                JSON.stringify(this.#thumbnailsObj, null, 4)
+            );
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     /**
@@ -307,6 +312,7 @@ class ClientFilesManager {
             this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
             await this.#generateThumbnails();
+            this.#sendFileInfo();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
@@ -325,8 +331,10 @@ class ClientFilesManager {
         this.selectedImagesDirPath = imagesDirPath;
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
-        if (!dirContainsAnyImages) return;
         this.#thumbnails.clearCurrentThumbnails();
+        this.currentFileIndex = 0;
+        this.#sendFileInfo();
+        if (!dirContainsAnyImages) return;
         await this.#thumbnails.setThumbnailsPath(imagesDirPath);
         await this.#generateThumbnails();
     }
