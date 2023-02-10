@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
@@ -10,6 +10,8 @@ import {
     ThumbnailContainer,
 } from './lazy-image-container.styles';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
+import { useSelector } from 'react-redux';
+import { getAnnotations } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -24,7 +26,8 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
 
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
-    const [isAnnotations, setIsAnnotations] = useState(false);
+    const [hasAnnotations, setHasAnnotations] = useState(false);
+    const { length: annotationCount } = useSelector(getAnnotations);
 
     const handleThumbnailClick = async () => {
         try {
@@ -34,15 +37,20 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
         }
     };
 
+    useEffect(() => {
+        // updates hasAnnotation if the selected image's annotations count changes
+        selected && setHasAnnotations(!!annotationCount);
+    }, [annotationCount]);
+
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
      * @param {Blob} [blobData=null]
-     * @param {Boolean} annotation
+     * @param {Boolean} isAnnotations
      */
-    const thumbnailHandler = (blobData = null, annotation) => {
+    const thumbnailHandler = (blobData = null, isAnnotations) => {
         setThumbnailSrc(URL.createObjectURL(blobData));
-        if (isAnnotations !== annotation) setIsAnnotations(annotation);
+        if (isAnnotations !== hasAnnotations) setHasAnnotations(isAnnotations);
     };
 
     /**
@@ -75,7 +83,7 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
                 selected={selected}
                 onClick={handleThumbnailClick}>
                 {thumbnailSrc && <img src={thumbnailSrc} alt={fileName} />}
-                {isAnnotations && (
+                {hasAnnotations && (
                     <LazyImageIconWrapper>
                         <AnnotationIcon
                             width={'24px'}
