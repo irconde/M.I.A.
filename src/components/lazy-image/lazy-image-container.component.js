@@ -49,10 +49,8 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
      * Clears/revokes the current display thumbnail blob to free up memory
      */
     const clearThumbnail = () => {
-        if (thumbnailSrc) {
-            URL.revokeObjectURL(thumbnailSrc);
-            setThumbnailSrc(null);
-        }
+        URL.revokeObjectURL(thumbnailSrc);
+        setThumbnailSrc(null);
     };
 
     useLayoutEffect(() => {
@@ -66,34 +64,30 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
                 .catch((error) => {
                     console.log(error);
                 });
-        } else if (!isOnScreen) {
+        } else if (!isOnScreen && thumbnailSrc) {
             clearThumbnail();
         }
     }, [isOnScreen]);
 
     return (
         <ImageContainer ref={containerElement}>
-            {thumbnailSrc && (
-                <>
-                    <ThumbnailContainer
-                        selected={selected}
-                        onClick={handleThumbnailClick}>
-                        <img src={thumbnailSrc} alt={fileName} />
-                        {isAnnotations && (
-                            <LazyImageIconWrapper>
-                                <AnnotationIcon
-                                    width={'24px'}
-                                    height={'24px'}
-                                    color={'white'}
-                                />
-                            </LazyImageIconWrapper>
-                        )}
-                    </ThumbnailContainer>
-                    <LazyImageTextContainer>
-                        <LazyImageText>{fileName}</LazyImageText>
-                    </LazyImageTextContainer>
-                </>
-            )}
+            <ThumbnailContainer
+                selected={selected}
+                onClick={handleThumbnailClick}>
+                {thumbnailSrc && <img src={thumbnailSrc} alt={fileName} />}
+                {isAnnotations && (
+                    <LazyImageIconWrapper>
+                        <AnnotationIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
+                        />
+                    </LazyImageIconWrapper>
+                )}
+            </ThumbnailContainer>
+            <LazyImageTextContainer>
+                <LazyImageText>{fileName}</LazyImageText>
+            </LazyImageTextContainer>
         </ImageContainer>
     );
 }

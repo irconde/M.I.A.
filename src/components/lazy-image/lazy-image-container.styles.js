@@ -5,7 +5,7 @@ import { colors } from '../../utils/enums/Constants';
 const TEXT_CONTAINER_HEIGHT = '2.5rem';
 const IMAGE_HEIGHT = '149px';
 const IMAGE_WIDTH = '197px';
-const IMAGE_PLACEHOLDER_COLOR = 'grey';
+const IMAGE_PLACEHOLDER_COLOR = 'gray';
 
 export const ImageContainer = styled.div`
     display: flex;
@@ -15,7 +15,7 @@ export const ImageContainer = styled.div`
     margin-bottom: 0.2rem;
     align-items: center;
     width: ${LAZY_SIDE_MENU_WIDTH};
-    height: auto;
+    height: calc(${IMAGE_HEIGHT} + ${TEXT_CONTAINER_HEIGHT});
 `;
 
 export const ThumbnailContainer = styled.div`
