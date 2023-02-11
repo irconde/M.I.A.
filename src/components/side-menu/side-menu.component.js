@@ -10,7 +10,7 @@ import {
     toggleVisibility,
 } from '../../redux/slices/annotation.slice';
 import {
-    getCollapsedSideMenu,
+    getSideMenuVisible,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
 } from '../../redux/slices/ui.slice';
@@ -45,7 +45,7 @@ const iconProps = {
  */
 const SideMenuComponent = () => {
     const annotations = useSelector(getAnnotations);
-    const collapsedSideMenu = useSelector(getCollapsedSideMenu);
+    const isSideMenuVisible = useSelector(getSideMenuVisible);
     const dispatch = useDispatch();
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
@@ -73,7 +73,7 @@ const SideMenuComponent = () => {
 
     if (annotations.length > 0) {
         return (
-            <SideMenuContainer collapsedSideMenu={collapsedSideMenu}>
+            <SideMenuContainer collapsedSideMenu={isSideMenuVisible}>
                 <SideMenuListWrapper
                     height={document.documentElement.clientHeight}>
                     <SideMenuList id={'side-menu-list'}>

@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../utils/enums/Constants';
 
 const initialState = {
-    collapsedSideMenu: false,
     annotationContextPosition: {
         top: 0,
         left: 0,
@@ -25,7 +24,7 @@ const uiSlice = createSlice({
     initialState,
     reducers: {
         toggleSideMenu: (state, action) => {
-            state.collapsedSideMenu = !state.collapsedSideMenu;
+            state.sideMenuVisible = !state.sideMenuVisible;
         },
         updateAnnotationContextPosition: (state, action) => {
             const { top, left } = action.payload;
@@ -82,7 +81,6 @@ export const {
     updateAnnotationMode,
 } = uiSlice.actions;
 
-export const getCollapsedSideMenu = (state) => state.ui.collapsedSideMenu;
 export const getAnnotationContextPosition = (state) =>
     state.ui.annotationContextPosition;
 export const getAnnotationContextVisible = (state) =>
