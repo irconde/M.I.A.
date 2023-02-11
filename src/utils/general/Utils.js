@@ -561,6 +561,21 @@ export default class Utils {
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
     }
 
+    static getBboxFromHandles(start, end) {
+        let bbox = [];
+        // Fix flipped rectangle issues
+        if (start.x > end.x && start.y > end.y) {
+            bbox = [end.x, end.y, start.x, start.y];
+        } else if (start.x > end.x) {
+            bbox = [end.x, start.y, start.x, end.y];
+        } else if (start.y > end.y) {
+            bbox = [start.x, end.y, end.x, start.y];
+        } else {
+            bbox = [start.x, start.y, end.x, end.y];
+        }
+        return bbox;
+    }
+
     static calculateAnnotationContextPosition(
         cornerstone,
         annotation,

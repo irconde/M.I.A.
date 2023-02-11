@@ -13,6 +13,7 @@ import { ImageViewport } from './image-display.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
+    addAnnotation,
     addAnnotationArray,
     clearAnnotationSelection,
     getAnnotations,
@@ -193,7 +194,44 @@ const ImageDisplayComponent = () => {
             if (
                 annotationModeRef.current !== constants.annotationMode.NO_TOOL
             ) {
-                console.log('creating');
+                if (
+                    annotationModeRef.current ===
+                    constants.annotationMode.BOUNDING
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.boundingBox
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { data } = toolState;
+                        const { handles } = data[0];
+                        let bbox = Utils.getBboxFromHandles(
+                            handles.start,
+                            handles.end
+                        );
+
+                        // Converting from
+                        // [x_0, y_0, x_f, y_f]
+                        // to
+                        // [x_0, y_0, width, height]
+                        bbox[2] = bbox[2] - bbox[0];
+                        bbox[3] = bbox[3] - bbox[1];
+                        dispatch(
+                            updateEditionMode(constants.annotationMode.NO_TOOL)
+                        );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.SELECTION
+                            )
+                        );
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            addAnnotation,
+                            bbox
+                        );
+                        Utils.resetCornerstoneTools(viewportRef.current);
+                    }
+                }
             } else if (
                 editionModeRef.current !== constants.editionMode.NO_TOOL
             ) {
@@ -205,30 +243,22 @@ const ImageDisplayComponent = () => {
                     if (toolState !== undefined && toolState.data.length > 0) {
                         const { data } = toolState;
                         const { handles, id, segmentation } = data[0];
-                        let coords = [];
-                        const { start, end } = handles;
-                        // Fix flipped rectangle issues
-                        if (start.x > end.x && start.y > end.y) {
-                            coords = [end.x, end.y, start.x, start.y];
-                        } else if (start.x > end.x) {
-                            coords = [end.x, start.y, start.x, end.y];
-                        } else if (start.y > end.y) {
-                            coords = [start.x, end.y, end.x, start.y];
-                        } else {
-                            coords = [start.x, start.y, end.x, end.y];
-                        }
+                        let bbox = Utils.getBboxFromHandles(
+                            handles.start,
+                            handles.end
+                        );
                         const newSegmentation = [];
                         segmentation.forEach((segment) => {
                             newSegmentation.push(
-                                Utils.calculatePolygonMask(coords, segment)
+                                Utils.calculatePolygonMask(bbox, segment)
                             );
                         });
                         // Converting from
                         // [x_0, y_0, x_f, y_f]
                         // to
                         // [x_0, y_0, width, height]
-                        coords[2] = coords[2] - coords[0];
-                        coords[3] = coords[3] - coords[1];
+                        bbox[2] = bbox[2] - bbox[0];
+                        bbox[3] = bbox[3] - bbox[1];
                         dispatch(
                             updateEditionMode(constants.editionMode.NO_TOOL)
                         );
@@ -241,7 +271,7 @@ const ImageDisplayComponent = () => {
                         Utils.dispatchAndUpdateImage(
                             dispatch,
                             updateAnnotationPosition,
-                            { id, bbox: coords, segmentation: newSegmentation }
+                            { id, bbox: bbox, segmentation: newSegmentation }
                         );
                         Utils.resetCornerstoneTools(viewportRef.current);
                     }
