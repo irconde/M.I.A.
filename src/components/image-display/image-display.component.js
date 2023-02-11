@@ -13,8 +13,8 @@ import { ImageViewport } from './image-display.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
-    addAnnotation,
     addAnnotationArray,
+    addBboxAnnotation,
     clearAnnotationSelection,
     getAnnotations,
     getSelectedAnnotation,
@@ -226,7 +226,7 @@ const ImageDisplayComponent = () => {
                         );
                         Utils.dispatchAndUpdateImage(
                             dispatch,
-                            addAnnotation,
+                            addBboxAnnotation,
                             bbox
                         );
                         Utils.resetCornerstoneTools(viewportRef.current);

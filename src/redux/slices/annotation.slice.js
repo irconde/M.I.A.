@@ -134,24 +134,56 @@ const annotationSlice = createSlice({
                 state.categories = categories;
             }
         },
-        addAnnotation: (state, action) => {
+        addBboxAnnotation: (state, action) => {
             let newAnnotation = {
                 bbox: action.payload,
             };
-            const imageId = state.annotations[0].image_id;
-            let maxAnnotationId = state.annotations.reduce((a, b) =>
-                a.id > b.id ? a : b
-            ).id;
-            newAnnotation.image_id = imageId;
-            newAnnotation.id = maxAnnotationId;
+            newAnnotation.image_id = state.annotations[0].image_id;
+            newAnnotation.id =
+                state.annotations.reduce((a, b) => (a.id > b.id ? a : b)).id +
+                1;
             newAnnotation.selected = false;
             newAnnotation.categorySelected = false;
             newAnnotation.visible = true;
             newAnnotation.categoryVisible = true;
             newAnnotation.segmentation = [];
             newAnnotation.iscrowd = 0;
-            newAnnotation.categoryName = 'Test';
-            newAnnotation.color = '#ffffff';
+
+            // Category lookup
+            const foundCategoryIndex = state.categories.findIndex(
+                (category) => category.name.toLowerCase() === 'operator'
+            );
+            if (foundCategoryIndex === -1) {
+                newAnnotation.category_id =
+                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
+                newAnnotation.categoryName = 'operator';
+                state.categories.push({
+                    supercategory: 'operator',
+                    id: newAnnotation.category_id,
+                    name: 'operator',
+                });
+            } else {
+                newAnnotation.category_id =
+                    state.categories[foundCategoryIndex].id;
+                newAnnotation.categoryName =
+                    state.categories[foundCategoryIndex].name;
+            }
+
+            // Color lookup
+            let annotationColor = randomColor({
+                seed: newAnnotation.category_id,
+                hue: 'random',
+                luminosity: 'bright',
+            });
+            const foundColorIdx = state.colors.findIndex(
+                (color) => color.categoryName === newAnnotation.categoryName
+            );
+            if (foundColorIdx !== -1) {
+                annotationColor = state.colors[foundColorIdx].color;
+            }
+            newAnnotation.color = annotationColor;
+
             state.annotations.push(newAnnotation);
         },
         selectAnnotation: (state, action) => {
@@ -320,7 +352,7 @@ const annotationSlice = createSlice({
 });
 
 export const {
-    addAnnotation,
+    addBboxAnnotation,
     addAnnotationArray,
     selectAnnotation,
     clearAnnotationSelection,
