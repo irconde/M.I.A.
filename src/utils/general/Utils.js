@@ -527,6 +527,40 @@ export default class Utils {
         return fakeEvent;
     }
 
+    static resetCornerstoneTools(viewport) {
+        Utils.setToolDisabled(constants.toolNames.boundingBox);
+        Utils.setToolDisabled(constants.toolNames.segmentation);
+        Utils.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.clearToolState(
+            viewport,
+            constants.toolNames.boundingBox
+        );
+        cornerstoneTools.clearToolState(
+            viewport,
+            constants.toolNames.segmentation
+        );
+        cornerstoneTools.clearToolState(viewport, constants.toolNames.movement);
+        cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.segmentation, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+            updatingAnnotation: false,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.movement, {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
+        cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
+        cornerstoneTools.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+        cornerstoneTools.setToolActive('ZoomMouseWheel', {});
+        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+    }
+
     static calculateAnnotationContextPosition(
         cornerstone,
         annotation,

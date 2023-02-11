@@ -91,6 +91,12 @@ function createWindow() {
 
         // Open the DevTools.
         mainWindow.webContents.on('did-frame-finish-load', () => {
+            mainWindow.webContents.closeDevTools();
+
+            mainWindow.webContents.once('devtools-opened', () => {
+                mainWindow.focus();
+            });
+
             mainWindow.webContents.openDevTools();
         });
     } else {

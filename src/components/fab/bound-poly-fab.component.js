@@ -1,6 +1,6 @@
 import React from 'react';
 import * as constants from '../../utils/enums/Constants';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getCornerstoneMode } from '../../redux/slices-old/ui/uiSlice';
 import Tooltip from '@mui/material/Tooltip';
 import {
@@ -12,10 +12,16 @@ import {
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
 import {
+    clearAnnotationWidgets,
     getIsFABVisible,
     getLazyImageMenuVisible,
     getSideMenuVisible,
+    updateAnnotationMode,
+    updateCornerstoneMode,
+    updateEditionMode,
 } from '../../redux/slices/ui.slice';
+import { clearAnnotationSelection } from '../../redux/slices/annotation.slice';
+import Utils from '../../utils/general/Utils';
 
 /**
  * Styled div for the FAB Button. Takes in props to control the look depending on certain properties.
@@ -37,13 +43,30 @@ const BoundPolyFABComponent = () => {
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const sideMenuCollapsed = useSelector(getSideMenuVisible);
     const lazyMenuCollapsed = useSelector(getLazyImageMenuVisible);
+    const dispatch = useDispatch();
 
-    const handleClick = (e, cb) => {
-        if (
-            isVisible &&
-            cornerstoneMode === constants.cornerstoneMode.SELECTION
-        ) {
-            cb(e);
+    const handleClick = (type) => {
+        const viewport = document.getElementById('imageContainer');
+        if (viewport !== null) {
+            Utils.resetCornerstoneTools(viewport);
+        }
+        dispatch(clearAnnotationSelection());
+        dispatch(clearAnnotationWidgets());
+        dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+        if (type === constants.annotationMode.BOUNDING) {
+            dispatch(
+                updateCornerstoneMode(constants.cornerstoneMode.ANNOTATION)
+            );
+            Utils.setToolActive(constants.toolNames.boundingBox);
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateAnnotationMode,
+                constants.annotationMode.BOUNDING
+            );
+        } else if (type === constants.annotationMode.POLYGON) {
+            //
+        } else {
+            //
         }
     };
     // Calculating screen size and setting horizontal value accordingly.
@@ -58,7 +81,6 @@ const BoundPolyFABComponent = () => {
     } else {
         leftPX = 0;
     }*/
-    console.log(leftPX);
     let fabOpacity;
     let show;
     if (
@@ -93,8 +115,8 @@ const BoundPolyFABComponent = () => {
         <FABContainer leftPX={leftPX} fabOpacity={fabOpacity} show={show}>
             <Tooltip title="Create box annotation" placement="bottom">
                 <FABoption
-                    onClick={(e) => {
-                        console.log('create bounding');
+                    onClick={() => {
+                        handleClick(constants.annotationMode.BOUNDING);
                     }}>
                     <FabIconWrapper>
                         <RectangleIcon
@@ -110,8 +132,8 @@ const BoundPolyFABComponent = () => {
             <FABdivider />
             <Tooltip title="Create mask annotation" placement="bottom">
                 <FABoption
-                    onClick={(e) => {
-                        console.log('create segmentation');
+                    onClick={() => {
+                        handleClick(constants.annotationMode.POLYGON);
                     }}>
                     <FabIconWrapper>
                         <PolygonIcon
