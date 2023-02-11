@@ -527,6 +527,44 @@ export default class Utils {
         return fakeEvent;
     }
 
+    static renderBboxCrosshair(context, target, mousePosition, viewport) {
+        const crosshairLength = 8;
+        const mousePos = cornerstone.pageToPixel(
+            target,
+            mousePosition.x,
+            mousePosition.y
+        );
+        const imageSize = cornerstone.getImage(viewport);
+        context.lineWidth = 2;
+        if (
+            mousePos.x >= 0 &&
+            mousePos.x <= imageSize.width &&
+            mousePos.y >= 0 &&
+            mousePos.y <= imageSize.height
+        ) {
+            context.beginPath();
+            context.setLineDash([2, 2]);
+            context.strokeStyle = 'grey';
+            context.moveTo(mousePos.x, 0);
+            context.lineTo(mousePos.x, imageSize.height);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(0, mousePos.y);
+            context.lineTo(imageSize.width, mousePos.y);
+            context.stroke();
+        }
+        context.setLineDash([]);
+        context.strokeStyle = constants.colors.BLUE;
+        context.beginPath();
+        context.moveTo(mousePos.x - crosshairLength, mousePos.y);
+        context.lineTo(mousePos.x + crosshairLength, mousePos.y);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(mousePos.x, mousePos.y - crosshairLength);
+        context.lineTo(mousePos.x, mousePos.y + crosshairLength);
+        context.stroke();
+    }
+
     static resetCornerstoneTools(viewport) {
         Utils.setToolDisabled(constants.toolNames.boundingBox);
         Utils.setToolDisabled(constants.toolNames.segmentation);

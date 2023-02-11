@@ -28,6 +28,7 @@ import {
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
+    updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
     updateZoomLevel,
@@ -70,6 +71,8 @@ const ImageDisplayComponent = () => {
     const annotations = useSelector(getAnnotations);
     const [pixelData, setPixelData] = useState(null);
     const [viewport, setViewport] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const mousePositionRef = useRef(mousePosition);
     const [error, setError] = useState('');
     const annotationRef = useRef(annotations);
     const zoomLevel = useRef();
@@ -112,15 +115,23 @@ const ImageDisplayComponent = () => {
     }, [selectedCategory]);
 
     useEffect(() => {
+        mousePositionRef.current = mousePosition;
+    }, [mousePosition]);
+
+    useEffect(() => {
         if (annotationModeRef.current !== annotationMode) {
             if (annotationMode !== constants.annotationMode.NO_TOOL) {
                 viewportRef.current.addEventListener('mouseup', onDragEnd);
+                if (annotationMode === constants.annotationMode.BOUNDING) {
+                    document.body.addEventListener('mousemove', onMouseMoved);
+                }
                 stopListeningClickEvents();
             }
         }
         annotationModeRef.current = annotationMode;
         return () => {
             viewportRef.current.removeEventListener('mouseup', onDragEnd);
+            document.body.removeEventListener('mousemove', onMouseMoved);
             startListeningClickEvents();
         };
     }, [annotationMode]);
@@ -180,6 +191,13 @@ const ImageDisplayComponent = () => {
             });
     }, []);
 
+    const onMouseMoved = useCallback(
+        (event) => {
+            setMousePosition({ x: event.x, y: event.y });
+        },
+        [annotationMode]
+    );
+
     const polygonRenderingCallback = useCallback(
         (event) => {
             cornerstone.updateImage(viewportRef.current, true);
@@ -217,7 +235,9 @@ const ImageDisplayComponent = () => {
                         bbox[2] = bbox[2] - bbox[0];
                         bbox[3] = bbox[3] - bbox[1];
                         dispatch(
-                            updateEditionMode(constants.annotationMode.NO_TOOL)
+                            updateAnnotationMode(
+                                constants.annotationMode.NO_TOOL
+                            )
                         );
                         dispatch(
                             updateCornerstoneMode(
@@ -385,6 +405,14 @@ const ImageDisplayComponent = () => {
             zoomLevel: zoomLevel.current,
         });
         const context = eventData.canvasContext;
+        if (annotationModeRef.current === constants.annotationMode.BOUNDING) {
+            Utils.renderBboxCrosshair(
+                context,
+                event.target,
+                mousePositionRef.current,
+                viewportRef.current
+            );
+        }
         renderAnnotations(context, annotationRef.current);
         startListeningClickEvents();
     };
