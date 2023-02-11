@@ -73,7 +73,7 @@ const SideMenuComponent = () => {
 
     if (annotations.length > 0) {
         return (
-            <SideMenuContainer collapsedSideMenu={isSideMenuVisible}>
+            <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
                 <SideMenuListWrapper
                     height={document.documentElement.clientHeight}>
                     <SideMenuList id={'side-menu-list'}>
