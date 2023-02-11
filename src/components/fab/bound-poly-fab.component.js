@@ -64,7 +64,19 @@ const BoundPolyFABComponent = () => {
                 constants.annotationMode.BOUNDING
             );
         } else if (type === constants.annotationMode.POLYGON) {
-            //
+            dispatch(
+                updateCornerstoneMode(constants.cornerstoneMode.ANNOTATION)
+            );
+            Utils.setToolOptions(constants.toolNames.segmentation, {
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                annotationMode: constants.annotationMode.POLYGON,
+            });
+            Utils.setToolActive(constants.toolNames.segmentation);
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateAnnotationMode,
+                constants.annotationMode.POLYGON
+            );
         } else {
             //
         }

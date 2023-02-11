@@ -25,6 +25,7 @@ import {
 import {
     clearAnnotationWidgets,
     getAnnotationMode,
+    getCornerstoneMode,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
@@ -76,6 +77,8 @@ const ImageDisplayComponent = () => {
     const [error, setError] = useState('');
     const annotationRef = useRef(annotations);
     const zoomLevel = useRef();
+    const cornerstoneMode = useSelector(getCornerstoneMode);
+    const cornerstoneModeRef = useRef(cornerstoneMode);
     const editionMode = useSelector(getEditionMode);
     const editionModeRef = useRef(editionMode);
     const annotationMode = useSelector(getAnnotationMode);
@@ -117,6 +120,10 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         mousePositionRef.current = mousePosition;
     }, [mousePosition]);
+
+    useEffect(() => {
+        cornerstoneModeRef.current = cornerstoneMode;
+    }, [cornerstoneMode]);
 
     useEffect(() => {
         if (annotationModeRef.current !== annotationMode) {
@@ -257,6 +264,20 @@ const ImageDisplayComponent = () => {
                         }
                         Utils.resetCornerstoneTools(viewportRef.current);
                     }
+                } else if (
+                    annotationModeRef.current ===
+                    constants.annotationMode.POLYGON
+                ) {
+                    console.log('polying');
+                    dispatch(
+                        updateAnnotationMode(constants.annotationMode.NO_TOOL)
+                    );
+                    dispatch(
+                        updateCornerstoneMode(
+                            constants.cornerstoneMode.SELECTION
+                        )
+                    );
+                    Utils.resetCornerstoneTools(viewportRef.current);
                 }
             } else if (
                 editionModeRef.current !== constants.editionMode.NO_TOOL
@@ -420,7 +441,11 @@ const ImageDisplayComponent = () => {
             );
         }
         renderAnnotations(context, annotationRef.current);
-        startListeningClickEvents();
+        if (
+            cornerstoneModeRef.current === constants.cornerstoneMode.SELECTION
+        ) {
+            startListeningClickEvents();
+        }
     };
 
     const onMouseClicked = (event) => {
