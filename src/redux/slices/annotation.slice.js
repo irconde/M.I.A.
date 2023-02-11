@@ -135,8 +135,10 @@ const annotationSlice = createSlice({
             }
         },
         addBboxAnnotation: (state, action) => {
+            const { bbox, area } = action.payload;
             let newAnnotation = {
-                bbox: action.payload,
+                bbox,
+                area,
             };
             newAnnotation.image_id = state.annotations[0].image_id;
             newAnnotation.id =

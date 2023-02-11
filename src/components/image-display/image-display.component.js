@@ -124,6 +124,7 @@ const ImageDisplayComponent = () => {
                 viewportRef.current.addEventListener('mouseup', onDragEnd);
                 if (annotationMode === constants.annotationMode.BOUNDING) {
                     document.body.addEventListener('mousemove', onMouseMoved);
+                    document.body.style.cursor = 'none';
                 }
                 stopListeningClickEvents();
             }
@@ -132,6 +133,7 @@ const ImageDisplayComponent = () => {
         return () => {
             viewportRef.current.removeEventListener('mouseup', onDragEnd);
             document.body.removeEventListener('mousemove', onMouseMoved);
+            document.body.style.cursor = 'default';
             startListeningClickEvents();
         };
     }, [annotationMode]);
@@ -194,6 +196,7 @@ const ImageDisplayComponent = () => {
     const onMouseMoved = useCallback(
         (event) => {
             setMousePosition({ x: event.x, y: event.y });
+            cornerstone.updateImage(viewportRef.current, true);
         },
         [annotationMode]
     );
@@ -207,7 +210,6 @@ const ImageDisplayComponent = () => {
 
     const onDragEnd = useCallback(
         (event) => {
-            console.log(event);
             let toolState = null;
             if (
                 annotationModeRef.current !== constants.annotationMode.NO_TOOL
@@ -227,7 +229,9 @@ const ImageDisplayComponent = () => {
                             handles.start,
                             handles.end
                         );
-
+                        const area = Math.abs(
+                            (bbox[0] - bbox[2]) * (bbox[1] - bbox[3])
+                        );
                         // Converting from
                         // [x_0, y_0, x_f, y_f]
                         // to
@@ -244,11 +248,13 @@ const ImageDisplayComponent = () => {
                                 constants.cornerstoneMode.SELECTION
                             )
                         );
-                        Utils.dispatchAndUpdateImage(
-                            dispatch,
-                            addBboxAnnotation,
-                            bbox
-                        );
+                        if (area > 0) {
+                            Utils.dispatchAndUpdateImage(
+                                dispatch,
+                                addBboxAnnotation,
+                                { bbox, area }
+                            );
+                        }
                         Utils.resetCornerstoneTools(viewportRef.current);
                     }
                 }
@@ -480,7 +486,6 @@ const ImageDisplayComponent = () => {
                 annotation,
                 viewportRef.current
             );
-            console.log(`x: ${x} | y: ${y}`);
             dispatch(updateAnnotationContextPosition({ top: x, left: y }));
         }
     };

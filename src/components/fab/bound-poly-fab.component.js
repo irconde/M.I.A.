@@ -48,7 +48,6 @@ const BoundPolyFABComponent = () => {
     const handleClick = (type) => {
         const viewport = document.getElementById('imageContainer');
         if (viewport !== null) {
-            console.log('reseting tools');
             Utils.resetCornerstoneTools(viewport);
         }
         dispatch(clearAnnotationSelection());
