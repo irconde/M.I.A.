@@ -131,7 +131,6 @@ const ImageDisplayComponent = () => {
                 stopListeningClickEvents();
                 if (annotationMode === constants.annotationMode.BOUNDING) {
                     viewportRef.current.addEventListener('mouseup', onDragEnd);
-                    document.body.addEventListener('mousemove', onMouseMoved);
                     document.body.style.cursor = 'none';
                 } else if (
                     annotationMode === constants.annotationMode.POLYGON
@@ -150,7 +149,6 @@ const ImageDisplayComponent = () => {
                 constants.events.POLYGON_MASK_CREATED,
                 onPolygonEnd
             );
-            document.body.removeEventListener('mousemove', onMouseMoved);
             document.body.style.cursor = 'default';
             startListeningClickEvents();
         };
@@ -189,6 +187,7 @@ const ImageDisplayComponent = () => {
                         'cornerstoneimagerendered',
                         onImageRenderedHandler
                     );
+                    document.body.addEventListener('mousemove', onMouseMoved);
                 })
                 .catch(console.log);
         return () => {
@@ -196,6 +195,7 @@ const ImageDisplayComponent = () => {
                 'cornerstoneimagerendered',
                 onImageRenderedHandler
             );
+            document.body.removeEventListener('mousemove', onMouseMoved);
         };
     }, [selectedImagesDirPath, pixelData]);
 
@@ -469,7 +469,7 @@ const ImageDisplayComponent = () => {
         }
         renderAnnotations(context, annotationRef.current);
         if (
-            cornerstoneModeRef.current === constants.cornerstoneMode.SELECTION
+            cornerstoneModeRef.current !== constants.cornerstoneMode.ANNOTATION
         ) {
             startListeningClickEvents();
         } else {
