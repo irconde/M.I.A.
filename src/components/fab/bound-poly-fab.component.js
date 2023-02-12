@@ -14,8 +14,6 @@ import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
 import {
     clearAnnotationWidgets,
     getIsFABVisible,
-    getLazyImageMenuVisible,
-    getSideMenuVisible,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
@@ -41,8 +39,9 @@ import Utils from '../../utils/general/Utils';
 const BoundPolyFABComponent = () => {
     const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
-    const sideMenuCollapsed = useSelector(getSideMenuVisible);
-    const lazyMenuCollapsed = useSelector(getLazyImageMenuVisible);
+    // TODO: Calculate position depending on menus
+    /*const sideMenuCollapsed = useSelector(getSideMenuVisible);
+    const lazyMenuCollapsed = useSelector(getLazyImageMenuVisible);*/
     const dispatch = useDispatch();
 
     const handleClick = (type) => {
@@ -81,18 +80,7 @@ const BoundPolyFABComponent = () => {
             //
         }
     };
-    // Calculating screen size and setting horizontal value accordingly.
-    //let leftPX = sideMenuCollapsed ? '0' : '-' + constants.sideMenuWidth + 'px';
     let leftPX = 0;
-    /*if (lazyMenuCollapsed && sideMenuCollapsed) {
-        leftPX = 0;
-    } else if (!lazyMenuCollapsed && sideMenuCollapsed) {
-        leftPX = `${constants.sideMenuWidth}px`;
-    } else if (lazyMenuCollapsed && !sideMenuCollapsed) {
-        leftPX = `-${constants.sideMenuWidth}px`;
-    } else {
-        leftPX = 0;
-    }*/
     let fabOpacity;
     let show;
     if (
@@ -101,26 +89,11 @@ const BoundPolyFABComponent = () => {
     ) {
         fabOpacity = false;
         show = true;
-        if (cornerstoneMode === constants.cornerstoneMode.ANNOTATION) {
-            // TODO: Future refactoring
-            /*let canvasElements =
-                document.getElementsByClassName('cornerstone-canvas');
-            let multipleViewports = canvasElements.length > 1;
-            if (canvasElements[0] !== undefined)
-                canvasElements[0].id = 'selectedTop';
-            if (multipleViewports) canvasElements[1].id = 'selectedSide';*/
-        }
     } else if (isVisible === false) {
         show = false;
     } else {
         fabOpacity = true;
         show = true;
-        // TODO: Future refactoring
-        /*let canvasElements =
-            document.getElementsByClassName('cornerstone-canvas');
-        let multipleViewports = canvasElements.length > 1;
-        canvasElements[0].id = '';
-        if (multipleViewports) canvasElements[1].id = '';*/
     }
 
     return (
