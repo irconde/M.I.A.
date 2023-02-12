@@ -56,6 +56,10 @@ const BoundPolyFABComponent = () => {
             dispatch(
                 updateCornerstoneMode(constants.cornerstoneMode.ANNOTATION)
             );
+            Utils.setToolOptions(constants.toolNames.boundingBox, {
+                cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+                annotationMode: constants.annotationMode.BOUNDING,
+            });
             Utils.setToolActive(constants.toolNames.boundingBox);
             Utils.dispatchAndUpdateImage(
                 dispatch,
