@@ -134,11 +134,12 @@ const annotationSlice = createSlice({
                 state.categories = categories;
             }
         },
-        addBboxAnnotation: (state, action) => {
-            const { bbox, area } = action.payload;
+        addAnnotation: (state, action) => {
+            const { bbox, area, segmentation } = action.payload;
             let newAnnotation = {
                 bbox,
                 area,
+                segmentation,
             };
             newAnnotation.image_id = state.annotations[0].image_id;
             newAnnotation.id =
@@ -148,7 +149,6 @@ const annotationSlice = createSlice({
             newAnnotation.categorySelected = false;
             newAnnotation.visible = true;
             newAnnotation.categoryVisible = true;
-            newAnnotation.segmentation = [];
             newAnnotation.iscrowd = 0;
 
             // Category lookup
@@ -354,7 +354,7 @@ const annotationSlice = createSlice({
 });
 
 export const {
-    addBboxAnnotation,
+    addAnnotation,
     addAnnotationArray,
     selectAnnotation,
     clearAnnotationSelection,

@@ -13,8 +13,8 @@ import { ImageViewport } from './image-display.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
+    addAnnotation,
     addAnnotationArray,
-    addBboxAnnotation,
     clearAnnotationSelection,
     getAnnotations,
     getSelectedAnnotation,
@@ -228,7 +228,27 @@ const ImageDisplayComponent = () => {
 
     const onPolygonEnd = useCallback(
         (event) => {
-            console.log('polygon made!');
+            let toolState = cornerstoneTools.getToolState(
+                viewportRef.current,
+                constants.toolNames.segmentation
+            );
+            if (toolState !== undefined && toolState.data.length > 0) {
+                const { data } = toolState;
+                const { handles } = data[0];
+                const bbox = Utils.calculateBoundingBox(handles.points);
+                const segmentation = [
+                    Utils.polygonDataToXYArray(data[0].handles.points, bbox),
+                ];
+                const area = Math.abs(
+                    (bbox[0] - (bbox[0] + bbox[2])) *
+                        (bbox[1] - (bbox[1] + bbox[3]))
+                );
+                Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
+                    bbox,
+                    area,
+                    segmentation,
+                });
+            }
             dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
             dispatch(
                 updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
@@ -281,8 +301,8 @@ const ImageDisplayComponent = () => {
                         if (area > 0) {
                             Utils.dispatchAndUpdateImage(
                                 dispatch,
-                                addBboxAnnotation,
-                                { bbox, area }
+                                addAnnotation,
+                                { bbox, area, segmentation: [] }
                             );
                         }
                         Utils.resetCornerstoneTools(viewportRef.current);
@@ -341,13 +361,11 @@ const ImageDisplayComponent = () => {
                     if (toolState !== undefined && toolState.data.length > 0) {
                         const { data } = toolState;
                         const { handles, id } = data[0];
-                        const coords = Utils.calculateBoundingBox(
-                            handles.points
-                        );
+                        const bbox = Utils.calculateBoundingBox(handles.points);
                         const newSegmentation = [
                             Utils.polygonDataToXYArray(
                                 data[0].handles.points,
-                                coords
+                                bbox
                             ),
                         ];
                         dispatch(
@@ -362,7 +380,7 @@ const ImageDisplayComponent = () => {
                         Utils.dispatchAndUpdateImage(
                             dispatch,
                             updateAnnotationPosition,
-                            { id, bbox: coords, segmentation: newSegmentation }
+                            { id, bbox, segmentation: newSegmentation }
                         );
                         Utils.resetCornerstoneTools(viewportRef.current);
                     }
