@@ -214,9 +214,13 @@ const ImageDisplayComponent = () => {
     const onMouseMoved = useCallback(
         (event) => {
             setMousePosition({ x: event.x, y: event.y });
-            cornerstone.updateImage(viewportRef.current, true);
+            if (
+                annotationModeRef.current === constants.annotationMode.BOUNDING
+            ) {
+                cornerstone.updateImage(viewportRef.current, true);
+            }
         },
-        [annotationMode]
+        [annotationModeRef]
     );
 
     const polygonRenderingCallback = useCallback(
