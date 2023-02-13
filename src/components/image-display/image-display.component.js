@@ -129,13 +129,16 @@ const ImageDisplayComponent = () => {
         if (annotationModeRef.current !== annotationMode) {
             if (annotationMode !== constants.annotationMode.NO_TOOL) {
                 stopListeningClickEvents();
-                viewportRef.current.addEventListener('mouseup', onDragEnd);
                 document.body.style.cursor = 'none';
                 if (annotationMode === constants.annotationMode.POLYGON) {
                     viewportRef.current.addEventListener(
                         constants.events.POLYGON_MASK_CREATED,
                         onPolygonEnd
                     );
+                } else if (
+                    annotationMode === constants.annotationMode.BOUNDING
+                ) {
+                    viewportRef.current.addEventListener('mouseup', onDragEnd);
                 }
             }
         }
@@ -560,7 +563,6 @@ const ImageDisplayComponent = () => {
     };
 
     const stopListeningClickEvents = () => {
-        console.log('stop');
         viewportRef.current.removeEventListener(
             'cornerstonetoolsmouseclick',
             onMouseClicked
@@ -568,8 +570,6 @@ const ImageDisplayComponent = () => {
     };
 
     const startListeningClickEvents = () => {
-        console.log('start');
-        console.trace();
         viewportRef.current.addEventListener(
             'cornerstonetoolsmouseclick',
             onMouseClicked
