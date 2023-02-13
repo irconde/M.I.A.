@@ -23,6 +23,7 @@ export const FABContainer = styled.div`
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
     transition: all 0.3s ease-in;
+    font-family: Noto Sans JP;
 
     @keyframes fadein {
         from {

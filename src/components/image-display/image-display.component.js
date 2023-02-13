@@ -129,12 +129,9 @@ const ImageDisplayComponent = () => {
         if (annotationModeRef.current !== annotationMode) {
             if (annotationMode !== constants.annotationMode.NO_TOOL) {
                 stopListeningClickEvents();
-                if (annotationMode === constants.annotationMode.BOUNDING) {
-                    viewportRef.current.addEventListener('mouseup', onDragEnd);
-                    document.body.style.cursor = 'none';
-                } else if (
-                    annotationMode === constants.annotationMode.POLYGON
-                ) {
+                viewportRef.current.addEventListener('mouseup', onDragEnd);
+                document.body.style.cursor = 'none';
+                if (annotationMode === constants.annotationMode.POLYGON) {
                     viewportRef.current.addEventListener(
                         constants.events.POLYGON_MASK_CREATED,
                         onPolygonEnd
@@ -215,7 +212,9 @@ const ImageDisplayComponent = () => {
         (event) => {
             setMousePosition({ x: event.x, y: event.y });
             if (
-                annotationModeRef.current === constants.annotationMode.BOUNDING
+                annotationModeRef.current ===
+                    constants.annotationMode.BOUNDING ||
+                annotationModeRef.current === constants.annotationMode.POLYGON
             ) {
                 cornerstone.updateImage(viewportRef.current, true);
             }
@@ -463,7 +462,10 @@ const ImageDisplayComponent = () => {
             zoomLevel: zoomLevel.current,
         });
         const context = eventData.canvasContext;
-        if (annotationModeRef.current === constants.annotationMode.BOUNDING) {
+        if (
+            annotationModeRef.current === constants.annotationMode.BOUNDING ||
+            annotationModeRef.current === constants.annotationMode.POLYGON
+        ) {
             Utils.renderBboxCrosshair(
                 context,
                 event.target,
@@ -483,6 +485,7 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = useCallback(
         (event) => {
+            console.log('mouse clicked');
             if (annotationRef.current.length > 0) {
                 const mousePos = cornerstone.canvasToPixel(event.target, {
                     x: event.detail.currentPoints.canvas.x,
@@ -557,6 +560,7 @@ const ImageDisplayComponent = () => {
     };
 
     const stopListeningClickEvents = () => {
+        console.log('stop');
         viewportRef.current.removeEventListener(
             'cornerstonetoolsmouseclick',
             onMouseClicked
@@ -564,6 +568,8 @@ const ImageDisplayComponent = () => {
     };
 
     const startListeningClickEvents = () => {
+        console.log('start');
+        console.trace();
         viewportRef.current.addEventListener(
             'cornerstonetoolsmouseclick',
             onMouseClicked
