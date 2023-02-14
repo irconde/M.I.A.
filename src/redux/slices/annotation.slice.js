@@ -70,12 +70,35 @@ export const saveColorsFile = createAsyncThunk(
     }
 );
 
+export const saveCurrentAnnotations = createAsyncThunk(
+    'annotations/saveCurrentAnnotations',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation } = state;
+        // TODO: Extract App dataset to COCO
+        let cocoAnnotations = [];
+        cocoAnnotations.push({ test: 'test' });
+        await ipcRenderer
+            .invoke(Channels.saveCurrentFile, cocoAnnotations)
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        /*
+                return true;*/
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],
     selectedAnnotation: null,
     colors: [],
     selectedCategory: '',
+    hasAnnotationChanged: false,
 };
 
 const annotationSlice = createSlice({
@@ -133,6 +156,7 @@ const annotationSlice = createSlice({
 
                 state.categories = categories;
             }
+            state.hasAnnotationChanged = false;
         },
         addAnnotation: (state, action) => {
             const { bbox, area, segmentation } = action.payload;
@@ -187,6 +211,7 @@ const annotationSlice = createSlice({
             newAnnotation.color = annotationColor;
 
             state.annotations.push(newAnnotation);
+            state.hasAnnotationChanged = true;
         },
         selectAnnotation: (state, action) => {
             state.annotations.forEach((annotation) => {
@@ -280,6 +305,7 @@ const annotationSlice = createSlice({
                 (annotation) => annotation.id !== state.selectedAnnotation.id
             );
             state.selectedAnnotation = null;
+            state.hasAnnotationChanged = true;
         },
         updateAnnotationColor: (state, action) => {
             const { categoryName, color } = action.payload;
@@ -323,6 +349,7 @@ const annotationSlice = createSlice({
                     foundAnnotation.color = sameCategoryAnnotation.color;
                 }
             }
+            state.hasAnnotationChanged = true;
         },
         updateAnnotationPosition: (state, action) => {
             const { bbox, id, segmentation } = action.payload;
@@ -338,6 +365,7 @@ const annotationSlice = createSlice({
                     state.selectedAnnotation = foundAnnotation;
                 }
             }
+            state.hasAnnotationChanged = true;
         },
     },
     extraReducers: {
@@ -349,6 +377,15 @@ const annotationSlice = createSlice({
         },
         [saveColorsFile.rejected]: (state, { payload }) => {
             console.log(payload);
+        },
+        [saveCurrentAnnotations.fulfilled]: (state, { payload }) => {
+            console.log('Save fullfiled');
+        },
+        [saveCurrentAnnotations.pending]: (state, { payload }) => {
+            console.log('save pending');
+        },
+        [saveCurrentAnnotations.rejected]: (state, { payload }) => {
+            console.log('save rejected');
         },
     },
 });
@@ -393,5 +430,7 @@ export const getAnnotationCategories = (state) => {
 };
 
 export const getSelectedCategory = (state) => state.annotation.selectedCategory;
+export const getHasAnnotationChanged = (state) =>
+    state.annotation.hasAnnotationChanged;
 
 export default annotationSlice.reducer;

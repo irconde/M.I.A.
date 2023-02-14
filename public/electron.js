@@ -204,6 +204,16 @@ ipcMain.handle(
     }
 );
 
+ipcMain.handle(
+    Constants.Channels.saveCurrentFile,
+    async (event, cocoAnnotations) => {
+        return new Promise((res) => {
+            console.log(cocoAnnotations);
+            res();
+        });
+    }
+);
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data
