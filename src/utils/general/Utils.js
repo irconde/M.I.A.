@@ -527,6 +527,93 @@ export default class Utils {
         return fakeEvent;
     }
 
+    static renderBboxCrosshair(context, target, mousePosition, viewport) {
+        const crosshairLength = 8;
+        const mousePos = cornerstone.pageToPixel(
+            target,
+            mousePosition.x,
+            mousePosition.y
+        );
+        const imageSize = cornerstone.getImage(viewport);
+        context.lineWidth = 2;
+        if (
+            mousePos.x >= 0 &&
+            mousePos.x <= imageSize.width &&
+            mousePos.y >= 0 &&
+            mousePos.y <= imageSize.height
+        ) {
+            context.beginPath();
+            context.setLineDash([2, 2]);
+            context.strokeStyle = 'grey';
+            context.moveTo(mousePos.x, 0);
+            context.lineTo(mousePos.x, imageSize.height);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(0, mousePos.y);
+            context.lineTo(imageSize.width, mousePos.y);
+            context.stroke();
+        }
+        context.setLineDash([]);
+        context.strokeStyle = constants.colors.BLUE;
+        context.beginPath();
+        context.moveTo(mousePos.x - crosshairLength, mousePos.y);
+        context.lineTo(mousePos.x + crosshairLength, mousePos.y);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(mousePos.x, mousePos.y - crosshairLength);
+        context.lineTo(mousePos.x, mousePos.y + crosshairLength);
+        context.stroke();
+    }
+
+    static resetCornerstoneTools(viewport) {
+        Utils.setToolDisabled(constants.toolNames.boundingBox);
+        Utils.setToolDisabled(constants.toolNames.segmentation);
+        Utils.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.clearToolState(
+            viewport,
+            constants.toolNames.boundingBox
+        );
+        cornerstoneTools.clearToolState(
+            viewport,
+            constants.toolNames.segmentation
+        );
+        cornerstoneTools.clearToolState(viewport, constants.toolNames.movement);
+        cornerstoneTools.setToolOptions(constants.toolNames.boundingBox, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.segmentation, {
+            cornerstoneMode: constants.cornerstoneMode.SELECTION,
+            temporaryLabel: undefined,
+            updatingAnnotation: false,
+        });
+        cornerstoneTools.setToolOptions(constants.toolNames.movement, {
+            cornerstoneMode: constants.cornerstoneMode.ANNOTATION,
+            temporaryLabel: undefined,
+        });
+        cornerstoneTools.setToolDisabled(constants.toolNames.boundingBox);
+        cornerstoneTools.setToolDisabled(constants.toolNames.segmentation);
+        cornerstoneTools.setToolDisabled(constants.toolNames.movement);
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+        cornerstoneTools.setToolActive('ZoomMouseWheel', {});
+        cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+    }
+
+    static getBboxFromHandles(start, end) {
+        let bbox = [];
+        // Fix flipped rectangle issues
+        if (start.x > end.x && start.y > end.y) {
+            bbox = [end.x, end.y, start.x, start.y];
+        } else if (start.x > end.x) {
+            bbox = [end.x, start.y, start.x, end.y];
+        } else if (start.y > end.y) {
+            bbox = [start.x, end.y, end.x, start.y];
+        } else {
+            bbox = [start.x, start.y, end.x, end.y];
+        }
+        return bbox;
+    }
+
     static calculateAnnotationContextPosition(
         cornerstone,
         annotation,

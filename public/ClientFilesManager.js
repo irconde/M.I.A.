@@ -347,8 +347,7 @@ class ClientFilesManager {
         return new Promise((resolve, reject) => {
             fs.readFile(this.selectedAnnotationFile, (error, data) => {
                 if (error) reject(error);
-                let annotations = [],
-                    categories = [];
+                let annotations = [];
                 const allAnnotations = JSON.parse(data);
                 const imageInformation = allAnnotations.images.find(
                     (image) =>
@@ -360,18 +359,8 @@ class ClientFilesManager {
                     annotations = allAnnotations.annotations.filter(
                         (annotation) => annotation.image_id === imageId
                     );
-                    if (annotations?.length > 0) {
-                        const unique = [
-                            ...new Set(
-                                annotations.map((item) => item.category_id)
-                            ),
-                        ];
-                        categories = allAnnotations.categories.filter(
-                            (category) => unique.includes(category.id)
-                        );
-                    }
                 }
-                resolve({ annotations, categories });
+                resolve({ annotations, categories: allAnnotations.categories });
             });
         });
     }

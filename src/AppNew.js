@@ -15,6 +15,7 @@ import ContactModal from './components/contact-modal/contact-modal.component';
 import AnnotationContextMenuComponent from './components/annotation-context/annotation-context-menu.component';
 import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
+import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -92,6 +93,7 @@ const AppNew = () => {
             <AnnotationContextMenuComponent />
             <ColorPickerComponent />
             <EditLabelComponent />
+            <BoundPolyFABComponent />
         </div>
     );
 };

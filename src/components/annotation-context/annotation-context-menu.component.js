@@ -22,6 +22,7 @@ import {
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateColorPickerVisibility,
+    updateCornerstoneMode,
     updateEditionMode,
     updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
@@ -78,6 +79,9 @@ const AnnotationContextMenuComponent = () => {
                     editionMode: constants.editionMode.MOVE,
                 });
                 Utils.setToolActive(constants.toolNames.movement);
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     updateEditionMode,
@@ -108,6 +112,9 @@ const AnnotationContextMenuComponent = () => {
                     updatingDetection: true,
                 });
                 Utils.setToolActive(constants.toolNames.segmentation);
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     updateEditionMode,
@@ -156,6 +163,9 @@ const AnnotationContextMenuComponent = () => {
                     editionMode: constants.editionMode.BOUNDING,
                 });
                 Utils.setToolActive(constants.toolNames.boundingBox);
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     updateEditionMode,

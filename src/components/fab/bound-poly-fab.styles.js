@@ -1,11 +1,9 @@
 import styled from 'styled-components';
-import * as constants from '../../utils/enums/Constants';
 
 export const FABContainer = styled.div`
     position: absolute;
     left: ${(props) => props.leftPX};
-    bottom: ${(props) =>
-        props.deviceType === constants.DEVICE_TYPE.DESKTOP ? '5%' : '2%'};
+    bottom: 5%;
     padding: 0.7rem 1.25rem;
     background-color: #313131;
     color: #fff;
@@ -25,6 +23,7 @@ export const FABContainer = styled.div`
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
     transition: all 0.3s ease-in;
+    font-family: Noto Sans JP;
 
     @keyframes fadein {
         from {

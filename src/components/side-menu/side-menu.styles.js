@@ -10,10 +10,10 @@ export const SideMenuContainer = styled.div`
     -moz-transition: all 0.3s ease-in;
     -o-transition: all 0.3s ease-in;
     -ms-transition: all 0.3s ease-in;
-    transition: ${({ collapsedSideMenu }) =>
-        collapsedSideMenu ? 'none' : 'all 0.3s ease-in'};
+    transition: ${({ isSideMenuVisible }) =>
+        isSideMenuVisible ? 'all 0.3s ease-in' : 'none'};
     transform: translate(
-        ${(props) => (props.collapsedSideMenu ? sideMenuWidth : 0)}px
+        ${(props) => (props.isSideMenuVisible ? 0 : sideMenuWidth)}px
     );
     position: fixed;
     right: 0;
