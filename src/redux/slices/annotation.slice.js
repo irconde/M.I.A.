@@ -77,9 +77,25 @@ export const saveCurrentAnnotations = createAsyncThunk(
         const { annotation } = state;
         // TODO: Extract App dataset to COCO
         let cocoAnnotations = [];
-        cocoAnnotations.push({ test: 'test' });
+        const cocoCategories = annotation.categories;
+        annotation.annotations.forEach((annot) => {
+            // TODO: Transform segmentation back to COCO
+            const { area, iscrowd, image_id, bbox, category_id, id } = annot;
+            let newAnnotation = {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                category_id,
+                id,
+            };
+            cocoAnnotations.push(newAnnotation);
+        });
         await ipcRenderer
-            .invoke(Channels.saveCurrentFile, cocoAnnotations)
+            .invoke(Channels.saveCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+            })
             .then(() => {
                 return true;
             })
