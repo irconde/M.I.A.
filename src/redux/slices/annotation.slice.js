@@ -4,6 +4,34 @@ import { Channels } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
+const coordArrayToPolygonData = (coordArray) => {
+    let data = [];
+    let count = 0;
+    for (let i = 0; i < coordArray.length; i += 2) {
+        let x = coordArray[i];
+        let y = coordArray[i + 1];
+        data[count] = { x: x, y: y };
+        count++;
+    }
+    return data;
+};
+const calculateMaskAnchorPoints = (boundingBox, polygonCoords) => {
+    // og: [x_0, y_0, x_f, y_f]
+    // new: [x_0, y_0, width, height]
+    const xDist = boundingBox[2];
+    const yDist = boundingBox[3];
+    const x_f = boundingBox[0] + boundingBox[2];
+    const y_f = boundingBox[1] + boundingBox[3];
+    polygonCoords.forEach((point) => {
+        point.anchor = {
+            top: ((y_f - point.y) / yDist) * 100,
+            bottom: ((point.y - boundingBox[1]) / yDist) * 100,
+            left: ((point.x - boundingBox[0]) / xDist) * 100,
+            right: ((x_f - point.x) / xDist) * 100,
+        };
+    });
+    return polygonCoords;
+};
 export const saveColorsFile = createAsyncThunk(
     'annotations/saveColors',
     async (payload, { getState, rejectWithValue }) => {
@@ -81,39 +109,6 @@ const annotationSlice = createSlice({
                             annotationColor = colors[foundColorIdx].color;
                         }
                     }
-                    const coordArrayToPolygonData = (coordArray) => {
-                        let data = [];
-                        let count = 0;
-                        for (let i = 0; i < coordArray.length; i += 2) {
-                            let x = coordArray[i];
-                            let y = coordArray[i + 1];
-                            data[count] = { x: x, y: y };
-                            count++;
-                        }
-                        return data;
-                    };
-                    const calculateMaskAnchorPoints = (
-                        boundingBox,
-                        polygonCoords
-                    ) => {
-                        // og: [x_0, y_0, x_f, y_f]
-                        // new: [x_0, y_0, width, height]
-                        const xDist = boundingBox[2];
-                        const yDist = boundingBox[3];
-                        const x_f = boundingBox[0] + boundingBox[2];
-                        const y_f = boundingBox[1] + boundingBox[3];
-                        polygonCoords.forEach((point) => {
-                            point.anchor = {
-                                top: ((y_f - point.y) / yDist) * 100,
-                                bottom:
-                                    ((point.y - boundingBox[1]) / yDist) * 100,
-                                left:
-                                    ((point.x - boundingBox[0]) / xDist) * 100,
-                                right: ((x_f - point.x) / xDist) * 100,
-                            };
-                        });
-                        return polygonCoords;
-                    };
                     for (let j = 0; j < annotation.segmentation.length; j++) {
                         const dataArray = coordArrayToPolygonData(
                             annotation.segmentation[j]
@@ -140,6 +135,60 @@ const annotationSlice = createSlice({
 
                 state.categories = categories;
             }
+        },
+        addAnnotation: (state, action) => {
+            const { bbox, area, segmentation } = action.payload;
+            let newAnnotation = {
+                bbox,
+                area,
+                segmentation,
+            };
+            newAnnotation.image_id = state.annotations[0].image_id;
+            newAnnotation.id =
+                state.annotations.reduce((a, b) => (a.id > b.id ? a : b)).id +
+                1;
+            newAnnotation.selected = false;
+            newAnnotation.categorySelected = false;
+            newAnnotation.visible = true;
+            newAnnotation.categoryVisible = true;
+            newAnnotation.iscrowd = 0;
+
+            // Category lookup
+            const foundCategoryIndex = state.categories.findIndex(
+                (category) => category.name.toLowerCase() === 'operator'
+            );
+            if (foundCategoryIndex === -1) {
+                newAnnotation.category_id =
+                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
+                newAnnotation.categoryName = 'operator';
+                state.categories.push({
+                    supercategory: 'operator',
+                    id: newAnnotation.category_id,
+                    name: 'operator',
+                });
+            } else {
+                newAnnotation.category_id =
+                    state.categories[foundCategoryIndex].id;
+                newAnnotation.categoryName =
+                    state.categories[foundCategoryIndex].name;
+            }
+
+            // Color lookup
+            let annotationColor = randomColor({
+                seed: newAnnotation.category_id,
+                hue: 'random',
+                luminosity: 'bright',
+            });
+            const foundColorIdx = state.colors.findIndex(
+                (color) => color.categoryName === newAnnotation.categoryName
+            );
+            if (foundColorIdx !== -1) {
+                annotationColor = state.colors[foundColorIdx].color;
+            }
+            newAnnotation.color = annotationColor;
+
+            state.annotations.push(newAnnotation);
         },
         selectAnnotation: (state, action) => {
             state.annotations.forEach((annotation) => {
@@ -307,6 +356,7 @@ const annotationSlice = createSlice({
 });
 
 export const {
+    addAnnotation,
     addAnnotationArray,
     selectAnnotation,
     clearAnnotationSelection,

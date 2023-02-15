@@ -8,7 +8,7 @@ import {
 import LazyImageContainerComponent from './lazy-image-container.component';
 import {
     getCurrFileName,
-    getIsLazyMenuCollapsed,
+    getLazyImageMenuVisible,
 } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
@@ -21,7 +21,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  */
 function LazyImageMenuComponent() {
     const [thumbnails, setThumbnails] = useState([]);
-    const isLazyMenuCollapsed = useSelector(getIsLazyMenuCollapsed);
+    const isLazyMenuVisible = useSelector(getLazyImageMenuVisible);
     const currentFileName = useSelector(getCurrFileName);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ function LazyImageMenuComponent() {
 
     return (
         <LazyImageMenuContainer>
-            <LazyImagesContainer collapsedLazyMenu={isLazyMenuCollapsed}>
+            <LazyImagesContainer collapsedLazyMenu={isLazyMenuVisible}>
                 {thumbnails.map(({ fileName, filePath }) => (
                     <LazyImageContainerComponent
                         key={fileName}

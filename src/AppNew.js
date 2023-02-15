@@ -15,6 +15,8 @@ import AnnotationContextMenuComponent from './components/annotation-context/anno
 import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
+import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
+
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -60,6 +62,7 @@ const AppNew = () => {
             <AnnotationContextMenuComponent />
             <ColorPickerComponent />
             <EditLabelComponent />
+            <BoundPolyFABComponent />
         </div>
     );
 };
