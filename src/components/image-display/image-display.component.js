@@ -24,9 +24,9 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
+    getAnnotationContextVisible,
     getAnnotationMode,
     getCornerstoneMode,
-    getAnnotationContextVisible,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
@@ -89,6 +89,7 @@ const ImageDisplayComponent = () => {
     const selectedCategory = useSelector(getSelectedCategory);
     const selectedCategoryRef = useRef(selectedCategory);
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
+    const isAnnotationContextVisibleRef = useRef(isAnnotationContextVisible);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -106,6 +107,10 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        isAnnotationContextVisibleRef.current = isAnnotationContextVisible;
+    }, [isAnnotationContextVisible]);
 
     useEffect(() => {
         annotationRef.current = annotations;
@@ -557,7 +562,7 @@ const ImageDisplayComponent = () => {
                 dispatch(updateAnnotationContextPosition({ top, left }));
             }
         } else {
-            if (isAnnotationContextVisible) {
+            if (isAnnotationContextVisibleRef.current) {
                 dispatch(updateAnnotationContextVisibility(false));
             }
         }
@@ -595,7 +600,6 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = useCallback(
         (event) => {
-            console.log('mouse clicked');
             if (annotationRef.current.length > 0) {
                 const mousePos = cornerstone.canvasToPixel(event.target, {
                     x: event.detail.currentPoints.canvas.x,
