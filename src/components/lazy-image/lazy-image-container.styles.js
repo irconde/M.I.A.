@@ -5,7 +5,7 @@ import { colors } from '../../utils/enums/Constants';
 const TEXT_CONTAINER_HEIGHT = '2.5rem';
 const IMAGE_HEIGHT = '149px';
 const IMAGE_WIDTH = '197px';
-const IMAGE_PLACEHOLDER_COLOR = 'gray';
+const IMAGE_PLACEHOLDER_COLOR = '#626262';
 
 export const ImageContainer = styled.div`
     display: flex;
