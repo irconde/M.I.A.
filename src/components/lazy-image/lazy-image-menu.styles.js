@@ -17,12 +17,30 @@ export const LazyImageMenuContainer = styled.div`
     padding-top: calc((${LAZY_SIDE_MENU_WIDTH} - ${DEFAULT_IMAGE_WIDTH}) / 2);
     box-sizing: border-box;
 
+    /* width */
+
     ::-webkit-scrollbar {
-        width: 0;
+        width: 9px;
     }
 
+    /* Track */
+
+    ::-webkit-scrollbar-track {
+        background: #292929;
+    }
+
+    /* Handle */
+
     ::-webkit-scrollbar-thumb {
-        background-color: white;
+        background: #555;
+        border-radius: 6px;
+        border: solid 1px #4e4e4e;
+    }
+
+    /* Handle on hover */
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 `;
 
