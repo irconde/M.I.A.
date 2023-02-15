@@ -4,6 +4,14 @@ import { Channels } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
+const polygonDataToCoordArray = (polygonData) => {
+    let points = [];
+    for (let index in polygonData) {
+        points.push(polygonData[index].x);
+        points.push(polygonData[index].y);
+    }
+    return points;
+};
 const coordArrayToPolygonData = (coordArray) => {
     let data = [];
     let count = 0;
@@ -79,13 +87,25 @@ export const saveCurrentAnnotations = createAsyncThunk(
         let cocoAnnotations = [];
         const cocoCategories = annotation.categories;
         annotation.annotations.forEach((annot) => {
-            // TODO: Transform segmentation back to COCO
-            const { area, iscrowd, image_id, bbox, category_id, id } = annot;
+            const {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                category_id,
+                id,
+                segmentation,
+            } = annot;
+            let newSegmentation = [];
+            segmentation.forEach((segment) => {
+                newSegmentation.push(polygonDataToCoordArray(segment));
+            });
             let newAnnotation = {
                 area,
                 iscrowd,
                 image_id,
                 bbox,
+                segmentation: newSegmentation,
                 category_id,
                 id,
             };
