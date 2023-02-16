@@ -250,11 +250,13 @@ const annotationSlice = createSlice({
             state.hasAnnotationChanged = true;
         },
         selectAnnotation: (state, action) => {
+            let anySelected = false;
             state.annotations.forEach((annotation) => {
                 if (annotation.id === action.payload) {
                     annotation.selected = !annotation.selected;
                     if (annotation.selected) {
                         state.selectedAnnotation = annotation;
+                        anySelected = true;
                     }
                 } else {
                     annotation.selected = false;
@@ -262,6 +264,9 @@ const annotationSlice = createSlice({
                 annotation.categorySelected = false;
             });
 
+            if (anySelected === false && state.selectedAnnotation !== null) {
+                state.selectedAnnotation = null;
+            }
             state.selectedCategory = '';
         },
         selectAnnotationCategory: (state, action) => {

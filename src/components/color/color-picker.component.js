@@ -40,13 +40,13 @@ const ColorPickerComponent = () => {
                 annotationContextPosition.top +
                     zoomLevel +
                     detectionContextStyle.HEIGHT +
-                    10
+                    15
             );
             setLeftPosition(
                 annotationContextPosition.left + zoomLevel + menuOffset
             );
         }
-    }, [selectedAnnotation]);
+    }, [selectedAnnotation, annotationContextPosition]);
 
     const colorChangeComplete = (color) => {
         const newColor = {
