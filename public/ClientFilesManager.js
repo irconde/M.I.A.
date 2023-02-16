@@ -72,30 +72,13 @@ class Thumbnails {
                 if (!this.#thumbnailsObj[fileName]) {
                     throw new Error('Thumbnail does not exist for that file');
                 } else {
-                    // const fileData = fs.readFileSync(filePath);
                     const fileData = await fs.promises.readFile(filePath);
                     return {
                         fileData: Buffer.from(fileData).toString('base64'),
-                        isAnnotations: await this.#hasAnnotations(fileName),
                     };
                 }
             }
         );
-    }
-
-    /**
-     * Check if a given file name has any annotations associated with it
-     * @param fileName {string}
-     * @returns {Promise<boolean>}
-     */
-    async #hasAnnotations(fileName) {
-        try {
-            const data = await fs.promises.readFile(this.#annotationFilePath);
-            const { images } = JSON.parse(data);
-            return images.some((image) => image.file_name === fileName);
-        } catch (e) {
-            return false;
-        }
     }
 
     setAnnotationFilePath(path) {
@@ -454,7 +437,9 @@ class ClientFilesManager {
         };
         // if the promise has not been resolved before, then resolve it once
         if (!this.thumbnailsPromise.isSettled)
-            this.thumbnailsPromise.resolve(this.#objToArray(allThumbnails));
+            this.thumbnailsPromise.resolve(
+                this.#prepareClientThumbnails(allThumbnails)
+            );
 
         this.#thumbnails.scheduleStorageUpdate(
             Thumbnails.ACTION.UPDATE_ALL,
@@ -462,22 +447,50 @@ class ClientFilesManager {
         );
         this.#sendThumbnailsUpdate(
             Channels.updateThumbnails,
-            this.#objToArray(allThumbnails)
+            this.#prepareClientThumbnails(allThumbnails)
         );
     }
 
     /**
      * Takes an object of thumbnails and returns an array of the thumbnails
-     * in the original order of the files
-     * @param thumbnails {object}
-     * @returns {[]}
+     * in the original order of the files and determines which thumbnails have annotations
+     * @param thumbnails {Object<string, string>}
+     * @returns {Array<{fileName: string, filePath: string, hasAnnotations: boolean}>}
      */
-    #objToArray(thumbnails) {
+    async #prepareClientThumbnails(thumbnails) {
         const _thumbnails = [];
+        const annotations = await this.#getAllAnnotationsFromStorage();
         this.fileNames.forEach((fileName) =>
-            _thumbnails.push({ fileName, filePath: thumbnails[fileName] })
+            _thumbnails.push({
+                fileName,
+                filePath: thumbnails[fileName],
+                hasAnnotations: !!annotations[fileName],
+            })
         );
         return _thumbnails;
+    }
+
+    /**
+     * Reads the annotations file if there is one, and returns an object with keys
+     * for each file and a boolean indicating if the file has annotations
+     * @returns {Object<string, boolean>}
+     */
+    async #getAllAnnotationsFromStorage() {
+        try {
+            const data = await fs.promises.readFile(
+                this.selectedAnnotationFile
+            );
+            const { images, annotations } = JSON.parse(data);
+            const annotationsMap = {};
+            images.forEach((image) => {
+                annotationsMap[image.file_name] = annotations.some(
+                    (annotation) => annotation.image_id === image.id
+                );
+            });
+            return annotationsMap;
+        } catch (e) {
+            return {};
+        }
     }
 
     #sendFileInfo() {

@@ -21,12 +21,17 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  * @component
  *
  */
-function LazyImageContainerComponent({ filePath, fileName, selected }) {
+function LazyImageContainerComponent({
+    filePath,
+    fileName,
+    hasAnnotations,
+    selected,
+}) {
     const containerElement = useRef();
 
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
-    const [hasAnnotations, setHasAnnotations] = useState(false);
+    const [isAnnotations, setHasAnnotations] = useState(hasAnnotations);
     const { length: annotationCount } = useSelector(getAnnotations);
 
     const handleThumbnailClick = async () => {
@@ -46,11 +51,9 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
      * @param {Blob} [blobData=null]
-     * @param {Boolean} isAnnotations
      */
-    const thumbnailHandler = (blobData = null, isAnnotations) => {
+    const thumbnailHandler = (blobData = null) => {
         setThumbnailSrc(URL.createObjectURL(blobData));
-        if (isAnnotations !== hasAnnotations) setHasAnnotations(isAnnotations);
     };
 
     /**
@@ -65,9 +68,9 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
         if (isOnScreen && !thumbnailSrc) {
             ipcRenderer
                 .invoke(Channels.getThumbnail, { fileName, filePath })
-                .then(({ fileData, isAnnotations }) => {
+                .then(({ fileData }) => {
                     const blobData = Utils.b64toBlob(fileData, 'image/png');
-                    thumbnailHandler(blobData, isAnnotations);
+                    thumbnailHandler(blobData);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -83,7 +86,7 @@ function LazyImageContainerComponent({ filePath, fileName, selected }) {
                 selected={selected}
                 onClick={handleThumbnailClick}>
                 {thumbnailSrc && <img src={thumbnailSrc} alt={fileName} />}
-                {hasAnnotations && (
+                {isAnnotations && (
                     <LazyImageIconWrapper>
                         <AnnotationIcon
                             width={'24px'}
@@ -104,6 +107,7 @@ LazyImageContainerComponent.propTypes = {
     fileName: PropTypes.string,
     filePath: PropTypes.string,
     selected: PropTypes.bool,
+    hasAnnotations: PropTypes.bool,
 };
 
 export default LazyImageContainerComponent;

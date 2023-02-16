@@ -65,14 +65,17 @@ function LazyImageMenuComponent() {
     return (
         <LazyImageMenuContainer>
             <LazyImagesContainer collapsedLazyMenu={isLazyMenuVisible}>
-                {thumbnails.map(({ fileName, filePath }) => (
-                    <LazyImageContainerComponent
-                        key={fileName}
-                        selected={fileName === currentFileName}
-                        fileName={fileName}
-                        filePath={filePath}
-                    />
-                ))}
+                {thumbnails.map(
+                    ({ fileName, filePath, hasAnnotations = false }) => (
+                        <LazyImageContainerComponent
+                            key={fileName}
+                            selected={fileName === currentFileName}
+                            fileName={fileName}
+                            filePath={filePath}
+                            hasAnnotations={hasAnnotations}
+                        />
+                    )
+                )}
             </LazyImagesContainer>
         </LazyImageMenuContainer>
     );
