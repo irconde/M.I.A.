@@ -3,7 +3,7 @@ import * as constants from '../../utils/enums/Constants';
 
 export const EditLabelWrapper = styled.div`
     position: absolute;
-    min-width: 120px;
+    min-width: 160px;
     z-index: 500;
     width: ${(props) => `${props.width}px`};
     left: ${(props) => `${props.left}px`};

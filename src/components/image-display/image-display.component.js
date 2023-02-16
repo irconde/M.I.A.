@@ -24,6 +24,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
+    getAnnotationContextVisible,
     getAnnotationMode,
     getCornerstoneMode,
     getEditionMode,
@@ -87,6 +88,8 @@ const ImageDisplayComponent = () => {
     const selectedAnnotationRef = useRef(selectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
     const selectedCategoryRef = useRef(selectedCategory);
+    const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
+    const isAnnotationContextVisibleRef = useRef(isAnnotationContextVisible);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -104,6 +107,10 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        isAnnotationContextVisibleRef.current = isAnnotationContextVisible;
+    }, [isAnnotationContextVisible]);
 
     useEffect(() => {
         annotationRef.current = annotations;
@@ -450,11 +457,116 @@ const ImageDisplayComponent = () => {
         if (!event) {
             return;
         }
-
         console.log('image render');
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
+
+        if (selectedAnnotationRef.current !== null) {
+            if (editionModeRef.current !== constants.editionMode.NO_TOOL) {
+                let toolState = null;
+                if (editionModeRef.current === constants.editionMode.BOUNDING) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.boundingBox
+                    );
+                    console.log(toolState);
+                    if (
+                        toolState !== null &&
+                        toolState !== undefined &&
+                        toolState.data.length > 0
+                    ) {
+                        const { data } = toolState;
+                        const { handles } = data[0];
+                        let bbox = [];
+                        const { start, end } = handles;
+                        // Fix flipped rectangle issues
+                        if (start.x > end.x && start.y > end.y) {
+                            bbox = [end.x, end.y, start.x, start.y];
+                        } else if (start.x > end.x) {
+                            bbox = [end.x, start.y, start.x, end.y];
+                        } else if (start.y > end.y) {
+                            bbox = [start.x, end.y, end.x, start.y];
+                        } else {
+                            bbox = [start.x, start.y, end.x, end.y];
+                        }
+                        bbox[2] = bbox[2] - bbox[0];
+                        bbox[3] = bbox[3] - bbox[1];
+                        const { top, left } =
+                            Utils.calculateAnnotationContextPosition(
+                                cornerstone,
+                                bbox,
+                                viewportRef.current,
+                                zoomLevel.current
+                            );
+                        dispatch(
+                            updateAnnotationContextPosition({ top, left })
+                        );
+                    }
+                } else if (
+                    editionModeRef.current === constants.editionMode.MOVE
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.movement
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { handles } = toolState.data[0];
+                        const bbox = [
+                            handles.start.x,
+                            handles.start.y,
+                            handles.end.x - handles.start.x,
+                            handles.end.y - handles.start.y,
+                        ];
+                        const { top, left } =
+                            Utils.calculateAnnotationContextPosition(
+                                cornerstone,
+                                bbox,
+                                viewportRef.current,
+                                zoomLevel.current
+                            );
+                        dispatch(
+                            updateAnnotationContextPosition({ top, left })
+                        );
+                    }
+                } else if (
+                    editionModeRef.current === constants.editionMode.POLYGON
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.segmentation
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { data } = toolState;
+                        const { handles } = data[0];
+                        const bbox = Utils.calculateBoundingBox(handles.points);
+                        const { top, left } =
+                            Utils.calculateAnnotationContextPosition(
+                                cornerstone,
+                                bbox,
+                                viewportRef.current,
+                                zoomLevel.current
+                            );
+                        dispatch(
+                            updateAnnotationContextPosition({ top, left })
+                        );
+                    }
+                }
+            } else {
+                const { top, left } = Utils.calculateAnnotationContextPosition(
+                    cornerstone,
+                    selectedAnnotationRef.current.bbox,
+                    viewportRef.current,
+                    zoomLevel.current
+                );
+                dispatch(updateAnnotationContextPosition({ top, left }));
+            }
+        } else {
+            if (isAnnotationContextVisibleRef.current) {
+                dispatch(updateAnnotationContextVisibility(false));
+            }
+        }
+
         Utils.setToolOptions(constants.toolNames.boundingBox, {
             zoomLevel: zoomLevel.current,
         });
@@ -488,7 +600,6 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = useCallback(
         (event) => {
-            console.log('mouse clicked');
             if (annotationRef.current.length > 0) {
                 const mousePos = cornerstone.canvasToPixel(event.target, {
                     x: event.detail.currentPoints.canvas.x,
@@ -549,16 +660,19 @@ const ImageDisplayComponent = () => {
             } else {
                 inputZoomLevel = zoomLevel.current;
             }
-            let annotationContextGap = 0;
-            annotationContextGap =
-                viewportInfo.offset / inputZoomLevel - annotation.bbox[2];
 
-            const { x, y } = Utils.calculateAnnotationContextPosition(
+            const { top, left } = Utils.calculateAnnotationContextPosition(
                 cornerstone,
                 annotation,
-                viewportRef.current
+                viewportRef.current,
+                zoomLevel.current
             );
-            dispatch(updateAnnotationContextPosition({ top: x, left: y }));
+            dispatch(
+                updateAnnotationContextPosition({
+                    top,
+                    left,
+                })
+            );
         }
     };
 
