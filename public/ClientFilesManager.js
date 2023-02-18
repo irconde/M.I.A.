@@ -293,6 +293,46 @@ class ClientFilesManager {
         await this.#generateThumbnails();
     }
 
+    async updateAnnotationsFile(newAnnotationData) {
+        return new Promise((resolve, reject) => {
+            const { cocoAnnotations, cocoCategories } = newAnnotationData;
+            if (
+                this.selectedAnnotationFile !== '' &&
+                fs.existsSync(this.selectedAnnotationFile)
+            ) {
+                fs.readFile(this.selectedAnnotationFile, (err, data) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        const annotationFile = JSON.parse(data);
+                        annotationFile.categories = cocoCategories;
+                        cocoAnnotations.forEach((annotation) => {
+                            const foundIndex =
+                                annotationFile.annotations.findIndex(
+                                    (fileAnnotation) =>
+                                        fileAnnotation.id === annotation.id
+                                );
+                            if (foundIndex !== -1) {
+                                annotationFile.annotations[foundIndex] =
+                                    annotation;
+                            } else {
+                                // ID set by client may not be unique, need to check file
+                                annotation.id =
+                                    annotationFile.annotations.reduce((a, b) =>
+                                        a.id > b.id ? a : b
+                                    ).id + 1;
+                                annotationFile.annotations.push(annotation);
+                            }
+                        });
+                        // TODO: Could cause an out of bounds exception
+                        this.currentFileIndex++;
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
+
     /**
      * Reads the next file data if there is one and increments the current index
      * @returns {pixelData: <Buffer>, annotationInformation: Array}

@@ -206,11 +206,8 @@ ipcMain.handle(
 
 ipcMain.handle(
     Constants.Channels.saveCurrentFile,
-    async (event, cocoAnnotations) => {
-        return new Promise((res) => {
-            console.log(cocoAnnotations);
-            res();
-        });
+    async (event, newAnnotations) => {
+        return await files.updateAnnotationsFile(newAnnotations);
     }
 );
 

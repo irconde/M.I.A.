@@ -470,7 +470,6 @@ const ImageDisplayComponent = () => {
                         viewportRef.current,
                         constants.toolNames.boundingBox
                     );
-                    console.log(toolState);
                     if (
                         toolState !== null &&
                         toolState !== undefined &&
