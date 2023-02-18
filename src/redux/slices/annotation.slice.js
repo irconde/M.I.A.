@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import randomColor from 'randomcolor';
-import { Channels } from '../../utils/enums/Constants';
+import { Channels, SAVE_STATUSES } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -83,7 +83,6 @@ export const saveCurrentAnnotations = createAsyncThunk(
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
         const { annotation } = state;
-        // TODO: Extract App dataset to COCO
         let cocoAnnotations = [];
         const cocoCategories = annotation.categories;
         annotation.annotations.forEach((annot) => {
@@ -97,9 +96,11 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 segmentation,
             } = annot;
             let newSegmentation = [];
-            segmentation.forEach((segment) => {
-                newSegmentation.push(polygonDataToCoordArray(segment));
-            });
+            if (segmentation?.length > 0) {
+                segmentation.forEach((segment) => {
+                    newSegmentation.push(polygonDataToCoordArray(segment));
+                });
+            }
             let newAnnotation = {
                 area,
                 iscrowd,
@@ -123,8 +124,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 console.log(error);
                 rejectWithValue(error);
             });
-        /*
-                return true;*/
+        /*return true;*/
     }
 );
 
@@ -135,6 +135,8 @@ const initialState = {
     colors: [],
     selectedCategory: '',
     hasAnnotationChanged: false,
+    saveAnnotationsStatus: SAVE_STATUSES.IDLE,
+    saveFailureMessage: '',
 };
 
 const annotationSlice = createSlice({
@@ -360,7 +362,6 @@ const annotationSlice = createSlice({
             }
         },
         updateAnnotationCategory: (state, action) => {
-            // TODO: Check if the new category exists in categories or not
             const { id, newCategory } = action.payload;
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
@@ -408,25 +409,38 @@ const annotationSlice = createSlice({
             }
             state.hasAnnotationChanged = true;
         },
+        updateSaveAnnotationStatus: (state, action) => {
+            state.saveAnnotationsStatus = action.payload;
+        },
+        clearAnnotationData: (state) => {
+            state.annotations = [];
+            state.categories = [];
+            state.selectedAnnotation = null;
+            state.selectedCategory = '';
+            state.hasAnnotationChanged = false;
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
             state.colors = payload;
         },
-        [saveColorsFile.pending]: (state, { payload }) => {
-            //
-        },
         [saveColorsFile.rejected]: (state, { payload }) => {
             console.log(payload);
         },
-        [saveCurrentAnnotations.fulfilled]: (state, { payload }) => {
-            console.log('Save fullfiled');
+        [saveCurrentAnnotations.fulfilled]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
-        [saveCurrentAnnotations.pending]: (state, { payload }) => {
-            console.log('save pending');
+        [saveCurrentAnnotations.pending]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
         },
         [saveCurrentAnnotations.rejected]: (state, { payload }) => {
-            console.log('save rejected');
+            console.log(payload);
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }
         },
     },
 });
@@ -443,6 +457,8 @@ export const {
     updateAnnotationCategory,
     updateAnnotationPosition,
     selectAnnotationCategory,
+    updateSaveAnnotationStatus,
+    clearAnnotationData,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -473,5 +489,7 @@ export const getAnnotationCategories = (state) => {
 export const getSelectedCategory = (state) => state.annotation.selectedCategory;
 export const getHasAnnotationChanged = (state) =>
     state.annotation.hasAnnotationChanged;
+export const getSaveAnnotationStatus = (state) =>
+    state.annotation.saveAnnotationsStatus;
 
 export default annotationSlice.reducer;
