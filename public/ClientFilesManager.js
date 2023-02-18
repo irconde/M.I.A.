@@ -334,8 +334,12 @@ class ClientFilesManager {
                                         console.log(err);
                                         reject(err);
                                     } else {
-                                        // TODO: Could cause an out of bounds exception
-                                        this.currentFileIndex++;
+                                        if (
+                                            this.currentFileIndex <
+                                            this.fileNames.length - 1
+                                        ) {
+                                            this.currentFileIndex++;
+                                        }
                                         resolve();
                                     }
                                 }
