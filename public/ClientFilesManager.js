@@ -324,9 +324,19 @@ class ClientFilesManager {
                                 annotationFile.annotations.push(annotation);
                             }
                         });
-                        // TODO: Could cause an out of bounds exception
-                        this.currentFileIndex++;
-                        resolve();
+                        fs.writeFile(
+                            this.selectedAnnotationFile,
+                            JSON.stringify(annotationFile),
+                            (err) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    // TODO: Could cause an out of bounds exception
+                                    this.currentFileIndex++;
+                                    resolve();
+                                }
+                            }
+                        );
                     }
                 });
             }
