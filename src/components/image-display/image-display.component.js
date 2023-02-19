@@ -842,7 +842,6 @@ const ImageDisplayComponent = () => {
 
     const displayDicomImage = async (pixelData) => {
         return new Promise((resolve, reject) => {
-            console.log(pixelData);
             const cornerstonePixelData =
                 cornerstoneWADOImageLoader.wadouri.fileManager.add(
                     new Blob([pixelData])

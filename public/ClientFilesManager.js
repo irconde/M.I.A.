@@ -8,6 +8,8 @@ const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
 const chokidar = require('chokidar');
 const async = require('async');
+const dicomParser = require('dicom-parser');
+const Utils = require('./Utils');
 
 class CustomPromise {
     isSettled = false;
@@ -194,6 +196,48 @@ class Thumbnails {
     }
 
     /**
+     * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
+     * @param {ArrayBuffer} imageData
+     * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
+     */
+    dicomToPngData(imageData) {
+        try {
+            // Allow raw files
+            const options = {
+                TransferSyntaxUID: '1.2.840.10008.1.2',
+            };
+            // Parse the byte array to get a DataSet object that has the parsed contents
+            const dataSet = dicomParser.parseDicom(imageData, options);
+
+            // get the pixel data element (contains the offset and length of the data)
+            const pixelDataElement = dataSet.elements.x7fe00010;
+
+            // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
+            const pixelData = new Uint16Array(
+                dataSet.byteArray.buffer,
+                pixelDataElement.dataOffset,
+                pixelDataElement.length / 2
+            );
+            const intervals = Utils.buildIntervals();
+            const height = dataSet.int16('x00280010');
+            const width = dataSet.int16('x00280011');
+            const EightbitPixels = new Uint8ClampedArray(4 * width * height);
+            let z = 0;
+            for (let i = 0; i < pixelData.length; i++) {
+                const greyValue = Utils.findGrayValue(pixelData[i], intervals);
+                EightbitPixels[z] = greyValue;
+                EightbitPixels[z + 1] = greyValue;
+                EightbitPixels[z + 2] = greyValue;
+                EightbitPixels[z + 3] = 255;
+                z += 4;
+            }
+            return { width, height, pixelData: EightbitPixels };
+        } catch (ex) {
+            console.log('Error parsing byte stream', ex);
+        }
+    }
+
+    /**
      * Creates and saves a png image and returns a promise that resolves to the path of the image thumbnail created
      * @param selectedImagesDirPath {string}
      * @param fileName {string}
@@ -203,10 +247,31 @@ class Thumbnails {
         const pixelData = await fs.promises.readFile(
             path.join(selectedImagesDirPath, fileName)
         );
-        const thumbnailPath = path.join(this.#thumbnailsPath, fileName);
-        await sharp(pixelData)
-            .resize(Constants.Thumbnail.width)
-            .toFile(thumbnailPath);
+        let thumbnailPath = '';
+        if (path.extname(fileName).toLowerCase() !== '.dcm') {
+            thumbnailPath = path.join(this.#thumbnailsPath, fileName);
+            await sharp(pixelData)
+                .resize(Constants.Thumbnail.width)
+                .toFile(thumbnailPath)
+                .catch((error) => console.log(error));
+        } else {
+            const split = fileName.split('.');
+            thumbnailPath = path.join(this.#thumbnailsPath, `${split[0]}.png`);
+            const dicomPngData = this.dicomToPngData(pixelData);
+            sharp(dicomPngData.pixelData, {
+                raw: {
+                    width: dicomPngData.width,
+                    height: dicomPngData.height,
+                    channels: 4,
+                },
+            })
+                .resize(Constants.Thumbnail.width)
+                .png()
+                .toFile(thumbnailPath)
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
         return thumbnailPath;
     }
 }
@@ -269,7 +334,7 @@ class ClientFilesManager {
         if (dirContainsAnyImages) {
             this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-            //await this.#generateThumbnails();
+            await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
@@ -290,7 +355,7 @@ class ClientFilesManager {
         if (!dirContainsAnyImages) return;
         this.#thumbnails.clearCurrentThumbnails();
         await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-        //await this.#generateThumbnails();
+        await this.#generateThumbnails();
     }
 
     async updateAnnotationsFile(newAnnotationData) {
@@ -460,7 +525,9 @@ class ClientFilesManager {
         const storedThumbnails = await this.#thumbnails.getThumbnails();
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
-            if (storedThumbnails?.hasOwnProperty(fileName)) return;
+            if (storedThumbnails?.hasOwnProperty(fileName)) {
+                return;
+            }
             newThumbnails[fileName] = await this.#thumbnails.generateThumbnail(
                 this.selectedImagesDirPath,
                 fileName
