@@ -16,6 +16,7 @@ import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
+import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 
 
 const AppNew = () => {
@@ -63,6 +64,7 @@ const AppNew = () => {
             <ColorPickerComponent />
             <EditLabelComponent />
             <BoundPolyFABComponent />
+            <SaveButtonComponent />
         </div>
     );
 };

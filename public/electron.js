@@ -196,6 +196,13 @@ ipcMain.handle(Channels.saveColorsFile, async (event, colorUpdate) => {
     return await updateColorsJSON(colorUpdate);
 });
 
+ipcMain.handle(
+    Constants.Channels.saveCurrentFile,
+    async (event, newAnnotations) => {
+        return await files.updateAnnotationsFile(newAnnotations);
+    }
+);
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data

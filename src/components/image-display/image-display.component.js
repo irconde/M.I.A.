@@ -15,12 +15,15 @@ import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
     addAnnotation,
     addAnnotationArray,
+    clearAnnotationData,
     clearAnnotationSelection,
     getAnnotations,
+    getSaveAnnotationStatus,
     getSelectedAnnotation,
     getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
+    updateSaveAnnotationStatus,
 } from '../../redux/slices/annotation.slice';
 import {
     clearAnnotationWidgets,
@@ -92,6 +95,7 @@ const ImageDisplayComponent = () => {
     const currentFileName = useSelector(getCurrFileName);
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
     const isAnnotationContextVisibleRef = useRef(isAnnotationContextVisible);
+    const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -209,6 +213,24 @@ const ImageDisplayComponent = () => {
     }, [selectedImagesDirPath, pixelData]);
 
     useEffect(() => {
+        fetchCurrentFile();
+    }, [currentFileName]);
+
+    useEffect(() => {
+        if (saveAnnotationStatus === constants.SAVE_STATUSES.SAVED) {
+            dispatch(updateSaveAnnotationStatus(constants.SAVE_STATUSES.IDLE));
+            dispatch(
+                updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
+            );
+            dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+            dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
+            dispatch(clearAnnotationWidgets());
+            dispatch(clearAnnotationData());
+            fetchCurrentFile();
+        }
+    }, [saveAnnotationStatus]);
+
+    const fetchCurrentFile = () => {
         getCurrentFile()
             .then((data) => {
                 const { pixelData, annotationInformation, colors } = data;
@@ -218,7 +240,7 @@ const ImageDisplayComponent = () => {
             .catch((error) => {
                 console.log(error);
             });
-    }, [currentFileName]);
+    };
 
     const onMouseMoved = useCallback(
         (event) => {
@@ -339,11 +361,13 @@ const ImageDisplayComponent = () => {
                             handles.end
                         );
                         const newSegmentation = [];
-                        segmentation.forEach((segment) => {
-                            newSegmentation.push(
-                                Utils.calculatePolygonMask(bbox, segment)
-                            );
-                        });
+                        if (segmentation?.length > 0) {
+                            segmentation.forEach((segment) => {
+                                newSegmentation.push(
+                                    Utils.calculatePolygonMask(bbox, segment)
+                                );
+                            });
+                        }
                         // Converting from
                         // [x_0, y_0, x_f, y_f]
                         // to
@@ -472,7 +496,6 @@ const ImageDisplayComponent = () => {
                         viewportRef.current,
                         constants.toolNames.boundingBox
                     );
-                    console.log(toolState);
                     if (
                         toolState !== null &&
                         toolState !== undefined &&
@@ -608,7 +631,7 @@ const ImageDisplayComponent = () => {
                     y: event.detail.currentPoints.canvas.y,
                 });
                 let clickedPos = constants.selection.NO_SELECTION;
-                for (let j = annotationRef.current.length - 1; j > -1; j--) {
+                for (let j = 0; j < annotationRef.current.length; j++) {
                     if (!annotationRef.current[j].visible) continue;
                     if (
                         Utils.pointInRect(

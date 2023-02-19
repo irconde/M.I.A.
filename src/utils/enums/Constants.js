@@ -153,3 +153,10 @@ export const toolNames = {
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;
+
+export const SAVE_STATUSES = {
+    IDLE: 'idle',
+    PENDING: 'pending',
+    SAVED: 'saved',
+    FAILURE: 'failure',
+};
