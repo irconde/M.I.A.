@@ -544,7 +544,7 @@ class ClientFilesManager {
                             this.selectedImagesDirPath,
                             addedFilename
                         );
-                    const thumbnailObj = await this.#thumbnails.addThumbnail(
+                    await this.#thumbnails.addThumbnail(
                         addedFilename,
                         newThumbnailPath
                     );
@@ -552,6 +552,11 @@ class ClientFilesManager {
                         fileName: addedFilename,
                         filePath: newThumbnailPath,
                     });
+                    // if the added file is the only file, then send a file update
+                    if (this.fileNames.length === 1) {
+                        this.currentFileIndex = 0;
+                        this.#sendFileInfo();
+                    }
                 } catch (e) {
                     console.log(e);
                 }
@@ -565,6 +570,17 @@ class ClientFilesManager {
                 );
                 if (removedFileIndex <= -1) {
                     throw new Error('Error with removed file index');
+                } else if (this.fileNames.length === 1) {
+                    // no files are left
+                    this.currentFileIndex = -1;
+                    this.#sendFileInfo();
+                } else if (removedFileIndex === this.currentFileIndex) {
+                    // if the removed file is the current one, then send a file update
+                    this.currentFileIndex = Math.max(
+                        this.currentFileIndex - 1,
+                        0
+                    );
+                    this.#sendFileInfo();
                 }
                 this.fileNames.splice(removedFileIndex, 1);
                 await this.#thumbnails.removeThumbnail(removedFileName);
