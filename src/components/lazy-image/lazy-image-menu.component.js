@@ -11,6 +11,7 @@ import {
     getLazyImageMenuVisible,
 } from '../../redux/slices/ui.slice';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
+import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const MAX_THUMBNAILS_COUNT = 40;
@@ -55,6 +56,12 @@ function LazyImageMenuComponent() {
     const scrollContainerRef = useRef(null);
     const { length: annotationsCount } = useSelector(getAnnotations);
     const [prevFileName, setPrevFileName] = useState(currentFileName);
+    const { selectedImagesDirPath, selectedAnnotationFile } =
+        useSelector(getAssetsDirPaths);
+
+    useEffect(() => {
+        scrollContainerRef.current.scrollTop = 0;
+    }, [selectedImagesDirPath, selectedAnnotationFile]);
 
     useEffect(() => {
         listenForThumbnailUpdates();
