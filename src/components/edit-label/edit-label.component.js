@@ -40,8 +40,10 @@ const EditLabelComponent = () => {
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const newLabel = useSelector(getInputLabel);
     const viewport = document.getElementById('imageContainer');
-    const [x, setX] = useState(0);
-    const [y, setY] = useState(0);
+    const [position, setPosition] = useState({
+        x: 0,
+        y: 0,
+    });
     useEffect(() => {
         if (isVisible) {
             const newViewport = document.getElementById('imageContainer');
@@ -52,15 +54,11 @@ const EditLabelComponent = () => {
                 const verticalGap = offsetTop / zoomLevel;
 
                 try {
-                    const { xData, yData } = cornerstone.pixelToCanvas(
-                        newViewport,
-                        {
-                            x: selectedAnnotation?.bbox[0] + horizontalGap,
-                            y: selectedAnnotation?.bbox[1] + verticalGap,
-                        }
-                    );
-                    setX(xData);
-                    setY(yData);
+                    const coordinates = cornerstone.pixelToCanvas(newViewport, {
+                        x: selectedAnnotation?.bbox[0] + horizontalGap,
+                        y: selectedAnnotation?.bbox[1] + verticalGap,
+                    });
+                    setPosition(coordinates);
                 } catch (e) {
                     console.log(e);
                 }
@@ -89,7 +87,8 @@ const EditLabelComponent = () => {
         }
     }, [isListOpen]);
     useEffect(() => {
-        // When component is updated to be visible or the label list is closed, focus the text input field for user input
+        // When component is updated to be visible or the label list is closed, focus the text input field for user
+        // input
         if (isVisible && !isListOpen) {
             inputField.current.focus();
             setShowClearIcon(true);
@@ -105,6 +104,7 @@ const EditLabelComponent = () => {
         if (!isVisible) {
             setIsListOpen(false);
             setShowClearIcon(false);
+            dispatch(setInputLabel(''));
         }
     }, [isVisible, isListOpen]);
 
@@ -149,7 +149,7 @@ const EditLabelComponent = () => {
      * @returns {number} fontSize
      */
     const getFontSize = (str) => {
-        var fontArr = str.split(' ');
+        let fontArr = str.split(' ');
         let floatNum = parseFloat(fontArr[1]);
         Math.floor(floatNum);
         let fontSize = parseInt(floatNum);
@@ -171,23 +171,20 @@ const EditLabelComponent = () => {
      * Scales the given width by the zoom level and account for the detection border width
      *
      * @param {number} width
-     * @param {string} viewport
      * @returns {number}
      */
-    const getWidth = (width, viewport) => {
+    const getWidth = (width) => {
         const { BORDER_WIDTH } = constants.annotationStyle;
-        return (
-            scaleByZoom(width, viewport) + scaleByZoom(BORDER_WIDTH, viewport)
-        );
+        return scaleByZoom(width) + scaleByZoom(BORDER_WIDTH);
     };
 
     if (isVisible) {
         return (
             <EditLabelWrapper
                 viewport={viewport}
-                top={y - INPUT_HEIGHT}
-                left={x - scaleByZoom(zoomLevel)}
-                width={getWidth(selectedAnnotation?.bbox[2], viewport)}
+                top={position.y - INPUT_HEIGHT}
+                left={position.x - zoomLevel}
+                width={getWidth(selectedAnnotation?.bbox[2])}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>

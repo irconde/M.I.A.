@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -35,7 +35,8 @@ import Utils from '../../utils/general/Utils';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
 
 /**
- * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific detections.
+ * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific
+ * detections.
  *
  * @component
  */
@@ -44,10 +45,18 @@ const AnnotationContextMenuComponent = () => {
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
     const position = useSelector(getAnnotationContextPosition);
+    const positionRef = useRef(position);
+    useEffect(() => {
+        positionRef.current = position;
+    }, [position]);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const dispatch = useDispatch();
     /*const recentScroll = useSelector(getRecentScroll);*/
     const handleClick = (type) => {
+        const viewport = document.getElementById('imageContainer');
+        if (viewport !== null) {
+            Utils.resetCornerstoneTools(viewport);
+        }
         switch (type) {
             case constants.editionMode.MOVE:
                 dispatch(updateAnnotationContextVisibility(false));
@@ -89,11 +98,11 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             case constants.editionMode.COLOR:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 dispatch(updateColorPickerVisibility(true));
                 break;
             case constants.editionMode.LABEL:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 dispatch(updateEditLabelVisibility(true));
                 break;
             case constants.editionMode.POLYGON:
