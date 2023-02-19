@@ -30,41 +30,35 @@ function LazyImageMenuComponent() {
     const scrollContainerRef = useRef(null);
 
     useEffect(() => {
-        addElectronChannels();
+        listenForThumbnailUpdates();
+        ipcRenderer
+            .invoke(Channels.requestInitialThumbnailsList)
+            .then(setThumbnails)
+            .catch(() => {
+                // TODO: what should go in the lazy menu if no thumbnails are present?
+                console.log('no thumbnails to begin with');
+            });
     }, []);
 
-    const addElectronChannels = () => {
-        const {
-            removeThumbnail,
-            addThumbnail,
-            updateThumbnails,
-            requestInitialThumbnailsList,
-        } = Channels;
+    const listenForThumbnailUpdates = () => {
+        const { removeThumbnail, addThumbnail, updateThumbnails } = Channels;
         ipcRenderer
             .on(removeThumbnail, (e, removedThumbnailName) => {
                 // must use a function here to get the most up-to-date state
                 setThumbnails((thumbnails) =>
                     thumbnails.filter(
-                        (thumbnail) => thumbnail !== removedThumbnailName
+                        (thumbnail) =>
+                            thumbnail.fileName !== removedThumbnailName
                     )
                 );
             })
             .on(addThumbnail, (e, addedThumbnail) => {
                 // must use a function here to get the most up-to-date state
-                setThumbnails((thumbnails) => [
-                    ...thumbnails,
-                    ...addedThumbnail,
-                ]);
+                setThumbnails((thumbnails) => [...thumbnails, addedThumbnail]);
             })
             .on(updateThumbnails, (e, thumbnails) => {
                 setThumbnails(thumbnails);
                 setCurrChunk(0);
-            });
-        ipcRenderer
-            .invoke(requestInitialThumbnailsList)
-            .then(setThumbnails)
-            .catch(() => {
-                console.log('no thumbnails to begin with');
             });
     };
 

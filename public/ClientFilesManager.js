@@ -58,7 +58,7 @@ class Thumbnails {
                 : done();
         }, 1);
         // runs when the queue is empty with no tasks to complete
-        this.#queue.drain(this.#saveThumbnailsToStorage);
+        this.#queue.drain(() => this.#saveThumbnailsToStorage());
 
         /**
          * Loads the specified thumbnail if the file name provided exists. If so it will
@@ -435,27 +435,31 @@ class ClientFilesManager {
             ...storedThumbnails,
             ...newThumbnails,
         };
-        // if the promise has not been resolved before, then resolve it once
-        if (!this.thumbnailsPromise.isSettled)
-            this.thumbnailsPromise.resolve(
-                this.#prepareClientThumbnails(allThumbnails)
-            );
+
+        const clientThumbnails = await this.#prepareClientThumbnails(
+            allThumbnails
+        );
 
         this.#thumbnails.scheduleStorageUpdate(
             Thumbnails.ACTION.UPDATE_ALL,
             allThumbnails
         );
-        this.#sendThumbnailsUpdate(
-            Channels.updateThumbnails,
-            this.#prepareClientThumbnails(allThumbnails)
-        );
+
+        // if the promise has not been resolved before, then resolve it once
+        if (!this.thumbnailsPromise.isSettled)
+            this.thumbnailsPromise.resolve(clientThumbnails);
+        else
+            this.#sendThumbnailsUpdate(
+                Channels.updateThumbnails,
+                clientThumbnails
+            );
     }
 
     /**
      * Takes an object of thumbnails and returns an array of the thumbnails
      * in the original order of the files and determines which thumbnails have annotations
      * @param thumbnails {Object<string, string>}
-     * @returns {Array<{fileName: string, filePath: string, hasAnnotations: boolean}>}
+     * @returns {Promise<Array<{fileName: string, filePath: string, hasAnnotations: boolean}>>}
      */
     async #prepareClientThumbnails(thumbnails) {
         const _thumbnails = [];
