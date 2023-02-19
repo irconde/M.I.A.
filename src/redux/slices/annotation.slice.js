@@ -206,10 +206,16 @@ const annotationSlice = createSlice({
                 area,
                 segmentation,
             };
-            newAnnotation.image_id = state.annotations[0].image_id;
-            newAnnotation.id =
-                state.annotations.reduce((a, b) => (a.id > b.id ? a : b)).id +
-                1;
+            if (state.annotations.length > 0) {
+                newAnnotation.image_id = state.annotations[0].image_id;
+                newAnnotation.id =
+                    state.annotations.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
+            } else {
+                newAnnotation.image_id = 1;
+                newAnnotation.id = 1;
+            }
+
             newAnnotation.selected = false;
             newAnnotation.categorySelected = false;
             newAnnotation.visible = true;
@@ -221,9 +227,13 @@ const annotationSlice = createSlice({
                 (category) => category.name.toLowerCase() === 'operator'
             );
             if (foundCategoryIndex === -1) {
-                newAnnotation.category_id =
-                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
-                        .id + 1;
+                if (state.categories.length > 0) {
+                    newAnnotation.category_id =
+                        state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                            .id + 1;
+                } else {
+                    newAnnotation.category_id = 1;
+                }
                 newAnnotation.categoryName = 'operator';
                 state.categories.push({
                     supercategory: 'operator',
