@@ -217,6 +217,11 @@ const ImageDisplayComponent = () => {
     useEffect(() => {
         if (saveAnnotationStatus === constants.SAVE_STATUSES.SAVED) {
             dispatch(updateSaveAnnotationStatus(constants.SAVE_STATUSES.IDLE));
+            dispatch(
+                updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
+            );
+            dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+            dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
             dispatch(clearAnnotationData());
             fetchCurrentFile();
         }
