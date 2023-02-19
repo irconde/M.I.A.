@@ -213,7 +213,7 @@ class Thumbnails {
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
-    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', 'jpeg'];
+    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.dcm'];
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
@@ -246,7 +246,7 @@ class ClientFilesManager {
      */
     static #isFileTypeAllowed(fileName) {
         return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
-            path.extname(fileName)
+            path.extname(fileName).toLowerCase()
         );
     }
 
@@ -269,7 +269,7 @@ class ClientFilesManager {
         if (dirContainsAnyImages) {
             this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-            await this.#generateThumbnails();
+            //await this.#generateThumbnails();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
@@ -290,7 +290,7 @@ class ClientFilesManager {
         if (!dirContainsAnyImages) return;
         this.#thumbnails.clearCurrentThumbnails();
         await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-        await this.#generateThumbnails();
+        //await this.#generateThumbnails();
     }
 
     async updateAnnotationsFile(newAnnotationData) {
@@ -406,7 +406,14 @@ class ClientFilesManager {
             )
         );
 
-        return { pixelData, annotationInformation, colors };
+        return {
+            pixelData,
+            pixelType: path
+                .extname(this.fileNames[this.currentFileIndex])
+                .toLowerCase(),
+            annotationInformation,
+            colors,
+        };
     }
 
     async getAnnotationsForFile() {

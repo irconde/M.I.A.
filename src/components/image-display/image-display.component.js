@@ -75,6 +75,7 @@ const ImageDisplayComponent = () => {
     const viewportRef = useRef(null);
     const annotations = useSelector(getAnnotations);
     const [pixelData, setPixelData] = useState(null);
+    const [pixelType, setPixelType] = useState(null);
     const [viewport, setViewport] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mousePositionRef = useRef(mousePosition);
@@ -191,16 +192,36 @@ const ImageDisplayComponent = () => {
 
     useEffect(() => {
         const imageElement = viewportRef.current;
-        selectedImagesDirPath &&
-            displayImage(pixelData)
-                .then(() => {
-                    imageElement.addEventListener(
-                        'cornerstoneimagerendered',
-                        onImageRenderedHandler
-                    );
-                    document.body.addEventListener('mousemove', onMouseMoved);
-                })
-                .catch(console.log);
+        if (selectedImagesDirPath) {
+            if (pixelData === null || pixelType === null) return;
+            if (pixelType.toLowerCase() !== '.dcm') {
+                displayCocoImage(pixelData)
+                    .then(() => {
+                        imageElement.addEventListener(
+                            'cornerstoneimagerendered',
+                            onImageRenderedHandler
+                        );
+                        document.body.addEventListener(
+                            'mousemove',
+                            onMouseMoved
+                        );
+                    })
+                    .catch(console.log);
+            } else {
+                displayDicomImage(pixelData)
+                    .then(() => {
+                        imageElement.addEventListener(
+                            'cornerstoneimagerendered',
+                            onImageRenderedHandler
+                        );
+                        document.body.addEventListener(
+                            'mousemove',
+                            onMouseMoved
+                        );
+                    })
+                    .catch(console.log);
+            }
+        }
         return () => {
             imageElement.removeEventListener(
                 'cornerstoneimagerendered',
@@ -208,7 +229,7 @@ const ImageDisplayComponent = () => {
             );
             document.body.removeEventListener('mousemove', onMouseMoved);
         };
-    }, [selectedImagesDirPath, pixelData]);
+    }, [selectedImagesDirPath, pixelData, pixelType]);
 
     useEffect(() => {
         fetchCurrentFile();
@@ -231,9 +252,11 @@ const ImageDisplayComponent = () => {
     const fetchCurrentFile = () => {
         getCurrentFile()
             .then((data) => {
-                const { pixelData, annotationInformation, colors } = data;
+                const { pixelData, pixelType, annotationInformation, colors } =
+                    data;
                 dispatch(addAnnotationArray({ annotationInformation, colors }));
                 setPixelData(pixelData);
+                setPixelType(pixelType);
             })
             .catch((error) => {
                 console.log(error);
@@ -788,7 +811,7 @@ const ImageDisplayComponent = () => {
         }
     };
 
-    const displayImage = async (pixelData) => {
+    const displayCocoImage = async (pixelData) => {
         try {
             const imageIdTop = 'coco:0';
             Utils.loadImage(imageIdTop, pixelData)
@@ -815,6 +838,37 @@ const ImageDisplayComponent = () => {
             // TODO: clear the viewport when there's no more files
             setError(e.message);
         }
+    };
+
+    const displayDicomImage = async (pixelData) => {
+        return new Promise((resolve, reject) => {
+            console.log(pixelData);
+            const cornerstonePixelData =
+                cornerstoneWADOImageLoader.wadouri.fileManager.add(
+                    new Blob([pixelData])
+                );
+            cornerstone
+                .loadImage(cornerstonePixelData)
+                .then((image) => {
+                    const viewport = cornerstone.getDefaultViewportForImage(
+                        viewportRef.current,
+                        image
+                    );
+                    viewport.translation.y = constants.viewportStyle.ORIGIN;
+                    viewport.scale = 1.2;
+
+                    cornerstone.displayImage(
+                        viewportRef.current,
+                        image,
+                        viewport
+                    );
+                    resolve();
+                })
+                .catch((error) => {
+                    setError(error.message);
+                    reject(error);
+                });
+        });
     };
 
     return (
