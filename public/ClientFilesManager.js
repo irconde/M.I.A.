@@ -170,12 +170,10 @@ class Thumbnails {
      * Adds a thumbnail to storage
      * @param filename {string}
      * @param path {string}
-     * @returns {Promise<object>}
      */
-    async addThumbnail(filename, path) {
+    addThumbnail(filename, path) {
         const newObj = { [filename]: path };
         this.scheduleStorageUpdate(Thumbnails.ACTION.ADD, newObj);
-        return newObj;
     }
 
     /**
@@ -534,7 +532,7 @@ class ClientFilesManager {
                 const addedFilename = getFileNameFromPath(addedFilePath);
                 if (!ClientFilesManager.#isFileTypeAllowed(addedFilename))
                     return;
-                this.fileNames.push(addedFilename);
+
                 await this.#thumbnails.setThumbnailsPath(
                     this.selectedImagesDirPath
                 );
@@ -544,7 +542,7 @@ class ClientFilesManager {
                             this.selectedImagesDirPath,
                             addedFilename
                         );
-                    await this.#thumbnails.addThumbnail(
+                    this.#thumbnails.addThumbnail(
                         addedFilename,
                         newThumbnailPath
                     );
@@ -552,6 +550,7 @@ class ClientFilesManager {
                         fileName: addedFilename,
                         filePath: newThumbnailPath,
                     });
+                    this.fileNames.push(addedFilename);
                     // if the added file is the only file, then send a file update
                     if (this.fileNames.length === 1) {
                         this.currentFileIndex = 0;
@@ -570,7 +569,11 @@ class ClientFilesManager {
                 );
                 if (removedFileIndex <= -1) {
                     throw new Error('Error with removed file index');
-                } else if (this.fileNames.length === 1) {
+                }
+
+                this.fileNames.splice(removedFileIndex, 1);
+
+                if (this.fileNames.length === 0) {
                     // no files are left
                     this.currentFileIndex = -1;
                     this.#sendFileInfo();
@@ -581,8 +584,10 @@ class ClientFilesManager {
                         0
                     );
                     this.#sendFileInfo();
+                } else if (removedFileIndex < this.currentFileIndex) {
+                    // update the current index if the file removed is before the current file
+                    this.currentFileIndex--;
                 }
-                this.fileNames.splice(removedFileIndex, 1);
                 await this.#thumbnails.removeThumbnail(removedFileName);
                 this.#sendThumbnailsUpdate(
                     Channels.removeThumbnail,

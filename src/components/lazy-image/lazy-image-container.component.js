@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const REPEAT_REQUEST_COUNT = 3;
 
 /**
  * Container component for the lazy image thumbnails
@@ -64,17 +65,29 @@ function LazyImageContainerComponent({
         setThumbnailSrc(null);
     };
 
+    /**
+     * Requests the thumbnail pixel data from electron and updates the state
+     * if failed, it will recursively try again (REPEAT_REQUEST_COUNT) times
+     * it tries again because electron takes time to generate the thumbnail
+     * @param {number} [trialCount=0]
+     */
+    const requestThumbnailData = (trialCount = 0) => {
+        if (trialCount === REPEAT_REQUEST_COUNT) return;
+        ipcRenderer
+            .invoke(Channels.getThumbnail, { fileName, filePath })
+            .then(({ fileData }) => {
+                const blobData = Utils.b64toBlob(fileData, 'image/png');
+                thumbnailHandler(blobData);
+            })
+            .catch((error) => {
+                console.log(error);
+                setTimeout(() => requestThumbnailData(trialCount + 1), 100);
+            });
+    };
+
     useLayoutEffect(() => {
         if (isOnScreen && !thumbnailSrc) {
-            ipcRenderer
-                .invoke(Channels.getThumbnail, { fileName, filePath })
-                .then(({ fileData }) => {
-                    const blobData = Utils.b64toBlob(fileData, 'image/png');
-                    thumbnailHandler(blobData);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            requestThumbnailData();
         } else if (!isOnScreen && thumbnailSrc) {
             clearThumbnail();
         }
