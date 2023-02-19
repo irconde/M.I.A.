@@ -293,6 +293,72 @@ class ClientFilesManager {
         await this.#generateThumbnails();
     }
 
+    async updateAnnotationsFile(newAnnotationData) {
+        return new Promise((resolve, reject) => {
+            try {
+                const { cocoAnnotations, cocoCategories, cocoDeleted } =
+                    newAnnotationData;
+                if (
+                    this.selectedAnnotationFile !== '' &&
+                    fs.existsSync(this.selectedAnnotationFile)
+                ) {
+                    fs.readFile(this.selectedAnnotationFile, (err, data) => {
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            const annotationFile = JSON.parse(data);
+                            annotationFile.categories = cocoCategories;
+                            cocoAnnotations.forEach((annotation) => {
+                                const foundIndex =
+                                    annotationFile.annotations.findIndex(
+                                        (fileAnnotation) =>
+                                            fileAnnotation.id === annotation.id
+                                    );
+                                if (foundIndex !== -1) {
+                                    annotationFile.annotations[foundIndex] =
+                                        annotation;
+                                } else {
+                                    // ID set by client may not be unique, need to check file
+                                    annotation.id =
+                                        annotationFile.annotations.reduce(
+                                            (a, b) => (a.id > b.id ? a : b)
+                                        ).id + 1;
+                                    annotationFile.annotations.push(annotation);
+                                }
+                            });
+                            annotationFile.annotations =
+                                annotationFile.annotations.filter((annot) => {
+                                    return !cocoDeleted.includes(annot.id);
+                                });
+                            fs.writeFile(
+                                this.selectedAnnotationFile,
+                                JSON.stringify(annotationFile),
+                                (err) => {
+                                    if (err) {
+                                        console.log(err);
+                                        reject(err);
+                                    } else {
+                                        if (
+                                            this.currentFileIndex <
+                                            this.fileNames.length - 1
+                                        ) {
+                                            this.currentFileIndex++;
+                                        }
+                                        resolve();
+                                    }
+                                }
+                            );
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    }
+
     /**
      * Reads the next file data if there is one and increments the current index
      * @returns {pixelData: <Buffer>, annotationInformation: Array}

@@ -16,11 +16,13 @@ import {
     StyledSelectedDetection,
 } from './annotation-context-menu.styles';
 import {
+    clearAnnotationWidgets,
     getAnnotationContextPosition,
     getAnnotationContextVisible,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
+    updateAnnotationMode,
     updateColorPickerVisibility,
     updateCornerstoneMode,
     updateEditionMode,
@@ -183,6 +185,14 @@ const AnnotationContextMenuComponent = () => {
                 break;
             case constants.editionMode.DELETE:
                 dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
+                );
+                dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+                dispatch(
+                    updateAnnotationMode(constants.annotationMode.NO_TOOL)
+                );
+                dispatch(clearAnnotationWidgets());
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     deleteSelectedAnnotation

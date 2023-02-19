@@ -1,9 +1,17 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import randomColor from 'randomcolor';
-import { Channels } from '../../utils/enums/Constants';
+import { Channels, SAVE_STATUSES } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
+const polygonDataToCoordArray = (polygonData) => {
+    let points = [];
+    for (let index in polygonData) {
+        points.push(polygonData[index].x);
+        points.push(polygonData[index].y);
+    }
+    return points;
+};
 const coordArrayToPolygonData = (coordArray) => {
     let data = [];
     let count = 0;
@@ -70,12 +78,68 @@ export const saveColorsFile = createAsyncThunk(
     }
 );
 
+export const saveCurrentAnnotations = createAsyncThunk(
+    'annotations/saveCurrentAnnotations',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation } = state;
+        let cocoAnnotations = [];
+        const cocoCategories = annotation.categories;
+        const cocoDeleted = annotation.deletedAnnotationIds;
+        annotation.annotations.forEach((annot) => {
+            const {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                category_id,
+                id,
+                segmentation,
+            } = annot;
+            let newSegmentation = [];
+            if (segmentation?.length > 0) {
+                segmentation.forEach((segment) => {
+                    newSegmentation.push(polygonDataToCoordArray(segment));
+                });
+            }
+            let newAnnotation = {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                segmentation: newSegmentation,
+                category_id,
+                id,
+            };
+            cocoAnnotations.push(newAnnotation);
+        });
+        await ipcRenderer
+            .invoke(Channels.saveCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        /*return true;*/
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],
     selectedAnnotation: null,
     colors: [],
     selectedCategory: '',
+    hasAnnotationChanged: false,
+    saveAnnotationsStatus: SAVE_STATUSES.IDLE,
+    saveFailureMessage: '',
+    deletedAnnotationIds: [],
 };
 
 const annotationSlice = createSlice({
@@ -133,6 +197,7 @@ const annotationSlice = createSlice({
 
                 state.categories = categories;
             }
+            state.hasAnnotationChanged = false;
         },
         addAnnotation: (state, action) => {
             const { bbox, area, segmentation } = action.payload;
@@ -187,6 +252,7 @@ const annotationSlice = createSlice({
             newAnnotation.color = annotationColor;
 
             state.annotations.push(newAnnotation);
+            state.hasAnnotationChanged = true;
         },
         selectAnnotation: (state, action) => {
             let anySelected = false;
@@ -281,10 +347,12 @@ const annotationSlice = createSlice({
             });
         },
         deleteSelectedAnnotation: (state, action) => {
+            state.deletedAnnotationIds.push(state.selectedAnnotation.id);
             state.annotations = state.annotations.filter(
                 (annotation) => annotation.id !== state.selectedAnnotation.id
             );
             state.selectedAnnotation = null;
+            state.hasAnnotationChanged = true;
         },
         updateAnnotationColor: (state, action) => {
             const { categoryName, color } = action.payload;
@@ -298,7 +366,6 @@ const annotationSlice = createSlice({
             }
         },
         updateAnnotationCategory: (state, action) => {
-            // TODO: Check if the new category exists in categories or not
             const { id, newCategory } = action.payload;
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
@@ -328,6 +395,7 @@ const annotationSlice = createSlice({
                     foundAnnotation.color = sameCategoryAnnotation.color;
                 }
             }
+            state.hasAnnotationChanged = true;
         },
         updateAnnotationPosition: (state, action) => {
             const { bbox, id, segmentation } = action.payload;
@@ -343,17 +411,41 @@ const annotationSlice = createSlice({
                     state.selectedAnnotation = foundAnnotation;
                 }
             }
+            state.hasAnnotationChanged = true;
+        },
+        updateSaveAnnotationStatus: (state, action) => {
+            state.saveAnnotationsStatus = action.payload;
+        },
+        clearAnnotationData: (state) => {
+            state.annotations = [];
+            state.categories = [];
+            state.selectedAnnotation = null;
+            state.selectedCategory = '';
+            state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
         },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
             state.colors = payload;
         },
-        [saveColorsFile.pending]: (state, { payload }) => {
-            //
-        },
         [saveColorsFile.rejected]: (state, { payload }) => {
             console.log(payload);
+        },
+        [saveCurrentAnnotations.fulfilled]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+        },
+        [saveCurrentAnnotations.pending]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+        },
+        [saveCurrentAnnotations.rejected]: (state, { payload }) => {
+            console.log(payload);
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }
         },
     },
 });
@@ -370,6 +462,8 @@ export const {
     updateAnnotationCategory,
     updateAnnotationPosition,
     selectAnnotationCategory,
+    updateSaveAnnotationStatus,
+    clearAnnotationData,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -398,5 +492,9 @@ export const getAnnotationCategories = (state) => {
 };
 
 export const getSelectedCategory = (state) => state.annotation.selectedCategory;
+export const getHasAnnotationChanged = (state) =>
+    state.annotation.hasAnnotationChanged;
+export const getSaveAnnotationStatus = (state) =>
+    state.annotation.saveAnnotationsStatus;
 
 export default annotationSlice.reducer;

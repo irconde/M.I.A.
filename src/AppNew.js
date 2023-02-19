@@ -16,6 +16,7 @@ import AnnotationContextMenuComponent from './components/annotation-context/anno
 import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
+import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -94,6 +95,7 @@ const AppNew = () => {
             <ColorPickerComponent />
             <EditLabelComponent />
             <BoundPolyFABComponent />
+            <SaveButtonComponent />
         </div>
     );
 };
