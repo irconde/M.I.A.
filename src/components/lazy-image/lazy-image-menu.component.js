@@ -57,6 +57,7 @@ function LazyImageMenuComponent() {
                 setThumbnails((thumbnails) => [...thumbnails, addedThumbnail]);
             })
             .on(updateThumbnails, (e, thumbnails) => {
+                console.log(thumbnails);
                 setThumbnails(thumbnails);
                 setCurrChunk(0);
             });

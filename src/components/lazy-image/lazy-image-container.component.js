@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
@@ -29,11 +29,9 @@ function LazyImageContainerComponent({
     selected,
 }) {
     const containerElement = useRef();
-
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
-    const [isAnnotations, setHasAnnotations] = useState(hasAnnotations);
-    const { length: annotationCount } = useSelector(getAnnotations);
+    const annotations = useSelector(getAnnotations);
 
     const handleThumbnailClick = async () => {
         try {
@@ -42,11 +40,6 @@ function LazyImageContainerComponent({
             console.log(error);
         }
     };
-
-    useEffect(() => {
-        // updates hasAnnotation if the selected image's annotations count changes
-        selected && setHasAnnotations(!!annotationCount);
-    }, [annotationCount]);
 
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
@@ -93,13 +86,16 @@ function LazyImageContainerComponent({
         }
     }, [isOnScreen]);
 
+    const shouldShowAnnotationIcon = () =>
+        selected ? !!annotations.length : hasAnnotations;
+
     return (
         <ImageContainer ref={containerElement}>
             <ThumbnailContainer
                 selected={selected}
                 onClick={handleThumbnailClick}>
                 {thumbnailSrc && <img src={thumbnailSrc} alt={fileName} />}
-                {isAnnotations && (
+                {shouldShowAnnotationIcon() && (
                     <LazyImageIconWrapper>
                         <AnnotationIcon
                             width={'24px'}
