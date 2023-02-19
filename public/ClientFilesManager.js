@@ -296,7 +296,8 @@ class ClientFilesManager {
     async updateAnnotationsFile(newAnnotationData) {
         return new Promise((resolve, reject) => {
             try {
-                const { cocoAnnotations, cocoCategories } = newAnnotationData;
+                const { cocoAnnotations, cocoCategories, cocoDeleted } =
+                    newAnnotationData;
                 if (
                     this.selectedAnnotationFile !== '' &&
                     fs.existsSync(this.selectedAnnotationFile)
@@ -326,6 +327,10 @@ class ClientFilesManager {
                                     annotationFile.annotations.push(annotation);
                                 }
                             });
+                            annotationFile.annotations =
+                                annotationFile.annotations.filter((annot) => {
+                                    return !cocoDeleted.includes(annot.id);
+                                });
                             fs.writeFile(
                                 this.selectedAnnotationFile,
                                 JSON.stringify(annotationFile),

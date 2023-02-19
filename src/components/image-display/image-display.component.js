@@ -222,6 +222,7 @@ const ImageDisplayComponent = () => {
             );
             dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
             dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
+            dispatch(clearAnnotationWidgets());
             dispatch(clearAnnotationData());
             fetchCurrentFile();
         }

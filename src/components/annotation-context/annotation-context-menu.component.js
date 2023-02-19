@@ -16,6 +16,7 @@ import {
     StyledSelectedDetection,
 } from './annotation-context-menu.styles';
 import {
+    clearAnnotationWidgets,
     getAnnotationContextPosition,
     getAnnotationContextVisible,
     getEditionMode,
@@ -191,6 +192,7 @@ const AnnotationContextMenuComponent = () => {
                 dispatch(
                     updateAnnotationMode(constants.annotationMode.NO_TOOL)
                 );
+                dispatch(clearAnnotationWidgets());
                 Utils.dispatchAndUpdateImage(
                     dispatch,
                     deleteSelectedAnnotation

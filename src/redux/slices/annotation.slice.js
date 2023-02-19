@@ -85,6 +85,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
         const { annotation } = state;
         let cocoAnnotations = [];
         const cocoCategories = annotation.categories;
+        const cocoDeleted = annotation.deletedAnnotationIds;
         annotation.annotations.forEach((annot) => {
             const {
                 area,
@@ -116,6 +117,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
             .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,
                 cocoCategories,
+                cocoDeleted,
             })
             .then(() => {
                 return true;
@@ -137,6 +139,7 @@ const initialState = {
     hasAnnotationChanged: false,
     saveAnnotationsStatus: SAVE_STATUSES.IDLE,
     saveFailureMessage: '',
+    deletedAnnotationIds: [],
 };
 
 const annotationSlice = createSlice({
@@ -344,6 +347,7 @@ const annotationSlice = createSlice({
             });
         },
         deleteSelectedAnnotation: (state, action) => {
+            state.deletedAnnotationIds.push(state.selectedAnnotation.id);
             state.annotations = state.annotations.filter(
                 (annotation) => annotation.id !== state.selectedAnnotation.id
             );
@@ -418,6 +422,7 @@ const annotationSlice = createSlice({
             state.selectedAnnotation = null;
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
         },
     },
     extraReducers: {
