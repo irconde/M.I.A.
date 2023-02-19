@@ -10,11 +10,36 @@ import {
     getCurrFileName,
     getLazyImageMenuVisible,
 } from '../../redux/slices/ui.slice';
+import { getAnnotations } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const MAX_THUMBNAILS_COUNT = 40;
 const THUMBNAILS_FETCH_AMOUNT = 5;
 const TOP_SCROLL_PER_THUMBNAIL = 2.8;
+
+const useThumbnails = (defaultVal = []) => {
+    const [thumbnails, _setThumbnails] = useState(defaultVal);
+
+    const padShowAnnIconProp = (thumbs) =>
+        thumbs.map((thumb) =>
+            thumb.showAnnIcon === undefined
+                ? {
+                      ...thumb,
+                      showAnnIcon: thumb.hasAnnotations || false,
+                  }
+                : thumb
+        );
+
+    const setThumbnails = (arg) => {
+        if (typeof arg === 'function') {
+            _setThumbnails((thumbnails) => padShowAnnIconProp(arg(thumbnails)));
+        } else {
+            _setThumbnails(padShowAnnIconProp(arg));
+        }
+    };
+
+    return [thumbnails, setThumbnails];
+};
 
 /**
  * Component for displaying the lazy image menu.
@@ -23,11 +48,13 @@ const TOP_SCROLL_PER_THUMBNAIL = 2.8;
  *
  */
 function LazyImageMenuComponent() {
-    const [thumbnails, setThumbnails] = useState([]);
+    const [thumbnails, setThumbnails] = useThumbnails([]);
     const isLazyMenuVisible = useSelector(getLazyImageMenuVisible);
     const currentFileName = useSelector(getCurrFileName);
     const [currChunk, setCurrChunk] = useState(0);
     const scrollContainerRef = useRef(null);
+    const { length: annotationsCount } = useSelector(getAnnotations);
+    const [prevFileName, setPrevFileName] = useState(currentFileName);
 
     useEffect(() => {
         listenForThumbnailUpdates();
@@ -40,8 +67,43 @@ function LazyImageMenuComponent() {
             });
     }, []);
 
+    useEffect(() => {
+        // update showAnnIcon when the annotation count changes
+        setThumbnails(
+            thumbnails.map((thumb) =>
+                thumb.fileName === currentFileName
+                    ? {
+                          ...thumb,
+                          showAnnIcon: !!annotationsCount,
+                      }
+                    : thumb
+            )
+        );
+    }, [annotationsCount]);
+
+    useEffect(() => {
+        // if switch files, reflect the actual state of the previous file rather
+        // than the previous redux one
+        setThumbnails((thumbnails) =>
+            thumbnails.map((thumb) =>
+                thumb.fileName === prevFileName
+                    ? {
+                          ...thumb,
+                          showAnnIcon: thumb.hasAnnotations,
+                      }
+                    : thumb
+            )
+        );
+        setPrevFileName(currentFileName);
+    }, [currentFileName]);
+
     const listenForThumbnailUpdates = () => {
-        const { removeThumbnail, addThumbnail, updateThumbnails } = Channels;
+        const {
+            removeThumbnail,
+            addThumbnail,
+            updateThumbnails,
+            updateThumbnailHasAnnotations,
+        } = Channels;
         ipcRenderer
             .on(removeThumbnail, (e, removedThumbnailName) => {
                 // must use a function here to get the most up-to-date state
@@ -57,10 +119,25 @@ function LazyImageMenuComponent() {
                 setThumbnails((thumbnails) => [...thumbnails, addedThumbnail]);
             })
             .on(updateThumbnails, (e, thumbnails) => {
-                console.log(thumbnails);
                 setThumbnails(thumbnails);
                 setCurrChunk(0);
-            });
+            })
+            .on(
+                updateThumbnailHasAnnotations,
+                (e, { hasAnnotations, fileName }) => {
+                    setThumbnails((thumbnails) =>
+                        thumbnails.map((thumb) =>
+                            thumb.fileName === fileName
+                                ? {
+                                      ...thumb,
+                                      hasAnnotations,
+                                      showAnnIcon: hasAnnotations,
+                                  }
+                                : thumb
+                        )
+                    );
+                }
+            );
     };
 
     const handleScroll = () => {
@@ -95,13 +172,13 @@ function LazyImageMenuComponent() {
             <LazyImagesContainer collapsedLazyMenu={isLazyMenuVisible}>
                 {thumbnails
                     .slice(start, end)
-                    .map(({ fileName, filePath, hasAnnotations = false }) => (
+                    .map(({ fileName, filePath, showAnnIcon }) => (
                         <LazyImageContainerComponent
                             key={fileName}
                             selected={fileName === currentFileName}
                             fileName={fileName}
                             filePath={filePath}
-                            hasAnnotations={hasAnnotations}
+                            hasAnnotations={showAnnIcon}
                         />
                     ))}
             </LazyImagesContainer>

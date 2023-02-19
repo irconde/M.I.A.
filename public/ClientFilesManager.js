@@ -366,12 +366,28 @@ class ClientFilesManager {
                                         console.log(err);
                                         reject(err);
                                     } else {
+                                        const fileName =
+                                            this.fileNames[
+                                                this.currentFileIndex
+                                            ];
+                                        this.#sendThumbnailsUpdate(
+                                            Channels.updateThumbnailHasAnnotations,
+                                            {
+                                                hasAnnotations:
+                                                    !!this.#getAnnotations(
+                                                        annotationFile,
+                                                        fileName
+                                                    ).length,
+                                                fileName,
+                                            }
+                                        );
                                         if (
                                             this.currentFileIndex <
                                             this.fileNames.length - 1
                                         ) {
                                             this.currentFileIndex++;
                                         }
+
                                         resolve();
                                     }
                                 }
@@ -447,22 +463,35 @@ class ClientFilesManager {
         return new Promise((resolve, reject) => {
             fs.readFile(this.selectedAnnotationFile, (error, data) => {
                 if (error) reject(error);
-                let annotations = [];
                 const allAnnotations = JSON.parse(data);
-                const imageInformation = allAnnotations.images.find(
-                    (image) =>
-                        image.file_name ===
+                resolve({
+                    annotations: this.#getAnnotations(
+                        allAnnotations,
                         this.fileNames[this.currentFileIndex]
-                );
-                if (imageInformation !== undefined) {
-                    const imageId = imageInformation.id;
-                    annotations = allAnnotations.annotations.filter(
-                        (annotation) => annotation.image_id === imageId
-                    );
-                }
-                resolve({ annotations, categories: allAnnotations.categories });
+                    ),
+                    categories: allAnnotations.categories,
+                });
             });
         });
+    }
+
+    /**
+     * Given the annotations object, it gets the annotations for the given image file name
+     *
+     * @param annotationFileObj {object} - annotations object read from a file
+     * @param fileName {string} - file name of the image
+     * @return {T[]|*[]}
+     */
+    #getAnnotations(annotationFileObj, fileName) {
+        const imageInformation = annotationFileObj.images.find(
+            (image) => image.file_name === fileName
+        );
+        if (imageInformation !== undefined) {
+            const imageId = imageInformation.id;
+            return annotationFileObj.annotations.filter(
+                (annotation) => annotation.image_id === imageId
+            );
+        } else return [];
     }
 
     /**
