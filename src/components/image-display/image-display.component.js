@@ -37,6 +37,7 @@ import {
     updateCornerstoneMode,
     updateEditionMode,
     updateZoomLevel,
+    getCurrFileName
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
 import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
@@ -91,6 +92,7 @@ const ImageDisplayComponent = () => {
     const selectedAnnotationRef = useRef(selectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
     const selectedCategoryRef = useRef(selectedCategory);
+    const currentFileName = useSelector(getCurrFileName);
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
     const isAnnotationContextVisibleRef = useRef(isAnnotationContextVisible);
     const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
@@ -212,7 +214,7 @@ const ImageDisplayComponent = () => {
 
     useEffect(() => {
         fetchCurrentFile();
-    }, []);
+    }, [currentFileName]);
 
     useEffect(() => {
         if (saveAnnotationStatus === constants.SAVE_STATUSES.SAVED) {

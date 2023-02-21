@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     ConnectionStatusIconsContainer,
     ConnectionTypeInfo,
@@ -22,6 +22,7 @@ import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 import { Channels } from '../../utils/enums/Constants';
 import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
+import { updateCurrFileName } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
@@ -37,6 +38,7 @@ const iconProps = {
  *
  */
 const TopBarComponent = (props) => {
+    const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     const [fileState, setFileState] = useState({
@@ -45,6 +47,7 @@ const TopBarComponent = (props) => {
     });
     useEffect(() => {
         ipcRenderer.on(Channels.newFileUpdate, (e, args) => {
+            dispatch(updateCurrFileName(args.currentFileName));
             setFileState(args);
         });
     }, []);
