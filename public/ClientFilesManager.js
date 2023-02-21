@@ -200,7 +200,7 @@ class Thumbnails {
      * @param {ArrayBuffer} imageData
      * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
      */
-    dicomToPngData(imageData) {
+    dicomToPngData(imageData, fileName) {
         try {
             // Allow raw files
             const options = {
@@ -211,7 +211,43 @@ class Thumbnails {
 
             // get the pixel data element (contains the offset and length of the data)
             const pixelDataElement = dataSet.elements.x7fe00010;
+            const height = dataSet.int16('x00280010');
+            const width = dataSet.int16('x00280011');
+            //const monochrome = dataSet.elements.x00280004;
+            const monochrome = dataSet.string('x00280004');
+            const bitsAllocated = dataSet.int16('x00280100');
+            const bitsStored = dataSet.int16('x00280101');
+            const rows = dataSet.int16('x00280010');
+            const columns = dataSet.int16('x00280011');
+            const pixelAspectRatio = dataSet.intString('x00280034');
+            const pixelRepresentation = dataSet.int16('x00280103');
+            const smallestPixel = dataSet.int16('x00280106');
+            const largestPixel = dataSet.int16('x00280107');
+            const samplesPerPixel = dataSet.int16('x00280002');
 
+            fs.writeFileSync(
+                `${this.#thumbnailsPath}/${fileName}-info.json`,
+                JSON.stringify(
+                    {
+                        pixelDataElement,
+                        width,
+                        height,
+                        length: dataSet.byteArray.length,
+                        monochrome,
+                        bitsAllocated,
+                        bitsStored,
+                        rows,
+                        columns,
+                        pixelAspectRatio,
+                        pixelRepresentation,
+                        smallestPixel,
+                        largestPixel,
+                        samplesPerPixel,
+                    },
+                    null,
+                    4
+                )
+            );
             // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
             const pixelData = new Uint16Array(
                 dataSet.byteArray.buffer,
@@ -219,8 +255,6 @@ class Thumbnails {
                 pixelDataElement.length / 2
             );
             const intervals = Utils.buildIntervals();
-            const height = dataSet.int16('x00280010');
-            const width = dataSet.int16('x00280011');
             const EightbitPixels = new Uint8ClampedArray(4 * width * height);
             let z = 0;
             for (let i = 0; i < pixelData.length; i++) {
@@ -257,7 +291,7 @@ class Thumbnails {
         } else {
             const split = fileName.split('.');
             thumbnailPath = path.join(this.#thumbnailsPath, `${split[0]}.png`);
-            const dicomPngData = this.dicomToPngData(pixelData);
+            const dicomPngData = this.dicomToPngData(pixelData, split[0]);
             sharp(dicomPngData.pixelData, {
                 raw: {
                     width: dicomPngData.width,
