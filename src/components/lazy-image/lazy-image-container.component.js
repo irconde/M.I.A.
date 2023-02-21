@@ -92,7 +92,7 @@ function LazyImageContainerComponent({
     };
 
     useLayoutEffect(() => {
-        if (isOnScreen && !thumbnailSrc) {
+        if (isOnScreen && !thumbnailSrc && filePath !== 'DICOM') {
             requestThumbnailData();
         } else if (!isOnScreen && thumbnailSrc) {
             clearThumbnail();
