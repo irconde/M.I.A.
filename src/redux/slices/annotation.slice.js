@@ -149,6 +149,7 @@ const annotationSlice = createSlice({
         addAnnotationArray: (state, action) => {
             const { annotationInformation, colors } = action.payload;
             const { annotations, categories } = annotationInformation;
+            state.annotations = [];
             state.colors = colors;
             if (annotations?.length > 0) {
                 annotations.forEach((annotation) => {
@@ -181,6 +182,7 @@ const annotationSlice = createSlice({
                             dataArray
                         );
                     }
+
                     state.annotations.push({
                         ...annotation,
                         color: annotationColor,

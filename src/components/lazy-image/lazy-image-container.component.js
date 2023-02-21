@@ -1,11 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
-import { getCurrentFile } from '../../redux/slices-old/server/serverSlice';
 import Utils from '../../utils/general/Utils';
 import { Channels } from '../../utils/enums/Constants';
-import { getGeneratingThumbnails } from '../../redux/slices-old/ui/uiSlice';
-import Tooltip from '@mui/material/Tooltip';
 import {
     ImageContainer,
     LazyImageIconWrapper,
@@ -13,11 +9,13 @@ import {
     LazyImageTextContainer,
     ThumbnailContainer,
 } from './lazy-image-container.styles';
-import TwoViewIcon from '../../icons/lazy-image-menu/two-view-icon/two-view.icon';
-import SingleViewIcon from '../../icons/lazy-image-menu/single-view-icon/single-view.icon';
-import AnnotationsIcon from '../../icons/lazy-image-menu/annotations-icon/annotations.icon';
+import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
+import { useSelector } from 'react-redux';
+import { getAnnotations } from '../../redux/slices/annotation.slice';
+import { getCurrFileName } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const REPEAT_REQUEST_COUNT = 3;
 
 /**
  * Container component for the lazy image thumbnails
@@ -25,144 +23,115 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  * @component
  *
  */
-function LazyImageContainerComponent(props) {
-    const generatingThumbnails = useSelector(getGeneratingThumbnails);
+function LazyImageContainerComponent({
+    filePath,
+    fileName,
+    hasAnnotations,
+    selected,
+}) {
     const containerElement = useRef();
-    const [thumbnailHeight, setThumbnailHeight] = useState('auto');
-    /**
-     * Thumbnails load with a height of auto and we keep track of that calculated height, or height of the image,
-     * using this handler. Which sets the thumbnail height passed into the container element of the image.
-     * This is namely so that when an image goes offscreen, we keep the container the same size of that image.
-     * @param {number} height
-     */
-    const thumbnailHeightHandler = (height) => {
-        if (height !== thumbnailHeight) setThumbnailHeight(height);
-    };
     const isOnScreen = Utils.useOnScreen(containerElement);
-    const [thumbnailSrc, setThumbnailSrc] = useState(null);
-    const [numOfViews, SetNumOfViews] = useState();
-    const [isDetections, SetIsDetections] = useState();
+    const [thumbnailSrc, setThumbnailSrc] = useState('');
+    // const [annot, setAnnot] = useState(hasAnnotations);
+    const annotations = useSelector(getAnnotations);
+    const currFile = useSelector(getCurrFileName);
+
+    // useEffect(() => {
+    //     console.log('Annotations update');
+    //     selected && setAnnot(!!annotations.length);
+    // }, [annotations]);
+    //
+    // useEffect(() => {
+    //     console.log('Current file update');
+    //     setAnnot(hasAnnotations);
+    // }, [currFile]);
+
+    const handleThumbnailClick = async () => {
+        try {
+            await ipcRenderer.invoke(Channels.selectFile, fileName);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     /**
      * Takes in the thumbnail Blob (image/png) thumbnail and creates an object url for the image to display.
      * If no parameter is passed it revokes the blobs object url if it was loaded already.
      * @param {Blob} [blobData=null]
-     * @param {Number} views
-     * @param {Boolean} detections
      */
-    const thumbnailHandler = (blobData = null, views, detections) => {
+    const thumbnailHandler = (blobData = null) => {
         setThumbnailSrc(URL.createObjectURL(blobData));
-        if (numOfViews !== views) SetNumOfViews(views);
-        if (isDetections !== detections) SetIsDetections(detections);
     };
 
     /**
      * Clears/revokes the current display thumbnail blob to free up memory
      */
     const clearThumbnail = () => {
-        if (thumbnailSrc !== null) {
-            URL.revokeObjectURL(thumbnailSrc);
-            setThumbnailSrc(null);
-        }
+        URL.revokeObjectURL(thumbnailSrc);
+        setThumbnailSrc(null);
+    };
+
+    /**
+     * Requests the thumbnail pixel data from electron and updates the state
+     * if failed, it will recursively try again (REPEAT_REQUEST_COUNT) times
+     * it tries again because electron takes time to generate the thumbnail
+     * @param {number} [trialCount=0]
+     */
+    const requestThumbnailData = (trialCount = 0) => {
+        if (trialCount === REPEAT_REQUEST_COUNT) return;
+        ipcRenderer
+            .invoke(Channels.getThumbnail, { fileName, filePath })
+            .then(({ fileData }) => {
+                const blobData = Utils.b64toBlob(fileData, 'image/png');
+                thumbnailHandler(blobData);
+            })
+            .catch((error) => {
+                console.log(error);
+                setTimeout(() => requestThumbnailData(trialCount + 1), 100);
+            });
     };
 
     useLayoutEffect(() => {
-        if (!generatingThumbnails) {
-            if (isOnScreen && thumbnailSrc === null) {
-                ipcRenderer
-                    .invoke(Channels.getThumbnail, props.file)
-                    .then((result) => {
-                        const blobData = Utils.b64toBlob(
-                            result.fileData,
-                            'image/png'
-                        );
-                        thumbnailHandler(
-                            blobData,
-                            result.numOfViews,
-                            result.isDetections
-                        );
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            }
-            if (!isOnScreen && thumbnailSrc !== null) {
-                clearThumbnail();
-            }
+        if (isOnScreen && !thumbnailSrc) {
+            requestThumbnailData();
+        } else if (!isOnScreen && thumbnailSrc) {
+            clearThumbnail();
         }
-    });
-    const currentFileName = useSelector(getCurrentFile);
-    let splitPath;
-    if (navigator.platform === 'Win32') {
-        splitPath = props.file.split('\\');
-    } else {
-        splitPath = props.file.split('/');
-    }
-    const thisFileName = splitPath[splitPath.length - 1];
-    const selected = currentFileName === thisFileName;
+    }, [isOnScreen]);
+
+    // const shouldShowAnnotationIcon = () =>
+    //     selected && currFile === fileName
+    //         ? !!annotations.length
+    //         : hasAnnotations;
+
     return (
-        <ImageContainer
-            ref={containerElement}
-            selected={selected}
-            thumbnailHeight={thumbnailHeight}
-            loading={generatingThumbnails.toString()}>
-            {thumbnailSrc !== null ? (
-                <ThumbnailContainer
-                    onClick={() =>
-                        props.getSpecificFileFromLocalDirectory(props.file)
-                    }>
-                    <img
-                        onLoad={() => {
-                            thumbnailHeightHandler(
-                                containerElement.current.clientHeight
-                            );
-                        }}
-                        src={thumbnailSrc}
-                        alt={thisFileName}
-                    />
-                </ThumbnailContainer>
-            ) : null}
-            <LazyImageTextContainer>
-                <Tooltip title={props.file}>
-                    <LazyImageText>{thisFileName}</LazyImageText>
-                </Tooltip>
-                <LazyImageIconWrapper>
-                    {numOfViews > 1 ? (
-                        <TwoViewIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
-                        />
-                    ) : (
-                        <SingleViewIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
-                        />
-                    )}
-                </LazyImageIconWrapper>
-                {isDetections === true ? (
+        <ImageContainer ref={containerElement}>
+            <ThumbnailContainer
+                selected={selected}
+                onClick={handleThumbnailClick}>
+                {thumbnailSrc && <img src={thumbnailSrc} alt={fileName} />}
+                {hasAnnotations && (
                     <LazyImageIconWrapper>
-                        <AnnotationsIcon
-                            width={'20px'}
-                            height={'20px'}
-                            color={'#E3E3E3'}
+                        <AnnotationIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'white'}
                         />
                     </LazyImageIconWrapper>
-                ) : null}
+                )}
+            </ThumbnailContainer>
+            <LazyImageTextContainer>
+                <LazyImageText>{fileName}</LazyImageText>
             </LazyImageTextContainer>
         </ImageContainer>
     );
 }
 
 LazyImageContainerComponent.propTypes = {
-    /**
-     * Name of file
-     */
-    file: PropTypes.string,
-    /**
-     * Calls the Electron channel to invoke a specific file from the selected file system folder.
-     */
-    getSpecificFileFromLocalDirectory: PropTypes.func,
+    fileName: PropTypes.string,
+    filePath: PropTypes.string,
+    selected: PropTypes.bool,
+    hasAnnotations: PropTypes.bool,
 };
 
 export default LazyImageContainerComponent;
