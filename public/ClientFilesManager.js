@@ -196,82 +196,6 @@ class Thumbnails {
     }
 
     /**
-     * Generates a PNG formatted pixel data along with the width and height of the passed in DICOS/TDR image
-     * @param {ArrayBuffer} imageData
-     * @returns {{width: Number; height: Number; pixelData: Uint8ClampedArray}}
-     */
-    dicomToPngData(imageData, fileName) {
-        try {
-            // Allow raw files
-            const options = {
-                TransferSyntaxUID: '1.2.840.10008.1.2',
-            };
-            // Parse the byte array to get a DataSet object that has the parsed contents
-            const dataSet = dicomParser.parseDicom(imageData, options);
-
-            // get the pixel data element (contains the offset and length of the data)
-            const pixelDataElement = dataSet.elements.x7fe00010;
-            const height = dataSet.int16('x00280010');
-            const width = dataSet.int16('x00280011');
-            //const monochrome = dataSet.elements.x00280004;
-            const monochrome = dataSet.string('x00280004');
-            const bitsAllocated = dataSet.int16('x00280100');
-            const bitsStored = dataSet.int16('x00280101');
-            const rows = dataSet.int16('x00280010');
-            const columns = dataSet.int16('x00280011');
-            const pixelAspectRatio = dataSet.intString('x00280034');
-            const pixelRepresentation = dataSet.int16('x00280103');
-            const smallestPixel = dataSet.int16('x00280106');
-            const largestPixel = dataSet.int16('x00280107');
-            const samplesPerPixel = dataSet.int16('x00280002');
-
-            fs.writeFileSync(
-                `${this.#thumbnailsPath}/${fileName}-info.json`,
-                JSON.stringify(
-                    {
-                        pixelDataElement,
-                        width,
-                        height,
-                        length: dataSet.byteArray.length,
-                        monochrome,
-                        bitsAllocated,
-                        bitsStored,
-                        rows,
-                        columns,
-                        pixelAspectRatio,
-                        pixelRepresentation,
-                        smallestPixel,
-                        largestPixel,
-                        samplesPerPixel,
-                    },
-                    null,
-                    4
-                )
-            );
-            // create a typed array on the pixel data (this example assumes 16 bit unsigned data)
-            const pixelData = new Uint16Array(
-                dataSet.byteArray.buffer,
-                pixelDataElement.dataOffset,
-                pixelDataElement.length / 2
-            );
-            const intervals = Utils.buildIntervals();
-            const EightbitPixels = new Uint8ClampedArray(4 * width * height);
-            let z = 0;
-            for (let i = 0; i < pixelData.length; i++) {
-                const greyValue = Utils.findGrayValue(pixelData[i], intervals);
-                EightbitPixels[z] = greyValue;
-                EightbitPixels[z + 1] = greyValue;
-                EightbitPixels[z + 2] = greyValue;
-                EightbitPixels[z + 3] = 255;
-                z += 4;
-            }
-            return { width, height, pixelData: EightbitPixels };
-        } catch (ex) {
-            console.log('Error parsing byte stream', ex);
-        }
-    }
-
-    /**
      * Creates and saves a png image and returns a promise that resolves to the path of the image thumbnail created
      * @param selectedImagesDirPath {string}
      * @param fileName {string}
@@ -289,22 +213,7 @@ class Thumbnails {
                 .toFile(thumbnailPath)
                 .catch((error) => console.log(error));
         } else {
-            const split = fileName.split('.');
-            thumbnailPath = path.join(this.#thumbnailsPath, `${split[0]}.png`);
-            const dicomPngData = this.dicomToPngData(pixelData, split[0]);
-            sharp(dicomPngData.pixelData, {
-                raw: {
-                    width: dicomPngData.width,
-                    height: dicomPngData.height,
-                    channels: 4,
-                },
-            })
-                .resize(Constants.Thumbnail.width)
-                .png()
-                .toFile(thumbnailPath)
-                .catch((error) => {
-                    console.log(error);
-                });
+            thumbnailPath = 'DICOM';
         }
         return thumbnailPath;
     }
