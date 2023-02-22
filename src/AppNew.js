@@ -18,7 +18,6 @@ import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.comp
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 
-
 const AppNew = () => {
     const dispatch = useDispatch();
     const areSettingsLoading = useSelector(getSettingsLoadingState);
@@ -38,34 +37,39 @@ const AppNew = () => {
     }, [selectedImagesDirPath]);
 
     return (
-        <div>
-            {!areSettingsLoading && (
-                <>
-                    <ImportModalComponent
-                        open={importModalOpen}
-                        setOpen={setImportModalOpen}
-                    />
-                    <ImageDisplayComponent />
-                </>
-            )}
-            <TopBarComponent
-                openImportModal={() => setImportModalOpen(true)}
-                openContactModal={() => setContactModalOpen(true)}
-                openAboutModal={() => setAboutModalOpen(true)}
-            />
-            <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
-            <ContactModal
-                closeModal={() => setContactModalOpen(false)}
-                open={contactModalOpen}
-            />
-            <LazyImageMenuComponent />
-            <SideMenuComponent />
-            <AnnotationContextMenuComponent />
-            <ColorPickerComponent />
-            <EditLabelComponent />
-            <BoundPolyFABComponent />
-            <SaveButtonComponent />
-        </div>
+        !areSettingsLoading && (
+            <div>
+                <ImportModalComponent
+                    open={importModalOpen}
+                    setOpen={setImportModalOpen}
+                />
+                {selectedImagesDirPath && (
+                    <>
+                        <ImageDisplayComponent />
+                        <TopBarComponent
+                            openImportModal={() => setImportModalOpen(true)}
+                            openContactModal={() => setContactModalOpen(true)}
+                            openAboutModal={() => setAboutModalOpen(true)}
+                        />
+                        <AboutModal
+                            open={aboutModalOpen}
+                            setOpen={setAboutModalOpen}
+                        />
+                        <ContactModal
+                            closeModal={() => setContactModalOpen(false)}
+                            open={contactModalOpen}
+                        />
+                        <LazyImageMenuComponent />
+                        <SideMenuComponent />
+                        <AnnotationContextMenuComponent />
+                        <ColorPickerComponent />
+                        <EditLabelComponent />
+                        <BoundPolyFABComponent />
+                        <SaveButtonComponent />
+                    </>
+                )}
+            </div>
+        )
     );
 };
 

@@ -41,7 +41,6 @@ const ImportModalComponent = ({ open, setOpen }) => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
-    //const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
         images: selectedImagesDirPath || '',
         annotations: selectedAnnotationFile || '',
@@ -50,8 +49,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
         annotationsError: '',
     });
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => selectedImagesDirPath && setOpen(false);
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
@@ -118,7 +116,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationFile: paths.annotations,
                 })
-            ).then(handleClose);
+            ).then(() => setOpen(false));
         }
     };
 
