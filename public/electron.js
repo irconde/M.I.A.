@@ -50,12 +50,16 @@ function createWindow() {
         display = screen.getPrimaryDisplay();
     } else {
         const data = fs.readFileSync(MONITOR_FILE_PATH);
-        const rectangle = JSON.parse(data);
-        display = screen.getDisplayMatching(rectangle);
+        try {
+            const rectangle = JSON.parse(data);
+            display = screen.getDisplayMatching(rectangle);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     mainWindow = new BrowserWindow({
-        ...display.bounds,
+        ...display?.bounds,
         backgroundColor: '#3a3a3a',
         show: false,
         webPreferences: {
@@ -104,9 +108,9 @@ function createWindow() {
     };
 
     if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).finally(
-            loadWindowContent
-        );
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS], {
+            forceDownload: true,
+        }).finally(loadWindowContent);
 
         // Open the DevTools.
         mainWindow.webContents.on('did-frame-finish-load', () => {

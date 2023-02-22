@@ -30,6 +30,7 @@ import {
     getAnnotationContextVisible,
     getAnnotationMode,
     getCornerstoneMode,
+    getCurrFileName,
     getEditionMode,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
@@ -37,7 +38,6 @@ import {
     updateCornerstoneMode,
     updateEditionMode,
     updateZoomLevel,
-    getCurrFileName
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
 import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
@@ -157,8 +157,8 @@ const ImageDisplayComponent = () => {
         }
         annotationModeRef.current = annotationMode;
         return () => {
-            viewportRef.current.removeEventListener('mouseup', onDragEnd);
-            viewportRef.current.removeEventListener(
+            viewportRef.current?.removeEventListener('mouseup', onDragEnd);
+            viewportRef.current?.removeEventListener(
                 constants.events.POLYGON_MASK_CREATED,
                 onPolygonEnd
             );
@@ -182,8 +182,8 @@ const ImageDisplayComponent = () => {
         }
         editionModeRef.current = editionMode;
         return () => {
-            viewportRef.current.removeEventListener('mouseup', onDragEnd);
-            viewportRef.current.removeEventListener(
+            viewportRef.current?.removeEventListener('mouseup', onDragEnd);
+            viewportRef.current?.removeEventListener(
                 'cornerstonetoolsmousedrag',
                 polygonRenderingCallback
             );
@@ -709,7 +709,7 @@ const ImageDisplayComponent = () => {
     };
 
     const startListeningClickEvents = () => {
-        viewportRef.current.addEventListener(
+        viewportRef.current?.addEventListener(
             'cornerstonetoolsmouseclick',
             onMouseClicked
         );

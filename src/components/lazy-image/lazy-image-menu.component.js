@@ -68,8 +68,9 @@ function LazyImageMenuComponent() {
         ipcRenderer
             .invoke(Channels.requestInitialThumbnailsList)
             .then(setThumbnails)
-            .catch(() => {
+            .catch((e) => {
                 // TODO: what should go in the lazy menu if no thumbnails are present?
+                console.log(e);
                 console.log('no thumbnails to begin with');
             });
     }, []);
