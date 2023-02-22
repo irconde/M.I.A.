@@ -199,7 +199,21 @@ ipcMain.handle(Channels.saveColorsFile, async (event, colorUpdate) => {
 ipcMain.handle(
     Constants.Channels.saveCurrentFile,
     async (event, newAnnotations) => {
-        return await files.updateAnnotationsFile(newAnnotations);
+        if (files.selectedAnnotationFile !== '') {
+            return await files.updateAnnotationsFile(newAnnotations);
+        } else {
+            const dialogResult = await dialog.showOpenDialog({
+                properties: ['openDirectory'],
+            });
+
+            // if the event is cancelled by the user
+            if (dialogResult.canceled) return null;
+
+            return await files.createAnnotationsFile(
+                dialogResult.filePaths[0],
+                newAnnotations
+            );
+        }
     }
 );
 

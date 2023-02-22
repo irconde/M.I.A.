@@ -408,6 +408,88 @@ class ClientFilesManager {
         });
     }
 
+    async createAnnotationsFile(annotationFilePath, newAnnotationData) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+        const { cocoAnnotations, cocoCategories } = newAnnotationData;
+        let annotationJson = {
+            info: {
+                description: 'COCO Dataset',
+                url: 'http://cocodataset.org',
+                version: '1.0',
+                year: year,
+                contributor: 'COCO Consortium',
+                date_created: `${year}/${month}/${day}`,
+            },
+            licenses: [
+                {
+                    url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
+                    id: 1,
+                    name: 'Attribution-NonCommercial-ShareAlike License',
+                },
+                {
+                    url: 'http://creativecommons.org/licenses/by-nc/2.0/',
+                    id: 2,
+                    name: 'Attribution-NonCommercial License',
+                },
+                {
+                    url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
+                    id: 3,
+                    name: 'Attribution-NonCommercial-NoDerivs License',
+                },
+                {
+                    url: 'http://creativecommons.org/licenses/by/2.0/',
+                    id: 4,
+                    name: 'Attribution License',
+                },
+                {
+                    url: 'http://creativecommons.org/licenses/by-sa/2.0/',
+                    id: 5,
+                    name: 'Attribution-ShareAlike License',
+                },
+                {
+                    url: 'http://creativecommons.org/licenses/by-nd/2.0/',
+                    id: 6,
+                    name: 'Attribution-NoDerivs License',
+                },
+                {
+                    url: 'http://flickr.com/commons/usage/',
+                    id: 7,
+                    name: 'No known copyright restrictions',
+                },
+                {
+                    url: 'http://www.usa.gov/copyright.shtml',
+                    id: 8,
+                    name: 'United States Government Work',
+                },
+            ],
+            images: [],
+            annotations: cocoAnnotations,
+            categories: cocoCategories,
+        };
+
+        this.fileNames.forEach((file, index) => {
+            annotationJson.images.push({
+                id: index + 1,
+                coco_url: path.join(this.selectedImagesDirPath, file),
+                file_name: file,
+                date_capture: todayDateString,
+            });
+        });
+        return await fs.promises.writeFile(
+            path.join(annotationFilePath, 'annotation.json'),
+            JSON.stringify(annotationJson, null, 4)
+        );
+    }
+
     /**
      * Reads the next file data if there is one and increments the current index
      * @returns {pixelData: <Buffer>, annotationInformation: Array}

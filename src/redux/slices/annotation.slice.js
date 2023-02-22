@@ -508,5 +508,7 @@ export const getHasAnnotationChanged = (state) =>
     state.annotation.hasAnnotationChanged;
 export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
+export const getIsAnyAnnotations = (state) =>
+    state.annotation.annotations?.length > 0;
 
 export default annotationSlice.reducer;
