@@ -143,6 +143,8 @@ export const Channels = {
     addThumbnail: 'add-thumbnail',
     removeThumbnail: 'remove-thumbnail',
     updateThumbnails: 'update-thumbnails',
+    updateThumbnailHasAnnotations: 'update-thumbnail-has-annotations',
+    selectFile: 'select-file',
 };
 
 export const toolNames = {
@@ -152,3 +154,10 @@ export const toolNames = {
 };
 
 export const NEXT_BUTTON_FAB_MARGIN = 50;
+
+export const SAVE_STATUSES = {
+    IDLE: 'idle',
+    PENDING: 'pending',
+    SAVED: 'saved',
+    FAILURE: 'failure',
+};

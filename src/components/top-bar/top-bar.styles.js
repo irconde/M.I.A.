@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { LAZY_SIDE_MENU_WIDTH } from '../lazy-image/lazy-image-menu.styles';
 
 export const TopBarContainer = styled.div`
     position: absolute;
@@ -14,11 +15,6 @@ export const TopBarContainer = styled.div`
     box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
     font-family: 'Noto Sans', sans-serif;
     white-space: nowrap;
-`;
-
-export const LazyMenuToggleContainer = styled.div`
-    position: absolute;
-    z-index: 2;
 `;
 
 export const TitleLabelContainer = styled.div`
@@ -73,10 +69,12 @@ export const ImportDataContainer = styled.div`
     display: flex;
     height: inherit;
     align-items: center;
+    justify-content: center;
     position: fixed;
     float: left;
     left: 0;
     background-color: #484848;
+    width: ${LAZY_SIDE_MENU_WIDTH};
 `;
 
 export const ImportDataText = styled.div`

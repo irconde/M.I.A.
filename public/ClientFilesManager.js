@@ -43,6 +43,7 @@ class Thumbnails {
     static #STORAGE_SAVE_DELAY = 100;
     #thumbnailsObj = null;
     #thumbnailsPath = '';
+    #annotationFilePath = '';
     // Keeps track of the scheduled updates to the thumbnails and update the json file when
     // the queue is empty. This avoids having to save to the file on every single update
     #queue;
@@ -57,13 +58,31 @@ class Thumbnails {
                 : done();
         }, 1);
         // runs when the queue is empty with no tasks to complete
-        this.#queue.drain(() => {
-            // TODO: remove logs
-            console.log('Finished all queued tasks');
-            this.#saveThumbnailsToStorage().then(() => {
-                console.log('SAVED IN DRAIN');
-            });
-        });
+        this.#queue.drain(() => this.#saveThumbnailsToStorage());
+
+        /**
+         * Loads the specified thumbnail if the file name provided exists. If so it will
+         * load the thumbnail and then, it will return the Base64 binary string of the thumbnail.
+         * @param {string} args File path sent from react
+         * @returns {string}
+         */
+        ipcMain.handle(
+            Channels.getThumbnail,
+            async (event, { fileName, filePath }) => {
+                if (!this.#thumbnailsObj[fileName]) {
+                    throw new Error('Thumbnail does not exist for that file');
+                } else {
+                    const fileData = await fs.promises.readFile(filePath);
+                    return {
+                        fileData: Buffer.from(fileData).toString('base64'),
+                    };
+                }
+            }
+        );
+    }
+
+    setAnnotationFilePath(path) {
+        this.#annotationFilePath = path;
     }
 
     /**
@@ -103,13 +122,18 @@ class Thumbnails {
      * @returns {Promise<void>}
      */
     async #saveThumbnailsToStorage() {
-        await fs.promises.writeFile(
-            path.join(
-                this.#thumbnailsPath,
-                ClientFilesManager.STORAGE_FILE_NAME
-            ),
-            JSON.stringify(this.#thumbnailsObj, null, 4)
-        );
+        try {
+            if (!this.#thumbnailsPath) return;
+            await fs.promises.writeFile(
+                path.join(
+                    this.#thumbnailsPath,
+                    ClientFilesManager.STORAGE_FILE_NAME
+                ),
+                JSON.stringify(this.#thumbnailsObj, null, 4)
+            );
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     /**
@@ -146,12 +170,10 @@ class Thumbnails {
      * Adds a thumbnail to storage
      * @param filename {string}
      * @param path {string}
-     * @returns {Promise<object>}
      */
-    async addThumbnail(filename, path) {
+    addThumbnail(filename, path) {
         const newObj = { [filename]: path };
         this.scheduleStorageUpdate(Thumbnails.ACTION.ADD, newObj);
-        return newObj;
     }
 
     /**
@@ -213,7 +235,7 @@ class Thumbnails {
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
-    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', 'jpeg'];
+    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
@@ -259,6 +281,7 @@ class ClientFilesManager {
      */
     async initSelectedPaths(imagesDirPath, annotationFilePath, colorFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
+        this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         // if no path exits in the settings then reject the React promise
         if (imagesDirPath === '') return this.thumbnailsPromise.reject();
 
@@ -270,6 +293,7 @@ class ClientFilesManager {
             this.currentFileIndex = 0;
             await this.#thumbnails.setThumbnailsPath(imagesDirPath);
             await this.#generateThumbnails();
+            this.#sendFileInfo();
         } else if (!this.thumbnailsPromise.isSettled) {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
@@ -284,13 +308,98 @@ class ClientFilesManager {
      */
     async updateSelectedPaths(imagesDirPath, annotationFilePath) {
         this.selectedAnnotationFile = annotationFilePath;
+        this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         this.selectedImagesDirPath = imagesDirPath;
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
-        if (!dirContainsAnyImages) return;
         this.#thumbnails.clearCurrentThumbnails();
+        this.currentFileIndex = 0;
+        this.#sendFileInfo();
+        if (!dirContainsAnyImages) return;
         await this.#thumbnails.setThumbnailsPath(imagesDirPath);
         await this.#generateThumbnails();
+    }
+
+    async updateAnnotationsFile(newAnnotationData) {
+        return new Promise((resolve, reject) => {
+            try {
+                const { cocoAnnotations, cocoCategories, cocoDeleted } =
+                    newAnnotationData;
+                if (
+                    this.selectedAnnotationFile !== '' &&
+                    fs.existsSync(this.selectedAnnotationFile)
+                ) {
+                    fs.readFile(this.selectedAnnotationFile, (err, data) => {
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            const annotationFile = JSON.parse(data);
+                            annotationFile.categories = cocoCategories;
+                            cocoAnnotations.forEach((annotation) => {
+                                const foundIndex =
+                                    annotationFile.annotations.findIndex(
+                                        (fileAnnotation) =>
+                                            fileAnnotation.id === annotation.id
+                                    );
+                                if (foundIndex !== -1) {
+                                    annotationFile.annotations[foundIndex] =
+                                        annotation;
+                                } else {
+                                    // ID set by client may not be unique, need to check file
+                                    annotation.id =
+                                        annotationFile.annotations.reduce(
+                                            (a, b) => (a.id > b.id ? a : b)
+                                        ).id + 1;
+                                    annotationFile.annotations.push(annotation);
+                                }
+                            });
+                            annotationFile.annotations =
+                                annotationFile.annotations.filter((annot) => {
+                                    return !cocoDeleted.includes(annot.id);
+                                });
+                            fs.writeFile(
+                                this.selectedAnnotationFile,
+                                JSON.stringify(annotationFile),
+                                (err) => {
+                                    if (err) {
+                                        console.log(err);
+                                        reject(err);
+                                    } else {
+                                        const fileName =
+                                            this.fileNames[
+                                                this.currentFileIndex
+                                            ];
+                                        this.#sendThumbnailsUpdate(
+                                            Channels.updateThumbnailHasAnnotations,
+                                            {
+                                                hasAnnotations:
+                                                    !!this.#getAnnotations(
+                                                        annotationFile,
+                                                        fileName
+                                                    ).length,
+                                                fileName,
+                                            }
+                                        );
+                                        if (
+                                            this.currentFileIndex <
+                                            this.fileNames.length - 1
+                                        ) {
+                                            this.currentFileIndex++;
+                                        }
+
+                                        resolve();
+                                    }
+                                }
+                            );
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
     }
 
     /**
@@ -343,26 +452,46 @@ class ClientFilesManager {
         return { pixelData, annotationInformation, colors };
     }
 
+    async selectFile(filename) {
+        const index = this.fileNames.findIndex((name) => name === filename);
+        if (index === -1) throw new Error("File name doesn't exists");
+        this.currentFileIndex = index;
+        this.#sendFileInfo();
+    }
+
     async getAnnotationsForFile() {
         return new Promise((resolve, reject) => {
             fs.readFile(this.selectedAnnotationFile, (error, data) => {
                 if (error) reject(error);
-                let annotations = [];
                 const allAnnotations = JSON.parse(data);
-                const imageInformation = allAnnotations.images.find(
-                    (image) =>
-                        image.file_name ===
+                resolve({
+                    annotations: this.#getAnnotations(
+                        allAnnotations,
                         this.fileNames[this.currentFileIndex]
-                );
-                if (imageInformation !== undefined) {
-                    const imageId = imageInformation.id;
-                    annotations = allAnnotations.annotations.filter(
-                        (annotation) => annotation.image_id === imageId
-                    );
-                }
-                resolve({ annotations, categories: allAnnotations.categories });
+                    ),
+                    categories: allAnnotations.categories,
+                });
             });
         });
+    }
+
+    /**
+     * Given the annotations object, it gets the annotations for the given image file name
+     *
+     * @param annotationFileObj {object} - annotations object read from a file
+     * @param fileName {string} - file name of the image
+     * @return {T[]|*[]}
+     */
+    #getAnnotations(annotationFileObj, fileName) {
+        const imageInformation = annotationFileObj.images.find(
+            (image) => image.file_name === fileName
+        );
+        if (imageInformation !== undefined) {
+            const imageId = imageInformation.id;
+            return annotationFileObj.annotations.filter(
+                (annotation) => annotation.image_id === imageId
+            );
+        } else return [];
     }
 
     /**
@@ -399,15 +528,66 @@ class ClientFilesManager {
             ...storedThumbnails,
             ...newThumbnails,
         };
-        // if the promise has not been resolved before, then resolve it once
-        if (!this.thumbnailsPromise.isSettled)
-            this.thumbnailsPromise.resolve(allThumbnails);
+
+        const clientThumbnails = await this.#prepareClientThumbnails(
+            allThumbnails
+        );
 
         this.#thumbnails.scheduleStorageUpdate(
             Thumbnails.ACTION.UPDATE_ALL,
             allThumbnails
         );
-        this.#sendThumbnailsUpdate(Channels.updateThumbnails, allThumbnails);
+
+        // if the promise has not been resolved before, then resolve it once
+        if (!this.thumbnailsPromise.isSettled)
+            this.thumbnailsPromise.resolve(clientThumbnails);
+        else
+            this.#sendThumbnailsUpdate(
+                Channels.updateThumbnails,
+                clientThumbnails
+            );
+    }
+
+    /**
+     * Takes an object of thumbnails and returns an array of the thumbnails
+     * in the original order of the files and determines which thumbnails have annotations
+     * @param thumbnails {Object<string, string>}
+     * @returns {Promise<Array<{fileName: string, filePath: string, hasAnnotations: boolean}>>}
+     */
+    async #prepareClientThumbnails(thumbnails) {
+        const _thumbnails = [];
+        const annotations = await this.#getAllAnnotationsFromStorage();
+        this.fileNames.forEach((fileName) =>
+            _thumbnails.push({
+                fileName,
+                filePath: thumbnails[fileName],
+                hasAnnotations: !!annotations[fileName],
+            })
+        );
+        return _thumbnails;
+    }
+
+    /**
+     * Reads the annotations file if there is one, and returns an object with keys
+     * for each file and a boolean indicating if the file has annotations
+     * @returns {Object<string, boolean>}
+     */
+    async #getAllAnnotationsFromStorage() {
+        try {
+            const data = await fs.promises.readFile(
+                this.selectedAnnotationFile
+            );
+            const { images, annotations } = JSON.parse(data);
+            const annotationsMap = {};
+            images.forEach((image) => {
+                annotationsMap[image.file_name] = annotations.some(
+                    (annotation) => annotation.image_id === image.id
+                );
+            });
+            return annotationsMap;
+        } catch (e) {
+            return {};
+        }
     }
 
     #sendFileInfo() {
@@ -447,8 +627,7 @@ class ClientFilesManager {
                 const addedFilename = getFileNameFromPath(addedFilePath);
                 if (!ClientFilesManager.#isFileTypeAllowed(addedFilename))
                     return;
-                console.log(addedFilename, ' added!');
-                this.fileNames.push(addedFilename);
+
                 await this.#thumbnails.setThumbnailsPath(
                     this.selectedImagesDirPath
                 );
@@ -458,14 +637,20 @@ class ClientFilesManager {
                             this.selectedImagesDirPath,
                             addedFilename
                         );
-                    const thumbnailObj = await this.#thumbnails.addThumbnail(
+                    this.#thumbnails.addThumbnail(
                         addedFilename,
                         newThumbnailPath
                     );
-                    this.#sendThumbnailsUpdate(
-                        Channels.addThumbnail,
-                        thumbnailObj
-                    );
+                    this.#sendThumbnailsUpdate(Channels.addThumbnail, {
+                        fileName: addedFilename,
+                        filePath: newThumbnailPath,
+                    });
+                    this.fileNames.push(addedFilename);
+                    // if the added file is the only file, then send a file update
+                    if (this.fileNames.length === 1) {
+                        this.currentFileIndex = 0;
+                        this.#sendFileInfo();
+                    }
                 } catch (e) {
                     console.log(e);
                 }
@@ -474,14 +659,30 @@ class ClientFilesManager {
                 const removedFileName = getFileNameFromPath(removedFilePath);
                 if (!ClientFilesManager.#isFileTypeAllowed(removedFileName))
                     return;
-                console.log(removedFileName, ' removed!');
                 const removedFileIndex = this.fileNames.findIndex(
                     (fileName) => fileName === removedFileName
                 );
                 if (removedFileIndex <= -1) {
                     throw new Error('Error with removed file index');
                 }
+
                 this.fileNames.splice(removedFileIndex, 1);
+
+                if (this.fileNames.length === 0) {
+                    // no files are left
+                    this.currentFileIndex = -1;
+                    this.#sendFileInfo();
+                } else if (removedFileIndex === this.currentFileIndex) {
+                    // if the removed file is the current one, then send a file update
+                    this.currentFileIndex = Math.max(
+                        this.currentFileIndex - 1,
+                        0
+                    );
+                    this.#sendFileInfo();
+                } else if (removedFileIndex < this.currentFileIndex) {
+                    // update the current index if the file removed is before the current file
+                    this.currentFileIndex--;
+                }
                 await this.#thumbnails.removeThumbnail(removedFileName);
                 this.#sendThumbnailsUpdate(
                     Channels.removeThumbnail,

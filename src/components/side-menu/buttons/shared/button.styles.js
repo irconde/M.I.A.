@@ -5,6 +5,7 @@ import {
 } from '../../../../utils/enums/Constants';
 
 export const CollapsedButtonContainer = styled.div`
+    z-index: 5;
     margin: ${NEXT_BUTTON_FAB_MARGIN}px;
     position: absolute;
     bottom: 0;
@@ -40,7 +41,10 @@ export const CollapsedButtonContainer = styled.div`
 `;
 
 export const SideMenuButtonContainer = styled.div`
-    width: 100%;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: ${() => sideMenuWidth}px;
     display: flex;
     align-items: center;
     align-self: flex-end;

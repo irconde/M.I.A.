@@ -1,12 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
-import {
-    getCollapsedSideMenu,
-    getIsFabVisible,
-    getIsImageToolsOpen,
-} from '../../../redux/slices-old/ui/uiSlice';
-import { getDetectionChanged } from '../../../redux/slices-old/detections/detectionsSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
 import {
@@ -16,6 +9,14 @@ import {
 
 import { SaveButtonFab, SaveButtonText } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
+import {
+    getIsFABVisible,
+    getSideMenuVisible,
+} from '../../../redux/slices/ui.slice';
+import {
+    getHasAnnotationChanged,
+    saveCurrentAnnotations,
+} from '../../../redux/slices/annotation.slice';
 
 /**
  * Component button that allows user to save edited detections and load next files in queue. Similar to NextButtonComponent compnent but for local files only.
@@ -25,22 +26,26 @@ import Tooltip from '@mui/material/Tooltip';
  *
  */
 
-const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
-    const isCollapsed = useSelector(getCollapsedSideMenu);
-    const isImageToolsOpen = useSelector(getIsImageToolsOpen);
-    const detectionChanged = useSelector(getDetectionChanged);
-    const isBoundPolyVisible = useSelector(getIsFabVisible);
+const SaveButtonComponent = () => {
+    const isCollapsed = useSelector(getSideMenuVisible);
+    /*const isImageToolsOpen = useSelector(getIsImageToolsOpen);*/
+    const detectionChanged = useSelector(getHasAnnotationChanged);
+    const isBoundPolyVisible = useSelector(getIsFABVisible);
+    const dispatch = useDispatch();
 
-    if (collapseBtn)
+    const saveImageClick = () => {
+        dispatch(saveCurrentAnnotations());
+    };
+    if (!isCollapsed)
         return (
             <Tooltip
-                disableHoverListener={isImageToolsOpen || !detectionChanged}
-                title={'Save Image'}>
+                disableHoverListener={!detectionChanged}
+                title={'Save Annotations'}>
                 <CollapsedButtonContainer
-                    $isFaded={isImageToolsOpen || !detectionChanged}
+                    $isFaded={!detectionChanged}
                     isCollapsed={isCollapsed}>
                     <SaveButtonFab
-                        onClick={nextImageClick}
+                        onClick={() => saveImageClick()}
                         $enabled={detectionChanged}
                         disabled={!isBoundPolyVisible}
                         color="primary">
@@ -55,28 +60,17 @@ const SaveButtonComponent = ({ nextImageClick, collapseBtn = false }) => {
         );
     else
         return (
-            <Tooltip title={'Save Image'}>
+            <Tooltip title={'Save Annotations'}>
                 <SideMenuButtonContainer
-                    $isFaded={isImageToolsOpen || !detectionChanged}
+                    $isFaded={!detectionChanged}
                     enabled={detectionChanged}
-                    onClick={nextImageClick}
+                    onClick={() => saveImageClick()}
                     id="SaveButtonComponent">
                     <SaveArrowIcon width="24px" height="24px" color="white" />
                     <SaveButtonText>Save File</SaveButtonText>
                 </SideMenuButtonContainer>
             </Tooltip>
         );
-};
-
-SaveButtonComponent.propTypes = {
-    /**
-     * Callback for loading next image
-     */
-    nextImageClick: PropTypes.func.isRequired,
-    /**
-     * Boolean value determining if side menu component is collapsed or not.
-     */
-    collapseBtn: PropTypes.bool,
 };
 
 export default SaveButtonComponent;
