@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import miaSrc from '../../icons/splash-screen/mia-logo.svg';
+import { LinearProgress } from '@mui/material';
 
 export const SplashScreenBG = styled.div`
-    background-color: black;
+    background-color: #3a3a3a;
     display: grid;
     place-items: center;
     width: 100vw;
@@ -21,14 +21,6 @@ export const SplitBGContainer = styled.div`
     position: relative;
 `;
 
-export const MiaLogoImg = styled.img.attrs(() => ({ src: miaSrc }))`
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-`;
-
 export const RightPolygon = styled.div`
     background-color: #4b7df7;
     height: 100%;
@@ -38,4 +30,21 @@ export const RightPolygon = styled.div`
 export const LoaderContainer = styled.div`
     background-color: #fafafa;
     height: 71px;
+    display: grid;
+    place-items: center;
+`;
+
+export const LinearProgressMUI = styled(LinearProgress).attrs(() => ({
+    width: '292px',
+    height: '191px',
+}))`
+    width: 85%;
+
+    &.MuiLinearProgress-root {
+        background-color: #d8d8d8;
+    }
+
+    .MuiLinearProgress-bar {
+        background-color: #adadad;
+    }
 `;

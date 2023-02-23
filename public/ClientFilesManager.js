@@ -243,7 +243,7 @@ class ClientFilesManager {
     selectedAnnotationFile = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
-    #isLoadingThumbnails = true;
+    #isLoadingThumbnails = false;
 
     constructor(mainWindow) {
         this.mainWindow = mainWindow;
@@ -301,14 +301,16 @@ class ClientFilesManager {
      * @returns {Promise<void>}
      */
     async initSelectedPaths(imagesDirPath, annotationFilePath, colorFilePath) {
-        this.#sendThumbnailsStatus(true);
         this.selectedAnnotationFile = annotationFilePath;
         this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         // if no path exits in the settings then reject the React promise
-        if (imagesDirPath === '') return this.thumbnailsPromise.reject();
+        if (imagesDirPath === '') {
+            return this.thumbnailsPromise.reject();
+        }
 
         this.selectedImagesDirPath = imagesDirPath;
         this.colorFilePath = colorFilePath;
+        this.#sendThumbnailsStatus(true);
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {
@@ -339,9 +341,10 @@ class ClientFilesManager {
         this.#thumbnails.clearCurrentThumbnails();
         this.currentFileIndex = 0;
         this.#sendFileInfo();
-        if (!dirContainsAnyImages) return;
-        await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-        await this.#generateThumbnails();
+        if (dirContainsAnyImages) {
+            await this.#thumbnails.setThumbnailsPath(imagesDirPath);
+            await this.#generateThumbnails();
+        }
         this.#sendThumbnailsStatus(false);
     }
 

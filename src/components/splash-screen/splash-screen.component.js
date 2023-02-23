@@ -1,22 +1,28 @@
 import React from 'react';
 import {
+    LinearProgressMUI,
     LoaderContainer,
-    MiaLogoImg,
     RightPolygon,
     SplashScreenBG,
     SplashScreenContainer,
     SplitBGContainer,
 } from './splash-screen.styles';
+import { MiaLogoContainer } from '../../icons/mia-logo-icon/mia-logo.icon.styles';
+import MiaLogoIcon from '../../icons/mia-logo-icon/mia-logo.icon';
 
 function SplashScreenComponent() {
     return (
         <SplashScreenBG>
             <SplashScreenContainer>
                 <SplitBGContainer>
-                    <MiaLogoImg />
+                    <MiaLogoContainer>
+                        <MiaLogoIcon />
+                    </MiaLogoContainer>
                     <RightPolygon />
                 </SplitBGContainer>
-                <LoaderContainer></LoaderContainer>
+                <LoaderContainer>
+                    <LinearProgressMUI />
+                </LoaderContainer>
             </SplashScreenContainer>
         </SplashScreenBG>
     );
