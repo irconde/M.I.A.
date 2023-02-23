@@ -569,11 +569,6 @@ class ClientFilesManager {
         // if the promise has not been resolved before, then resolve it once
         if (!this.thumbnailsPromise.isSettled)
             this.thumbnailsPromise.resolve(clientThumbnails);
-        else
-            this.#sendThumbnailsUpdate(
-                Channels.updateThumbnails,
-                clientThumbnails
-            );
     }
 
     /**
