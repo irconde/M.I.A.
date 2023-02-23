@@ -59,15 +59,19 @@ const AboutModal = ({ open, setOpen }) => {
                             </AboutHeaderInfo>
                         </AboutHeader>
                         <AppSummary>
-                            The Pilot GUI is a cross-platform application,
-                            developed by the{' '}
-                            <strong>Emerging Analytics Center</strong> as a part
-                            of the <strong>Pilot System</strong> - an
-                            intelligent decision support system for baggage
-                            screening - in order to enable x-ray machine
-                            operators to visually check the multiple detections
-                            or objects identified as potentially of interest by
-                            the system itself.
+                            M.I.A. (Medical Imaging Annotation) is a
+                            cross-platform application to{' '}
+                            <strong>annotate</strong> (drawing bounding boxes,
+                            polygon masks, etc.){' '}
+                            <strong>standard medical</strong> imaging for
+                            creating specific datasets.
+                            <br></br>
+                            <br></br>
+                            The application is a spin off of the{' '}
+                            <strong>Pilot System</strong>, an intelligent
+                            decision support system for advanced threat
+                            recognition on x-ray images developed by the
+                            <strong>Emerging Analytics Center</strong>.
                         </AppSummary>
                         <TeamAndLibrary>
                             <TeamLibraryWrapper>
