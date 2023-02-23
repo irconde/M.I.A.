@@ -56,7 +56,7 @@ export const StyledPaper = styled(Paper).attrs(() => ({
 
 export const ModalRoot = styled.div`
     flex-grow: 1;
-    height: 37rem;
+    height: 33rem;
 `;
 
 export const Description = styled.p`
@@ -95,7 +95,7 @@ export const AppSummary = styled.div`
     font-size: 16px;
     color: #a6a6a6;
     text-align: justify;
-    margin: 0 10px;
+    margin: 0 10px 2rem 10px;
 
     strong {
         font-weight: 600;
