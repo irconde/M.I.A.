@@ -18,7 +18,6 @@ import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.comp
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 import SplashScreenComponent from './components/splash-screen/splash-screen.component';
-import useThumbnailsLoading from './utils/hooks/thumbnails-loading.hook';
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -27,7 +26,8 @@ const AppNew = () => {
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
-    const areThumbnailsLoading = useThumbnailsLoading(true);
+    // const areThumbnailsLoading = useThumbnailsLoading(true);
+    const areThumbnailsLoading = true;
 
     useEffect(() => {
         dispatch(initSettings());
