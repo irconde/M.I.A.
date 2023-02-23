@@ -9,16 +9,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import ImageDisplayComponent from './components/image-display/image-display.component';
 import TopBarComponent from './components/top-bar/top-bar.component';
 import AboutModal from './components/about-modal/about-modal.component';
-import { Channels } from './utils/enums/Constants';
 import SideMenuComponent from './components/side-menu/side-menu.component';
 import ContactModal from './components/contact-modal/contact-modal.component';
 import AnnotationContextMenuComponent from './components/annotation-context/annotation-context-menu.component';
 import ColorPickerComponent from './components/color/color-picker.component';
 import EditLabelComponent from './components/edit-label/edit-label.component';
+import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 
-const ipcRenderer = window.require('electron').ipcRenderer;
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -30,8 +29,6 @@ const AppNew = () => {
     const [contactModalOpen, setContactModalOpen] = useState(false);
 
     useEffect(() => {
-        // TODO: move this to lazy image component
-        addElectronChannels();
         dispatch(initSettings());
     }, []);
 
@@ -39,35 +36,6 @@ const AppNew = () => {
         // only open the modal if there is no selected images' dir path
         selectedImagesDirPath === '' && setImportModalOpen(true);
     }, [selectedImagesDirPath]);
-
-    const addElectronChannels = () => {
-        const {
-            removeThumbnail,
-            addThumbnail,
-            updateThumbnails,
-            requestInitialThumbnailsList,
-        } = Channels;
-        ipcRenderer.on(removeThumbnail, (e, removedThumbnail) => {
-            console.log('REMOVE');
-            console.log(removedThumbnail);
-        });
-        ipcRenderer.on(addThumbnail, (e, addedThumbnail) => {
-            console.log('ADDED');
-            console.log(addedThumbnail);
-        });
-        ipcRenderer.on(updateThumbnails, (e, thumbnailsObj) => {
-            console.log('UPDATE');
-            console.log(thumbnailsObj);
-        });
-        ipcRenderer
-            .invoke(requestInitialThumbnailsList)
-            .then((thumbnails) => {
-                console.log('INIT');
-            })
-            .catch(() => {
-                console.log('no thumbnails to begin with');
-            });
-    };
 
     return (
         <div>
@@ -90,6 +58,7 @@ const AppNew = () => {
                 closeModal={() => setContactModalOpen(false)}
                 open={contactModalOpen}
             />
+            <LazyImageMenuComponent />
             <SideMenuComponent />
             <AnnotationContextMenuComponent />
             <ColorPickerComponent />

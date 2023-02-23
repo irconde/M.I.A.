@@ -14,6 +14,7 @@ const initialState = {
     editLabelVisibility: false,
     inputLabel: '',
     zoomLevel: 0,
+    currentFileName: '',
     sideMenuVisible: true,
     lazyImageMenuVisible: false,
     fabVisible: true,
@@ -25,6 +26,9 @@ const uiSlice = createSlice({
     reducers: {
         toggleSideMenu: (state, action) => {
             state.sideMenuVisible = !state.sideMenuVisible;
+        },
+        toggleLazySideMenu: (state, action) => {
+            state.lazyImageMenuVisible = !state.lazyImageMenuVisible;
         },
         updateAnnotationContextPosition: (state, action) => {
             const { top, left } = action.payload;
@@ -64,11 +68,15 @@ const uiSlice = createSlice({
         updateEditionMode: (state, action) => {
             state.editionMode = action.payload;
         },
+        updateCurrFileName: (state, action) => {
+            state.currentFileName = action.payload;
+        },
     },
 });
 
 export const {
     toggleSideMenu,
+    toggleLazySideMenu,
     updateAnnotationContextPosition,
     updateZoomLevel,
     updateColorPickerVisibility,
@@ -79,6 +87,7 @@ export const {
     updateEditionMode,
     updateCornerstoneMode,
     updateAnnotationMode,
+    updateCurrFileName,
 } = uiSlice.actions;
 
 export const getAnnotationContextPosition = (state) =>
@@ -92,6 +101,8 @@ export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getEditLabelVisible = (state) => state.ui.editLabelVisibility;
 export const getZoomLevel = (state) => state.ui.zoomLevel;
 export const getInputLabel = (state) => state.ui.inputLabel;
+export const getCurrFileName = (state) => state.ui.currentFileName;
+
 export const getSideMenuVisible = (state) => state.ui.sideMenuVisible;
 export const getLazyImageMenuVisible = (state) => state.ui.lazyImageMenuVisible;
 export const getIsFABVisible = (state) => state.ui.fabVisible;
