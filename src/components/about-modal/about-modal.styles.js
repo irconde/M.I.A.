@@ -48,9 +48,9 @@ export const StyledPaper = styled(Paper).attrs(() => ({
     background-color: #1f1f1f;
     outline: none;
     font-family: Noto Sans JP;
-    width: 45vw;
+    width: 40vw;
     min-width: 32rem;
-    max-width: 40rem;
+    max-width: 45rem;
     padding: 2rem;
 `;
 
@@ -58,19 +58,6 @@ export const ModalRoot = styled.div`
     flex-grow: 1;
     height: 37rem;
 `;
-
-// export const Title = styled.p`
-//     font-family: Noto Sans JP;
-//     font-size: 1rem;
-//     font-weight: normal;
-//     font-stretch: normal;
-//     font-style: normal;
-//     line-height: normal;
-//     letter-spacing: normal;
-//     color: #fff;
-//     margin-bottom: 0.25rem;
-//     margin-top: 0.75rem;
-// `;
 
 export const Description = styled.p`
     color: ${GREY_COLOR};
@@ -91,35 +78,6 @@ export const AboutHeader = styled.div`
     height: 14%;
 `;
 
-// export const AboutHeaderInfo = styled.div`
-//     flex-direction: column;
-//     font-family: Noto Sans JP;
-//     margin: 0 10px 10px;
-// `;
-//
-// export const VersionInfo = styled.div`
-//     font-size: 15px;
-//     color: #7e7e7e;
-// `;
-//
-// export const AboutTitle = styled.div`
-//     object-fit: contain;
-//     font-size: 42px;
-//     font-weight: 400;
-//     font-stretch: normal;
-//     font-style: normal;
-//     line-height: normal;
-//     letter-spacing: normal;
-//     color: #e1e1e1;
-//     flex: auto;
-//     align-self: center;
-//     height: fit-content;
-//
-//     strong {
-//         font-weight: 900;
-//     }
-// `;
-
 export const CloseIconWrapper = styled.div`
     align-self: flex-start;
     display: flex;
@@ -132,9 +90,9 @@ export const CloseIconWrapper = styled.div`
 `;
 
 export const AppSummary = styled.div`
-    height: 19.5%;
+    height: 11rem;
     font-weight: normal;
-    font-size: 14px;
+    font-size: 16px;
     color: #a6a6a6;
     text-align: justify;
     margin: 0 10px;
@@ -151,8 +109,9 @@ export const SummaryDivider = styled.div`
 `;
 
 export const TeamAndLibrary = styled.div`
-    height: 57%;
+    height: 11rem;
     display: flex;
+    justify-content: space-between;
     color: #e1e1e1;
     margin: 1rem;
     font-size: 20px;
@@ -170,7 +129,7 @@ export const TeamLibraryHeader = styled.div`
 export const TeamLibraryTitle = styled.div`
     color: #e1e1e1;
     margin-left: 5px;
-    font-size: 18px;
+    padding-left: 0.5rem;
 `;
 
 export const TeamLibraryWrapper = styled.div`
@@ -180,15 +139,23 @@ export const TeamLibraryWrapper = styled.div`
 
 export const TeamLibraryList = styled.div`
     display: flex;
+    flex-direction: column;
     justify-content: start;
-    align-items: center;
+    align-items: flex-start;
     color: #a6a6a6;
     font-size: 16px;
-    width: 15rem;
 
     ul {
         list-style-position: inside;
         padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 8rem;
+
+        li {
+            padding: 0.25rem;
+        }
     }
 
     a {

@@ -57,14 +57,6 @@ const AboutModal = ({ open, setOpen }) => {
                                     color={'white'}
                                 />
                             </CloseIconWrapper>
-                            {/*<AboutHeaderInfo>*/}
-                            {/*    <AboutTitle>*/}
-                            {/*        Pilot<strong>GUI</strong>*/}
-                            {/*    </AboutTitle>*/}
-                            {/*    /!*<VersionInfo>*!/*/}
-                            {/*    /!*    Version {process.env.REACT_APP_VERSION}*!/*/}
-                            {/*    /!*</VersionInfo>*!/*/}
-                            {/*</AboutHeaderInfo>*/}
                         </AboutHeader>
                         <AppSummary>
                             M.I.A. (Medical Imaging Annotation) is a
@@ -81,7 +73,7 @@ const AboutModal = ({ open, setOpen }) => {
                             <strong>Emerging Analytics Center</strong>.
                         </AppSummary>
                         <TeamAndLibrary>
-                            <TeamLibraryWrapper style={{ marginRight: '4rem' }}>
+                            <TeamLibraryWrapper>
                                 <TeamLibraryHeader>
                                     <TeamIcon
                                         width="32px"
@@ -130,18 +122,18 @@ const AboutModal = ({ open, setOpen }) => {
                                         </li>
                                         <li>
                                             <a
-                                                href="https://github.com/mui/material-ui"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                MUI - Material UI
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
                                                 href="https://github.com/electron/electron"
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 ElectronJS
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="https://github.com/mui/material-ui"
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                MUI - Material UI
                                             </a>
                                         </li>
                                         <li>
