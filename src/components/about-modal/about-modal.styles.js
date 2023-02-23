@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 import { createTheme, Paper } from '@mui/material';
 
-import GUIicon from '../../icons/settings-modal/app-icon.png';
-
 const GREY_COLOR = '#9d9d9d';
 
 export const modalTheme = createTheme({
@@ -119,13 +117,6 @@ export const AboutTitle = styled.div`
     strong {
         font-weight: 900;
     }
-`;
-
-export const AppIcon = styled.img.attrs({
-    src: `${GUIicon}`,
-})`
-    height: auto;
-    max-width: 100%;
 `;
 
 export const AppIconWrapper = styled.div`

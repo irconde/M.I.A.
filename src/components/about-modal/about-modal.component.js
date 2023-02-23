@@ -2,10 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     AboutHeader,
-    AboutHeaderInfo,
-    AboutTitle,
-    AppIcon,
-    AppIconWrapper,
     AppSummary,
     ModalRoot,
     modalTheme,
@@ -15,11 +11,11 @@ import {
     TeamLibraryList,
     TeamLibraryTitle,
     TeamLibraryWrapper,
-    VersionInfo,
 } from './about-modal.styles';
 import { Modal, ThemeProvider } from '@mui/material';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
+import { ReactComponent as AppIcon } from '../../icons/app-logo.icon.svg';
 
 /**
  * Component dialog for changing settings of application.
@@ -46,17 +42,21 @@ const AboutModal = ({ open, setOpen }) => {
                 <StyledPaper>
                     <ModalRoot>
                         <AboutHeader>
-                            <AppIconWrapper>
-                                <AppIcon />
-                            </AppIconWrapper>
-                            <AboutHeaderInfo>
-                                <AboutTitle>
-                                    Pilot<strong>GUI</strong>
-                                </AboutTitle>
-                                <VersionInfo>
-                                    Version {process.env.REACT_APP_VERSION}
-                                </VersionInfo>
-                            </AboutHeaderInfo>
+                            {/*<AppIconWrapper>*/}
+                            <AppIcon
+                                width="228px"
+                                height="75px"
+                                color="white"
+                            />
+                            {/*</AppIconWrapper>*/}
+                            {/*<AboutHeaderInfo>*/}
+                            {/*    <AboutTitle>*/}
+                            {/*        Pilot<strong>GUI</strong>*/}
+                            {/*    </AboutTitle>*/}
+                            {/*    /!*<VersionInfo>*!/*/}
+                            {/*    /!*    Version {process.env.REACT_APP_VERSION}*!/*/}
+                            {/*    /!*</VersionInfo>*!/*/}
+                            {/*</AboutHeaderInfo>*/}
                         </AboutHeader>
                         <AppSummary>
                             M.I.A. (Medical Imaging Annotation) is a
@@ -89,9 +89,6 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>James Bromley</li>
                                         <li>Dako Albeik</li>
                                         <li>Luka Woodson</li>
-                                        <li>Toby Ebarb</li>
-                                        <li>Dylan Johnson</li>
-                                        <li>Stephanie Bagandov</li>
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>
@@ -156,14 +153,14 @@ const AboutModal = ({ open, setOpen }) => {
                                                 ElectronJS
                                             </a>
                                         </li>
-                                        <li>
-                                            <a
-                                                href="https://github.com/socketio/socket.io"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                Socket.IO
-                                            </a>
-                                        </li>
+                                        {/*<li>*/}
+                                        {/*    <a*/}
+                                        {/*        href="https://github.com/socketio/socket.io"*/}
+                                        {/*        target="_blank"*/}
+                                        {/*        rel="noopener noreferrer">*/}
+                                        {/*        Socket.IO*/}
+                                        {/*    </a>*/}
+                                        {/*</li>*/}
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>
