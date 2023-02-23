@@ -8,6 +8,9 @@ const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
 const chokidar = require('chokidar');
 const async = require('async');
+const PNG = require('pngjs').PNG;
+const jpeg = require('jpeg-js');
+const dicomParser = require('dicom-parser');
 
 class CustomPromise {
     isSettled = false;
@@ -483,10 +486,12 @@ class ClientFilesManager {
             categories: cocoCategories,
         };
 
+        // TODO: Get width and height, depending on image type
         this.fileNames.forEach((file, index) => {
             annotationJson.images.push({
                 id: index + 1,
-                coco_url: path.join(this.selectedImagesDirPath, file),
+                coco_url: '',
+                flickr_url: '',
                 file_name: file,
                 date_capture: todayDateString,
             });
@@ -505,6 +510,55 @@ class ClientFilesManager {
             });
             writeStream.write(JSON.stringify(annotationJson, null, 4));
             writeStream.end();
+        });
+    }
+
+    async getPNGDimensions(fileName) {
+        return new Promise((resolve, reject) => {
+            fs.createReadStream(fileName)
+                .pipe(new PNG())
+                .on('parsed', function () {
+                    resolve({ width: this.width, height: this.height });
+                })
+                .on('error', function (error) {
+                    reject(error);
+                });
+        });
+    }
+
+    async getJPEGDimensions(fileName) {
+        return new Promise((resolve, reject) => {
+            const stream = fs.createReadStream(fileName);
+            let data = Buffer.from([]);
+            stream.on('data', (chunk) => {
+                data = Buffer.concat([data, chunk]);
+            });
+            stream.on('end', () => {
+                const { width, height } = jpeg.decode(data);
+                resolve({ width, height });
+            });
+            stream.on('error', (error) => {
+                reject(error);
+            });
+        });
+    }
+
+    async getDICOMDimensions(fileName) {
+        return new Promise((resolve, reject) => {
+            const stream = fs.createReadStream(fileName);
+            let data = Buffer.from([]);
+            stream.on('data', (chunk) => {
+                data = Buffer.concat([data, chunk]);
+            });
+            stream.on('end', () => {
+                const dataSet = dicomParser.parseDicom(data);
+                const width = dataSet.uint16('x00280011');
+                const height = dataSet.uint16('x00280010');
+                resolve({ width, height });
+            });
+            stream.on('error', (error) => {
+                reject(error);
+            });
         });
     }
 
