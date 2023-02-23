@@ -17,10 +17,8 @@ import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
-import { Channels } from './utils/enums/Constants';
 import SplashScreenComponent from './components/splash-screen/splash-screen.component';
-
-const ipcRenderer = window.require('electron').ipcRenderer;
+import useThumbnailsLoading from './utils/hooks/thumbnails-loading.hook';
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -29,17 +27,10 @@ const AppNew = () => {
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
-    const [areThumbnailsLoading, setAreThumbnailsLoading] = useState(true);
+    const areThumbnailsLoading = useThumbnailsLoading(true);
 
     useEffect(() => {
         dispatch(initSettings());
-        ipcRenderer.invoke(Channels.thumbnailStatus).then((isLoading) => {
-            setAreThumbnailsLoading(isLoading);
-            ipcRenderer.on(Channels.thumbnailStatus, (e, isLoading) => {
-                console.log({ isLoading });
-                setAreThumbnailsLoading(isLoading);
-            });
-        });
     }, []);
 
     useEffect(() => {
