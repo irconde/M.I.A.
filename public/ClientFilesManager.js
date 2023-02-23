@@ -335,11 +335,19 @@ class ClientFilesManager {
                     this.selectedAnnotationFile !== '' &&
                     fs.existsSync(this.selectedAnnotationFile)
                 ) {
-                    fs.readFile(this.selectedAnnotationFile, (err, data) => {
-                        if (err) {
-                            console.log(err);
-                            reject(err);
-                        } else {
+                    const readStream = fs.createReadStream(
+                        this.selectedAnnotationFile
+                    );
+                    let data = '';
+                    readStream.on('error', (err) => {
+                        console.log(err);
+                        reject(err);
+                    });
+                    readStream.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    readStream.on('end', () => {
+                        try {
                             const annotationFile = JSON.parse(data);
                             annotationFile.categories = cocoCategories;
                             cocoAnnotations.forEach((annotation) => {
@@ -361,43 +369,42 @@ class ClientFilesManager {
                                 }
                             });
                             annotationFile.annotations =
-                                annotationFile.annotations.filter((annot) => {
-                                    return !cocoDeleted.includes(annot.id);
-                                });
-                            fs.writeFile(
-                                this.selectedAnnotationFile,
-                                JSON.stringify(annotationFile),
-                                (err) => {
-                                    if (err) {
-                                        console.log(err);
-                                        reject(err);
-                                    } else {
-                                        const fileName =
-                                            this.fileNames[
-                                                this.currentFileIndex
-                                            ];
-                                        this.#sendThumbnailsUpdate(
-                                            Channels.updateThumbnailHasAnnotations,
-                                            {
-                                                hasAnnotations:
-                                                    !!this.#getAnnotations(
-                                                        annotationFile,
-                                                        fileName
-                                                    ).length,
-                                                fileName,
-                                            }
-                                        );
-                                        if (
-                                            this.currentFileIndex <
-                                            this.fileNames.length - 1
-                                        ) {
-                                            this.currentFileIndex++;
-                                        }
-
-                                        resolve();
-                                    }
-                                }
+                                annotationFile.annotations.filter(
+                                    (annot) => !cocoDeleted.includes(annot.id)
+                                );
+                            const writeStream = fs.createWriteStream(
+                                this.selectedAnnotationFile
                             );
+                            writeStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            writeStream.on('finish', () => {
+                                const fileName =
+                                    this.fileNames[this.currentFileIndex];
+                                this.#sendThumbnailsUpdate(
+                                    Channels.updateThumbnailHasAnnotations,
+                                    {
+                                        hasAnnotations: !!this.#getAnnotations(
+                                            annotationFile,
+                                            fileName
+                                        ).length,
+                                        fileName,
+                                    }
+                                );
+                                if (
+                                    this.currentFileIndex <
+                                    this.fileNames.length - 1
+                                ) {
+                                    this.currentFileIndex++;
+                                }
+                                resolve();
+                            });
+                            writeStream.write(JSON.stringify(annotationFile));
+                            writeStream.end();
+                        } catch (err) {
+                            console.log(err);
+                            reject(err);
                         }
                     });
                 }
@@ -484,10 +491,21 @@ class ClientFilesManager {
                 date_capture: todayDateString,
             });
         });
-        return await fs.promises.writeFile(
-            path.join(annotationFilePath, 'annotation.json'),
-            JSON.stringify(annotationJson, null, 4)
-        );
+
+        return new Promise((resolve, reject) => {
+            const writeStream = fs.createWriteStream(
+                path.join(annotationFilePath, 'annotation.json')
+            );
+            writeStream.on('error', (err) => {
+                console.log(err);
+                reject(err);
+            });
+            writeStream.on('finish', () => {
+                resolve();
+            });
+            writeStream.write(JSON.stringify(annotationJson, null, 4));
+            writeStream.end();
+        });
     }
 
     /**
@@ -556,8 +574,15 @@ class ClientFilesManager {
 
     async getAnnotationsForFile() {
         return new Promise((resolve, reject) => {
-            fs.readFile(this.selectedAnnotationFile, (error, data) => {
-                if (error) reject(error);
+            const readStream = fs.createReadStream(this.selectedAnnotationFile);
+            let data = '';
+            readStream.on('error', (error) => {
+                reject(error);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
                 const allAnnotations = JSON.parse(data);
                 resolve({
                     annotations: this.#getAnnotations(
