@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     LoaderContainer,
+    MiaLogoImg,
     RightPolygon,
     SplashScreenBG,
     SplashScreenContainer,
@@ -12,6 +13,7 @@ function SplashScreenComponent() {
         <SplashScreenBG>
             <SplashScreenContainer>
                 <SplitBGContainer>
+                    <MiaLogoImg />
                     <RightPolygon />
                 </SplitBGContainer>
                 <LoaderContainer></LoaderContainer>

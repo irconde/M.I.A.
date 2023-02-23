@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import miaSrc from '../../icons/splash-screen/mia-logo.svg';
 
 export const SplashScreenBG = styled.div`
     background-color: black;
@@ -17,6 +18,15 @@ export const SplitBGContainer = styled.div`
     width: 641px;
     height: 369px;
     background-color: #3a6ff6;
+    position: relative;
+`;
+
+export const MiaLogoImg = styled.img.attrs(() => ({ src: miaSrc }))`
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
 `;
 
 export const RightPolygon = styled.div`
