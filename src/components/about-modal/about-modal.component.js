@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import {
     AboutHeader,
     AppSummary,
+    CloseIconWrapper,
     ModalRoot,
     modalTheme,
     StyledPaper,
+    SummaryDivider,
     TeamAndLibrary,
     TeamLibraryHeader,
     TeamLibraryList,
@@ -16,6 +18,7 @@ import { Modal, ThemeProvider } from '@mui/material';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 import { ReactComponent as AppIcon } from '../../icons/app-logo.icon.svg';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 
 /**
  * Component dialog for changing settings of application.
@@ -37,18 +40,23 @@ const AboutModal = ({ open, setOpen }) => {
             <Modal
                 open={open}
                 onClose={handleClose}
-                aria-labelledby="settings-window"
-                aria-describedby="control the apps remote and local settings">
+                aria-labelledby="about-modal"
+                aria-describedby="information about the app and developers">
                 <StyledPaper>
                     <ModalRoot>
                         <AboutHeader>
-                            {/*<AppIconWrapper>*/}
                             <AppIcon
                                 width="228px"
                                 height="75px"
                                 color="white"
                             />
-                            {/*</AppIconWrapper>*/}
+                            <CloseIconWrapper onClick={handleClose}>
+                                <CloseIcon
+                                    width={'32px'}
+                                    height={'32px'}
+                                    color={'white'}
+                                />
+                            </CloseIconWrapper>
                             {/*<AboutHeaderInfo>*/}
                             {/*    <AboutTitle>*/}
                             {/*        Pilot<strong>GUI</strong>*/}
@@ -65,16 +73,15 @@ const AboutModal = ({ open, setOpen }) => {
                             polygon masks, etc.){' '}
                             <strong>standard medical</strong> imaging for
                             creating specific datasets.
-                            <br></br>
-                            <br></br>
+                            <SummaryDivider />
                             The application is a spin off of the{' '}
                             <strong>Pilot System</strong>, an intelligent
                             decision support system for advanced threat
-                            recognition on x-ray images developed by the
+                            recognition on x-ray images developed by the{' '}
                             <strong>Emerging Analytics Center</strong>.
                         </AppSummary>
                         <TeamAndLibrary>
-                            <TeamLibraryWrapper>
+                            <TeamLibraryWrapper style={{ marginRight: '4rem' }}>
                                 <TeamLibraryHeader>
                                     <TeamIcon
                                         width="32px"
@@ -92,7 +99,7 @@ const AboutModal = ({ open, setOpen }) => {
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>
-                            <TeamLibraryWrapper>
+                            <TeamLibraryWrapper style={{ width: '20rem' }}>
                                 <TeamLibraryHeader>
                                     <CodeBracketsIcon
                                         width="32px"
@@ -115,10 +122,26 @@ const AboutModal = ({ open, setOpen }) => {
                                         </li>
                                         <li>
                                             <a
+                                                href="https://github.com/reduxjs/redux"
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                Redux
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
                                                 href="https://github.com/mui/material-ui"
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 MUI - Material UI
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="https://github.com/electron/electron"
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                ElectronJS
                                             </a>
                                         </li>
                                         <li>
@@ -131,36 +154,12 @@ const AboutModal = ({ open, setOpen }) => {
                                         </li>
                                         <li>
                                             <a
-                                                href="https://github.com/reduxjs/redux"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                Redux
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
                                                 href="https://www.npmjs.com/package/eac-cornerstone-tools"
                                                 target="_blank"
                                                 rel="noopener noreferrer">
-                                                EAC Cornerstone Tools
+                                                Cornerstone Tools
                                             </a>
                                         </li>
-                                        <li>
-                                            <a
-                                                href="https://github.com/electron/electron"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                ElectronJS
-                                            </a>
-                                        </li>
-                                        {/*<li>*/}
-                                        {/*    <a*/}
-                                        {/*        href="https://github.com/socketio/socket.io"*/}
-                                        {/*        target="_blank"*/}
-                                        {/*        rel="noopener noreferrer">*/}
-                                        {/*        Socket.IO*/}
-                                        {/*    </a>*/}
-                                        {/*</li>*/}
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>

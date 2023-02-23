@@ -48,7 +48,7 @@ export const StyledPaper = styled(Paper).attrs(() => ({
     background-color: #1f1f1f;
     outline: none;
     font-family: Noto Sans JP;
-    width: 30vw;
+    width: 45vw;
     min-width: 32rem;
     max-width: 40rem;
     padding: 2rem;
@@ -59,18 +59,18 @@ export const ModalRoot = styled.div`
     height: 37rem;
 `;
 
-export const Title = styled.p`
-    font-family: Noto Sans JP;
-    font-size: 1rem;
-    font-weight: normal;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: normal;
-    color: #fff;
-    margin-bottom: 0.25rem;
-    margin-top: 0.75rem;
-`;
+// export const Title = styled.p`
+//     font-family: Noto Sans JP;
+//     font-size: 1rem;
+//     font-weight: normal;
+//     font-stretch: normal;
+//     font-style: normal;
+//     line-height: normal;
+//     letter-spacing: normal;
+//     color: #fff;
+//     margin-bottom: 0.25rem;
+//     margin-top: 0.75rem;
+// `;
 
 export const Description = styled.p`
     color: ${GREY_COLOR};
@@ -87,45 +87,48 @@ export const AboutHeader = styled.div`
     padding: 20px;
     margin-bottom: 10px;
     align-items: center;
+    justify-content: space-between;
     height: 14%;
 `;
 
-export const AboutHeaderInfo = styled.div`
-    flex-direction: column;
-    font-family: Noto Sans JP;
-    margin: 0 10px 10px;
-`;
+// export const AboutHeaderInfo = styled.div`
+//     flex-direction: column;
+//     font-family: Noto Sans JP;
+//     margin: 0 10px 10px;
+// `;
+//
+// export const VersionInfo = styled.div`
+//     font-size: 15px;
+//     color: #7e7e7e;
+// `;
+//
+// export const AboutTitle = styled.div`
+//     object-fit: contain;
+//     font-size: 42px;
+//     font-weight: 400;
+//     font-stretch: normal;
+//     font-style: normal;
+//     line-height: normal;
+//     letter-spacing: normal;
+//     color: #e1e1e1;
+//     flex: auto;
+//     align-self: center;
+//     height: fit-content;
+//
+//     strong {
+//         font-weight: 900;
+//     }
+// `;
 
-export const VersionInfo = styled.div`
-    font-size: 15px;
-    color: #7e7e7e;
-`;
-
-export const AboutTitle = styled.div`
-    object-fit: contain;
-    font-size: 42px;
-    font-weight: 400;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: normal;
-    color: #e1e1e1;
-    flex: auto;
-    align-self: center;
-    height: fit-content;
-
-    strong {
-        font-weight: 900;
-    }
-`;
-
-export const AppIconWrapper = styled.div`
-    height: 80px;
-    width: 80px;
-    background: #282828;
+export const CloseIconWrapper = styled.div`
+    align-self: flex-start;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    :hover {
+        cursor: pointer;
+    }
 `;
 
 export const AppSummary = styled.div`
@@ -135,14 +138,23 @@ export const AppSummary = styled.div`
     color: #a6a6a6;
     text-align: justify;
     margin: 0 10px;
+
+    strong {
+        font-weight: 600;
+        color: #d5d5d5;
+    }
+`;
+
+export const SummaryDivider = styled.div`
+    height: 1rem;
+    width: 100%;
 `;
 
 export const TeamAndLibrary = styled.div`
     height: 57%;
     display: flex;
-    justify-content: space-around;
     color: #e1e1e1;
-    margin: 25px 0 0;
+    margin: 1rem;
     font-size: 20px;
 `;
 
@@ -171,10 +183,10 @@ export const TeamLibraryList = styled.div`
     justify-content: start;
     align-items: center;
     color: #a6a6a6;
-    font-size: 14px;
+    font-size: 16px;
+    width: 15rem;
 
     ul {
-        list-style-type: square;
         list-style-position: inside;
         padding: 0;
     }
