@@ -49,9 +49,14 @@ function createWindow() {
     if (!fs.existsSync(MONITOR_FILE_PATH)) {
         display = screen.getPrimaryDisplay();
     } else {
-        const data = fs.readFileSync(MONITOR_FILE_PATH);
-        const rectangle = JSON.parse(data);
-        display = screen.getDisplayMatching(rectangle);
+        try {
+            const data = fs.readFileSync(MONITOR_FILE_PATH);
+            const rectangle = JSON.parse(data);
+            display = screen.getDisplayMatching(rectangle);
+        } catch (error) {
+            console.log(error);
+            display = screen.getPrimaryDisplay();
+        }
     }
 
     mainWindow = new BrowserWindow({

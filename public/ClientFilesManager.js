@@ -419,106 +419,158 @@ class ClientFilesManager {
     }
 
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-
-        const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
-        const { cocoAnnotations, cocoCategories } = newAnnotationData;
-        let annotationJson = {
-            info: {
-                description: 'COCO Dataset',
-                url: 'http://cocodataset.org',
-                version: '1.0',
-                year: year,
-                contributor: 'COCO Consortium',
-                date_created: `${year}/${month}/${day}`,
-            },
-            licenses: [
-                {
-                    url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
-                    id: 1,
-                    name: 'Attribution-NonCommercial-ShareAlike License',
-                },
-                {
-                    url: 'http://creativecommons.org/licenses/by-nc/2.0/',
-                    id: 2,
-                    name: 'Attribution-NonCommercial License',
-                },
-                {
-                    url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
-                    id: 3,
-                    name: 'Attribution-NonCommercial-NoDerivs License',
-                },
-                {
-                    url: 'http://creativecommons.org/licenses/by/2.0/',
-                    id: 4,
-                    name: 'Attribution License',
-                },
-                {
-                    url: 'http://creativecommons.org/licenses/by-sa/2.0/',
-                    id: 5,
-                    name: 'Attribution-ShareAlike License',
-                },
-                {
-                    url: 'http://creativecommons.org/licenses/by-nd/2.0/',
-                    id: 6,
-                    name: 'Attribution-NoDerivs License',
-                },
-                {
-                    url: 'http://flickr.com/commons/usage/',
-                    id: 7,
-                    name: 'No known copyright restrictions',
-                },
-                {
-                    url: 'http://www.usa.gov/copyright.shtml',
-                    id: 8,
-                    name: 'United States Government Work',
-                },
-            ],
-            images: [],
-            annotations: cocoAnnotations,
-            categories: cocoCategories,
-        };
-
-        // TODO: Get width and height, depending on image type
-        this.fileNames.forEach((file, index) => {
-            annotationJson.images.push({
-                id: index + 1,
-                coco_url: '',
-                flickr_url: '',
-                file_name: file,
-                date_capture: todayDateString,
-            });
-        });
-
         return new Promise((resolve, reject) => {
-            const writeStream = fs.createWriteStream(
-                path.join(annotationFilePath, 'annotation.json')
-            );
-            writeStream.on('error', (err) => {
-                console.log(err);
-                reject(err);
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+            const { cocoAnnotations, cocoCategories } = newAnnotationData;
+            let annotationJson = {
+                info: {
+                    description: 'COCO Dataset',
+                    url: 'http://cocodataset.org',
+                    version: '1.0',
+                    year: year,
+                    contributor: 'COCO Consortium',
+                    date_created: `${year}/${month}/${day}`,
+                },
+                licenses: [
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
+                        id: 1,
+                        name: 'Attribution-NonCommercial-ShareAlike License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc/2.0/',
+                        id: 2,
+                        name: 'Attribution-NonCommercial License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
+                        id: 3,
+                        name: 'Attribution-NonCommercial-NoDerivs License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by/2.0/',
+                        id: 4,
+                        name: 'Attribution License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-sa/2.0/',
+                        id: 5,
+                        name: 'Attribution-ShareAlike License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nd/2.0/',
+                        id: 6,
+                        name: 'Attribution-NoDerivs License',
+                    },
+                    {
+                        url: 'http://flickr.com/commons/usage/',
+                        id: 7,
+                        name: 'No known copyright restrictions',
+                    },
+                    {
+                        url: 'http://www.usa.gov/copyright.shtml',
+                        id: 8,
+                        name: 'United States Government Work',
+                    },
+                ],
+                images: [],
+                annotations: cocoAnnotations,
+                categories: cocoCategories,
+            };
+            const listOfPromises = [];
+            // TODO: Get width and height, depending on image type
+            this.fileNames.forEach((file, index) => {
+                annotationJson.images.push({
+                    id: index + 1,
+                    coco_url: '',
+                    flickr_url: '',
+                    file_name: file,
+                    date_capture: todayDateString,
+                });
+                if (path.extname(file).toLowerCase() === '.dcm') {
+                    listOfPromises.push(
+                        this.getDICOMDimensions(
+                            path.join(this.selectedImagesDirPath, file),
+                            file
+                        )
+                    );
+                } else if (
+                    path.extname(file).toLowerCase() === '.jpg' ||
+                    path.extname(file).toLowerCase() === '.jpeg'
+                ) {
+                    listOfPromises.push(
+                        this.getJPEGDimensions(
+                            path.join(this.selectedImagesDirPath, file),
+                            file
+                        )
+                    );
+                } else if (path.extname(file).toLowerCase() === '.png') {
+                    listOfPromises.push(
+                        this.getPNGDimensions(
+                            path.join(this.selectedImagesDirPath, file),
+                            file
+                        )
+                    );
+                }
             });
-            writeStream.on('finish', () => {
-                resolve();
-            });
-            writeStream.write(JSON.stringify(annotationJson, null, 4));
-            writeStream.end();
+
+            Promise.all(listOfPromises)
+                .then((results) => {
+                    results.forEach((result) => {
+                        const foundIndex = annotationJson.images.findIndex(
+                            (image) => image.file_name === result.fileName
+                        );
+                        if (foundIndex !== -1) {
+                            annotationJson.images[foundIndex].width =
+                                result.width;
+                            annotationJson.images[foundIndex].height =
+                                result.height;
+                        }
+                    });
+                    const annotationPath = path.join(
+                        annotationFilePath,
+                        'annotation.json'
+                    );
+                    const writeStream = fs.createWriteStream(annotationPath);
+                    writeStream.on('error', (err) => {
+                        console.log(err);
+                        reject(err);
+                    });
+                    writeStream.on('finish', () => {
+                        this.selectedAnnotationFile = annotationPath;
+                        this.#thumbnails.setAnnotationFilePath(annotationPath);
+                        this.currentFileIndex++;
+                        resolve();
+                    });
+                    writeStream.write(JSON.stringify(annotationJson, null, 4));
+                    writeStream.end();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
         });
     }
 
-    async getPNGDimensions(fileName) {
+    async getPNGDimensions(filePath, fileName) {
         return new Promise((resolve, reject) => {
-            fs.createReadStream(fileName)
+            fs.createReadStream(filePath)
                 .pipe(new PNG())
                 .on('parsed', function () {
-                    resolve({ width: this.width, height: this.height });
+                    resolve({
+                        width: this.width,
+                        height: this.height,
+                        fileName,
+                    });
                 })
                 .on('error', function (error) {
                     reject(error);
@@ -526,16 +578,16 @@ class ClientFilesManager {
         });
     }
 
-    async getJPEGDimensions(fileName) {
+    async getJPEGDimensions(filePath, fileName) {
         return new Promise((resolve, reject) => {
-            const stream = fs.createReadStream(fileName);
+            const stream = fs.createReadStream(filePath);
             let data = Buffer.from([]);
             stream.on('data', (chunk) => {
                 data = Buffer.concat([data, chunk]);
             });
             stream.on('end', () => {
                 const { width, height } = jpeg.decode(data);
-                resolve({ width, height });
+                resolve({ width, height, fileName });
             });
             stream.on('error', (error) => {
                 reject(error);
@@ -543,9 +595,9 @@ class ClientFilesManager {
         });
     }
 
-    async getDICOMDimensions(fileName) {
+    async getDICOMDimensions(filePath, fileName) {
         return new Promise((resolve, reject) => {
-            const stream = fs.createReadStream(fileName);
+            const stream = fs.createReadStream(filePath);
             let data = Buffer.from([]);
             stream.on('data', (chunk) => {
                 data = Buffer.concat([data, chunk]);
@@ -554,7 +606,7 @@ class ClientFilesManager {
                 const dataSet = dicomParser.parseDicom(data);
                 const width = dataSet.uint16('x00280011');
                 const height = dataSet.uint16('x00280010');
-                resolve({ width, height });
+                resolve({ width, height, fileName });
             });
             stream.on('error', (error) => {
                 reject(error);
