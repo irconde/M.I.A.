@@ -61,33 +61,6 @@ export const ModalSection = styled.div`
     padding-top: 1.5rem;
 `;
 
-export const ConfirmButton = styled(Button).attrs(() => ({
-    variant: 'contained',
-}))`
-    &.MuiButton-root.MuiButton-contained {
-        align-self: flex-end;
-        margin-top: 3rem;
-        width: 45%;
-        font-family: Noto Sans JP, sans-serif;
-        font-size: 17px;
-        font-weight: 500;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        text-align: justify;
-        color: ${({ disabled }) => !disabled && '#fff'};
-        padding-block: 0.5rem;
-        white-space: nowrap;
-        background-color: ${({ $success }) => $success && 'green'};
-    }
-
-    & svg {
-        fill: ${({ disabled }) => (disabled ? 'rgba(0, 0, 0, 0.26)' : 'white')};
-        transition: fill 250ms;
-    }
-`;
-
 export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
@@ -133,9 +106,4 @@ export const OutlinedButton = styled(Button).attrs(() => ({
         text-transform: none;
         width: 38%;
     }
-`;
-
-export const IconWrapper = styled.span`
-    display: flex;
-    padding-left: 0.5rem;
 `;

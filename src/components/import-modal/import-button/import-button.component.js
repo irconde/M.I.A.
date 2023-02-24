@@ -1,5 +1,5 @@
 import SpinnerIcon from '../../../icons/import-modal/spinner-icon/spinner.icon';
-import { ConfirmButton, IconWrapper } from '../import-modal.styles';
+import { ConfirmButton, IconWrapper } from './import-button.styles';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import useThumbnailsLoading from '../../../utils/hooks/thumbnails-loading.hook';
 import PropTypes from 'prop-types';
@@ -25,7 +25,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
         setPrevLoading(areThumbnailsLoading);
     }, [areThumbnailsLoading]);
 
-    const renderButton = () => {
+    const renderBtnContents = () => {
         let icon;
         let text;
         if (success) {
@@ -57,7 +57,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
                 !!paths.annotationsError ||
                 !!paths.imagesError
             }>
-            {renderButton()}
+            {renderBtnContents()}
         </ConfirmButton>
     );
 }
