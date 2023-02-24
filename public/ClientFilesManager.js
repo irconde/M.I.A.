@@ -486,8 +486,8 @@ class ClientFilesManager {
                 annotations: cocoAnnotations,
                 categories: cocoCategories,
             };
+
             const listOfPromises = [];
-            // TODO: Get width and height, depending on image type
             this.fileNames.forEach((file, index) => {
                 annotationJson.images.push({
                     id: index + 1,
@@ -496,30 +496,20 @@ class ClientFilesManager {
                     file_name: file,
                     date_capture: todayDateString,
                 });
+                const imagePath = path.join(this.selectedImagesDirPath, file);
                 if (path.extname(file).toLowerCase() === '.dcm') {
                     listOfPromises.push(
-                        this.getDICOMDimensions(
-                            path.join(this.selectedImagesDirPath, file),
-                            file
-                        )
+                        this.getDICOMDimensions(imagePath, file)
                     );
                 } else if (
                     path.extname(file).toLowerCase() === '.jpg' ||
                     path.extname(file).toLowerCase() === '.jpeg'
                 ) {
                     listOfPromises.push(
-                        this.getJPEGDimensions(
-                            path.join(this.selectedImagesDirPath, file),
-                            file
-                        )
+                        this.getJPEGDimensions(imagePath, file)
                     );
                 } else if (path.extname(file).toLowerCase() === '.png') {
-                    listOfPromises.push(
-                        this.getPNGDimensions(
-                            path.join(this.selectedImagesDirPath, file),
-                            file
-                        )
-                    );
+                    listOfPromises.push(this.getPNGDimensions(imagePath, file));
                 }
             });
 
