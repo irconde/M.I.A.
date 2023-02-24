@@ -68,6 +68,10 @@ function createWindow() {
             webSecurity: false,
         },
     });
+    mainWindow.webContents.on('new-window', (e, url) => {
+        e.preventDefault();
+        require('electron').shell.openExternal(url);
+    });
 
     files = new ClientFilesManager(mainWindow);
 
