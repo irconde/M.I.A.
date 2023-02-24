@@ -27,7 +27,7 @@
     "cornerstone-web-image-loader": "^2.1.1",
     "cross-fetch": "^3.1.5",
     "dcmjs": "^0.21.0",
-    "dicom-parser": "^1.8.2",
+    "dicom-parser": "^1.8.21",
     "dotenv": "8.2.0",
     "eac-cornerstone-tools": "^1.0.6",
     "electron-devtools-installer": "^3.2.0",
@@ -67,8 +67,7 @@
     "package-electron": "electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
-    "docs": "jsdoc -c jsdoc.json -t ./node_modules/better-docs"
+    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet"
   },
   "build": {
     "appId": "edu.ualr.eac.mia",
@@ -103,7 +102,6 @@
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
     "babel-eslint": "^10.1.0",
-    "better-docs": "2.7.2",
     "electron": "^23.1.0",
     "electron-builder": "^23.6.0",
     "eslint": "^7.19.0",
@@ -112,7 +110,6 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react": "^7.22.0",
     "if-node-version": "^1.1.1",
-    "jsdoc": "^3.6.7",
     "prettier": "^2.2.1",
     "run-script-os": "^1.1.6"
   }
