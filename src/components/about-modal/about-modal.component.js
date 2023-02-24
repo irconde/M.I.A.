@@ -20,6 +20,8 @@ import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code
 import { ReactComponent as AppIcon } from '../../icons/app-logo.icon.svg';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 
+const shell = window.require('electron').shell;
+
 /**
  * Component dialog for changing settings of application.
  *
@@ -33,6 +35,11 @@ const AboutModal = ({ open, setOpen }) => {
      */
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleClick = (event) => {
+        event.preventDefault();
+        shell.openExternal(event.target.href);
     };
 
     return (
@@ -107,6 +114,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/facebook/react/"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 React.js
@@ -115,6 +123,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/reduxjs/redux"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 Redux
@@ -123,6 +132,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/electron/electron"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 ElectronJS
@@ -131,6 +141,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/mui/material-ui"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 MUI - Material UI
@@ -139,6 +150,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/cornerstonejs/cornerstone"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 CornerstoneJS
@@ -147,6 +159,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://www.npmjs.com/package/eac-cornerstone-tools"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 Cornerstone Tools
