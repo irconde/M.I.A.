@@ -79,6 +79,7 @@ export const ConfirmButton = styled(Button).attrs(() => ({
         color: ${({ disabled }) => !disabled && '#fff'};
         padding-block: 0.5rem;
         white-space: nowrap;
+        background-color: ${({ $success }) => $success && 'green'};
     }
 
     & svg {
@@ -134,7 +135,7 @@ export const OutlinedButton = styled(Button).attrs(() => ({
     }
 `;
 
-export const SaveIconWrapper = styled.span`
+export const IconWrapper = styled.span`
     display: flex;
     padding-left: 0.5rem;
 `;
