@@ -1,12 +1,12 @@
 {
-  "name": "dna-client-ui",
-  "productName": "Pilot GUI",
+  "name": "mia-client-ui",
+  "productName": "Medial Imaging Annotation",
   "main": "public/electron.js",
-  "version": "5.0.0",
+  "version": "1.0.0",
   "private": true,
   "homepage": "./",
   "dependencies": {
-    "@babel/core": "^7.17.9",
+    "@babel/core": "^7.21.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/material": "^5.6.3",
@@ -71,7 +71,7 @@
     "docs": "jsdoc -c jsdoc.json -t ./node_modules/better-docs"
   },
   "build": {
-    "appId": "edu.ualr.eac.dna.pilot.gui",
+    "appId": "edu.ualr.eac.mia",
     "directories": {
       "buildResources": "build"
     },

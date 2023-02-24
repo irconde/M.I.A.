@@ -61,6 +61,10 @@ function createWindow() {
 
     mainWindow = new BrowserWindow({
         ...display.bounds,
+        icon: path.join(
+            __dirname,
+            `${process.platform === 'darwin' ? 'icon.icns' : 'icon.ico'}`
+        ),
         webPreferences: {
             // Node Integration enables the use of the Node.JS File system
             // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
