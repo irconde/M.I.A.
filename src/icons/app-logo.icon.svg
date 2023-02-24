@@ -1,0 +1,22 @@
+<svg width="230" height="75" viewBox="0 0 230 75" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+        <path stroke="#FAFAFA" fill="#FAFAFA"
+              d="M.5 17.5h6v6h-6zM.5 51.5h6v6h-6zM17.5 51.5h6v6h-6zM32.5 14.5h9v9h-9zM51.5 17.5h6v6h-6zM32.5 51.5h9v9h-9zM64.5 51.5h9v9h-9zM3.5 51V22.5"/>
+        <path stroke="#FAFAFA" fill="#FAFAFA" stroke-linecap="square" d="m6.395 22.405 14.21 29.19M20.412 51.6 34 24"/>
+        <path stroke="#FAFAFA" stroke-width="2" fill="#FAFAFA" stroke-linecap="square" d="M36.5 50.603V24.397"/>
+        <path stroke="#FAFAFA" fill="#FAFAFA" d="M52.611 23 39 51.597M55.389 24 69 51.6"/>
+        <text font-family="NotoSansJP-Regular, Noto Sans JP" font-size="18" letter-spacing="1.636" fill="#fafafa"
+              transform="translate(0 1)">
+            <tspan x="99" y="23">MEDICAL</tspan>
+        </text>
+        <path stroke="#FAFAFA" stroke-linecap="square" d="M86.5 1.401v72.198"/>
+        <text font-family="NotoSansJP-Regular, Noto Sans JP" font-size="18" letter-spacing="1.636" fill="#fafafa"
+              transform="translate(0 1)">
+            <tspan x="99" y="45">IMAGING</tspan>
+        </text>
+        <text font-family="NotoSansJP-Regular, Noto Sans JP" font-size="18" letter-spacing="1.636" fill="#fafafa"
+              transform="translate(0 1)">
+            <tspan x="99" y="66">ANNOTATION</tspan>
+        </text>
+    </g>
+</svg>
