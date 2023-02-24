@@ -1,30 +1,47 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
-const sideMenuWidth = 256 + constants.RESOLUTION_UNIT;
+export const LAZY_SIDE_MENU_WIDTH = 256 + constants.RESOLUTION_UNIT;
+export const DEFAULT_IMAGE_WIDTH = '197px';
 
 export const LazyImageMenuContainer = styled.div`
     position: fixed;
     left: 0;
-    top: 0;
-    height: 100%;
+    bottom: 0;
+    height: calc(100% - 3.375rem);
     overflow-x: hidden;
     overflow-y: visible;
     background-color: #292929;
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
-    transition: ${(props) =>
-        props.collapsedLazyMenu === true ? 'none' : 'all 0.3s ease-in'};
     z-index: 2;
     width: 256px;
-    transform: ${(props) => props.translateStyle};
-`;
+    padding-top: calc((${LAZY_SIDE_MENU_WIDTH} - ${DEFAULT_IMAGE_WIDTH}) / 2);
+    box-sizing: border-box;
 
-export const LazyImageMenuPadding = styled.div`
-    height: ${constants.sideMenuPaddingTop} + ${constants.RESOLUTION_UNIT};
-    width: 100%;
+    /* width */
+
+    ::-webkit-scrollbar {
+        width: 9px;
+    }
+
+    /* Track */
+
+    ::-webkit-scrollbar-track {
+        background: #292929;
+    }
+
+    /* Handle */
+
+    ::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 6px;
+        border: solid 1px #4e4e4e;
+    }
+
+    /* Handle on hover */
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 `;
 
 export const LazyImagesContainer = styled.div`
@@ -32,40 +49,9 @@ export const LazyImagesContainer = styled.div`
     flex-flow: row wrap;
     justify-content: center;
     align-items: flex-start;
-    width: ${sideMenuWidth};
+    width: ${LAZY_SIDE_MENU_WIDTH};
     height: ${(props) =>
         props.collapsedLazyMenu === true
             ? document.documentElement.clientHeight
             : 'none'};
-`;
-
-export const ImagesInWorkspace = styled.div`
-    width: 100%;
-    height: 20px;
-    margin-top: 0;
-    font-size: 14px;
-    font-weight: normal;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: -0.58px;
-    text-align: center;
-    color: #e3e3e3;
-    display: flex;
-    justify-content: flex-start;
-    position: sticky;
-    top: 0px;
-    background-color: #292929;
-    z-index: 1;
-    padding: 1rem 0 1rem 1rem;
-    box-shadow: ${(props) =>
-        props.shouldAddBoxShadow &&
-        '0 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5)'};
-`;
-
-export const FolderIconWrapper = styled.div`
-    margin-right: 10px;
-    align-self: center;
-    display: flex;
-    align-items: center;
 `;

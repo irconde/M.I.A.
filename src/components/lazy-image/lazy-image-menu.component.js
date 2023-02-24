@@ -1,24 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Channels } from '../../utils/enums/Constants';
 import {
-    getCollapsedLazyMenu,
-    getLocalFileOpen,
-    setGeneratingThumbnails,
-} from '../../redux/slices-old/ui/uiSlice';
-import * as constants from '../../utils/enums/Constants';
-import Utils from '../../utils/general/Utils';
-import LazyImageContainer from './lazy-image-container.component';
-import {
-    FolderIconWrapper,
-    ImagesInWorkspace,
     LazyImageMenuContainer,
-    LazyImageMenuPadding,
     LazyImagesContainer,
 } from './lazy-image-menu.styles';
-import FolderIcon from '../../icons/shared/folder-icon/folder.icon';
+import LazyImageContainerComponent from './lazy-image-container.component';
+import {
+    getCurrFileName,
+    getLazyImageMenuVisible,
+} from '../../redux/slices/ui.slice';
+import { getAnnotations } from '../../redux/slices/annotation.slice';
+import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const MAX_THUMBNAILS_COUNT = 40;
+const THUMBNAILS_FETCH_AMOUNT = 5;
+const TOP_SCROLL_PER_THUMBNAIL = 2.8;
+
+const useThumbnails = (defaultVal = []) => {
+    const [thumbnails, _setThumbnails] = useState(defaultVal);
+
+    const padShowAnnIconProp = (thumbs) =>
+        thumbs.map((thumb) =>
+            thumb.showAnnIcon === undefined
+                ? {
+                      ...thumb,
+                      showAnnIcon: thumb.hasAnnotations || false,
+                  }
+                : thumb
+        );
+
+    const setThumbnails = (arg) => {
+        if (typeof arg === 'function') {
+            _setThumbnails((thumbnails) => padShowAnnIconProp(arg(thumbnails)));
+        } else {
+            _setThumbnails(padShowAnnIconProp(arg));
+        }
+    };
+
+    return [thumbnails, setThumbnails];
+};
 
 /**
  * Component for displaying the lazy image menu.
@@ -26,101 +48,151 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  * @component
  *
  */
-function LazyImageMenuComponent(props) {
-    const dispatch = useDispatch();
-    ipcRenderer.on(constants.Channels.thumbnailStatus, (event, status) => {
-        dispatch(setGeneratingThumbnails(status));
-    });
-    const enableMenu = useSelector(getLocalFileOpen);
-    const collapsedLazyMenu = useSelector(getCollapsedLazyMenu);
-    const [translateStyle, setTranslateStyle] = useState({
-        transform: `translate(0)`,
-    });
-    const prevIsMenuCollapsed = Utils.usePrevious(collapsedLazyMenu);
+function LazyImageMenuComponent() {
+    const [thumbnails, setThumbnails] = useThumbnails([]);
+    const isLazyMenuVisible = useSelector(getLazyImageMenuVisible);
+    const currentFileName = useSelector(getCurrFileName);
+    const [currChunk, setCurrChunk] = useState(0);
+    const scrollContainerRef = useRef(null);
+    const { length: annotationsCount } = useSelector(getAnnotations);
+    const [prevFileName, setPrevFileName] = useState(currentFileName);
+    const { selectedImagesDirPath, selectedAnnotationFile } =
+        useSelector(getAssetsDirPaths);
+
     useEffect(() => {
-        if (prevIsMenuCollapsed !== collapsedLazyMenu) {
-            if (collapsedLazyMenu === true) {
-                setTranslateStyle({
-                    transform: `translate(${-Math.abs(256 + 10)}px)`,
-                });
-            } else {
-                setTranslateStyle({
-                    transform: `translate(0)`,
-                });
-            }
-        }
-    });
+        scrollContainerRef.current.scrollTop = 0;
+    }, [selectedImagesDirPath, selectedAnnotationFile]);
 
-    // change piece of state when the user scrolls. Used for adding box-shadow to header
-    const [shouldAddBoxShadow, setShouldAddBoxShadow] = useState(false);
+    useEffect(() => {
+        listenForThumbnailUpdates();
+        ipcRenderer
+            .invoke(Channels.requestInitialThumbnailsList)
+            .then(setThumbnails)
+            .catch(() => {
+                // TODO: what should go in the lazy menu if no thumbnails are present?
+                console.log('no thumbnails to begin with');
+            });
+    }, []);
 
-    function handleMenuContainerScroll(event) {
-        const element = event.target;
-        if (element.scrollTop > 0) {
-            setShouldAddBoxShadow(true);
-        } else {
-            setShouldAddBoxShadow(false);
-        }
-    }
+    useEffect(() => {
+        // update showAnnIcon when the annotation count changes
+        setThumbnails(
+            thumbnails.map((thumb) =>
+                thumb.fileName === currentFileName
+                    ? {
+                          ...thumb,
+                          showAnnIcon: !!annotationsCount,
+                      }
+                    : thumb
+            )
+        );
+    }, [annotationsCount]);
 
-    if (enableMenu) {
-        if (collapsedLazyMenu) {
-            return (
-                <LazyImageMenuContainer
-                    onScroll={handleMenuContainerScroll}
-                    translateStyle={translateStyle}>
-                    <LazyImageMenuPadding />
-                    <LazyImagesContainer
-                        collapsedLazyMenu={collapsedLazyMenu}
-                    />
-                </LazyImageMenuContainer>
+    useEffect(() => {
+        // if switch files, reflect the actual state of the previous file rather
+        // than the previous redux one
+        setThumbnails((thumbnails) =>
+            thumbnails.map((thumb) =>
+                thumb.fileName === prevFileName
+                    ? {
+                          ...thumb,
+                          showAnnIcon: thumb.hasAnnotations,
+                      }
+                    : thumb
+            )
+        );
+        setPrevFileName(currentFileName);
+    }, [currentFileName]);
+
+    const listenForThumbnailUpdates = () => {
+        const {
+            removeThumbnail,
+            addThumbnail,
+            updateThumbnails,
+            updateThumbnailHasAnnotations,
+        } = Channels;
+        ipcRenderer
+            .on(removeThumbnail, (e, removedThumbnailName) => {
+                // must use a function here to get the most up-to-date state
+                setThumbnails((thumbnails) =>
+                    thumbnails.filter(
+                        (thumbnail) =>
+                            thumbnail.fileName !== removedThumbnailName
+                    )
+                );
+            })
+            .on(addThumbnail, (e, addedThumbnail) => {
+                // must use a function here to get the most up-to-date state
+                setThumbnails((thumbnails) => [...thumbnails, addedThumbnail]);
+            })
+            .on(updateThumbnails, (e, thumbnails) => {
+                setThumbnails(thumbnails);
+                setCurrChunk(0);
+            })
+            .on(
+                updateThumbnailHasAnnotations,
+                (e, { hasAnnotations, fileName }) => {
+                    setThumbnails((thumbnails) =>
+                        thumbnails.map((thumb) =>
+                            thumb.fileName === fileName
+                                ? {
+                                      ...thumb,
+                                      hasAnnotations,
+                                      showAnnIcon: hasAnnotations,
+                                  }
+                                : thumb
+                        )
+                    );
+                }
             );
-        } else if (!collapsedLazyMenu) {
-            return (
-                <LazyImageMenuContainer
-                    onScroll={handleMenuContainerScroll}
-                    translateStyle={translateStyle}>
-                    <ImagesInWorkspace shouldAddBoxShadow={shouldAddBoxShadow}>
-                        <FolderIconWrapper>
-                            <FolderIcon
-                                width={'24px'}
-                                height={'24px'}
-                                color={'white'}
-                            />
-                        </FolderIconWrapper>
-                        Images in Workspace
-                    </ImagesInWorkspace>
-                    <LazyImagesContainer collapsedLazyMenu={collapsedLazyMenu}>
-                        {props.thumbnails !== null
-                            ? props.thumbnails.map((file, index) => {
-                                  return (
-                                      <LazyImageContainer
-                                          getSpecificFileFromLocalDirectory={
-                                              props.getSpecificFileFromLocalDirectory
-                                          }
-                                          key={index}
-                                          file={file}
-                                      />
-                                  );
-                              })
-                            : null}
-                    </LazyImagesContainer>
-                </LazyImageMenuContainer>
-            );
-        } else return null;
-    } else return null;
+    };
+
+    const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } =
+            scrollContainerRef.current;
+
+        if (scrollTop === 0 && currChunk !== 0) {
+            setCurrChunk(currChunk - 1);
+            scrollContainerRef.current.scrollTop =
+                TOP_SCROLL_PER_THUMBNAIL * THUMBNAILS_FETCH_AMOUNT;
+        } else if (
+            Math.ceil(scrollHeight - scrollTop) === clientHeight &&
+            thumbnails.length >= calculateInterval().end
+        ) {
+            setCurrChunk(currChunk + 1);
+        }
+    };
+
+    const calculateInterval = () => {
+        const start = currChunk * THUMBNAILS_FETCH_AMOUNT;
+        return {
+            start,
+            end: start + MAX_THUMBNAILS_COUNT,
+        };
+    };
+
+    const { start, end } = calculateInterval();
+    return (
+        <LazyImageMenuContainer
+            ref={scrollContainerRef}
+            onScroll={handleScroll}>
+            <LazyImagesContainer collapsedLazyMenu={isLazyMenuVisible}>
+                {thumbnails
+                    .slice(start, end)
+                    .map(({ fileName, filePath, showAnnIcon }) => (
+                        <LazyImageContainerComponent
+                            key={fileName}
+                            selected={fileName === currentFileName}
+                            fileName={fileName}
+                            filePath={filePath}
+                            hasAnnotations={showAnnIcon}
+                        />
+                    ))}
+            </LazyImagesContainer>
+        </LazyImageMenuContainer>
+    );
 }
 
-LazyImageMenuComponent.propTypes = {
-    /**
-     * Array with string values to the file path of thumbnails,
-     * IE: ['D:\images\.thumbnails\1_img.ora_thumbnail.png', 'D:\images\.thumbnails\2_img.ora_thumbnail.png', ...]
-     */
-    thumbnails: PropTypes.array,
-    /**
-     * Calls the Electron channel to invoke a specific file from the selected file system folder.
-     */
-    getSpecificFileFromLocalDirectory: PropTypes.func,
-};
+LazyImageMenuComponent.propTypes = {};
 
 export default LazyImageMenuComponent;
