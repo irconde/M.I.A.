@@ -867,10 +867,12 @@ class ClientFilesManager {
                     });
                     this.fileNames.push(addedFilename);
 
-                    this.addImageAnnotationHandler(
-                        addedFilePath,
-                        addedFilename
-                    );
+                    if (this.selectedAnnotationFile !== '') {
+                        this.addImageAnnotationHandler(
+                            addedFilePath,
+                            addedFilename
+                        );
+                    }
 
                     // if the added file is the only file, then send a file update
                     if (this.fileNames.length === 1) {
@@ -892,8 +894,9 @@ class ClientFilesManager {
                     throw new Error('Error with removed file index');
                 }
 
-                this.removeImageFromAnnotations(removedFileName);
-
+                if (this.selectedAnnotationFile !== '') {
+                    this.removeImageFromAnnotations(removedFileName);
+                }
                 this.fileNames.splice(removedFileIndex, 1);
 
                 if (this.fileNames.length === 0) {
