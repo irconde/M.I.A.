@@ -121,6 +121,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
+                fileName: payload,
             })
             .then(() => {
                 return true;
@@ -143,6 +144,7 @@ const initialState = {
     saveAnnotationsStatus: SAVE_STATUSES.IDLE,
     saveFailureMessage: '',
     deletedAnnotationIds: [],
+    maxAnnotationId: 1,
 };
 
 const annotationSlice = createSlice({
@@ -151,9 +153,11 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotationInformation, colors } = action.payload;
-            const { annotations, categories } = annotationInformation;
+            const { annotations, categories, maxAnnotationId } =
+                annotationInformation;
             state.annotations = [];
             state.colors = colors;
+            state.maxAnnotationId = maxAnnotationId;
             if (annotations?.length > 0) {
                 annotations.forEach((annotation) => {
                     const categoryNameIdx = categories.findIndex(
@@ -218,7 +222,7 @@ const annotationSlice = createSlice({
                         .id + 1;
             } else {
                 newAnnotation.image_id = 1;
-                newAnnotation.id = 1;
+                newAnnotation.id = state.maxAnnotationId++;
             }
 
             newAnnotation.selected = false;

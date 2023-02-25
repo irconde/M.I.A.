@@ -334,10 +334,13 @@ class ClientFilesManager {
 
     async updateAnnotationsFile(newAnnotationData) {
         return new Promise((resolve, reject) => {
-            console.log('updating');
             try {
-                const { cocoAnnotations, cocoCategories, cocoDeleted } =
-                    newAnnotationData;
+                const {
+                    cocoAnnotations,
+                    cocoCategories,
+                    cocoDeleted,
+                    fileName,
+                } = newAnnotationData;
                 if (
                     this.selectedAnnotationFile !== '' &&
                     fs.existsSync(this.selectedAnnotationFile)
@@ -355,7 +358,6 @@ class ClientFilesManager {
                     });
                     readStream.on('end', () => {
                         try {
-                            console.log('end');
                             const annotationFile = JSON.parse(data);
                             annotationFile.categories = cocoCategories;
                             cocoAnnotations.forEach((annotation) => {
@@ -364,6 +366,12 @@ class ClientFilesManager {
                                         (fileAnnotation) =>
                                             fileAnnotation.id === annotation.id
                                     );
+                                const foundImage = annotationFile.images.find(
+                                    (image) => image.file_name === fileName
+                                );
+                                if (foundImage) {
+                                    annotation.image_id = foundImage.id;
+                                }
                                 if (foundIndex !== -1) {
                                     annotationFile.annotations[foundIndex] =
                                         annotation;
@@ -388,17 +396,16 @@ class ClientFilesManager {
                                 reject(err);
                             });
                             writeStream.on('finish', () => {
-                                console.log('finish');
-                                const fileName =
+                                const savedFileName =
                                     this.fileNames[this.currentFileIndex];
                                 this.#sendUpdate(
                                     Channels.updateThumbnailHasAnnotations,
                                     {
                                         hasAnnotations: !!this.#getAnnotations(
                                             annotationFile,
-                                            fileName
+                                            savedFileName
                                         ).length,
-                                        fileName,
+                                        fileName: savedFileName,
                                     }
                                 );
                                 if (
@@ -407,8 +414,6 @@ class ClientFilesManager {
                                 ) {
                                     this.currentFileIndex++;
                                 }
-                                console.log(cocoAnnotations);
-                                console.log(annotationFile.annotations);
                                 resolve();
                             });
                             writeStream.write(JSON.stringify(annotationFile));
@@ -707,12 +712,17 @@ class ClientFilesManager {
             });
             readStream.on('end', () => {
                 const allAnnotations = JSON.parse(data);
+                const maxAnnotationId =
+                    allAnnotations.annotations.reduce((a, b) =>
+                        a.id > b.id ? a : b
+                    ).id + 1;
                 resolve({
                     annotations: this.#getAnnotations(
                         allAnnotations,
                         this.fileNames[this.currentFileIndex]
                     ),
                     categories: allAnnotations.categories,
+                    maxAnnotationId,
                 });
             });
         });
