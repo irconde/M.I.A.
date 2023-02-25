@@ -11,6 +11,7 @@ const async = require('async');
 const PNG = require('pngjs').PNG;
 const jpeg = require('jpeg-js');
 const dicomParser = require('dicom-parser');
+const readline = require('readline');
 
 class CustomPromise {
     isSettled = false;
@@ -563,6 +564,7 @@ class ClientFilesManager {
                     });
                 })
                 .on('error', function (error) {
+                    console.log(error);
                     reject(error);
                 });
         });
@@ -580,6 +582,7 @@ class ClientFilesManager {
                 resolve({ width, height, fileName });
             });
             stream.on('error', (error) => {
+                console.log(error);
                 reject(error);
             });
         });
@@ -599,6 +602,7 @@ class ClientFilesManager {
                 resolve({ width, height, fileName });
             });
             stream.on('error', (error) => {
+                console.log(error);
                 reject(error);
             });
         });
@@ -862,6 +866,12 @@ class ClientFilesManager {
                         filePath: newThumbnailPath,
                     });
                     this.fileNames.push(addedFilename);
+
+                    this.addImageAnnotationHandler(
+                        addedFilePath,
+                        addedFilename
+                    );
+
                     // if the added file is the only file, then send a file update
                     if (this.fileNames.length === 1) {
                         this.currentFileIndex = 0;
@@ -881,6 +891,8 @@ class ClientFilesManager {
                 if (removedFileIndex <= -1) {
                     throw new Error('Error with removed file index');
                 }
+
+                this.removeImageFromAnnotations(removedFileName);
 
                 this.fileNames.splice(removedFileIndex, 1);
 
@@ -910,6 +922,149 @@ class ClientFilesManager {
     async removeFileWatcher() {
         await this.#watcher?.unwatch(this.selectedImagesDirPath);
         await this.#watcher?.close();
+    }
+
+    async removeImageFromAnnotations(filename) {
+        // Read the annotations file and parse it as JSON
+        const annotationsFilename = this.selectedAnnotationFile;
+        const annotationsReadStream = fs.createReadStream(
+            annotationsFilename,
+            'utf8'
+        );
+        const annotationsReader = readline.createInterface({
+            input: annotationsReadStream,
+            crlfDelay: Infinity,
+        });
+
+        let annotationsString = '';
+        annotationsReader.on('line', (line) => {
+            annotationsString += line;
+        });
+
+        annotationsReader.on('close', () => {
+            const annotations = JSON.parse(annotationsString);
+
+            // Find the image with the given filename
+            const image = annotations.images.find(
+                (img) => img.file_name === filename
+            );
+
+            if (image) {
+                const imageId = image.id;
+
+                // Remove all instances associated with the image
+                annotations.annotations = annotations.annotations.filter(
+                    (ann) => ann.image_id !== imageId
+                );
+
+                // Remove the image from the annotations
+                annotations.images = annotations.images.filter(
+                    (img) => img.id !== imageId
+                );
+
+                // Write the updated annotations to the file
+                const writeStream = fs.createWriteStream(annotationsFilename, {
+                    encoding: 'utf8',
+                });
+                const updatedAnnotationsString = JSON.stringify(annotations);
+                writeStream.write(updatedAnnotationsString);
+                writeStream.end();
+
+                console.log(
+                    `Removed instances from ${filename} and saved updated annotations to ${annotationsFilename}`
+                );
+            } else {
+                console.error(`Image ${filename} not found in the annotations`);
+            }
+        });
+    }
+
+    async addImageAnnotationHandler(filePath, fileName) {
+        if (path.extname(fileName).toLowerCase() === '.dcm') {
+            this.getDICOMDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        } else if (path.extname(fileName).toLowerCase() === '.png') {
+            this.getPNGDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        } else if (
+            path.extname(fileName).toLowerCase() === '.jpg' ||
+            path.extname(fileName).toLowerCase() === '.jpeg'
+        ) {
+            this.getJPEGDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        }
+    }
+
+    async addImageToAnnotations(filename, width, height) {
+        // Read the annotations file and parse it as JSON
+        const annotationsFilename = this.selectedAnnotationFile;
+        const annotationsReadStream = fs.createReadStream(
+            annotationsFilename,
+            'utf8'
+        );
+        const annotationsReader = readline.createInterface({
+            input: annotationsReadStream,
+            crlfDelay: Infinity,
+        });
+
+        let annotationsString = '';
+        annotationsReader.on('line', (line) => {
+            annotationsString += line;
+        });
+
+        annotationsReader.on('close', () => {
+            const annotations = JSON.parse(annotationsString);
+
+            // Generate a new image ID
+            const maxImageId = Math.max(
+                ...annotations.images.map((img) => img.id)
+            );
+            const newImageId = maxImageId + 1;
+
+            // Add the new image to the annotations
+            const newImage = {
+                id: newImageId,
+                file_name: filename,
+                width,
+                height,
+                coco_url: '',
+                flickr_url: '',
+            };
+            annotations.images.push(newImage);
+
+            // Serialize the updated annotations
+            const updatedAnnotationsString = JSON.stringify(annotations);
+
+            // Write the updated annotations to the file
+            const writeStream = fs.createWriteStream(annotationsFilename, {
+                encoding: 'utf8',
+            });
+            writeStream.write(updatedAnnotationsString);
+            writeStream.end();
+
+            console.log(`Added image ${filename} to annotations`);
+        });
     }
 }
 
