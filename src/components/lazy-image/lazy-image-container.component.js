@@ -10,9 +10,7 @@ import {
     ThumbnailContainer,
 } from './lazy-image-container.styles';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
-import { useSelector } from 'react-redux';
-import { getAnnotations } from '../../redux/slices/annotation.slice';
-import { getCurrFileName } from '../../redux/slices/ui.slice';
+import DicomThumbnail from '../../icons/thumb_placeholder.png';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const REPEAT_REQUEST_COUNT = 3;
@@ -32,19 +30,6 @@ function LazyImageContainerComponent({
     const containerElement = useRef();
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
-    // const [annot, setAnnot] = useState(hasAnnotations);
-    const annotations = useSelector(getAnnotations);
-    const currFile = useSelector(getCurrFileName);
-
-    // useEffect(() => {
-    //     console.log('Annotations update');
-    //     selected && setAnnot(!!annotations.length);
-    // }, [annotations]);
-    //
-    // useEffect(() => {
-    //     console.log('Current file update');
-    //     setAnnot(hasAnnotations);
-    // }, [currFile]);
 
     const handleThumbnailClick = async () => {
         try {
@@ -91,18 +76,25 @@ function LazyImageContainerComponent({
             });
     };
 
+    const setDicomThumbnailData = () => {
+        setThumbnailSrc(DicomThumbnail);
+    };
+
     useLayoutEffect(() => {
-        if (isOnScreen && !thumbnailSrc && filePath !== 'DICOM') {
-            requestThumbnailData();
-        } else if (!isOnScreen && thumbnailSrc) {
-            clearThumbnail();
+        if (filePath?.toLowerCase() !== 'dicom') {
+            if (isOnScreen && !thumbnailSrc) {
+                requestThumbnailData();
+            } else if (!isOnScreen && thumbnailSrc) {
+                clearThumbnail();
+            }
+        } else {
+            if (isOnScreen && !thumbnailSrc) {
+                setDicomThumbnailData();
+            } else if (!isOnScreen && thumbnailSrc) {
+                clearThumbnail();
+            }
         }
     }, [isOnScreen]);
-
-    // const shouldShowAnnotationIcon = () =>
-    //     selected && currFile === fileName
-    //         ? !!annotations.length
-    //         : hasAnnotations;
 
     return (
         <ImageContainer ref={containerElement}>
