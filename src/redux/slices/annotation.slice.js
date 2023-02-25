@@ -113,6 +113,9 @@ export const saveCurrentAnnotations = createAsyncThunk(
             };
             cocoAnnotations.push(newAnnotation);
         });
+        console.log(cocoAnnotations);
+        console.log(cocoCategories);
+        console.log(cocoDeleted);
         await ipcRenderer
             .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,

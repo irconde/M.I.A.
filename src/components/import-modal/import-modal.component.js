@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
     ConfirmButton,
@@ -49,6 +49,15 @@ const ImportModalComponent = ({ open, setOpen }) => {
         imagesError: '',
         annotationsError: '',
     });
+
+    useEffect(() => {
+        if (selectedAnnotationFile !== paths.annotations) {
+            setPaths({
+                ...paths,
+                annotations: selectedAnnotationFile,
+            });
+        }
+    }, [selectedAnnotationFile]);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);

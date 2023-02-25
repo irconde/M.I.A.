@@ -75,7 +75,7 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(mainWindow);
+    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH);
 
     mainWindow
         .loadURL(

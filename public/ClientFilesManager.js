@@ -251,15 +251,17 @@ class ClientFilesManager {
     selectedImagesDirPath = '';
     colorFilePath = '';
     selectedAnnotationFile = '';
+    settingsPath = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
 
-    constructor(mainWindow) {
+    constructor(mainWindow, settingsPath) {
         this.mainWindow = mainWindow;
         // we create a promise for the thumbnails that will be resolved later
         // once the thumbnails have been generated. If there are further updates
         // to the files then Electron will send more thumbnails to React
         this.thumbnailsPromise = new CustomPromise();
+        this.settingsPath = settingsPath;
         ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
             try {
                 return await this.thumbnailsPromise.promise;
@@ -332,6 +334,7 @@ class ClientFilesManager {
 
     async updateAnnotationsFile(newAnnotationData) {
         return new Promise((resolve, reject) => {
+            console.log('updating');
             try {
                 const { cocoAnnotations, cocoCategories, cocoDeleted } =
                     newAnnotationData;
@@ -352,6 +355,7 @@ class ClientFilesManager {
                     });
                     readStream.on('end', () => {
                         try {
+                            console.log('end');
                             const annotationFile = JSON.parse(data);
                             annotationFile.categories = cocoCategories;
                             cocoAnnotations.forEach((annotation) => {
@@ -384,9 +388,10 @@ class ClientFilesManager {
                                 reject(err);
                             });
                             writeStream.on('finish', () => {
+                                console.log('finish');
                                 const fileName =
                                     this.fileNames[this.currentFileIndex];
-                                this.#sendThumbnailsUpdate(
+                                this.#sendUpdate(
                                     Channels.updateThumbnailHasAnnotations,
                                     {
                                         hasAnnotations: !!this.#getAnnotations(
@@ -402,6 +407,8 @@ class ClientFilesManager {
                                 ) {
                                     this.currentFileIndex++;
                                 }
+                                console.log(cocoAnnotations);
+                                console.log(annotationFile.annotations);
                                 resolve();
                             });
                             writeStream.write(JSON.stringify(annotationFile));
@@ -539,6 +546,22 @@ class ClientFilesManager {
                     writeStream.on('finish', () => {
                         this.selectedAnnotationFile = annotationPath;
                         this.#thumbnails.setAnnotationFilePath(annotationPath);
+                        this.#sendUpdate(
+                            Channels.updateAnnotationFile,
+                            this.selectedAnnotationFile
+                        );
+                        const settingsWriteStream = fs.createWriteStream(
+                            this.settingsPath
+                        );
+                        settingsWriteStream.write(
+                            JSON.stringify({
+                                selectedImagesDirPath:
+                                    this.selectedImagesDirPath,
+                                selectedAnnotationFile:
+                                    this.selectedAnnotationFile,
+                            })
+                        );
+                        settingsWriteStream.end();
                         this.currentFileIndex++;
                         resolve();
                     });
@@ -761,11 +784,7 @@ class ClientFilesManager {
         // if the promise has not been resolved before, then resolve it once
         if (!this.thumbnailsPromise.isSettled)
             this.thumbnailsPromise.resolve(clientThumbnails);
-        else
-            this.#sendThumbnailsUpdate(
-                Channels.updateThumbnails,
-                clientThumbnails
-            );
+        else this.#sendUpdate(Channels.updateThumbnails, clientThumbnails);
     }
 
     /**
@@ -823,7 +842,8 @@ class ClientFilesManager {
      * @param channel {string}
      * @param payload {object}
      */
-    #sendThumbnailsUpdate(channel, payload) {
+    #sendUpdate(channel, payload) {
+        console.log('sending');
         this.mainWindow.webContents.send(channel, payload);
     }
 
@@ -861,7 +881,7 @@ class ClientFilesManager {
                         addedFilename,
                         newThumbnailPath
                     );
-                    this.#sendThumbnailsUpdate(Channels.addThumbnail, {
+                    this.#sendUpdate(Channels.addThumbnail, {
                         fileName: addedFilename,
                         filePath: newThumbnailPath,
                     });
@@ -915,10 +935,7 @@ class ClientFilesManager {
                     this.currentFileIndex--;
                 }
                 await this.#thumbnails.removeThumbnail(removedFileName);
-                this.#sendThumbnailsUpdate(
-                    Channels.removeThumbnail,
-                    removedFileName
-                );
+                this.#sendUpdate(Channels.removeThumbnail, removedFileName);
             });
     }
 
