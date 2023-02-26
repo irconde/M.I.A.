@@ -5,8 +5,10 @@ export const SplashScreenBG = styled.div`
     background-color: #3a3a3a;
     display: grid;
     place-items: center;
+    position: absolute;
     width: 100vw;
     height: 100vh;
+    z-index: 100000;
 `;
 
 export const SplashScreenContainer = styled.div`

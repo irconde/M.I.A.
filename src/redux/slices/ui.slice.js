@@ -18,6 +18,8 @@ const initialState = {
     sideMenuVisible: true,
     lazyImageMenuVisible: false,
     fabVisible: true,
+    splashScreenVisible: true,
+    showApp: true,
 };
 
 const uiSlice = createSlice({
@@ -71,6 +73,12 @@ const uiSlice = createSlice({
         updateCurrFileName: (state, action) => {
             state.currentFileName = action.payload;
         },
+        updateSplashScreenVisibility: (state, action) => {
+            state.splashScreenVisible = action.payload;
+        },
+        updateShowApp: (state, action) => {
+            state.showApp = action.payload;
+        },
     },
 });
 
@@ -88,6 +96,8 @@ export const {
     updateCornerstoneMode,
     updateAnnotationMode,
     updateCurrFileName,
+    updateSplashScreenVisibility,
+    updateShowApp,
 } = uiSlice.actions;
 
 export const getAnnotationContextPosition = (state) =>
@@ -106,4 +116,7 @@ export const getCurrFileName = (state) => state.ui.currentFileName;
 export const getSideMenuVisible = (state) => state.ui.sideMenuVisible;
 export const getLazyImageMenuVisible = (state) => state.ui.lazyImageMenuVisible;
 export const getIsFABVisible = (state) => state.ui.fabVisible;
+export const getSplashScreenVisibility = (state) =>
+    state.ui.splashScreenVisible;
+export const getShowApp = (state) => state.ui.showApp;
 export default uiSlice.reducer;

@@ -17,6 +17,8 @@ import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
+import { getShowApp, getSplashScreenVisibility } from './redux/slices/ui.slice';
+import SplashScreenComponent from './components/splash-screen/splash-screen.component';
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -25,6 +27,8 @@ const AppNew = () => {
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
+    const showApp = useSelector(getShowApp);
+    const showSplashScreen = useSelector(getSplashScreenVisibility);
 
     useEffect(() => {
         dispatch(initSettings());
@@ -36,39 +40,44 @@ const AppNew = () => {
     }, [selectedImagesDirPath]);
 
     return (
-        !areSettingsLoading && (
-            <div>
-                <ImportModalComponent
-                    open={importModalOpen}
-                    setOpen={setImportModalOpen}
-                />
-                {selectedImagesDirPath && (
-                    <>
-                        <ImageDisplayComponent />
-                        <TopBarComponent
-                            openImportModal={() => setImportModalOpen(true)}
-                            openContactModal={() => setContactModalOpen(true)}
-                            openAboutModal={() => setAboutModalOpen(true)}
-                        />
-                        <AboutModal
-                            open={aboutModalOpen}
-                            setOpen={setAboutModalOpen}
-                        />
-                        <ContactModal
-                            closeModal={() => setContactModalOpen(false)}
-                            open={contactModalOpen}
-                        />
-                        <LazyImageMenuComponent />
-                        <SideMenuComponent />
-                        <AnnotationContextMenuComponent />
-                        <ColorPickerComponent />
-                        <EditLabelComponent />
-                        <BoundPolyFABComponent />
-                        <SaveButtonComponent />
-                    </>
-                )}
-            </div>
-        )
+        <>
+            {showSplashScreen && <SplashScreenComponent />}
+            {!areSettingsLoading && (
+                <div>
+                    <ImportModalComponent
+                        open={importModalOpen}
+                        setOpen={setImportModalOpen}
+                    />
+                    {selectedImagesDirPath && showApp && (
+                        <>
+                            <ImageDisplayComponent />
+                            <TopBarComponent
+                                openImportModal={() => setImportModalOpen(true)}
+                                openContactModal={() =>
+                                    setContactModalOpen(true)
+                                }
+                                openAboutModal={() => setAboutModalOpen(true)}
+                            />
+                            <AboutModal
+                                open={aboutModalOpen}
+                                setOpen={setAboutModalOpen}
+                            />
+                            <ContactModal
+                                closeModal={() => setContactModalOpen(false)}
+                                open={contactModalOpen}
+                            />
+                            <LazyImageMenuComponent />
+                            <SideMenuComponent />
+                            <AnnotationContextMenuComponent />
+                            <ColorPickerComponent />
+                            <EditLabelComponent />
+                            <BoundPolyFABComponent />
+                            <SaveButtonComponent />
+                        </>
+                    )}
+                </div>
+            )}
+        </>
     );
 };
 

@@ -5,6 +5,11 @@ import useThumbnailsLoading from '../../../utils/hooks/thumbnails-loading.hook';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
+import { useDispatch } from 'react-redux';
+import {
+    updateShowApp,
+    updateSplashScreenVisibility,
+} from '../../../redux/slices/ui.slice';
 
 const iconProps = {
     width: '36px',
@@ -12,15 +17,24 @@ const iconProps = {
     color: 'white',
 };
 
+const CLOSE_MODAL_DELAY = 1000;
+
 function ImportButtonComponent({ handleClick, setOpen, paths }) {
     const areThumbnailsLoading = useThumbnailsLoading(false);
     const [prevLoading, setPrevLoading] = useState(areThumbnailsLoading);
     const [success, setSuccess] = useState(null);
+    const dispatch = useDispatch();
 
     useEffect(() => {
+        // when done loading thumbnails
         if (prevLoading && !areThumbnailsLoading) {
             setSuccess(true);
-            setTimeout(() => setOpen(false), 1000);
+            dispatch(updateShowApp(false));
+            setTimeout(() => {
+                setOpen(false);
+                dispatch(updateSplashScreenVisibility(true));
+                dispatch(updateShowApp(true));
+            }, CLOSE_MODAL_DELAY);
         }
         setPrevLoading(areThumbnailsLoading);
     }, [areThumbnailsLoading]);
