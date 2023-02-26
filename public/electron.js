@@ -213,6 +213,8 @@ ipcMain.handle(
         } else {
             const dialogResult = await dialog.showOpenDialog({
                 properties: ['openDirectory'],
+                buttonLabel: 'Select folder',
+                title: 'Select a folder to save annotations',
             });
 
             // if the event is cancelled by the user
