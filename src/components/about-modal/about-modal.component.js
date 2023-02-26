@@ -2,24 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     AboutHeader,
-    AboutHeaderInfo,
-    AboutTitle,
-    AppIcon,
-    AppIconWrapper,
     AppSummary,
+    CloseIconWrapper,
     ModalRoot,
     modalTheme,
     StyledPaper,
+    SummaryDivider,
     TeamAndLibrary,
     TeamLibraryHeader,
     TeamLibraryList,
     TeamLibraryTitle,
     TeamLibraryWrapper,
-    VersionInfo,
 } from './about-modal.styles';
 import { Modal, ThemeProvider } from '@mui/material';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
+import { ReactComponent as AppIcon } from '../../icons/app-logo.icon.svg';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+
+const shell = window.require('electron').shell;
 
 /**
  * Component dialog for changing settings of application.
@@ -36,38 +37,47 @@ const AboutModal = ({ open, setOpen }) => {
         setOpen(false);
     };
 
+    const handleClick = (event) => {
+        event.preventDefault();
+        shell.openExternal(event.target.href);
+    };
+
     return (
         <ThemeProvider theme={modalTheme}>
             <Modal
                 open={open}
                 onClose={handleClose}
-                aria-labelledby="settings-window"
-                aria-describedby="control the apps remote and local settings">
+                aria-labelledby="about-modal"
+                aria-describedby="information about the app and developers">
                 <StyledPaper>
                     <ModalRoot>
                         <AboutHeader>
-                            <AppIconWrapper>
-                                <AppIcon />
-                            </AppIconWrapper>
-                            <AboutHeaderInfo>
-                                <AboutTitle>
-                                    Pilot<strong>GUI</strong>
-                                </AboutTitle>
-                                <VersionInfo>
-                                    Version {process.env.REACT_APP_VERSION}
-                                </VersionInfo>
-                            </AboutHeaderInfo>
+                            <AppIcon
+                                width="228px"
+                                height="75px"
+                                color="white"
+                            />
+                            <CloseIconWrapper onClick={handleClose}>
+                                <CloseIcon
+                                    width={'32px'}
+                                    height={'32px'}
+                                    color={'white'}
+                                />
+                            </CloseIconWrapper>
                         </AboutHeader>
                         <AppSummary>
-                            The Pilot GUI is a cross-platform application,
-                            developed by the{' '}
-                            <strong>Emerging Analytics Center</strong> as a part
-                            of the <strong>Pilot System</strong> - an
-                            intelligent decision support system for baggage
-                            screening - in order to enable x-ray machine
-                            operators to visually check the multiple detections
-                            or objects identified as potentially of interest by
-                            the system itself.
+                            M.I.A. (Medical Imaging Annotation) is a
+                            cross-platform application to{' '}
+                            <strong>annotate</strong> (drawing bounding boxes,
+                            polygon masks, etc.){' '}
+                            <strong>standard medical</strong> imaging for
+                            creating specific datasets.
+                            <SummaryDivider />
+                            The application is a spin off of the{' '}
+                            <strong>Pilot System</strong>, an intelligent
+                            decision support system for advanced threat
+                            recognition on x-ray images developed by the{' '}
+                            <strong>Emerging Analytics Center</strong>.
                         </AppSummary>
                         <TeamAndLibrary>
                             <TeamLibraryWrapper>
@@ -85,13 +95,10 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>James Bromley</li>
                                         <li>Dako Albeik</li>
                                         <li>Luka Woodson</li>
-                                        <li>Toby Ebarb</li>
-                                        <li>Dylan Johnson</li>
-                                        <li>Stephanie Bagandov</li>
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>
-                            <TeamLibraryWrapper>
+                            <TeamLibraryWrapper style={{ width: '20rem' }}>
                                 <TeamLibraryHeader>
                                     <CodeBracketsIcon
                                         width="32px"
@@ -107,6 +114,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/facebook/react/"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 React.js
@@ -114,7 +122,26 @@ const AboutModal = ({ open, setOpen }) => {
                                         </li>
                                         <li>
                                             <a
+                                                href="https://github.com/reduxjs/redux"
+                                                onClick={handleClick}
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                Redux
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="https://github.com/electron/electron"
+                                                onClick={handleClick}
+                                                target="_blank"
+                                                rel="noopener noreferrer">
+                                                ElectronJS
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
                                                 href="https://github.com/mui/material-ui"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 MUI - Material UI
@@ -123,6 +150,7 @@ const AboutModal = ({ open, setOpen }) => {
                                         <li>
                                             <a
                                                 href="https://github.com/cornerstonejs/cornerstone"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 CornerstoneJS
@@ -130,34 +158,11 @@ const AboutModal = ({ open, setOpen }) => {
                                         </li>
                                         <li>
                                             <a
-                                                href="https://github.com/reduxjs/redux"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                Redux
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
                                                 href="https://www.npmjs.com/package/eac-cornerstone-tools"
+                                                onClick={handleClick}
                                                 target="_blank"
                                                 rel="noopener noreferrer">
-                                                EAC Cornerstone Tools
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="https://github.com/electron/electron"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                ElectronJS
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="https://github.com/socketio/socket.io"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                Socket.IO
+                                                Cornerstone Tools
                                             </a>
                                         </li>
                                     </ul>

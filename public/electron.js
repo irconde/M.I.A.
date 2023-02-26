@@ -59,6 +59,11 @@ function createWindow() {
     }
 
     mainWindow = new BrowserWindow({
+        ...display.bounds,
+        icon: path.join(
+            __dirname,
+            `${process.platform === 'darwin' ? 'icon.icns' : 'icon.ico'}`
+        ),
         ...display?.bounds,
         backgroundColor: '#3a3a3a',
         show: false,
