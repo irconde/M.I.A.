@@ -26,12 +26,15 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // when done loading thumbnails
-        if (prevLoading && !areThumbnailsLoading) {
-            setSuccess(true);
+        if (!prevLoading && areThumbnailsLoading) {
+            // when loading
             dispatch(updateShowApp(false));
+        } else if (prevLoading && !areThumbnailsLoading) {
+            // when done loading thumbnails
+            setSuccess(true);
             setTimeout(() => {
                 setOpen(false);
+                console.log('SHOW AFTER LOADING IS DONE');
                 dispatch(updateSplashScreenVisibility(true));
                 dispatch(updateShowApp(true));
             }, CLOSE_MODAL_DELAY);

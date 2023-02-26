@@ -17,13 +17,21 @@ import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
-import { getShowApp, getSplashScreenVisibility } from './redux/slices/ui.slice';
+import {
+    getShowApp,
+    getSplashScreenVisibility,
+    updateShowApp,
+    updateSplashScreenVisibility,
+} from './redux/slices/ui.slice';
 import SplashScreenComponent from './components/splash-screen/splash-screen.component';
 
 const AppNew = () => {
     const dispatch = useDispatch();
     const areSettingsLoading = useSelector(getSettingsLoadingState);
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
+    const [prevSelectedImgDir, setPrevSelectedImgDir] = useState(
+        selectedImagesDirPath
+    );
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -36,7 +44,15 @@ const AppNew = () => {
 
     useEffect(() => {
         // only open the modal if there is no selected images' dir path
-        selectedImagesDirPath === '' && setImportModalOpen(true);
+        if (selectedImagesDirPath === '') {
+            setImportModalOpen(true);
+        } else if (selectedImagesDirPath && prevSelectedImgDir === undefined) {
+            // on initial load, show the app if there's a path
+            // checking for prev state ensures this only runs once
+            dispatch(updateSplashScreenVisibility(true));
+            dispatch(updateShowApp(true));
+        }
+        setPrevSelectedImgDir(selectedImagesDirPath);
     }, [selectedImagesDirPath]);
 
     return (

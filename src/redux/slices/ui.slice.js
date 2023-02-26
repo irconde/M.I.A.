@@ -19,7 +19,7 @@ const initialState = {
     lazyImageMenuVisible: false,
     fabVisible: true,
     splashScreenVisible: true,
-    showApp: true,
+    showApp: false,
 };
 
 const uiSlice = createSlice({
