@@ -120,6 +120,7 @@ export const DEVICE_TYPE = {
 };
 
 export const Channels = {
+    updateAnnotationFile: 'update-annotation-file',
     saveColorsFile: 'save-colors-file',
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',

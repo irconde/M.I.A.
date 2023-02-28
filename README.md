@@ -39,7 +39,7 @@ ELECTRON_START_URL=http://127.0.0.1:3000
 Access the root folder of the project from a terminal and run the following command:
 
 ```
-npm install --legacy-peer-deps
+npm install
 ```
 
 ## Starting the client in development mode

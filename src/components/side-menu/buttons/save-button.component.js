@@ -10,11 +10,13 @@ import {
 import { SaveButtonFab, SaveButtonText } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 import {
+    getCurrFileName,
     getIsFABVisible,
     getSideMenuVisible,
 } from '../../../redux/slices/ui.slice';
 import {
     getHasAnnotationChanged,
+    getIsAnyAnnotations,
     saveCurrentAnnotations,
 } from '../../../redux/slices/annotation.slice';
 
@@ -31,46 +33,54 @@ const SaveButtonComponent = () => {
     /*const isImageToolsOpen = useSelector(getIsImageToolsOpen);*/
     const detectionChanged = useSelector(getHasAnnotationChanged);
     const isBoundPolyVisible = useSelector(getIsFABVisible);
+    const isAnyAnnotations = useSelector(getIsAnyAnnotations);
+    const currentFile = useSelector(getCurrFileName);
     const dispatch = useDispatch();
 
     const saveImageClick = () => {
-        dispatch(saveCurrentAnnotations());
+        dispatch(saveCurrentAnnotations(currentFile));
     };
-    if (!isCollapsed)
-        return (
-            <Tooltip
-                disableHoverListener={!detectionChanged}
-                title={'Save Annotations'}>
-                <CollapsedButtonContainer
-                    $isFaded={!detectionChanged}
-                    isCollapsed={isCollapsed}>
-                    <SaveButtonFab
+    if (isAnyAnnotations) {
+        if (!isCollapsed)
+            return (
+                <Tooltip
+                    disableHoverListener={!detectionChanged}
+                    title={'Save Annotations'}>
+                    <CollapsedButtonContainer
+                        $isFaded={!detectionChanged}
+                        isCollapsed={isCollapsed}>
+                        <SaveButtonFab
+                            onClick={() => saveImageClick()}
+                            $enabled={detectionChanged}
+                            disabled={!isBoundPolyVisible}
+                            color="primary">
+                            <SaveArrowIcon
+                                width="24px"
+                                height="24px"
+                                color="white"
+                            />
+                        </SaveButtonFab>
+                    </CollapsedButtonContainer>
+                </Tooltip>
+            );
+        else
+            return (
+                <Tooltip title={'Save Annotations'}>
+                    <SideMenuButtonContainer
+                        $isFaded={!detectionChanged}
+                        enabled={detectionChanged}
                         onClick={() => saveImageClick()}
-                        $enabled={detectionChanged}
-                        disabled={!isBoundPolyVisible}
-                        color="primary">
+                        id="SaveButtonComponent">
                         <SaveArrowIcon
                             width="24px"
                             height="24px"
                             color="white"
                         />
-                    </SaveButtonFab>
-                </CollapsedButtonContainer>
-            </Tooltip>
-        );
-    else
-        return (
-            <Tooltip title={'Save Annotations'}>
-                <SideMenuButtonContainer
-                    $isFaded={!detectionChanged}
-                    enabled={detectionChanged}
-                    onClick={() => saveImageClick()}
-                    id="SaveButtonComponent">
-                    <SaveArrowIcon width="24px" height="24px" color="white" />
-                    <SaveButtonText>Save File</SaveButtonText>
-                </SideMenuButtonContainer>
-            </Tooltip>
-        );
+                        <SaveButtonText>Save File</SaveButtonText>
+                    </SideMenuButtonContainer>
+                </Tooltip>
+            );
+    } else return null;
 };
 
 export default SaveButtonComponent;

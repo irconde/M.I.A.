@@ -4,6 +4,7 @@ import {
     getAssetsDirPaths,
     getSettingsLoadingState,
     initSettings,
+    updateAnnotationFile,
 } from './redux/slices/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import ImageDisplayComponent from './components/image-display/image-display.component';
@@ -17,7 +18,9 @@ import EditLabelComponent from './components/edit-label/edit-label.component';
 import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
 import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
 import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
+import { Channels } from './utils/enums/Constants';
 
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -30,6 +33,10 @@ const AppNew = () => {
 
     useEffect(() => {
         dispatch(initSettings());
+        ipcRenderer.on(Channels.updateAnnotationFile, (e, data) => {
+            console.log(data);
+            dispatch(updateAnnotationFile(data));
+        });
     }, []);
 
     useEffect(() => {

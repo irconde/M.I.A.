@@ -49,9 +49,14 @@ function createWindow() {
     if (!fs.existsSync(MONITOR_FILE_PATH)) {
         display = screen.getPrimaryDisplay();
     } else {
-        const data = fs.readFileSync(MONITOR_FILE_PATH);
-        const rectangle = JSON.parse(data);
-        display = screen.getDisplayMatching(rectangle);
+        try {
+            const data = fs.readFileSync(MONITOR_FILE_PATH);
+            const rectangle = JSON.parse(data);
+            display = screen.getDisplayMatching(rectangle);
+        } catch (error) {
+            console.log(error);
+            display = screen.getPrimaryDisplay();
+        }
     }
 
     mainWindow = new BrowserWindow({
@@ -70,7 +75,7 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(mainWindow);
+    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH);
 
     mainWindow
         .loadURL(
@@ -203,7 +208,23 @@ ipcMain.handle(Channels.saveColorsFile, async (event, colorUpdate) => {
 ipcMain.handle(
     Constants.Channels.saveCurrentFile,
     async (event, newAnnotations) => {
-        return await files.updateAnnotationsFile(newAnnotations);
+        if (files.selectedAnnotationFile !== '') {
+            return await files.updateAnnotationsFile(newAnnotations);
+        } else {
+            const dialogResult = await dialog.showOpenDialog({
+                properties: ['openDirectory'],
+                buttonLabel: 'Select folder',
+                title: 'Select a folder to save annotations',
+            });
+
+            // if the event is cancelled by the user
+            if (dialogResult.canceled) return null;
+
+            return await files.createAnnotationsFile(
+                dialogResult.filePaths[0],
+                newAnnotations
+            );
+        }
     }
 );
 
