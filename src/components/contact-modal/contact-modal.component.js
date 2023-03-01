@@ -17,9 +17,9 @@ import {
     SubmitButton,
 } from './contact-modal.styles';
 import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
+import { Channels } from '../../utils/enums/Constants';
 
-const FORM_URL =
-    'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
@@ -35,15 +35,10 @@ const ContactModal = ({ open, closeModal }) => {
             submitting: true,
         });
         try {
-            const result = await fetch(FORM_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    Accept: 'application/json',
-                },
-                body: formData,
-            });
-            const success = result.status === 200;
+            const success = await ipcRenderer.invoke(
+                Channels.sentFeedbackHTTP,
+                formData
+            );
             setStatus({
                 success,
                 submitting: false,

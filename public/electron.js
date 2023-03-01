@@ -71,7 +71,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             devTools: isDev,
-            webSecurity: false,
+            webSecurity: true,
         },
     });
 
@@ -247,6 +247,25 @@ ipcMain.handle(Channels.selectFile, (e, fileName) =>
  * Sends the settings variable to the React process
  */
 ipcMain.handle(Channels.getSettings, async () => appSettings);
+
+ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
+    const FORM_URL =
+        'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
+
+    try {
+        const res = await fetch(FORM_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json',
+            },
+            body: data,
+        });
+        return res.status === 200;
+    } catch (e) {
+        return false;
+    }
+});
 
 /**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,
