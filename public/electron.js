@@ -4,6 +4,7 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const Constants = require('./Constants');
+require('dotenv').config();
 const { Channels } = Constants;
 let mainWindow;
 let appSettings = null;
@@ -248,9 +249,11 @@ ipcMain.handle(Channels.selectFile, (e, fileName) =>
  */
 ipcMain.handle(Channels.getSettings, async () => appSettings);
 
+/**
+ * Sends a post request to a Google form and responds to react with a boolean success value
+ */
 ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
-    const FORM_URL =
-        'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
+    const FORM_URL = `https://script.google.com/macros/s/${process.env.GOOGLE_FORM_API_KEY}/exec`;
 
     try {
         const res = await fetch(FORM_URL, {
