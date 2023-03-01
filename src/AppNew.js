@@ -32,12 +32,17 @@ const AppNew = () => {
     }, []);
 
     useEffect(() => {
+        // hide the splash screen when the import modal is visible
+        if (!importModalOpen) return;
+        setTimeout(() => dispatch(updateSplashScreenVisibility(false)), 2000);
+    }, [importModalOpen]);
+
+    useEffect(() => {
         // only open the modal if there is no selected images' dir path
         if (selectedImagesDirPath === '') {
             setImportModalOpen(true);
         } else if (selectedImagesDirPath && prevSelectedImgDir === undefined) {
-            // on initial load, show the app if there's a path
-            // checking for prev state ensures this only runs once
+            // show the app if there is a path saved in the settings file
             dispatch(updateSplashScreenVisibility(true));
             dispatch(updateShowApp(true));
         }

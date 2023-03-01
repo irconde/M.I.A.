@@ -6,10 +6,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
 import { useDispatch } from 'react-redux';
-import {
-    updateShowApp,
-    updateSplashScreenVisibility,
-} from '../../../redux/slices/ui.slice';
+import { updateShowApp } from '../../../redux/slices/ui.slice';
 
 const iconProps = {
     width: '36px',
@@ -32,11 +29,9 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
         } else if (prevLoading && !areThumbnailsLoading) {
             // when done loading thumbnails
             setSuccess(true);
+            dispatch(updateShowApp(true));
             setTimeout(() => {
                 setOpen(false);
-                console.log('SHOW AFTER LOADING IS DONE');
-                dispatch(updateSplashScreenVisibility(true));
-                dispatch(updateShowApp(true));
             }, CLOSE_MODAL_DELAY);
         }
         setPrevLoading(areThumbnailsLoading);

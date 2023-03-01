@@ -23,6 +23,7 @@ function ApplicationComponent({ openImportModal }) {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        // hide the splash screen on mount
         setTimeout(
             () =>
                 requestAnimationFrame(() =>
