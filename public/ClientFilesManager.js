@@ -711,21 +711,11 @@ class ClientFilesManager {
                 data += chunk;
             });
             readStream.on('end', () => {
-                // TODO: get image id
                 const allAnnotations = JSON.parse(data);
                 const maxAnnotationId =
                     allAnnotations.annotations.reduce((a, b) =>
                         a.id > b.id ? a : b
                     ).id + 1;
-                const image = allAnnotations.images.find(
-                    (img) =>
-                        img.file_name === this.fileNames[this.currentFileIndex]
-                );
-                let imageId = 1;
-                // TODO: What to do if it is over?
-                if (image && image?.id <= Number.MAX_SAFE_INTEGER) {
-                    imageId = image.id;
-                }
                 resolve({
                     annotations: this.#getAnnotations(
                         allAnnotations,
@@ -733,7 +723,6 @@ class ClientFilesManager {
                     ),
                     categories: allAnnotations.categories,
                     maxAnnotationId,
-                    imageId,
                 });
             });
         });
