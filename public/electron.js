@@ -9,15 +9,14 @@ const { Channels } = Constants;
 let mainWindow;
 let appSettings = null;
 let annotationColors = [];
-const MONITOR_FILE_PATH = isDev
-    ? 'monitorConfig.json'
-    : path.join(app.getPath('userData'), 'monitorConfig.json');
-const SETTINGS_FILE_PATH = isDev
-    ? 'settings.json'
-    : path.join(app.getPath('userData'), 'settings.json');
-const COLORS_FILE_PATH = isDev
-    ? 'colors.json'
-    : path.join(app.getPath('userData'), 'colors.json');
+
+const [MONITOR_FILE_PATH, SETTINGS_FILE_PATH, COLORS_FILE_PATH] = [
+    'monitorConfig.json',
+    'settings.json',
+    'colors.json',
+].map((fileName) =>
+    isDev ? fileName : path.join(app.getPath('userData'), fileName)
+);
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -72,7 +71,6 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             devTools: isDev,
-            webSecurity: true,
         },
     });
 
