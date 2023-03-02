@@ -64,6 +64,33 @@ const clearSessionStorage = () => {
     removeFromSessionStorage('deletedAnnotationIds');
 };
 
+const prepareAnnotationsForCoco = (annotation) => {
+    let cocoAnnotations = [];
+    const cocoCategories = annotation.categories;
+    const cocoDeleted = annotation.deletedAnnotationIds;
+    annotation.annotations.forEach((annot) => {
+        const { area, iscrowd, image_id, bbox, category_id, id, segmentation } =
+            annot;
+        let newSegmentation = [];
+        if (segmentation?.length > 0) {
+            segmentation.forEach((segment) => {
+                newSegmentation.push(polygonDataToCoordArray(segment));
+            });
+        }
+        let newAnnotation = {
+            area,
+            iscrowd,
+            image_id,
+            bbox,
+            segmentation: newSegmentation,
+            category_id,
+            id,
+        };
+        cocoAnnotations.push(newAnnotation);
+    });
+    return { cocoAnnotations, cocoCategories, cocoDeleted };
+};
+
 export const saveColorsFile = createAsyncThunk(
     'annotations/saveColors',
     async (payload, { getState, rejectWithValue }) => {
@@ -107,36 +134,8 @@ export const saveCurrentAnnotations = createAsyncThunk(
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
         const { annotation } = state;
-        let cocoAnnotations = [];
-        const cocoCategories = annotation.categories;
-        const cocoDeleted = annotation.deletedAnnotationIds;
-        annotation.annotations.forEach((annot) => {
-            const {
-                area,
-                iscrowd,
-                image_id,
-                bbox,
-                category_id,
-                id,
-                segmentation,
-            } = annot;
-            let newSegmentation = [];
-            if (segmentation?.length > 0) {
-                segmentation.forEach((segment) => {
-                    newSegmentation.push(polygonDataToCoordArray(segment));
-                });
-            }
-            let newAnnotation = {
-                area,
-                iscrowd,
-                image_id,
-                bbox,
-                segmentation: newSegmentation,
-                category_id,
-                id,
-            };
-            cocoAnnotations.push(newAnnotation);
-        });
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
         await ipcRenderer
             .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,
@@ -151,7 +150,30 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 console.log(error);
                 rejectWithValue(error);
             });
-        /*return true;*/
+    }
+);
+
+export const selectFileAndSaveTempAnnotations = createAsyncThunk(
+    'annotations/selectFileAndSaveTempAnnotations',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer
+            .invoke(Channels.selectFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                fileName: payload,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
     }
 );
 
@@ -509,6 +531,22 @@ const annotationSlice = createSlice({
             } else if (typeof payload === 'object') {
                 state.saveFailureMessage = payload.toString();
             }
+        },
+        [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
+            //state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+            clearSessionStorage();
+        },
+        [selectFileAndSaveTempAnnotations.pending]: (state) => {
+            //state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+        },
+        [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
+            /*console.log(payload);
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }*/
         },
     },
 });

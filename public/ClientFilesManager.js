@@ -431,6 +431,16 @@ class ClientFilesManager {
         });
     }
 
+    async createUpdateTempAnnotationsFile(
+        cocoAnnotations,
+        cocoCategories,
+        cocoDeleted
+    ) {
+        console.log(cocoAnnotations);
+        console.log(cocoCategories);
+        console.log(cocoDeleted);
+    }
+
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
         return new Promise((resolve, reject) => {
             const now = new Date();

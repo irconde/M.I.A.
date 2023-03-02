@@ -238,9 +238,15 @@ ipcMain.handle(Channels.getCurrentFile, () =>
     files.getCurrentFile(annotationColors)
 );
 
-ipcMain.handle(Channels.selectFile, (e, fileName) =>
-    files.selectFile(fileName)
-);
+ipcMain.handle(Channels.selectFile, async (e, args) => {
+    const { fileName, cocoAnnotations, cocoCategories, cocoDeleted } = args;
+    await files.createUpdateTempAnnotationsFile(
+        cocoAnnotations,
+        cocoCategories,
+        cocoDeleted
+    );
+    await files.selectFile(fileName);
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
