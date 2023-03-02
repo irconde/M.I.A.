@@ -255,7 +255,7 @@ class ClientFilesManager {
     #watcher = null;
     #thumbnails = new Thumbnails();
 
-    constructor(mainWindow, settingsPath) {
+    constructor(mainWindow, settingsPath, tempPath) {
         this.mainWindow = mainWindow;
         // we create a promise for the thumbnails that will be resolved later
         // once the thumbnails have been generated. If there are further updates
@@ -271,6 +271,19 @@ class ClientFilesManager {
                 this.thumbnailsPromise.destruct();
             }
         });
+        this.initTempFile(tempPath);
+    }
+
+    async initTempFile(tempPath) {
+        const writeStream = fs.createWriteStream(tempPath);
+        writeStream.on('error', (err) => {
+            console.log(err);
+        });
+        writeStream.on('finish', () => {
+            console.log('Cleared temp data on startup');
+        });
+        writeStream.write(JSON.stringify([]));
+        writeStream.end();
     }
 
     /**
@@ -434,11 +447,44 @@ class ClientFilesManager {
     async createUpdateTempAnnotationsFile(
         cocoAnnotations,
         cocoCategories,
-        cocoDeleted
+        cocoDeleted,
+        fileName,
+        filePath
     ) {
-        console.log(cocoAnnotations);
-        console.log(cocoCategories);
-        console.log(cocoDeleted);
+        if (cocoAnnotations?.length > 0) {
+            const readStream = fs.createReadStream(filePath);
+            let data = '';
+            readStream.on('error', (err) => {
+                console.log(err);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
+                try {
+                    let annotationFile = JSON.parse(data);
+
+                    annotationFile.push({
+                        fileName,
+                        cocoAnnotations,
+                        cocoCategories,
+                        cocoDeleted,
+                    });
+
+                    const writeStream = fs.createWriteStream(filePath);
+                    writeStream.on('error', (err) => {
+                        console.log(err);
+                    });
+                    writeStream.on('finish', () => {
+                        console.log('Saved temp data');
+                    });
+                    writeStream.write(JSON.stringify(annotationFile));
+                    writeStream.end();
+                } catch (err) {
+                    console.log(err);
+                }
+            });
+        }
     }
 
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {

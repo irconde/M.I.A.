@@ -38,3 +38,4 @@ yarn-error.log*
 # Docs
 /docs
 /colors.json
+/tempAnnotations.json

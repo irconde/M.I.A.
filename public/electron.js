@@ -17,6 +17,9 @@ const SETTINGS_FILE_PATH = isDev
 const COLORS_FILE_PATH = isDev
     ? 'colors.json'
     : path.join(app.getPath('userData'), 'colors.json');
+const TEMP_ANNOTATIONS_FILE_PATH = isDev
+    ? 'tempAnnotations.json'
+    : path.join(app.getPath('userData'), 'tempAnnotations.json');
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -31,7 +34,12 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
-            ignore: ['settings.json', 'monitorConfig.json', 'colors.json'],
+            ignore: [
+                'settings.json',
+                'monitorConfig.json',
+                'colors.json',
+                'tempAnnotations.json',
+            ],
         });
     } catch (e) {
         console.log(e);
@@ -75,7 +83,11 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH);
+    files = new ClientFilesManager(
+        mainWindow,
+        SETTINGS_FILE_PATH,
+        TEMP_ANNOTATIONS_FILE_PATH
+    );
 
     mainWindow
         .loadURL(
@@ -243,7 +255,9 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
     await files.createUpdateTempAnnotationsFile(
         cocoAnnotations,
         cocoCategories,
-        cocoDeleted
+        cocoDeleted,
+        fileName,
+        TEMP_ANNOTATIONS_FILE_PATH
     );
     await files.selectFile(fileName);
 });
