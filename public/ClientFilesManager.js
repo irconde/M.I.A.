@@ -346,6 +346,7 @@ class ClientFilesManager {
     }
 
     async updateAnnotationsFile(newAnnotationData) {
+        // TODO: Refactor below to save temp data if there is any
         return new Promise((resolve, reject) => {
             try {
                 const {
@@ -757,6 +758,7 @@ class ClientFilesManager {
     }
 
     async getAnnotationsForFile() {
+        // TODO: Refactor below to get temp data if there is any
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.selectedAnnotationFile);
             let data = '';
