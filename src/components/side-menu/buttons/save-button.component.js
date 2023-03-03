@@ -7,21 +7,27 @@ import {
     SideMenuButtonContainer,
 } from './shared/button.styles';
 
-import { SaveButtonFab, SaveButtonText } from './save-button.styles';
+import {
+    SaveAsButtonContainer,
+    SaveButtonContainer,
+    SaveButtonFab,
+    SaveButtonText,
+} from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 import {
-    getCurrFileName,
     getIsFABVisible,
     getSideMenuVisible,
 } from '../../../redux/slices/ui.slice';
 import {
     getHasAnnotationChanged,
     getIsAnyAnnotations,
+    saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../../redux/slices/annotation.slice';
 
 /**
- * Component button that allows user to save edited detections and load next files in queue. Similar to NextButtonComponent compnent but for local files only.
+ * Component button that allows user to save edited detections and load next files in queue. Similar to
+ * NextButtonComponent compnent but for local files only.
  *
  * @component
  *
@@ -34,11 +40,15 @@ const SaveButtonComponent = () => {
     const detectionChanged = useSelector(getHasAnnotationChanged);
     const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
-    const currentFile = useSelector(getCurrFileName);
+    // const currentFile = useSelector(getCurrFileName);
     const dispatch = useDispatch();
 
     const saveImageClick = () => {
-        dispatch(saveCurrentAnnotations(currentFile));
+        dispatch(saveCurrentAnnotations());
+    };
+
+    const saveAsImageClick = () => {
+        dispatch(saveAsCurrentFile());
     };
     if (isAnyAnnotations) {
         if (!isCollapsed)
@@ -65,20 +75,27 @@ const SaveButtonComponent = () => {
             );
         else
             return (
-                <Tooltip title={'Save Annotations'}>
-                    <SideMenuButtonContainer
-                        $isFaded={!detectionChanged}
-                        enabled={detectionChanged}
-                        onClick={() => saveImageClick()}
-                        id="SaveButtonComponent">
-                        <SaveArrowIcon
-                            width="24px"
-                            height="24px"
-                            color="white"
-                        />
-                        <SaveButtonText>Save File</SaveButtonText>
-                    </SideMenuButtonContainer>
-                </Tooltip>
+                <SideMenuButtonContainer
+                    // $isFaded={!detectionChanged}
+                    enabled={detectionChanged}
+                    id="SaveButtonComponent">
+                    <Tooltip title={'Save Annotations'}>
+                        <SaveButtonContainer onClick={() => saveImageClick()}>
+                            <SaveArrowIcon
+                                width="24px"
+                                height="24px"
+                                color="white"
+                            />
+                            <SaveButtonText>Save File</SaveButtonText>
+                        </SaveButtonContainer>
+                    </Tooltip>
+                    <Tooltip title={'Save As'}>
+                        <SaveAsButtonContainer
+                            onClick={() => saveAsImageClick()}>
+                            +{/* // TODO - FIX ME         */}
+                        </SaveAsButtonContainer>
+                    </Tooltip>
+                </SideMenuButtonContainer>
             );
     } else return null;
 };

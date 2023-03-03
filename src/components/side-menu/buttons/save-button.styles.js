@@ -11,3 +11,22 @@ export const SaveButtonFab = styled(Fab)`
             props.$enabled ? '#367eff' : '#313131'};
     }
 `;
+
+export const SaveAsButtonContainer = styled.div`
+    background-color: #367eff;
+    width: 2rem;
+    height: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const SaveButtonContainer = styled.div`
+    // opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
+    background-color: #367eff;
+    width: 12rem;
+    height: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;

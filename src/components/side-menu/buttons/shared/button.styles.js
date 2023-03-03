@@ -48,15 +48,13 @@ export const SideMenuButtonContainer = styled.div`
     display: flex;
     align-items: center;
     align-self: flex-end;
-    justify-content: center;
-    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
+    justify-content: flex-start;
+    background-color: transparent;
     box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
     font-size: 12pt;
     height: 75px;
     gap: 0.3rem;
-    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
-    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
+    cursor: pointer;
 
     p {
         flex: 1;

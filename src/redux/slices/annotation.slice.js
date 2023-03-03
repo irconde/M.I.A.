@@ -134,6 +134,62 @@ export const saveCurrentAnnotations = createAsyncThunk(
     }
 );
 
+export const saveAsCurrentFile = createAsyncThunk(
+    'annotations/saveAsCurrentFile',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation } = state;
+        let cocoAnnotations = [];
+        const cocoCategories = annotation.categories;
+        const cocoDeleted = annotation.deletedAnnotationIds;
+        annotation.annotations.forEach((annot) => {
+            const {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                category_id,
+                id,
+                segmentation,
+            } = annot;
+            let newSegmentation = [];
+            if (segmentation?.length > 0) {
+                segmentation.forEach((segment) => {
+                    newSegmentation.push(polygonDataToCoordArray(segment));
+                });
+            }
+            let newAnnotation = {
+                area,
+                iscrowd,
+                image_id,
+                bbox,
+                segmentation: newSegmentation,
+                category_id,
+                id,
+            };
+            cocoAnnotations.push(newAnnotation);
+        });
+        console.log(cocoAnnotations);
+        console.log(cocoCategories);
+        console.log(cocoDeleted);
+        await ipcRenderer
+            .invoke(Channels.saveAsCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                fileName: payload,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+        /*return true;*/
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],

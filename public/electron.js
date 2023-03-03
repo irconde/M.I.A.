@@ -228,6 +228,25 @@ ipcMain.handle(
     }
 );
 
+ipcMain.handle(
+    Constants.Channels.saveAsCurrentFile,
+    async (event, newAnnotations) => {
+        const dialogResult = await dialog.showOpenDialog({
+            properties: ['openDirectory'],
+            buttonLabel: 'Select folder',
+            title: 'Select a folder to save annotations',
+        });
+
+        // if the event is cancelled by the user
+        if (dialogResult.canceled) return null;
+
+        return await files.createAnnotationsFile(
+            dialogResult.filePaths[0],
+            newAnnotations
+        );
+    }
+);
+
 /**
  * A channel between the main process (electron) and the renderer process (react).
  * Sends next file data
