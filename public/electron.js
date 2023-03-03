@@ -262,9 +262,10 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
             },
             body: data,
         });
-        return res.status === 200;
-    } catch (e) {
-        return false;
+        if (!res.ok) throw Error(res.statusText);
+        else return { success: res.ok };
+    } catch (error) {
+        return { success: false, error };
     }
 });
 

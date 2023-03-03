@@ -25,21 +25,25 @@ const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
         success: null,
         submitting: false,
+        error: '',
     });
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
+            error: '',
             success: null,
             submitting: true,
         });
         try {
-            const success = await ipcRenderer.invoke(
+            const { success, error } = await ipcRenderer.invoke(
                 Channels.sentFeedbackHTTP,
                 formData
             );
+            if (error) throw error;
             setStatus({
+                error: '',
                 success,
                 submitting: false,
             });
@@ -49,9 +53,19 @@ const ContactModal = ({ open, closeModal }) => {
             }
         } catch (e) {
             setStatus({
+                error: e.message || e,
                 success: false,
                 submitting: false,
             });
+            setTimeout(
+                () =>
+                    setStatus((st) => ({
+                        ...st,
+                        error: '',
+                        success: null,
+                    })),
+                2000
+            );
         }
     };
 
@@ -67,9 +81,10 @@ const ContactModal = ({ open, closeModal }) => {
                         <ContactHeader>
                             <ContactHeaderInfo>
                                 <ContactTitle>Contact Us</ContactTitle>
-                                <ContactHeaderParagraph>
-                                    Your feedback will help us improve the user
-                                    experience.
+                                <ContactHeaderParagraph error={status.error}>
+                                    {status.error
+                                        ? status.error
+                                        : 'Your feedback will help us improve the user experience.'}
                                 </ContactHeaderParagraph>
                             </ContactHeaderInfo>
                         </ContactHeader>

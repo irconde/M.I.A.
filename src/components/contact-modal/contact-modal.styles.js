@@ -22,7 +22,7 @@ export const ContactHeaderParagraph = styled.div`
     height: 19.5%;
     font-weight: normal;
     font-size: 14px;
-    color: #a6a6a6;
+    color: ${({ error }) => (error ? 'red' : '#a6a6a6')};
     text-align: justify;
 `;
 
@@ -56,7 +56,6 @@ export const SubmitButton = styled(Button)`
                 ? colors.GREEN
                 : colors.RED};
         color: ${colors.WHITE};
-        margin-top: 7%;
 
         transition: filter 200ms;
         pointer-events: ${({ $success }) => ($success ? 'none' : 'unset')};
