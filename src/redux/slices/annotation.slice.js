@@ -212,9 +212,13 @@ const annotationSlice = createSlice({
             state.colors = colors;
             state.imageId = imageId;
 
-            console.log(deletedAnnotationIds);
+            if (deletedAnnotationIds !== undefined) {
+                // Loaded from temp data
+                state.deletedAnnotationIds = deletedAnnotationIds;
+                state.hasAnnotationChanged = true;
+            }
 
-            if (state.maxAnnotationId === 1) {
+            if (state.maxAnnotationId === 1 && maxAnnotationId !== undefined) {
                 state.maxAnnotationId = maxAnnotationId;
             }
             if (annotations?.length > 0) {
