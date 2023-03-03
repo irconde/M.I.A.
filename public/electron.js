@@ -114,11 +114,6 @@ function createWindow() {
             await files.removeFileWatcher();
             mainWindow = null;
         });
-        /*mainWindow.on('window-all-closed', () => {
-            if (process.platform !== 'darwin') {
-                app.quit();
-            }
-        });*/
     };
 
     if (isDev) {
@@ -159,12 +154,6 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
-
-/*app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
-    }
-});*/
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
