@@ -285,26 +285,18 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
         } else {
             let errorMessage;
             switch (res.status) {
-                case 400:
-                    errorMessage = 'Invalid request. Please check your input.';
-                    break;
                 case 401:
-                    errorMessage =
-                        'Unauthorized. Please authenticate and try again.';
-                    break;
                 case 403:
                     errorMessage =
-                        'Forbidden. You are not authorized to perform this action.';
+                        'Internal error. Try again in a few moments.';
                     break;
                 case 404:
                     errorMessage =
-                        'Resource not found. Please check your URL and try again.';
-                    break;
-                case 500:
-                    errorMessage = 'Server error. Please try again later.';
+                        'The server is not responding properly at the moment. Could you try to send the message again in a few minutes?';
                     break;
                 default:
-                    errorMessage = `An error occurred. Status code: ${res.status}`;
+                    errorMessage =
+                        'The message could not be sent at the moment. Could you try it again in a few minutes?';
                     break;
             }
             throw new Error(errorMessage);
