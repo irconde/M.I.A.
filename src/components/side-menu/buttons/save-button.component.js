@@ -83,20 +83,15 @@ const SaveButtonComponent = () => {
                     id="SaveButtonComponent">
                     <Tooltip title={'Save Annotations'}>
                         <SaveButtonContainer onClick={() => saveImageClick()}>
-                            <SaveArrowIcon
-                                width="24px"
-                                height="24px"
-                                color="white"
-                            />
-                            <SaveButtonText>Save File</SaveButtonText>
+                            <SaveButtonText>Save</SaveButtonText>
                         </SaveButtonContainer>
                     </Tooltip>
                     <Tooltip title={'Save As'}>
                         <SaveAsButtonContainer
                             onClick={() => saveAsImageClick()}>
                             <SaveAsIcon
-                                width={'24px'}
-                                height={'24px'}
+                                width={'32px'}
+                                height={'32px'}
                                 color={'white'}
                             />
                         </SaveAsButtonContainer>

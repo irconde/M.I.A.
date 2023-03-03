@@ -51,9 +51,8 @@ export const SideMenuButtonContainer = styled.div`
     justify-content: flex-start;
     background-color: transparent;
     box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
-    font-size: 12pt;
-    height: 75px;
-    gap: 0.3rem;
+    font-size: 16pt;
+    height: 57px;
     cursor: pointer;
 
     p {

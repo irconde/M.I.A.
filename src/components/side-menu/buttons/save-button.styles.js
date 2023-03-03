@@ -14,7 +14,7 @@ export const SaveButtonFab = styled(Fab)`
 
 export const SaveAsButtonContainer = styled.div`
     background-color: #367eff;
-    width: 2rem;
+    width: 4.5rem;
     height: inherit;
     display: flex;
     align-items: center;
@@ -29,4 +29,5 @@ export const SaveButtonContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-right: 0.1rem;
 `;
