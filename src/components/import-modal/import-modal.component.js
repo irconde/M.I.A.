@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-    ConfirmButton,
     ModalBody,
     ModalSection,
     modalTheme,
     ModalTitle,
     OutlinedButton,
-    SaveIconWrapper,
     StyledInput,
     StyledModal,
 } from './import-modal.styles';
@@ -15,13 +13,13 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Modal } from '@mui/material';
 import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
 import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
-import SaveArrowIcon from '../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import { Channels } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAssetsDirPaths,
     updateSettings,
 } from '../../redux/slices/settings.slice';
+import ImportButtonComponent from './import-button/import-button.component';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -41,7 +39,6 @@ const ImportModalComponent = ({ open, setOpen }) => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
-    //const [open, setOpen] = useState(true);
     const [paths, setPaths] = useState({
         images: selectedImagesDirPath || '',
         annotations: selectedAnnotationFile || '',
@@ -50,6 +47,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
         annotationsError: '',
     });
 
+    const handleClose = () => selectedImagesDirPath && setOpen(false);
     useEffect(() => {
         if (selectedAnnotationFile !== paths.annotations) {
             setPaths({
@@ -58,9 +56,6 @@ const ImportModalComponent = ({ open, setOpen }) => {
             });
         }
     }, [selectedAnnotationFile]);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
@@ -127,7 +122,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
                     selectedImagesDirPath: paths.images,
                     selectedAnnotationFile: paths.annotations,
                 })
-            ).then(handleClose);
+            ).then();
         }
     };
 
@@ -195,23 +190,11 @@ const ImportModalComponent = ({ open, setOpen }) => {
                                     Import Annotations
                                 </OutlinedButton>
                             </ModalSection>
-                            <ConfirmButton
-                                onClick={handleConfirmBtnClick}
-                                disabled={
-                                    !paths.images.trim() ||
-                                    paths.isLoading ||
-                                    !!paths.annotationsError ||
-                                    !!paths.imagesError
-                                }>
-                                CONFIRM DATA IMPORT
-                                <SaveIconWrapper>
-                                    <SaveArrowIcon
-                                        width={'36px'}
-                                        height={'36px'}
-                                        color={'white'}
-                                    />
-                                </SaveIconWrapper>
-                            </ConfirmButton>
+                            <ImportButtonComponent
+                                handleClick={handleConfirmBtnClick}
+                                setOpen={setOpen}
+                                paths={paths}
+                            />
                         </ModalBody>
                     </StyledModal>
                 </Modal>
