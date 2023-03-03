@@ -19,6 +19,10 @@ export const SaveAsButtonContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+
+    :hover {
+        background-color: #2b65ce;
+    }
 `;
 
 export const SaveButtonContainer = styled.div`
@@ -30,4 +34,8 @@ export const SaveButtonContainer = styled.div`
     align-items: center;
     justify-content: center;
     margin-right: 0.1rem;
+
+    :hover {
+        background-color: #2b65ce;
+    }
 `;
