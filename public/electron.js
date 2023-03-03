@@ -240,10 +240,15 @@ ipcMain.handle(
         // if the event is cancelled by the user
         if (dialogResult.canceled) return null;
 
-        return await files.createAnnotationsFile(
-            dialogResult.filePaths[0],
-            newAnnotations
-        );
+        try {
+            const res = await files.createAnnotationsFile(
+                dialogResult.filePaths[0],
+                newAnnotations
+            );
+            return res;
+        } catch (e) {
+            console.log(e);
+        }
     }
 );
 

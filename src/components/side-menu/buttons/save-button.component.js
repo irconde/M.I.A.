@@ -24,6 +24,7 @@ import {
     saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../../redux/slices/annotation.slice';
+import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
 
 /**
  * Component button that allows user to save edited detections and load next files in queue. Similar to
@@ -92,7 +93,11 @@ const SaveButtonComponent = () => {
                     <Tooltip title={'Save As'}>
                         <SaveAsButtonContainer
                             onClick={() => saveAsImageClick()}>
-                            +{/* // TODO - FIX ME         */}
+                            <SaveAsIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
                         </SaveAsButtonContainer>
                     </Tooltip>
                 </SideMenuButtonContainer>

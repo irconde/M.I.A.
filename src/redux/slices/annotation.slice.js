@@ -522,6 +522,21 @@ const annotationSlice = createSlice({
                 state.saveFailureMessage = payload.toString();
             }
         },
+        [saveAsCurrentFile.fulfilled]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+        },
+        [saveAsCurrentFile.pending]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+        },
+        [saveAsCurrentFile.rejected]: (state, { payload }) => {
+            console.log(payload);
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }
+        },
     },
 });
 
