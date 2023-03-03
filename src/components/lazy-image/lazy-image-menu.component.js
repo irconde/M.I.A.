@@ -61,23 +61,36 @@ function LazyImageMenuComponent() {
 
     useEffect(() => {
         scrollContainerRef.current.scrollTop = 0;
+        setCurrChunk(0);
+        ipcRenderer
+            .invoke(Channels.requestInitialThumbnailsList)
+            .then(setThumbnails)
+            .catch((e) => {
+                // TODO: what should go in the lazy menu if no thumbnails are present?
+                console.log(e);
+                console.log('no thumbnails to begin with');
+            });
     }, [selectedImagesDirPath, selectedAnnotationFile]);
 
     useEffect(() => {
         listenForThumbnailUpdates();
-        ipcRenderer
-            .invoke(Channels.requestInitialThumbnailsList)
-            .then(setThumbnails)
-            .catch(() => {
-                // TODO: what should go in the lazy menu if no thumbnails are present?
-                console.log('no thumbnails to begin with');
-            });
+
+        return () => {
+            const {
+                removeThumbnail,
+                addThumbnail,
+                updateThumbnailHasAnnotations,
+            } = Channels;
+            ipcRenderer.removeAllListeners(removeThumbnail);
+            ipcRenderer.removeAllListeners(addThumbnail);
+            ipcRenderer.removeAllListeners(updateThumbnailHasAnnotations);
+        };
     }, []);
 
     useEffect(() => {
         // update showAnnIcon when the annotation count changes
-        setThumbnails(
-            thumbnails.map((thumb) =>
+        setThumbnails((thumbs) =>
+            thumbs.map((thumb) =>
                 thumb.fileName === currentFileName
                     ? {
                           ...thumb,
@@ -105,12 +118,8 @@ function LazyImageMenuComponent() {
     }, [currentFileName]);
 
     const listenForThumbnailUpdates = () => {
-        const {
-            removeThumbnail,
-            addThumbnail,
-            updateThumbnails,
-            updateThumbnailHasAnnotations,
-        } = Channels;
+        const { removeThumbnail, addThumbnail, updateThumbnailHasAnnotations } =
+            Channels;
         ipcRenderer
             .on(removeThumbnail, (e, removedThumbnailName) => {
                 // must use a function here to get the most up-to-date state
@@ -125,10 +134,6 @@ function LazyImageMenuComponent() {
                 // must use a function here to get the most up-to-date state
                 setThumbnails((thumbnails) => [...thumbnails, addedThumbnail]);
             })
-            .on(updateThumbnails, (e, thumbnails) => {
-                setThumbnails(thumbnails);
-                setCurrChunk(0);
-            })
             .on(
                 updateThumbnailHasAnnotations,
                 (e, { hasAnnotations, fileName }) => {
@@ -137,7 +142,7 @@ function LazyImageMenuComponent() {
                             thumb.fileName === fileName
                                 ? {
                                       ...thumb,
-                                      hasAnnotations,
+                                      hasAnnotations: hasAnnotations,
                                       showAnnIcon: hasAnnotations,
                                   }
                                 : thumb
@@ -172,6 +177,7 @@ function LazyImageMenuComponent() {
     };
 
     const { start, end } = calculateInterval();
+
     return (
         <LazyImageMenuContainer
             ref={scrollContainerRef}
