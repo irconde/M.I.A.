@@ -39,7 +39,11 @@ const initialState = {
 const settingsSlice = createSlice({
     name: 'settings',
     initialState,
-    reducers: {},
+    reducers: {
+        updateAnnotationFile: (state, action) => {
+            state.settings.selectedAnnotationFile = action.payload;
+        },
+    },
     extraReducers: {
         [initSettings.fulfilled]: (state, { payload }) => {
             for (let key in payload) {
@@ -63,6 +67,8 @@ const settingsSlice = createSlice({
         },
     },
 });
+
+export const { updateAnnotationFile } = settingsSlice.actions;
 
 // Selectors
 export const getSettingsLoadingState = (state) => state.settings.isLoading;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
     ModalBody,
@@ -48,6 +48,14 @@ const ImportModalComponent = ({ open, setOpen }) => {
     });
 
     const handleClose = () => selectedImagesDirPath && setOpen(false);
+    useEffect(() => {
+        if (selectedAnnotationFile !== paths.annotations) {
+            setPaths({
+                ...paths,
+                annotations: selectedAnnotationFile,
+            });
+        }
+    }, [selectedAnnotationFile]);
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });

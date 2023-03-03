@@ -113,11 +113,15 @@ export const saveCurrentAnnotations = createAsyncThunk(
             };
             cocoAnnotations.push(newAnnotation);
         });
+        console.log(cocoAnnotations);
+        console.log(cocoCategories);
+        console.log(cocoDeleted);
         await ipcRenderer
             .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
+                fileName: payload,
             })
             .then(() => {
                 return true;
@@ -140,6 +144,7 @@ const initialState = {
     saveAnnotationsStatus: SAVE_STATUSES.IDLE,
     saveFailureMessage: '',
     deletedAnnotationIds: [],
+    maxAnnotationId: 1,
 };
 
 const annotationSlice = createSlice({
@@ -148,9 +153,11 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotationInformation, colors } = action.payload;
-            const { annotations, categories } = annotationInformation;
+            const { annotations, categories, maxAnnotationId } =
+                annotationInformation;
             state.annotations = [];
             state.colors = colors;
+            state.maxAnnotationId = maxAnnotationId;
             if (annotations?.length > 0) {
                 annotations.forEach((annotation) => {
                     const categoryNameIdx = categories.findIndex(
@@ -208,10 +215,16 @@ const annotationSlice = createSlice({
                 area,
                 segmentation,
             };
-            newAnnotation.image_id = state.annotations[0].image_id;
-            newAnnotation.id =
-                state.annotations.reduce((a, b) => (a.id > b.id ? a : b)).id +
-                1;
+            if (state.annotations.length > 0) {
+                newAnnotation.image_id = state.annotations[0].image_id;
+                newAnnotation.id =
+                    state.annotations.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
+            } else {
+                newAnnotation.image_id = 1;
+                newAnnotation.id = state.maxAnnotationId++;
+            }
+
             newAnnotation.selected = false;
             newAnnotation.categorySelected = false;
             newAnnotation.visible = true;
@@ -223,9 +236,13 @@ const annotationSlice = createSlice({
                 (category) => category.name.toLowerCase() === 'operator'
             );
             if (foundCategoryIndex === -1) {
-                newAnnotation.category_id =
-                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
-                        .id + 1;
+                if (state.categories.length > 0) {
+                    newAnnotation.category_id =
+                        state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                            .id + 1;
+                } else {
+                    newAnnotation.category_id = 1;
+                }
                 newAnnotation.categoryName = 'operator';
                 state.categories.push({
                     supercategory: 'operator',
@@ -498,5 +515,7 @@ export const getHasAnnotationChanged = (state) =>
     state.annotation.hasAnnotationChanged;
 export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
+export const getIsAnyAnnotations = (state) =>
+    state.annotation.annotations?.length > 0;
 
 export default annotationSlice.reducer;

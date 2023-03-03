@@ -8,6 +8,10 @@ const { ipcMain } = require('electron');
 const { Channels } = require('./Constants');
 const chokidar = require('chokidar');
 const async = require('async');
+const PNG = require('pngjs').PNG;
+const jpeg = require('jpeg-js');
+const dicomParser = require('dicom-parser');
+const readline = require('readline');
 
 class CustomPromise {
     isSettled = false;
@@ -225,32 +229,40 @@ class Thumbnails {
         const pixelData = await fs.promises.readFile(
             path.join(selectedImagesDirPath, fileName)
         );
-        const thumbnailPath = path.join(this.#thumbnailsPath, fileName);
-        await sharp(pixelData)
-            .resize(Constants.Thumbnail.width)
-            .toFile(thumbnailPath);
+        let thumbnailPath = '';
+        if (path.extname(fileName).toLowerCase() !== '.dcm') {
+            thumbnailPath = path.join(this.#thumbnailsPath, fileName);
+            await sharp(pixelData)
+                .resize(Constants.Thumbnail.width)
+                .toFile(thumbnailPath)
+                .catch((error) => console.log(error));
+        } else {
+            thumbnailPath = 'DICOM';
+        }
         return thumbnailPath;
     }
 }
 
 class ClientFilesManager {
     static STORAGE_FILE_NAME = 'thumbnails.json';
-    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
+    static IMAGE_FILE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.dcm'];
     fileNames = [];
     currentFileIndex = -1;
     selectedImagesDirPath = '';
     colorFilePath = '';
     selectedAnnotationFile = '';
+    settingsPath = '';
     #watcher = null;
     #thumbnails = new Thumbnails();
     #isLoadingThumbnails = false;
 
-    constructor(mainWindow) {
+    constructor(mainWindow, settingsPath) {
         this.mainWindow = mainWindow;
         // we create a promise for the thumbnails that will be resolved later
         // once the thumbnails have been generated. If there are further updates
         // to the files then Electron will send more thumbnails to React
         this.thumbnailsPromise = new CustomPromise();
+        this.settingsPath = settingsPath;
         ipcMain.handle(Channels.requestInitialThumbnailsList, async () => {
             try {
                 return this.thumbnailsPromise.isSettled
@@ -277,7 +289,7 @@ class ClientFilesManager {
      */
     static #isFileTypeAllowed(fileName) {
         return ClientFilesManager.IMAGE_FILE_EXTENSIONS.includes(
-            path.extname(fileName)
+            path.extname(fileName).toLowerCase()
         );
     }
 
@@ -287,10 +299,7 @@ class ClientFilesManager {
      */
     #sendThumbnailsStatus(isLoading) {
         this.#isLoadingThumbnails = isLoading;
-        this.#sendThumbnailsUpdate(
-            Channels.thumbnailStatus,
-            this.#isLoadingThumbnails
-        );
+        this.#sendUpdate(Channels.thumbnailStatus, this.#isLoadingThumbnails);
     }
 
     /**
@@ -351,17 +360,29 @@ class ClientFilesManager {
     async updateAnnotationsFile(newAnnotationData) {
         return new Promise((resolve, reject) => {
             try {
-                const { cocoAnnotations, cocoCategories, cocoDeleted } =
-                    newAnnotationData;
+                const {
+                    cocoAnnotations,
+                    cocoCategories,
+                    cocoDeleted,
+                    fileName,
+                } = newAnnotationData;
                 if (
                     this.selectedAnnotationFile !== '' &&
                     fs.existsSync(this.selectedAnnotationFile)
                 ) {
-                    fs.readFile(this.selectedAnnotationFile, (err, data) => {
-                        if (err) {
-                            console.log(err);
-                            reject(err);
-                        } else {
+                    const readStream = fs.createReadStream(
+                        this.selectedAnnotationFile
+                    );
+                    let data = '';
+                    readStream.on('error', (err) => {
+                        console.log(err);
+                        reject(err);
+                    });
+                    readStream.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    readStream.on('end', () => {
+                        try {
                             const annotationFile = JSON.parse(data);
                             annotationFile.categories = cocoCategories;
                             cocoAnnotations.forEach((annotation) => {
@@ -370,6 +391,12 @@ class ClientFilesManager {
                                         (fileAnnotation) =>
                                             fileAnnotation.id === annotation.id
                                     );
+                                const foundImage = annotationFile.images.find(
+                                    (image) => image.file_name === fileName
+                                );
+                                if (foundImage) {
+                                    annotation.image_id = foundImage.id;
+                                }
                                 if (foundIndex !== -1) {
                                     annotationFile.annotations[foundIndex] =
                                         annotation;
@@ -383,43 +410,42 @@ class ClientFilesManager {
                                 }
                             });
                             annotationFile.annotations =
-                                annotationFile.annotations.filter((annot) => {
-                                    return !cocoDeleted.includes(annot.id);
-                                });
-                            fs.writeFile(
-                                this.selectedAnnotationFile,
-                                JSON.stringify(annotationFile),
-                                (err) => {
-                                    if (err) {
-                                        console.log(err);
-                                        reject(err);
-                                    } else {
-                                        const fileName =
-                                            this.fileNames[
-                                                this.currentFileIndex
-                                            ];
-                                        this.#sendThumbnailsUpdate(
-                                            Channels.updateThumbnailHasAnnotations,
-                                            {
-                                                hasAnnotations:
-                                                    !!this.#getAnnotations(
-                                                        annotationFile,
-                                                        fileName
-                                                    ).length,
-                                                fileName,
-                                            }
-                                        );
-                                        if (
-                                            this.currentFileIndex <
-                                            this.fileNames.length - 1
-                                        ) {
-                                            this.currentFileIndex++;
-                                        }
-
-                                        resolve();
-                                    }
-                                }
+                                annotationFile.annotations.filter(
+                                    (annot) => !cocoDeleted.includes(annot.id)
+                                );
+                            const writeStream = fs.createWriteStream(
+                                this.selectedAnnotationFile
                             );
+                            writeStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            writeStream.on('finish', () => {
+                                const savedFileName =
+                                    this.fileNames[this.currentFileIndex];
+                                this.#sendUpdate(
+                                    Channels.updateThumbnailHasAnnotations,
+                                    {
+                                        hasAnnotations: !!this.#getAnnotations(
+                                            annotationFile,
+                                            savedFileName
+                                        ).length,
+                                        fileName: savedFileName,
+                                    }
+                                );
+                                if (
+                                    this.currentFileIndex <
+                                    this.fileNames.length - 1
+                                ) {
+                                    this.currentFileIndex++;
+                                }
+                                resolve();
+                            });
+                            writeStream.write(JSON.stringify(annotationFile));
+                            writeStream.end();
+                        } catch (err) {
+                            console.log(err);
+                            reject(err);
                         }
                     });
                 }
@@ -427,6 +453,211 @@ class ClientFilesManager {
                 console.log(e);
                 reject(e);
             }
+        });
+    }
+
+    async createAnnotationsFile(annotationFilePath, newAnnotationData) {
+        return new Promise((resolve, reject) => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+            const { cocoAnnotations, cocoCategories } = newAnnotationData;
+            let annotationJson = {
+                info: {
+                    description: 'COCO Dataset',
+                    url: 'http://cocodataset.org',
+                    version: '1.0',
+                    year: year,
+                    contributor: 'COCO Consortium',
+                    date_created: `${year}/${month}/${day}`,
+                },
+                licenses: [
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
+                        id: 1,
+                        name: 'Attribution-NonCommercial-ShareAlike License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc/2.0/',
+                        id: 2,
+                        name: 'Attribution-NonCommercial License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
+                        id: 3,
+                        name: 'Attribution-NonCommercial-NoDerivs License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by/2.0/',
+                        id: 4,
+                        name: 'Attribution License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-sa/2.0/',
+                        id: 5,
+                        name: 'Attribution-ShareAlike License',
+                    },
+                    {
+                        url: 'http://creativecommons.org/licenses/by-nd/2.0/',
+                        id: 6,
+                        name: 'Attribution-NoDerivs License',
+                    },
+                    {
+                        url: 'http://flickr.com/commons/usage/',
+                        id: 7,
+                        name: 'No known copyright restrictions',
+                    },
+                    {
+                        url: 'http://www.usa.gov/copyright.shtml',
+                        id: 8,
+                        name: 'United States Government Work',
+                    },
+                ],
+                images: [],
+                annotations: cocoAnnotations,
+                categories: cocoCategories,
+            };
+
+            const listOfPromises = [];
+            this.fileNames.forEach((file, index) => {
+                annotationJson.images.push({
+                    id: index + 1,
+                    coco_url: '',
+                    flickr_url: '',
+                    file_name: file,
+                    date_capture: todayDateString,
+                });
+                const imagePath = path.join(this.selectedImagesDirPath, file);
+                if (path.extname(file).toLowerCase() === '.dcm') {
+                    listOfPromises.push(
+                        this.getDICOMDimensions(imagePath, file)
+                    );
+                } else if (
+                    path.extname(file).toLowerCase() === '.jpg' ||
+                    path.extname(file).toLowerCase() === '.jpeg'
+                ) {
+                    listOfPromises.push(
+                        this.getJPEGDimensions(imagePath, file)
+                    );
+                } else if (path.extname(file).toLowerCase() === '.png') {
+                    listOfPromises.push(this.getPNGDimensions(imagePath, file));
+                }
+            });
+
+            Promise.all(listOfPromises)
+                .then((results) => {
+                    results.forEach((result) => {
+                        const foundIndex = annotationJson.images.findIndex(
+                            (image) => image.file_name === result.fileName
+                        );
+                        if (foundIndex !== -1) {
+                            annotationJson.images[foundIndex].width =
+                                result.width;
+                            annotationJson.images[foundIndex].height =
+                                result.height;
+                        }
+                    });
+                    const annotationPath = path.join(
+                        annotationFilePath,
+                        'annotation.json'
+                    );
+                    const writeStream = fs.createWriteStream(annotationPath);
+                    writeStream.on('error', (err) => {
+                        console.log(err);
+                        reject(err);
+                    });
+                    writeStream.on('finish', () => {
+                        this.selectedAnnotationFile = annotationPath;
+                        this.#thumbnails.setAnnotationFilePath(annotationPath);
+                        this.#sendUpdate(
+                            Channels.updateAnnotationFile,
+                            this.selectedAnnotationFile
+                        );
+                        const settingsWriteStream = fs.createWriteStream(
+                            this.settingsPath
+                        );
+                        settingsWriteStream.write(
+                            JSON.stringify({
+                                selectedImagesDirPath:
+                                    this.selectedImagesDirPath,
+                                selectedAnnotationFile:
+                                    this.selectedAnnotationFile,
+                            })
+                        );
+                        settingsWriteStream.end();
+                        this.currentFileIndex++;
+                        resolve();
+                    });
+                    writeStream.write(JSON.stringify(annotationJson, null, 4));
+                    writeStream.end();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+    }
+
+    async getPNGDimensions(filePath, fileName) {
+        return new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(new PNG())
+                .on('parsed', function () {
+                    resolve({
+                        width: this.width,
+                        height: this.height,
+                        fileName,
+                    });
+                })
+                .on('error', function (error) {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+    }
+
+    async getJPEGDimensions(filePath, fileName) {
+        return new Promise((resolve, reject) => {
+            const stream = fs.createReadStream(filePath);
+            let data = Buffer.from([]);
+            stream.on('data', (chunk) => {
+                data = Buffer.concat([data, chunk]);
+            });
+            stream.on('end', () => {
+                const { width, height } = jpeg.decode(data);
+                resolve({ width, height, fileName });
+            });
+            stream.on('error', (error) => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
+    async getDICOMDimensions(filePath, fileName) {
+        return new Promise((resolve, reject) => {
+            const stream = fs.createReadStream(filePath);
+            let data = Buffer.from([]);
+            stream.on('data', (chunk) => {
+                data = Buffer.concat([data, chunk]);
+            });
+            stream.on('end', () => {
+                const dataSet = dicomParser.parseDicom(data);
+                const width = dataSet.uint16('x00280011');
+                const height = dataSet.uint16('x00280010');
+                resolve({ width, height, fileName });
+            });
+            stream.on('error', (error) => {
+                console.log(error);
+                reject(error);
+            });
         });
     }
 
@@ -477,7 +708,14 @@ class ClientFilesManager {
             )
         );
 
-        return { pixelData, annotationInformation, colors };
+        return {
+            pixelData,
+            pixelType: path
+                .extname(this.fileNames[this.currentFileIndex])
+                .toLowerCase(),
+            annotationInformation,
+            colors,
+        };
     }
 
     async selectFile(filename) {
@@ -489,15 +727,27 @@ class ClientFilesManager {
 
     async getAnnotationsForFile() {
         return new Promise((resolve, reject) => {
-            fs.readFile(this.selectedAnnotationFile, (error, data) => {
-                if (error) reject(error);
+            const readStream = fs.createReadStream(this.selectedAnnotationFile);
+            let data = '';
+            readStream.on('error', (error) => {
+                reject(error);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
                 const allAnnotations = JSON.parse(data);
+                const maxAnnotationId =
+                    allAnnotations.annotations.reduce((a, b) =>
+                        a.id > b.id ? a : b
+                    ).id + 1;
                 resolve({
                     annotations: this.#getAnnotations(
                         allAnnotations,
                         this.fileNames[this.currentFileIndex]
                     ),
                     categories: allAnnotations.categories,
+                    maxAnnotationId,
                 });
             });
         });
@@ -627,7 +877,7 @@ class ClientFilesManager {
      * @param channel {string}
      * @param payload {object}
      */
-    #sendThumbnailsUpdate(channel, payload) {
+    #sendUpdate(channel, payload) {
         this.mainWindow.webContents.send(channel, payload);
     }
 
@@ -665,11 +915,19 @@ class ClientFilesManager {
                         addedFilename,
                         newThumbnailPath
                     );
-                    this.#sendThumbnailsUpdate(Channels.addThumbnail, {
+                    this.#sendUpdate(Channels.addThumbnail, {
                         fileName: addedFilename,
                         filePath: newThumbnailPath,
                     });
                     this.fileNames.push(addedFilename);
+
+                    if (this.selectedAnnotationFile !== '') {
+                        this.addImageAnnotationHandler(
+                            addedFilePath,
+                            addedFilename
+                        );
+                    }
+
                     // if the added file is the only file, then send a file update
                     if (this.fileNames.length === 1) {
                         this.currentFileIndex = 0;
@@ -690,6 +948,9 @@ class ClientFilesManager {
                     throw new Error('Error with removed file index');
                 }
 
+                if (this.selectedAnnotationFile !== '') {
+                    this.removeImageFromAnnotations(removedFileName);
+                }
                 this.fileNames.splice(removedFileIndex, 1);
 
                 if (this.fileNames.length === 0) {
@@ -708,16 +969,156 @@ class ClientFilesManager {
                     this.currentFileIndex--;
                 }
                 await this.#thumbnails.removeThumbnail(removedFileName);
-                this.#sendThumbnailsUpdate(
-                    Channels.removeThumbnail,
-                    removedFileName
-                );
+                this.#sendUpdate(Channels.removeThumbnail, removedFileName);
             });
     }
 
     async removeFileWatcher() {
         await this.#watcher?.unwatch(this.selectedImagesDirPath);
         await this.#watcher?.close();
+    }
+
+    async removeImageFromAnnotations(filename) {
+        // Read the annotations file and parse it as JSON
+        const annotationsFilename = this.selectedAnnotationFile;
+        const annotationsReadStream = fs.createReadStream(
+            annotationsFilename,
+            'utf8'
+        );
+        const annotationsReader = readline.createInterface({
+            input: annotationsReadStream,
+            crlfDelay: Infinity,
+        });
+
+        let annotationsString = '';
+        annotationsReader.on('line', (line) => {
+            annotationsString += line;
+        });
+
+        annotationsReader.on('close', () => {
+            const annotations = JSON.parse(annotationsString);
+
+            // Find the image with the given filename
+            const image = annotations.images.find(
+                (img) => img.file_name === filename
+            );
+
+            if (image) {
+                const imageId = image.id;
+
+                // Remove all instances associated with the image
+                annotations.annotations = annotations.annotations.filter(
+                    (ann) => ann.image_id !== imageId
+                );
+
+                // Remove the image from the annotations
+                annotations.images = annotations.images.filter(
+                    (img) => img.id !== imageId
+                );
+
+                // Write the updated annotations to the file
+                const writeStream = fs.createWriteStream(annotationsFilename, {
+                    encoding: 'utf8',
+                });
+                const updatedAnnotationsString = JSON.stringify(annotations);
+                writeStream.write(updatedAnnotationsString);
+                writeStream.end();
+
+                console.log(
+                    `Removed instances from ${filename} and saved updated annotations to ${annotationsFilename}`
+                );
+            } else {
+                console.error(`Image ${filename} not found in the annotations`);
+            }
+        });
+    }
+
+    async addImageAnnotationHandler(filePath, fileName) {
+        if (path.extname(fileName).toLowerCase() === '.dcm') {
+            this.getDICOMDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        } else if (path.extname(fileName).toLowerCase() === '.png') {
+            this.getPNGDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        } else if (
+            path.extname(fileName).toLowerCase() === '.jpg' ||
+            path.extname(fileName).toLowerCase() === '.jpeg'
+        ) {
+            this.getJPEGDimensions(filePath, fileName)
+                .then((result) => {
+                    this.addImageToAnnotations(
+                        result.fileName,
+                        result.width,
+                        result.height
+                    );
+                })
+                .catch((error) => console.log(error));
+        }
+    }
+
+    async addImageToAnnotations(filename, width, height) {
+        // Read the annotations file and parse it as JSON
+        const annotationsFilename = this.selectedAnnotationFile;
+        const annotationsReadStream = fs.createReadStream(
+            annotationsFilename,
+            'utf8'
+        );
+        const annotationsReader = readline.createInterface({
+            input: annotationsReadStream,
+            crlfDelay: Infinity,
+        });
+
+        let annotationsString = '';
+        annotationsReader.on('line', (line) => {
+            annotationsString += line;
+        });
+
+        annotationsReader.on('close', () => {
+            const annotations = JSON.parse(annotationsString);
+
+            // Generate a new image ID
+            const maxImageId = Math.max(
+                ...annotations.images.map((img) => img.id)
+            );
+            const newImageId = maxImageId + 1;
+
+            // Add the new image to the annotations
+            const newImage = {
+                id: newImageId,
+                file_name: filename,
+                width,
+                height,
+                coco_url: '',
+                flickr_url: '',
+            };
+            annotations.images.push(newImage);
+
+            // Serialize the updated annotations
+            const updatedAnnotationsString = JSON.stringify(annotations);
+
+            // Write the updated annotations to the file
+            const writeStream = fs.createWriteStream(annotationsFilename, {
+                encoding: 'utf8',
+            });
+            writeStream.write(updatedAnnotationsString);
+            writeStream.end();
+
+            console.log(`Added image ${filename} to annotations`);
+        });
     }
 }
 

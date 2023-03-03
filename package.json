@@ -27,7 +27,7 @@
     "cornerstone-web-image-loader": "^2.1.1",
     "cross-fetch": "^3.1.5",
     "dcmjs": "^0.21.0",
-    "dicom-parser": "^1.8.13",
+    "dicom-parser": "^1.8.21",
     "dotenv": "8.2.0",
     "eac-cornerstone-tools": "^1.0.6",
     "electron-devtools-installer": "^3.2.0",
@@ -35,10 +35,12 @@
     "electron-reloader": "^1.2.3",
     "fswin": "^3.22.106",
     "hammerjs": "^2.0.8",
+    "jpeg-js": "^0.4.4",
     "jszip": "^3.9.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.debounce": "^4.0.8",
     "npm-run-all": "^4.1.5",
+    "pngjs": "^7.0.0",
     "randomcolor": "^0.6.2",
     "react": "^18.1.0",
     "react-color": "^2.19.3",
@@ -65,8 +67,7 @@
     "package-electron": "electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
-    "docs": "jsdoc -c jsdoc.json -t ./node_modules/better-docs"
+    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet"
   },
   "build": {
     "appId": "edu.ualr.eac.mia",
@@ -101,7 +102,6 @@
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
     "babel-eslint": "^10.1.0",
-    "better-docs": "2.7.2",
     "electron": "^23.1.0",
     "electron-builder": "^23.6.0",
     "eslint": "^7.19.0",
@@ -110,7 +110,6 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react": "^7.22.0",
     "if-node-version": "^1.1.1",
-    "jsdoc": "^3.6.7",
     "prettier": "^2.2.1",
     "run-script-os": "^1.1.6"
   }

@@ -1,4 +1,5 @@
 module.exports.Channels = {
+    updateAnnotationFile: 'update-annotation-file',
     saveColorsFile: 'save-colors-file',
     verifyDirectories: 'verify-directories',
     loadFiles: 'load-files',

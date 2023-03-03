@@ -10,6 +10,7 @@ import {
     ThumbnailContainer,
 } from './lazy-image-container.styles';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
+import DicomThumbnail from '../../icons/thumb_placeholder.png';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const REPEAT_REQUEST_COUNT = 3;
@@ -75,11 +76,23 @@ function LazyImageContainerComponent({
             });
     };
 
+    const setDicomThumbnailData = () => {
+        setThumbnailSrc(DicomThumbnail);
+    };
+
     useLayoutEffect(() => {
-        if (isOnScreen && !thumbnailSrc) {
-            requestThumbnailData();
-        } else if (!isOnScreen && thumbnailSrc) {
-            clearThumbnail();
+        if (filePath?.toLowerCase() !== 'dicom') {
+            if (isOnScreen && !thumbnailSrc) {
+                requestThumbnailData();
+            } else if (!isOnScreen && thumbnailSrc) {
+                clearThumbnail();
+            }
+        } else {
+            if (isOnScreen && !thumbnailSrc) {
+                setDicomThumbnailData();
+            } else if (!isOnScreen && thumbnailSrc) {
+                clearThumbnail();
+            }
         }
     }, [isOnScreen]);
 

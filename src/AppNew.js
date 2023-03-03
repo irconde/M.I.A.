@@ -4,8 +4,12 @@ import {
     getAssetsDirPaths,
     getSettingsLoadingState,
     initSettings,
+    updateAnnotationFile,
 } from './redux/slices/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
+import { Channels } from './utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
 import {
     getShowApp,
     getSplashScreenVisibility,
@@ -29,6 +33,10 @@ const AppNew = () => {
 
     useEffect(() => {
         dispatch(initSettings());
+        ipcRenderer.on(Channels.updateAnnotationFile, (e, data) => {
+            console.log(data);
+            dispatch(updateAnnotationFile(data));
+        });
     }, []);
 
     useEffect(() => {
