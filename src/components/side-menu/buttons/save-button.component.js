@@ -15,6 +15,7 @@ import {
 } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 import {
+    getCurrFileName,
     getIsFABVisible,
     getSideMenuVisible,
 } from '../../../redux/slices/ui.slice';
@@ -41,15 +42,15 @@ const SaveButtonComponent = () => {
     const detectionChanged = useSelector(getHasAnnotationChanged);
     const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
-    // const currentFile = useSelector(getCurrFileName);
+    const currentFile = useSelector(getCurrFileName);
     const dispatch = useDispatch();
 
     const saveImageClick = () => {
-        dispatch(saveCurrentAnnotations());
+        dispatch(saveCurrentAnnotations(currentFile));
     };
 
     const saveAsImageClick = () => {
-        dispatch(saveAsCurrentFile());
+        dispatch(saveAsCurrentFile(currentFile));
     };
     if (isAnyAnnotations) {
         if (!isCollapsed)
