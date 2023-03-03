@@ -10,6 +10,8 @@ export const ContactHeader = styled.div`
     margin-bottom: 10px;
     align-items: center;
     height: 8%;
+    width: 100%;
+    position: relative;
 `;
 
 export const ContactHeaderInfo = styled.div`
@@ -47,6 +49,7 @@ export const ContactTitle = styled.div`
 export const SubmitButton = styled(Button)`
     &.MuiButton-root {
         margin: 1%;
+        margin-top: 2%;
         width: 10rem;
         height: 3rem;
         background: ${({ $success, $submitting }) =>
@@ -92,4 +95,14 @@ export const FormFieldFull = styled(FormControl)`
         width: 100%;
         padding: 1%;
     }
+`;
+
+export const RequiredLabel = styled.p`
+    text-align: end;
+    padding: 0;
+    margin: 0;
+    margin-inline: 1%;
+    color: #a6a6a6;
+    width: 100%;
+    font-size: 0.8rem;
 `;

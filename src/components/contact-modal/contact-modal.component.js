@@ -1,5 +1,6 @@
 import { Modal, TextField, ThemeProvider } from '@mui/material';
 import {
+    CloseIconWrapper,
     ModalRoot,
     modalTheme,
     StyledPaper,
@@ -14,45 +15,38 @@ import {
     FormContainer,
     FormFieldFull,
     FormFieldShort,
+    RequiredLabel,
     SubmitButton,
 } from './contact-modal.styles';
 import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 import { Channels } from '../../utils/enums/Constants';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 const FIELDS = [
     {
         name: 'First Name',
-        required: true,
-        type: 'text',
         placeholder: 'First Name',
         sm: true,
     },
     {
         name: 'Last Name',
-        required: true,
-        type: 'text',
         placeholder: 'Last Name',
         sm: true,
     },
-    { name: 'Email', required: true, type: 'email', placeholder: 'Email' },
+    { name: 'Email', type: 'email', placeholder: 'Email' },
     {
         name: 'Institution Name',
-        required: true,
-        type: 'text',
         placeholder: 'Institution Name',
     },
     {
         name: 'Institution Website',
-        required: true,
-        type: 'text',
+        required: false,
         placeholder: 'Institution Website',
     },
     {
         name: 'Description',
-        required: true,
-        type: 'text',
         placeholder: 'Description',
         multiline: true,
         rows: 4,
@@ -125,6 +119,15 @@ const ContactModal = ({ open, closeModal }) => {
                                         : 'Your feedback will help us improve the user experience.'}
                                 </ContactHeaderParagraph>
                             </ContactHeaderInfo>
+                            <CloseIconWrapper
+                                onClick={closeModal}
+                                style={{ position: 'absolute', right: 0 }}>
+                                <CloseIcon
+                                    width={'32px'}
+                                    height={'32px'}
+                                    color={'white'}
+                                />
+                            </CloseIconWrapper>
                         </ContactHeader>
                         <form onSubmit={handleSubmit}>
                             <FormContainer>
@@ -134,7 +137,7 @@ const ContactModal = ({ open, closeModal }) => {
                                         name,
                                         placeholder,
                                         variant = 'outlined',
-                                        type,
+                                        type = 'text',
                                         multiline = false,
                                         rows = 1,
                                         sm = false,
@@ -143,7 +146,9 @@ const ContactModal = ({ open, closeModal }) => {
                                             <TextField
                                                 required={required}
                                                 name={name}
-                                                placeholder={placeholder}
+                                                placeholder={`${placeholder}${
+                                                    required ? '*' : ''
+                                                }`}
                                                 variant={variant}
                                                 type={type}
                                                 multiline={multiline}
@@ -167,6 +172,7 @@ const ContactModal = ({ open, closeModal }) => {
                                         );
                                     }
                                 )}
+                                <RequiredLabel>* required</RequiredLabel>
                                 <SubmitButton
                                     $success={status.success}
                                     $submitting={status.submitting}
