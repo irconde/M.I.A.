@@ -21,6 +21,44 @@ import { Channels } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
+const FIELDS = [
+    {
+        name: 'First Name',
+        required: true,
+        type: 'text',
+        placeholder: 'First Name',
+        sm: true,
+    },
+    {
+        name: 'Last Name',
+        required: true,
+        type: 'text',
+        placeholder: 'Last Name',
+        sm: true,
+    },
+    { name: 'Email', required: true, type: 'email', placeholder: 'Email' },
+    {
+        name: 'Institution Name',
+        required: true,
+        type: 'text',
+        placeholder: 'Institution Name',
+    },
+    {
+        name: 'Institution Website',
+        required: true,
+        type: 'text',
+        placeholder: 'Institution Website',
+    },
+    {
+        name: 'Description',
+        required: true,
+        type: 'text',
+        placeholder: 'Description',
+        multiline: true,
+        rows: 4,
+    },
+];
+
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
         success: null,
@@ -90,57 +128,45 @@ const ContactModal = ({ open, closeModal }) => {
                         </ContactHeader>
                         <form onSubmit={handleSubmit}>
                             <FormContainer>
-                                <FormFieldShort>
-                                    <TextField
-                                        required={true}
-                                        name={'First Name'}
-                                        variant={'outlined'}
-                                        placeholder={'First Name'}
-                                    />
-                                </FormFieldShort>
-                                <FormFieldShort>
-                                    <TextField
-                                        required={true}
-                                        name={'Last Name'}
-                                        variant={'outlined'}
-                                        placeholder={'Last Name'}
-                                    />
-                                </FormFieldShort>
-                                <FormFieldFull>
-                                    <TextField
-                                        type={'email'}
-                                        required={true}
-                                        name={'Email'}
-                                        variant={'outlined'}
-                                        placeholder={'Email'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Institution Name'}
-                                        variant={'outlined'}
-                                        placeholder={'Institution Name'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Institution Website'}
-                                        variant={'outlined'}
-                                        placeholder={'Institution Website'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Description'}
-                                        variant={'outlined'}
-                                        placeholder={'Description'}
-                                        multiline={true}
-                                        rows={4}
-                                    />
-                                </FormFieldFull>
+                                {FIELDS.map(
+                                    ({
+                                        required = true,
+                                        name,
+                                        placeholder,
+                                        variant = 'outlined',
+                                        type,
+                                        multiline = false,
+                                        rows = 1,
+                                        sm = false,
+                                    }) => {
+                                        const textField = (
+                                            <TextField
+                                                required={required}
+                                                name={name}
+                                                placeholder={placeholder}
+                                                variant={variant}
+                                                type={type}
+                                                multiline={multiline}
+                                                rows={rows}
+                                                onChange={() =>
+                                                    setStatus({
+                                                        ...status,
+                                                        error: '',
+                                                    })
+                                                }
+                                            />
+                                        );
+                                        return sm ? (
+                                            <FormFieldShort key={name}>
+                                                {textField}
+                                            </FormFieldShort>
+                                        ) : (
+                                            <FormFieldFull key={name}>
+                                                {textField}
+                                            </FormFieldFull>
+                                        );
+                                    }
+                                )}
                                 <SubmitButton
                                     $success={status.success}
                                     $submitting={status.submitting}
