@@ -1,5 +1,6 @@
 const electron = require('electron');
-const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
+const { dialog, ipcMain, app, BrowserWindow, screen, globalShortcut } =
+    electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -106,11 +107,18 @@ function createWindow() {
                     if (err) throw err;
                 }
             );
+            mainWindow.removeAllListeners();
+            globalShortcut.unregisterAll();
         });
         mainWindow.on('closed', async () => {
             await files.removeFileWatcher();
             mainWindow = null;
         });
+        /*mainWindow.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') {
+                app.quit();
+            }
+        });*/
     };
 
     if (isDev) {
@@ -138,7 +146,11 @@ app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            createWindow();
+            try {
+                createWindow();
+            } catch (e) {
+                app.quit();
+            }
         });
 });
 
@@ -148,11 +160,11 @@ app.on('window-all-closed', () => {
     }
 });
 
-app.on('activate', () => {
+/*app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
     }
-});
+});*/
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
