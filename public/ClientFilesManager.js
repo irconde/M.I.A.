@@ -467,7 +467,6 @@ class ClientFilesManager {
             readStream.on('end', () => {
                 try {
                     let annotationFile = JSON.parse(data);
-                    console.log(fileName);
                     annotationFile.push({
                         fileName,
                         imageId,
@@ -736,7 +735,6 @@ class ClientFilesManager {
         }
 
         let annotationInformation = [];
-        console.log(this.fileNames[this.currentFileIndex]);
         annotationInformation = await this.getAnnotationsForFile(
             this.fileNames[this.currentFileIndex]
         );
@@ -778,12 +776,9 @@ class ClientFilesManager {
             readStream.on('end', () => {
                 const tempData = JSON.parse(data);
                 if (tempData?.length > 0) {
-                    const foundTempData = tempData.find((temp) => {
-                        console.log(
-                            `temp: ${temp.fileName} | current: ${fileName}`
-                        );
-                        return temp.fileName === fileName;
-                    });
+                    const foundTempData = tempData.find(
+                        (temp) => temp.fileName === fileName
+                    );
                     if (foundTempData) {
                         resolve({
                             annotations: foundTempData.cocoAnnotations,
