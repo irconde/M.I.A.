@@ -278,23 +278,10 @@ class ClientFilesManager {
                 this.thumbnailsPromise.destruct();
             }
         });
-        this.initTempFile(tempPath);
         ipcMain.handle(
             Channels.thumbnailStatus,
             () => this.#isLoadingThumbnails
         );
-    }
-
-    async initTempFile(tempPath) {
-        const writeStream = fs.createWriteStream(tempPath);
-        writeStream.on('error', (err) => {
-            console.log(err);
-        });
-        writeStream.on('finish', () => {
-            console.log('Cleared temp data on startup');
-        });
-        writeStream.write(JSON.stringify([]));
-        writeStream.end();
     }
 
     /**

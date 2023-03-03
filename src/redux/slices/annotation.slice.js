@@ -216,6 +216,8 @@ const annotationSlice = createSlice({
                 // Loaded from temp data
                 state.deletedAnnotationIds = deletedAnnotationIds;
                 state.hasAnnotationChanged = true;
+            } else {
+                state.hasAnnotationChanged = false;
             }
 
             if (state.maxAnnotationId === 1 && maxAnnotationId !== undefined) {
@@ -269,7 +271,6 @@ const annotationSlice = createSlice({
 
                 state.categories = categories;
             }
-            state.hasAnnotationChanged = false;
 
             saveToSessionStorage('annotations', state.annotations);
             saveToSessionStorage('categories', state.categories);
@@ -551,6 +552,7 @@ const annotationSlice = createSlice({
         [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
             //state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
             clearSessionStorage();
+            state.deletedAnnotationIds = [];
         },
         [selectFileAndSaveTempAnnotations.pending]: (state) => {
             //state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;

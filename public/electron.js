@@ -86,7 +86,11 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH, TEMP_ANNOTATIONS_FILE_PATH);
+    files = new ClientFilesManager(
+        mainWindow,
+        SETTINGS_FILE_PATH,
+        TEMP_ANNOTATIONS_FILE_PATH
+    );
     files.initSelectedPaths(
         appSettings.selectedImagesDirPath,
         appSettings.selectedAnnotationFile
@@ -156,10 +160,23 @@ app.on('window-all-closed', () => {
     }
 });
 
-app.on('activate', () => {
+// TODO: macOS users: test if needed
+/*app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
     }
+});*/
+
+app.on('web-contents-created', () => {
+    const writeStream = fs.createWriteStream(TEMP_ANNOTATIONS_FILE_PATH);
+    writeStream.on('error', (err) => {
+        console.log(err);
+    });
+    writeStream.on('finish', () => {
+        console.log('Cleared temp data on startup');
+    });
+    writeStream.write(JSON.stringify([]));
+    writeStream.end();
 });
 
 /**
@@ -295,6 +312,7 @@ ipcMain.handle(Channels.getSettings, async () => appSettings);
  * @returns {Promise<Object>}
  */
 const initSettings = async () => {
+    console.log('init settings');
     const allPromises = [];
     allPromises.push(
         new Promise((resolve, reject) => {
