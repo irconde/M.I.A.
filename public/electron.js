@@ -251,12 +251,20 @@ ipcMain.handle(Channels.getCurrentFile, () =>
 );
 
 ipcMain.handle(Channels.selectFile, async (e, args) => {
-    const { fileName, cocoAnnotations, cocoCategories, cocoDeleted } = args;
+    const {
+        fileName,
+        cocoAnnotations,
+        cocoCategories,
+        cocoDeleted,
+        tempFileName,
+        imageId,
+    } = args;
     await files.createUpdateTempAnnotationsFile(
         cocoAnnotations,
         cocoCategories,
         cocoDeleted,
-        fileName,
+        tempFileName,
+        imageId,
         TEMP_ANNOTATIONS_FILE_PATH
     );
     await files.selectFile(fileName);

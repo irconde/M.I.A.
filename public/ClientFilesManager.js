@@ -253,6 +253,7 @@ class ClientFilesManager {
     selectedAnnotationFile = '';
     settingsPath = '';
     #watcher = null;
+    tempPath = '';
     #thumbnails = new Thumbnails();
 
     constructor(mainWindow, settingsPath, tempPath) {
@@ -262,6 +263,7 @@ class ClientFilesManager {
         // to the files then Electron will send more thumbnails to React
         this.thumbnailsPromise = new CustomPromise();
         this.settingsPath = settingsPath;
+        this.tempPath = tempPath;
         ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
             try {
                 return await this.thumbnailsPromise.promise;
@@ -450,6 +452,7 @@ class ClientFilesManager {
         cocoCategories,
         cocoDeleted,
         fileName,
+        imageId,
         filePath
     ) {
         if (cocoAnnotations?.length > 0) {
@@ -464,9 +467,10 @@ class ClientFilesManager {
             readStream.on('end', () => {
                 try {
                     let annotationFile = JSON.parse(data);
-
+                    console.log(fileName);
                     annotationFile.push({
                         fileName,
+                        imageId,
                         cocoAnnotations,
                         cocoCategories,
                         cocoDeleted,
@@ -709,7 +713,9 @@ class ClientFilesManager {
 
         let annotationInformation = [];
         if (this.selectedAnnotationFile) {
-            annotationInformation = await this.getAnnotationsForFile();
+            annotationInformation = await this.getAnnotationsForFile(
+                this.fileNames[this.currentFileIndex]
+            );
         }
         const pixelData = await fs.promises.readFile(
             path.join(
@@ -730,9 +736,10 @@ class ClientFilesManager {
         }
 
         let annotationInformation = [];
-        if (this.selectedAnnotationFile) {
-            annotationInformation = await this.getAnnotationsForFile();
-        }
+        console.log(this.fileNames[this.currentFileIndex]);
+        annotationInformation = await this.getAnnotationsForFile(
+            this.fileNames[this.currentFileIndex]
+        );
         const pixelData = await fs.promises.readFile(
             path.join(
                 this.selectedImagesDirPath,
@@ -757,8 +764,48 @@ class ClientFilesManager {
         this.#sendFileInfo();
     }
 
-    async getAnnotationsForFile() {
+    async getAnnotationsForFile(fileName) {
         // TODO: Refactor below to get temp data if there is any
+        return new Promise((resolve, reject) => {
+            const readStream = fs.createReadStream(this.tempPath);
+            let data = '';
+            readStream.on('error', (error) => {
+                reject(error);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
+                const tempData = JSON.parse(data);
+                if (tempData?.length > 0) {
+                    const foundTempData = tempData.find((temp) => {
+                        console.log(
+                            `temp: ${temp.fileName} | current: ${fileName}`
+                        );
+                        return temp.fileName === fileName;
+                    });
+                    if (foundTempData) {
+                        resolve({
+                            annotations: foundTempData.cocoAnnotations,
+                            categories: foundTempData.cocoCategories,
+                            deletedAnnotationIds: foundTempData.cocoDeleted,
+                            imageId: foundTempData.imageId,
+                        });
+                    } else if (this.selectedAnnotationFile) {
+                        this.#cocoAnnotationLoader()
+                            .then((data) => resolve(data))
+                            .catch((err) => reject(err));
+                    }
+                } else if (this.selectedAnnotationFile) {
+                    this.#cocoAnnotationLoader()
+                        .then((data) => resolve(data))
+                        .catch((err) => reject(err));
+                }
+            });
+        });
+    }
+
+    #cocoAnnotationLoader() {
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.selectedAnnotationFile);
             let data = '';

@@ -157,7 +157,7 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
     'annotations/selectFileAndSaveTempAnnotations',
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
-        const { annotation } = state;
+        const { annotation, ui } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
         await ipcRenderer
@@ -167,6 +167,8 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
                     : [],
                 cocoCategories,
                 cocoDeleted,
+                tempFileName: ui.currentFileName,
+                imageId: annotation.imageId,
                 fileName: payload,
             })
             .then(() => {
@@ -199,11 +201,19 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotationInformation, colors } = action.payload;
-            const { annotations, categories, maxAnnotationId, imageId } =
-                annotationInformation;
+            const {
+                annotations,
+                categories,
+                maxAnnotationId,
+                imageId,
+                deletedAnnotationIds,
+            } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
             state.imageId = imageId;
+
+            console.log(deletedAnnotationIds);
+
             if (state.maxAnnotationId === 1) {
                 state.maxAnnotationId = maxAnnotationId;
             }
