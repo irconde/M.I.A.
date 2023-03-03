@@ -278,10 +278,39 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
             },
             body: data,
         });
-        if (!res.ok) throw Error(res.statusText);
-        else return { success: res.ok };
+        if (res.ok) {
+            return {
+                success: res.ok,
+            };
+        } else {
+            let errorMessage;
+            switch (res.status) {
+                case 400:
+                    errorMessage = 'Invalid request. Please check your input.';
+                    break;
+                case 401:
+                    errorMessage =
+                        'Unauthorized. Please authenticate and try again.';
+                    break;
+                case 403:
+                    errorMessage =
+                        'Forbidden. You are not authorized to perform this action.';
+                    break;
+                case 404:
+                    errorMessage =
+                        'Resource not found. Please check your URL and try again.';
+                    break;
+                case 500:
+                    errorMessage = 'Server error. Please try again later.';
+                    break;
+                default:
+                    errorMessage = `An error occurred. Status code: ${res.status}`;
+                    break;
+            }
+            throw new Error(errorMessage);
+        }
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.message };
     }
 });
 
