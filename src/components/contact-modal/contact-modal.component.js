@@ -81,7 +81,10 @@ const ContactModal = ({ open, closeModal }) => {
             });
             if (success) {
                 e.target.reset();
-                setTimeout(closeModal, 1000);
+                setTimeout(() => {
+                    closeModal();
+                    setStatus({ error: '', success: null, submitting: false });
+                }, 1000);
             }
         } catch (e) {
             setStatus({
