@@ -7,29 +7,29 @@ import {
     updateAnnotationFile,
 } from './redux/slices/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import ImageDisplayComponent from './components/image-display/image-display.component';
-import TopBarComponent from './components/top-bar/top-bar.component';
-import AboutModal from './components/about-modal/about-modal.component';
-import SideMenuComponent from './components/side-menu/side-menu.component';
-import ContactModal from './components/contact-modal/contact-modal.component';
-import AnnotationContextMenuComponent from './components/annotation-context/annotation-context-menu.component';
-import ColorPickerComponent from './components/color/color-picker.component';
-import EditLabelComponent from './components/edit-label/edit-label.component';
-import LazyImageMenuComponent from './components/lazy-image/lazy-image-menu.component';
-import BoundPolyFABComponent from './components/fab/bound-poly-fab.component';
-import SaveButtonComponent from './components/side-menu/buttons/save-button.component';
 import { Channels } from './utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+import {
+    getShowApp,
+    getSplashScreenVisibility,
+    updateShowApp,
+    updateSplashScreenVisibility,
+} from './redux/slices/ui.slice';
+import SplashScreenComponent from './components/splash-screen/splash-screen.component';
+import ApplicationComponent from './components/application/application.component';
 
 const AppNew = () => {
     const dispatch = useDispatch();
     const areSettingsLoading = useSelector(getSettingsLoadingState);
-    const { selectedImagesDirPath, selectedAnnotationFile } =
-        useSelector(getAssetsDirPaths);
+    const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
+    const [prevSelectedImgDir, setPrevSelectedImgDir] = useState(
+        selectedImagesDirPath
+    );
     const [importModalOpen, setImportModalOpen] = useState(false);
-    const [aboutModalOpen, setAboutModalOpen] = useState(false);
-    const [contactModalOpen, setContactModalOpen] = useState(false);
+
+    const showApp = useSelector(getShowApp);
+    const showSplashScreen = useSelector(getSplashScreenVisibility);
 
     useEffect(() => {
         dispatch(initSettings());
@@ -40,39 +40,40 @@ const AppNew = () => {
     }, []);
 
     useEffect(() => {
+        // hide the splash screen when the import modal is visible
+        if (!importModalOpen) return;
+        setTimeout(() => dispatch(updateSplashScreenVisibility(false)), 2000);
+    }, [importModalOpen]);
+
+    useEffect(() => {
         // only open the modal if there is no selected images' dir path
-        selectedImagesDirPath === '' && setImportModalOpen(true);
+        if (selectedImagesDirPath === '') {
+            setImportModalOpen(true);
+        } else if (selectedImagesDirPath && prevSelectedImgDir === undefined) {
+            // show the app if there is a path saved in the settings file
+            dispatch(updateSplashScreenVisibility(true));
+            dispatch(updateShowApp(true));
+        }
+        setPrevSelectedImgDir(selectedImagesDirPath);
     }, [selectedImagesDirPath]);
 
     return (
-        <div>
+        <>
+            {showSplashScreen && <SplashScreenComponent />}
             {!areSettingsLoading && (
-                <>
+                <div>
                     <ImportModalComponent
                         open={importModalOpen}
                         setOpen={setImportModalOpen}
                     />
-                    <ImageDisplayComponent />
-                </>
+                    {selectedImagesDirPath && showApp && (
+                        <ApplicationComponent
+                            openImportModal={() => setImportModalOpen(true)}
+                        />
+                    )}
+                </div>
             )}
-            <TopBarComponent
-                openImportModal={() => setImportModalOpen(true)}
-                openContactModal={() => setContactModalOpen(true)}
-                openAboutModal={() => setAboutModalOpen(true)}
-            />
-            <AboutModal open={aboutModalOpen} setOpen={setAboutModalOpen} />
-            <ContactModal
-                closeModal={() => setContactModalOpen(false)}
-                open={contactModalOpen}
-            />
-            <LazyImageMenuComponent />
-            <SideMenuComponent />
-            <AnnotationContextMenuComponent />
-            <ColorPickerComponent />
-            <EditLabelComponent />
-            <BoundPolyFABComponent />
-            <SaveButtonComponent />
-        </div>
+        </>
     );
 };
 
