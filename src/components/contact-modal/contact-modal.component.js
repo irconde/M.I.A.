@@ -79,26 +79,22 @@ const ContactModal = ({ open, closeModal }) => {
                 success,
                 submitting: false,
             });
-            if (success) {
-                e.target.reset();
-                setTimeout(() => {
-                    closeModal();
-                    setStatus({ error: '', success: null, submitting: false });
-                }, 1000);
-            }
+            e.target.reset();
+            setTimeout(closeModal, 1000);
         } catch (e) {
             setStatus({
                 error: e.message || e,
                 success: false,
                 submitting: false,
             });
+        } finally {
             setTimeout(
                 () =>
-                    setStatus((st) => ({
-                        ...st,
+                    setStatus({
+                        submitting: false,
                         error: '',
                         success: null,
-                    })),
+                    }),
                 2000
             );
         }
