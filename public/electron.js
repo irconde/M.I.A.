@@ -57,12 +57,12 @@ function createWindow() {
     if (!fs.existsSync(MONITOR_FILE_PATH)) {
         display = screen.getPrimaryDisplay();
     } else {
+        const data = fs.readFileSync(MONITOR_FILE_PATH);
         try {
-            const data = fs.readFileSync(MONITOR_FILE_PATH);
             const rectangle = JSON.parse(data);
             display = screen.getDisplayMatching(rectangle);
-        } catch (error) {
-            console.log(error);
+        } catch (e) {
+            console.log(e);
             display = screen.getPrimaryDisplay();
         }
     }
@@ -73,6 +73,9 @@ function createWindow() {
             __dirname,
             `${process.platform === 'darwin' ? 'icon.icns' : 'icon.ico'}`
         ),
+        ...display?.bounds,
+        backgroundColor: '#3a3a3a',
+        show: false,
         webPreferences: {
             // Node Integration enables the use of the Node.JS File system
             // Disabling Context Isolation allows the renderer process to make calls to Electron to use Node.JS FS
@@ -83,33 +86,45 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(
-        mainWindow,
-        SETTINGS_FILE_PATH,
-        TEMP_ANNOTATIONS_FILE_PATH
+    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH, TEMP_ANNOTATIONS_FILE_PATH);
+    files.initSelectedPaths(
+        appSettings.selectedImagesDirPath,
+        appSettings.selectedAnnotationFile
     );
 
-    mainWindow
-        .loadURL(
-            isDev
-                ? 'http://localhost:3000'
-                : `file://${path.join(__dirname, '../build/index.html')}`
-        )
-        .catch((err) => console.log(err));
+    const loadWindowContent = () => {
+        mainWindow
+            .loadURL(
+                isDev
+                    ? 'http://localhost:3000'
+                    : `file://${path.join(__dirname, '../build/index.html')}`
+            )
+            .then(() => {
+                mainWindow.maximize();
+                mainWindow.show();
+            })
+            .catch((err) => console.log(err));
 
-    mainWindow.maximize();
-    mainWindow.on('close', async () => {
-        const rectangle = mainWindow.getBounds();
-        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
-            if (err) throw err;
+        mainWindow.on('close', async () => {
+            const rectangle = mainWindow.getBounds();
+            fs.writeFile(
+                MONITOR_FILE_PATH,
+                JSON.stringify(rectangle),
+                (err) => {
+                    if (err) throw err;
+                }
+            );
         });
-    });
-    mainWindow.on('closed', async () => {
-        await files.removeFileWatcher();
-        mainWindow = null;
-    });
+        mainWindow.on('closed', async () => {
+            await files.removeFileWatcher();
+            mainWindow = null;
+        });
+    };
+
     if (isDev) {
-        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).finally();
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS], {
+            forceDownload: true,
+        }).finally(loadWindowContent);
 
         // Open the DevTools.
         mainWindow.webContents.on('did-frame-finish-load', () => {
@@ -123,6 +138,7 @@ function createWindow() {
         });
     } else {
         mainWindow.removeMenu();
+        loadWindowContent();
     }
 }
 
@@ -131,10 +147,6 @@ app.whenReady().then(() => {
         .catch(console.log)
         .finally(() => {
             createWindow();
-            files.initSelectedPaths(
-                appSettings.selectedImagesDirPath,
-                appSettings.selectedAnnotationFile
-            );
         });
 });
 

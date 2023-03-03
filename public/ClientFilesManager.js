@@ -143,7 +143,7 @@ class Thumbnails {
     /**
      * Gets the thumbnails object from storage and updates the private class member
      * If value already exists in memory, then we just return it
-     * @returns {Promise<Object | null>}
+     * @returns {Promise<Object<string, string> | null>}
      */
     async getThumbnails() {
         try {
@@ -255,6 +255,7 @@ class ClientFilesManager {
     #watcher = null;
     tempPath = '';
     #thumbnails = new Thumbnails();
+    #isLoadingThumbnails = false;
 
     constructor(mainWindow, settingsPath, tempPath) {
         this.mainWindow = mainWindow;
@@ -264,9 +265,13 @@ class ClientFilesManager {
         this.thumbnailsPromise = new CustomPromise();
         this.settingsPath = settingsPath;
         this.tempPath = tempPath;
-        ipcMain.handleOnce(Channels.requestInitialThumbnailsList, async () => {
+        ipcMain.handle(Channels.requestInitialThumbnailsList, async () => {
             try {
-                return await this.thumbnailsPromise.promise;
+                return this.thumbnailsPromise.isSettled
+                    ? await this.#prepareClientThumbnails(
+                          await this.#thumbnails.getThumbnails()
+                      )
+                    : await this.thumbnailsPromise.promise;
             } catch (e) {
                 throw new Error('No initial thumbnails');
             } finally {
@@ -274,6 +279,10 @@ class ClientFilesManager {
             }
         });
         this.initTempFile(tempPath);
+        ipcMain.handle(
+            Channels.thumbnailStatus,
+            () => this.#isLoadingThumbnails
+        );
     }
 
     async initTempFile(tempPath) {
@@ -300,6 +309,15 @@ class ClientFilesManager {
     }
 
     /**
+     * Setter for isLoadingThumbnails which also sends the value to the React process
+     * @param isLoading {boolean}
+     */
+    #sendThumbnailsStatus(isLoading) {
+        this.#isLoadingThumbnails = isLoading;
+        this.#sendUpdate(Channels.thumbnailStatus, this.#isLoadingThumbnails);
+    }
+
+    /**
      * Called when the app is first launched with the images' dir path from the settings
      * @param imagesDirPath {string}
      * @param annotationFilePath {string}
@@ -310,10 +328,13 @@ class ClientFilesManager {
         this.selectedAnnotationFile = annotationFilePath;
         this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         // if no path exits in the settings then reject the React promise
-        if (imagesDirPath === '') return this.thumbnailsPromise.reject();
+        if (imagesDirPath === '') {
+            return this.thumbnailsPromise.reject();
+        }
 
         this.selectedImagesDirPath = imagesDirPath;
         this.colorFilePath = colorFilePath;
+        this.#sendThumbnailsStatus(true);
         await this.#setDirWatcher();
         const dirContainsAnyImages = await this.#updateFileNames(imagesDirPath);
         if (dirContainsAnyImages) {
@@ -325,6 +346,7 @@ class ClientFilesManager {
             // if the directory path from the settings contains no images then reject the promise
             this.thumbnailsPromise.reject();
         }
+        this.#sendThumbnailsStatus(false);
     }
 
     /**
@@ -334,6 +356,7 @@ class ClientFilesManager {
      * @returns {Promise<void>}
      */
     async updateSelectedPaths(imagesDirPath, annotationFilePath) {
+        this.#sendThumbnailsStatus(true);
         this.selectedAnnotationFile = annotationFilePath;
         this.#thumbnails.setAnnotationFilePath(annotationFilePath);
         this.selectedImagesDirPath = imagesDirPath;
@@ -342,9 +365,11 @@ class ClientFilesManager {
         this.#thumbnails.clearCurrentThumbnails();
         this.currentFileIndex = 0;
         this.#sendFileInfo();
-        if (!dirContainsAnyImages) return;
-        await this.#thumbnails.setThumbnailsPath(imagesDirPath);
-        await this.#generateThumbnails();
+        if (dirContainsAnyImages) {
+            await this.#thumbnails.setThumbnailsPath(imagesDirPath);
+            await this.#generateThumbnails();
+        }
+        this.#sendThumbnailsStatus(false);
     }
 
     async updateAnnotationsFile(newAnnotationData) {
@@ -907,17 +932,17 @@ class ClientFilesManager {
         // if the promise has not been resolved before, then resolve it once
         if (!this.thumbnailsPromise.isSettled)
             this.thumbnailsPromise.resolve(clientThumbnails);
-        else this.#sendUpdate(Channels.updateThumbnails, clientThumbnails);
     }
 
     /**
      * Takes an object of thumbnails and returns an array of the thumbnails
      * in the original order of the files and determines which thumbnails have annotations
-     * @param thumbnails {Object<string, string>}
+     * @param thumbnails {Object<string, string> | null}
      * @returns {Promise<Array<{fileName: string, filePath: string, hasAnnotations: boolean}>>}
      */
     async #prepareClientThumbnails(thumbnails) {
         const _thumbnails = [];
+        if (thumbnails === null) return _thumbnails;
         const annotations = await this.#getAllAnnotationsFromStorage();
         this.fileNames.forEach((fileName) =>
             _thumbnails.push({
@@ -966,7 +991,6 @@ class ClientFilesManager {
      * @param payload {object}
      */
     #sendUpdate(channel, payload) {
-        console.log('sending');
         this.mainWindow.webContents.send(channel, payload);
     }
 

@@ -60,7 +60,7 @@ const SideMenuComponent = () => {
 
     const [expandedCategories, setExpandedCategories] = useState(() => {
         return Object.keys(annotationsByCategory).reduce((object, key) => {
-            object[key] = true;
+            object[key] = false;
             return object;
         }, {});
     });
