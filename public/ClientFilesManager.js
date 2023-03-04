@@ -602,6 +602,7 @@ class ClientFilesManager {
             };
 
             const listOfPromises = [];
+            // TODO: Refactor to not loop through file names, but only the file names based on the annotations
             this.fileNames.forEach((file, index) => {
                 annotationJson.images.push({
                     id: index + 1,
