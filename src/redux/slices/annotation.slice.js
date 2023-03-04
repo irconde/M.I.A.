@@ -345,6 +345,9 @@ const annotationSlice = createSlice({
             saveToSessionStorage('categories', state.categories);
             saveToSessionStorage('maxAnnotationId', state.maxAnnotationId);
         },
+        updateColors: (state, action) => {
+            state.colors = action.payload;
+        },
         selectAnnotation: (state, action) => {
             let anySelected = false;
             state.annotations.forEach((annotation) => {
@@ -553,6 +556,11 @@ const annotationSlice = createSlice({
         [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
             //state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
             clearSessionStorage();
+            state.annotations = [];
+            state.categories = [];
+            state.selectedAnnotation = null;
+            state.selectedCategory = '';
+            state.hasAnnotationChanged = false;
             state.deletedAnnotationIds = [];
         },
         [selectFileAndSaveTempAnnotations.pending]: (state) => {
@@ -584,6 +592,7 @@ export const {
     selectAnnotationCategory,
     updateSaveAnnotationStatus,
     clearAnnotationData,
+    updateColors,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;

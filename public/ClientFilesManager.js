@@ -510,40 +510,59 @@ class ClientFilesManager {
         imageId,
         filePath
     ) {
-        if (cocoAnnotations?.length > 0) {
-            const readStream = fs.createReadStream(filePath);
-            let data = '';
-            readStream.on('error', (err) => {
-                console.log(err);
-            });
-            readStream.on('data', (chunk) => {
-                data += chunk;
-            });
-            readStream.on('end', () => {
-                try {
-                    let annotationFile = JSON.parse(data);
-                    annotationFile.push({
-                        fileName,
-                        imageId,
-                        cocoAnnotations,
-                        cocoCategories,
-                        cocoDeleted,
-                    });
-
-                    const writeStream = fs.createWriteStream(filePath);
-                    writeStream.on('error', (err) => {
-                        console.log(err);
-                    });
-                    writeStream.on('finish', () => {
-                        console.log('Saved temp data');
-                    });
-                    writeStream.write(JSON.stringify(annotationFile));
-                    writeStream.end();
-                } catch (err) {
+        return new Promise((resolve, reject) => {
+            if (cocoAnnotations?.length > 0) {
+                const readStream = fs.createReadStream(filePath);
+                let data = '';
+                readStream.on('error', (err) => {
                     console.log(err);
-                }
-            });
-        }
+                    reject(err);
+                });
+                readStream.on('data', (chunk) => {
+                    data += chunk;
+                });
+                readStream.on('end', () => {
+                    try {
+                        let annotationFile = JSON.parse(data);
+                        const foundIndex = annotationFile.findIndex(
+                            (temp) => temp.fileName === fileName
+                        );
+                        if (foundIndex === -1) {
+                            annotationFile.push({
+                                fileName,
+                                imageId,
+                                cocoAnnotations,
+                                cocoCategories,
+                                cocoDeleted,
+                            });
+                        } else {
+                            annotationFile[foundIndex] = {
+                                fileName,
+                                imageId,
+                                cocoAnnotations,
+                                cocoCategories,
+                                cocoDeleted,
+                            };
+                        }
+
+                        const writeStream = fs.createWriteStream(filePath);
+                        writeStream.on('error', (err) => {
+                            console.log(err);
+                            reject(err);
+                        });
+                        writeStream.on('finish', () => {
+                            console.log('Saved temp data');
+                            resolve();
+                        });
+                        writeStream.write(JSON.stringify(annotationFile));
+                        writeStream.end();
+                    } catch (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                });
+            } else resolve();
+        });
     }
 
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
@@ -671,7 +690,7 @@ class ClientFilesManager {
                         );
                     }
                 });
-
+                //testa
                 Promise.all(listOfPromises)
                     .then((results) => {
                         results.forEach((result) => {
@@ -837,6 +856,7 @@ class ClientFilesManager {
             )
         );
 
+        console.log('returning information');
         return {
             pixelData,
             pixelType: path
@@ -848,10 +868,19 @@ class ClientFilesManager {
     }
 
     async selectFile(filename) {
-        const index = this.fileNames.findIndex((name) => name === filename);
-        if (index === -1) throw new Error("File name doesn't exists");
-        this.currentFileIndex = index;
-        this.#sendFileInfo();
+        return new Promise((resolve, reject) => {
+            try {
+                const index = this.fileNames.findIndex(
+                    (name) => name === filename
+                );
+                if (index === -1) throw new Error("File name doesn't exists");
+                this.currentFileIndex = index;
+                this.#sendFileInfo();
+                resolve();
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     async getAnnotationsForFile(fileName) {
@@ -882,12 +911,12 @@ class ClientFilesManager {
                         this.#cocoAnnotationLoader()
                             .then((data) => resolve(data))
                             .catch((err) => reject(err));
-                    }
+                    } else resolve();
                 } else if (this.selectedAnnotationFile) {
                     this.#cocoAnnotationLoader()
                         .then((data) => resolve(data))
                         .catch((err) => reject(err));
-                }
+                } else resolve();
             });
         });
     }

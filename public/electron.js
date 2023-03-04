@@ -275,28 +275,46 @@ ipcMain.handle(
  */
 ipcMain.handle(Channels.getNextFile, () => files.getNextFile());
 
-ipcMain.handle(Channels.getCurrentFile, () =>
-    files.getCurrentFile(annotationColors)
-);
+ipcMain.handle(Channels.getCurrentFile, async () => {
+    return await files.getCurrentFile(annotationColors);
+});
 
 ipcMain.handle(Channels.selectFile, async (e, args) => {
-    const {
-        fileName,
-        cocoAnnotations,
-        cocoCategories,
-        cocoDeleted,
-        tempFileName,
-        imageId,
-    } = args;
-    await files.createUpdateTempAnnotationsFile(
-        cocoAnnotations,
-        cocoCategories,
-        cocoDeleted,
-        tempFileName,
-        imageId,
-        TEMP_ANNOTATIONS_FILE_PATH
-    );
-    await files.selectFile(fileName);
+    return new Promise((resolve, reject) => {
+        try {
+            const {
+                fileName,
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                tempFileName,
+                imageId,
+            } = args;
+            console.log(tempFileName);
+            console.log(fileName);
+            files
+                .createUpdateTempAnnotationsFile(
+                    cocoAnnotations,
+                    cocoCategories,
+                    cocoDeleted,
+                    tempFileName,
+                    imageId,
+                    TEMP_ANNOTATIONS_FILE_PATH
+                )
+                .then(() => {
+                    files
+                        .selectFile(fileName)
+                        .then(() => resolve())
+                        .catch((e) => reject(e));
+                })
+                .catch((e) => {
+                    reject(e);
+                });
+        } catch (e) {
+            console.log(e);
+            reject(e);
+        }
+    });
 });
 
 /**
