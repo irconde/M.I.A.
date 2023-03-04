@@ -1,5 +1,6 @@
 const electron = require('electron');
-const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
+const { dialog, ipcMain, app, BrowserWindow, screen, globalShortcut } =
+    electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -106,6 +107,8 @@ function createWindow() {
                     if (err) throw err;
                 }
             );
+            mainWindow.removeAllListeners();
+            globalShortcut.unregisterAll();
         });
         mainWindow.on('closed', async () => {
             await files.removeFileWatcher();
@@ -138,19 +141,17 @@ app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            createWindow();
+            try {
+                createWindow();
+            } catch (e) {
+                app.quit();
+            }
         });
 });
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
-    }
-});
-
-app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
     }
 });
 
