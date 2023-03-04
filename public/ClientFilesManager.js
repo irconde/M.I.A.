@@ -404,7 +404,7 @@ class ClientFilesManager {
                             tempReadStream.on('data', (chunk) => {
                                 tempData += chunk;
                             });
-                            readStream.on('end', () => {
+                            tempReadStream.on('end', () => {
                                 const tempJsonData = JSON.parse(tempData);
                                 if (tempJsonData?.length > 0) {
                                     tempJsonData.forEach((temp) => {
@@ -435,30 +435,31 @@ class ClientFilesManager {
                                         console.log(
                                             'Cleared temp data on save event'
                                         );
+                                        const savedFileName =
+                                            this.fileNames[
+                                                this.currentFileIndex
+                                            ];
+                                        this.#sendUpdate(
+                                            Channels.updateThumbnailHasAnnotations,
+                                            {
+                                                hasAnnotations:
+                                                    !!this.#getAnnotations(
+                                                        annotationFile,
+                                                        savedFileName
+                                                    ).length,
+                                                fileName: savedFileName,
+                                            }
+                                        );
+                                        if (
+                                            this.currentFileIndex <
+                                            this.fileNames.length - 1
+                                        ) {
+                                            this.currentFileIndex++;
+                                        }
+                                        resolve();
                                     });
                                     tempWriteStream.write(JSON.stringify([]));
                                     tempWriteStream.end();
-
-                                    const savedFileName =
-                                        this.fileNames[this.currentFileIndex];
-                                    this.#sendUpdate(
-                                        Channels.updateThumbnailHasAnnotations,
-                                        {
-                                            hasAnnotations:
-                                                !!this.#getAnnotations(
-                                                    annotationFile,
-                                                    savedFileName
-                                                ).length,
-                                            fileName: savedFileName,
-                                        }
-                                    );
-                                    if (
-                                        this.currentFileIndex <
-                                        this.fileNames.length - 1
-                                    ) {
-                                        this.currentFileIndex++;
-                                    }
-                                    resolve();
                                 });
                                 writeStream.write(
                                     JSON.stringify(annotationFile)
@@ -547,6 +548,7 @@ class ClientFilesManager {
 
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
         return new Promise((resolve, reject) => {
+            // TODO: Include temp data
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
