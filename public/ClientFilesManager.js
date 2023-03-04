@@ -426,6 +426,19 @@ class ClientFilesManager {
                                     reject(err);
                                 });
                                 writeStream.on('finish', () => {
+                                    const tempWriteStream =
+                                        fs.createWriteStream(this.tempPath);
+                                    tempWriteStream.on('error', (err) => {
+                                        console.log(err);
+                                    });
+                                    tempWriteStream.on('finish', () => {
+                                        console.log(
+                                            'Cleared temp data on save event'
+                                        );
+                                    });
+                                    tempWriteStream.write(JSON.stringify([]));
+                                    tempWriteStream.end();
+
                                     const savedFileName =
                                         this.fileNames[this.currentFileIndex];
                                     this.#sendUpdate(
