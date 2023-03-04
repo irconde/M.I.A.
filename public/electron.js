@@ -85,7 +85,8 @@ function createWindow() {
         appSettings.selectedAnnotationFile
     );
 
-    const loadWindowContent = () => {
+    const loadWindowContent = (attempts = 100, e = null) => {
+        if (attempts === 1) throw new Error(e);
         mainWindow
             .loadURL(
                 isDev
@@ -95,25 +96,26 @@ function createWindow() {
             .then(() => {
                 mainWindow.maximize();
                 mainWindow.show();
+                mainWindow.on('close', async () => {
+                    const rectangle = mainWindow.getBounds();
+                    fs.writeFile(
+                        MONITOR_FILE_PATH,
+                        JSON.stringify(rectangle),
+                        (err) => {
+                            if (err) throw err;
+                        }
+                    );
+                    mainWindow.removeAllListeners();
+                    globalShortcut.unregisterAll();
+                });
+                mainWindow.on('closed', async () => {
+                    await files.removeFileWatcher();
+                    mainWindow = null;
+                });
             })
-            .catch((err) => console.log(err));
-
-        mainWindow.on('close', async () => {
-            const rectangle = mainWindow.getBounds();
-            fs.writeFile(
-                MONITOR_FILE_PATH,
-                JSON.stringify(rectangle),
-                (err) => {
-                    if (err) throw err;
-                }
+            .catch((err) =>
+                setTimeout(() => loadWindowContent(attempts - 1, err), 100)
             );
-            mainWindow.removeAllListeners();
-            globalShortcut.unregisterAll();
-        });
-        mainWindow.on('closed', async () => {
-            await files.removeFileWatcher();
-            mainWindow = null;
-        });
     };
 
     if (isDev) {
