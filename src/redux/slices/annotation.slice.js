@@ -142,6 +142,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 cocoCategories,
                 cocoDeleted,
                 fileName: payload,
+                imageId: annotation.imageId,
             })
             .then(() => {
                 return true;
