@@ -548,152 +548,187 @@ class ClientFilesManager {
 
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
         return new Promise((resolve, reject) => {
-            // TODO: Include temp data
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-
-            const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
-            const { cocoAnnotations, cocoCategories } = newAnnotationData;
-            let annotationJson = {
-                info: {
-                    description: 'COCO Dataset',
-                    url: 'http://cocodataset.org',
-                    version: '1.0',
-                    year: year,
-                    contributor: 'COCO Consortium',
-                    date_created: `${year}/${month}/${day}`,
-                },
-                licenses: [
-                    {
-                        url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
-                        id: 1,
-                        name: 'Attribution-NonCommercial-ShareAlike License',
-                    },
-                    {
-                        url: 'http://creativecommons.org/licenses/by-nc/2.0/',
-                        id: 2,
-                        name: 'Attribution-NonCommercial License',
-                    },
-                    {
-                        url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
-                        id: 3,
-                        name: 'Attribution-NonCommercial-NoDerivs License',
-                    },
-                    {
-                        url: 'http://creativecommons.org/licenses/by/2.0/',
-                        id: 4,
-                        name: 'Attribution License',
-                    },
-                    {
-                        url: 'http://creativecommons.org/licenses/by-sa/2.0/',
-                        id: 5,
-                        name: 'Attribution-ShareAlike License',
-                    },
-                    {
-                        url: 'http://creativecommons.org/licenses/by-nd/2.0/',
-                        id: 6,
-                        name: 'Attribution-NoDerivs License',
-                    },
-                    {
-                        url: 'http://flickr.com/commons/usage/',
-                        id: 7,
-                        name: 'No known copyright restrictions',
-                    },
-                    {
-                        url: 'http://www.usa.gov/copyright.shtml',
-                        id: 8,
-                        name: 'United States Government Work',
-                    },
-                ],
-                images: [],
-                annotations: cocoAnnotations,
-                categories: cocoCategories,
-            };
-
-            const listOfPromises = [];
-            // TODO: Refactor to not loop through file names, but only the file names based on the annotations
-            this.fileNames.forEach((file, index) => {
-                annotationJson.images.push({
-                    id: index + 1,
-                    coco_url: '',
-                    flickr_url: '',
-                    file_name: file,
-                    date_capture: todayDateString,
-                });
-                const imagePath = path.join(this.selectedImagesDirPath, file);
-                if (path.extname(file).toLowerCase() === '.dcm') {
-                    listOfPromises.push(
-                        this.getDICOMDimensions(imagePath, file)
-                    );
-                } else if (
-                    path.extname(file).toLowerCase() === '.jpg' ||
-                    path.extname(file).toLowerCase() === '.jpeg'
-                ) {
-                    listOfPromises.push(
-                        this.getJPEGDimensions(imagePath, file)
-                    );
-                } else if (path.extname(file).toLowerCase() === '.png') {
-                    listOfPromises.push(this.getPNGDimensions(imagePath, file));
-                }
+            const readStream = fs.createReadStream(this.tempPath);
+            let tempData = '';
+            readStream.on('error', (err) => {
+                console.log(err);
             });
+            readStream.on('data', (chunk) => {
+                tempData += chunk;
+            });
+            readStream.on('end', () => {
+                const tempJson = JSON.parse(tempData);
 
-            Promise.all(listOfPromises)
-                .then((results) => {
-                    results.forEach((result) => {
-                        const foundIndex = annotationJson.images.findIndex(
-                            (image) => image.file_name === result.fileName
-                        );
-                        if (foundIndex !== -1) {
-                            annotationJson.images[foundIndex].width =
-                                result.width;
-                            annotationJson.images[foundIndex].height =
-                                result.height;
-                        }
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+
+                const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+                const { cocoAnnotations, cocoCategories, fileName, imageId } =
+                    newAnnotationData;
+                let annotationJson = {
+                    info: {
+                        description: 'COCO Dataset',
+                        url: 'http://cocodataset.org',
+                        version: '1.0',
+                        year: year,
+                        contributor: 'COCO Consortium',
+                        date_created: `${year}/${month}/${day}`,
+                    },
+                    licenses: [
+                        {
+                            url: 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
+                            id: 1,
+                            name: 'Attribution-NonCommercial-ShareAlike License',
+                        },
+                        {
+                            url: 'http://creativecommons.org/licenses/by-nc/2.0/',
+                            id: 2,
+                            name: 'Attribution-NonCommercial License',
+                        },
+                        {
+                            url: 'http://creativecommons.org/licenses/by-nc-nd/2.0/',
+                            id: 3,
+                            name: 'Attribution-NonCommercial-NoDerivs License',
+                        },
+                        {
+                            url: 'http://creativecommons.org/licenses/by/2.0/',
+                            id: 4,
+                            name: 'Attribution License',
+                        },
+                        {
+                            url: 'http://creativecommons.org/licenses/by-sa/2.0/',
+                            id: 5,
+                            name: 'Attribution-ShareAlike License',
+                        },
+                        {
+                            url: 'http://creativecommons.org/licenses/by-nd/2.0/',
+                            id: 6,
+                            name: 'Attribution-NoDerivs License',
+                        },
+                        {
+                            url: 'http://flickr.com/commons/usage/',
+                            id: 7,
+                            name: 'No known copyright restrictions',
+                        },
+                        {
+                            url: 'http://www.usa.gov/copyright.shtml',
+                            id: 8,
+                            name: 'United States Government Work',
+                        },
+                    ],
+                    images: [],
+                    annotations: cocoAnnotations,
+                    categories: cocoCategories,
+                };
+
+                const listOfPromises = [];
+                let files = [fileName];
+                if (tempJson?.length > 0) {
+                    tempJson.forEach((temp) => {
+                        files.push(temp.fileName);
+                        annotationJson.annotations = [
+                            ...annotationJson.annotations,
+                            temp.cocoAnnotations,
+                        ];
+                        annotationJson.annotations =
+                            annotationJson.annotations.filter(
+                                (annot) => !temp.cocoDeleted.includes(annot.id)
+                            );
                     });
-                    const annotationPath = path.join(
-                        annotationFilePath,
-                        'annotation.json'
+                }
+                files.forEach((file, index) => {
+                    annotationJson.images.push({
+                        id: index + 1,
+                        coco_url: '',
+                        flickr_url: '',
+                        file_name: file,
+                        date_capture: todayDateString,
+                    });
+                    const imagePath = path.join(
+                        this.selectedImagesDirPath,
+                        file
                     );
-                    const writeStream = fs.createWriteStream(annotationPath);
-                    writeStream.on('error', (err) => {
-                        console.log(err);
-                        reject(err);
-                    });
-                    writeStream.on('finish', () => {
-                        this.selectedAnnotationFile = annotationPath;
-                        this.#thumbnails.setAnnotationFilePath(annotationPath);
-                        this.#sendUpdate(
-                            Channels.updateAnnotationFile,
-                            this.selectedAnnotationFile
+                    if (path.extname(file).toLowerCase() === '.dcm') {
+                        listOfPromises.push(
+                            this.getDICOMDimensions(imagePath, file)
                         );
-                        const settingsWriteStream = fs.createWriteStream(
-                            this.settingsPath
+                    } else if (
+                        path.extname(file).toLowerCase() === '.jpg' ||
+                        path.extname(file).toLowerCase() === '.jpeg'
+                    ) {
+                        listOfPromises.push(
+                            this.getJPEGDimensions(imagePath, file)
                         );
-                        settingsWriteStream.write(
-                            JSON.stringify({
-                                selectedImagesDirPath:
-                                    this.selectedImagesDirPath,
-                                selectedAnnotationFile:
-                                    this.selectedAnnotationFile,
-                            })
+                    } else if (path.extname(file).toLowerCase() === '.png') {
+                        listOfPromises.push(
+                            this.getPNGDimensions(imagePath, file)
                         );
-                        settingsWriteStream.end();
-                        this.currentFileIndex++;
-                        resolve();
-                    });
-                    writeStream.write(JSON.stringify(annotationJson, null, 4));
-                    writeStream.end();
-                })
-                .catch((error) => {
-                    console.log(error);
-                    reject(error);
+                    }
                 });
+
+                Promise.all(listOfPromises)
+                    .then((results) => {
+                        results.forEach((result) => {
+                            const foundIndex = annotationJson.images.findIndex(
+                                (image) => image.file_name === result.fileName
+                            );
+                            if (foundIndex !== -1) {
+                                annotationJson.images[foundIndex].width =
+                                    result.width;
+                                annotationJson.images[foundIndex].height =
+                                    result.height;
+                            }
+                        });
+                        const annotationPath = path.join(
+                            annotationFilePath,
+                            'annotation.json'
+                        );
+                        const writeStream =
+                            fs.createWriteStream(annotationPath);
+                        writeStream.on('error', (err) => {
+                            console.log(err);
+                            reject(err);
+                        });
+                        writeStream.on('finish', () => {
+                            this.selectedAnnotationFile = annotationPath;
+                            this.#thumbnails.setAnnotationFilePath(
+                                annotationPath
+                            );
+                            this.#sendUpdate(
+                                Channels.updateAnnotationFile,
+                                this.selectedAnnotationFile
+                            );
+                            const settingsWriteStream = fs.createWriteStream(
+                                this.settingsPath
+                            );
+                            settingsWriteStream.write(
+                                JSON.stringify({
+                                    selectedImagesDirPath:
+                                        this.selectedImagesDirPath,
+                                    selectedAnnotationFile:
+                                        this.selectedAnnotationFile,
+                                })
+                            );
+                            settingsWriteStream.end();
+                            this.currentFileIndex++;
+                            resolve();
+                        });
+                        writeStream.write(
+                            JSON.stringify(annotationJson, null, 4)
+                        );
+                        writeStream.end();
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject(error);
+                    });
+            });
         });
     }
 
