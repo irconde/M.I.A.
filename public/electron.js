@@ -1,5 +1,6 @@
 const electron = require('electron');
-const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
+const { dialog, ipcMain, app, BrowserWindow, screen, globalShortcut } =
+    electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -118,6 +119,8 @@ function createWindow() {
                     if (err) throw err;
                 }
             );
+            mainWindow.removeAllListeners();
+            globalShortcut.unregisterAll();
         });
         mainWindow.on('closed', async () => {
             await files.removeFileWatcher();
@@ -150,7 +153,11 @@ app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            createWindow();
+            try {
+                createWindow();
+            } catch (e) {
+                app.quit();
+            }
         });
 });
 
@@ -159,13 +166,6 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
-
-// TODO: macOS users: test if needed
-/*app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
-    }
-});*/
 
 app.on('web-contents-created', () => {
     const writeStream = fs.createWriteStream(TEMP_ANNOTATIONS_FILE_PATH);
@@ -312,7 +312,6 @@ ipcMain.handle(Channels.getSettings, async () => appSettings);
  * @returns {Promise<Object>}
  */
 const initSettings = async () => {
-    console.log('init settings');
     const allPromises = [];
     allPromises.push(
         new Promise((resolve, reject) => {
