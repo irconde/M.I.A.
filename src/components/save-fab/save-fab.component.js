@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
+import SaveAsIcon from '../../icons/save-fab/save-as-icon/save-as.icon';
+import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
 
 const FAB_HEIGHT = '4rem';
 const ACTION_FAB_HEIGHT = '3.5rem';
@@ -10,7 +14,6 @@ const FabWrapper = styled.div`
     right: 2rem;
     z-index: 999;
     height: auto;
-    outline: 1px solid red;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -20,8 +23,7 @@ const FabButton = styled.button`
     width: ${FAB_HEIGHT};
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: #0077b6;
-    color: white;
+    background-color: #367eff;
     font-size: 2rem;
     display: flex;
     align-items: center;
@@ -36,7 +38,7 @@ const FabButton = styled.button`
     ${({ expanded }) =>
         expanded &&
         css`
-            background-color: #1d3557;
+            background-color: #395280;
         `}
 `;
 
@@ -44,8 +46,7 @@ const FabItem = styled.button`
     width: ${ACTION_FAB_HEIGHT};
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: #fcbf49;
-    color: white;
+    background-color: #367eff;
     font-size: 1.5rem;
     display: flex;
     align-items: center;
@@ -83,13 +84,17 @@ const ExpandableFab = () => {
     return (
         <FabWrapper>
             <FabItem index={1} expanded={isExpanded}>
-                1
+                <SaveAsIcon width={'24px'} height={'24px'} color={'white'} />
             </FabItem>
             <FabItem index={2} expanded={isExpanded}>
-                2
+                <SaveIcon width={'24px'} height={'24px'} color={'white'} />
             </FabItem>
             <FabButton expanded={isExpanded} onClick={handleFabClick}>
-                {isExpanded ? '-' : '+'}
+                {isExpanded ? (
+                    <CloseIcon width={'24px'} height={'24px'} color={'white'} />
+                ) : (
+                    <FabIcon width={'24px'} height={'24px'} color={'white'} />
+                )}
             </FabButton>
         </FabWrapper>
     );
