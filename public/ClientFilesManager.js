@@ -450,12 +450,6 @@ class ClientFilesManager {
                                                 fileName: savedFileName,
                                             }
                                         );
-                                        if (
-                                            this.currentFileIndex <
-                                            this.fileNames.length - 1
-                                        ) {
-                                            this.currentFileIndex++;
-                                        }
                                         resolve();
                                     });
                                     tempWriteStream.write(JSON.stringify([]));
@@ -765,7 +759,6 @@ class ClientFilesManager {
                             });
                             tempOutWriteStream.on('finish', () => {
                                 console.log('Cleared temp data on save new');
-                                this.currentFileIndex++;
                                 resolve();
                             });
                             tempOutWriteStream.write(JSON.stringify([]));
