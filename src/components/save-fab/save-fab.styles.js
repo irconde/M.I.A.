@@ -1,25 +1,70 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const SaveFabContainer = styled.div`
-    outline: 1px solid red;
-    display: flex;
-    flex-direction: column;
+const FAB_HEIGHT = '4rem';
+const ACTION_FAB_HEIGHT = '3.5rem';
+
+export const FabWrapper = styled.div`
     position: absolute;
-    bottom: ${({ bottom }) => '25px'};
-    right: ${({ right }) => '25px'};
-    width: 5rem;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+    height: auto;
+    display: flex;
     align-items: center;
-    height: ${({ open }) => (open ? 'fit-content' : '5rem')};
+    flex-direction: column;
 `;
 
-export const SaveFabButton = styled.button`
+export const FabButton = styled.button`
+    width: ${FAB_HEIGHT};
     aspect-ratio: 1;
-    background-color: lightgrey;
     border-radius: 50%;
+    background-color: #367eff;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    width: 100%;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+
+    ${({ expanded }) =>
+        expanded &&
+        css`
+            background-color: #395280;
+        `}
 `;
 
-export const FabActionButton = styled(SaveFabButton)`
-    width: 80%;
+export const FabItem = styled.button`
+    width: ${ACTION_FAB_HEIGHT};
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background-color: #367eff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 0.5rem;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+
+    ${({ expanded, index }) =>
+        expanded
+            ? css`
+                  transform: translate(0, 0);
+                  opacity: 1;
+              `
+            : css`
+                  transform: translate(
+                      0,
+                      calc(${index} * ${ACTION_FAB_HEIGHT})
+                  );
+                  opacity: 0;
+              `}
 `;
