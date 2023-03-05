@@ -43,6 +43,11 @@ if (isDev) {
  */
 let files;
 
+const handleWindowClose = async (e) => {
+    e.preventDefault();
+    mainWindow.webContents.send('CLOSE-APP');
+};
+
 function createWindow() {
     let display;
     // check for file containing information about last window location and dimensions
@@ -93,27 +98,15 @@ function createWindow() {
                     : `file://${path.join(__dirname, '../build/index.html')}`
             )
             .then(() => {
+                mainWindow.on('close', handleWindowClose);
+                // mainWindow.on('closed', async () => {
+                //     await files.removeFileWatcher();
+                //     mainWindow = null;
+                // });
                 mainWindow.maximize();
                 mainWindow.show();
             })
             .catch((err) => console.log(err));
-
-        mainWindow.on('close', async () => {
-            const rectangle = mainWindow.getBounds();
-            fs.writeFile(
-                MONITOR_FILE_PATH,
-                JSON.stringify(rectangle),
-                (err) => {
-                    if (err) throw err;
-                }
-            );
-            mainWindow.removeAllListeners();
-            globalShortcut.unregisterAll();
-        });
-        mainWindow.on('closed', async () => {
-            await files.removeFileWatcher();
-            mainWindow = null;
-        });
     };
 
     if (isDev) {
@@ -180,6 +173,19 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
 
         return result.filePaths[0];
     }
+});
+
+ipcMain.handleOnce('CLOSE-APP', async () => {
+    console.log('CLOSE APP HANDLER ONCE');
+    const rectangle = mainWindow.getBounds();
+    fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
+        if (err) throw err;
+    });
+    mainWindow.removeAllListeners();
+    globalShortcut.unregisterAll();
+    await files.removeFileWatcher();
+    mainWindow.close();
+    mainWindow = null;
 });
 
 /**

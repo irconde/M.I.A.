@@ -33,10 +33,14 @@ const AppNew = () => {
 
     useEffect(() => {
         dispatch(initSettings());
-        ipcRenderer.on(Channels.updateAnnotationFile, (e, data) => {
-            console.log(data);
-            dispatch(updateAnnotationFile(data));
-        });
+        ipcRenderer
+            .on(Channels.updateAnnotationFile, (e, data) => {
+                console.log(data);
+                dispatch(updateAnnotationFile(data));
+            })
+            .on('CLOSE-APP', (e, args) => {
+                console.log('CLOSE-APP');
+            });
     }, []);
 
     useEffect(() => {
@@ -62,6 +66,13 @@ const AppNew = () => {
             {showSplashScreen && <SplashScreenComponent />}
             {!areSettingsLoading && (
                 <div>
+                    <button
+                        onClick={() => {
+                            ipcRenderer.invoke('CLOSE-APP').then();
+                        }}
+                        style={{ position: 'absolute', zIndex: '1000' }}>
+                        CLOSE
+                    </button>
                     <ImportModalComponent
                         open={importModalOpen}
                         setOpen={setImportModalOpen}
