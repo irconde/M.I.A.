@@ -478,10 +478,15 @@ const annotationSlice = createSlice({
                     category.name.toLowerCase() === newCategory.toLowerCase()
             );
             if (foundCategory === undefined) {
+                const newId =
+                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
                 state.categories.push({
                     supercategory: 'operator',
                     name: newCategory.toLowerCase(),
+                    id: newId,
                 });
+                foundAnnotation.category_id = newId;
             } else {
                 const sameCategoryAnnotation = state.annotations.find(
                     (annotation) =>
@@ -493,6 +498,10 @@ const annotationSlice = createSlice({
                     foundAnnotation !== undefined
                 ) {
                     foundAnnotation.color = sameCategoryAnnotation.color;
+                }
+
+                if (foundAnnotation !== undefined) {
+                    foundAnnotation.category_id = foundCategory.id;
                 }
             }
             state.hasAnnotationChanged = true;

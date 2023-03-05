@@ -554,7 +554,9 @@ class ClientFilesManager {
                             console.log('Saved temp data');
                             resolve();
                         });
-                        writeStream.write(JSON.stringify(annotationFile));
+                        writeStream.write(
+                            JSON.stringify(annotationFile, null, 4)
+                        );
                         writeStream.end();
                     } catch (err) {
                         console.log(err);
@@ -590,6 +592,7 @@ class ClientFilesManager {
 
                 const { cocoAnnotations, cocoCategories, fileName, imageId } =
                     newAnnotationData;
+                const mappedImages = [{ fileName: fileName, imageId: imageId }];
                 let annotationJson = {
                     info: {
                         description: 'COCO Dataset',
@@ -650,47 +653,59 @@ class ClientFilesManager {
                 let files = [fileName];
                 if (tempJson?.length > 0) {
                     tempJson.forEach((temp) => {
-                        files.push(temp.fileName);
-                        annotationJson.annotations = [
-                            ...annotationJson.annotations,
-                            temp.cocoAnnotations,
-                        ];
-                        annotationJson.annotations =
-                            annotationJson.annotations.filter(
-                                (annot) => !temp.cocoDeleted.includes(annot.id)
-                            );
+                        if (temp.fileName !== fileName) {
+                            mappedImages.push({
+                                fileName: temp.fileName,
+                                imageId: temp.imageId,
+                            });
+                            files.push(temp.fileName);
+                            annotationJson.annotations = [
+                                ...annotationJson.annotations,
+                                ...temp.cocoAnnotations,
+                            ];
+                            annotationJson.annotations =
+                                annotationJson.annotations.filter(
+                                    (annot) =>
+                                        !temp.cocoDeleted.includes(annot.id)
+                                );
+                        }
                     });
                 }
-                files.forEach((file, index) => {
+                mappedImages.forEach((mapped, index) => {
                     annotationJson.images.push({
-                        id: index + 1,
+                        id: mapped.imageId,
                         coco_url: '',
                         flickr_url: '',
-                        file_name: file,
+                        file_name: mapped.fileName,
                         date_capture: todayDateString,
                     });
                     const imagePath = path.join(
                         this.selectedImagesDirPath,
-                        file
+                        mapped.fileName
                     );
-                    if (path.extname(file).toLowerCase() === '.dcm') {
-                        listOfPromises.push(
-                            this.getDICOMDimensions(imagePath, file)
-                        );
-                    } else if (
-                        path.extname(file).toLowerCase() === '.jpg' ||
-                        path.extname(file).toLowerCase() === '.jpeg'
+                    if (
+                        path.extname(mapped.fileName).toLowerCase() === '.dcm'
                     ) {
                         listOfPromises.push(
-                            this.getJPEGDimensions(imagePath, file)
+                            this.getDICOMDimensions(imagePath, mapped.fileName)
                         );
-                    } else if (path.extname(file).toLowerCase() === '.png') {
+                    } else if (
+                        path.extname(mapped.fileName).toLowerCase() ===
+                            '.jpg' ||
+                        path.extname(mapped.fileName).toLowerCase() === '.jpeg'
+                    ) {
                         listOfPromises.push(
-                            this.getPNGDimensions(imagePath, file)
+                            this.getJPEGDimensions(imagePath, mapped.fileName)
+                        );
+                    } else if (
+                        path.extname(mapped.fileName).toLowerCase() === '.png'
+                    ) {
+                        listOfPromises.push(
+                            this.getPNGDimensions(imagePath, mapped.fileName)
                         );
                     }
                 });
-                //testa
+
                 Promise.all(listOfPromises)
                     .then((results) => {
                         results.forEach((result) => {
@@ -735,8 +750,20 @@ class ClientFilesManager {
                                 })
                             );
                             settingsWriteStream.end();
-                            this.currentFileIndex++;
-                            resolve();
+                            const tempOutWriteStream = fs.createWriteStream(
+                                this.tempPath
+                            );
+                            tempOutWriteStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            tempOutWriteStream.on('finish', () => {
+                                console.log('Cleared temp data on save new');
+                                this.currentFileIndex++;
+                                resolve();
+                            });
+                            tempOutWriteStream.write(JSON.stringify([]));
+                            tempOutWriteStream.end();
                         });
                         writeStream.write(
                             JSON.stringify(annotationJson, null, 4)
@@ -911,12 +938,12 @@ class ClientFilesManager {
                         this.#cocoAnnotationLoader()
                             .then((data) => resolve(data))
                             .catch((err) => reject(err));
-                    } else resolve();
+                    } else resolve({ imageId: this.currentFileIndex + 1 });
                 } else if (this.selectedAnnotationFile) {
                     this.#cocoAnnotationLoader()
                         .then((data) => resolve(data))
                         .catch((err) => reject(err));
-                } else resolve();
+                } else resolve({ imageId: this.currentFileIndex + 1 });
             });
         });
     }
@@ -942,11 +969,14 @@ class ClientFilesManager {
                     (img) =>
                         img.file_name === this.fileNames[this.currentFileIndex]
                 );
+                console.log(image);
 
                 let imageId = 1;
                 // TODO: What to do if it is over?
                 if (image && image?.id <= Number.MAX_SAFE_INTEGER) {
                     imageId = image.id;
+                } else {
+                    imageId = this.currentFileIndex + 1;
                 }
 
                 resolve({
