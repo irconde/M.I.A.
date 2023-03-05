@@ -79,6 +79,9 @@ const uiSlice = createSlice({
         updateShowApp: (state, action) => {
             state.showApp = action.payload;
         },
+        updateFABVisibility: (state, action) => {
+            state.isFABVisible = action.payload;
+        },
     },
 });
 
@@ -98,6 +101,7 @@ export const {
     updateCurrFileName,
     updateSplashScreenVisibility,
     updateShowApp,
+    updateFABVisibility,
 } = uiSlice.actions;
 
 export const getAnnotationContextPosition = (state) =>

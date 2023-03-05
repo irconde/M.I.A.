@@ -40,6 +40,57 @@ const calculateMaskAnchorPoints = (boundingBox, polygonCoords) => {
     });
     return polygonCoords;
 };
+
+const saveToSessionStorage = (key, value) => {
+    sessionStorage.setItem(key, JSON.stringify(value));
+};
+
+const getFromSessionStorage = (key) => {
+    const data = sessionStorage.getItem(key);
+    if (data) {
+        return JSON.parse(data);
+    }
+    return null;
+};
+
+const removeFromSessionStorage = (key) => {
+    sessionStorage.removeItem(key);
+};
+
+const clearSessionStorage = () => {
+    removeFromSessionStorage('annotations');
+    removeFromSessionStorage('categories');
+    removeFromSessionStorage('imageId');
+    removeFromSessionStorage('deletedAnnotationIds');
+};
+
+const prepareAnnotationsForCoco = (annotation) => {
+    let cocoAnnotations = [];
+    const cocoCategories = annotation.categories;
+    const cocoDeleted = annotation.deletedAnnotationIds;
+    annotation.annotations.forEach((annot) => {
+        const { area, iscrowd, image_id, bbox, category_id, id, segmentation } =
+            annot;
+        let newSegmentation = [];
+        if (segmentation?.length > 0) {
+            segmentation.forEach((segment) => {
+                newSegmentation.push(polygonDataToCoordArray(segment));
+            });
+        }
+        let newAnnotation = {
+            area,
+            iscrowd,
+            image_id,
+            bbox,
+            segmentation: newSegmentation,
+            category_id,
+            id,
+        };
+        cocoAnnotations.push(newAnnotation);
+    });
+    return { cocoAnnotations, cocoCategories, cocoDeleted };
+};
+
 export const saveColorsFile = createAsyncThunk(
     'annotations/saveColors',
     async (payload, { getState, rejectWithValue }) => {
@@ -83,44 +134,42 @@ export const saveCurrentAnnotations = createAsyncThunk(
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
         const { annotation } = state;
-        let cocoAnnotations = [];
-        const cocoCategories = annotation.categories;
-        const cocoDeleted = annotation.deletedAnnotationIds;
-        annotation.annotations.forEach((annot) => {
-            const {
-                area,
-                iscrowd,
-                image_id,
-                bbox,
-                category_id,
-                id,
-                segmentation,
-            } = annot;
-            let newSegmentation = [];
-            if (segmentation?.length > 0) {
-                segmentation.forEach((segment) => {
-                    newSegmentation.push(polygonDataToCoordArray(segment));
-                });
-            }
-            let newAnnotation = {
-                area,
-                iscrowd,
-                image_id,
-                bbox,
-                segmentation: newSegmentation,
-                category_id,
-                id,
-            };
-            cocoAnnotations.push(newAnnotation);
-        });
-        console.log(cocoAnnotations);
-        console.log(cocoCategories);
-        console.log(cocoDeleted);
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
         await ipcRenderer
             .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
+                fileName: payload,
+                imageId: annotation.imageId,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+    }
+);
+
+export const selectFileAndSaveTempAnnotations = createAsyncThunk(
+    'annotations/selectFileAndSaveTempAnnotations',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation, ui } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer
+            .invoke(Channels.selectFile, {
+                cocoAnnotations: annotation.hasAnnotationChanged
+                    ? cocoAnnotations
+                    : [],
+                cocoCategories,
+                cocoDeleted,
+                tempFileName: ui.currentFileName,
+                imageId: annotation.imageId,
                 fileName: payload,
             })
             .then(() => {
@@ -130,7 +179,6 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 console.log(error);
                 rejectWithValue(error);
             });
-        /*return true;*/
     }
 );
 
@@ -145,6 +193,7 @@ const initialState = {
     saveFailureMessage: '',
     deletedAnnotationIds: [],
     maxAnnotationId: 1,
+    imageId: 0,
 };
 
 const annotationSlice = createSlice({
@@ -153,11 +202,28 @@ const annotationSlice = createSlice({
     reducers: {
         addAnnotationArray: (state, action) => {
             const { annotationInformation, colors } = action.payload;
-            const { annotations, categories, maxAnnotationId } =
-                annotationInformation;
+            const {
+                annotations,
+                categories,
+                maxAnnotationId,
+                imageId,
+                deletedAnnotationIds,
+            } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
-            state.maxAnnotationId = maxAnnotationId;
+            state.imageId = imageId;
+
+            if (deletedAnnotationIds !== undefined) {
+                // Loaded from temp data
+                state.deletedAnnotationIds = deletedAnnotationIds;
+                state.hasAnnotationChanged = true;
+            } else {
+                state.hasAnnotationChanged = false;
+            }
+
+            if (state.maxAnnotationId === 1 && maxAnnotationId !== undefined) {
+                state.maxAnnotationId = maxAnnotationId;
+            }
             if (annotations?.length > 0) {
                 annotations.forEach((annotation) => {
                     const categoryNameIdx = categories.findIndex(
@@ -206,7 +272,15 @@ const annotationSlice = createSlice({
 
                 state.categories = categories;
             }
-            state.hasAnnotationChanged = false;
+
+            saveToSessionStorage('annotations', state.annotations);
+            saveToSessionStorage('categories', state.categories);
+            saveToSessionStorage('imageId', state.imageId);
+            saveToSessionStorage('maxAnnotationId', state.maxAnnotationId);
+            saveToSessionStorage(
+                'deletedAnnotationIds',
+                state.deletedAnnotationIds
+            );
         },
         addAnnotation: (state, action) => {
             const { bbox, area, segmentation } = action.payload;
@@ -215,15 +289,9 @@ const annotationSlice = createSlice({
                 area,
                 segmentation,
             };
-            if (state.annotations.length > 0) {
-                newAnnotation.image_id = state.annotations[0].image_id;
-                newAnnotation.id =
-                    state.annotations.reduce((a, b) => (a.id > b.id ? a : b))
-                        .id + 1;
-            } else {
-                newAnnotation.image_id = 1;
-                newAnnotation.id = state.maxAnnotationId++;
-            }
+            newAnnotation.image_id = state.imageId;
+            // TODO: May need to check: Number.MAX_SAFE_INTEGER - some values from COCO data are getting large: 908800474295
+            newAnnotation.id = state.maxAnnotationId++;
 
             newAnnotation.selected = false;
             newAnnotation.categorySelected = false;
@@ -272,6 +340,13 @@ const annotationSlice = createSlice({
 
             state.annotations.push(newAnnotation);
             state.hasAnnotationChanged = true;
+
+            saveToSessionStorage('annotations', state.annotations);
+            saveToSessionStorage('categories', state.categories);
+            saveToSessionStorage('maxAnnotationId', state.maxAnnotationId);
+        },
+        updateColors: (state, action) => {
+            state.colors = action.payload;
         },
         selectAnnotation: (state, action) => {
             let anySelected = false;
@@ -372,6 +447,12 @@ const annotationSlice = createSlice({
             );
             state.selectedAnnotation = null;
             state.hasAnnotationChanged = true;
+
+            saveToSessionStorage('annotations', state.annotations);
+            saveToSessionStorage(
+                'deletedAnnotationIds',
+                state.deletedAnnotationIds
+            );
         },
         updateAnnotationColor: (state, action) => {
             const { categoryName, color } = action.payload;
@@ -397,10 +478,15 @@ const annotationSlice = createSlice({
                     category.name.toLowerCase() === newCategory.toLowerCase()
             );
             if (foundCategory === undefined) {
+                const newId =
+                    state.categories.reduce((a, b) => (a.id > b.id ? a : b))
+                        .id + 1;
                 state.categories.push({
                     supercategory: 'operator',
                     name: newCategory.toLowerCase(),
+                    id: newId,
                 });
+                foundAnnotation.category_id = newId;
             } else {
                 const sameCategoryAnnotation = state.annotations.find(
                     (annotation) =>
@@ -413,8 +499,15 @@ const annotationSlice = createSlice({
                 ) {
                     foundAnnotation.color = sameCategoryAnnotation.color;
                 }
+
+                if (foundAnnotation !== undefined) {
+                    foundAnnotation.category_id = foundCategory.id;
+                }
             }
             state.hasAnnotationChanged = true;
+
+            saveToSessionStorage('annotations', state.annotations);
+            saveToSessionStorage('categories', state.categories);
         },
         updateAnnotationPosition: (state, action) => {
             const { bbox, id, segmentation } = action.payload;
@@ -431,6 +524,8 @@ const annotationSlice = createSlice({
                 }
             }
             state.hasAnnotationChanged = true;
+
+            saveToSessionStorage('annotations', state.annotations);
         },
         updateSaveAnnotationStatus: (state, action) => {
             state.saveAnnotationsStatus = action.payload;
@@ -442,6 +537,7 @@ const annotationSlice = createSlice({
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
             state.deletedAnnotationIds = [];
+            clearSessionStorage();
         },
     },
     extraReducers: {
@@ -466,6 +562,20 @@ const annotationSlice = createSlice({
                 state.saveFailureMessage = payload.toString();
             }
         },
+        [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
+            clearSessionStorage();
+            state.annotations = [];
+            state.selectedAnnotation = null;
+            state.selectedCategory = '';
+            state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
+        },
+        [selectFileAndSaveTempAnnotations.pending]: (state) => {
+            //
+        },
+        [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
+            console.log(payload);
+        },
     },
 });
 
@@ -483,6 +593,7 @@ export const {
     selectAnnotationCategory,
     updateSaveAnnotationStatus,
     clearAnnotationData,
+    updateColors,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
