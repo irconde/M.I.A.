@@ -146,6 +146,7 @@ export const Channels = {
     updateThumbnails: 'update-thumbnails',
     updateThumbnailHasAnnotations: 'update-thumbnail-has-annotations',
     selectFile: 'select-file',
+    closeApp: 'close-app',
 };
 
 export const toolNames = {

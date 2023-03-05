@@ -18,6 +18,7 @@ import {
 } from './redux/slices/ui.slice';
 import SplashScreenComponent from './components/splash-screen/splash-screen.component';
 import ApplicationComponent from './components/application/application.component';
+import CloseModalComponent from './components/close-modal/close-modal.component';
 
 const AppNew = () => {
     const dispatch = useDispatch();
@@ -33,14 +34,10 @@ const AppNew = () => {
 
     useEffect(() => {
         dispatch(initSettings());
-        ipcRenderer
-            .on(Channels.updateAnnotationFile, (e, data) => {
-                console.log(data);
-                dispatch(updateAnnotationFile(data));
-            })
-            .on('CLOSE-APP', (e, args) => {
-                console.log('CLOSE-APP');
-            });
+        ipcRenderer.on(Channels.updateAnnotationFile, (e, data) => {
+            console.log(data);
+            dispatch(updateAnnotationFile(data));
+        });
     }, []);
 
     useEffect(() => {
@@ -63,16 +60,10 @@ const AppNew = () => {
 
     return (
         <>
+            <CloseModalComponent />
             {showSplashScreen && <SplashScreenComponent />}
             {!areSettingsLoading && (
                 <div>
-                    <button
-                        onClick={() => {
-                            ipcRenderer.invoke('CLOSE-APP').then();
-                        }}
-                        style={{ position: 'absolute', zIndex: '1000' }}>
-                        CLOSE
-                    </button>
                     <ImportModalComponent
                         open={importModalOpen}
                         setOpen={setImportModalOpen}
