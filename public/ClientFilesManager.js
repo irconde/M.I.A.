@@ -485,7 +485,13 @@ class ClientFilesManager {
         cocoCategories,
         cocoDeleted
     ) {
-        annotationFile.categories = cocoCategories;
+        cocoCategories.forEach((category) => {
+            if (
+                !annotationFile.categories.some((cat) => cat.id === category.id)
+            ) {
+                annotationFile.categories.push(category);
+            }
+        });
         cocoAnnotations.forEach((annotation) => {
             const foundIndex = annotationFile.annotations.findIndex(
                 (fileAnnotation) => fileAnnotation.id === annotation.id
