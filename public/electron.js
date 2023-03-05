@@ -290,8 +290,7 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
                 tempFileName,
                 imageId,
             } = args;
-            console.log(tempFileName);
-            console.log(fileName);
+
             files
                 .createUpdateTempAnnotationsFile(
                     cocoAnnotations,
