@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Channels } from '../../utils/enums/Constants';
+import {
+    CloseModalBody,
+    ModalButton,
+    ModalButtonRow,
+    ModalText,
+    ModalWrapper,
+} from './close-modal.styles';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 function CloseModalComponent() {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
 
     useEffect(() => {
         ipcRenderer.on(Channels.closeApp, () => setIsOpen(true));
@@ -16,22 +23,22 @@ function CloseModalComponent() {
     };
 
     return (
-        isOpen && (
-            <div
-                style={{
-                    zIndex: 10000,
-                    background: 'rgba(0,0,0, 0.6)',
-                    width: '100vw',
-                    height: '100vh',
-                    position: 'absolute',
-                    display: 'flex',
-                    placeItems: 'center',
-                }}>
-                <p>Are you sure you want to terminate the app?</p>
-                <button onClick={() => setIsOpen(false)}>No</button>
-                <button onClick={handleYes}>Yes</button>
-            </div>
-        )
+        <ModalWrapper onClick={() => setIsOpen(false)}>
+            {isOpen && (
+                <CloseModalBody onClick={(e) => e.stopPropagation()}>
+                    <ModalText>
+                        You have unsaved changes. Are you sure you want to
+                        terminate the app?
+                    </ModalText>
+                    <ModalButtonRow>
+                        <ModalButton onClick={() => setIsOpen(false)}>
+                            No
+                        </ModalButton>
+                        <ModalButton onClick={handleYes}>Yes</ModalButton>
+                    </ModalButtonRow>
+                </CloseModalBody>
+            )}
+        </ModalWrapper>
     );
 }
 
