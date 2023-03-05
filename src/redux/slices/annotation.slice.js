@@ -566,7 +566,6 @@ const annotationSlice = createSlice({
             //state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
             clearSessionStorage();
             state.annotations = [];
-            state.categories = [];
             state.selectedAnnotation = null;
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
