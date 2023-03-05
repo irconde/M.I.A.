@@ -883,7 +883,6 @@ class ClientFilesManager {
             )
         );
 
-        console.log('returning information');
         return {
             pixelData,
             pixelType: path
@@ -969,7 +968,6 @@ class ClientFilesManager {
                     (img) =>
                         img.file_name === this.fileNames[this.currentFileIndex]
                 );
-                console.log(image);
 
                 let imageId = 1;
                 // TODO: What to do if it is over?

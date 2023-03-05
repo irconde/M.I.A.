@@ -305,9 +305,13 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
                     files
                         .selectFile(fileName)
                         .then(() => resolve())
-                        .catch((e) => reject(e));
+                        .catch((e) => {
+                            console.log(e);
+                            reject(e);
+                        });
                 })
                 .catch((e) => {
+                    console.log(e);
                     reject(e);
                 });
         } catch (e) {

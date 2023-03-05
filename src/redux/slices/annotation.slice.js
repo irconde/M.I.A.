@@ -563,7 +563,6 @@ const annotationSlice = createSlice({
             }
         },
         [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
-            //state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
             clearSessionStorage();
             state.annotations = [];
             state.selectedAnnotation = null;
@@ -572,16 +571,10 @@ const annotationSlice = createSlice({
             state.deletedAnnotationIds = [];
         },
         [selectFileAndSaveTempAnnotations.pending]: (state) => {
-            //state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+            //
         },
         [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
-            /*console.log(payload);
-            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
-            if (typeof payload === 'string') {
-                state.saveFailureMessage = payload;
-            } else if (typeof payload === 'object') {
-                state.saveFailureMessage = payload.toString();
-            }*/
+            console.log(payload);
         },
     },
 });
