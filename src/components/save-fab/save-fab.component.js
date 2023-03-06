@@ -9,6 +9,8 @@ import {
     SaveAsFabBtn,
     SaveFabBtn,
 } from './save-fab.styles';
+import { useSelector } from 'react-redux';
+import { getSideMenuVisible } from '../../redux/slices/ui.slice';
 
 const iconProps = {
     width: '24px',
@@ -17,6 +19,7 @@ const iconProps = {
 };
 
 const ExpandableFab = () => {
+    const sideMenuVisible = useSelector(getSideMenuVisible);
     const [isExpanded, setIsExpanded] = useState(false);
     const fabRef = useRef(null);
 
@@ -50,7 +53,7 @@ const ExpandableFab = () => {
     };
 
     return (
-        <FabWrapper>
+        <FabWrapper show={!sideMenuVisible}>
             <SaveAsFabBtn
                 index={2}
                 expanded={isExpanded}
