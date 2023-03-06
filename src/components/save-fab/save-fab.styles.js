@@ -25,6 +25,7 @@ export const FabButton = styled.button`
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    z-index: 5;
 
     &:hover {
         transform: scale(1.1);
@@ -49,6 +50,7 @@ export const FabItem = styled.button`
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     margin-bottom: 0.5rem;
+    z-index: 3;
 
     &:hover {
         transform: scale(1.1);

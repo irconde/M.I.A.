@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import SaveAsIcon from '../../icons/save-fab/save-as-icon/save-as.icon';
 import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
@@ -13,6 +13,21 @@ const iconProps = {
 
 const ExpandableFab = () => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const fabRef = useRef(null);
+
+    useEffect(() => {
+        // if clicked on outside of element
+        function handleClickOutside(event) {
+            if (fabRef.current && !fabRef.current.contains(event.target)) {
+                setIsExpanded(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [fabRef]);
 
     const handleFabClick = () => {
         setIsExpanded(!isExpanded);
@@ -34,7 +49,10 @@ const ExpandableFab = () => {
             <FabItem index={2} expanded={isExpanded} onClick={handleSave}>
                 <SaveIcon {...iconProps} />
             </FabItem>
-            <FabButton expanded={isExpanded} onClick={handleFabClick}>
+            <FabButton
+                expanded={isExpanded}
+                onClick={handleFabClick}
+                ref={fabRef}>
                 {isExpanded ? (
                     <CloseIcon {...iconProps} />
                 ) : (
