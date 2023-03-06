@@ -1,5 +1,6 @@
 const electron = require('electron');
-const { dialog, ipcMain, app, BrowserWindow, screen } = electron;
+const { dialog, ipcMain, app, BrowserWindow, screen, globalShortcut } =
+    electron;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
@@ -10,10 +11,16 @@ let mainWindow;
 let appSettings = null;
 let annotationColors = [];
 
-const [MONITOR_FILE_PATH, SETTINGS_FILE_PATH, COLORS_FILE_PATH] = [
+const [
+    MONITOR_FILE_PATH,
+    SETTINGS_FILE_PATH,
+    COLORS_FILE_PATH,
+    TEMP_ANNOTATIONS_FILE_PATH,
+] = [
     'monitorConfig.json',
     'settings.json',
     'colors.json',
+    'tempAnnotations.json',
 ].map((fileName) =>
     isDev ? fileName : path.join(app.getPath('userData'), fileName)
 );
@@ -31,7 +38,12 @@ if (isDev) {
     try {
         require('electron-reloader')(module, {
             watchRenderer: true,
-            ignore: ['settings.json', 'monitorConfig.json', 'colors.json'],
+            ignore: [
+                'settings.json',
+                'monitorConfig.json',
+                'colors.json',
+                'tempAnnotations.json',
+            ],
         });
     } catch (e) {
         console.log(e);
@@ -77,7 +89,11 @@ function createWindow() {
         },
     });
 
-    files = new ClientFilesManager(mainWindow, SETTINGS_FILE_PATH);
+    files = new ClientFilesManager(
+        mainWindow,
+        SETTINGS_FILE_PATH,
+        TEMP_ANNOTATIONS_FILE_PATH
+    );
     files.initSelectedPaths(
         appSettings.selectedImagesDirPath,
         appSettings.selectedAnnotationFile
@@ -105,6 +121,8 @@ function createWindow() {
                     if (err) throw err;
                 }
             );
+            mainWindow.removeAllListeners();
+            globalShortcut.unregisterAll();
         });
         mainWindow.on('closed', async () => {
             await files.removeFileWatcher();
@@ -137,7 +155,11 @@ app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            createWindow();
+            try {
+                createWindow();
+            } catch (e) {
+                app.quit();
+            }
         });
 });
 
@@ -147,10 +169,16 @@ app.on('window-all-closed', () => {
     }
 });
 
-app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
-    }
+app.on('web-contents-created', () => {
+    const writeStream = fs.createWriteStream(TEMP_ANNOTATIONS_FILE_PATH);
+    writeStream.on('error', (err) => {
+        console.log(err);
+    });
+    writeStream.on('finish', () => {
+        console.log('Cleared temp data on startup');
+    });
+    writeStream.write(JSON.stringify([]));
+    writeStream.end();
 });
 
 /**
@@ -249,13 +277,50 @@ ipcMain.handle(
  */
 ipcMain.handle(Channels.getNextFile, () => files.getNextFile());
 
-ipcMain.handle(Channels.getCurrentFile, () =>
-    files.getCurrentFile(annotationColors)
-);
+ipcMain.handle(Channels.getCurrentFile, async () => {
+    return await files.getCurrentFile(annotationColors);
+});
 
-ipcMain.handle(Channels.selectFile, (e, fileName) =>
-    files.selectFile(fileName)
-);
+ipcMain.handle(Channels.selectFile, async (e, args) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const {
+                fileName,
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                tempFileName,
+                imageId,
+            } = args;
+
+            files
+                .createUpdateTempAnnotationsFile(
+                    cocoAnnotations,
+                    cocoCategories,
+                    cocoDeleted,
+                    tempFileName,
+                    imageId,
+                    TEMP_ANNOTATIONS_FILE_PATH
+                )
+                .then(() => {
+                    files
+                        .selectFile(fileName)
+                        .then(() => resolve())
+                        .catch((e) => {
+                            console.log(e);
+                            reject(e);
+                        });
+                })
+                .catch((e) => {
+                    console.log(e);
+                    reject(e);
+                });
+        } catch (e) {
+            console.log(e);
+            reject(e);
+        }
+    });
+});
 
 /**
  * A channel between the main process (electron) and the renderer process (react).
@@ -275,6 +340,7 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json',
+                redirect: 'follow',
             },
             body: data,
         });
