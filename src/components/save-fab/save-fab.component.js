@@ -16,6 +16,9 @@ const ExpandableFab = () => {
     const fabRef = useRef(null);
 
     useEffect(() => {
+        // only add the click listener to the document when the fab is open
+        if (!isExpanded) return;
+
         // if clicked on outside of element
         function handleClickOutside(event) {
             if (fabRef.current && !fabRef.current.contains(event.target)) {
@@ -27,7 +30,7 @@ const ExpandableFab = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [fabRef]);
+    }, [isExpanded]);
 
     const handleFabClick = () => {
         setIsExpanded(!isExpanded);
@@ -43,10 +46,10 @@ const ExpandableFab = () => {
 
     return (
         <FabWrapper>
-            <FabItem index={1} expanded={isExpanded} onClick={handleSaveAs}>
+            <FabItem index={2} expanded={isExpanded} onClick={handleSaveAs}>
                 <SaveAsIcon {...iconProps} />
             </FabItem>
-            <FabItem index={2} expanded={isExpanded} onClick={handleSave}>
+            <FabItem index={1} expanded={isExpanded} onClick={handleSave}>
                 <SaveIcon {...iconProps} />
             </FabItem>
             <FabButton
