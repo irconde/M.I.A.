@@ -23,6 +23,7 @@ import {
     getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
+    updateColors,
     updateSaveAnnotationStatus,
 } from '../../redux/slices/annotation.slice';
 import {
@@ -234,6 +235,7 @@ const ImageDisplayComponent = () => {
     }, [selectedImagesDirPath, pixelData, pixelType]);
 
     useEffect(() => {
+        console.log('fetch current file');
         fetchCurrentFile();
     }, [currentFileName]);
 
@@ -256,7 +258,13 @@ const ImageDisplayComponent = () => {
             .then((data) => {
                 const { pixelData, pixelType, annotationInformation, colors } =
                     data;
-                dispatch(addAnnotationArray({ annotationInformation, colors }));
+                if (annotationInformation !== undefined) {
+                    dispatch(
+                        addAnnotationArray({ annotationInformation, colors })
+                    );
+                } else {
+                    dispatch(updateColors(colors));
+                }
                 setPixelData(pixelData);
                 setPixelType(pixelType);
             })

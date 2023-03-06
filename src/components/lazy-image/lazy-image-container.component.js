@@ -11,6 +11,8 @@ import {
 } from './lazy-image-container.styles';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 import DicomThumbnail from '../../icons/thumb_placeholder.png';
+import { useDispatch } from 'react-redux';
+import { selectFileAndSaveTempAnnotations } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const REPEAT_REQUEST_COUNT = 3;
@@ -30,10 +32,11 @@ function LazyImageContainerComponent({
     const containerElement = useRef();
     const isOnScreen = Utils.useOnScreen(containerElement);
     const [thumbnailSrc, setThumbnailSrc] = useState('');
+    const dispatch = useDispatch();
 
     const handleThumbnailClick = async () => {
         try {
-            await ipcRenderer.invoke(Channels.selectFile, fileName);
+            dispatch(selectFileAndSaveTempAnnotations(fileName));
         } catch (error) {
             console.log(error);
         }

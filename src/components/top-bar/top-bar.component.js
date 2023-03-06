@@ -20,9 +20,15 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
-import { Channels } from '../../utils/enums/Constants';
+import { Channels, cornerstoneMode } from '../../utils/enums/Constants';
 import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
-import { updateCurrFileName } from '../../redux/slices/ui.slice';
+import {
+    clearAnnotationWidgets,
+    updateCornerstoneMode,
+    updateCurrFileName,
+    updateFABVisibility,
+} from '../../redux/slices/ui.slice';
+import Utils from '../../utils/general/Utils';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
@@ -47,7 +53,18 @@ const TopBarComponent = (props) => {
     });
     useEffect(() => {
         ipcRenderer.on(Channels.newFileUpdate, (e, args) => {
-            dispatch(updateCurrFileName(args.currentFileName));
+            dispatch(clearAnnotationWidgets());
+            dispatch(updateFABVisibility(true));
+            dispatch(updateCornerstoneMode(cornerstoneMode.SELECTION));
+            const viewport = document.getElementById('imageContainer');
+            if (viewport !== null) {
+                Utils.resetCornerstoneTools(viewport);
+            }
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateCurrFileName,
+                args.currentFileName
+            );
             setFileState(args);
         });
     }, []);
