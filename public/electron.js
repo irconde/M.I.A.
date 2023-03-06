@@ -5,6 +5,7 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const Constants = require('./Constants');
+const fetch = require('electron-fetch').default;
 require('dotenv').config();
 const { Channels } = Constants;
 let mainWindow;
@@ -333,6 +334,8 @@ ipcMain.handle(Channels.getSettings, async () => appSettings);
  */
 ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
     const FORM_URL = `https://script.google.com/macros/s/${process.env.GOOGLE_FORM_API_KEY}/exec`;
+
+    console.log(data);
 
     try {
         const res = await fetch(FORM_URL, {

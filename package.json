@@ -31,6 +31,7 @@
     "dotenv": "^8.2.0",
     "eac-cornerstone-tools": "^1.0.6",
     "electron-devtools-installer": "^3.2.0",
+    "electron-fetch": "^1.9.1",
     "electron-is-dev": "^2.0.0",
     "electron-reloader": "^1.2.3",
     "fswin": "^3.22.106",
