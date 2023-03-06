@@ -26,9 +26,11 @@ export const FabButton = styled.button`
     transition: all 0.2s ease-in-out;
     z-index: 5;
     border: none;
+    outline: none;
 
     &:hover {
-        transform: scale(1.1);
+        background: ${({ expanded }) =>
+            expanded ? 'rgba(57,82,128,0.88)' : '#2B65CE'};
     }
 
     ${({ expanded }) =>
@@ -44,6 +46,26 @@ export const FabItem = styled(FabButton)`
     margin-bottom: 0.5rem;
     z-index: 3;
 
+    :hover {
+        :before {
+            width: 90px;
+            height: 20px;
+            position: absolute;
+            right: 110%;
+            white-space: nowrap;
+            padding: 1px 9px 2px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px 0 black;
+            background-color: #fff;
+            color: #367eff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        background-color: #2b65ce;
+    }
+
     ${({ expanded, index }) =>
         expanded
             ? css`
@@ -55,4 +77,20 @@ export const FabItem = styled(FabButton)`
                   transform: translate(0, calc(${index} * 117%));
                   opacity: 0;
               `}
+`;
+
+export const SaveFabBtn = styled(FabItem)`
+    :hover {
+        :before {
+            content: 'Save changes';
+        }
+    }
+`;
+
+export const SaveAsFabBtn = styled(FabItem)`
+    :hover {
+        :before {
+            content: 'Save to new file';
+        }
+    }
 `;

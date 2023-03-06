@@ -3,7 +3,12 @@ import SaveAsIcon from '../../icons/save-fab/save-as-icon/save-as.icon';
 import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
-import { FabButton, FabItem, FabWrapper } from './save-fab.styles';
+import {
+    FabButton,
+    FabWrapper,
+    SaveAsFabBtn,
+    SaveFabBtn,
+} from './save-fab.styles';
 
 const iconProps = {
     width: '24px',
@@ -46,12 +51,15 @@ const ExpandableFab = () => {
 
     return (
         <FabWrapper>
-            <FabItem index={2} expanded={isExpanded} onClick={handleSaveAs}>
+            <SaveAsFabBtn
+                index={2}
+                expanded={isExpanded}
+                onClick={handleSaveAs}>
                 <SaveAsIcon {...iconProps} />
-            </FabItem>
-            <FabItem index={1} expanded={isExpanded} onClick={handleSave}>
+            </SaveAsFabBtn>
+            <SaveFabBtn index={1} expanded={isExpanded} onClick={handleSave}>
                 <SaveIcon {...iconProps} />
-            </FabItem>
+            </SaveFabBtn>
             <FabButton
                 expanded={isExpanded}
                 onClick={handleFabClick}
