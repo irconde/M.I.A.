@@ -398,7 +398,40 @@ const initSettings = async () => {
                     } else {
                         // if settings already exist
                         appSettings = JSON.parse(data);
-                        resolve(appSettings);
+                        let rewriteSettings = false;
+                        if (
+                            appSettings.selectedImagesDirPath !== '' &&
+                            !fs.existsSync(appSettings.selectedImagesDirPath)
+                        ) {
+                            appSettings.selectedImagesDirPath = '';
+                            rewriteSettings = true;
+                        }
+                        if (
+                            appSettings.selectedAnnotationFile !== '' &&
+                            !fs.existsSync(appSettings.selectedAnnotationFile)
+                        ) {
+                            appSettings.selectedAnnotationFile = '';
+                            rewriteSettings = true;
+                        }
+
+                        if (rewriteSettings) {
+                            const writeStream =
+                                fs.createWriteStream(SETTINGS_FILE_PATH);
+                            writeStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            writeStream.on('finish', () => {
+                                console.log(
+                                    'Re-saved settings due to one of the paths not existing'
+                                );
+                                resolve();
+                            });
+                            writeStream.write(JSON.stringify(appSettings));
+                            writeStream.end();
+                        } else {
+                            resolve(appSettings);
+                        }
                     }
                 });
             } else {
