@@ -23,7 +23,7 @@ import {
     getSideMenuVisible,
     updateIsImageToolsOpen,
 } from '../../redux/slices/ui.slice';
-import { cornerstone } from '../import-modal/import-modal.component';
+import { cornerstone } from '../image-display/image-display.component';
 
 const ImageToolsFab = () => {
     const isOpen = useSelector(getIsImageToolsOpen);
@@ -71,9 +71,9 @@ const ImageToolsFab = () => {
         setBrightness(value);
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
-            const viewportTop = cornerstone.getViewport(imageElement);
-            updateViewportBrightness(value, viewportTop);
-            cornerstone.setViewport(imageElement, viewportTop);
+            const viewport = cornerstone.getViewport(imageElement);
+            updateViewportBrightness(value, viewport);
+            cornerstone.setViewport(imageElement, viewport);
         }
     };
 

@@ -25,7 +25,7 @@ export const SpeedDialWrapper = styled.div`
     position: absolute;
     right: ${getRightPos}px;
     bottom: ${({ $isSideMenuCollapsed }) =>
-        $isSideMenuCollapsed
+        $isSideMenuCollapsed === false
             ? 2.35 * NEXT_BUTTON_FAB_MARGIN
             : NEXT_BUTTON_FAB_MARGIN}px;
     transition: all 0.3s ease-in;
