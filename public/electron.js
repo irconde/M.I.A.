@@ -6,7 +6,7 @@ const isDev = require('electron-is-dev');
 const fs = require('fs');
 const Constants = require('./Constants');
 const fetch = require('electron-fetch').default;
-require('dotenv').config();
+
 const { Channels } = Constants;
 let mainWindow;
 let appSettings = null;
@@ -100,7 +100,8 @@ function createWindow() {
         appSettings.selectedAnnotationFile
     );
 
-    const loadWindowContent = () => {
+    const loadWindowContent = (attempts = 25, e) => {
+        if (attempts === 1) throw e;
         mainWindow
             .loadURL(
                 isDev
@@ -111,7 +112,11 @@ function createWindow() {
                 mainWindow.maximize();
                 mainWindow.show();
             })
-            .catch((err) => console.log(err));
+            .catch(
+                (err) =>
+                    isDev &&
+                    setTimeout(() => loadWindowContent(attempts - 1, err), 100)
+            );
 
         mainWindow.on('close', async () => {
             const rectangle = mainWindow.getBounds();
@@ -333,9 +338,7 @@ ipcMain.handle(Channels.getSettings, async () => appSettings);
  * Sends a post request to a Google form and responds to react with a boolean success value
  */
 ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
-    const FORM_URL = `https://script.google.com/macros/s/${process.env.GOOGLE_FORM_API_KEY}/exec`;
-
-    console.log(data);
+    const FORM_URL = `https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec`;
 
     try {
         const res = await fetch(FORM_URL, {
