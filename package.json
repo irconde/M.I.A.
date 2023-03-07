@@ -82,6 +82,12 @@
     },
     "mac": {
       "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": "dir",
+      "asarUnpack": [
+        "**/node_modules/sharp/**"
+      ]
     }
   },
   "eslintConfig": {
