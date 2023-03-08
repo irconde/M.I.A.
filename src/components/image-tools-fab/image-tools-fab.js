@@ -20,6 +20,7 @@ import {
     getCurrFileName,
     getIsFABVisible,
     getIsImageToolsOpen,
+    getMaxImageValues,
     getSideMenuVisible,
     updateIsImageToolsOpen,
 } from '../../redux/slices/ui.slice';
@@ -31,15 +32,14 @@ const ImageToolsFab = () => {
     const isSideMenuVisible = useSelector(getSideMenuVisible);
     const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
+    const maxImageValues = useSelector(getMaxImageValues);
+    const { maxBrightness, maxContrast } = maxImageValues;
     const dispatch = useDispatch();
     const [isInverted, setInverted] = useState(false);
     const [sliderVisibility, setSliderVisibility] = useState({
         brightnessSlider: false,
         contrastSlider: false,
     });
-    const MAX_CONTRAST = 80000;
-    const MAX_BRIGHTNESS = 80000;
-    const MAX_SLIDER_VAL = 100;
     const [contrast, setContrast] = useState(50);
     const [brightness, setBrightness] = useState(50);
 
@@ -85,9 +85,7 @@ const ImageToolsFab = () => {
      * @param {Object} viewport
      */
     const updateViewportContrast = (contrast, viewport) => {
-        // convert from slider scale to cornerstone scale
-        viewport.voi.windowWidth =
-            (MAX_CONTRAST / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - contrast);
+        viewport.voi.windowWidth = maxContrast - (contrast / 100) * maxContrast;
     };
 
     /**
@@ -98,9 +96,9 @@ const ImageToolsFab = () => {
      * @param {Object} viewport
      */
     const updateViewportBrightness = (brightness, viewport) => {
-        // convert from slider scale to cornerstone scale
+        //(inputBrightness / 100) * maxBrightnessValue;
         viewport.voi.windowCenter =
-            (MAX_BRIGHTNESS / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - brightness);
+            maxBrightness - (brightness / 100) * maxBrightness;
     };
 
     const toggleBrightnessSliderVisibility = () => {
@@ -126,9 +124,9 @@ const ImageToolsFab = () => {
 
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
-            const viewportTop = cornerstone.getViewport(imageElement);
-            viewportTop.invert = !viewportTop.invert;
-            cornerstone.setViewport(imageElement, viewportTop);
+            const viewport = cornerstone.getViewport(imageElement);
+            viewport.invert = !viewport.invert;
+            cornerstone.setViewport(imageElement, viewport);
         }
     };
 

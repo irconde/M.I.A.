@@ -21,6 +21,8 @@ const initialState = {
     splashScreenVisible: true,
     showApp: false,
     isImageToolsOpen: false,
+    maxContrast: 0,
+    maxBrightness: 0,
 };
 
 const uiSlice = createSlice({
@@ -86,6 +88,11 @@ const uiSlice = createSlice({
         updateIsImageToolsOpen: (state, action) => {
             state.isImageToolsOpen = action.payload;
         },
+        updateMaxImageValues: (state, action) => {
+            const { maxBrightness, maxContrast } = action.payload;
+            state.maxBrightness = maxBrightness;
+            state.maxContrast = maxContrast;
+        },
     },
 });
 
@@ -107,6 +114,7 @@ export const {
     updateShowApp,
     updateFABVisibility,
     updateIsImageToolsOpen,
+    updateMaxImageValues,
 } = uiSlice.actions;
 
 export const getAnnotationContextPosition = (state) =>
@@ -129,5 +137,11 @@ export const getSplashScreenVisibility = (state) =>
     state.ui.splashScreenVisible;
 export const getShowApp = (state) => state.ui.showApp;
 export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
+export const getMaxImageValues = (state) => {
+    return {
+        maxBrightness: state.ui.maxBrightness,
+        maxContrast: state.ui.maxContrast,
+    };
+};
 
 export default uiSlice.reducer;

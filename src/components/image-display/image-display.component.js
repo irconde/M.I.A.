@@ -33,11 +33,13 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
+    getMaxImageValues,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
+    updateMaxImageValues,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
@@ -98,6 +100,8 @@ const ImageDisplayComponent = () => {
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
     const isAnnotationContextVisibleRef = useRef(isAnnotationContextVisible);
     const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
+    const maxImageValues = useSelector(getMaxImageValues);
+    const maxImageValuesRef = useRef(maxImageValues);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -115,6 +119,10 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        maxImageValuesRef.current = maxImageValues;
+    }, [maxImageValues]);
 
     useEffect(() => {
         isAnnotationContextVisibleRef.current = isAnnotationContextVisible;
@@ -518,6 +526,27 @@ const ImageDisplayComponent = () => {
         const eventData = event.detail;
         zoomLevel.current = eventData.viewport.scale;
         dispatch(updateZoomLevel(zoomLevel.current));
+
+        if (
+            maxImageValuesRef.current.maxBrightness === 0 &&
+            maxImageValuesRef.current.maxContrast === 0
+        ) {
+            const element = document.getElementById('imageContainer'); // Replace 'example-element' with the ID of the element containing the image
+            if (element !== null) {
+                const image = cornerstone.getImage(element);
+
+                // Calculate the range between the minimum and maximum pixel values
+                const pixelRange = image.maxPixelValue - image.minPixelValue;
+                console.log(
+                    `max: ${image.maxPixelValue} | min: ${image.minPixelValue}`
+                );
+                console.log(`pixel range: ${pixelRange}`);
+                // Calculate the maximum contrast value based on the pixel range
+                const maxContrast = pixelRange / 2;
+                const maxBrightness = image.maxPixelValue;
+                dispatch(updateMaxImageValues({ maxBrightness, maxContrast }));
+            }
+        }
 
         if (selectedAnnotationRef.current !== null) {
             if (editionModeRef.current !== constants.editionMode.NO_TOOL) {
