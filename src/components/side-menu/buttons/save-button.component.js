@@ -48,9 +48,6 @@ const SaveButtonComponent = () => {
         dispatch(saveCurrentAnnotations(currentFile));
     };
 
-    const saveAsImageClick = () => {
-        dispatch(saveCurrentAnnotations(currentFile));
-    };
     if (isAnyAnnotations) {
         if (!isCollapsed)
             return (
@@ -86,8 +83,7 @@ const SaveButtonComponent = () => {
                         </SaveButtonContainer>
                     </Tooltip>
                     <Tooltip title={'Save As'}>
-                        <SaveAsButtonContainer
-                            onClick={() => saveAsImageClick()}>
+                        <SaveAsButtonContainer onClick={() => saveImageClick()}>
                             <SaveAsIcon
                                 width={'32px'}
                                 height={'32px'}
