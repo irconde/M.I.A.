@@ -531,7 +531,8 @@ const ImageDisplayComponent = () => {
             maxImageValuesRef.current.maxBrightness === 0 &&
             maxImageValuesRef.current.maxContrast === 0
         ) {
-            const element = document.getElementById('imageContainer'); // Replace 'example-element' with the ID of the element containing the image
+            // TODO: When to reset between images
+            const element = document.getElementById('imageContainer');
             if (element !== null) {
                 const image = cornerstone.getImage(element);
 
