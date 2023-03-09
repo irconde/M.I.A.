@@ -39,7 +39,6 @@ export const TitleContent = styled.div`
     height: 70%;
     width: 100%;
     font-family: NotoSansJP-Medium, sans-serif;
-    outline: 1px solid red;
 `;
 
 export const GrainIconContainer = styled.div`
@@ -61,7 +60,7 @@ export const ProcessingContainer = styled.span`
     font-weight: 600;
     display: flex;
     overflow: hidden;
-    width: 70%;
+    width: 70.5%;
     padding-left: 20%;
 `;
 
