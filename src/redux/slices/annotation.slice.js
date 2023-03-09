@@ -122,7 +122,7 @@ export const saveColorsFile = createAsyncThunk(
             })
             .catch((error) => {
                 console.log(error);
-                rejectWithValue(error);
+                return rejectWithValue(error.message);
             });
 
         return colorUpdate;
@@ -136,20 +136,18 @@ export const saveCurrentAnnotations = createAsyncThunk(
         const { annotation } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
-        await ipcRenderer.invoke(Channels.saveCurrentFile, {
-            cocoAnnotations,
-            cocoCategories,
-            cocoDeleted,
-            fileName: payload,
-            imageId: annotation.imageId,
-        });
-        // .then(() => {
-        //     return true;
-        // })
-        // .catch((error) => {
-        //     console.log(error);
-        //     rejectWithValue(error);
-        // });
+        try {
+            await ipcRenderer.invoke(Channels.saveCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                fileName: payload,
+                imageId: annotation.imageId,
+            });
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue(error.message);
+        }
     }
 );
 
@@ -160,8 +158,8 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
         const { annotation, ui } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
-        await ipcRenderer
-            .invoke(Channels.selectFile, {
+        try {
+            await ipcRenderer.invoke(Channels.selectFile, {
                 cocoAnnotations: annotation.hasAnnotationChanged
                     ? cocoAnnotations
                     : [],
@@ -170,31 +168,34 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
                 tempFileName: ui.currentFileName,
                 imageId: annotation.imageId,
                 fileName: payload,
-            })
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                console.log(error);
-                rejectWithValue(error);
             });
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue(error.message);
+        }
     }
 );
 
 export const saveAsCurrentFile = createAsyncThunk(
     'annotations/saveAsCurrentFile',
-    async (payload, { getState }) => {
+    async (payload, { getState, rejectWithValue }) => {
         const state = getState();
         const { annotation } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
-        await ipcRenderer.invoke(Channels.saveAsCurrentFile, {
-            cocoAnnotations,
-            cocoCategories,
-            cocoDeleted,
-            fileName: payload,
-            imageId: annotation.imageId,
-        });
+        try {
+            await ipcRenderer.invoke(Channels.saveAsCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                fileName: payload,
+                imageId: annotation.imageId,
+            });
+            return true;
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue(error.message);
+        }
     }
 );
 
