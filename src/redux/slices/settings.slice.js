@@ -14,7 +14,7 @@ export const initSettings = createAsyncThunk(
         try {
             return await ipcRenderer.invoke(Channels.getSettings);
         } catch (e) {
-            rejectWithValue(e);
+            return rejectWithValue(e.message);
         }
     }
 );

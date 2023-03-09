@@ -580,7 +580,6 @@ const annotationSlice = createSlice({
             }
         },
         [saveAsCurrentFile.fulfilled]: (state) => {
-            console.log('Fulfilled');
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
         [saveAsCurrentFile.pending]: (state) => {
