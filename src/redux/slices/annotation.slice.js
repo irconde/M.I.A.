@@ -136,21 +136,20 @@ export const saveCurrentAnnotations = createAsyncThunk(
         const { annotation } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
-        await ipcRenderer
-            .invoke(Channels.saveCurrentFile, {
-                cocoAnnotations,
-                cocoCategories,
-                cocoDeleted,
-                fileName: payload,
-                imageId: annotation.imageId,
-            })
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                console.log(error);
-                rejectWithValue(error);
-            });
+        await ipcRenderer.invoke(Channels.saveCurrentFile, {
+            cocoAnnotations,
+            cocoCategories,
+            cocoDeleted,
+            fileName: payload,
+            imageId: annotation.imageId,
+        });
+        // .then(() => {
+        //     return true;
+        // })
+        // .catch((error) => {
+        //     console.log(error);
+        //     rejectWithValue(error);
+        // });
     }
 );
 
@@ -179,6 +178,23 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
                 console.log(error);
                 rejectWithValue(error);
             });
+    }
+);
+
+export const saveAsCurrentFile = createAsyncThunk(
+    'annotations/saveAsCurrentFile',
+    async (payload, { getState }) => {
+        const state = getState();
+        const { annotation } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer.invoke(Channels.saveAsCurrentFile, {
+            cocoAnnotations,
+            cocoCategories,
+            cocoDeleted,
+            fileName: payload,
+            imageId: annotation.imageId,
+        });
     }
 );
 
@@ -562,6 +578,21 @@ const annotationSlice = createSlice({
                 state.saveFailureMessage = payload.toString();
             }
         },
+        [saveAsCurrentFile.fulfilled]: (state) => {
+            console.log('Fulfilled');
+            state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+        },
+        [saveAsCurrentFile.pending]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+        },
+        [saveAsCurrentFile.rejected]: (state, { payload }) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }
+        },
         [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
             clearSessionStorage();
             state.annotations = [];
@@ -569,11 +600,14 @@ const annotationSlice = createSlice({
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
             state.deletedAnnotationIds = [];
+            console.log('Fulfilled');
         },
         [selectFileAndSaveTempAnnotations.pending]: (state) => {
             //
+            console.log('Pending');
         },
         [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
+            console.log('Rejected');
             console.log(payload);
         },
     },

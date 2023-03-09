@@ -259,7 +259,7 @@ ipcMain.handle(
             });
 
             // if the event is cancelled by the user
-            if (dialogResult.canceled) return null;
+            if (dialogResult.canceled) throw new Error('Cancelled');
 
             return await files.createAnnotationsFile(
                 dialogResult.filePaths[0],
@@ -279,7 +279,7 @@ ipcMain.handle(
         });
 
         // if the event is cancelled by the user
-        if (dialogResult.canceled) return null;
+        if (dialogResult.canceled) throw new Error('Cancelled');
 
         try {
             const res = await files.createAnnotationsFile(

@@ -22,6 +22,7 @@ import {
 import {
     getHasAnnotationChanged,
     getIsAnyAnnotations,
+    saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../../redux/slices/annotation.slice';
 import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
@@ -48,6 +49,9 @@ const SaveButtonComponent = () => {
         dispatch(saveCurrentAnnotations(currentFile));
     };
 
+    const saveAsImageClick = () => {
+        dispatch(saveAsCurrentFile(currentFile));
+    };
     if (isAnyAnnotations) {
         if (!isCollapsed)
             return (
@@ -83,7 +87,8 @@ const SaveButtonComponent = () => {
                         </SaveButtonContainer>
                     </Tooltip>
                     <Tooltip title={'Save As'}>
-                        <SaveAsButtonContainer onClick={() => saveImageClick()}>
+                        <SaveAsButtonContainer
+                            onClick={() => saveAsImageClick()}>
                             <SaveAsIcon
                                 width={'32px'}
                                 height={'32px'}
