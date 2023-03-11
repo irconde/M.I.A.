@@ -136,43 +136,21 @@ export const saveCurrentAnnotations = createAsyncThunk(
         const { annotation } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
-        try {
-            await ipcRenderer.invoke(Channels.saveCurrentFile, {
+        await ipcRenderer
+            .invoke(Channels.saveCurrentFile, {
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
                 fileName: payload,
                 imageId: annotation.imageId,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error.message);
             });
-        } catch (error) {
-            console.log(error);
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
-export const selectFileAndSaveTempAnnotations = createAsyncThunk(
-    'annotations/selectFileAndSaveTempAnnotations',
-    async (payload, { getState, rejectWithValue }) => {
-        const state = getState();
-        const { annotation, ui } = state;
-        const { cocoAnnotations, cocoCategories, cocoDeleted } =
-            prepareAnnotationsForCoco(annotation);
-        try {
-            await ipcRenderer.invoke(Channels.selectFile, {
-                cocoAnnotations: annotation.hasAnnotationChanged
-                    ? cocoAnnotations
-                    : [],
-                cocoCategories,
-                cocoDeleted,
-                tempFileName: ui.currentFileName,
-                imageId: annotation.imageId,
-                fileName: payload,
-            });
-        } catch (error) {
-            console.log(error);
-            return rejectWithValue(error.message);
-        }
     }
 );
 
@@ -198,6 +176,36 @@ export const saveAsCurrentFile = createAsyncThunk(
         }
     }
 );
+
+export const selectFileAndSaveTempAnnotations = createAsyncThunk(
+    'annotations/selectFileAndSaveTempAnnotations',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation, ui } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer
+            .invoke(Channels.selectFile, {
+                cocoAnnotations: annotation.hasAnnotationChanged
+                    ? cocoAnnotations
+                    : [],
+                cocoCategories,
+                cocoDeleted,
+                tempFileName: ui.currentFileName,
+                imageId: annotation.imageId,
+                fileName: payload,
+            })
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                console.log(error);
+                rejectWithValue(error);
+            });
+    }
+);
+
+
 
 const initialState = {
     annotations: [],
@@ -579,6 +587,20 @@ const annotationSlice = createSlice({
                 state.saveFailureMessage = payload.toString();
             }
         },
+        [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
+            clearSessionStorage();
+            state.annotations = [];
+            state.selectedAnnotation = null;
+            state.selectedCategory = '';
+            state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
+        },
+        [selectFileAndSaveTempAnnotations.pending]: (state) => {
+            //
+        },
+        [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
+            console.log(payload);
+        },
         [saveAsCurrentFile.fulfilled]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
@@ -592,23 +614,6 @@ const annotationSlice = createSlice({
             } else if (typeof payload === 'object') {
                 state.saveFailureMessage = payload.toString();
             }
-        },
-        [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
-            clearSessionStorage();
-            state.annotations = [];
-            state.selectedAnnotation = null;
-            state.selectedCategory = '';
-            state.hasAnnotationChanged = false;
-            state.deletedAnnotationIds = [];
-            console.log('Fulfilled');
-        },
-        [selectFileAndSaveTempAnnotations.pending]: (state) => {
-            //
-            console.log('Pending');
-        },
-        [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
-            console.log('Rejected');
-            console.log(payload);
         },
     },
 });

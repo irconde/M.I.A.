@@ -147,6 +147,7 @@ export const Channels = {
     updateThumbnails: 'update-thumbnails',
     updateThumbnailHasAnnotations: 'update-thumbnail-has-annotations',
     selectFile: 'select-file',
+    sentFeedbackHTTP: 'send-feedback-http',
 };
 
 export const toolNames = {

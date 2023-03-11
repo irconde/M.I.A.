@@ -25,6 +25,7 @@ module.exports.Channels = {
     removeThumbnail: 'remove-thumbnail',
     updateThumbnailHasAnnotations: 'update-thumbnail-has-annotations',
     selectFile: 'select-file',
+    sentFeedbackHTTP: 'send-feedback-http',
 };
 
 module.exports.FileWatcher = {
