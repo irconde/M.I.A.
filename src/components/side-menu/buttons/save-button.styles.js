@@ -3,6 +3,8 @@ import { Fab } from '@mui/material';
 
 export const SaveButtonText = styled.p`
     display: contents;
+    width: 49px;
+    height: 29px;
 `;
 
 export const SaveButtonFab = styled(Fab)`

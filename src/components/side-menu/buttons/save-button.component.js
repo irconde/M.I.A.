@@ -28,6 +28,7 @@ import {
 } from '../../../redux/slices/annotation.slice';
 import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
 import SavingModal from '../../saving-modal/saving-modal.component';
+import GrainIcon from '../../../icons/grain-icon/grain.icon';
 
 /**
  * Component button that allows user to save edited detections and load next files in queue.
@@ -88,6 +89,11 @@ const SaveButtonComponent = () => {
                                 $isFaded={!annotationChanges}
                                 enabled={annotationChanges}
                                 onClick={() => saveImageClick()}>
+                                <GrainIcon
+                                    width="20px"
+                                    height="20px"
+                                    color="#fff"
+                                />
                                 <SaveButtonText>Save</SaveButtonText>
                             </SaveButtonContainer>
                         </Tooltip>

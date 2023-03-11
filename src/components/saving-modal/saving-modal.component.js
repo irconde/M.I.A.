@@ -11,7 +11,7 @@ import {
     SplitBGContainer,
     Title,
     TitleContent,
-} from '../saving-modal/saving-modal.styles';
+} from './saving-modal.styles';
 import React from 'react';
 import GrainIcon from '../../icons/grain-icon/grain.icon';
 

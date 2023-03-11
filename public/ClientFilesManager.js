@@ -793,7 +793,7 @@ class ClientFilesManager {
                         coco_url: '',
                         flickr_url: '',
                         file_name: mapped.fileName,
-                        date_capture: todayDateString,
+                        date_captured: todayDateString,
                     });
                     const imagePath = path.join(
                         this.selectedImagesDirPath,
