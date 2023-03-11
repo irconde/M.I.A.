@@ -20,12 +20,14 @@ import {
     getCurrFileName,
     getIsFABVisible,
     getIsImageToolsOpen,
-    getMaxImageValues,
     getSideMenuVisible,
     updateIsImageToolsOpen,
 } from '../../redux/slices/ui.slice';
 import { cornerstone } from '../image-display/image-display.component';
-import { getHasAllAnnotationsDeleted } from '../../redux/slices/annotation.slice';
+import {
+    getHasAllAnnotationsDeleted,
+    getMaxImageValues,
+} from '../../redux/slices/annotation.slice';
 
 const ImageToolsFab = () => {
     const isOpen = useSelector(getIsImageToolsOpen);

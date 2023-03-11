@@ -19,12 +19,14 @@ import {
     clearAnnotationSelection,
     getAnnotations,
     getImageId,
+    getMaxImageValues,
     getSaveAnnotationStatus,
     getSelectedAnnotation,
     getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
     updateColors,
+    updateMaxImageValues,
     updateSaveAnnotationStatus,
 } from '../../redux/slices/annotation.slice';
 import {
@@ -34,13 +36,11 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
-    getMaxImageValues,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
-    updateMaxImageValues,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
@@ -512,10 +512,6 @@ const ImageDisplayComponent = () => {
 
                 // Calculate the range between the minimum and maximum pixel values
                 const pixelRange = image.maxPixelValue - image.minPixelValue;
-                console.log(
-                    `max: ${image.maxPixelValue} | min: ${image.minPixelValue}`
-                );
-                console.log(`pixel range: ${pixelRange}`);
                 // Calculate the maximum contrast value based on the pixel range
                 const maxContrast = pixelRange / 0.5;
                 const maxBrightness = image.maxPixelValue;
