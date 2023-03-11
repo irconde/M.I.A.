@@ -18,6 +18,7 @@ import {
     clearAnnotationData,
     clearAnnotationSelection,
     getAnnotations,
+    getImageId,
     getSaveAnnotationStatus,
     getSelectedAnnotation,
     getSelectedCategory,
@@ -81,6 +82,7 @@ const ImageDisplayComponent = () => {
     const [pixelData, setPixelData] = useState(null);
     const [pixelType, setPixelType] = useState(null);
     const [viewport, setViewport] = useState(null);
+    const imageId = useSelector(getImageId);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mousePositionRef = useRef(mousePosition);
     const [error, setError] = useState('');
@@ -202,9 +204,10 @@ const ImageDisplayComponent = () => {
     }, [editionMode]);
 
     useEffect(() => {
+        const imageElement = viewportRef.current;
         if (selectedImagesDirPath) {
             if (pixelData === null || pixelType === null) return;
-            Utils.resetCornerstoneTools(viewportRef.current);
+            Utils.resetCornerstoneTools(imageElement);
             if (pixelType.toLowerCase() !== '.dcm') {
                 displayCocoImage(pixelData)
                     .then(() => {
@@ -221,7 +224,7 @@ const ImageDisplayComponent = () => {
             } else {
                 displayDicomImage(pixelData)
                     .then(() => {
-                        viewportRef.current.addEventListener(
+                        imageElement.addEventListener(
                             'cornerstoneimagerendered',
                             onImageRenderedHandler
                         );
@@ -234,7 +237,7 @@ const ImageDisplayComponent = () => {
             }
         }
         return () => {
-            viewportRef.current.removeEventListener(
+            imageElement.removeEventListener(
                 'cornerstoneimagerendered',
                 onImageRenderedHandler
             );
@@ -810,7 +813,7 @@ const ImageDisplayComponent = () => {
 
     const displayCocoImage = async (pixelData) => {
         try {
-            const imageIdTop = 'coco:0';
+            const imageIdTop = `coco:${imageId}`;
             Utils.loadImage(imageIdTop, pixelData)
                 .then((image) => {
                     const viewport = cornerstone.getDefaultViewportForImage(
@@ -819,7 +822,7 @@ const ImageDisplayComponent = () => {
                     );
                     viewport.translation.y = constants.viewportStyle.ORIGIN;
                     viewport.scale = 1.2;
-                    setViewport(viewport);
+
                     cornerstone.displayImage(
                         viewportRef.current,
                         image,

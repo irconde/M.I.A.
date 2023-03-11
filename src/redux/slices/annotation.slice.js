@@ -631,5 +631,6 @@ export const getIsAnyAnnotations = (state) =>
 export const getHasAllAnnotationsDeleted = (state) =>
     state.annotation.annotations?.length === 0 &&
     state.annotation.hasAnnotationChanged === true;
+export const getImageId = (state) => state.annotation.imageId;
 
 export default annotationSlice.reducer;

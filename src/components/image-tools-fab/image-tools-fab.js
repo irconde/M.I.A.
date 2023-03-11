@@ -161,7 +161,8 @@ const ImageToolsFab = () => {
             <SpeedDialWrapper
                 onMouseLeave={handleClose}
                 $isSideMenuCollapsed={
-                    !isSideMenuVisible || hasAllAnnotationsDeleted
+                    (!isSideMenuVisible || hasAllAnnotationsDeleted) &&
+                    currentFile !== ''
                 }>
                 <SliderGroup
                     $show={
