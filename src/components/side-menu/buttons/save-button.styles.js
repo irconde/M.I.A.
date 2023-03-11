@@ -13,12 +13,15 @@ export const SaveButtonFab = styled(Fab)`
 `;
 
 export const SaveAsButtonContainer = styled.div`
-    background-color: #367eff;
-    width: 4.5rem;
+    width: 25%;
     height: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
+    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
+    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
+    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
 
     :hover {
         background-color: #2b65ce;
@@ -26,9 +29,11 @@ export const SaveAsButtonContainer = styled.div`
 `;
 
 export const SaveButtonContainer = styled.div`
-    // opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
-    background-color: #367eff;
-    width: 12rem;
+    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
+    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
+    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
+    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
+    width: 75%;
     height: inherit;
     display: flex;
     align-items: center;

@@ -40,7 +40,7 @@ import SavingModal from '../../saving-modal/saving-modal.component';
 const SaveButtonComponent = () => {
     const isCollapsed = useSelector(getSideMenuVisible);
     /*const isImageToolsOpen = useSelector(getIsImageToolsOpen);*/
-    const detectionChanged = useSelector(getHasAnnotationChanged);
+    const annotationChanges = useSelector(getHasAnnotationChanged);
     const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
     const currentFile = useSelector(getCurrFileName);
@@ -59,14 +59,14 @@ const SaveButtonComponent = () => {
         if (!isCollapsed)
             return (
                 <Tooltip
-                    disableHoverListener={!detectionChanged}
+                    disableHoverListener={!annotationChanges}
                     title={'Save Annotations'}>
                     <CollapsedButtonContainer
-                        $isFaded={!detectionChanged}
+                        $isFaded={!annotationChanges}
                         isCollapsed={isCollapsed}>
                         <SaveButtonFab
                             onClick={() => saveImageClick()}
-                            $enabled={detectionChanged}
+                            $enabled={annotationChanges}
                             disabled={!isBoundPolyVisible}
                             color="primary">
                             <SaveArrowIcon
@@ -82,19 +82,19 @@ const SaveButtonComponent = () => {
             return (
                 <>
                     {openModal ? <SavingModal /> : null}
-                    <SideMenuButtonContainer
-                        // $isFaded={!detectionChanged}
-                        enabled={detectionChanged}
-                        id="SaveButtonComponent">
+                    <SideMenuButtonContainer id="SaveButtonComponent">
                         <Tooltip title={'Save Annotations'}>
                             <SaveButtonContainer
+                                $isFaded={!annotationChanges}
+                                enabled={annotationChanges}
                                 onClick={() => saveImageClick()}>
                                 <SaveButtonText>Save</SaveButtonText>
                             </SaveButtonContainer>
                         </Tooltip>
                         <Tooltip title={'Save As'}>
                             <SaveAsButtonContainer
-                                // TODO: Refactor onClick to make setOpenModal wait until saveImageClick is finished
+                                $isFaded={!annotationChanges}
+                                enabled={annotationChanges}
                                 onClick={() => {
                                     saveAsImageClick();
                                 }}>
