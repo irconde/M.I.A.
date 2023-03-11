@@ -26,10 +26,16 @@ import {
 import { cornerstone } from '../image-display/image-display.component';
 import {
     getHasAllAnnotationsDeleted,
+    getImageBrightness,
+    getImageContrast,
+    getImageInversion,
     getMaxImageValues,
+    updateImageBrightness,
+    updateImageContrast,
+    updateImageInversion,
 } from '../../redux/slices/annotation.slice';
 
-const ImageToolsFab = () => {
+const ImageToolsFabComponent = () => {
     const isOpen = useSelector(getIsImageToolsOpen);
     const currentFile = useSelector(getCurrFileName);
     const isSideMenuVisible = useSelector(getSideMenuVisible);
@@ -39,13 +45,13 @@ const ImageToolsFab = () => {
     const maxImageValues = useSelector(getMaxImageValues);
     const { maxBrightness, maxContrast } = maxImageValues;
     const dispatch = useDispatch();
-    const [isInverted, setInverted] = useState(false);
+    const isInverted = useSelector(getImageInversion);
     const [sliderVisibility, setSliderVisibility] = useState({
         brightnessSlider: false,
         contrastSlider: false,
     });
-    const [contrast, setContrast] = useState(50);
-    const [brightness, setBrightness] = useState(50);
+    const brightness = useSelector(getImageBrightness);
+    const contrast = useSelector(getImageContrast);
 
     /**
      * Updates the contrast of the viewports based on the value of the
@@ -57,7 +63,7 @@ const ImageToolsFab = () => {
     const handleContrastChange = (e, value) => {
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
-            setContrast(value);
+            dispatch(updateImageContrast(value));
             const enabledElement = cornerstone.getEnabledElement(imageElement);
             updateViewportContrast(value, enabledElement.viewport);
             cornerstone.setViewport(imageElement, enabledElement.viewport);
@@ -72,9 +78,9 @@ const ImageToolsFab = () => {
      * @param {number} value
      */
     const handleBrightnessChange = (e, value) => {
-        setBrightness(value);
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
+            dispatch(updateImageBrightness(value));
             const enabledElement = cornerstone.getEnabledElement(imageElement);
             updateViewportBrightness(value, enabledElement.viewport);
             cornerstone.setViewport(imageElement, enabledElement.viewport);
@@ -119,7 +125,7 @@ const ImageToolsFab = () => {
     };
 
     const toggleInvert = () => {
-        setInverted(!isInverted);
+        dispatch(updateImageInversion(!isInverted));
         setSliderVisibility({
             brightnessSlider: false,
             contrastSlider: false,
@@ -264,4 +270,4 @@ const ImageToolsFab = () => {
     } else return null;
 };
 
-export default ImageToolsFab;
+export default ImageToolsFabComponent;
