@@ -387,12 +387,14 @@ class ClientFilesManager {
                     readStream.on('end', () => {
                         try {
                             let annotationFile = JSON.parse(data);
-                            annotationFile = this.updateCocoFileForAnnotations(
-                                annotationFile,
+                            const annotationUpdates = [];
+                            annotationUpdates.push({
+                                fileName,
+                                imageId,
                                 cocoAnnotations,
                                 cocoCategories,
-                                cocoDeleted
-                            );
+                                cocoDeleted,
+                            });
                             const tempReadStream = fs.createReadStream(
                                 this.tempPath
                             );
@@ -408,57 +410,92 @@ class ClientFilesManager {
                                 const tempJsonData = JSON.parse(tempData);
                                 if (tempJsonData?.length > 0) {
                                     tempJsonData.forEach((temp) => {
-                                        annotationFile =
-                                            this.updateCocoFileForAnnotations(
-                                                annotationFile,
-                                                temp.cocoAnnotations,
-                                                temp.cocoCategories,
-                                                temp.cocoDeleted
-                                            );
+                                        if (
+                                            temp.fileName.toLowerCase() !==
+                                            fileName.toLowerCase()
+                                        ) {
+                                            annotationUpdates.push({
+                                                fileName: temp.fileName,
+                                                imageId: temp.imageId,
+                                                cocoAnnotations:
+                                                    temp.cocoAnnotations,
+                                                cocoCategories:
+                                                    temp.cocoCategories,
+                                                cocoDeleted: temp.cocoDeleted,
+                                            });
+                                        }
                                     });
                                 }
+                                const listOfPromises = [];
+                                annotationUpdates.forEach((update) => {
+                                    listOfPromises.push(
+                                        this.updateCocoFileForAnnotations(
+                                            annotationFile,
+                                            update.cocoAnnotations,
+                                            update.cocoCategories,
+                                            update.cocoDeleted,
+                                            update.fileName,
+                                            update.imageId
+                                        )
+                                    );
+                                });
 
-                                const writeStream = fs.createWriteStream(
-                                    this.selectedAnnotationFile
-                                );
-                                writeStream.on('error', (err) => {
-                                    console.log(err);
-                                    reject(err);
-                                });
-                                writeStream.on('finish', () => {
-                                    const tempWriteStream =
-                                        fs.createWriteStream(this.tempPath);
-                                    tempWriteStream.on('error', (err) => {
-                                        console.log(err);
-                                    });
-                                    tempWriteStream.on('finish', () => {
-                                        console.log(
-                                            'Cleared temp data on save event'
+                                Promise.all(listOfPromises)
+                                    .then(() => {
+                                        const writeStream =
+                                            fs.createWriteStream(
+                                                this.selectedAnnotationFile
+                                            );
+                                        writeStream.on('error', (err) => {
+                                            console.log(err);
+                                            reject(err);
+                                        });
+                                        writeStream.on('finish', () => {
+                                            const tempWriteStream =
+                                                fs.createWriteStream(
+                                                    this.tempPath
+                                                );
+                                            tempWriteStream.on(
+                                                'error',
+                                                (err) => {
+                                                    console.log(err);
+                                                }
+                                            );
+                                            tempWriteStream.on('finish', () => {
+                                                console.log(
+                                                    'Cleared temp data on save event'
+                                                );
+                                                const savedFileName =
+                                                    this.fileNames[
+                                                        this.currentFileIndex
+                                                    ];
+                                                this.#sendUpdate(
+                                                    Channels.updateThumbnailHasAnnotations,
+                                                    {
+                                                        hasAnnotations:
+                                                            !!this.#getAnnotations(
+                                                                annotationFile,
+                                                                savedFileName
+                                                            ).length,
+                                                        fileName: savedFileName,
+                                                    }
+                                                );
+                                                resolve();
+                                            });
+                                            tempWriteStream.write(
+                                                JSON.stringify([])
+                                            );
+                                            tempWriteStream.end();
+                                        });
+                                        writeStream.write(
+                                            JSON.stringify(annotationFile)
                                         );
-                                        const savedFileName =
-                                            this.fileNames[
-                                                this.currentFileIndex
-                                            ];
-                                        this.#sendUpdate(
-                                            Channels.updateThumbnailHasAnnotations,
-                                            {
-                                                hasAnnotations:
-                                                    !!this.#getAnnotations(
-                                                        annotationFile,
-                                                        savedFileName
-                                                    ).length,
-                                                fileName: savedFileName,
-                                            }
-                                        );
-                                        resolve();
+                                        writeStream.end();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                        reject(error);
                                     });
-                                    tempWriteStream.write(JSON.stringify([]));
-                                    tempWriteStream.end();
-                                });
-                                writeStream.write(
-                                    JSON.stringify(annotationFile)
-                                );
-                                writeStream.end();
                             });
                         } catch (err) {
                             console.log(err);
@@ -473,33 +510,105 @@ class ClientFilesManager {
         });
     }
 
-    updateCocoFileForAnnotations(
+    async updateCocoFileForAnnotations(
         annotationFile,
         cocoAnnotations,
         cocoCategories,
-        cocoDeleted
+        cocoDeleted,
+        fileName,
+        imageId
     ) {
-        cocoCategories.forEach((category) => {
-            if (
-                !annotationFile.categories.some((cat) => cat.id === category.id)
-            ) {
-                annotationFile.categories.push(category);
+        return new Promise((resolve, reject) => {
+            try {
+                const listOfPromises = [];
+
+                // Category correlation
+                cocoCategories.forEach((category) => {
+                    if (
+                        !annotationFile.categories.some(
+                            (cat) => cat.id === category.id
+                        )
+                    ) {
+                        annotationFile.categories.push(category);
+                    }
+                });
+
+                // Image Correlation
+                const image = annotationFile.images.find(
+                    (img) => img.id === imageId
+                );
+                if (image === undefined) {
+                    const imagePath = path.join(
+                        this.selectedImagesDirPath,
+                        fileName
+                    );
+                    annotationFile.images.push({
+                        id: imageId,
+                        coco_url: '',
+                        flickr_url: '',
+                        file_name: fileName,
+                        date_captured: this.getTodayDateString(),
+                    });
+
+                    if (path.extname(fileName).toLowerCase() === '.dcm') {
+                        listOfPromises.push(
+                            this.getDICOMDimensions(imagePath, fileName)
+                        );
+                    } else if (
+                        path.extname(fileName).toLowerCase() === '.jpg' ||
+                        path.extname(fileName).toLowerCase() === '.jpeg'
+                    ) {
+                        listOfPromises.push(
+                            this.getJPEGDimensions(imagePath, fileName)
+                        );
+                    } else if (
+                        path.extname(fileName).toLowerCase() === '.png'
+                    ) {
+                        listOfPromises.push(
+                            this.getPNGDimensions(imagePath, fileName)
+                        );
+                    }
+                }
+
+                // Annotation Correlation
+                cocoAnnotations.forEach((annotation) => {
+                    const foundIndex = annotationFile.annotations.findIndex(
+                        (fileAnnotation) => fileAnnotation.id === annotation.id
+                    );
+                    if (foundIndex !== -1) {
+                        annotationFile.annotations[foundIndex] = annotation;
+                    } else {
+                        annotationFile.annotations.push(annotation);
+                    }
+                });
+                annotationFile.annotations = annotationFile.annotations.filter(
+                    (annot) => !cocoDeleted.includes(annot.id)
+                );
+
+                Promise.all(listOfPromises)
+                    .then((results) => {
+                        // Handle width and height calculation of images
+                        results.forEach((result) => {
+                            const foundIndex = annotationFile.images.findIndex(
+                                (image) => image.file_name === result.fileName
+                            );
+                            if (foundIndex !== -1) {
+                                annotationFile.images[foundIndex].width =
+                                    result.width;
+                                annotationFile.images[foundIndex].height =
+                                    result.height;
+                            }
+                        });
+                        resolve();
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject(error);
+                    });
+            } catch (error) {
+                reject(error);
             }
         });
-        cocoAnnotations.forEach((annotation) => {
-            const foundIndex = annotationFile.annotations.findIndex(
-                (fileAnnotation) => fileAnnotation.id === annotation.id
-            );
-            if (foundIndex !== -1) {
-                annotationFile.annotations[foundIndex] = annotation;
-            } else {
-                annotationFile.annotations.push(annotation);
-            }
-        });
-        annotationFile.annotations = annotationFile.annotations.filter(
-            (annot) => !cocoDeleted.includes(annot.id)
-        );
-        return annotationFile;
     }
 
     async createUpdateTempAnnotationsFile(
@@ -567,6 +676,18 @@ class ClientFilesManager {
         });
     }
 
+    getTodayDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
     async createAnnotationsFile(annotationFilePath, newAnnotationData) {
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.tempPath);
@@ -579,16 +700,11 @@ class ClientFilesManager {
             });
             readStream.on('end', () => {
                 const tempJson = JSON.parse(tempData);
-
+                const todayDateString = this.getTodayDateString();
                 const now = new Date();
                 const year = now.getFullYear();
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-
-                const todayDateString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
                 const { cocoAnnotations, cocoCategories, fileName, imageId } =
                     newAnnotationData;

@@ -887,7 +887,9 @@ const ImageDisplayComponent = () => {
                         id="viewerContainer"
                         onContextMenu={(e) => e.preventDefault()}
                         className="disable-selection noIbar"
-                        unselectable="off"
+                        style={{
+                            userSelect: 'none',
+                        }}
                         ref={(el) => {
                             el &&
                                 el.addEventListener('selectstart', (e) => {
