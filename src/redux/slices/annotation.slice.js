@@ -205,8 +205,6 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
     }
 );
 
-
-
 const initialState = {
     annotations: [],
     categories: [],
@@ -219,6 +217,7 @@ const initialState = {
     deletedAnnotationIds: [],
     maxAnnotationId: 1,
     imageId: 0,
+    saveAsModalOpen: false,
 };
 
 const annotationSlice = createSlice({
@@ -602,12 +601,15 @@ const annotationSlice = createSlice({
             console.log(payload);
         },
         [saveAsCurrentFile.fulfilled]: (state) => {
+            state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
         [saveAsCurrentFile.pending]: (state) => {
+            state.saveAsModalOpen = true;
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
         },
         [saveAsCurrentFile.rejected]: (state, { payload }) => {
+            state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
             if (typeof payload === 'string') {
                 state.saveFailureMessage = payload;
@@ -667,5 +669,6 @@ export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
 export const getIsAnyAnnotations = (state) =>
     state.annotation.annotations?.length > 0;
+export const getIsSaveModalOpen = (state) => state.annotation.saveAsModalOpen;
 
 export default annotationSlice.reducer;

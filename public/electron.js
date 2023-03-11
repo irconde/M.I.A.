@@ -290,11 +290,10 @@ ipcMain.handle(
         if (dialogResult.canceled) throw new Error('Cancelled');
 
         try {
-            const res = await files.createAnnotationsFile(
+            return await files.createAnnotationsFile(
                 dialogResult.filePaths[0],
                 newAnnotations
             );
-            return res;
         } catch (e) {
             console.log(e);
         }

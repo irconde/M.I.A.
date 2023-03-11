@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
@@ -22,16 +22,15 @@ import {
 import {
     getHasAnnotationChanged,
     getIsAnyAnnotations,
+    getIsSaveModalOpen,
     saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../../redux/slices/annotation.slice';
 import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
 import SavingModal from '../../saving-modal/saving-modal.component';
-import { timeout } from 'async';
 
 /**
- * Component button that allows user to save edited detections and load next files in queue. Similar to
- * NextButtonComponent compnent but for local files only.
+ * Component button that allows user to save edited detections and load next files in queue.
  *
  * @component
  *
@@ -45,7 +44,7 @@ const SaveButtonComponent = () => {
     const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
     const currentFile = useSelector(getCurrFileName);
-    const [openModal, setOpenModal] = useState(false);
+    const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
 
     const saveImageClick = () => {
@@ -54,12 +53,6 @@ const SaveButtonComponent = () => {
 
     const saveAsImageClick = () => {
         dispatch(saveAsCurrentFile(currentFile));
-        // TODO: refactor to delay per amount of files
-        timeout(() => setOpenModal(false), 1000);
-    };
-
-    const handleSaveAs = async (error) => {
-        return saveAsImageClick.then(setOpenModal(true)).catch(error);
     };
 
     if (isAnyAnnotations) {
@@ -104,7 +97,6 @@ const SaveButtonComponent = () => {
                                 // TODO: Refactor onClick to make setOpenModal wait until saveImageClick is finished
                                 onClick={() => {
                                     saveAsImageClick();
-                                    setOpenModal(true);
                                 }}>
                                 <SaveAsIcon
                                     width={'32px'}

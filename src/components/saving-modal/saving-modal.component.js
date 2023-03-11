@@ -1,26 +1,21 @@
 import {
-    TitleContent,
     GrainIconContainer,
     LinearProgressMUI,
     LoaderContainer,
     ModalContent,
     Processing,
+    ProcessingContainer,
     RightPolygon,
     SavingModalBG,
     SavingModalContainer,
     SplitBGContainer,
     Title,
-    ProcessingContainer,
+    TitleContent,
 } from '../saving-modal/saving-modal.styles';
 import React from 'react';
 import GrainIcon from '../../icons/grain-icon/grain.icon';
-import { getCurrFileName } from '../../redux/slices/ui.slice';
-import { useSelector } from 'react-redux';
 
 function SavingModal() {
-    // TODO: Refactor to save all changed files to new annotation file, not just currentFile.
-    const currentFile = useSelector(getCurrFileName);
-
     return (
         <SavingModalBG>
             <SavingModalContainer>
@@ -38,8 +33,6 @@ function SavingModal() {
                         </TitleContent>
                         <ProcessingContainer>
                             <Processing>Processing</Processing>
-                            <div>{currentFile}</div>
-                            {/*    26 character limit    */}
                         </ProcessingContainer>
                     </ModalContent>
                     <RightPolygon />
