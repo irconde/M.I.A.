@@ -1146,6 +1146,7 @@ class ClientFilesManager {
         const storedThumbnails = await this.#thumbnails.getThumbnails();
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
+            // TODO: Fix has property error
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
             newThumbnails[fileName] = await this.#thumbnails.generateThumbnail(
                 this.selectedImagesDirPath,
