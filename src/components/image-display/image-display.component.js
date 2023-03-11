@@ -202,13 +202,13 @@ const ImageDisplayComponent = () => {
     }, [editionMode]);
 
     useEffect(() => {
-        const imageElement = viewportRef.current;
         if (selectedImagesDirPath) {
             if (pixelData === null || pixelType === null) return;
+            Utils.resetCornerstoneTools(viewportRef.current);
             if (pixelType.toLowerCase() !== '.dcm') {
                 displayCocoImage(pixelData)
                     .then(() => {
-                        imageElement.addEventListener(
+                        viewportRef.current.addEventListener(
                             'cornerstoneimagerendered',
                             onImageRenderedHandler
                         );
@@ -221,7 +221,7 @@ const ImageDisplayComponent = () => {
             } else {
                 displayDicomImage(pixelData)
                     .then(() => {
-                        imageElement.addEventListener(
+                        viewportRef.current.addEventListener(
                             'cornerstoneimagerendered',
                             onImageRenderedHandler
                         );
@@ -234,7 +234,7 @@ const ImageDisplayComponent = () => {
             }
         }
         return () => {
-            imageElement.removeEventListener(
+            viewportRef.current.removeEventListener(
                 'cornerstoneimagerendered',
                 onImageRenderedHandler
             );

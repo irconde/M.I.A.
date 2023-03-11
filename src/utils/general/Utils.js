@@ -600,6 +600,8 @@ export default class Utils {
         cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
         cornerstoneTools.setToolActive('ZoomMouseWheel', {});
         cornerstoneTools.setToolActive('ZoomTouchPinch', {});
+        cornerstone.reset(viewport);
+        cornerstone.removeElementData(viewport);
     }
 
     static getBboxFromHandles(start, end) {

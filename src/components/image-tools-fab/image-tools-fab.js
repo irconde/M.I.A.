@@ -25,11 +25,13 @@ import {
     updateIsImageToolsOpen,
 } from '../../redux/slices/ui.slice';
 import { cornerstone } from '../image-display/image-display.component';
+import { getHasAllAnnotationsDeleted } from '../../redux/slices/annotation.slice';
 
 const ImageToolsFab = () => {
     const isOpen = useSelector(getIsImageToolsOpen);
     const currentFile = useSelector(getCurrFileName);
     const isSideMenuVisible = useSelector(getSideMenuVisible);
+    const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
     const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const maxImageValues = useSelector(getMaxImageValues);
@@ -54,9 +56,9 @@ const ImageToolsFab = () => {
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
             setContrast(value);
-            const viewport = cornerstone.getViewport(imageElement);
-            updateViewportContrast(value, viewport);
-            cornerstone.setViewport(imageElement, viewport);
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            updateViewportContrast(value, enabledElement.viewport);
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -71,9 +73,9 @@ const ImageToolsFab = () => {
         setBrightness(value);
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
-            const viewport = cornerstone.getViewport(imageElement);
-            updateViewportBrightness(value, viewport);
-            cornerstone.setViewport(imageElement, viewport);
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            updateViewportBrightness(value, enabledElement.viewport);
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -96,7 +98,6 @@ const ImageToolsFab = () => {
      * @param {Object} viewport
      */
     const updateViewportBrightness = (brightness, viewport) => {
-        //(inputBrightness / 100) * maxBrightnessValue;
         viewport.voi.windowCenter =
             maxBrightness - (brightness / 100) * maxBrightness;
     };
@@ -124,9 +125,9 @@ const ImageToolsFab = () => {
 
         const imageElement = document.getElementById('imageContainer');
         if (imageElement !== null) {
-            const viewport = cornerstone.getViewport(imageElement);
-            viewport.invert = !viewport.invert;
-            cornerstone.setViewport(imageElement, viewport);
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            enabledElement.viewport.invert = !enabledElement.viewport.invert;
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -159,7 +160,9 @@ const ImageToolsFab = () => {
         return (
             <SpeedDialWrapper
                 onMouseLeave={handleClose}
-                $isSideMenuCollapsed={isSideMenuVisible}>
+                $isSideMenuCollapsed={
+                    !isSideMenuVisible || hasAllAnnotationsDeleted
+                }>
                 <SliderGroup
                     $show={
                         sliderVisibility.contrastSlider ||
