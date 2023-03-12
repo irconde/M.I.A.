@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Channels } from '../../utils/enums/Constants';
 import {
     CloseModalBody,
@@ -12,7 +11,7 @@ import {
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 function CloseModalComponent() {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         ipcRenderer.on(Channels.closeApp, () => setIsOpen(true));
