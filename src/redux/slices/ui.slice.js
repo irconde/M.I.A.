@@ -20,6 +20,7 @@ const initialState = {
     fabVisible: true,
     splashScreenVisible: true,
     showApp: false,
+    isImageToolsOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -82,6 +83,9 @@ const uiSlice = createSlice({
         updateFABVisibility: (state, action) => {
             state.isFABVisible = action.payload;
         },
+        updateIsImageToolsOpen: (state, action) => {
+            state.isImageToolsOpen = action.payload;
+        },
     },
 });
 
@@ -102,6 +106,7 @@ export const {
     updateSplashScreenVisibility,
     updateShowApp,
     updateFABVisibility,
+    updateIsImageToolsOpen,
 } = uiSlice.actions;
 
 export const getAnnotationContextPosition = (state) =>
@@ -123,4 +128,6 @@ export const getIsFABVisible = (state) => state.ui.fabVisible;
 export const getSplashScreenVisibility = (state) =>
     state.ui.splashScreenVisible;
 export const getShowApp = (state) => state.ui.showApp;
+export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
+
 export default uiSlice.reducer;
