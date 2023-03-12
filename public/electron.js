@@ -231,37 +231,44 @@ ipcMain.handleOnce(Channels.closeApp, async (event, data) => {
                         );
                     });
             } else {
-                dialog
-                    .showOpenDialog({
-                        properties: ['openDirectory'],
-                        buttonLabel: 'Select folder',
-                        title: 'Select a folder to save annotations',
-                    })
-                    .then((dialogResult) => {
-                        // if the event is cancelled by the user
-                        if (dialogResult.canceled === false) {
-                            files
-                                .createAnnotationsFile(
-                                    dialogResult.filePaths[0],
-                                    data,
-                                    true
-                                )
-                                .catch((err) => console.log(err))
-                                .finally(() => {
-                                    closeAndRemoveListeners(mainWindow).finally(
-                                        () => resolve()
-                                    );
-                                });
-                        } else {
-                            return reject();
-                        }
-                    })
-                    .catch((err) => console.log(err))
-                    .finally(() => {
-                        closeAndRemoveListeners(mainWindow).finally(() =>
-                            resolve()
-                        );
-                    });
+                const { cocoAnnotations } = data;
+                if (cocoAnnotations?.length > 0) {
+                    dialog
+                        .showOpenDialog({
+                            properties: ['openDirectory'],
+                            buttonLabel: 'Select folder',
+                            title: 'Select a folder to save annotations',
+                        })
+                        .then((dialogResult) => {
+                            // if the event is cancelled by the user
+                            if (dialogResult.canceled === false) {
+                                files
+                                    .createAnnotationsFile(
+                                        dialogResult.filePaths[0],
+                                        data,
+                                        true
+                                    )
+                                    .catch((err) => console.log(err))
+                                    .finally(() => {
+                                        closeAndRemoveListeners(
+                                            mainWindow
+                                        ).finally(() => resolve());
+                                    });
+                            } else {
+                                return reject();
+                            }
+                        })
+                        .catch((err) => console.log(err))
+                        .finally(() => {
+                            closeAndRemoveListeners(mainWindow).finally(() =>
+                                resolve()
+                            );
+                        });
+                } else {
+                    closeAndRemoveListeners(mainWindow).finally(() =>
+                        resolve()
+                    );
+                }
             }
         });
     });
