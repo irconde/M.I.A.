@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    getHasAllAnnotationsDeleted,
     getSelectedAnnotation,
     getSelectedCategory,
     selectAnnotation,
@@ -11,6 +12,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     getSideMenuVisible,
+    toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
 } from '../../redux/slices/ui.slice';
@@ -46,20 +48,21 @@ const iconProps = {
 const SideMenuComponent = () => {
     const dispatch = useDispatch();
     const annotations = useSelector(getAnnotations);
-    const annotationsRef = useRef(annotations);
     const isSideMenuVisible = useSelector(getSideMenuVisible);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
+    const allAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
+    const allAnnotationsDeletedRef = useRef(allAnnotationsDeleted);
 
     useEffect(() => {
         if (
-            annotationsRef.current !== annotations &&
-            annotations?.length === 0
+            allAnnotationsDeleted !== allAnnotationsDeletedRef.current &&
+            allAnnotationsDeleted === true
         ) {
-            //dispatch(toggleSideMenu());
+            dispatch(toggleSideMenu());
         }
-        annotationsRef.current = annotations;
-    }, [annotations]);
+        allAnnotationsDeletedRef.current = allAnnotationsDeleted;
+    }, [allAnnotationsDeleted]);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
         if (!object[annotation.categoryName]) {
