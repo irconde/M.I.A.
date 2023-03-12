@@ -246,7 +246,7 @@ const ImageToolsFabComponent = () => {
                             />
                         }
                         tooltipTitle={'Contrast'}
-                        placement={'left-start'}
+                        placement={'left'}
                         onClick={toggleContrastSliderVisibility}
                         $active={sliderVisibility.contrastSlider}
                     />
@@ -260,7 +260,7 @@ const ImageToolsFabComponent = () => {
                             />
                         }
                         tooltipTitle={'Brightness'}
-                        placement={'left-start'}
+                        placement={'left'}
                         onClick={toggleBrightnessSliderVisibility}
                         $active={sliderVisibility.brightnessSlider}
                     />

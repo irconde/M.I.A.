@@ -13,6 +13,8 @@ const getRightPos = ({ $isSideMenuCollapsed }) => {
     let right = NEXT_BUTTON_FAB_MARGIN;
     if (!$isSideMenuCollapsed) {
         right += sideMenuWidth;
+    } else {
+        right += sideMenuWidth / 2;
     }
     return right;
 };
@@ -24,10 +26,7 @@ export const SpeedDialWrapper = styled.div`
     z-index: 1;
     position: absolute;
     right: ${getRightPos}px;
-    bottom: ${({ $isSideMenuCollapsed }) =>
-        $isSideMenuCollapsed === false
-            ? 2.35 * NEXT_BUTTON_FAB_MARGIN
-            : NEXT_BUTTON_FAB_MARGIN}px;
+    bottom: 5%;
     transition: all 0.3s ease-in;
 
     @keyframes fadein {
@@ -61,7 +60,7 @@ export const StyledSpeedDial = styled(SpeedDial)`
             $isOpen && $invert ? selectedBlue : noSelectGrey};
         border: 1px solid #414141;
         z-index: 1;
-        box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
@@ -90,7 +89,7 @@ export const StyledAction = styled(SpeedDialAction)`
             $active ? selectedBlue : noSelectGrey};
         margin: 0;
         border: 1px solid #414141;
-        box-shadow: 0rem 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
             cursor: pointer;
