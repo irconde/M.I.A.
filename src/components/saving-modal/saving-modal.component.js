@@ -3,8 +3,6 @@ import {
     LinearProgressMUI,
     LoaderContainer,
     ModalContent,
-    Processing,
-    ProcessingContainer,
     RightPolygon,
     SavingModalBG,
     SavingModalContainer,
@@ -31,9 +29,6 @@ function SavingModal() {
                             </GrainIconContainer>
                             <Title>SAVING ANNOTATIONS TO NEW FILE</Title>
                         </TitleContent>
-                        <ProcessingContainer>
-                            <Processing>Processing</Processing>
-                        </ProcessingContainer>
                     </ModalContent>
                     <RightPolygon />
                 </SplitBGContainer>

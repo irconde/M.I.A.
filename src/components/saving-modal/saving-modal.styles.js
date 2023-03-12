@@ -54,22 +54,6 @@ export const Title = styled.div`
     width: 80%;
 `;
 
-export const ProcessingContainer = styled.span`
-    font-size: 14px;
-    line-height: 2.29;
-    font-weight: 600;
-    display: flex;
-    overflow: hidden;
-    width: 70.5%;
-    padding-left: 20%;
-`;
-
-export const Processing = styled.span`
-    font-weight: 300;
-    padding-right: 5px;
-    opacity: 0.8;
-`;
-
 export const RightPolygon = styled.div`
     background-color: #4b7df7;
     height: 100%;
