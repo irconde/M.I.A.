@@ -46,3 +46,16 @@ export const SaveButtonContainer = styled.div`
         background-color: #2b65ce;
     }
 `;
+
+export const SaveIconContainer = styled.div`
+    display: inherit;
+    margin-right: 2%;
+    margin-left: 2%;
+`;
+
+export const SaveAsDivider = styled.div`
+    width: 2px;
+    height: 100%;
+    opacity: 0.22;
+    background-color: #000;
+`;

@@ -9,9 +9,11 @@ import {
 
 import {
     SaveAsButtonContainer,
+    SaveAsDivider,
     SaveButtonContainer,
     SaveButtonFab,
     SaveButtonText,
+    SaveIconContainer,
 } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 import {
@@ -89,14 +91,17 @@ const SaveButtonComponent = () => {
                                 $isFaded={!annotationChanges}
                                 enabled={annotationChanges}
                                 onClick={() => saveImageClick()}>
-                                <GrainIcon
-                                    width="20px"
-                                    height="20px"
-                                    color="#fff"
-                                />
+                                <SaveIconContainer>
+                                    <GrainIcon
+                                        width="24px"
+                                        height="24px"
+                                        color="#fff"
+                                    />
+                                </SaveIconContainer>
                                 <SaveButtonText>Save</SaveButtonText>
                             </SaveButtonContainer>
                         </Tooltip>
+                        <SaveAsDivider />
                         <Tooltip title={'Save As'}>
                             <SaveAsButtonContainer
                                 $isFaded={!annotationChanges}
