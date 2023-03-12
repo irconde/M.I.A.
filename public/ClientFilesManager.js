@@ -835,20 +835,16 @@ class ClientFilesManager {
                                     result.height;
                             }
                         });
-                        const annotationPath = path.join(
-                            annotationFilePath,
-                            'annotation.json'
-                        );
                         const writeStream =
-                            fs.createWriteStream(annotationPath);
+                            fs.createWriteStream(annotationFilePath);
                         writeStream.on('error', (err) => {
                             console.log(err);
                             reject(err);
                         });
                         writeStream.on('finish', () => {
-                            this.selectedAnnotationFile = annotationPath;
+                            this.selectedAnnotationFile = annotationFilePath;
                             this.#thumbnails.setAnnotationFilePath(
-                                annotationPath
+                                annotationFilePath
                             );
                             this.#sendUpdate(
                                 Channels.updateAnnotationFile,

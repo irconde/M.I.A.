@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
@@ -27,10 +27,14 @@ import {
     getIsSaveModalOpen,
     saveAsCurrentFile,
     saveCurrentAnnotations,
+    updateShowSaveAsModal,
 } from '../../../redux/slices/annotation.slice';
 import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
 import SavingModal from '../../saving-modal/saving-modal.component';
 import GrainIcon from '../../../icons/grain-icon/grain.icon';
+import { Channels } from '../../../utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 /**
  * Component button that allows user to save edited detections and load next files in queue.
@@ -49,6 +53,12 @@ const SaveButtonComponent = () => {
     const currentFile = useSelector(getCurrFileName);
     const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        ipcRenderer.on(Channels.updateSaveModalStatus, (e, args) => {
+            dispatch(updateShowSaveAsModal(args));
+        });
+    });
 
     const saveImageClick = () => {
         dispatch(saveCurrentAnnotations(currentFile));

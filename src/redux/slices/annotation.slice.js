@@ -587,6 +587,9 @@ const annotationSlice = createSlice({
         updateImageInversion: (state, action) => {
             state.inverted = action.payload;
         },
+        updateShowSaveAsModal: (state, action) => {
+            state.saveAsModalOpen = action.payload;
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -596,12 +599,14 @@ const annotationSlice = createSlice({
             console.log(payload);
         },
         [saveCurrentAnnotations.fulfilled]: (state) => {
+            state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
         [saveCurrentAnnotations.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
         },
         [saveCurrentAnnotations.rejected]: (state, { payload }) => {
+            state.saveAsModalOpen = false;
             console.log(payload);
             state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
             if (typeof payload === 'string') {
@@ -634,7 +639,6 @@ const annotationSlice = createSlice({
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
         [saveAsCurrentFile.pending]: (state) => {
-            state.saveAsModalOpen = true;
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
         },
         [saveAsCurrentFile.rejected]: (state, { payload }) => {
@@ -668,6 +672,7 @@ export const {
     updateImageBrightness,
     updateImageContrast,
     updateImageInversion,
+    updateShowSaveAsModal,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
