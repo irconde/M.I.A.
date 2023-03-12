@@ -158,7 +158,7 @@ export const toolNames = {
     movement: 'AnnotationMovementTool',
 };
 
-export const NEXT_BUTTON_FAB_MARGIN = 50;
+export const NEXT_BUTTON_FAB_MARGIN = 7;
 
 export const SAVE_STATUSES = {
     IDLE: 'idle',

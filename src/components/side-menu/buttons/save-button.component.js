@@ -1,17 +1,12 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
-import {
-    CollapsedButtonContainer,
-    SideMenuButtonContainer,
-} from './shared/button.styles';
+import { SideMenuButtonContainer } from './shared/button.styles';
 
 import {
     SaveAsButtonContainer,
     SaveAsDivider,
     SaveButtonContainer,
-    SaveButtonFab,
     SaveButtonText,
     SaveIconContainer,
 } from './save-button.styles';
@@ -69,29 +64,7 @@ const SaveButtonComponent = () => {
     };
 
     if (isAnyAnnotations) {
-        if (!isCollapsed)
-            return (
-                <Tooltip
-                    disableHoverListener={!annotationChanges}
-                    title={'Save Annotations'}>
-                    <CollapsedButtonContainer
-                        $isFaded={!annotationChanges}
-                        isCollapsed={isCollapsed}>
-                        <SaveButtonFab
-                            onClick={() => saveImageClick()}
-                            $enabled={annotationChanges}
-                            disabled={!isBoundPolyVisible}
-                            color="primary">
-                            <SaveArrowIcon
-                                width="24px"
-                                height="24px"
-                                color="white"
-                            />
-                        </SaveButtonFab>
-                    </CollapsedButtonContainer>
-                </Tooltip>
-            );
-        else
+        if (isCollapsed)
             return (
                 <>
                     {openModal ? <SavingModal /> : null}

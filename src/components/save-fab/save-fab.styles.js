@@ -5,7 +5,7 @@ const ACTION_FAB_HEIGHT = '3.5rem';
 
 export const FabWrapper = styled.div`
     position: absolute;
-    bottom: ${({ show }) => (show ? '2rem' : '-100%')};
+    bottom: ${({ show }) => (show ? '5%' : '-100%')};
     transition: bottom 200ms;
     right: 2rem;
     z-index: 999;
