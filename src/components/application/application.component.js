@@ -14,6 +14,7 @@ import SaveButtonComponent from '../side-menu/buttons/save-button.component';
 import PropTypes from 'prop-types';
 import { updateSplashScreenVisibility } from '../../redux/slices/ui.slice';
 import { useDispatch } from 'react-redux';
+import SaveFabComponent from '../save-fab/save-fab.component';
 import ImageToolsFabComponent from '../image-tools-fab/image-tools-fab.component';
 
 const SPLASH_SCREEN_DELAY = 2000;
@@ -55,6 +56,7 @@ function ApplicationComponent({ openImportModal }) {
             <BoundPolyFABComponent />
             <SaveButtonComponent />
             <ImageToolsFabComponent />
+            <SaveFabComponent />
         </>
     );
 }

@@ -1,9 +1,6 @@
 import styled from 'styled-components';
 import { Slider, SpeedDial, SpeedDialAction, Tooltip } from '@mui/material';
-import {
-    NEXT_BUTTON_FAB_MARGIN,
-    sideMenuWidth,
-} from '../../utils/enums/Constants';
+import { NEXT_BUTTON_FAB_MARGIN } from '../../utils/enums/Constants';
 
 const noSelectGrey = '#313131';
 const selectedBlue = '#367eff';
@@ -12,11 +9,9 @@ const selectedBlue = '#367eff';
 const getRightPos = ({ $isSideMenuCollapsed }) => {
     let right = NEXT_BUTTON_FAB_MARGIN;
     if (!$isSideMenuCollapsed) {
-        right += sideMenuWidth;
-    } else {
-        right += sideMenuWidth / 2;
+        right += 10;
     }
-    return right;
+    return `${right}rem`;
 };
 
 export const SpeedDialWrapper = styled.div`
@@ -25,7 +20,7 @@ export const SpeedDialWrapper = styled.div`
     height: 12rem;
     z-index: 1;
     position: absolute;
-    right: ${getRightPos}px;
+    right: ${getRightPos};
     bottom: 5%;
     transition: all 0.3s ease-in;
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAnnotations,
+    getHasAllAnnotationsDeleted,
     getSelectedAnnotation,
     getSelectedCategory,
     selectAnnotation,
@@ -11,6 +12,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     getSideMenuVisible,
+    toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
 } from '../../redux/slices/ui.slice';
@@ -44,11 +46,23 @@ const iconProps = {
  *
  */
 const SideMenuComponent = () => {
+    const dispatch = useDispatch();
     const annotations = useSelector(getAnnotations);
     const isSideMenuVisible = useSelector(getSideMenuVisible);
-    const dispatch = useDispatch();
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const selectedCategory = useSelector(getSelectedCategory);
+    const allAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
+    const allAnnotationsDeletedRef = useRef(allAnnotationsDeleted);
+
+    useEffect(() => {
+        if (
+            allAnnotationsDeleted !== allAnnotationsDeletedRef.current &&
+            allAnnotationsDeleted === true
+        ) {
+            dispatch(toggleSideMenu());
+        }
+        allAnnotationsDeletedRef.current = allAnnotationsDeleted;
+    }, [allAnnotationsDeleted]);
 
     const annotationsByCategory = annotations.reduce((object, annotation) => {
         if (!object[annotation.categoryName]) {
@@ -212,11 +226,12 @@ const SideMenuComponent = () => {
                                                                     const {
                                                                         x,
                                                                         y,
-                                                                    } = Utils.calculateAnnotationContextPosition(
-                                                                        cornerstone,
-                                                                        annotation,
-                                                                        viewport
-                                                                    );
+                                                                    } =
+                                                                        Utils.calculateAnnotationContextPosition(
+                                                                            cornerstone,
+                                                                            annotation,
+                                                                            viewport
+                                                                        );
                                                                     console.log(
                                                                         `x: ${x} | y: ${y}`
                                                                     );

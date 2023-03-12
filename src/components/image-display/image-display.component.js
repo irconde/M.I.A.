@@ -36,6 +36,7 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
+    toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
@@ -318,6 +319,9 @@ const ImageDisplayComponent = () => {
                 (bbox[0] - (bbox[0] + bbox[2])) *
                     (bbox[1] - (bbox[1] + bbox[3]))
             );
+            if (annotationRef.current.length === 0) {
+                dispatch(toggleSideMenu());
+            }
             Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
                 bbox,
                 area,
@@ -364,6 +368,9 @@ const ImageDisplayComponent = () => {
                         )
                     );
                     if (area > 0) {
+                        if (annotationRef.current.length === 0) {
+                            dispatch(toggleSideMenu());
+                        }
                         Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
                             bbox,
                             area,
