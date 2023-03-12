@@ -133,7 +133,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
     'annotations/saveCurrentAnnotations',
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
-        const { annotation } = state;
+        const { annotation, ui } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
         await ipcRenderer
@@ -141,7 +141,7 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
-                fileName: payload,
+                fileName: ui.currentFileName,
                 imageId: annotation.imageId,
             })
             .then(() => {
@@ -158,7 +158,7 @@ export const saveAsCurrentFile = createAsyncThunk(
     'annotations/saveAsCurrentFile',
     async (payload, { getState, rejectWithValue }) => {
         const state = getState();
-        const { annotation } = state;
+        const { annotation, ui } = state;
         const { cocoAnnotations, cocoCategories, cocoDeleted } =
             prepareAnnotationsForCoco(annotation);
         try {
@@ -166,7 +166,7 @@ export const saveAsCurrentFile = createAsyncThunk(
                 cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
-                fileName: payload,
+                fileName: ui.currentFileName,
                 imageId: annotation.imageId,
             });
             return true;

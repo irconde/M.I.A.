@@ -9,8 +9,14 @@ import {
     SaveAsFabBtn,
     SaveFabBtn,
 } from './save-fab.styles';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getSideMenuVisible } from '../../redux/slices/ui.slice';
+import {
+    getHasAllAnnotationsDeleted,
+    getHasAnnotationChanged,
+    saveAsCurrentFile,
+    saveCurrentAnnotations,
+} from '../../redux/slices/annotation.slice';
 
 const iconProps = {
     width: '24px',
@@ -20,8 +26,12 @@ const iconProps = {
 
 const ExpandableFab = () => {
     const sideMenuVisible = useSelector(getSideMenuVisible);
+    const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(false);
     const fabRef = useRef(null);
+    const hasAnnotationsChanged = useSelector(getHasAnnotationChanged);
+    const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
+    const enabled = hasAnnotationsChanged || hasAllAnnotationsDeleted;
 
     useEffect(() => {
         // only add the click listener to the document when the fab is open
@@ -45,11 +55,11 @@ const ExpandableFab = () => {
     };
 
     const handleSave = () => {
-        console.log('Save');
+        dispatch(saveCurrentAnnotations());
     };
 
     const handleSaveAs = () => {
-        console.log('Save As');
+        dispatch(saveAsCurrentFile());
     };
 
     return (
@@ -64,8 +74,13 @@ const ExpandableFab = () => {
                 <SaveIcon {...iconProps} />
             </SaveFabBtn>
             <FabButton
+                enabled={enabled}
                 expanded={isExpanded}
-                onClick={handleFabClick}
+                onClick={() => {
+                    if (enabled) {
+                        handleFabClick();
+                    }
+                }}
                 ref={fabRef}>
                 {isExpanded ? (
                     <CloseIcon {...iconProps} />

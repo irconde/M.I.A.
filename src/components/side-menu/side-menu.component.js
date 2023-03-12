@@ -11,7 +11,6 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     getSideMenuVisible,
-    toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
 } from '../../redux/slices/ui.slice';
@@ -57,7 +56,7 @@ const SideMenuComponent = () => {
             annotationsRef.current !== annotations &&
             annotations?.length === 0
         ) {
-            dispatch(toggleSideMenu());
+            //dispatch(toggleSideMenu());
         }
         annotationsRef.current = annotations;
     }, [annotations]);

@@ -19,7 +19,7 @@ export const FabButton = styled.button`
     width: ${FAB_HEIGHT};
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: #367eff;
+    background-color: ${({ enabled }) => (enabled ? '#367eff' : '#252525')};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,8 +30,12 @@ export const FabButton = styled.button`
     outline: none;
 
     &:hover {
-        background: ${({ expanded }) =>
-            expanded ? 'rgba(57,82,128,0.88)' : '#2B65CE'};
+        background: ${({ expanded, enabled }) =>
+            expanded
+                ? 'rgba(57,82,128,0.88)'
+                : enabled
+                ? '#2B65CE'
+                : '#4B4B4B'};
     }
 
     ${({ expanded }) =>

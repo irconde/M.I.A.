@@ -11,11 +11,7 @@ import {
     SaveIconContainer,
 } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
-import {
-    getCurrFileName,
-    getIsFABVisible,
-    getSideMenuVisible,
-} from '../../../redux/slices/ui.slice';
+import { getSideMenuVisible } from '../../../redux/slices/ui.slice';
 import {
     getHasAnnotationChanged,
     getIsAnyAnnotations,
@@ -41,11 +37,8 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 
 const SaveButtonComponent = () => {
     const isCollapsed = useSelector(getSideMenuVisible);
-    /*const isImageToolsOpen = useSelector(getIsImageToolsOpen);*/
     const annotationChanges = useSelector(getHasAnnotationChanged);
-    const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
-    const currentFile = useSelector(getCurrFileName);
     const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
 
@@ -56,11 +49,11 @@ const SaveButtonComponent = () => {
     });
 
     const saveImageClick = () => {
-        dispatch(saveCurrentAnnotations(currentFile));
+        dispatch(saveCurrentAnnotations());
     };
 
     const saveAsImageClick = () => {
-        dispatch(saveAsCurrentFile(currentFile));
+        dispatch(saveAsCurrentFile());
     };
 
     if (isAnyAnnotations) {
