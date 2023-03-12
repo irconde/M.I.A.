@@ -794,7 +794,7 @@ class ClientFilesManager {
                         }
                     });
                 }
-                mappedImages.forEach((mapped, index) => {
+                mappedImages.forEach((mapped) => {
                     annotationJson.images.push({
                         id: mapped.imageId,
                         coco_url: '',
@@ -853,6 +853,7 @@ class ClientFilesManager {
                             reject(err);
                         });
                         writeStream.on('finish', () => {
+                            console.log('Finished saving annotations');
                             this.selectedAnnotationFile = annotationPath;
                             this.#thumbnails.setAnnotationFilePath(
                                 annotationPath
@@ -866,6 +867,29 @@ class ClientFilesManager {
                             const settingsWriteStream = fs.createWriteStream(
                                 this.settingsPath
                             );
+
+                            settingsWriteStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            settingsWriteStream.on('finish', () => {
+                                console.log('Saved Settings');
+                                const tempOutWriteStream = fs.createWriteStream(
+                                    this.tempPath
+                                );
+                                tempOutWriteStream.on('error', (err) => {
+                                    console.log(err);
+                                    reject(err);
+                                });
+                                tempOutWriteStream.on('finish', () => {
+                                    console.log(
+                                        'Cleared temp data on save new'
+                                    );
+                                    resolve();
+                                });
+                                tempOutWriteStream.write(JSON.stringify([]));
+                                tempOutWriteStream.end();
+                            });
                             settingsWriteStream.write(
                                 JSON.stringify({
                                     selectedImagesDirPath:
@@ -875,19 +899,6 @@ class ClientFilesManager {
                                 })
                             );
                             settingsWriteStream.end();
-                            const tempOutWriteStream = fs.createWriteStream(
-                                this.tempPath
-                            );
-                            tempOutWriteStream.on('error', (err) => {
-                                console.log(err);
-                                reject(err);
-                            });
-                            tempOutWriteStream.on('finish', () => {
-                                console.log('Cleared temp data on save new');
-                                resolve();
-                            });
-                            tempOutWriteStream.write(JSON.stringify([]));
-                            tempOutWriteStream.end();
                         });
                         writeStream.write(
                             JSON.stringify(annotationJson, null, 4)

@@ -212,7 +212,7 @@ const closeAndRemoveListeners = async (mainWindow) => {
     });
 };
 
-ipcMain.handleOnce(Channels.closeApp, async (event, data) => {
+ipcMain.handle(Channels.closeApp, async (event, data) => {
     return new Promise((resolve, reject) => {
         const rectangle = mainWindow.getBounds();
         fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
@@ -258,12 +258,7 @@ ipcMain.handleOnce(Channels.closeApp, async (event, data) => {
                                 return reject();
                             }
                         })
-                        .catch((err) => console.log(err))
-                        .finally(() => {
-                            closeAndRemoveListeners(mainWindow).finally(() =>
-                                resolve()
-                            );
-                        });
+                        .catch((err) => console.log(err));
                 } else {
                     closeAndRemoveListeners(mainWindow).finally(() =>
                         resolve()
