@@ -48,7 +48,6 @@ const EditLabelComponent = () => {
         if (isVisible) {
             const newViewport = document.getElementById('imageContainer');
             if (newViewport !== null) {
-                console.log('calc label');
                 const { offsetLeft, offsetTop } = newViewport;
                 const horizontalGap = offsetLeft / zoomLevel;
                 const verticalGap = offsetTop / zoomLevel;

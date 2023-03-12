@@ -232,9 +232,6 @@ const SideMenuComponent = () => {
                                                                             annotation,
                                                                             viewport
                                                                         );
-                                                                    console.log(
-                                                                        `x: ${x} | y: ${y}`
-                                                                    );
                                                                     dispatch(
                                                                         updateAnnotationContextPosition(
                                                                             {

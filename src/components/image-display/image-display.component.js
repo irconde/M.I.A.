@@ -247,7 +247,6 @@ const ImageDisplayComponent = () => {
     }, [selectedImagesDirPath, pixelData, pixelType]);
 
     useEffect(() => {
-        console.log('fetch current file');
         fetchCurrentFile();
     }, [currentFileName]);
 
@@ -512,7 +511,6 @@ const ImageDisplayComponent = () => {
             maxImageValuesRef.current.maxBrightness === 0 &&
             maxImageValuesRef.current.maxContrast === 0
         ) {
-            // TODO: When to reset between images
             const element = document.getElementById('imageContainer');
             if (element !== null) {
                 const image = cornerstone.getImage(element);
@@ -838,7 +836,6 @@ const ImageDisplayComponent = () => {
             // clear error if there is one
             error && setError('');
         } catch (e) {
-            // TODO: clear the viewport when there's no more files
             setError(e.message);
         }
     };

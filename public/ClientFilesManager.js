@@ -1040,7 +1040,6 @@ class ClientFilesManager {
     }
 
     async getAnnotationsForFile(fileName) {
-        // TODO: Refactor below to get temp data if there is any
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.tempPath);
             let data = '';

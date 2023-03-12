@@ -199,7 +199,7 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             default:
-                console.log('NIHIL');
+                console.log('default-no-action');
         }
     };
 

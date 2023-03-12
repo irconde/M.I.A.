@@ -35,7 +35,6 @@ const AppNew = () => {
     useEffect(() => {
         dispatch(initSettings());
         ipcRenderer.on(Channels.updateAnnotationFile, (e, data) => {
-            console.log(data);
             dispatch(updateAnnotationFile(data));
         });
     }, []);

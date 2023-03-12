@@ -39,9 +39,6 @@ import Utils from '../../utils/general/Utils';
 const BoundPolyFABComponent = () => {
     const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
-    // TODO: Calculate position depending on menus
-    /*const sideMenuCollapsed = useSelector(getSideMenuVisible);
-    const lazyMenuCollapsed = useSelector(getLazyImageMenuVisible);*/
     const dispatch = useDispatch();
 
     const handleClick = (type) => {

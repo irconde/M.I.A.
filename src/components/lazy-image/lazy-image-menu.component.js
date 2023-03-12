@@ -66,9 +66,7 @@ function LazyImageMenuComponent() {
             .invoke(Channels.requestInitialThumbnailsList)
             .then(setThumbnails)
             .catch((e) => {
-                // TODO: what should go in the lazy menu if no thumbnails are present?
                 console.log(e);
-                console.log('no thumbnails to begin with');
             });
     }, [selectedImagesDirPath, selectedAnnotationFile]);
 
