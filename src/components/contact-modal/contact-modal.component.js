@@ -1,5 +1,6 @@
 import { Modal, TextField, ThemeProvider } from '@mui/material';
 import {
+    CloseIconWrapper,
     ModalRoot,
     modalTheme,
     StyledPaper,
@@ -14,49 +15,88 @@ import {
     FormContainer,
     FormFieldFull,
     FormFieldShort,
+    RequiredLabel,
     SubmitButton,
 } from './contact-modal.styles';
 import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
+import { Channels } from '../../utils/enums/Constants';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 
-const FORM_URL =
-    'https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec';
+const ipcRenderer = window.require('electron').ipcRenderer;
+
+const FIELDS = [
+    {
+        name: 'First Name',
+        placeholder: 'First Name',
+        sm: true,
+    },
+    {
+        name: 'Last Name',
+        placeholder: 'Last Name',
+        sm: true,
+    },
+    { name: 'Email', type: 'email', placeholder: 'Email' },
+    {
+        name: 'Institution Name',
+        placeholder: 'Institution Name',
+    },
+    {
+        name: 'Institution Website',
+        required: false,
+        placeholder: 'Institution Website',
+    },
+    {
+        name: 'Description',
+        placeholder: 'Description',
+        multiline: true,
+        rows: 4,
+    },
+];
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
         success: null,
         submitting: false,
+        error: '',
     });
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
+            error: '',
             success: null,
             submitting: true,
         });
         try {
-            const result = await fetch(FORM_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    Accept: 'application/json',
-                },
-                body: formData,
-            });
-            const success = result.status === 200;
+            const { success, error } = await ipcRenderer.invoke(
+                Channels.sentFeedbackHTTP,
+                formData
+            );
+            if (error) throw error;
             setStatus({
+                error: '',
                 success,
                 submitting: false,
             });
-            if (success) {
-                e.target.reset();
-                setTimeout(closeModal, 1000);
-            }
+            e.target.reset();
+            setTimeout(closeModal, 1000);
         } catch (e) {
             setStatus({
+                error: e.message || e,
                 success: false,
                 submitting: false,
             });
+        } finally {
+            setTimeout(
+                () =>
+                    setStatus({
+                        submitting: false,
+                        error: '',
+                        success: null,
+                    }),
+                2000
+            );
         }
     };
 
@@ -72,65 +112,66 @@ const ContactModal = ({ open, closeModal }) => {
                         <ContactHeader>
                             <ContactHeaderInfo>
                                 <ContactTitle>Contact Us</ContactTitle>
-                                <ContactHeaderParagraph>
-                                    Your feedback will help us improve the user
-                                    experience.
+                                <ContactHeaderParagraph error={status.error}>
+                                    {status.error
+                                        ? status.error
+                                        : 'Your feedback will help us improve the user experience.'}
                                 </ContactHeaderParagraph>
                             </ContactHeaderInfo>
+                            <CloseIconWrapper
+                                onClick={closeModal}
+                                style={{ position: 'absolute', right: 0 }}>
+                                <CloseIcon
+                                    width={'32px'}
+                                    height={'32px'}
+                                    color={'white'}
+                                />
+                            </CloseIconWrapper>
                         </ContactHeader>
                         <form onSubmit={handleSubmit}>
                             <FormContainer>
-                                <FormFieldShort>
-                                    <TextField
-                                        required={true}
-                                        name={'First Name'}
-                                        variant={'outlined'}
-                                        placeholder={'First Name'}
-                                    />
-                                </FormFieldShort>
-                                <FormFieldShort>
-                                    <TextField
-                                        required={true}
-                                        name={'Last Name'}
-                                        variant={'outlined'}
-                                        placeholder={'Last Name'}
-                                    />
-                                </FormFieldShort>
-                                <FormFieldFull>
-                                    <TextField
-                                        type={'email'}
-                                        required={true}
-                                        name={'Email'}
-                                        variant={'outlined'}
-                                        placeholder={'Email'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Institution Name'}
-                                        variant={'outlined'}
-                                        placeholder={'Institution Name'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Institution Website'}
-                                        variant={'outlined'}
-                                        placeholder={'Institution Website'}
-                                    />
-                                </FormFieldFull>
-                                <FormFieldFull>
-                                    <TextField
-                                        required={true}
-                                        name={'Description'}
-                                        variant={'outlined'}
-                                        placeholder={'Description'}
-                                        multiline={true}
-                                        rows={4}
-                                    />
-                                </FormFieldFull>
+                                {FIELDS.map(
+                                    ({
+                                        required = true,
+                                        name,
+                                        placeholder,
+                                        variant = 'outlined',
+                                        type = 'text',
+                                        multiline = false,
+                                        rows = 1,
+                                        sm = false,
+                                    }) => {
+                                        const textField = (
+                                            <TextField
+                                                required={required}
+                                                name={name}
+                                                placeholder={`${placeholder}${
+                                                    required ? '*' : ''
+                                                }`}
+                                                variant={variant}
+                                                type={type}
+                                                multiline={multiline}
+                                                rows={rows}
+                                                onChange={() =>
+                                                    setStatus({
+                                                        ...status,
+                                                        error: '',
+                                                    })
+                                                }
+                                            />
+                                        );
+                                        return sm ? (
+                                            <FormFieldShort key={name}>
+                                                {textField}
+                                            </FormFieldShort>
+                                        ) : (
+                                            <FormFieldFull key={name}>
+                                                {textField}
+                                            </FormFieldFull>
+                                        );
+                                    }
+                                )}
+                                <RequiredLabel>* required</RequiredLabel>
                                 <SubmitButton
                                     $success={status.success}
                                     $submitting={status.submitting}
