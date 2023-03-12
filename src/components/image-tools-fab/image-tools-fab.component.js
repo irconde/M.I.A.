@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
     SliderGroup,
     SliderWrapper,
@@ -11,41 +10,48 @@ import {
     StyledTooltip,
 } from './image-tools-fab.styles';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    getCollapsedSideMenu,
-    getCornerstoneMode,
-    getIsFabVisible,
-    getIsImageToolsOpen,
-    getSettingsVisibility,
-    getSingleViewport,
-    toggleImageToolsOpen,
-} from '../../redux/slices-old/ui/uiSlice';
 import * as constants from '../../utils/enums/Constants';
 import ScaleIcon from '../../icons/image-tools-fab/scale-icon/scale.icon';
 import InvertIcon from '../../icons/image-tools-fab/invert-icon/invert.icon';
 import ContrastIcon from '../../icons/image-tools-fab/contrast-icon/contrast.icon';
 import BrightnessIcon from '../../icons/image-tools-fab/brightness-icon/brightness.icon';
-import { getCurrentFile } from '../../redux/slices-old/server/serverSlice';
+import {
+    getCornerstoneMode,
+    getCurrFileName,
+    getIsFABVisible,
+    getIsImageToolsOpen,
+    getSideMenuVisible,
+    updateIsImageToolsOpen,
+} from '../../redux/slices/ui.slice';
+import { cornerstone } from '../image-display/image-display.component';
+import {
+    getHasAllAnnotationsDeleted,
+    getImageBrightness,
+    getImageContrast,
+    getImageInversion,
+    getMaxImageValues,
+    updateImageBrightness,
+    updateImageContrast,
+    updateImageInversion,
+} from '../../redux/slices/annotation.slice';
 
-const ImageToolsFab = (props) => {
+const ImageToolsFabComponent = () => {
     const isOpen = useSelector(getIsImageToolsOpen);
-    const currentFile = useSelector(getCurrentFile);
-    const isSideMenuCollapsed = useSelector(getCollapsedSideMenu);
-    const isVisible = useSelector(getIsFabVisible);
-    const settingsVisibility = useSelector(getSettingsVisibility);
+    const currentFile = useSelector(getCurrFileName);
+    const isSideMenuVisible = useSelector(getSideMenuVisible);
+    const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
+    const isVisible = useSelector(getIsFABVisible);
     const cornerstoneMode = useSelector(getCornerstoneMode);
-    const singleViewport = useSelector(getSingleViewport);
+    const maxImageValues = useSelector(getMaxImageValues);
+    const { maxBrightness, maxContrast } = maxImageValues;
     const dispatch = useDispatch();
-    const [isInverted, setInverted] = useState(false);
+    const isInverted = useSelector(getImageInversion);
     const [sliderVisibility, setSliderVisibility] = useState({
         brightnessSlider: false,
         contrastSlider: false,
     });
-    const MAX_CONTRAST = 80000;
-    const MAX_BRIGHTNESS = 80000;
-    const MAX_SLIDER_VAL = 100;
-    const [contrast, setContrast] = useState(50);
-    const [brightness, setBrightness] = useState(50);
+    const brightness = useSelector(getImageBrightness);
+    const contrast = useSelector(getImageContrast);
 
     /**
      * Updates the contrast of the viewports based on the value of the
@@ -55,22 +61,12 @@ const ImageToolsFab = (props) => {
      * @param {number} value - between 0 and 100
      */
     const handleContrastChange = (e, value) => {
-        setContrast(value);
-        const viewportTop = props.cornerstone.getViewport(
-            props.imageViewportTop
-        );
-        updateViewportContrast(value, viewportTop);
-        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
-
-        if (!singleViewport) {
-            const viewportSide = props.cornerstone.getViewport(
-                props.imageViewportSide
-            );
-            updateViewportContrast(value, viewportSide);
-            props.cornerstone.setViewport(
-                props.imageViewportSide,
-                viewportSide
-            );
+        const imageElement = document.getElementById('imageContainer');
+        if (imageElement !== null) {
+            dispatch(updateImageContrast(value));
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            updateViewportContrast(value, enabledElement.viewport);
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -82,22 +78,12 @@ const ImageToolsFab = (props) => {
      * @param {number} value
      */
     const handleBrightnessChange = (e, value) => {
-        setBrightness(value);
-        const viewportTop = props.cornerstone.getViewport(
-            props.imageViewportTop
-        );
-        updateViewportBrightness(value, viewportTop);
-        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
-
-        if (!singleViewport) {
-            const viewportSide = props.cornerstone.getViewport(
-                props.imageViewportSide
-            );
-            updateViewportBrightness(value, viewportSide);
-            props.cornerstone.setViewport(
-                props.imageViewportSide,
-                viewportSide
-            );
+        const imageElement = document.getElementById('imageContainer');
+        if (imageElement !== null) {
+            dispatch(updateImageBrightness(value));
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            updateViewportBrightness(value, enabledElement.viewport);
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -109,9 +95,7 @@ const ImageToolsFab = (props) => {
      * @param {Object} viewport
      */
     const updateViewportContrast = (contrast, viewport) => {
-        // convert from slider scale to cornerstone scale
-        viewport.voi.windowWidth =
-            (MAX_CONTRAST / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - contrast);
+        viewport.voi.windowWidth = maxContrast - (contrast / 100) * maxContrast;
     };
 
     /**
@@ -122,9 +106,8 @@ const ImageToolsFab = (props) => {
      * @param {Object} viewport
      */
     const updateViewportBrightness = (brightness, viewport) => {
-        // convert from slider scale to cornerstone scale
         viewport.voi.windowCenter =
-            (MAX_BRIGHTNESS / MAX_SLIDER_VAL) * (MAX_SLIDER_VAL - brightness);
+            maxBrightness - (brightness / 100) * maxBrightness;
     };
 
     const toggleBrightnessSliderVisibility = () => {
@@ -142,26 +125,17 @@ const ImageToolsFab = (props) => {
     };
 
     const toggleInvert = () => {
-        setInverted(!isInverted);
+        dispatch(updateImageInversion(!isInverted));
         setSliderVisibility({
             brightnessSlider: false,
             contrastSlider: false,
         });
 
-        const viewportTop = props.cornerstone.getViewport(
-            props.imageViewportTop
-        );
-        viewportTop.invert = !viewportTop.invert;
-        props.cornerstone.setViewport(props.imageViewportTop, viewportTop);
-        if (!singleViewport) {
-            const viewportSide = props.cornerstone.getViewport(
-                props.imageViewportSide
-            );
-            viewportSide.invert = !viewportSide.invert;
-            props.cornerstone.setViewport(
-                props.imageViewportSide,
-                viewportSide
-            );
+        const imageElement = document.getElementById('imageContainer');
+        if (imageElement !== null) {
+            const enabledElement = cornerstone.getEnabledElement(imageElement);
+            enabledElement.viewport.invert = !enabledElement.viewport.invert;
+            cornerstone.setViewport(imageElement, enabledElement.viewport);
         }
     };
 
@@ -170,7 +144,7 @@ const ImageToolsFab = (props) => {
             brightnessSlider: false,
             contrastSlider: false,
         });
-        dispatch(toggleImageToolsOpen(false));
+        dispatch(updateIsImageToolsOpen(false));
     };
 
     /**
@@ -182,7 +156,7 @@ const ImageToolsFab = (props) => {
         if (
             cornerstoneMode === constants.cornerstoneMode.ANNOTATION ||
             cornerstoneMode === constants.cornerstoneMode.EDITION ||
-            (settingsVisibility && isVisible)
+            isVisible
         ) {
             return { $fabOpacity: false, $show: true };
         } else {
@@ -194,7 +168,10 @@ const ImageToolsFab = (props) => {
         return (
             <SpeedDialWrapper
                 onMouseLeave={handleClose}
-                $isSideMenuCollapsed={isSideMenuCollapsed}>
+                $isSideMenuCollapsed={
+                    (!isSideMenuVisible || hasAllAnnotationsDeleted) &&
+                    currentFile !== ''
+                }>
                 <SliderGroup
                     $show={
                         sliderVisibility.contrastSlider ||
@@ -233,7 +210,7 @@ const ImageToolsFab = (props) => {
                                 title={isOpen ? '' : 'Image Tools'}>
                                 <SpeedDialIconWrapper
                                     onClick={() => {
-                                        dispatch(toggleImageToolsOpen(true));
+                                        dispatch(updateIsImageToolsOpen(true));
                                     }}
                                     $show={!isOpen}>
                                     <ScaleIcon
@@ -269,7 +246,7 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Contrast'}
-                        placement={'left-start'}
+                        placement={'left'}
                         onClick={toggleContrastSliderVisibility}
                         $active={sliderVisibility.contrastSlider}
                     />
@@ -283,7 +260,7 @@ const ImageToolsFab = (props) => {
                             />
                         }
                         tooltipTitle={'Brightness'}
-                        placement={'left-start'}
+                        placement={'left'}
                         onClick={toggleBrightnessSliderVisibility}
                         $active={sliderVisibility.brightnessSlider}
                     />
@@ -293,10 +270,4 @@ const ImageToolsFab = (props) => {
     } else return null;
 };
 
-ImageToolsFab.propTypes = {
-    cornerstone: PropTypes.object.isRequired,
-    imageViewportTop: PropTypes.object.isRequired,
-    imageViewportSide: PropTypes.object.isRequired,
-};
-
-export default ImageToolsFab;
+export default ImageToolsFabComponent;

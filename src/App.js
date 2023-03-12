@@ -97,7 +97,7 @@ import {
 import fetch from 'cross-fetch';
 import { Alert, CircularProgress, Snackbar } from '@mui/material';
 import FileUtils from './utils/files/file-utils';
-import ImageToolsFab from './components/image-tools-fab/image-tools-fab';
+import ImageToolsFabComponent from './components/image-tools-fab/image-tools-fab.component';
 
 const electron = window.require('electron');
 const ipcRenderer = electron.ipcRenderer;
@@ -2932,7 +2932,7 @@ class App extends Component {
                             }
                             thumbnails={this.state.thumbnails}
                         />
-                        <ImageToolsFab
+                        <ImageToolsFabComponent
                             anchorOrigin={{
                                 vertical: 'bottom',
                                 horizontal: 'right',

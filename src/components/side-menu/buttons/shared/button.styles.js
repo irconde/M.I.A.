@@ -12,8 +12,7 @@ export const CollapsedButtonContainer = styled.div`
     right: 0;
 
     transition: all 0.3s ease-in;
-    transform: ${(props) =>
-        `translateY(${props.isCollapsed ? 0 : sideMenuWidth}px)`};
+    transform: ${(props) => `translateY(${props.isCollapsed ? 0 : 5}%)`};
 
     display: flex;
     justify-content: center;
