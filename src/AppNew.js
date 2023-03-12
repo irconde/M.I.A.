@@ -8,8 +8,6 @@ import {
 } from './redux/slices/settings.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Channels } from './utils/enums/Constants';
-
-const ipcRenderer = window.require('electron').ipcRenderer;
 import {
     getShowApp,
     getSplashScreenVisibility,
@@ -19,6 +17,8 @@ import {
 import SplashScreenComponent from './components/splash-screen/splash-screen.component';
 import ApplicationComponent from './components/application/application.component';
 import CloseModalComponent from './components/close-modal/close-modal.component';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 const AppNew = () => {
     const dispatch = useDispatch();

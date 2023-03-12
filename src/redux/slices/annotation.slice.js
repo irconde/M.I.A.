@@ -220,6 +220,11 @@ const initialState = {
     deletedAnnotationIds: [],
     maxAnnotationId: 1,
     imageId: 0,
+    maxContrast: 0,
+    maxBrightness: 0,
+    contrast: 50,
+    brightness: 50,
+    inverted: false,
 };
 
 const annotationSlice = createSlice({
@@ -563,7 +568,26 @@ const annotationSlice = createSlice({
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
             state.deletedAnnotationIds = [];
+            state.maxContrast = 0;
+            state.maxBrightness = 0;
+            state.brightness = 50;
+            state.contrast = 50;
+            state.inverted = false;
             clearSessionStorage();
+        },
+        updateMaxImageValues: (state, action) => {
+            const { maxBrightness, maxContrast } = action.payload;
+            state.maxBrightness = maxBrightness;
+            state.maxContrast = maxContrast;
+        },
+        updateImageBrightness: (state, action) => {
+            state.brightness = action.payload;
+        },
+        updateImageContrast: (state, action) => {
+            state.contrast = action.payload;
+        },
+        updateImageInversion: (state, action) => {
+            state.inverted = action.payload;
         },
     },
     extraReducers: {
@@ -589,12 +613,17 @@ const annotationSlice = createSlice({
             }
         },
         [selectFileAndSaveTempAnnotations.fulfilled]: (state) => {
-            clearSessionStorage();
             state.annotations = [];
             state.selectedAnnotation = null;
             state.selectedCategory = '';
             state.hasAnnotationChanged = false;
             state.deletedAnnotationIds = [];
+            state.maxBrightness = 0;
+            state.maxContrast = 0;
+            state.contrast = 50;
+            state.brightness = 50;
+            state.inverted = false;
+            clearSessionStorage();
         },
         [selectFileAndSaveTempAnnotations.pending]: (state) => {
             //
@@ -620,6 +649,10 @@ export const {
     updateSaveAnnotationStatus,
     clearAnnotationData,
     updateColors,
+    updateMaxImageValues,
+    updateImageBrightness,
+    updateImageContrast,
+    updateImageInversion,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -654,5 +687,18 @@ export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
 export const getIsAnyAnnotations = (state) =>
     state.annotation.annotations?.length > 0;
+export const getHasAllAnnotationsDeleted = (state) =>
+    state.annotation.annotations?.length === 0 &&
+    state.annotation.hasAnnotationChanged === true;
+export const getImageId = (state) => state.annotation.imageId;
+export const getMaxImageValues = (state) => {
+    return {
+        maxBrightness: state.annotation.maxBrightness,
+        maxContrast: state.annotation.maxContrast,
+    };
+};
+export const getImageBrightness = (state) => state.annotation.brightness;
+export const getImageContrast = (state) => state.annotation.contrast;
+export const getImageInversion = (state) => state.annotation.inverted;
 
 export default annotationSlice.reducer;
