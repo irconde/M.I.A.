@@ -5,22 +5,26 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const Constants = require('./Constants');
+const fetch = require('electron-fetch').default;
+
 const { Channels } = Constants;
 let mainWindow;
 let appSettings = null;
 let annotationColors = [];
-const MONITOR_FILE_PATH = isDev
-    ? 'monitorConfig.json'
-    : path.join(app.getPath('userData'), 'monitorConfig.json');
-const SETTINGS_FILE_PATH = isDev
-    ? 'settings.json'
-    : path.join(app.getPath('userData'), 'settings.json');
-const COLORS_FILE_PATH = isDev
-    ? 'colors.json'
-    : path.join(app.getPath('userData'), 'colors.json');
-const TEMP_ANNOTATIONS_FILE_PATH = isDev
-    ? 'tempAnnotations.json'
-    : path.join(app.getPath('userData'), 'tempAnnotations.json');
+
+const [
+    MONITOR_FILE_PATH,
+    SETTINGS_FILE_PATH,
+    COLORS_FILE_PATH,
+    TEMP_ANNOTATIONS_FILE_PATH,
+] = [
+    'monitorConfig.json',
+    'settings.json',
+    'colors.json',
+    'tempAnnotations.json',
+].map((fileName) =>
+    isDev ? fileName : path.join(app.getPath('userData'), fileName)
+);
 const {
     default: installExtension,
     REDUX_DEVTOOLS,
@@ -83,7 +87,6 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             devTools: isDev,
-            webSecurity: false,
         },
     });
 
@@ -97,8 +100,8 @@ function createWindow() {
         appSettings.selectedAnnotationFile
     );
 
-    const loadWindowContent = (attempts = 100, e = null) => {
-        if (attempts === 1) throw new Error(e);
+    const loadWindowContent = (attempts = 25, e) => {
+        if (attempts === 1) throw e;
         mainWindow
             .loadURL(
                 isDev
@@ -108,26 +111,25 @@ function createWindow() {
             .then(() => {
                 mainWindow.maximize();
                 mainWindow.show();
-                mainWindow.on('close', async () => {
-                    const rectangle = mainWindow.getBounds();
-                    fs.writeFile(
-                        MONITOR_FILE_PATH,
-                        JSON.stringify(rectangle),
-                        (err) => {
-                            if (err) throw err;
-                        }
-                    );
-                    mainWindow.removeAllListeners();
-                    globalShortcut.unregisterAll();
-                });
-                mainWindow.on('closed', async () => {
-                    await files.removeFileWatcher();
-                    mainWindow = null;
-                });
             })
-            .catch((err) =>
-                setTimeout(() => loadWindowContent(attempts - 1, err), 100)
+            .catch((err) => console.log(err));
+
+        mainWindow.on('close', async () => {
+            const rectangle = mainWindow.getBounds();
+            fs.writeFile(
+                MONITOR_FILE_PATH,
+                JSON.stringify(rectangle),
+                (err) => {
+                    if (err) throw err;
+                }
             );
+            mainWindow.removeAllListeners();
+            globalShortcut.unregisterAll();
+        });
+        mainWindow.on('closed', async () => {
+            await files.removeFileWatcher();
+            mainWindow = null;
+        });
     };
 
     if (isDev) {
@@ -329,6 +331,50 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
 ipcMain.handle(Channels.getSettings, async () => appSettings);
 
 /**
+ * Sends a post request to a Google form and responds to react with a boolean success value
+ */
+ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
+    const FORM_URL = `https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec`;
+
+    try {
+        const res = await fetch(FORM_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json',
+                redirect: 'follow',
+            },
+            body: data,
+        });
+        if (res.ok) {
+            return {
+                success: res.ok,
+            };
+        } else {
+            let errorMessage;
+            switch (res.status) {
+                case 401:
+                case 403:
+                    errorMessage =
+                        'Internal error. Try again in a few moments.';
+                    break;
+                case 404:
+                    errorMessage =
+                        'The server is not responding properly at the moment. Could you try to send the message again in a few minutes?';
+                    break;
+                default:
+                    errorMessage =
+                        'The message could not be sent at the moment. Could you try it again in a few minutes?';
+                    break;
+            }
+            throw new Error(errorMessage);
+        }
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+/**
  * Initializes the global object for the settings from a json file. If the file doesn't exist,
  * then the default settings are used to update the settings object and the json file
  *
@@ -348,7 +394,40 @@ const initSettings = async () => {
                     } else {
                         // if settings already exist
                         appSettings = JSON.parse(data);
-                        resolve(appSettings);
+                        let rewriteSettings = false;
+                        if (
+                            appSettings.selectedImagesDirPath !== '' &&
+                            !fs.existsSync(appSettings.selectedImagesDirPath)
+                        ) {
+                            appSettings.selectedImagesDirPath = '';
+                            rewriteSettings = true;
+                        }
+                        if (
+                            appSettings.selectedAnnotationFile !== '' &&
+                            !fs.existsSync(appSettings.selectedAnnotationFile)
+                        ) {
+                            appSettings.selectedAnnotationFile = '';
+                            rewriteSettings = true;
+                        }
+
+                        if (rewriteSettings) {
+                            const writeStream =
+                                fs.createWriteStream(SETTINGS_FILE_PATH);
+                            writeStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            writeStream.on('finish', () => {
+                                console.log(
+                                    'Re-saved settings due to one of the paths not existing'
+                                );
+                                resolve();
+                            });
+                            writeStream.write(JSON.stringify(appSettings));
+                            writeStream.end();
+                        } else {
+                            resolve(appSettings);
+                        }
                     }
                 });
             } else {

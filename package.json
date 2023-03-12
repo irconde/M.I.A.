@@ -28,9 +28,10 @@
     "cross-fetch": "^3.1.5",
     "dcmjs": "^0.21.0",
     "dicom-parser": "^1.8.21",
-    "dotenv": "8.2.0",
+    "dmg-license": "^1.0.11",
     "eac-cornerstone-tools": "^1.0.6",
     "electron-devtools-installer": "^3.2.0",
+    "electron-fetch": "^1.9.1",
     "electron-is-dev": "^2.0.0",
     "electron-reloader": "^1.2.3",
     "fswin": "^3.22.106",
@@ -82,6 +83,12 @@
     },
     "mac": {
       "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": "dir",
+      "asarUnpack": [
+        "**/node_modules/sharp/**"
+      ]
     }
   },
   "eslintConfig": {
