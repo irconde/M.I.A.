@@ -128,6 +128,7 @@ export const Channels = {
     getCurrentFile: 'get-current-file',
     getSpecificFile: 'get-specific-file',
     saveCurrentFile: 'save-current-file',
+    saveAsCurrentFile: 'save-as-current-file',
     saveIndFile: 'save-individual-file',
     getThumbnail: 'get-thumbnail',
     thumbnailStatus: 'thumbnail-status',
@@ -147,6 +148,7 @@ export const Channels = {
     updateThumbnailHasAnnotations: 'update-thumbnail-has-annotations',
     selectFile: 'select-file',
     sentFeedbackHTTP: 'send-feedback-http',
+    updateSaveModalStatus: 'update-save-modal-status',
     closeApp: 'close-app',
 };
 

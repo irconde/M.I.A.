@@ -800,7 +800,7 @@ class ClientFilesManager {
                         coco_url: '',
                         flickr_url: '',
                         file_name: mapped.fileName,
-                        date_capture: todayDateString,
+                        date_captured: todayDateString,
                     });
                     const imagePath = path.join(
                         this.selectedImagesDirPath,
@@ -842,21 +842,16 @@ class ClientFilesManager {
                                     result.height;
                             }
                         });
-                        const annotationPath = path.join(
-                            annotationFilePath,
-                            'annotation.json'
-                        );
                         const writeStream =
-                            fs.createWriteStream(annotationPath);
+                            fs.createWriteStream(annotationFilePath);
                         writeStream.on('error', (err) => {
                             console.log(err);
                             reject(err);
                         });
                         writeStream.on('finish', () => {
-                            console.log('Finished saving annotations');
-                            this.selectedAnnotationFile = annotationPath;
+                            this.selectedAnnotationFile = annotationFilePath;
                             this.#thumbnails.setAnnotationFilePath(
-                                annotationPath
+                                annotationFilePath
                             );
                             if (appClosing === false) {
                                 this.#sendUpdate(
@@ -1166,6 +1161,7 @@ class ClientFilesManager {
         const storedThumbnails = await this.#thumbnails.getThumbnails();
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
+            // TODO: Fix has property error
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
             newThumbnails[fileName] = await this.#thumbnails.generateThumbnail(
                 this.selectedImagesDirPath,

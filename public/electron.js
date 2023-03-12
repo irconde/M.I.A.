@@ -315,19 +315,40 @@ ipcMain.handle(
         if (files.selectedAnnotationFile !== '') {
             return await files.updateAnnotationsFile(newAnnotations);
         } else {
-            const dialogResult = await dialog.showOpenDialog({
-                properties: ['openDirectory'],
-                buttonLabel: 'Select folder',
-                title: 'Select a folder to save annotations',
+            const dialogResult = await dialog.showSaveDialog({
+                title: 'Save new annotations to file',
             });
 
             // if the event is cancelled by the user
-            if (dialogResult.canceled) return null;
+            if (dialogResult.canceled) throw new Error('Cancelled');
+            mainWindow.webContents.send(Channels.updateSaveModalStatus, true);
 
             return await files.createAnnotationsFile(
-                dialogResult.filePaths[0],
+                dialogResult.filePath,
                 newAnnotations
             );
+        }
+    }
+);
+
+ipcMain.handle(
+    Constants.Channels.saveAsCurrentFile,
+    async (event, newAnnotations) => {
+        const dialogResult = await dialog.showSaveDialog({
+            title: 'Save new annotations to file',
+        });
+
+        // if the event is cancelled by the user
+        if (dialogResult.canceled) throw new Error('Cancelled');
+        mainWindow.webContents.send(Channels.updateSaveModalStatus, true);
+
+        try {
+            return await files.createAnnotationsFile(
+                dialogResult.filePath,
+                newAnnotations
+            );
+        } catch (e) {
+            console.log(e);
         }
     }
 );
