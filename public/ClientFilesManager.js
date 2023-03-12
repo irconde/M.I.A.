@@ -359,7 +359,7 @@ class ClientFilesManager {
         this.#sendThumbnailsStatus(false);
     }
 
-    async updateAnnotationsFile(newAnnotationData) {
+    async updateAnnotationsFile(newAnnotationData, appClosing = false) {
         return new Promise((resolve, reject) => {
             try {
                 const {
@@ -469,17 +469,20 @@ class ClientFilesManager {
                                                     this.fileNames[
                                                         this.currentFileIndex
                                                     ];
-                                                this.#sendUpdate(
-                                                    Channels.updateThumbnailHasAnnotations,
-                                                    {
-                                                        hasAnnotations:
-                                                            !!this.#getAnnotations(
-                                                                annotationFile,
-                                                                savedFileName
-                                                            ).length,
-                                                        fileName: savedFileName,
-                                                    }
-                                                );
+                                                if (appClosing === false) {
+                                                    this.#sendUpdate(
+                                                        Channels.updateThumbnailHasAnnotations,
+                                                        {
+                                                            hasAnnotations:
+                                                                !!this.#getAnnotations(
+                                                                    annotationFile,
+                                                                    savedFileName
+                                                                ).length,
+                                                            fileName:
+                                                                savedFileName,
+                                                        }
+                                                    );
+                                                }
                                                 resolve();
                                             });
                                             tempWriteStream.write(
@@ -688,7 +691,11 @@ class ClientFilesManager {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    async createAnnotationsFile(annotationFilePath, newAnnotationData) {
+    async createAnnotationsFile(
+        annotationFilePath,
+        newAnnotationData,
+        appClosing = false
+    ) {
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.tempPath);
             let tempData = '';
@@ -850,10 +857,12 @@ class ClientFilesManager {
                             this.#thumbnails.setAnnotationFilePath(
                                 annotationPath
                             );
-                            this.#sendUpdate(
-                                Channels.updateAnnotationFile,
-                                this.selectedAnnotationFile
-                            );
+                            if (appClosing === false) {
+                                this.#sendUpdate(
+                                    Channels.updateAnnotationFile,
+                                    this.selectedAnnotationFile
+                                );
+                            }
                             const settingsWriteStream = fs.createWriteStream(
                                 this.settingsPath
                             );

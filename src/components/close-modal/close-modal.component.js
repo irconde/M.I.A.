@@ -7,18 +7,21 @@ import {
     ModalText,
     ModalWrapper,
 } from './close-modal.styles';
+import { useDispatch } from 'react-redux';
+import { closeAppAndSaveAnnotations } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 function CloseModalComponent() {
     const [isOpen, setIsOpen] = useState(false);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         ipcRenderer.on(Channels.closeApp, () => setIsOpen(true));
     }, []);
 
     const handleYes = () => {
-        ipcRenderer.invoke(Channels.closeApp).then();
+        dispatch(closeAppAndSaveAnnotations());
     };
 
     return (

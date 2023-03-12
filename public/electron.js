@@ -193,28 +193,76 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
     }
 });
 
-ipcMain.handleOnce(Channels.closeApp, async () => {
+const closeAndRemoveListeners = async (mainWindow) => {
     return new Promise((resolve) => {
+        mainWindow.removeAllListeners();
+        globalShortcut.unregisterAll();
+        files
+            .removeFileWatcher()
+            .catch((err) => {
+                console.log(`Error removing file watcher: ${err}`);
+            })
+            .finally(() => {
+                mainWindow.removeAllListeners();
+                globalShortcut.unregisterAll();
+                mainWindow.close();
+                mainWindow = null;
+                resolve();
+            });
+    });
+};
+
+ipcMain.handleOnce(Channels.closeApp, async (event, data) => {
+    return new Promise((resolve, reject) => {
         const rectangle = mainWindow.getBounds();
         fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
             if (err) {
                 console.log(`Error saving file: ${err}`);
             }
-            mainWindow.removeAllListeners();
-            globalShortcut.unregisterAll();
-            files
-                .removeFileWatcher()
-                .catch((err) => {
-                    console.log(`Error removing file watcher: ${err}`);
-                })
-                .finally(() => {
-                    console.log('closing');
-                    mainWindow.removeAllListeners();
-                    globalShortcut.unregisterAll();
-                    mainWindow.close();
-                    mainWindow = null;
-                    resolve();
-                });
+
+            // Annotation saving
+            if (files.selectedAnnotationFile !== '') {
+                files
+                    .updateAnnotationsFile(data, true)
+                    .catch((err) => console.log(err))
+                    .finally(() => {
+                        closeAndRemoveListeners(mainWindow).finally(() =>
+                            resolve()
+                        );
+                    });
+            } else {
+                dialog
+                    .showOpenDialog({
+                        properties: ['openDirectory'],
+                        buttonLabel: 'Select folder',
+                        title: 'Select a folder to save annotations',
+                    })
+                    .then((dialogResult) => {
+                        // if the event is cancelled by the user
+                        if (dialogResult.canceled === false) {
+                            files
+                                .createAnnotationsFile(
+                                    dialogResult.filePaths[0],
+                                    data,
+                                    true
+                                )
+                                .catch((err) => console.log(err))
+                                .finally(() => {
+                                    closeAndRemoveListeners(mainWindow).finally(
+                                        () => resolve()
+                                    );
+                                });
+                        } else {
+                            return reject();
+                        }
+                    })
+                    .catch((err) => console.log(err))
+                    .finally(() => {
+                        closeAndRemoveListeners(mainWindow).finally(() =>
+                            resolve()
+                        );
+                    });
+            }
         });
     });
 });
