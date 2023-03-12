@@ -20,9 +20,8 @@ export default class Utils {
      * @returns {Promise} - Resolves to CornerstoneImageObject to be displayed and returns error on reject
      */
     static async loadImage(imageId, arrayBuffer) {
-        const promise = new Promise((resolve, reject) => {
-            const imagePromise = arrayBufferToImage(arrayBuffer);
-            imagePromise
+        return new Promise((resolve, reject) => {
+            arrayBufferToImage(arrayBuffer)
                 .then((image) => {
                     const imageObject = createImage(image, imageId);
                     imageObject.rgba = true;
@@ -32,8 +31,6 @@ export default class Utils {
                     reject(error);
                 });
         });
-
-        return promise;
     }
 
     /**
