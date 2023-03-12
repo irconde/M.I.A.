@@ -1090,9 +1090,11 @@ class ClientFilesManager {
             readStream.on('end', () => {
                 const allAnnotations = JSON.parse(data);
                 const maxAnnotationId =
-                    allAnnotations.annotations.reduce((a, b) =>
-                        a.id > b.id ? a : b
-                    ).id + 1;
+                    allAnnotations?.annotations?.length > 0
+                        ? allAnnotations.annotations.reduce((a, b) =>
+                              a.id > b.id ? a : b
+                          ).id + 1
+                        : 1;
 
                 const image = allAnnotations.images.find(
                     (img) =>
