@@ -27,6 +27,7 @@ module.exports.Channels = {
     selectFile: 'select-file',
     sentFeedbackHTTP: 'send-feedback-http',
     updateSaveModalStatus: 'update-save-modal-status',
+    closeApp: 'close-app',
 };
 
 module.exports.FileWatcher = {

@@ -100,8 +100,7 @@ function createWindow() {
         appSettings.selectedAnnotationFile
     );
 
-    const loadWindowContent = (attempts = 25, e) => {
-        if (attempts === 1) throw e;
+    const loadWindowContent = () => {
         mainWindow
             .loadURL(
                 isDev
@@ -112,27 +111,13 @@ function createWindow() {
                 mainWindow.maximize();
                 mainWindow.show();
             })
-            .catch(
-                (err) =>
-                    isDev &&
-                    setTimeout(() => loadWindowContent(attempts - 1, err), 100)
-            );
+            .catch((err) => {
+                console.log(err);
+            });
 
-        mainWindow.on('close', async () => {
-            const rectangle = mainWindow.getBounds();
-            fs.writeFile(
-                MONITOR_FILE_PATH,
-                JSON.stringify(rectangle),
-                (err) => {
-                    if (err) throw err;
-                }
-            );
-            mainWindow.removeAllListeners();
-            globalShortcut.unregisterAll();
-        });
-        mainWindow.on('closed', async () => {
-            await files.removeFileWatcher();
-            mainWindow = null;
+        mainWindow.on('close', (e) => {
+            e.preventDefault();
+            mainWindow.webContents.send(Channels.closeApp);
         });
     };
 
@@ -161,18 +146,12 @@ app.whenReady().then(() => {
     initSettings()
         .catch(console.log)
         .finally(() => {
-            try {
-                createWindow();
-            } catch (e) {
-                app.quit();
-            }
+            createWindow();
         });
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
 
 app.on('web-contents-created', () => {
@@ -212,6 +191,82 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
 
         return result.filePaths[0];
     }
+});
+
+const closeAndRemoveListeners = async (mainWindow) => {
+    return new Promise((resolve) => {
+        mainWindow.removeAllListeners();
+        globalShortcut.unregisterAll();
+        files
+            .removeFileWatcher()
+            .catch((err) => {
+                console.log(`Error removing file watcher: ${err}`);
+            })
+            .finally(() => {
+                mainWindow.removeAllListeners();
+                globalShortcut.unregisterAll();
+                mainWindow.close();
+                mainWindow = null;
+                resolve();
+            });
+    });
+};
+
+ipcMain.handle(Channels.closeApp, async (event, data) => {
+    return new Promise((resolve, reject) => {
+        const rectangle = mainWindow.getBounds();
+        fs.writeFile(MONITOR_FILE_PATH, JSON.stringify(rectangle), (err) => {
+            if (err) {
+                console.log(`Error saving file: ${err}`);
+            }
+
+            // Annotation saving
+            if (files.selectedAnnotationFile !== '') {
+                files
+                    .updateAnnotationsFile(data, true)
+                    .catch((err) => console.log(err))
+                    .finally(() => {
+                        closeAndRemoveListeners(mainWindow).finally(() =>
+                            resolve()
+                        );
+                    });
+            } else {
+                const { cocoAnnotations } = data;
+                if (cocoAnnotations?.length > 0) {
+                    dialog
+                        .showOpenDialog({
+                            properties: ['openDirectory'],
+                            buttonLabel: 'Select folder',
+                            title: 'Select a folder to save annotations',
+                        })
+                        .then((dialogResult) => {
+                            // if the event is cancelled by the user
+                            if (dialogResult.canceled === false) {
+                                files
+                                    .createAnnotationsFile(
+                                        dialogResult.filePaths[0],
+                                        data,
+                                        true
+                                    )
+                                    .catch((err) => console.log(err))
+                                    .finally(() => {
+                                        closeAndRemoveListeners(
+                                            mainWindow
+                                        ).finally(() => resolve());
+                                    });
+                            } else {
+                                return reject();
+                            }
+                        })
+                        .catch((err) => console.log(err));
+                } else {
+                    closeAndRemoveListeners(mainWindow).finally(() =>
+                        resolve()
+                    );
+                }
+            }
+        });
+    });
 });
 
 /**
@@ -392,7 +447,7 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
                         'The message could not be sent at the moment. Could you try it again in a few minutes?';
                     break;
             }
-            throw new Error(errorMessage);
+            return { success: false, error: errorMessage };
         }
     } catch (error) {
         return { success: false, error: error.message };

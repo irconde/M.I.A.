@@ -205,6 +205,32 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
     }
 );
 
+export const closeAppAndSaveAnnotations = createAsyncThunk(
+    'annotations/closeAppAndSaveAnnotations',
+    async (payload, { getState }) => {
+        const state = getState();
+        const { annotation, ui } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer
+            .invoke(Channels.closeApp, {
+                cocoAnnotations: annotation.hasAnnotationChanged
+                    ? cocoAnnotations
+                    : [],
+                cocoCategories,
+                cocoDeleted,
+                imageId: annotation.imageId,
+                fileName: ui.currentFileName,
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                return true;
+            });
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],
