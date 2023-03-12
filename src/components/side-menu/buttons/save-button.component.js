@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 
@@ -7,7 +7,14 @@ import {
     SideMenuButtonContainer,
 } from './shared/button.styles';
 
-import { SaveButtonFab, SaveButtonText } from './save-button.styles';
+import {
+    SaveAsButtonContainer,
+    SaveAsDivider,
+    SaveButtonContainer,
+    SaveButtonFab,
+    SaveButtonText,
+    SaveIconContainer,
+} from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
 import {
     getCurrFileName,
@@ -17,11 +24,20 @@ import {
 import {
     getHasAnnotationChanged,
     getIsAnyAnnotations,
+    getIsSaveModalOpen,
+    saveAsCurrentFile,
     saveCurrentAnnotations,
+    updateShowSaveAsModal,
 } from '../../../redux/slices/annotation.slice';
+import SaveAsIcon from '../../../icons/side-menu/save-as-icon/save-as.icon';
+import SavingModal from '../../saving-modal/saving-modal.component';
+import GrainIcon from '../../../icons/grain-icon/grain.icon';
+import { Channels } from '../../../utils/enums/Constants';
+
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 /**
- * Component button that allows user to save edited detections and load next files in queue. Similar to NextButtonComponent compnent but for local files only.
+ * Component button that allows user to save edited detections and load next files in queue.
  *
  * @component
  *
@@ -31,27 +47,39 @@ import {
 const SaveButtonComponent = () => {
     const isCollapsed = useSelector(getSideMenuVisible);
     /*const isImageToolsOpen = useSelector(getIsImageToolsOpen);*/
-    const detectionChanged = useSelector(getHasAnnotationChanged);
+    const annotationChanges = useSelector(getHasAnnotationChanged);
     const isBoundPolyVisible = useSelector(getIsFABVisible);
     const isAnyAnnotations = useSelector(getIsAnyAnnotations);
     const currentFile = useSelector(getCurrFileName);
+    const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        ipcRenderer.on(Channels.updateSaveModalStatus, (e, args) => {
+            dispatch(updateShowSaveAsModal(args));
+        });
+    });
 
     const saveImageClick = () => {
         dispatch(saveCurrentAnnotations(currentFile));
     };
+
+    const saveAsImageClick = () => {
+        dispatch(saveAsCurrentFile(currentFile));
+    };
+
     if (isAnyAnnotations) {
         if (!isCollapsed)
             return (
                 <Tooltip
-                    disableHoverListener={!detectionChanged}
+                    disableHoverListener={!annotationChanges}
                     title={'Save Annotations'}>
                     <CollapsedButtonContainer
-                        $isFaded={!detectionChanged}
+                        $isFaded={!annotationChanges}
                         isCollapsed={isCollapsed}>
                         <SaveButtonFab
                             onClick={() => saveImageClick()}
-                            $enabled={detectionChanged}
+                            $enabled={annotationChanges}
                             disabled={!isBoundPolyVisible}
                             color="primary">
                             <SaveArrowIcon
@@ -65,20 +93,41 @@ const SaveButtonComponent = () => {
             );
         else
             return (
-                <Tooltip title={'Save Annotations'}>
-                    <SideMenuButtonContainer
-                        $isFaded={!detectionChanged}
-                        enabled={detectionChanged}
-                        onClick={() => saveImageClick()}
-                        id="SaveButtonComponent">
-                        <SaveArrowIcon
-                            width="24px"
-                            height="24px"
-                            color="white"
-                        />
-                        <SaveButtonText>Save File</SaveButtonText>
+                <>
+                    {openModal ? <SavingModal /> : null}
+                    <SideMenuButtonContainer id="SaveButtonComponent">
+                        <Tooltip title={'Save Annotations'}>
+                            <SaveButtonContainer
+                                $isFaded={!annotationChanges}
+                                enabled={annotationChanges}
+                                onClick={() => saveImageClick()}>
+                                <SaveIconContainer>
+                                    <GrainIcon
+                                        width="24px"
+                                        height="24px"
+                                        color="#fff"
+                                    />
+                                </SaveIconContainer>
+                                <SaveButtonText>Save</SaveButtonText>
+                            </SaveButtonContainer>
+                        </Tooltip>
+                        <SaveAsDivider />
+                        <Tooltip title={'Save As'}>
+                            <SaveAsButtonContainer
+                                $isFaded={!annotationChanges}
+                                enabled={annotationChanges}
+                                onClick={() => {
+                                    saveAsImageClick();
+                                }}>
+                                <SaveAsIcon
+                                    width={'32px'}
+                                    height={'32px'}
+                                    color={'white'}
+                                />
+                            </SaveAsButtonContainer>
+                        </Tooltip>
                     </SideMenuButtonContainer>
-                </Tooltip>
+                </>
             );
     } else return null;
 };

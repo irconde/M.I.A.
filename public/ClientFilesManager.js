@@ -359,7 +359,7 @@ class ClientFilesManager {
         this.#sendThumbnailsStatus(false);
     }
 
-    async updateAnnotationsFile(newAnnotationData) {
+    async updateAnnotationsFile(newAnnotationData, appClosing = false) {
         return new Promise((resolve, reject) => {
             try {
                 const {
@@ -469,17 +469,20 @@ class ClientFilesManager {
                                                     this.fileNames[
                                                         this.currentFileIndex
                                                     ];
-                                                this.#sendUpdate(
-                                                    Channels.updateThumbnailHasAnnotations,
-                                                    {
-                                                        hasAnnotations:
-                                                            !!this.#getAnnotations(
-                                                                annotationFile,
-                                                                savedFileName
-                                                            ).length,
-                                                        fileName: savedFileName,
-                                                    }
-                                                );
+                                                if (appClosing === false) {
+                                                    this.#sendUpdate(
+                                                        Channels.updateThumbnailHasAnnotations,
+                                                        {
+                                                            hasAnnotations:
+                                                                !!this.#getAnnotations(
+                                                                    annotationFile,
+                                                                    savedFileName
+                                                                ).length,
+                                                            fileName:
+                                                                savedFileName,
+                                                        }
+                                                    );
+                                                }
                                                 resolve();
                                             });
                                             tempWriteStream.write(
@@ -688,7 +691,11 @@ class ClientFilesManager {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    async createAnnotationsFile(annotationFilePath, newAnnotationData) {
+    async createAnnotationsFile(
+        annotationFilePath,
+        newAnnotationData,
+        appClosing = false
+    ) {
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(this.tempPath);
             let tempData = '';
@@ -787,13 +794,13 @@ class ClientFilesManager {
                         }
                     });
                 }
-                mappedImages.forEach((mapped, index) => {
+                mappedImages.forEach((mapped) => {
                     annotationJson.images.push({
                         id: mapped.imageId,
                         coco_url: '',
                         flickr_url: '',
                         file_name: mapped.fileName,
-                        date_capture: todayDateString,
+                        date_captured: todayDateString,
                     });
                     const imagePath = path.join(
                         this.selectedImagesDirPath,
@@ -835,28 +842,49 @@ class ClientFilesManager {
                                     result.height;
                             }
                         });
-                        const annotationPath = path.join(
-                            annotationFilePath,
-                            'annotation.json'
-                        );
                         const writeStream =
-                            fs.createWriteStream(annotationPath);
+                            fs.createWriteStream(annotationFilePath);
                         writeStream.on('error', (err) => {
                             console.log(err);
                             reject(err);
                         });
                         writeStream.on('finish', () => {
-                            this.selectedAnnotationFile = annotationPath;
+                            this.selectedAnnotationFile = annotationFilePath;
                             this.#thumbnails.setAnnotationFilePath(
-                                annotationPath
+                                annotationFilePath
                             );
-                            this.#sendUpdate(
-                                Channels.updateAnnotationFile,
-                                this.selectedAnnotationFile
-                            );
+                            if (appClosing === false) {
+                                this.#sendUpdate(
+                                    Channels.updateAnnotationFile,
+                                    this.selectedAnnotationFile
+                                );
+                            }
                             const settingsWriteStream = fs.createWriteStream(
                                 this.settingsPath
                             );
+
+                            settingsWriteStream.on('error', (err) => {
+                                console.log(err);
+                                reject(err);
+                            });
+                            settingsWriteStream.on('finish', () => {
+                                console.log('Saved Settings');
+                                const tempOutWriteStream = fs.createWriteStream(
+                                    this.tempPath
+                                );
+                                tempOutWriteStream.on('error', (err) => {
+                                    console.log(err);
+                                    reject(err);
+                                });
+                                tempOutWriteStream.on('finish', () => {
+                                    console.log(
+                                        'Cleared temp data on save new'
+                                    );
+                                    resolve();
+                                });
+                                tempOutWriteStream.write(JSON.stringify([]));
+                                tempOutWriteStream.end();
+                            });
                             settingsWriteStream.write(
                                 JSON.stringify({
                                     selectedImagesDirPath:
@@ -866,19 +894,6 @@ class ClientFilesManager {
                                 })
                             );
                             settingsWriteStream.end();
-                            const tempOutWriteStream = fs.createWriteStream(
-                                this.tempPath
-                            );
-                            tempOutWriteStream.on('error', (err) => {
-                                console.log(err);
-                                reject(err);
-                            });
-                            tempOutWriteStream.on('finish', () => {
-                                console.log('Cleared temp data on save new');
-                                resolve();
-                            });
-                            tempOutWriteStream.write(JSON.stringify([]));
-                            tempOutWriteStream.end();
                         });
                         writeStream.write(
                             JSON.stringify(annotationJson, null, 4)
@@ -1146,6 +1161,7 @@ class ClientFilesManager {
         const storedThumbnails = await this.#thumbnails.getThumbnails();
         const promises = this.fileNames.map(async (fileName) => {
             // skip creating a thumbnail if there's already one
+            // TODO: Fix has property error
             if (storedThumbnails?.hasOwnProperty(fileName)) return;
             newThumbnails[fileName] = await this.#thumbnails.generateThumbnail(
                 this.selectedImagesDirPath,

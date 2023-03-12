@@ -122,7 +122,7 @@ export const saveColorsFile = createAsyncThunk(
             })
             .catch((error) => {
                 console.log(error);
-                rejectWithValue(error);
+                return rejectWithValue(error.message);
             });
 
         return colorUpdate;
@@ -149,8 +149,31 @@ export const saveCurrentAnnotations = createAsyncThunk(
             })
             .catch((error) => {
                 console.log(error);
-                rejectWithValue(error);
+                rejectWithValue(error.message);
             });
+    }
+);
+
+export const saveAsCurrentFile = createAsyncThunk(
+    'annotations/saveAsCurrentFile',
+    async (payload, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { annotation } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        try {
+            await ipcRenderer.invoke(Channels.saveAsCurrentFile, {
+                cocoAnnotations,
+                cocoCategories,
+                cocoDeleted,
+                fileName: payload,
+                imageId: annotation.imageId,
+            });
+            return true;
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue(error.message);
+        }
     }
 );
 
@@ -182,6 +205,32 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
     }
 );
 
+export const closeAppAndSaveAnnotations = createAsyncThunk(
+    'annotations/closeAppAndSaveAnnotations',
+    async (payload, { getState }) => {
+        const state = getState();
+        const { annotation, ui } = state;
+        const { cocoAnnotations, cocoCategories, cocoDeleted } =
+            prepareAnnotationsForCoco(annotation);
+        await ipcRenderer
+            .invoke(Channels.closeApp, {
+                cocoAnnotations: annotation.hasAnnotationChanged
+                    ? cocoAnnotations
+                    : [],
+                cocoCategories,
+                cocoDeleted,
+                imageId: annotation.imageId,
+                fileName: ui.currentFileName,
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                return true;
+            });
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],
@@ -199,6 +248,7 @@ const initialState = {
     contrast: 50,
     brightness: 50,
     inverted: false,
+    saveAsModalOpen: false,
 };
 
 const annotationSlice = createSlice({
@@ -563,6 +613,9 @@ const annotationSlice = createSlice({
         updateImageInversion: (state, action) => {
             state.inverted = action.payload;
         },
+        updateShowSaveAsModal: (state, action) => {
+            state.saveAsModalOpen = action.payload;
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -572,12 +625,14 @@ const annotationSlice = createSlice({
             console.log(payload);
         },
         [saveCurrentAnnotations.fulfilled]: (state) => {
+            state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
         },
         [saveCurrentAnnotations.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
         },
         [saveCurrentAnnotations.rejected]: (state, { payload }) => {
+            state.saveAsModalOpen = false;
             console.log(payload);
             state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
             if (typeof payload === 'string') {
@@ -605,6 +660,22 @@ const annotationSlice = createSlice({
         [selectFileAndSaveTempAnnotations.rejected]: (state, { payload }) => {
             console.log(payload);
         },
+        [saveAsCurrentFile.fulfilled]: (state) => {
+            state.saveAsModalOpen = false;
+            state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+        },
+        [saveAsCurrentFile.pending]: (state) => {
+            state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
+        },
+        [saveAsCurrentFile.rejected]: (state, { payload }) => {
+            state.saveAsModalOpen = false;
+            state.saveAnnotationsStatus = SAVE_STATUSES.FAILURE;
+            if (typeof payload === 'string') {
+                state.saveFailureMessage = payload;
+            } else if (typeof payload === 'object') {
+                state.saveFailureMessage = payload.toString();
+            }
+        },
     },
 });
 
@@ -627,6 +698,7 @@ export const {
     updateImageBrightness,
     updateImageContrast,
     updateImageInversion,
+    updateShowSaveAsModal,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -674,5 +746,6 @@ export const getMaxImageValues = (state) => {
 export const getImageBrightness = (state) => state.annotation.brightness;
 export const getImageContrast = (state) => state.annotation.contrast;
 export const getImageInversion = (state) => state.annotation.inverted;
+export const getIsSaveModalOpen = (state) => state.annotation.saveAsModalOpen;
 
 export default annotationSlice.reducer;
