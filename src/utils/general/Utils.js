@@ -947,6 +947,46 @@ export default class Utils {
         }
     }
 
+    static decodeRLE(rle, width, height) {
+        const mask = new Uint8Array(width * height);
+        let maskIndex = 0;
+        let rleIndex = 0;
+        let inMask = false;
+
+        while (maskIndex < mask.length) {
+            let count = rle[rleIndex];
+
+            for (let i = 0; i < count; i++) {
+                if (inMask) {
+                    mask[maskIndex] = 1;
+                }
+                maskIndex++;
+            }
+            rleIndex++;
+            inMask = !inMask;
+        }
+
+        return mask;
+    }
+
+    static renderRLEMask(context, rle) {
+        // Decode the RLE segmentation
+        const width = rle.size[1];
+        const height = rle.size[0];
+        const mask = Utils.decodeRLE(rle.counts, width, height);
+        // Draw the RLE mask using context line paths
+        let maskIndex = 0;
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                if (mask[maskIndex] === 1) {
+                    context.rect(x, y, 1, 1);
+                }
+                maskIndex++;
+            }
+        }
+        context.fill();
+    }
+
     /**
      * Renders the binary mask associated with a detection
      *
