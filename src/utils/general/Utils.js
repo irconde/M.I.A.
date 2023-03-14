@@ -974,7 +974,7 @@ export default class Utils {
         const width = rle.size[1];
         const height = rle.size[0];
         const mask = Utils.decodeRLE(rle.counts, width, height);
-        // Draw the RLE mask using context line paths
+        // Draw the RLE mask using context rects
         let maskIndex = 0;
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
