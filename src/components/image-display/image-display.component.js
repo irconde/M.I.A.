@@ -782,9 +782,13 @@ const ImageDisplayComponent = () => {
 
             context.globalAlpha = 0.5;
             if (annotations[j].segmentation.length > 0) {
-                annotations[j].segmentation.forEach((segment) => {
-                    Utils.renderPolygonMasks(context, segment);
-                });
+                if (annotations[j].iscrowd === 0) {
+                    annotations[j].segmentation.forEach((segment) => {
+                        Utils.renderPolygonMasks(context, segment);
+                    });
+                }
+            } else if (annotations[j].iscrowd === 1) {
+                Utils.renderRLEMask(context, annotations[j].segmentation);
             }
 
             context.globalAlpha = 1.0;
