@@ -24,9 +24,12 @@ export const StyledModal = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 35vw;
+    width: 513px;
+    height: 348px;
+    display: flex;
+    flex-direction: column;
     background-color: #303030;
-    padding: 1.5rem;
+    padding: 24px 32px 34px 31px;
     box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
     border: solid 1px #464646;
 
@@ -53,34 +56,42 @@ export const ModalTitle = styled.h2`
 export const ModalBody = styled.div`
     display: flex;
     flex-direction: column;
+    flex: 1;
 `;
 
 export const ModalSection = styled.div`
     display: flex;
     align-items: center;
-    padding-top: 1.5rem;
+    padding-top: 32px;
 `;
 
 export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
 }))`
-    width: 50%;
+    width: 224px;
 
     &.MuiFormControl-root {
         margin-left: 1rem;
     }
 
     & .MuiInput-input {
+        font-size: 13px;
+        font-weight: 300;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: 1.46;
+        letter-spacing: normal;
+        text-align: justify;
         color: #fafafa;
     }
 
     & .MuiInput-root::before {
-        border-bottom: 2px solid #939393;
+        border-bottom: 2px solid #4e4e4e;
     }
 
     & .MuiInput-root:hover:not(.Mui-disabled)::before {
-        border-bottom: 2px solid #939393;
+        border-bottom: 2px solid #4e4e4e;
     }
 
     & .MuiInput-input::placeholder {
@@ -104,6 +115,9 @@ export const OutlinedButton = styled(Button).attrs(() => ({
         color: white;
         border: solid 1px #4e4e4e;
         text-transform: none;
-        width: 38%;
+        width: 152px;
+        height: 42px;
+        font-size: 13px;
+        font-weight: 500;
     }
 `;

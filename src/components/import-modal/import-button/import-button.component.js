@@ -9,8 +9,8 @@ import { useDispatch } from 'react-redux';
 import { updateShowApp } from '../../../redux/slices/ui.slice';
 
 const iconProps = {
-    width: '36px',
-    height: '36px',
+    width: '20px',
+    height: '20px',
     color: 'white',
 };
 
@@ -53,7 +53,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
 
         return (
             <>
-                {text}
+                <span>{text}</span>
                 <IconWrapper>{icon}</IconWrapper>
             </>
         );
