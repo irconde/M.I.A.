@@ -43,7 +43,6 @@ const ImportModalComponent = ({ open, setOpen }) => {
     const areThumbnailsLoading = useThumbnailsLoading(false);
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
-    console.log({ selectedImagesDirPath });
     const [showCloseIcon, setShowCloseIcon] = useState(!!selectedImagesDirPath);
 
     const [paths, setPaths] = useState({
