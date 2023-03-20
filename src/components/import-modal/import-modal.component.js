@@ -139,8 +139,8 @@ const ImportModalComponent = ({ open, setOpen }) => {
                         <ModalBody>
                             <ModalSection>
                                 <ImagesIcon
-                                    width={'24px'}
-                                    height={'24px'}
+                                    width={'20px'}
+                                    height={'20px'}
                                     color={'white'}
                                 />
                                 <StyledInput
@@ -163,8 +163,8 @@ const ImportModalComponent = ({ open, setOpen }) => {
                             </ModalSection>
                             <ModalSection>
                                 <AnnotationsIcon
-                                    width={'24px'}
-                                    height={'24px'}
+                                    width={'20px'}
+                                    height={'20px'}
                                     color={'white'}
                                 />
                                 <StyledInput

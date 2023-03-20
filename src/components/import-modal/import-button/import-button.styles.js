@@ -10,8 +10,9 @@ export const ConfirmButton = styled(Button).attrs(() => ({
         margin-bottom: 2px;
         width: 293px;
         height: 50px;
-        padding: 13px 36.7px 13px 37px;
         border-radius: 5px;
+
+        padding: 13px 60px 13px 61px;
         font-family: Noto Sans JP, sans-serif;
         font-size: 17px;
         font-weight: 500;

@@ -1,5 +1,14 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { ReactComponent as SpinnerIconComponent } from './spinner.icon.svg';
+
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const StyledSpinnerIcon = styled(SpinnerIconComponent).attrs(
     (props) => ({
@@ -8,4 +17,5 @@ export const StyledSpinnerIcon = styled(SpinnerIconComponent).attrs(
     })
 )`
     fill: ${(props) => props.color || 'white'};
+    animation: ${rotate} 0.75s linear infinite;
 `;

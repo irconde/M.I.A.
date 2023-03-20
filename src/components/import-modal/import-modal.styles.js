@@ -69,7 +69,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
 }))`
-    width: 224px;
+    width: 266px;
 
     &.MuiFormControl-root {
         margin-left: 1rem;
@@ -115,7 +115,7 @@ export const OutlinedButton = styled(Button).attrs(() => ({
         color: white;
         border: solid 1px #4e4e4e;
         text-transform: none;
-        width: 152px;
+        width: 160px;
         height: 42px;
         font-size: 13px;
         font-weight: 500;

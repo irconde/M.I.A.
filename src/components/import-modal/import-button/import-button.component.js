@@ -1,12 +1,12 @@
 import SpinnerIcon from '../../../icons/import-modal/spinner-icon/spinner.icon';
 import { ConfirmButton, IconWrapper } from './import-button.styles';
-import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
 import useThumbnailsLoading from '../../../utils/hooks/thumbnails-loading.hook';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
 import { useDispatch } from 'react-redux';
 import { updateShowApp } from '../../../redux/slices/ui.slice';
+import ConfirmImportIcon from '../../../icons/import-modal/confirm-import-icon/confirm-import.icon';
 
 const iconProps = {
     width: '20px',
@@ -48,7 +48,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
             icon = <SpinnerIcon {...iconProps} />;
         } else {
             text = 'CONFIRM DATA IMPORT';
-            icon = <SaveArrowIcon {...iconProps} />;
+            icon = <ConfirmImportIcon {...iconProps} />;
         }
 
         return (
