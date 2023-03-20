@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
+    IconContainer,
     ModalBody,
     ModalSection,
     modalTheme,
@@ -20,6 +21,8 @@ import {
     updateSettings,
 } from '../../redux/slices/settings.slice';
 import ImportButtonComponent from './import-button/import-button.component';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import useThumbnailsLoading from '../../utils/hooks/thumbnails-loading.hook';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -37,8 +40,12 @@ const ERROR = {
 
 const ImportModalComponent = ({ open, setOpen }) => {
     const dispatch = useDispatch();
+    const areThumbnailsLoading = useThumbnailsLoading(false);
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
+    console.log({ selectedImagesDirPath });
+    const [showCloseIcon, setShowCloseIcon] = useState(!!selectedImagesDirPath);
+
     const [paths, setPaths] = useState({
         images: selectedImagesDirPath || '',
         annotations: selectedAnnotationFile || '',
@@ -47,7 +54,9 @@ const ImportModalComponent = ({ open, setOpen }) => {
         annotationsError: '',
     });
 
-    const handleClose = () => selectedImagesDirPath && setOpen(false);
+    const handleClose = () =>
+        selectedImagesDirPath && !areThumbnailsLoading && setOpen(false);
+
     useEffect(() => {
         if (selectedAnnotationFile !== paths.annotations) {
             setPaths({
@@ -135,7 +144,19 @@ const ImportModalComponent = ({ open, setOpen }) => {
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description">
                     <StyledModal>
-                        <ModalTitle>SELECT DATA SOURCES</ModalTitle>
+                        <ModalTitle>
+                            SELECT DATA SOURCES
+                            {showCloseIcon && (
+                                <IconContainer onClick={handleClose}>
+                                    <CloseIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </IconContainer>
+                            )}
+                        </ModalTitle>
+
                         <ModalBody>
                             <ModalSection>
                                 <ImagesIcon
@@ -194,6 +215,8 @@ const ImportModalComponent = ({ open, setOpen }) => {
                                 handleClick={handleConfirmBtnClick}
                                 setOpen={setOpen}
                                 paths={paths}
+                                showCloseIcon={() => setShowCloseIcon(true)}
+                                areThumbnailsLoading={areThumbnailsLoading}
                             />
                         </ModalBody>
                     </StyledModal>

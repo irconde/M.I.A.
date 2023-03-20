@@ -51,6 +51,17 @@ export const ModalTitle = styled.h2`
     border-bottom: 1px solid #4e4e4e;
     padding-block: 1rem;
     margin: 0;
+    display: flex;
+    align-items: center;
+`;
+
+export const IconContainer = styled.button`
+    margin-left: auto;
+    display: flex;
+    cursor: pointer;
+    background: none;
+    outline: none;
+    border: none;
 `;
 
 export const ModalBody = styled.div`

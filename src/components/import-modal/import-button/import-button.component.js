@@ -1,6 +1,5 @@
 import SpinnerIcon from '../../../icons/import-modal/spinner-icon/spinner.icon';
 import { ConfirmButton, IconWrapper } from './import-button.styles';
-import useThumbnailsLoading from '../../../utils/hooks/thumbnails-loading.hook';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
@@ -16,8 +15,13 @@ const iconProps = {
 
 const CLOSE_MODAL_DELAY = 1000;
 
-function ImportButtonComponent({ handleClick, setOpen, paths }) {
-    const areThumbnailsLoading = useThumbnailsLoading(false);
+function ImportButtonComponent({
+    handleClick,
+    setOpen,
+    paths,
+    areThumbnailsLoading,
+    showCloseIcon,
+}) {
     const [prevLoading, setPrevLoading] = useState(areThumbnailsLoading);
     const [success, setSuccess] = useState(null);
     const dispatch = useDispatch();
@@ -32,6 +36,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
             dispatch(updateShowApp(true));
             setTimeout(() => {
                 setOpen(false);
+                showCloseIcon();
             }, CLOSE_MODAL_DELAY);
         }
         setPrevLoading(areThumbnailsLoading);
@@ -78,6 +83,8 @@ ImportButtonComponent.propTypes = {
     paths: PropTypes.object.isRequired,
     setOpen: PropTypes.func.isRequired,
     handleClick: PropTypes.func.isRequired,
+    areThumbnailsLoading: PropTypes.bool.isRequired,
+    showCloseIcon: PropTypes.func.isRequired,
 };
 
 export default ImportButtonComponent;
