@@ -13,7 +13,7 @@ import {
     ModalWrapper,
     IconWrapper,
 } from './close-modal.styles';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     closeAppAndSaveAnnotations,
     closeAppAndDontSaveAnnotations,
@@ -21,11 +21,17 @@ import {
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import WarningIcon from '../../icons/close-modal/warning-icon/warning.icon';
 import FabIcon from '../../icons/close-modal/fab-icon/fab.icon';
+import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
 function CloseModalComponent() {
     const [isOpen, setIsOpen] = useState(false);
+    const { selectedAnnotationFile } = useSelector(getAssetsDirPaths);
+    const annotationFileName = () => {
+        let tempPath = selectedAnnotationFile.replace(/\\/g, '\\\\');
+        return `${tempPath.match(/.*\\(.*)/)[1]}`;
+    };
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -74,8 +80,7 @@ function CloseModalComponent() {
                         <ContentText>
                             <ModalText>
                                 Save new annotations to{' '}
-                                {/* //TODO: use annotation file name */}
-                                <strong>annotations-01.json</strong> before
+                                <strong>{annotationFileName()}</strong> before
                                 closing?
                             </ModalText>
                             <ModalText
