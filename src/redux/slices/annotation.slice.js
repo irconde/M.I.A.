@@ -273,6 +273,7 @@ const initialState = {
     brightness: 50,
     inverted: false,
     saveAsModalOpen: false,
+    anyTempData: false,
 };
 
 const annotationSlice = createSlice({
@@ -287,10 +288,13 @@ const annotationSlice = createSlice({
                 maxAnnotationId,
                 imageId,
                 deletedAnnotationIds,
+                anyTempData,
             } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
             state.imageId = imageId;
+
+            state.anyTempData = anyTempData;
 
             if (deletedAnnotationIds !== undefined) {
                 // Loaded from temp data
@@ -753,6 +757,8 @@ export const getAnnotationCategories = (state) => {
 export const getSelectedCategory = (state) => state.annotation.selectedCategory;
 export const getHasAnnotationChanged = (state) =>
     state.annotation.hasAnnotationChanged;
+export const getHasAnyTempOrCurrentChanged = (state) =>
+    state.annotation.anyTempData || state.annotation.hasAnnotationChanged;
 export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
 export const getIsAnyAnnotations = (state) =>

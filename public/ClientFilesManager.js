@@ -1051,25 +1051,31 @@ class ClientFilesManager {
             });
             readStream.on('end', () => {
                 const tempData = JSON.parse(data);
+                let anyTempData = false;
                 if (tempData?.length > 0) {
+                    anyTempData = tempData.some(
+                        (temp) => temp.cocoAnnotations?.length > 0
+                    );
                     const foundTempData = tempData.find(
                         (temp) => temp.fileName === fileName
                     );
                     if (foundTempData) {
+                        anyTempData = foundTempData.cocoAnnotations?.length > 0;
                         resolve({
                             annotations: foundTempData.cocoAnnotations,
                             categories: foundTempData.cocoCategories,
                             deletedAnnotationIds: foundTempData.cocoDeleted,
                             imageId: foundTempData.imageId,
+                            anyTempData,
                         });
                     } else if (this.selectedAnnotationFile) {
                         this.#cocoAnnotationLoader()
-                            .then((data) => resolve(data))
+                            .then((data) => resolve({ ...data, anyTempData }))
                             .catch((err) => reject(err));
                     } else resolve({ imageId: this.currentFileIndex + 1 });
                 } else if (this.selectedAnnotationFile) {
                     this.#cocoAnnotationLoader()
-                        .then((data) => resolve(data))
+                        .then((data) => resolve({ ...data, anyTempData }))
                         .catch((err) => reject(err));
                 } else resolve({ imageId: this.currentFileIndex + 1 });
             });
