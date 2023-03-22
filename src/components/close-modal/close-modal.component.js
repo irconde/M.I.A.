@@ -87,7 +87,6 @@ function CloseModalComponent() {
                         </ContentText>
                     </Content>
                     <ModalButtonRow>
-                        {/* //TODO: implement functionality for dont save button*/}
                         <ModalButton
                             onClick={
                                 handleDontSave
