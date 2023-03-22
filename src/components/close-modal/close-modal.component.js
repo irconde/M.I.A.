@@ -14,7 +14,10 @@ import {
     IconWrapper,
 } from './close-modal.styles';
 import { useDispatch } from 'react-redux';
-import { closeAppAndSaveAnnotations } from '../../redux/slices/annotation.slice';
+import {
+    closeAppAndSaveAnnotations,
+    closeAppAndDontSaveAnnotations,
+} from '../../redux/slices/annotation.slice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import WarningIcon from '../../icons/close-modal/warning-icon/warning.icon';
 import FabIcon from '../../icons/close-modal/fab-icon/fab.icon';
@@ -31,6 +34,10 @@ function CloseModalComponent() {
 
     const handleYes = () => {
         dispatch(closeAppAndSaveAnnotations());
+    };
+
+    const handleDontSave = () => {
+        dispatch(closeAppAndDontSaveAnnotations());
     };
 
     return (
@@ -80,7 +87,11 @@ function CloseModalComponent() {
                         </ContentText>
                     </Content>
                     <ModalButtonRow>
-                        <ModalButton>{`Don't Save`}</ModalButton>
+                        {/* //TODO: implement functionality for dont save button*/}
+                        <ModalButton
+                            onClick={
+                                handleDontSave
+                            }>{`Don't Save`}</ModalButton>
                         <ModalButton onClick={() => setIsOpen(false)}>
                             Cancel
                         </ModalButton>
