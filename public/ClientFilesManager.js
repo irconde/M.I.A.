@@ -1060,7 +1060,6 @@ class ClientFilesManager {
                         (temp) => temp.fileName === fileName
                     );
                     if (foundTempData) {
-                        anyTempData = foundTempData.cocoAnnotations?.length > 0;
                         resolve({
                             annotations: foundTempData.cocoAnnotations,
                             categories: foundTempData.cocoCategories,
