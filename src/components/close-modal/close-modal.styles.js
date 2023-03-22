@@ -5,9 +5,8 @@ export const ModalWrapper = styled.div`
     position: absolute;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
     background-color: rgba(0, 0, 0, 0.5);
     transition: opacity 200ms;
     z-index: 1000;
@@ -19,45 +18,94 @@ export const ModalWrapper = styled.div`
 `;
 
 export const CloseModalBody = styled.div`
-    display: flex;
+    width: 572px;
+    height: 307px;
+    // padding: 22px 30px 32px 31px;
+    box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
+    border: solid 1px #464646;
+    background-color: #303030;
     font-family: Noto Sans JP, sans-serif;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #121212;
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.08),
-        rgba(255, 255, 255, 0.08)
-    );
-    width: 25rem;
-    height: 10rem;
-    padding: 1rem 2rem;
-    border-radius: 4px;
-    box-shadow: 0px 3px 3px -2px rgb(0 0 0 / 20%),
-        0px 3px 4px 0px rgb(0 0 0 / 14%), 0px 1px 8px 0px rgb(0 0 0 / 12%);
 `;
 
-export const ModalText = styled.p`
+export const CloseModalTitle = styled.div`
+    width: 191px;
+    color: #fafafa;
+    position: relative;
+    top: 22px;
+    left: 31px;
+`;
+
+export const CloseIconWrapper = styled.div`
+    position: relative;
+    left: 524px;
+    cursor: pointer;
+    width: min-content;
+`;
+
+export const Divider = styled.div`
+    position: relative;
+    width: 510px;
+    border: solid 0.5px #4e4e4e;
+    left: 31px;
+    top: 22px;
+`;
+
+export const Content = styled.div`
+    display: flex;
+    align-items: center;
+    margin: 52px 30px 32px 31px;
+`;
+
+export const IconWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+`;
+
+export const ContentText = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+`;
+
+export const ModalText = styled.div`
     color: #e1e1e1;
-    text-align: center;
+    margin-bottom: 10px;
 `;
 
 export const ModalButtonRow = styled.div`
     display: flex;
     flex-direction: row;
+    justify-content: flex-end;
 `;
 export const ModalButton = styled(Button)`
     &.MuiButton-root {
-        background: #367fff;
-        color: white;
-        width: 6rem;
-        height: 3rem;
-        margin: 1rem;
-        padding: 0.5rem;
-        transition: all 0.1s;
+        font-family: NotoSansJP, sans-serif;
+        font-size: 16px;
+        color: #ffffff;
+        width: 95px;
+        height: 42px;
+        margin-top: 14px;
+        padding: 8px 17px 10px;
+        border-radius: 4px;
+        border: solid 1px #4e4e4e;
+
+        &:first-child {
+            width: 144px;
+            padding: 8px 21px 10px 22px;
+        }
+
+        &:nth-child(2) {
+            margin-right: 18px;
+            margin-left: 56px;
+        }
+
+        &:nth-child(3) {
+            margin-right: 30px;
+        }
+
         :hover {
-            background: #367fff;
-            filter: brightness(85%);
+            background-color: #2658b2;
         }
     }
 `;

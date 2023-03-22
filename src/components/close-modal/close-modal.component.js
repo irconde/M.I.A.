@@ -2,13 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Channels } from '../../utils/enums/Constants';
 import {
     CloseModalBody,
+    CloseModalTitle,
+    Content,
+    ContentText,
+    Divider,
+    CloseIconWrapper,
     ModalButton,
     ModalButtonRow,
     ModalText,
     ModalWrapper,
+    IconWrapper,
 } from './close-modal.styles';
 import { useDispatch } from 'react-redux';
 import { closeAppAndSaveAnnotations } from '../../redux/slices/annotation.slice';
+import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import WarningIcon from '../../icons/close-modal/warning-icon/warning.icon';
+import FabIcon from '../../icons/close-modal/fab-icon/fab.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -25,18 +34,52 @@ function CloseModalComponent() {
     };
 
     return (
-        <ModalWrapper onClick={() => setIsOpen(false)}>
+        <ModalWrapper>
             {isOpen && (
                 <CloseModalBody onClick={(e) => e.stopPropagation()}>
-                    <ModalText>
-                        You have unsaved changes. Are you sure you want to
-                        terminate the app?
-                    </ModalText>
+                    <CloseModalTitle>UNSAVED ANNOTATIONS</CloseModalTitle>
+                    <CloseIconWrapper onClick={() => setIsOpen(false)}>
+                        <CloseIcon
+                            color={'white'}
+                            height={'24px'}
+                            width={'24px'}
+                        />
+                    </CloseIconWrapper>
+                    <Divider />
+                    <Content>
+                        <IconWrapper>
+                            <WarningIcon
+                                width={'100px'}
+                                height={'88px'}
+                                color={'#ffcb00'}
+                            />
+                            <FabIcon
+                                width={'39px'}
+                                height={'39px'}
+                                color={'#ffffff'}
+                            />
+                        </IconWrapper>
+                        <ContentText>
+                            <ModalText>
+                                Save new annotations to{' '}
+                                {/* //TODO: use annotation file name */}
+                                <strong>annotations-01.json</strong> before
+                                closing?
+                            </ModalText>
+                            <ModalText
+                                style={{
+                                    fontSize: '14px',
+                                }}>
+                                If you don’t save them, they will be lost.
+                            </ModalText>
+                        </ContentText>
+                    </Content>
                     <ModalButtonRow>
+                        <ModalButton>{`Don't Save`}</ModalButton>
                         <ModalButton onClick={() => setIsOpen(false)}>
-                            No
+                            Cancel
                         </ModalButton>
-                        <ModalButton onClick={handleYes}>Yes</ModalButton>
+                        <ModalButton onClick={handleYes}>Save</ModalButton>
                     </ModalButtonRow>
                 </CloseModalBody>
             )}
