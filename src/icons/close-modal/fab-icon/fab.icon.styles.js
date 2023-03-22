@@ -8,6 +8,7 @@ export const StyledFabIcon = styled(FabIconComponent).attrs((props) => ({
     fill: ${(props) => props.color || 'white'};
 
     position: relative;
-    top: 5px;
-    left: -32px;
+    top: ${(props) => (props.color === '#ffffff' ? '5px' : '6px')};
+    left: ${(props) => (props.color === '#ffffff' ? '-38px' : '-78px')};
+    z-index: ${(props) => (props.color === '#ffffff' ? '10' : '9')};
 `;

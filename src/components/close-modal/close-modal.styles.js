@@ -66,6 +66,7 @@ export const ContentText = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    margin-left: -43px;
 `;
 
 export const ModalText = styled.div`
@@ -86,13 +87,11 @@ export const ModalButton = styled(Button)`
         width: 95px;
         height: 42px;
         margin-top: 14px;
-        padding: 8px 17px 10px;
         border-radius: 4px;
         border: solid 1px #4e4e4e;
 
         &:first-child {
             width: 144px;
-            padding: 8px 21px 10px 22px;
         }
 
         &:nth-child(2) {

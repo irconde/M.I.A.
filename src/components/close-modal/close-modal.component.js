@@ -58,6 +58,11 @@ function CloseModalComponent() {
                                 height={'39px'}
                                 color={'#ffffff'}
                             />
+                            <FabIcon
+                                width={'39px'}
+                                height={'39px'}
+                                color={'rgba(0,0,0,0.7)'}
+                            />
                         </IconWrapper>
                         <ContentText>
                             <ModalText>
