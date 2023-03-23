@@ -441,6 +441,7 @@ const annotationSlice = createSlice({
                 action.payload !== state.selectedCategory
             ) {
                 state.selectedCategory = action.payload;
+                state.selectedAnnotation = null;
             } else {
                 state.selectedCategory = '';
             }

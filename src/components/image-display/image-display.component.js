@@ -752,7 +752,10 @@ const ImageDisplayComponent = () => {
             if (annotations[j].selected || annotations[j].categorySelected) {
                 renderColor = constants.annotationStyle.SELECTED_COLOR;
             }
-            if (selectedAnnotationRef.current !== null) {
+            if (
+                selectedAnnotationRef.current !== null &&
+                selectedCategoryRef.current === ''
+            ) {
                 if (selectedAnnotationRef.current.id !== annotations[j].id) {
                     const rgb = Utils.hexToRgb(annotations[j].color);
                     renderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`;
