@@ -154,26 +154,6 @@ export const TeamLibraryList = styled.div`
         padding-inline-start: 20px;
     }
 
-    //display: flex;
-    //flex-direction: column;
-    //justify-content: start;
-    //align-items: flex-start;
-    //color: #a6a6a6;
-    //font-size: 16px;
-
-    //ul {
-    //    list-style-position: inside;
-    //    padding: 0;
-    //    display: flex;
-    //    flex-direction: column;
-    //    flex-wrap: wrap;
-    //    height: 8rem;
-    //
-    //    li {
-    //        padding: 0.25rem;
-    //    }
-    //}
-
     a {
         color: #a6a6a6;
 
