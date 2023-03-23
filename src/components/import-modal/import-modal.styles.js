@@ -20,6 +20,7 @@ export const modalTheme = createTheme({
 });
 
 export const StyledModal = styled.div`
+    box-sizing: border-box;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -29,7 +30,7 @@ export const StyledModal = styled.div`
     display: flex;
     flex-direction: column;
     background-color: #303030;
-    padding: 24px 32px 34px 31px;
+    padding: 24px 32px;
     box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
     border: solid 1px #464646;
 
@@ -49,7 +50,7 @@ export const ModalTitle = styled.h2`
     text-align: justify;
     color: #fafafa;
     border-bottom: 1px solid #4e4e4e;
-    padding-block: 1rem;
+    padding-bottom: 24px;
     margin: 0;
     display: flex;
     align-items: center;
@@ -80,7 +81,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
     variant: 'standard',
     color: 'secondary',
 }))`
-    width: 266px;
+    width: 224px;
 
     &.MuiFormControl-root {
         margin-left: 1rem;
@@ -126,7 +127,7 @@ export const OutlinedButton = styled(Button).attrs(() => ({
         color: white;
         border: solid 1px #4e4e4e;
         text-transform: none;
-        width: 160px;
+        width: 152px;
         height: 42px;
         font-size: 13px;
         font-weight: 500;

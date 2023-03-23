@@ -7,7 +7,7 @@ export const ConfirmButton = styled(Button).attrs(() => ({
     &.MuiButton-root.MuiButton-contained {
         align-self: flex-end;
         margin-top: auto;
-        margin-bottom: 2px;
+        margin-bottom: 10px;
         width: 293px;
         height: 50px;
         border-radius: 5px;
