@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Channels } from '../../utils/enums/Constants';
 import {
     CloseModalBody,
@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     closeAppAndSaveAnnotations,
     closeAppAndDontSaveAnnotations,
+    getHasAnyTempOrCurrentChanged,
 } from '../../redux/slices/annotation.slice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import WarningIcon from '../../icons/close-modal/warning-icon/warning.icon';
@@ -27,6 +28,8 @@ const ipcRenderer = window.require('electron').ipcRenderer;
 
 function CloseModalComponent() {
     const [isOpen, setIsOpen] = useState(false);
+    const annotationsHaveChanged = useSelector(getHasAnyTempOrCurrentChanged);
+    const annotationsHaveChangedRef = useRef(annotationsHaveChanged);
     const { selectedAnnotationFile } = useSelector(getAssetsDirPaths);
     const annotationFileName = () => {
         let tempPath = selectedAnnotationFile.replace(/\\/g, '\\\\');
@@ -35,8 +38,16 @@ function CloseModalComponent() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        ipcRenderer.on(Channels.closeApp, () => setIsOpen(true));
-    }, []);
+        annotationsHaveChangedRef.current = annotationsHaveChanged;
+    }, [annotationsHaveChanged]);
+
+    useEffect(() => {
+        ipcRenderer.on(Channels.closeApp, () =>
+            annotationsHaveChangedRef.current
+                ? setIsOpen(true)
+                : handleDontSave()
+        );
+    }, [annotationsHaveChangedRef]);
 
     const handleYes = () => {
         dispatch(closeAppAndSaveAnnotations());
