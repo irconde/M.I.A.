@@ -66,25 +66,28 @@ const AboutModal = ({ open, setOpen }) => {
                             </CloseIconWrapper>
                         </AboutHeader>
                         <AppSummary>
-                            M.I.A. (Medical Imaging Annotation) is a
-                            cross-platform application to{' '}
-                            <strong>annotate</strong> (drawing bounding boxes,
-                            polygon masks, etc.){' '}
-                            <strong>standard medical</strong> imaging for
-                            creating specific datasets.
-                            <SummaryDivider />
-                            The application is a spin off of the{' '}
-                            <strong>Pilot System</strong>, an intelligent
-                            decision support system for advanced threat
-                            recognition on x-ray images developed by the{' '}
-                            <strong>Emerging Analytics Center</strong>.
+                            <p>
+                                <strong>M.I.A.</strong> (Medical Imaging
+                                Annotation) is a cross-platform application to{' '}
+                                <strong>annotate</strong> (drawing bounding
+                                boxes, polygon masks, etc.){' '}
+                                <strong>standard medical</strong> imaging for
+                                creating specific datasets.
+                            </p>
+                            <p>
+                                The application is a spin off of the{' '}
+                                <strong>Pilot System</strong>, an intelligent
+                                decision support system for advanced threat
+                                recognition on x-ray images developed by the{' '}
+                                <strong>Emerging Analytics Center</strong>.
+                            </p>
                         </AppSummary>
                         <TeamAndLibrary>
-                            <TeamLibraryWrapper>
+                            <TeamLibraryWrapper style={{ width: '182px' }}>
                                 <TeamLibraryHeader>
                                     <TeamIcon
-                                        width="32px"
-                                        height="32px"
+                                        width="24px"
+                                        height="24px"
                                         color="#e1e1e1"
                                     />
                                     <TeamLibraryTitle>Team</TeamLibraryTitle>
@@ -98,18 +101,19 @@ const AboutModal = ({ open, setOpen }) => {
                                     </ul>
                                 </TeamLibraryList>
                             </TeamLibraryWrapper>
-                            <TeamLibraryWrapper style={{ width: '20rem' }}>
+                            <TeamLibraryWrapper style={{ width: '247px' }}>
                                 <TeamLibraryHeader>
                                     <CodeBracketsIcon
-                                        width="32px"
-                                        height="32px"
+                                        width="24px"
+                                        height="24px"
                                         color="#e1e1e1"
                                     />
                                     <TeamLibraryTitle>
                                         Built With
                                     </TeamLibraryTitle>
                                 </TeamLibraryHeader>
-                                <TeamLibraryList>
+                                <TeamLibraryList
+                                    style={{ width: '247px', display: 'flex' }}>
                                     <ul>
                                         <li>
                                             <a
@@ -147,6 +151,8 @@ const AboutModal = ({ open, setOpen }) => {
                                                 MUI - Material UI
                                             </a>
                                         </li>
+                                    </ul>
+                                    <ul>
                                         <li>
                                             <a
                                                 href="https://github.com/cornerstonejs/cornerstone"
