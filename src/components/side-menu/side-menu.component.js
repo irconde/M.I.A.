@@ -113,6 +113,21 @@ const SideMenuComponent = () => {
                                                         )
                                                     );
                                                 }
+                                                if (
+                                                    JSON.stringify(
+                                                        expandedCategories
+                                                    ) === '{}' ||
+                                                    expandedCategories[
+                                                        categoryName
+                                                    ] === undefined ||
+                                                    expandedCategories[
+                                                        categoryName
+                                                    ] === false
+                                                ) {
+                                                    handleCollapse(
+                                                        categoryName
+                                                    );
+                                                }
                                                 Utils.dispatchAndUpdateImage(
                                                     dispatch,
                                                     selectAnnotationCategory,
