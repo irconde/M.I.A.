@@ -430,7 +430,8 @@ const annotationSlice = createSlice({
                     if (annotation.categorySelected && annotation.selected) {
                         annotation.selected = false;
                     }
-                } else if (annotation.categorySelected === true) {
+                } else {
+                    annotation.selected = false;
                     annotation.categorySelected = false;
                 }
             });
