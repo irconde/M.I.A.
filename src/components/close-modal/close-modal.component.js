@@ -25,16 +25,20 @@ import FabIcon from '../../icons/close-modal/fab-icon/fab.icon';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+const isWindows = navigator.userAgent.includes('Windows');
 
 function CloseModalComponent() {
     const [isOpen, setIsOpen] = useState(false);
     const annotationsHaveChanged = useSelector(getHasAnyTempOrCurrentChanged);
     const annotationsHaveChangedRef = useRef(annotationsHaveChanged);
     const { selectedAnnotationFile } = useSelector(getAssetsDirPaths);
+
     const annotationFileName = () => {
-        let tempPath = selectedAnnotationFile.replace(/\\/g, '\\\\');
-        return `${tempPath.match(/.*\\(.*)/)[1]}`;
+        const separator = isWindows ? '\\' : '/';
+        const parts = selectedAnnotationFile.split(separator);
+        return parts[parts.length - 1];
     };
+
     const dispatch = useDispatch();
 
     useEffect(() => {
