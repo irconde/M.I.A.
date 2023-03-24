@@ -67,7 +67,7 @@ function CloseModalComponent() {
     };
 
     return (
-        <ModalWrapper>
+        <ModalWrapper onClick={() => setIsOpen(false)}>
             {isOpen && (
                 <CloseModalBody onClick={(e) => e.stopPropagation()}>
                     <CloseModalTitle>
