@@ -49,6 +49,10 @@ function CloseModalComponent() {
         );
     }, [annotationsHaveChangedRef]);
 
+    useEffect(() => {
+        setTimeout(() => setIsOpen(true), 1000);
+    }, []);
+
     const handleYes = () => {
         dispatch(closeAppAndSaveAnnotations());
     };
@@ -61,15 +65,16 @@ function CloseModalComponent() {
         <ModalWrapper>
             {isOpen && (
                 <CloseModalBody onClick={(e) => e.stopPropagation()}>
-                    <CloseModalTitle>UNSAVED ANNOTATIONS</CloseModalTitle>
-                    <CloseIconWrapper onClick={() => setIsOpen(false)}>
-                        <CloseIcon
-                            color={'white'}
-                            height={'24px'}
-                            width={'24px'}
-                        />
-                    </CloseIconWrapper>
-                    <Divider />
+                    <CloseModalTitle>
+                        UNSAVED ANNOTATIONS
+                        <CloseIconWrapper onClick={() => setIsOpen(false)}>
+                            <CloseIcon
+                                color={'white'}
+                                height={'24px'}
+                                width={'24px'}
+                            />
+                        </CloseIconWrapper>
+                    </CloseModalTitle>
                     <Content>
                         <IconWrapper>
                             <WarningIcon
@@ -97,6 +102,7 @@ function CloseModalComponent() {
                             <ModalText
                                 style={{
                                     fontSize: '14px',
+                                    marginTop: '19px',
                                 }}>
                                 If you don’t save them, they will be lost.
                             </ModalText>

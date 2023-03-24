@@ -20,46 +20,45 @@ export const ModalWrapper = styled.div`
 export const CloseModalBody = styled.div`
     width: 572px;
     height: 307px;
-    // padding: 22px 30px 32px 31px;
+    padding: 22px 30px 32px 31px;
+    box-sizing: border-box;
     box-shadow: 0 1px 22px 0 rgba(0, 0, 0, 0.74);
     border: solid 1px #464646;
     background-color: #303030;
     font-family: Noto Sans JP, sans-serif;
+    display: flex;
+    flex-direction: column;
 `;
 
 export const CloseModalTitle = styled.div`
-    width: 191px;
     color: #fafafa;
-    position: relative;
-    top: 22px;
-    left: 31px;
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #4e4e4e;
+    padding-bottom: 24px;
 `;
 
-export const CloseIconWrapper = styled.div`
-    position: relative;
-    left: 524px;
+export const CloseIconWrapper = styled.button`
+    margin-left: auto;
+    display: flex;
     cursor: pointer;
-    width: min-content;
-`;
-
-export const Divider = styled.div`
-    position: relative;
-    width: 510px;
-    border: solid 0.5px #4e4e4e;
-    left: 31px;
-    top: 22px;
+    background: none;
+    outline: none;
+    border: none;
+    padding: 0;
 `;
 
 export const Content = styled.div`
     display: flex;
     align-items: center;
-    margin: 52px 30px 32px 31px;
+    margin-top: 30px;
 `;
 
 export const IconWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: baseline;
+    margin-left: -9px;
 `;
 
 export const ContentText = styled.div`
@@ -71,13 +70,15 @@ export const ContentText = styled.div`
 
 export const ModalText = styled.div`
     color: #e1e1e1;
-    margin-bottom: 10px;
+    margin: 0;
+    padding: 0;
 `;
 
 export const ModalButtonRow = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    margin-top: auto;
 `;
 export const ModalButton = styled(Button)`
     &.MuiButton-root {
@@ -85,26 +86,29 @@ export const ModalButton = styled(Button)`
         font-size: 16px;
         color: #ffffff;
         width: 95px;
-        height: 42px;
-        margin-top: 14px;
         border-radius: 4px;
         border: solid 1px #4e4e4e;
 
         &:first-child {
             width: 144px;
+            :hover {
+                border: solid 1px #2658b2;
+            }
         }
 
         &:nth-child(2) {
             margin-right: 18px;
             margin-left: 56px;
+            :hover {
+                border: solid 1px #2658b2;
+            }
         }
 
         &:nth-child(3) {
-            margin-right: 30px;
-        }
-
-        :hover {
-            background-color: #2658b2;
+            background-color: #367eff;
+            :hover {
+                background-color: #2658b2;
+            }
         }
     }
 `;
