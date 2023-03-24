@@ -41,7 +41,7 @@ export const StyledModal = styled.div`
 
 export const ModalTitle = styled.h2`
     font-family: Noto Sans JP, serif;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: bold;
     font-stretch: normal;
     font-style: normal;
@@ -63,6 +63,7 @@ export const IconContainer = styled.button`
     background: none;
     outline: none;
     border: none;
+    padding: 0;
 `;
 
 export const ModalBody = styled.div`
