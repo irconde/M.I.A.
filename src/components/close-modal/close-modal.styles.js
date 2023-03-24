@@ -55,17 +55,35 @@ export const Content = styled.div`
 `;
 
 export const IconWrapper = styled.div`
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: baseline;
-    margin-left: -9px;
+
+    svg:first-child {
+        margin-left: -9px;
+    }
+
+    svg:nth-child(2),
+    svg:nth-child(3) {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    svg:nth-child(3) {
+        bottom: -1px;
+        right: 1px;
+        z-index: 9;
+    }
 `;
 
 export const ContentText = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-left: -43px;
+    margin-left: 20px;
 `;
 
 export const ModalText = styled.div`
@@ -77,8 +95,8 @@ export const ModalText = styled.div`
 export const ModalButtonRow = styled.div`
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
     margin-top: auto;
+    margin-left: 108px;
 `;
 export const ModalButton = styled(Button)`
     &.MuiButton-root {
