@@ -1,22 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Channels } from '../../utils/enums/Constants';
 import {
+    CloseIconWrapper,
     CloseModalBody,
     CloseModalTitle,
     Content,
     ContentText,
-    Divider,
-    CloseIconWrapper,
+    IconWrapper,
     ModalButton,
     ModalButtonRow,
     ModalText,
     ModalWrapper,
-    IconWrapper,
 } from './close-modal.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    closeAppAndSaveAnnotations,
     closeAppAndDontSaveAnnotations,
+    closeAppAndSaveAnnotations,
     getHasAnyTempOrCurrentChanged,
 } from '../../redux/slices/annotation.slice';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
@@ -34,9 +33,15 @@ function CloseModalComponent() {
     const { selectedAnnotationFile } = useSelector(getAssetsDirPaths);
 
     const annotationFileName = () => {
-        const separator = isWindows ? '\\' : '/';
-        const parts = selectedAnnotationFile.split(separator);
-        return parts[parts.length - 1];
+        let regex = isWindows ? /.*\\(.*)/ : /.*\/(.*)/;
+
+        const matchResult = selectedAnnotationFile.match(regex);
+
+        if (matchResult !== null) {
+            return matchResult[1];
+        } else {
+            return 'No file name found';
+        }
     };
 
     const dispatch = useDispatch();
