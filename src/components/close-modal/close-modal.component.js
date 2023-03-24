@@ -49,10 +49,6 @@ function CloseModalComponent() {
         );
     }, [annotationsHaveChangedRef]);
 
-    useEffect(() => {
-        setTimeout(() => setIsOpen(true), 1000);
-    }, []);
-
     const handleYes = () => {
         dispatch(closeAppAndSaveAnnotations());
     };
