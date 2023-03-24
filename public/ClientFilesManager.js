@@ -1054,7 +1054,9 @@ class ClientFilesManager {
                 let anyTempData = false;
                 if (tempData?.length > 0) {
                     anyTempData = tempData.some(
-                        (temp) => temp.cocoAnnotations?.length > 0
+                        (temp) =>
+                            temp.cocoAnnotations?.length > 0 ||
+                            temp.cocoDeleted?.length > 0
                     );
                     const foundTempData = tempData.find(
                         (temp) => temp.fileName === fileName
