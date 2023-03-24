@@ -15,6 +15,7 @@ import {
     toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
+    updateCornerstoneMode,
 } from '../../redux/slices/ui.slice';
 import {
     AnnotationColor,
@@ -33,6 +34,7 @@ import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
 import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 import Utils from '../../utils/general/Utils';
 import { cornerstone } from '../image-display/image-display.component';
+import { cornerstoneMode } from '../../utils/enums/Constants';
 
 const iconProps = {
     width: '20px',
@@ -113,6 +115,26 @@ const SideMenuComponent = () => {
                                                         )
                                                     );
                                                 }
+                                                if (
+                                                    JSON.stringify(
+                                                        expandedCategories
+                                                    ) === '{}' ||
+                                                    expandedCategories[
+                                                        categoryName
+                                                    ] === undefined ||
+                                                    expandedCategories[
+                                                        categoryName
+                                                    ] === false
+                                                ) {
+                                                    handleCollapse(
+                                                        categoryName
+                                                    );
+                                                }
+                                                dispatch(
+                                                    updateCornerstoneMode(
+                                                        cornerstoneMode.SELECTION
+                                                    )
+                                                );
                                                 Utils.dispatchAndUpdateImage(
                                                     dispatch,
                                                     selectAnnotationCategory,
@@ -242,6 +264,11 @@ const SideMenuComponent = () => {
                                                                     );
                                                                 }
                                                             }
+                                                            dispatch(
+                                                                updateCornerstoneMode(
+                                                                    cornerstoneMode.EDITION
+                                                                )
+                                                            );
                                                             Utils.dispatchAndUpdateImage(
                                                                 dispatch,
                                                                 selectAnnotation,
