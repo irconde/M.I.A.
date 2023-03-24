@@ -236,13 +236,11 @@ export const closeAppAndDontSaveAnnotations = createAsyncThunk(
     async (payload, { getState }) => {
         const state = getState();
         const { annotation, ui } = state;
-        const { cocoAnnotations, cocoCategories, cocoDeleted } =
-            prepareAnnotationsForCoco(annotation);
         await ipcRenderer
             .invoke(Channels.closeApp, {
                 cocoAnnotations: [],
-                cocoCategories,
-                cocoDeleted,
+                cocoCategories: [],
+                cocoDeleted: [],
                 imageId: annotation.imageId,
                 fileName: ui.currentFileName,
             })
