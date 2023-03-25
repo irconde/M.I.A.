@@ -231,6 +231,28 @@ export const closeAppAndSaveAnnotations = createAsyncThunk(
     }
 );
 
+export const closeAppAndDontSaveAnnotations = createAsyncThunk(
+    'annotations/closeAppAndDontSaveAnnotations',
+    async (payload, { getState }) => {
+        const state = getState();
+        const { annotation, ui } = state;
+        await ipcRenderer
+            .invoke(Channels.closeApp, {
+                cocoAnnotations: [],
+                cocoCategories: [],
+                cocoDeleted: [],
+                imageId: annotation.imageId,
+                fileName: ui.currentFileName,
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                return true;
+            });
+    }
+);
+
 const initialState = {
     annotations: [],
     categories: [],
@@ -249,6 +271,7 @@ const initialState = {
     brightness: 50,
     inverted: false,
     saveAsModalOpen: false,
+    anyTempData: false,
 };
 
 const annotationSlice = createSlice({
@@ -263,10 +286,13 @@ const annotationSlice = createSlice({
                 maxAnnotationId,
                 imageId,
                 deletedAnnotationIds,
+                anyTempData,
             } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
             state.imageId = imageId;
+
+            state.anyTempData = anyTempData;
 
             if (deletedAnnotationIds !== undefined) {
                 // Loaded from temp data
@@ -430,7 +456,8 @@ const annotationSlice = createSlice({
                     if (annotation.categorySelected && annotation.selected) {
                         annotation.selected = false;
                     }
-                } else if (annotation.categorySelected === true) {
+                } else {
+                    annotation.selected = false;
                     annotation.categorySelected = false;
                 }
             });
@@ -441,6 +468,7 @@ const annotationSlice = createSlice({
                 action.payload !== state.selectedCategory
             ) {
                 state.selectedCategory = action.payload;
+                state.selectedAnnotation = null;
             } else {
                 state.selectedCategory = '';
             }
@@ -729,6 +757,8 @@ export const getAnnotationCategories = (state) => {
 export const getSelectedCategory = (state) => state.annotation.selectedCategory;
 export const getHasAnnotationChanged = (state) =>
     state.annotation.hasAnnotationChanged;
+export const getHasAnyTempOrCurrentChanged = (state) =>
+    state.annotation.anyTempData || state.annotation.hasAnnotationChanged;
 export const getSaveAnnotationStatus = (state) =>
     state.annotation.saveAnnotationsStatus;
 export const getIsAnyAnnotations = (state) =>
