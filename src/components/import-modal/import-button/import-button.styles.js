@@ -6,8 +6,13 @@ export const ConfirmButton = styled(Button).attrs(() => ({
 }))`
     &.MuiButton-root.MuiButton-contained {
         align-self: flex-end;
-        margin-top: 3rem;
-        width: 45%;
+        margin-top: auto;
+        margin-bottom: 10px;
+        width: 293px;
+        height: 50px;
+        border-radius: 5px;
+
+        padding: 13px 60px 13px 61px;
         font-family: Noto Sans JP, sans-serif;
         font-size: 17px;
         font-weight: 500;
@@ -16,19 +21,19 @@ export const ConfirmButton = styled(Button).attrs(() => ({
         line-height: normal;
         letter-spacing: normal;
         text-align: justify;
-        color: ${({ disabled }) => !disabled && '#fff'};
-        padding-block: 0.5rem;
+        color: white;
         white-space: nowrap;
-        background-color: ${({ $success }) => $success && '#3B8226'};
+        filter: ${({ disabled }) => disabled && 'brightness(60%)'};
+        background-color: ${({ $success, disabled }) =>
+            disabled ? '#367eff' : $success && '#3B8226'};
     }
 
     & svg {
-        fill: ${({ disabled }) => (disabled ? 'rgba(0, 0, 0, 0.26)' : 'white')};
         transition: fill 250ms;
     }
 `;
 
 export const IconWrapper = styled.span`
     display: flex;
-    padding-left: 0.5rem;
+    margin-left: 0.5rem;
 `;

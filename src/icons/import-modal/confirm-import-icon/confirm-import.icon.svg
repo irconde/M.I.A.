@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21px" height="20px" viewBox="0 0 21 20" version="1.1" xmlns="http://www.w3.org/2000/svg"
+>
+    <title>Confirm data import</title>
+    <g id="Desktop-UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Select-data-sources-on-app-launch" transform="translate(-950.000000, -584.000000)">
+            <g id="modal-window" transform="translate(526.000000, 305.000000)">
+                <g id="confirm-data-import-btn" transform="translate(188.000000, 264.000000)">
+                    <g id="Group-6-Copy" transform="translate(37.000000, 13.000000)">
+                        <g id="publish_FILL1_wght400_GRAD0_opsz48"
+                           transform="translate(209.333333, 12.000000) rotate(-180.000000) translate(-209.333333, -12.000000) translate(199.333333, 2.000000)">
+                            <rect id="Rectangle" x="0" y="0" width="20" height="20"></rect>
+                            <path d="M9.30729167,20 L9.30729167,8.40625 L5.86979167,12.15625 L4.63802083,10.8125 L10.1666667,4.78125 L15.6953125,10.8125 L14.4635417,12.15625 L11.0260417,8.40625 L11.0260417,20 L9.30729167,20 Z M1,6.34375 L1,1.875 C1,1.375 1.171875,0.9375 1.515625,0.5625 C1.859375,0.1875 2.26041667,0 2.71875,0 L17.6145833,0 C18.0729167,0 18.4739583,0.1875 18.8177083,0.5625 C19.1614583,0.9375 19.3333333,1.375 19.3333333,1.875 L19.3333333,6.34375 L17.6145833,6.34375 L17.6145833,1.875 L2.71875,1.875 L2.71875,6.34375 L1,6.34375 Z"
+                                  id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

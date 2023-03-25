@@ -1,23 +1,27 @@
 import SpinnerIcon from '../../../icons/import-modal/spinner-icon/spinner.icon';
 import { ConfirmButton, IconWrapper } from './import-button.styles';
-import SaveArrowIcon from '../../../icons/side-menu/save-arrow-icon/save-arrow.icon';
-import useThumbnailsLoading from '../../../utils/hooks/thumbnails-loading.hook';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
 import { useDispatch } from 'react-redux';
 import { updateShowApp } from '../../../redux/slices/ui.slice';
+import ConfirmImportIcon from '../../../icons/import-modal/confirm-import-icon/confirm-import.icon';
 
 const iconProps = {
-    width: '36px',
-    height: '36px',
+    width: '20px',
+    height: '20px',
     color: 'white',
 };
 
 const CLOSE_MODAL_DELAY = 1000;
 
-function ImportButtonComponent({ handleClick, setOpen, paths }) {
-    const areThumbnailsLoading = useThumbnailsLoading(false);
+function ImportButtonComponent({
+    handleClick,
+    setOpen,
+    paths,
+    areThumbnailsLoading,
+    showCloseIcon,
+}) {
     const [prevLoading, setPrevLoading] = useState(areThumbnailsLoading);
     const [success, setSuccess] = useState(null);
     const dispatch = useDispatch();
@@ -32,6 +36,7 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
             dispatch(updateShowApp(true));
             setTimeout(() => {
                 setOpen(false);
+                showCloseIcon();
             }, CLOSE_MODAL_DELAY);
         }
         setPrevLoading(areThumbnailsLoading);
@@ -48,12 +53,12 @@ function ImportButtonComponent({ handleClick, setOpen, paths }) {
             icon = <SpinnerIcon {...iconProps} />;
         } else {
             text = 'CONFIRM DATA IMPORT';
-            icon = <SaveArrowIcon {...iconProps} />;
+            icon = <ConfirmImportIcon {...iconProps} />;
         }
 
         return (
             <>
-                {text}
+                <span>{text}</span>
                 <IconWrapper>{icon}</IconWrapper>
             </>
         );
@@ -78,6 +83,8 @@ ImportButtonComponent.propTypes = {
     paths: PropTypes.object.isRequired,
     setOpen: PropTypes.func.isRequired,
     handleClick: PropTypes.func.isRequired,
+    areThumbnailsLoading: PropTypes.bool.isRequired,
+    showCloseIcon: PropTypes.func.isRequired,
 };
 
 export default ImportButtonComponent;
