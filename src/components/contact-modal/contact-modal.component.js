@@ -1,57 +1,24 @@
-import { Modal, TextField, ThemeProvider } from '@mui/material';
-import {
-    CloseIconWrapper,
-    ModalRoot,
-    modalTheme,
-    StyledPaper,
-} from '../about-modal/about-modal.styles';
+import { Modal, ThemeProvider } from '@mui/material';
+import { modalTheme } from '../about-modal/about-modal.styles';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import {
-    ContactHeader,
-    ContactHeaderInfo,
-    ContactHeaderParagraph,
+    CloseIconWrapper,
     ContactTitle,
-    FormContainer,
-    FormFieldFull,
-    FormFieldShort,
+    FormField,
     RequiredLabel,
+    StyledForm,
+    StyledInput,
+    StyledPaper,
+    StyledRow,
     SubmitButton,
 } from './contact-modal.styles';
 import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 import { Channels } from '../../utils/enums/Constants';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import { CONTACT_MODAL_ROWS } from './rows';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
-
-const FIELDS = [
-    {
-        name: 'First Name',
-        placeholder: 'First Name',
-        sm: true,
-    },
-    {
-        name: 'Last Name',
-        placeholder: 'Last Name',
-        sm: true,
-    },
-    { name: 'Email', type: 'email', placeholder: 'Email' },
-    {
-        name: 'Institution Name',
-        placeholder: 'Institution Name',
-    },
-    {
-        name: 'Institution Website',
-        required: false,
-        placeholder: 'Institution Website',
-    },
-    {
-        name: 'Description',
-        placeholder: 'Description',
-        multiline: true,
-        rows: 4,
-    },
-];
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
@@ -108,41 +75,51 @@ const ContactModal = ({ open, closeModal }) => {
                 aria-labelledby="contact-window"
                 aria-describedby="send information to the development team">
                 <StyledPaper>
-                    <ModalRoot>
-                        <ContactHeader>
-                            <ContactHeaderInfo>
-                                <ContactTitle>Contact Us</ContactTitle>
-                                <ContactHeaderParagraph error={status.error}>
-                                    {status.error
-                                        ? status.error
-                                        : 'Your feedback will help us improve the user experience.'}
-                                </ContactHeaderParagraph>
-                            </ContactHeaderInfo>
-                            <CloseIconWrapper
-                                onClick={closeModal}
-                                style={{ position: 'absolute', right: 0 }}>
-                                <CloseIcon
-                                    width={'32px'}
-                                    height={'32px'}
-                                    color={'white'}
-                                />
-                            </CloseIconWrapper>
-                        </ContactHeader>
-                        <form onSubmit={handleSubmit}>
-                            <FormContainer>
-                                {FIELDS.map(
+                    <ContactTitle>
+                        CONTACT US
+                        <CloseIconWrapper onClick={closeModal}>
+                            <CloseIcon
+                                width={'14px'}
+                                height={'14px'}
+                                color={'white'}
+                            />
+                        </CloseIconWrapper>
+                    </ContactTitle>
+
+                    <StyledForm
+                        onSubmit={handleSubmit}
+                        style={{ flex: 1, outline: '1px solid orange' }}>
+                        {CONTACT_MODAL_ROWS.map(({ Icon, inputs }, i) => (
+                            <StyledRow key={i}>
+                                {Icon && (
+                                    <span
+                                        style={{
+                                            width: '20px',
+                                            aspectRatio: '1',
+                                            outline: '1px solid white',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}>
+                                        <Icon
+                                            width={'20px'}
+                                            height={'20px'}
+                                            color={'white'}
+                                        />
+                                    </span>
+                                )}
+                                {inputs.map(
                                     ({
                                         required = true,
                                         name,
                                         placeholder,
-                                        variant = 'outlined',
+                                        variant = 'standard',
                                         type = 'text',
                                         multiline = false,
                                         rows = 1,
-                                        sm = false,
-                                    }) => {
-                                        const textField = (
-                                            <TextField
+                                        width,
+                                    }) => (
+                                        <FormField key={name} width={width}>
+                                            <StyledInput
                                                 required={required}
                                                 name={name}
                                                 placeholder={`${placeholder}${
@@ -159,41 +136,35 @@ const ContactModal = ({ open, closeModal }) => {
                                                     })
                                                 }
                                             />
-                                        );
-                                        return sm ? (
-                                            <FormFieldShort key={name}>
-                                                {textField}
-                                            </FormFieldShort>
-                                        ) : (
-                                            <FormFieldFull key={name}>
-                                                {textField}
-                                            </FormFieldFull>
-                                        );
-                                    }
+                                        </FormField>
+                                    )
                                 )}
-                                <RequiredLabel>* required</RequiredLabel>
-                                <SubmitButton
-                                    $success={status.success}
-                                    $submitting={status.submitting}
-                                    type={'submit'}
-                                    variant="contained">
-                                    {status.submitting ? (
-                                        <LoadingIcon
-                                            width={'24px'}
-                                            height={'24px'}
-                                            color={'white'}
-                                        />
-                                    ) : status.success === null ? (
-                                        'SUBMIT'
-                                    ) : status.success ? (
-                                        'SENT'
-                                    ) : (
-                                        'FAILED'
-                                    )}
-                                </SubmitButton>
-                            </FormContainer>
-                        </form>
-                    </ModalRoot>
+                            </StyledRow>
+                        ))}
+                        <RequiredLabel>*Required fields</RequiredLabel>
+                        <SubmitButton
+                            $success={status.success}
+                            $submitting={status.submitting}
+                            type={'submit'}
+                            variant="contained">
+                            {status.submitting ? (
+                                <>
+                                    SENDING MESSAGE
+                                    <LoadingIcon
+                                        width={'24px'}
+                                        height={'24px'}
+                                        color={'white'}
+                                    />
+                                </>
+                            ) : status.success === null ? (
+                                'SEND MESSAGE'
+                            ) : status.success ? (
+                                'MESSAGE SENT'
+                            ) : (
+                                'FAILED'
+                            )}
+                        </SubmitButton>
+                    </StyledForm>
                 </StyledPaper>
             </Modal>
         </ThemeProvider>
