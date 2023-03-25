@@ -58,6 +58,7 @@ function LazyImageMenuComponent() {
     const [prevFileName, setPrevFileName] = useState(currentFileName);
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
         scrollContainerRef.current.scrollTop = 0;
@@ -154,6 +155,8 @@ function LazyImageMenuComponent() {
         const { scrollTop, scrollHeight, clientHeight } =
             scrollContainerRef.current;
 
+        scrollTop > 0 !== isScrolled && setIsScrolled(scrollTop > 0);
+
         if (scrollTop === 0 && currChunk !== 0) {
             setCurrChunk(currChunk - 1);
             scrollContainerRef.current.scrollTop =
@@ -179,6 +182,7 @@ function LazyImageMenuComponent() {
     return (
         <LazyImageMenuContainer
             ref={scrollContainerRef}
+            isScrolled={isScrolled}
             onScroll={handleScroll}>
             <LazyImagesContainer collapsedLazyMenu={isLazyMenuVisible}>
                 {thumbnails

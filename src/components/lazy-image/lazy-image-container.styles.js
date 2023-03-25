@@ -10,7 +10,6 @@ const IMAGE_PLACEHOLDER_COLOR = '#626262';
 export const ImageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     justify-content: center;
     margin-bottom: 0.2rem;
     align-items: center;
@@ -20,16 +19,21 @@ export const ImageContainer = styled.div`
 
 export const ThumbnailContainer = styled.div`
     display: flex;
-    border-radius: 6px;
     cursor: pointer;
     position: relative;
-    border: ${({ selected }) => selected && '4px solid #367eff'};
+    outline: ${({ selected }) =>
+        selected ? '2px solid #367eff' : '1px solid #979797'};
     height: ${IMAGE_HEIGHT};
     width: ${IMAGE_WIDTH};
     background-color: ${IMAGE_PLACEHOLDER_COLOR};
 
+    transition: ${({ selected }) => !selected && 'outline-color 100ms'};
+
+    :hover {
+        outline: ${({ selected }) => !selected && '1px solid white'};
+    }
+
     img {
-        border-radius: ${({ selected }) => !selected && 'inherit'};
         object-fit: cover;
     }
 `;

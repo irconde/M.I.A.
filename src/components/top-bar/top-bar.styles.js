@@ -8,7 +8,7 @@ export const TopBarContainer = styled.div`
     background-color: #3a3a3a;
     top: 0;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
     align-items: center;
     justify-content: flex-end;
     color: white;

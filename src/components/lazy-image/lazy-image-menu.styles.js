@@ -12,7 +12,7 @@ export const LazyImageMenuContainer = styled.div`
     overflow-x: hidden;
     overflow-y: visible;
     background-color: #292929;
-    z-index: 2;
+    z-index: ${({ isScrolled }) => (isScrolled ? 1 : 2)};
     width: 256px;
     padding-top: calc((${LAZY_SIDE_MENU_WIDTH} - ${DEFAULT_IMAGE_WIDTH}) / 2);
     box-sizing: border-box;
