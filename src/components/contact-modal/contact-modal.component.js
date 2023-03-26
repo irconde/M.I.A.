@@ -81,8 +81,8 @@ const ContactModal = ({ open, closeModal }) => {
                         CONTACT US
                         <CloseIconWrapper onClick={closeModal}>
                             <CloseIcon
-                                width={'14px'}
-                                height={'14px'}
+                                width={'20px'}
+                                height={'20px'}
                                 color={'white'}
                             />
                         </CloseIconWrapper>

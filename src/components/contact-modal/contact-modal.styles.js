@@ -44,7 +44,21 @@ export const StyledPaper = styled(Paper).attrs(() => ({
 export const StyledInput = styled(TextField).attrs(() => ({
     color: 'secondary',
 }))`
-    &.MuiFormControl-root {
+    textarea {
+        font-size: 13px;
+    }
+
+    & .MuiOutlinedInput-notchedOutline {
+        border: 1px solid #4e4e4e;
+    }
+
+    .Mui-focused::after {
+        border: 1px solid white;
+    }
+
+    .MuiOutlinedInput-root:hover:not(.Mui-focused)
+        .MuiOutlinedInput-notchedOutline {
+        border: 1px solid #4e4e4e;
     }
 
     & .MuiInput-input {
@@ -60,17 +74,17 @@ export const StyledInput = styled(TextField).attrs(() => ({
     }
 
     & .MuiInput-root::before {
-        border-bottom: 2px solid #4e4e4e;
+        border-bottom: 1px solid #4e4e4e;
     }
 
     & .MuiInput-root:hover:not(.Mui-disabled)::before {
-        border-bottom: 2px solid #4e4e4e;
+        border-bottom: 1px solid #4e4e4e;
     }
 
     & .MuiInput-input::placeholder,
     textarea::placeholder {
         font-family: NotoSansJP, sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 300;
         font-stretch: normal;
         font-style: normal;
@@ -110,6 +124,7 @@ export const ContactTitle = styled.h2`
     padding-bottom: 24px;
     border-bottom: 1px solid #4e4e4e;
     margin: 0;
+    align-items: center;
 `;
 
 export const SubmitButton = styled(Button)`
