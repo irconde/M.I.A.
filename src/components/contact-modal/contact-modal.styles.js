@@ -46,6 +46,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
 }))`
     textarea {
         font-size: 13px;
+        font-family: 'Noto Sans JP', sans-serif;
     }
 
     & .MuiOutlinedInput-notchedOutline {
@@ -71,6 +72,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
         text-align: justify;
         color: #fafafa;
         padding: 0 0 6px 0;
+        font-family: 'Noto Sans JP', sans-serif;
     }
 
     & .MuiInput-root::before {
@@ -112,7 +114,7 @@ export const ModalIcon = styled.span`
 `;
 
 export const ContactTitle = styled.h2`
-    font-family: NotoSansJP, sans-serif;
+    font-family: 'Noto Sans JP', sans-serif;
     font-size: 16px;
     font-weight: 500;
     font-stretch: normal;
@@ -139,6 +141,7 @@ export const SubmitButton = styled(Button)`
         font-style: normal;
         line-height: normal;
         letter-spacing: normal;
+        font-family: 'Noto Sans JP', sans-serif;
         text-align: justify;
         display: flex;
         gap: 18px;
