@@ -4,6 +4,12 @@ import { colors } from '../../utils/enums/Constants';
 
 export const StyledRow = styled.div`
     display: flex;
+
+    margin-top: 32px;
+
+    :first-of-type {
+        margin-top: 40px;
+    }
 `;
 export const StyledPaper = styled(Paper).attrs(() => ({
     elevation: 3,
@@ -20,14 +26,18 @@ export const StyledPaper = styled(Paper).attrs(() => ({
     padding: 24px 32px 32px 32px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 
     ${StyledRow} > .MuiFormControl-root:first-of-type {
         margin-left: 9px;
     }
 
+    ${StyledRow} > .MuiFormControl-root:nth-of-type(2) {
+        margin-left: 24px;
+    }
+
     ${StyledRow}:last-of-type > .MuiFormControl-root:first-of-type {
-        margin-left: 36px;
-        background: red;
+        margin-left: 29px;
     }
 `;
 
@@ -46,17 +56,23 @@ export const StyledInput = styled(TextField).attrs(() => ({
         letter-spacing: normal;
         text-align: justify;
         color: #fafafa;
+        padding: 0 0 6px 0;
     }
 
     & .MuiInput-root::before {
         border-bottom: 2px solid #4e4e4e;
     }
 
+    & .MuiInputBase-root:hover {
+        outline: 1px solid orange;
+    }
+
     & .MuiInput-root:hover:not(.Mui-disabled)::before {
         border-bottom: 2px solid #4e4e4e;
     }
 
-    & .MuiInput-input::placeholder {
+    & .MuiInput-input::placeholder,
+    textarea::placeholder {
         font-family: NotoSansJP, sans-serif;
         font-size: 14px;
         font-weight: 300;
@@ -90,14 +106,22 @@ export const ContactTitle = styled.h2`
     color: #fafafa;
     padding-bottom: 24px;
     border-bottom: 1px solid #4e4e4e;
+    margin: 0;
 `;
 
 export const SubmitButton = styled(Button)`
     &.MuiButton-root {
-        margin: 1%;
-        margin-top: 2%;
-        width: 10rem;
-        height: 3rem;
+        align-self: end;
+        margin-top: auto;
+        width: 240px;
+        height: 50px;
+        font-size: 16px;
+        font-weight: 500;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: justify;
         background: ${({ $success, $submitting }) =>
             $submitting || $success === null
                 ? colors.BLUE
@@ -116,7 +140,7 @@ export const SubmitButton = styled(Button)`
                     : $success
                     ? colors.GREEN
                     : colors.RED};
-            filter: brightness(85%);
+            background: #2658b2;
         }
     }
 `;
