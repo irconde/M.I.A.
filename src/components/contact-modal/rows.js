@@ -1,41 +1,46 @@
-import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
+import PersonIcon from '../../icons/contact-modal/person-icon/person.icon';
+import MailIcon from '../../icons/contact-modal/mail-icon/mail.icon';
+import WorkIcon from '../../icons/contact-modal/work-icon/work.icon';
+import WebsiteIcon from '../../icons/contact-modal/website-icon/website.icon';
 
 export const CONTACT_MODAL_ROWS = [
     {
-        Icon: ArrowIcon,
+        Icon: PersonIcon,
         inputs: [
             {
                 name: 'First Name',
-                placeholder: 'First Name',
+                placeholder: 'First name',
                 width: '137px',
             },
             {
                 name: 'Last Name',
-                placeholder: 'Last Name',
+                placeholder: 'Last name',
                 width: '253px',
             },
         ],
     },
     {
-        Icon: ArrowIcon,
-        inputs: [{ name: 'Email', type: 'email', placeholder: 'Email' }],
+        Icon: MailIcon,
+        inputs: [
+            { name: 'Email', type: 'email', placeholder: 'Email address' },
+        ],
     },
     {
-        Icon: ArrowIcon,
+        Icon: WorkIcon,
         inputs: [
             {
                 name: 'Institution Name',
-                placeholder: 'Institution Name',
+                placeholder: 'Institution name',
             },
         ],
     },
     {
-        Icon: ArrowIcon,
+        Icon: WebsiteIcon,
         inputs: [
             {
                 name: 'Institution Website',
                 required: false,
-                placeholder: 'Institution Website',
+                placeholder: 'Institution website',
             },
         ],
     },

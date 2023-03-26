@@ -29,7 +29,7 @@ export const StyledPaper = styled(Paper).attrs(() => ({
     box-sizing: border-box;
 
     ${StyledRow} > .MuiFormControl-root:first-of-type {
-        margin-left: 9px;
+        margin-left: 16px;
     }
 
     ${StyledRow} > .MuiFormControl-root:nth-of-type(2) {
@@ -37,7 +37,7 @@ export const StyledPaper = styled(Paper).attrs(() => ({
     }
 
     ${StyledRow}:last-of-type > .MuiFormControl-root:first-of-type {
-        margin-left: 29px;
+        margin-left: 36px;
     }
 `;
 
@@ -61,10 +61,6 @@ export const StyledInput = styled(TextField).attrs(() => ({
 
     & .MuiInput-root::before {
         border-bottom: 2px solid #4e4e4e;
-    }
-
-    & .MuiInputBase-root:hover {
-        outline: 1px solid orange;
     }
 
     & .MuiInput-root:hover:not(.Mui-disabled)::before {
@@ -92,6 +88,13 @@ export const CloseIconWrapper = styled.div`
     margin-left: auto;
 
     cursor: pointer;
+`;
+
+export const ModalIcon = styled.span`
+    width: 20px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: start;
 `;
 
 export const ContactTitle = styled.h2`
@@ -122,6 +125,8 @@ export const SubmitButton = styled(Button)`
         line-height: normal;
         letter-spacing: normal;
         text-align: justify;
+        display: flex;
+        gap: 18px;
         background: ${({ $success, $submitting }) =>
             $submitting || $success === null
                 ? colors.BLUE
@@ -162,4 +167,5 @@ export const RequiredLabel = styled.p`
     color: #367eff;
     width: 100%;
     font-size: 13px;
+    margin-top: 8px;
 `;

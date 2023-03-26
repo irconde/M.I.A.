@@ -6,6 +6,7 @@ import {
     CloseIconWrapper,
     ContactTitle,
     FormField,
+    ModalIcon,
     RequiredLabel,
     StyledForm,
     StyledInput,
@@ -17,6 +18,7 @@ import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 import { Channels } from '../../utils/enums/Constants';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import { CONTACT_MODAL_ROWS } from './rows';
+import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -86,26 +88,17 @@ const ContactModal = ({ open, closeModal }) => {
                         </CloseIconWrapper>
                     </ContactTitle>
 
-                    <StyledForm
-                        onSubmit={handleSubmit}
-                        style={{ flex: 1, outline: '1px solid orange' }}>
+                    <StyledForm onSubmit={handleSubmit}>
                         {CONTACT_MODAL_ROWS.map(({ Icon, inputs }, i) => (
                             <StyledRow key={i}>
                                 {Icon && (
-                                    <span
-                                        style={{
-                                            width: '20px',
-                                            aspectRatio: '1',
-                                            outline: '1px solid white',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                        }}>
+                                    <ModalIcon>
                                         <Icon
                                             width={'20px'}
                                             height={'20px'}
                                             color={'white'}
                                         />
-                                    </span>
+                                    </ModalIcon>
                                 )}
                                 {inputs.map(
                                     ({
@@ -157,7 +150,14 @@ const ContactModal = ({ open, closeModal }) => {
                                     />
                                 </>
                             ) : status.success === null ? (
-                                'SEND MESSAGE'
+                                <>
+                                    SEND MESSAGE
+                                    <SendIcon
+                                        width={'20px'}
+                                        height={'20px'}
+                                        color={'white'}
+                                    />
+                                </>
                             ) : status.success ? (
                                 'MESSAGE SENT'
                             ) : (
