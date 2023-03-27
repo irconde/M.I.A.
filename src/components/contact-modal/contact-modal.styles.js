@@ -168,7 +168,9 @@ export const SubmitButton = styled(Button)`
     }
 `;
 
-export const StyledForm = styled.form`
+export const StyledForm = styled.form.attrs(() => ({
+    noValidate: true,
+}))`
     display: flex;
     flex-direction: column;
     flex: 1;

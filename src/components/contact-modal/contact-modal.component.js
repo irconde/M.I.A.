@@ -19,6 +19,7 @@ import { Channels } from '../../utils/enums/Constants';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import { CONTACT_MODAL_ROWS } from './rows';
 import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
+import useValidate from './useValidate';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -28,8 +29,11 @@ const ContactModal = ({ open, closeModal }) => {
         submitting: false,
         error: '',
     });
+    const [error, validate, resetError] = useValidate();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate(e.target)) return;
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
@@ -122,11 +126,15 @@ const ContactModal = ({ open, closeModal }) => {
                                                 type={type}
                                                 multiline={multiline}
                                                 rows={rows}
+                                                helperText={
+                                                    error.name === name
+                                                        ? error.text
+                                                        : ''
+                                                }
+                                                error={error.name === name}
                                                 onChange={() =>
-                                                    setStatus({
-                                                        ...status,
-                                                        error: '',
-                                                    })
+                                                    error.name === name &&
+                                                    resetError()
                                                 }
                                             />
                                         </FormField>
