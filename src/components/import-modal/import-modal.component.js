@@ -21,7 +21,7 @@ import {
     updateSettings,
 } from '../../redux/slices/settings.slice';
 import ImportButtonComponent from './import-button/import-button.component';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import useThumbnailsLoading from '../../utils/hooks/thumbnails-loading.hook';
 
 const ipcRenderer = window.require('electron').ipcRenderer;

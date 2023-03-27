@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SaveAsIcon from '../../icons/save-fab/save-as-icon/save-as.icon';
 import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
 import {
     FabButton,

@@ -61,7 +61,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
         border: 1px solid white;
     }
 
-    .MuiFormHelperText-root {
+    .MuiFormHelperText-root.Mui-error {
         position: absolute;
         top: 100%;
         font-family: 'Noto Sans JP', sans-serif;
@@ -72,7 +72,6 @@ export const StyledInput = styled(TextField).attrs(() => ({
         line-height: normal;
         letter-spacing: normal;
         text-align: justify;
-        color: #ff4b4b;
     }
 
     .MuiOutlinedInput-root:hover:not(.Mui-focused)
@@ -103,7 +102,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
 
     & .MuiInput-input::placeholder,
     textarea::placeholder {
-        font-family: NotoSansJP, sans-serif;
+        font-family: Noto Sans JP, sans-serif;
         font-size: 13px;
         font-weight: 300;
         font-stretch: normal;
@@ -148,41 +147,41 @@ export const ContactTitle = styled.h2`
 `;
 
 export const SubmitButton = styled(Button)`
-    &.MuiButton-root {
-        align-self: end;
-        margin-top: auto;
-        width: 240px;
-        height: 50px;
-        font-size: 16px;
-        font-weight: 500;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        font-family: 'Noto Sans JP', sans-serif;
-        text-align: justify;
-        display: flex;
-        gap: 18px;
-        background: ${({ $success, $submitting }) =>
-            $submitting || $success === null
-                ? colors.BLUE
-                : $success
-                ? colors.GREEN
-                : colors.RED};
-        color: ${colors.WHITE};
+  &.MuiButton-root {
+    align-self: end;
+    margin-top: auto;
+    width: 240px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-align: justify;
+    display: flex;
+    gap: 18px;
+    background: ${({ $success, $submitting }) =>
+        $submitting || $success === null
+            ? colors.BLUE
+            : $success
+            ? colors.GREEN
+            : colors.RED};
+    color: ${colors.WHITE};
 
-        transition: filter 200ms;
-        pointer-events: ${({ $success }) => ($success ? 'none' : 'unset')};
+    transition: background-color 150ms;
+    pointer-events: ${({ $success }) => ($success ? 'none' : 'unset')};
 
-        :hover {
-            background: ${({ $success, $submitting }) =>
-                $submitting || $success === null
-                    ? colors.BLUE
-                    : $success
-                    ? colors.GREEN
-                    : colors.RED};
-            background: #2658b2;
-        }
+    :hover {
+      background: ${({ $success, $submitting, $error }) =>
+          $submitting
+              ? colors.BLUE
+              : $error
+              ? colors.RED
+              : $success
+              ? colors.GREEN
+              : colors.HOVER_COLOR}
     }
 `;
 
@@ -198,10 +197,10 @@ export const FormField = styled(FormControl)`
     width: ${({ width }) => width || '100%'};
 `;
 
-export const RequiredLabel = styled.p`
+export const FooterText = styled.p`
     text-align: end;
     padding: 0;
-    color: #367eff;
+    color: ${({ error }) => (error ? colors.RED : colors.BLUE)};
     width: 100%;
     font-size: 13px;
     margin: 8px 0 0;

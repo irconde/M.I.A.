@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { createTheme, Paper } from '@mui/material';
+import { colors } from '../../utils/enums/Constants';
 
 const GREY_COLOR = '#9d9d9d';
 
@@ -17,6 +18,9 @@ export const modalTheme = createTheme({
             main: '#fafafa',
             dark: '#9d9d9d',
             contrastText: '#000000',
+        },
+        error: {
+            main: colors.RED,
         },
     },
     zIndex: {

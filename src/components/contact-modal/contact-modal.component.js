@@ -5,9 +5,9 @@ import React, { useState } from 'react';
 import {
     CloseIconWrapper,
     ContactTitle,
+    FooterText,
     FormField,
     ModalIcon,
-    RequiredLabel,
     StyledForm,
     StyledInput,
     StyledPaper,
@@ -15,12 +15,13 @@ import {
     SubmitButton,
 } from './contact-modal.styles';
 import { Channels } from '../../utils/enums/Constants';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import { CONTACT_MODAL_ROWS } from './rows';
 import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
 import useValidate from './useValidate';
 import SpinnerIcon from '../../icons/shared/spinner-icon/spinner.icon';
 import CheckMarkIcon from '../../icons/shared/check-mark-icon/check-mark.icon';
+import ErrorIcon from '../../icons/contact-modal/error-icon/error.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -137,10 +138,15 @@ const ContactModal = ({ open, closeModal }) => {
                                 )}
                             </StyledRow>
                         ))}
-                        <RequiredLabel>*Required fields</RequiredLabel>
+                        <FooterText error={status.error}>
+                            {status.error
+                                ? 'An unexpected error occurred. Try it again, or wait a few minutes'
+                                : '*Required fields'}
+                        </FooterText>
                         <SubmitButton
                             $success={status.success}
                             $submitting={status.submitting}
+                            $error={status.error}
                             type={'submit'}
                             variant="contained">
                             {status.submitting ? (
@@ -159,7 +165,10 @@ const ContactModal = ({ open, closeModal }) => {
                                     <CheckMarkIcon {...iconProps} />
                                 </>
                             ) : (
-                                'FAILED'
+                                <>
+                                    SUBMISSION FAILED
+                                    <ErrorIcon {...iconProps} />
+                                </>
                             )}
                         </SubmitButton>
                     </StyledForm>
