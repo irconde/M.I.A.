@@ -53,6 +53,10 @@ export const StyledInput = styled(TextField).attrs(() => ({
         border: 1px solid #4e4e4e;
     }
 
+    & .MuiInputBase-root.Mui-disabled .MuiOutlinedInput-notchedOutline {
+        border: 1px solid #4e4e4e;
+    }
+
     .Mui-focused::after {
         border: 1px solid white;
     }

@@ -114,19 +114,19 @@ const ContactModal = ({ open, closeModal }) => {
                                             <StyledInput
                                                 required={required}
                                                 name={name}
-                                                placeholder={`${placeholder}${
-                                                    required ? '*' : ''
-                                                }`}
                                                 variant={variant}
                                                 type={type}
                                                 multiline={multiline}
                                                 rows={rows}
+                                                error={error.name === name}
+                                                placeholder={`${placeholder}${
+                                                    required ? '*' : ''
+                                                }`}
                                                 helperText={
                                                     error.name === name
                                                         ? error.text
                                                         : ''
                                                 }
-                                                error={error.name === name}
                                                 onFocus={() =>
                                                     error.name === name &&
                                                     resetError()
