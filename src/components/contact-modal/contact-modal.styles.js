@@ -79,7 +79,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
         border-bottom: 1px solid #4e4e4e;
     }
 
-    & .MuiInput-root:hover:not(.Mui-disabled)::before {
+    & .MuiInput-root:hover:not(.Mui-disabled):not(.Mui-error)::before {
         border-bottom: 1px solid #4e4e4e;
     }
 
