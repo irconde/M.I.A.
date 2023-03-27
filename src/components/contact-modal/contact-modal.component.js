@@ -95,7 +95,11 @@ const ContactModal = ({ open, closeModal }) => {
                     <ContactTitle>
                         CONTACT US
                         <CloseIconWrapper onClick={handleClose}>
-                            <CloseIcon {...iconProps} />
+                            <CloseIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
                         </CloseIconWrapper>
                     </ContactTitle>
 
