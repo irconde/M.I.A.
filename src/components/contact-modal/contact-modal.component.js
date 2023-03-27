@@ -14,12 +14,12 @@ import {
     StyledRow,
     SubmitButton,
 } from './contact-modal.styles';
-import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 import { Channels } from '../../utils/enums/Constants';
 import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
 import { CONTACT_MODAL_ROWS } from './rows';
 import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
 import useValidate from './useValidate';
+import SpinnerIcon from '../../icons/shared/spinner-icon/spinner.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -151,9 +151,9 @@ const ContactModal = ({ open, closeModal }) => {
                             {status.submitting ? (
                                 <>
                                     SENDING MESSAGE
-                                    <LoadingIcon
-                                        width={'24px'}
-                                        height={'24px'}
+                                    <SpinnerIcon
+                                        width={'20px'}
+                                        height={'20px'}
                                         color={'white'}
                                     />
                                 </>
