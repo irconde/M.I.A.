@@ -181,9 +181,8 @@ export const FormField = styled(FormControl)`
 export const RequiredLabel = styled.p`
     text-align: end;
     padding: 0;
-    margin: 0;
     color: #367eff;
     width: 100%;
     font-size: 13px;
-    margin-top: 8px;
+    margin: 8px 0 0;
 `;

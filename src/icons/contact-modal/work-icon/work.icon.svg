@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 96 960 960" width="20"><path d="M168 912q-29.7 0-50.85-21.15Q96 869.7 96 840V408q0-29.7 21.15-50.85Q138.3 336 168 336h168v-72.212Q336 234 357.176 213q21.176-21 50.912-21h144.176Q582 192 603 213.15q21 21.15 21 50.85v72h168q29.7 0 50.85 21.15Q864 378.3 864 408v432q0 29.7-21.15 50.85Q821.7 912 792 912H168Zm240-576h144v-72H408v72Z"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>annotation-icon</title>
+    <g id="Desktop-UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="modal-contact-us" transform="translate(-558.000000, -435.000000)">
+            <g id="modal-window" transform="translate(526.000000, 215.000000)">
+                <g id="annotation-icon" transform="translate(32.000000, 220.000000)">
+                    <rect id="Rectangle" x="0" y="0" width="20" height="20"></rect>
+                    <path d="M1.5,19 C1.1,19 0.75,18.85 0.45,18.55 C0.15,18.25 0,17.9 0,17.5 L0,5.5 C0,5.1 0.15,4.75 0.45,4.45 C0.75,4.15 1.1,4 1.5,4 L6,4 L6,1.5 C6,1.1 6.15,0.75 6.45,0.45 C6.75,0.15 7.1,0 7.5,0 L12.5,0 C12.9,0 13.25,0.15 13.55,0.45 C13.85,0.75 14,1.1 14,1.5 L14,4 L18.5,4 C18.9,4 19.25,4.15 19.55,4.45 C19.85,4.75 20,5.1 20,5.5 L20,17.5 C20,17.9 19.85,18.25 19.55,18.55 C19.25,18.85 18.9,19 18.5,19 L1.5,19 Z M7.5,4 L12.5,4 L12.5,1.5 L7.5,1.5 L7.5,4 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
