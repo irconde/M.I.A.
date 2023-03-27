@@ -36,7 +36,7 @@ function LazyImageContainerComponent({
 
     const handleThumbnailClick = async () => {
         try {
-            dispatch(selectFileAndSaveTempAnnotations(fileName));
+            !selected && dispatch(selectFileAndSaveTempAnnotations(fileName));
         } catch (error) {
             console.log(error);
         }
