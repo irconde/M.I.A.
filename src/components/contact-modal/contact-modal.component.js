@@ -20,8 +20,11 @@ import { CONTACT_MODAL_ROWS } from './rows';
 import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
 import useValidate from './useValidate';
 import SpinnerIcon from '../../icons/shared/spinner-icon/spinner.icon';
+import CheckMarkIcon from '../../icons/shared/check-mark-icon/check-mark.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
+
+const iconProps = { width: '20px', height: '20px', color: 'white' };
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
@@ -84,11 +87,7 @@ const ContactModal = ({ open, closeModal }) => {
                     <ContactTitle>
                         CONTACT US
                         <CloseIconWrapper onClick={closeModal}>
-                            <CloseIcon
-                                width={'20px'}
-                                height={'20px'}
-                                color={'white'}
-                            />
+                            <CloseIcon {...iconProps} />
                         </CloseIconWrapper>
                     </ContactTitle>
 
@@ -97,23 +96,19 @@ const ContactModal = ({ open, closeModal }) => {
                             <StyledRow key={i}>
                                 {Icon && (
                                     <ModalIcon>
-                                        <Icon
-                                            width={'20px'}
-                                            height={'20px'}
-                                            color={'white'}
-                                        />
+                                        <Icon {...iconProps} />
                                     </ModalIcon>
                                 )}
                                 {inputs.map(
                                     ({
-                                        required = true,
                                         name,
                                         placeholder,
+                                        width,
+                                        required = true,
                                         variant = 'standard',
                                         type = 'text',
                                         multiline = false,
                                         rows = 1,
-                                        width,
                                     }) => (
                                         <FormField key={name} width={width}>
                                             <StyledInput
@@ -151,23 +146,18 @@ const ContactModal = ({ open, closeModal }) => {
                             {status.submitting ? (
                                 <>
                                     SENDING MESSAGE
-                                    <SpinnerIcon
-                                        width={'20px'}
-                                        height={'20px'}
-                                        color={'white'}
-                                    />
+                                    <SpinnerIcon {...iconProps} />
                                 </>
                             ) : status.success === null ? (
                                 <>
                                     SEND MESSAGE
-                                    <SendIcon
-                                        width={'20px'}
-                                        height={'20px'}
-                                        color={'white'}
-                                    />
+                                    <SendIcon {...iconProps} />
                                 </>
                             ) : status.success ? (
-                                'MESSAGE SENT'
+                                <>
+                                    MESSAGE SENT
+                                    <CheckMarkIcon {...iconProps} />
+                                </>
                             ) : (
                                 'FAILED'
                             )}

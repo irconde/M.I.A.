@@ -2,7 +2,7 @@ import SpinnerIcon from '../../../icons/shared/spinner-icon/spinner.icon';
 import { ConfirmButton, IconWrapper } from './import-button.styles';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import CheckMarkIcon from '../../../icons/import-modal/check-mark-icon/check-mark.icon';
+import CheckMarkIcon from '../../../icons/shared/check-mark-icon/check-mark.icon';
 import { useDispatch } from 'react-redux';
 import { updateShowApp } from '../../../redux/slices/ui.slice';
 import ConfirmImportIcon from '../../../icons/import-modal/confirm-import-icon/confirm-import.icon';
