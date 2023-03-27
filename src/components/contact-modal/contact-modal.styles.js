@@ -191,6 +191,10 @@ export const StyledForm = styled.form.attrs(() => ({
     display: flex;
     flex-direction: column;
     flex: 1;
+
+    ${StyledRow} {
+        opacity: ${({ disabled }) => disabled && '0.40'};
+    }
 `;
 
 export const FormField = styled(FormControl)`

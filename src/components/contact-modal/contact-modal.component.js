@@ -35,9 +35,13 @@ const ContactModal = ({ open, closeModal }) => {
     });
     const [error, validate, resetError] = useValidate();
 
+    const handleClose = () => {
+        if (!status.submitting) closeModal();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validate(e.target)) return;
+        if (status.submitting || !validate(e.target)) return;
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
@@ -77,22 +81,27 @@ const ContactModal = ({ open, closeModal }) => {
         }
     };
 
+    const getDisabled = () =>
+        !!(status.submitting || status.success || status.error);
+
     return (
         <ThemeProvider theme={modalTheme}>
             <Modal
                 open={open}
-                onClose={closeModal}
+                onClose={handleClose}
                 aria-labelledby="contact-window"
                 aria-describedby="send information to the development team">
                 <StyledPaper>
                     <ContactTitle>
                         CONTACT US
-                        <CloseIconWrapper onClick={closeModal}>
+                        <CloseIconWrapper onClick={handleClose}>
                             <CloseIcon {...iconProps} />
                         </CloseIconWrapper>
                     </ContactTitle>
 
-                    <StyledForm onSubmit={handleSubmit}>
+                    <StyledForm
+                        onSubmit={handleSubmit}
+                        disabled={getDisabled()}>
                         {CONTACT_MODAL_ROWS.map(({ Icon, inputs }, i) => (
                             <StyledRow key={i}>
                                 {Icon && (
@@ -119,6 +128,7 @@ const ContactModal = ({ open, closeModal }) => {
                                                 type={type}
                                                 multiline={multiline}
                                                 rows={rows}
+                                                disabled={getDisabled()}
                                                 error={error.name === name}
                                                 placeholder={`${placeholder}${
                                                     required ? '*' : ''
