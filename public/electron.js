@@ -414,7 +414,7 @@ ipcMain.handle(Channels.getSettings, async () => appSettings);
  * Sends a post request to a Google form and responds to react with a boolean success value
  */
 ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
-    const FORM_URL = `https://script.google.com/macros/s/AKfycbzlhA1q21UnuKDTkIqm7iZ-yKmAHCRmoUUTdKATipwV62ih9CZWCbP6tLaRc5c6F_T7Qg/exec`;
+    const FORM_URL = `https://script.google.com/macros/s/AKfycbxIDdLSzPpl-1IYTg6GbpSGAH5bI-YlmnP27UkMIXm95wwWECkHpqp38dmjtCQbRlSR_Q/exec`;
 
     try {
         const res = await fetch(FORM_URL, {
@@ -426,6 +426,7 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
             },
             body: data,
         });
+
         if (res.ok) {
             return {
                 success: res.ok,
