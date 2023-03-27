@@ -12,7 +12,7 @@ export const selection = {
 export const colors = {
     WHITE: '#FFFFFF',
     YELLOW: '#F7B500',
-    GREEN: '#87bb47',
+    GREEN: '#0b8409',
     RED: '#ff4b4b',
     BLUE: '#367FFF',
     HOVER_COLOR: '#2658b2',
