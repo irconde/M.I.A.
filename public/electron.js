@@ -410,8 +410,6 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
  */
 ipcMain.handle(Channels.getSettings, async () => appSettings);
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
  * Sends a post request to a Google form and responds to react with a boolean success value
  */
@@ -429,7 +427,6 @@ ipcMain.handle(Channels.sentFeedbackHTTP, async (e, data) => {
             body: data,
         });
 
-        await delay(3000);
         if (res.ok) {
             return {
                 success: res.ok,

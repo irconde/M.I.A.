@@ -21,7 +21,7 @@ const SPLASH_SCREEN_DELAY = 2000;
 
 function ApplicationComponent({ openImportModal }) {
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
-    const [contactModalOpen, setContactModalOpen] = useState(true);
+    const [contactModalOpen, setContactModalOpen] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
