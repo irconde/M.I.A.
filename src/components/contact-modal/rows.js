@@ -8,12 +8,12 @@ export const CONTACT_MODAL_ROWS = [
         Icon: PersonIcon,
         inputs: [
             {
-                name: 'First Name',
+                name: 'First name',
                 placeholder: 'First name',
                 width: '137px',
             },
             {
-                name: 'Last Name',
+                name: 'Last name',
                 placeholder: 'Last name',
                 width: '253px',
             },
@@ -29,7 +29,7 @@ export const CONTACT_MODAL_ROWS = [
         Icon: WorkIcon,
         inputs: [
             {
-                name: 'Institution Name',
+                name: 'Institution name',
                 placeholder: 'Institution name',
             },
         ],
@@ -38,7 +38,7 @@ export const CONTACT_MODAL_ROWS = [
         Icon: WebsiteIcon,
         inputs: [
             {
-                name: 'Institution Website',
+                name: 'Institution website',
                 required: false,
                 placeholder: 'Institution website',
             },
