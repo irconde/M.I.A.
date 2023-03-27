@@ -127,7 +127,7 @@ const ContactModal = ({ open, closeModal }) => {
                                                         : ''
                                                 }
                                                 error={error.name === name}
-                                                onChange={() =>
+                                                onFocus={() =>
                                                     error.name === name &&
                                                     resetError()
                                                 }
