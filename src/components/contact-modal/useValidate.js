@@ -62,7 +62,7 @@ function UseValidate() {
                     else if (!/\S+@\S+\.\S+/.test(value)) {
                         return setError({
                             name,
-                            text: 'Email format is invalid',
+                            text: 'The email format is not correct',
                         });
                     }
                     break;

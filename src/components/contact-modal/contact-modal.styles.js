@@ -57,6 +57,20 @@ export const StyledInput = styled(TextField).attrs(() => ({
         border: 1px solid white;
     }
 
+    .MuiFormHelperText-root {
+        position: absolute;
+        top: 100%;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 10px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: justify;
+        color: #ff4b4b;
+    }
+
     .MuiOutlinedInput-root:hover:not(.Mui-focused)
         .MuiOutlinedInput-notchedOutline {
         border: 1px solid #4e4e4e;
