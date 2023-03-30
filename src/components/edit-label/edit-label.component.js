@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import * as constants from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,7 +44,7 @@ const EditLabelComponent = () => {
         x: 0,
         y: 0,
     });
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (isVisible) {
             const newViewport = document.getElementById('imageContainer');
             if (newViewport !== null) {
