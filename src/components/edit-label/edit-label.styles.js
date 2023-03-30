@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
 const MIN_LABEL_WIDTH = '140px';
@@ -30,8 +30,11 @@ export const EditLabelWrapper = styled.div`
     background: ${constants.colors.BLUE};
 
     input {
-        padding-left: calc(4px * ${({ zoomLevel }) => zoomLevel});
-        font-size: max(calc(9px * ${({ zoomLevel }) => zoomLevel}), 12px);
+        ${({ zoomLevel }) => css`
+            padding-left: calc(5px * ${zoomLevel});
+            padding-top: calc(3px * ${zoomLevel});
+            font-size: calc(12px * ${Math.max(zoomLevel, 1)});
+        `}
     }
 `;
 
@@ -43,7 +46,7 @@ export const ArrowIconWrapper = styled.div`
 export const NewLabelInput = styled.input`
     background-color: transparent;
     font-family: 'Arial', 'sans-serif';
-    font-weight: 500;
+    font-weight: 600;
 
     color: ${constants.colors.WHITE};
     border: none;
@@ -51,6 +54,7 @@ export const NewLabelInput = styled.input`
     width: 100%;
     height: 100%;
     padding-right: 1.5rem;
+    box-sizing: border-box;
 
     &:disabled {
         background-color: rgba(0, 0, 0, 0.35);

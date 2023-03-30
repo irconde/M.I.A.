@@ -44,6 +44,7 @@ const EditLabelComponent = () => {
         x: 0,
         y: 0,
     });
+
     useLayoutEffect(() => {
         if (isVisible) {
             const newViewport = document.getElementById('imageContainer');
@@ -190,7 +191,7 @@ const EditLabelComponent = () => {
                     <InputContainer>
                         <NewLabelInput
                             placeholder={isListOpen ? '' : placeholder}
-                            value={isListOpen ? '' : newLabel}
+                            value={isListOpen ? '' : newLabel.toLowerCase()}
                             onChange={handleLabelInputChange}
                             onKeyDown={submitFromInput}
                             disabled={isListOpen}
