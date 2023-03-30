@@ -899,44 +899,40 @@ const ImageDisplayComponent = () => {
                     {error}
                 </p>
             ) : (
-                <>
-                    <div
-                        id="viewerContainer"
-                        onContextMenu={(e) => e.preventDefault()}
-                        className="disable-selection noIbar"
-                        onWheel={() => {
-                            if (isEditLabelVisible) {
-                                dispatch(updateEditLabelVisibility(false));
-                                editLabelDisplayInfo.current.pendingDisplay = true;
-                            }
+                <div
+                    id="viewerContainer"
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="disable-selection noIbar"
+                    onWheel={() => {
+                        if (isEditLabelVisible) {
+                            dispatch(updateEditLabelVisibility(false));
+                            editLabelDisplayInfo.current.pendingDisplay = true;
+                        }
 
-                            if (editLabelDisplayInfo.current.pendingDisplay) {
-                                clearTimeout(
-                                    editLabelDisplayInfo.current.timeout
-                                );
-                                editLabelDisplayInfo.current.timeout =
-                                    setTimeout(() => {
-                                        // runs when done scrolling
-                                        dispatch(
-                                            updateEditLabelVisibility(true)
-                                        );
-                                        editLabelDisplayInfo.current.pendingDisplay = false;
-                                    }, 300);
-                            }
-                        }}
-                        style={{
-                            userSelect: 'none',
-                            height: '100vh',
-                            width: '100%',
-                            position: 'absolute',
-                        }}
-                        ref={(el) => {
-                            el &&
-                                el.addEventListener('selectstart', (e) => {
-                                    e.preventDefault();
-                                });
-                        }}></div>
-                </>
+                        if (editLabelDisplayInfo.current.pendingDisplay) {
+                            clearTimeout(editLabelDisplayInfo.current.timeout);
+                            editLabelDisplayInfo.current.timeout = setTimeout(
+                                () => {
+                                    // runs when done scrolling
+                                    dispatch(updateEditLabelVisibility(true));
+                                    editLabelDisplayInfo.current.pendingDisplay = false;
+                                },
+                                300
+                            );
+                        }
+                    }}
+                    style={{
+                        userSelect: 'none',
+                        height: '100vh',
+                        width: '100%',
+                        position: 'absolute',
+                    }}
+                    ref={(el) => {
+                        el &&
+                            el.addEventListener('selectstart', (e) => {
+                                e.preventDefault();
+                            });
+                    }}></div>
             )}
         </ImageViewport>
     );
