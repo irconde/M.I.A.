@@ -36,12 +36,14 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
+    getEditLabelVisible,
     toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
+    updateEditLabelVisibility,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
@@ -105,6 +107,11 @@ const ImageDisplayComponent = () => {
     const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
     const maxImageValues = useSelector(getMaxImageValues);
     const maxImageValuesRef = useRef(maxImageValues);
+    const editLabelDisplayInfo = useRef({
+        timeout: null,
+        pendingDisplay: false,
+    });
+    const isEditLabelVisible = useSelector(getEditLabelVisible);
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -897,8 +904,31 @@ const ImageDisplayComponent = () => {
                         id="viewerContainer"
                         onContextMenu={(e) => e.preventDefault()}
                         className="disable-selection noIbar"
+                        onWheel={() => {
+                            if (isEditLabelVisible) {
+                                dispatch(updateEditLabelVisibility(false));
+                                editLabelDisplayInfo.current.pendingDisplay = true;
+                            }
+
+                            if (editLabelDisplayInfo.current.pendingDisplay) {
+                                clearTimeout(
+                                    editLabelDisplayInfo.current.timeout
+                                );
+                                editLabelDisplayInfo.current.timeout =
+                                    setTimeout(() => {
+                                        // runs when done scrolling
+                                        dispatch(
+                                            updateEditLabelVisibility(true)
+                                        );
+                                        editLabelDisplayInfo.current.pendingDisplay = false;
+                                    }, 300);
+                            }
+                        }}
                         style={{
                             userSelect: 'none',
+                            height: '100vh',
+                            width: '100%',
+                            position: 'absolute',
                         }}
                         ref={(el) => {
                             el &&
