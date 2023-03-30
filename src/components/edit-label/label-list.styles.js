@@ -7,10 +7,11 @@ export const LabelListWrapper = styled.div`
     max-height: 50px;
     overflow-x: hidden;
     overflow-y: scroll;
+    box-sizing: border-box;
     background: ${constants.colors.WHITE};
     border-bottom-left-radius: 4px;
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
-    height: 100%;
+    width: 100%;
 
     /* container scrollbar styles */
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
 import * as constants from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -27,6 +26,7 @@ import {
     updateAnnotationCategory,
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
+import ExpandIcon from '../../icons/shared/expand-icon/expand.icon';
 
 /**
  * Widget for editing a selected detection's label.
@@ -187,50 +187,49 @@ const EditLabelComponent = () => {
                 width={getWidth(selectedAnnotation?.bbox[2])}
                 zoomLevel={zoomLevel}
                 fontSize={getFontSize(font)}>
-                <InputContainer>
-                    <InputContainer>
-                        <NewLabelInput
-                            placeholder={isListOpen ? '' : placeholder}
-                            value={isListOpen ? '' : newLabel.toLowerCase()}
-                            onChange={handleLabelInputChange}
-                            onKeyDown={submitFromInput}
-                            disabled={isListOpen}
-                            ref={inputField}
-                        />
-                        {showClearIcon && (
-                            <ClearIconWrapper
-                                onClick={() => {
-                                    setShowClearIcon(false);
-                                    inputField.current.focus();
-                                    dispatch(setInputLabel(''));
-                                }}>
-                                <ClearIcon
-                                    width={'20px'}
-                                    height={'20px'}
-                                    color={'white'}
-                                />
-                            </ClearIconWrapper>
-                        )}
-                    </InputContainer>
-                    <ArrowIconWrapper
-                        onClick={() => {
-                            setIsListOpen(!isListOpen);
-                        }}>
-                        <ArrowIcon
-                            direction={isListOpen ? 'up' : 'down'}
-                            height="24px"
-                            width="24px"
-                            color={'white'}
-                        />
-                    </ArrowIconWrapper>
-                </InputContainer>
-                {isListOpen && (
-                    <LabelListComponent
-                        width={selectedAnnotation?.bbox[2]}
-                        labels={formattedLabels}
-                        onLabelSelect={submitFromList}
+                <InputContainer isListOpen={isListOpen}>
+                    <NewLabelInput
+                        placeholder={isListOpen ? '' : placeholder}
+                        value={isListOpen ? '' : newLabel.toLowerCase()}
+                        onChange={handleLabelInputChange}
+                        onKeyDown={submitFromInput}
+                        disabled={isListOpen}
+                        ref={inputField}
                     />
-                )}
+
+                    {isListOpen && (
+                        <LabelListComponent
+                            width={selectedAnnotation?.bbox[2]}
+                            labels={formattedLabels}
+                            onLabelSelect={submitFromList}
+                        />
+                    )}
+                    {showClearIcon && (
+                        <ClearIconWrapper
+                            onClick={() => {
+                                setShowClearIcon(false);
+                                inputField.current.focus();
+                                dispatch(setInputLabel(''));
+                            }}>
+                            <ClearIcon
+                                width={'20px'}
+                                height={'20px'}
+                                color={'white'}
+                            />
+                        </ClearIconWrapper>
+                    )}
+                </InputContainer>
+                <ArrowIconWrapper
+                    onClick={() => {
+                        setIsListOpen(!isListOpen);
+                    }}>
+                    <ExpandIcon
+                        direction={isListOpen ? 'up' : 'down'}
+                        height="24px"
+                        width="24px"
+                        color={'white'}
+                    />
+                </ArrowIconWrapper>
             </EditLabelWrapper>
         );
     } else return null;

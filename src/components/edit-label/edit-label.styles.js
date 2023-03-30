@@ -8,12 +8,15 @@ export const InputContainer = styled.div`
     justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
-    height: 100%;
+    height: fit-content;
+    min-height: 100%;
     width: 100%;
     position: relative;
+    flex-direction: ${({ isListOpen }) => (isListOpen ? 'column' : 'row')};
 `;
 export const EditLabelWrapper = styled.div`
     position: absolute;
+    display: flex;
     min-width: calc(
         ${MIN_LABEL_WIDTH} * ${({ zoomLevel }) => Math.max(1, zoomLevel)}
     );
@@ -34,12 +37,16 @@ export const EditLabelWrapper = styled.div`
             padding-left: calc(5px * ${zoomLevel});
             padding-top: calc(3px * ${zoomLevel});
             font-size: calc(12px * ${Math.max(zoomLevel, 1)});
+            height: ${({ zoomLevel }) => `calc(${zoomLevel} * 24px * 0.84)`};
         `}
     }
 `;
 
 export const ArrowIconWrapper = styled.div`
-    display: flex;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    height: 100%;
     cursor: pointer;
 `;
 

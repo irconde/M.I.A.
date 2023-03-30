@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { ReactComponent as ExpandIconComponent } from './expand.icon.svg';
-import { iconColor, iconSize } from '../../shared/24px.icon.styles';
+import { iconColor, iconSize } from '../24px.icon.styles';
 
 export const StyledExpandIcon = styled(ExpandIconComponent).attrs(iconSize)`
     transform: rotate(${(props) => getRotationAngle(props.direction)}deg);

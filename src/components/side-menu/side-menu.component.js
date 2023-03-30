@@ -30,7 +30,7 @@ import {
     SideMenuListWrapper,
 } from './side-menu.styles';
 import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibility-on.icon';
-import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
+import ExpandIcon from '../../icons/shared/expand-icon/expand.icon';
 import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 import Utils from '../../utils/general/Utils';
 import { cornerstone } from '../image-display/image-display.component';
@@ -248,12 +248,11 @@ const SideMenuComponent = () => {
                                                                     const {
                                                                         x,
                                                                         y,
-                                                                    } =
-                                                                        Utils.calculateAnnotationContextPosition(
-                                                                            cornerstone,
-                                                                            annotation,
-                                                                            viewport
-                                                                        );
+                                                                    } = Utils.calculateAnnotationContextPosition(
+                                                                        cornerstone,
+                                                                        annotation,
+                                                                        viewport
+                                                                    );
                                                                     dispatch(
                                                                         updateAnnotationContextPosition(
                                                                             {
