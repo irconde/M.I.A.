@@ -184,6 +184,7 @@ const EditLabelComponent = () => {
                 top={position.y - INPUT_HEIGHT}
                 left={position.x - zoomLevel}
                 width={getWidth(selectedAnnotation?.bbox[2])}
+                zoomLevel={zoomLevel}
                 fontSize={getFontSize(font)}>
                 <InputContainer>
                     <InputContainer>

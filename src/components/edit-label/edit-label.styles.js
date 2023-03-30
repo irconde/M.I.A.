@@ -8,6 +8,12 @@ export const EditLabelWrapper = styled.div`
     width: ${(props) => `${props.width}px`};
     left: ${(props) => `${props.left}px`};
     top: ${(props) => `${props.top}px`};
+    min-height: 24px;
+    height: ${({ zoomLevel }) => `calc(${zoomLevel} * 24px * 0.84)`};
+
+    transform: translateY(
+        calc(-100% + 24px + (1px * ${({ zoomLevel }) => zoomLevel}))
+    );
     background: ${constants.colors.BLUE};
 `;
 
