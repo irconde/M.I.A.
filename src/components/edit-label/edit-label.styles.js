@@ -1,9 +1,22 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
+const MIN_LABEL_WIDTH = '140px';
+
+export const InputContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    position: relative;
+`;
 export const EditLabelWrapper = styled.div`
     position: absolute;
-    min-width: 160px;
+    min-width: calc(
+        ${MIN_LABEL_WIDTH} * ${({ zoomLevel }) => Math.max(1, zoomLevel)}
+    );
     z-index: 500;
     width: ${(props) => `${props.width}px`};
     left: ${(props) => `${props.left}px`};
@@ -15,15 +28,11 @@ export const EditLabelWrapper = styled.div`
         calc(-100% + 24px + (1px * ${({ zoomLevel }) => zoomLevel}))
     );
     background: ${constants.colors.BLUE};
-`;
 
-export const InputContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 1.5rem;
-    width: 100%;
-    position: relative;
+    input {
+        padding-left: calc(4px * ${({ zoomLevel }) => zoomLevel});
+        font-size: max(calc(9px * ${({ zoomLevel }) => zoomLevel}), 12px);
+    }
 `;
 
 export const ArrowIconWrapper = styled.div`
