@@ -12,7 +12,6 @@ export const InputContainer = styled.div`
     min-height: 100%;
     width: 100%;
     position: relative;
-    flex-direction: ${({ isListOpen }) => (isListOpen ? 'column' : 'row')};
 `;
 export const EditLabelWrapper = styled.div`
     position: absolute;
@@ -48,6 +47,7 @@ export const ArrowIconWrapper = styled.div`
     aspect-ratio: 1 / 1;
     height: 100%;
     cursor: pointer;
+    background-color: ${constants.colors.BLUE};
 `;
 
 export const NewLabelInput = styled.input`
