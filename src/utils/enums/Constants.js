@@ -31,7 +31,7 @@ export const annotationStyle = {
     VALID_COLOR: colors.GREEN,
     INVALID_COLOR: colors.RED,
     LABEL_PADDING: 4,
-    LABEL_FONT: 'bold 12px Arial',
+    LABEL_FONT: 'bold 12px Noto Sans JP',
     LABEL_TEXT_COLOR: colors.WHITE,
     BORDER_WIDTH: 2,
 };

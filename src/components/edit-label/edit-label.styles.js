@@ -53,7 +53,7 @@ export const ArrowIconWrapper = styled.div`
 
 export const NewLabelInput = styled.input`
     background-color: transparent;
-    font-family: 'Arial', 'sans-serif';
+    font-family: 'Noto Sans JP', 'sans-serif';
     font-weight: 600;
 
     color: ${constants.colors.WHITE};

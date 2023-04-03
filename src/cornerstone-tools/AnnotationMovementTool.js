@@ -155,8 +155,11 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 fontSize *= this.options.zoomLevel;
                 fontSizeArr[0] = fontSize;
                 const newFontSize = fontSizeArr.join('px');
-                context.font =
-                    fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+                context.font = [
+                    fontArr[0],
+                    newFontSize,
+                    ...fontArr.slice(2),
+                ].join(' ');
 
                 context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
                 context.strokeStyle = data.renderColor;
