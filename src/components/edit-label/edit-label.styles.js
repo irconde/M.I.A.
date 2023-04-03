@@ -36,6 +36,7 @@ export const EditLabelWrapper = styled.div`
             padding-left: calc(5px * ${zoomLevel});
             padding-top: calc(3px * ${zoomLevel});
             font-size: calc(12px * ${Math.max(zoomLevel, 1)});
+            min-height: 24px;
             height: ${({ zoomLevel }) => `calc(${zoomLevel} * 24px * 0.84)`};
         `}
     }
