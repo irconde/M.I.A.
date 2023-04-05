@@ -30,16 +30,20 @@ export const annotationStyle = {
     SELECTED_COLOR: colors.BLUE,
     VALID_COLOR: colors.GREEN,
     INVALID_COLOR: colors.RED,
-    LABEL_PADDING: 4,
-    LABEL_FONT: 'bold 12px Noto Sans JP',
+    LABEL_PADDING: {
+        LEFT: 10,
+        BOTTOM: 9,
+    },
+    LABEL_FONT: 'bold 13px Noto Sans JP',
     FONT_DETAILS: {
         FAMILY: 'Noto Sans JP',
-        SIZE: 12,
+        SIZE: 13,
         WEIGHT: 'bold',
         get(zoom = 1) {
             return `${this.WEIGHT} ${this.SIZE / zoom}px ${this.FAMILY}`;
         },
     },
+    LABEL_HEIGHT: 28,
     LABEL_TEXT_COLOR: colors.WHITE,
     BORDER_WIDTH: 2,
 };

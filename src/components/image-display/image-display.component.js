@@ -747,9 +747,10 @@ const ImageDisplayComponent = () => {
 
     const renderAnnotations = (context, annotations) => {
         const { current: zoom } = zoomLevel;
-        const { LABEL_PADDING } = constants.annotationStyle;
+        const { LABEL_PADDING, BORDER_WIDTH, LABEL_HEIGHT } =
+            constants.annotationStyle;
         context.font = constants.annotationStyle.FONT_DETAILS.get(zoom);
-        context.lineWidth = constants.annotationStyle.BORDER_WIDTH / zoom;
+        context.lineWidth = BORDER_WIDTH / zoom;
 
         for (let j = 0; j < annotations.length; j++) {
             if (
@@ -805,27 +806,23 @@ const ImageDisplayComponent = () => {
             const { width, height } = Utils.getTextLabelSize(
                 context,
                 annotations[j].categoryName,
-                LABEL_PADDING,
-                zoom
+                LABEL_PADDING.LEFT,
+                zoom,
+                LABEL_HEIGHT
             );
 
+            const [x, y] = annotations[j].bbox;
             context.fillRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1] - height,
-                width,
-                height
-            );
-            context.strokeRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1] - height,
+                x - context.lineWidth / 2,
+                y - height,
                 width,
                 height
             );
             context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 annotations[j].categoryName,
-                annotations[j].bbox[0] + LABEL_PADDING / zoom,
-                annotations[j].bbox[1] - LABEL_PADDING / zoom
+                x + LABEL_PADDING.LEFT / zoom,
+                y - LABEL_PADDING.BOTTOM / zoom
             );
         }
     };

@@ -4,6 +4,8 @@ import * as constants from '../../utils/enums/Constants';
 const LABEL_WIDTH = '182px';
 const LABEL_HEIGHT = '28px';
 
+const { FONT_DETAILS, LABEL_PADDING } = constants.annotationStyle;
+
 export const InputContainer = styled.div`
     display: flex;
     justify-content: space-between;
@@ -39,12 +41,13 @@ export const ArrowIconWrapper = styled.div`
 `;
 
 export const NewLabelInput = styled.input`
-    font-family: 'Noto Sans JP', 'sans-serif';
-    font-weight: 600;
+    font-family: ${FONT_DETAILS.FAMILY}, 'sans-serif';
+    font-weight: ${FONT_DETAILS.WEIGHT};
+    font-size: ${FONT_DETAILS.SIZE}px;
 
     color: ${constants.colors.WHITE};
     min-height: 24px;
-    padding-left: ${constants.annotationStyle.LABEL_PADDING}px;
+    padding-left: ${LABEL_PADDING.LEFT - 2}px;
     background-color: #395280;
     border: none;
     user-select: none;
@@ -77,5 +80,3 @@ export const ClearIconWrapper = styled.div`
     cursor: pointer;
     vertical-align: text-top;
 `;
-
-export const INPUT_HEIGHT = 24;

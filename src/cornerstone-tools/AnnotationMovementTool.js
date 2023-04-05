@@ -167,7 +167,7 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 const labelSize = Utils.getTextLabelSize(
                     context,
                     data.categoryName,
-                    constants.annotationStyle.LABEL_PADDING *
+                    constants.annotationStyle.LABEL_PADDING.LEFT *
                         this.options.zoomLevel
                 );
                 context.fillRect(
@@ -180,10 +180,10 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 context.fillText(
                     data.categoryName,
                     myCoords.x +
-                        constants.annotationStyle.LABEL_PADDING *
+                        constants.annotationStyle.LABEL_PADDING.LEFT *
                             this.options.zoomLevel,
                     myCoords.y -
-                        constants.annotationStyle.LABEL_PADDING *
+                        constants.annotationStyle.LABEL_PADDING.LEFT *
                             this.options.zoomLevel
                 );
                 // Polygon Mask Rendering

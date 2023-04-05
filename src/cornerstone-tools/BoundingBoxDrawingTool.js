@@ -223,7 +223,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         const labelSize = Utils.getTextLabelSize(
                             context,
                             categoryName,
-                            constants.annotationStyle.LABEL_PADDING * zoom
+                            constants.annotationStyle.LABEL_PADDING.LEFT * zoom
                         );
                         context.fillRect(
                             myCoords.x - 1 * zoom,
@@ -236,9 +236,11 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
                         context.fillText(
                             categoryName,
                             myCoords.x +
-                                constants.annotationStyle.LABEL_PADDING * zoom,
+                                constants.annotationStyle.LABEL_PADDING.LEFT *
+                                    zoom,
                             myCoords.y -
-                                constants.annotationStyle.LABEL_PADDING * zoom
+                                constants.annotationStyle.LABEL_PADDING.BOTTOM *
+                                    zoom
                         );
                     }
                 }

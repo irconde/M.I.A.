@@ -5,7 +5,6 @@ import {
     ArrowIconWrapper,
     ClearIconWrapper,
     EditLabelWrapper,
-    INPUT_HEIGHT,
     InputContainer,
     NewLabelInput,
 } from './edit-label.styles';
@@ -47,6 +46,10 @@ const EditLabelComponent = () => {
     const inputField = useRef(null);
     const [isListOpen, setIsListOpen] = useState(false);
     const [showClearIcon, setShowClearIcon] = useState(false);
+
+    useEffect(() => {
+        console.log({ newLabel });
+    }, [newLabel]);
 
     useLayoutEffect(() => {
         if (isVisible) {
@@ -108,14 +111,15 @@ const EditLabelComponent = () => {
      * @param {KeyboardEvent} e event fired for every key press
      */
     const submitFromInput = (e) => {
-        if (e.key === 'Enter' && e.target.value !== '') {
+        const value = e.target.value.trim();
+        if (e.key === 'Enter' && value) {
             dispatch(updateEditLabelVisibility(false));
             dispatch(updateAnnotationContextVisibility(true));
-            dispatch(setInputLabel(''));
             Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
                 id: selectedAnnotation.id,
-                newCategory: newLabel,
+                newCategory: value,
             });
+            dispatch(setInputLabel(''));
         }
     };
 
@@ -139,7 +143,7 @@ const EditLabelComponent = () => {
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
-    const { BORDER_WIDTH } = constants.annotationStyle;
+    const { BORDER_WIDTH, LABEL_HEIGHT } = constants.annotationStyle;
     /**
      * Scales the given width by the zoom level and account for the detection border width
      *
@@ -153,7 +157,7 @@ const EditLabelComponent = () => {
     return (
         isVisible && (
             <EditLabelWrapper
-                top={position.y - INPUT_HEIGHT}
+                top={position.y - LABEL_HEIGHT}
                 left={position.x - BORDER_WIDTH / 2}
                 width={getWidth(selectedAnnotation?.bbox[2])}>
                 <InputContainer isListOpen={isListOpen}>
