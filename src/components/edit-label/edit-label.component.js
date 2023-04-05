@@ -167,6 +167,7 @@ const EditLabelComponent = () => {
         dispatch(setInputLabel(value.toUpperCase()));
     };
 
+    const { BORDER_WIDTH } = constants.annotationStyle;
     /**
      * Scales the given width by the zoom level and account for the detection border width
      *
@@ -174,8 +175,7 @@ const EditLabelComponent = () => {
      * @returns {number}
      */
     const getWidth = (width) => {
-        const { BORDER_WIDTH } = constants.annotationStyle;
-        return scaleByZoom(width) + scaleByZoom(BORDER_WIDTH);
+        return width ? scaleByZoom(width) + BORDER_WIDTH : 0;
     };
 
     if (isVisible) {
@@ -183,14 +183,14 @@ const EditLabelComponent = () => {
             <EditLabelWrapper
                 viewport={viewport}
                 top={position.y - INPUT_HEIGHT}
-                left={position.x - zoomLevel}
+                left={position.x - BORDER_WIDTH / 2}
                 width={getWidth(selectedAnnotation?.bbox[2])}
                 zoomLevel={zoomLevel}
                 fontSize={getFontSize(font)}>
                 <InputContainer isListOpen={isListOpen}>
                     <NewLabelInput
                         placeholder={isListOpen ? '' : placeholder}
-                        value={isListOpen ? '' : newLabel.toLowerCase()}
+                        value={newLabel.toLowerCase()}
                         onChange={handleLabelInputChange}
                         onKeyDown={submitFromInput}
                         disabled={isListOpen}
@@ -214,7 +214,7 @@ const EditLabelComponent = () => {
                             <ClearIcon
                                 width={'20px'}
                                 height={'20px'}
-                                color={'white'}
+                                color={'rgba(255, 255, 255, 0.5)'}
                             />
                         </ClearIconWrapper>
                     )}

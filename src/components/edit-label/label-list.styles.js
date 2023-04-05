@@ -3,9 +3,9 @@ import * as constants from '../../utils/enums/Constants';
 
 export const LabelListWrapper = styled.div`
     /* base container styles */
-    max-height: 150px;
+    max-height: 120px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     box-sizing: border-box;
     background: ${constants.colors.WHITE};
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
@@ -46,7 +46,10 @@ export const LabelList = styled.ul`
     /* styles for list elements */
 
     li {
-        padding: 3px 10px;
+        padding-left: 10px;
+        height: 24px;
+        display: flex;
+        align-items: center;
         font-family: Noto Sans JP, sans-serif;
         font-size: 13px;
         font-weight: 500;
