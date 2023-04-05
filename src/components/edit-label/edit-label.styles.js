@@ -65,7 +65,7 @@ export const NewLabelInput = styled.input`
     }
 
     &::placeholder {
-        color: #e0e0e0;
+        color: rgba(255, 255, 255, 0.5);
     }
 `;
 

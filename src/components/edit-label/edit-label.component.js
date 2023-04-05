@@ -39,11 +39,14 @@ const EditLabelComponent = () => {
     const isVisible = useSelector(getEditLabelVisible);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
     const newLabel = useSelector(getInputLabel);
-    const viewport = document.getElementById('imageContainer');
     const [position, setPosition] = useState({
         x: 0,
         y: 0,
     });
+    const labels = useSelector(getAnnotationCategories);
+    const inputField = useRef(null);
+    const [isListOpen, setIsListOpen] = useState(false);
+    const [showClearIcon, setShowClearIcon] = useState(false);
 
     useLayoutEffect(() => {
         if (isVisible) {
@@ -66,26 +69,8 @@ const EditLabelComponent = () => {
         }
     }, [isVisible, selectedAnnotation]);
 
-    const labels = useSelector(getAnnotationCategories);
-    const inputField = useRef(null);
-    const [isListOpen, setIsListOpen] = useState(false);
-    const [showClearIcon, setShowClearIcon] = useState(false);
-    const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
-    const fontSizeArr = fontArr[1].split('px');
-    fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
-    const newFontSize = fontSizeArr.join('px');
-    const font = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
-
     const formattedLabels = labels?.filter((label) => label !== 'unknown');
 
-    const placeholder = 'Input text';
-
-    // Clear input field when list is opened
-    useEffect(() => {
-        if (isListOpen) {
-            setShowClearIcon(false);
-        }
-    }, [isListOpen]);
     useEffect(() => {
         // When component is updated to be visible or the label list is closed, focus the text input field for user
         // input
@@ -144,19 +129,6 @@ const EditLabelComponent = () => {
     };
 
     /**
-     * Calculate the font size based on the given string
-     * @param {string} str
-     * @returns {number} fontSize
-     */
-    const getFontSize = (str) => {
-        let fontArr = str.split(' ');
-        let floatNum = parseFloat(fontArr[1]);
-        Math.floor(floatNum);
-        let fontSize = parseInt(floatNum);
-        return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
-    };
-
-    /**
      * Triggered when the edit label input field is changed. Shows and hides the clear icon
      *
      * @param {Event} e - change event object
@@ -178,18 +150,15 @@ const EditLabelComponent = () => {
         return width ? scaleByZoom(width) + BORDER_WIDTH : 0;
     };
 
-    if (isVisible) {
-        return (
+    return (
+        isVisible && (
             <EditLabelWrapper
-                viewport={viewport}
                 top={position.y - INPUT_HEIGHT}
                 left={position.x - BORDER_WIDTH / 2}
-                width={getWidth(selectedAnnotation?.bbox[2])}
-                zoomLevel={zoomLevel}
-                fontSize={getFontSize(font)}>
+                width={getWidth(selectedAnnotation?.bbox[2])}>
                 <InputContainer isListOpen={isListOpen}>
                     <NewLabelInput
-                        placeholder={isListOpen ? '' : placeholder}
+                        placeholder={'unknown'}
                         value={newLabel.toLowerCase()}
                         onChange={handleLabelInputChange}
                         onKeyDown={submitFromInput}
@@ -221,7 +190,10 @@ const EditLabelComponent = () => {
                 </InputContainer>
                 <ArrowIconWrapper
                     onClick={() => {
-                        setIsListOpen(!isListOpen);
+                        setIsListOpen((isListOpen) => {
+                            !isListOpen && setShowClearIcon(false);
+                            return !isListOpen;
+                        });
                     }}>
                     <ExpandIcon
                         direction={isListOpen ? 'up' : 'down'}
@@ -231,8 +203,8 @@ const EditLabelComponent = () => {
                     />
                 </ArrowIconWrapper>
             </EditLabelWrapper>
-        );
-    } else return null;
+        )
+    );
 };
 
 export default EditLabelComponent;

@@ -82,14 +82,13 @@ const ImageDisplayComponent = () => {
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
     const viewportRef = useRef(null);
     const annotations = useSelector(getAnnotations);
+    const annotationRef = useRef(annotations);
     const [pixelData, setPixelData] = useState(null);
     const [pixelType, setPixelType] = useState(null);
-    const [viewport, setViewport] = useState(null);
     const imageId = useSelector(getImageId);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mousePositionRef = useRef(mousePosition);
     const [error, setError] = useState('');
-    const annotationRef = useRef(annotations);
     const zoomLevel = useRef();
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const cornerstoneModeRef = useRef(cornerstoneMode);
@@ -110,6 +109,8 @@ const ImageDisplayComponent = () => {
     const editLabelDisplayInfo = useRef({
         timeout: null,
         pendingDisplay: false,
+        clientX: 0,
+        clientY: 0,
     });
     const isEditLabelVisible = useSelector(getEditLabelVisible);
     const setupCornerstoneJS = () => {
@@ -923,6 +924,26 @@ const ImageDisplayComponent = () => {
                                 300
                             );
                         }
+                    }}
+                    onMouseDown={({ clientX, clientY }) => {
+                        if (!isEditLabelVisible) return;
+                        // step 1: if the edit label is visible, save the mouse position
+                        dispatch(updateEditLabelVisibility(false));
+                        editLabelDisplayInfo.current.clientX = clientX;
+                        editLabelDisplayInfo.current.clientY = clientY;
+                        editLabelDisplayInfo.current.pendingDisplay = true;
+                    }}
+                    onMouseUp={(e) => {
+                        const { clientX, clientY, pendingDisplay } =
+                            editLabelDisplayInfo.current;
+                        // step 2: if the mouse position is different then we have a drag event
+                        if (
+                            (e.clientX !== clientX || e.clientY !== clientY) &&
+                            pendingDisplay
+                        ) {
+                            dispatch(updateEditLabelVisibility(true));
+                        }
+                        editLabelDisplayInfo.current.pendingDisplay = false;
                     }}
                     style={{
                         userSelect: 'none',
