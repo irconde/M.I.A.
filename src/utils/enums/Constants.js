@@ -32,6 +32,14 @@ export const annotationStyle = {
     INVALID_COLOR: colors.RED,
     LABEL_PADDING: 4,
     LABEL_FONT: 'bold 12px Noto Sans JP',
+    FONT_DETAILS: {
+        FAMILY: 'Noto Sans JP',
+        SIZE: 12,
+        WEIGHT: 'bold',
+        get(zoom = 1) {
+            return `${this.WEIGHT} ${this.SIZE / zoom}px ${this.FAMILY}`;
+        },
+    },
     LABEL_TEXT_COLOR: colors.WHITE,
     BORDER_WIDTH: 2,
 };

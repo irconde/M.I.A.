@@ -93,15 +93,16 @@ export default class Utils {
      * @param {Context} context - 2d canvas context
      * @param {string} labelText - Text content of the label
      * @param {number} padding - Blank space surrounding the text within the label
+     * @param {number} zoom - Current zoom level on canvas
      * @returns {{width: number, height: number}} - Label's dimensions
      */
-    static getTextLabelSize(context, labelText, padding) {
-        const textSize = context.measureText(labelText);
+    static getTextLabelSize(context, labelText, padding, zoom) {
+        const stringWidth = context.measureText(labelText).width;
         // Approximation to estimate the text height
         const lineHeight = context.measureText('M').width;
         return {
-            width: textSize.width + 2 * padding,
-            height: lineHeight + 2 * padding,
+            width: stringWidth + (2 * padding) / zoom,
+            height: lineHeight + (2 * padding) / zoom,
         };
     }
 

@@ -745,8 +745,10 @@ const ImageDisplayComponent = () => {
     };
 
     const renderAnnotations = (context, annotations) => {
-        context.font = constants.annotationStyle.LABEL_FONT;
-        context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
+        const { current: zoom } = zoomLevel;
+        const { LABEL_PADDING } = constants.annotationStyle;
+        context.font = constants.annotationStyle.FONT_DETAILS.get(zoom);
+        context.lineWidth = constants.annotationStyle.BORDER_WIDTH / zoom;
 
         for (let j = 0; j < annotations.length; j++) {
             if (
@@ -778,11 +780,6 @@ const ImageDisplayComponent = () => {
             context.strokeStyle = renderColor;
             context.fillStyle = renderColor;
 
-            const labelSize = Utils.getTextLabelSize(
-                context,
-                annotations[j].categoryName,
-                constants.annotationStyle.LABEL_PADDING
-            );
             context.strokeRect(
                 annotations[j].bbox[0],
                 annotations[j].bbox[1],
@@ -804,24 +801,30 @@ const ImageDisplayComponent = () => {
             context.globalAlpha = 1.0;
 
             // Label rendering
+            const { width, height } = Utils.getTextLabelSize(
+                context,
+                annotations[j].categoryName,
+                LABEL_PADDING,
+                zoom
+            );
+
             context.fillRect(
                 annotations[j].bbox[0],
-                annotations[j].bbox[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
+                annotations[j].bbox[1] - height,
+                width,
+                height
             );
             context.strokeRect(
                 annotations[j].bbox[0],
-                annotations[j].bbox[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
+                annotations[j].bbox[1] - height,
+                width,
+                height
             );
             context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 annotations[j].categoryName,
-                annotations[j].bbox[0] +
-                    constants.annotationStyle.LABEL_PADDING,
-                annotations[j].bbox[1] - constants.annotationStyle.LABEL_PADDING
+                annotations[j].bbox[0] + LABEL_PADDING / zoom,
+                annotations[j].bbox[1] - LABEL_PADDING / zoom
             );
         }
     };
