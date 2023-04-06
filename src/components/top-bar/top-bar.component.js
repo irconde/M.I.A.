@@ -16,13 +16,15 @@ import {
 } from './top-bar.styles';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import Tooltip from '@mui/material/Tooltip';
-import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
+import MenuFoldedIcon from '../../icons/top-bar/menu-folded-icon/menu-folded.icon';
+import MenuUnfoldedIcon from '../../icons/top-bar/menu-unfolded-icon/menu-unfolded.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 import { Channels, cornerstoneMode } from '../../utils/enums/Constants';
 import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
 import {
     clearAnnotationWidgets,
+    toggleSideMenu,
     updateCornerstoneMode,
     updateCurrFileName,
     updateFABVisibility,
@@ -53,6 +55,7 @@ const TopBarComponent = (props) => {
         25
     );
     const imagesPath = Utils.truncateFilePath(selectedImagesDirPath, 25);
+    const [isOpen, setIsOpen] = useState(true);
     const [fileState, setFileState] = useState({
         currentFileName: '',
         numberOfFiles: 0,
@@ -74,6 +77,11 @@ const TopBarComponent = (props) => {
             setFileState(args);
         });
     }, []);
+
+    const toggleClickHandler = () => {
+        setIsOpen(!isOpen);
+        dispatch(toggleSideMenu());
+    };
 
     return (
         <TopBarContainer id={'TopBar Container'}>
@@ -131,12 +139,20 @@ const TopBarComponent = (props) => {
                 </ContactIconsContainer>
                 <VerticalDivider />
                 <Tooltip title={'Fold/unfold Side Menu'}>
-                    <TopBarIconWrapper>
-                        <MenuToggleIcon
-                            width={'32px'}
-                            height={'32px'}
-                            color={'white'}
-                        />
+                    <TopBarIconWrapper onClick={toggleClickHandler}>
+                        {isOpen ? (
+                            <MenuUnfoldedIcon
+                                width={'32px'}
+                                height={'32px'}
+                                color={'white'}
+                            />
+                        ) : (
+                            <MenuFoldedIcon
+                                width={'32px'}
+                                height={'32px'}
+                                color={'white'}
+                            />
+                        )}
                     </TopBarIconWrapper>
                 </Tooltip>
             </IconsContainer>
