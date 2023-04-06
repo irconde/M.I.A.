@@ -1948,7 +1948,7 @@ class App extends Component {
                         boundingBoxArea > constants.BOUNDING_BOX_AREA_THRESHOLD
                     ) {
                         self.props.addDetection({
-                            algorithm: constants.OPERATOR,
+                            algorithm: constants.UNKNOWN,
                             boundingBox: coords,
                             className: data[0].class,
                             confidence: data[0].confidence,
@@ -2090,7 +2090,7 @@ class App extends Component {
                     ) {
                         let detUuid = uuidv4();
                         const newDetection = {
-                            algorithm: constants.OPERATOR,
+                            algorithm: constants.UNKNOWN,
                             boundingBox: coords,
                             className: data[0].class,
                             confidence: data[0].confidence,

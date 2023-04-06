@@ -12,7 +12,6 @@ const initialState = {
     editionMode: constants.editionMode.NO_TOOL,
     colorPickerVisible: false,
     editLabelVisibility: false,
-    inputLabel: '',
     zoomLevel: 0,
     currentFileName: '',
     sideMenuVisible: true,
@@ -50,9 +49,6 @@ const uiSlice = createSlice({
         },
         updateEditLabelVisibility: (state, action) => {
             state.editLabelVisibility = action.payload;
-        },
-        setInputLabel: (state, action) => {
-            state.inputLabel = action.payload;
         },
         clearAnnotationWidgets: (state, action) => {
             state.annotationContextPosition.top = 0;
@@ -97,7 +93,6 @@ export const {
     updateColorPickerVisibility,
     updateAnnotationContextVisibility,
     updateEditLabelVisibility,
-    setInputLabel,
     clearAnnotationWidgets,
     updateEditionMode,
     updateCornerstoneMode,
@@ -119,7 +114,6 @@ export const getEditionMode = (state) => state.ui.editionMode;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getEditLabelVisible = (state) => state.ui.editLabelVisibility;
 export const getZoomLevel = (state) => state.ui.zoomLevel;
-export const getInputLabel = (state) => state.ui.inputLabel;
 export const getCurrFileName = (state) => state.ui.currentFileName;
 
 export const getSideMenuVisible = (state) => state.ui.sideMenuVisible;

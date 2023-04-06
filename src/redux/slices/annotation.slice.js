@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import randomColor from 'randomcolor';
-import { Channels, SAVE_STATUSES } from '../../utils/enums/Constants';
+import { Channels, SAVE_STATUSES, UNKNOWN } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -382,7 +382,7 @@ const annotationSlice = createSlice({
 
             // Category lookup
             const foundCategoryIndex = state.categories.findIndex(
-                (category) => category.name.toLowerCase() === 'operator'
+                (category) => category.name.toLowerCase() === UNKNOWN
             );
             if (foundCategoryIndex === -1) {
                 if (state.categories.length > 0) {
@@ -392,11 +392,11 @@ const annotationSlice = createSlice({
                 } else {
                     newAnnotation.category_id = 1;
                 }
-                newAnnotation.categoryName = 'operator';
+                newAnnotation.categoryName = UNKNOWN;
                 state.categories.push({
-                    supercategory: 'operator',
+                    supercategory: UNKNOWN,
                     id: newAnnotation.category_id,
-                    name: 'operator',
+                    name: UNKNOWN,
                 });
             } else {
                 newAnnotation.category_id =
@@ -555,6 +555,8 @@ const annotationSlice = createSlice({
             );
             if (foundAnnotation !== undefined) {
                 foundAnnotation.categoryName = newCategory.toLowerCase();
+                state.selectedAnnotation.categoryName =
+                    newCategory.toLowerCase();
             }
             const foundCategory = state.categories.find(
                 (category) =>
@@ -565,7 +567,7 @@ const annotationSlice = createSlice({
                     state.categories.reduce((a, b) => (a.id > b.id ? a : b))
                         .id + 1;
                 state.categories.push({
-                    supercategory: 'operator',
+                    supercategory: UNKNOWN,
                     name: newCategory.toLowerCase(),
                     id: newId,
                 });

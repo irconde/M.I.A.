@@ -91,7 +91,7 @@ const SideMenuAlgorithmComponent = ({
     };
 
     let algorithmDisplay =
-        algorithm === constants.OPERATOR
+        algorithm === constants.UNKNOWN
             ? algorithm
             : constants.ALGORITHM + ' - ' + algorithm;
 
