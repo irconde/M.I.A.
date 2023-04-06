@@ -782,12 +782,9 @@ const ImageDisplayComponent = () => {
             context.strokeStyle = renderColor;
             context.fillStyle = renderColor;
 
-            context.strokeRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1],
-                annotations[j].bbox[2],
-                annotations[j].bbox[3]
-            );
+            const [x, y, w, h] = annotations[j].bbox;
+
+            context.strokeRect(x, y, w, h);
 
             context.globalAlpha = 0.5;
             if (annotations[j].segmentation.length > 0) {
@@ -811,7 +808,6 @@ const ImageDisplayComponent = () => {
                 LABEL_HEIGHT
             );
 
-            const [x, y] = annotations[j].bbox;
             context.fillRect(
                 x - context.lineWidth / 2,
                 y - height,
@@ -821,7 +817,7 @@ const ImageDisplayComponent = () => {
             context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
                 annotations[j].categoryName,
-                x + LABEL_PADDING.LEFT / zoom,
+                x + (LABEL_PADDING.LEFT - 1) / zoom,
                 y - LABEL_PADDING.BOTTOM / zoom
             );
         }

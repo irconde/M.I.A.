@@ -100,7 +100,7 @@ export default class Utils {
     static getTextLabelSize(context, text, padding, zoom, height = 28) {
         const stringWidth = context.measureText(text).width;
         return {
-            width: stringWidth + (2 * padding) / zoom,
+            width: stringWidth + (padding / zoom) * 2,
             height: height / zoom,
         };
     }

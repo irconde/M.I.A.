@@ -32,7 +32,7 @@ export const annotationStyle = {
     INVALID_COLOR: colors.RED,
     LABEL_PADDING: {
         LEFT: 10,
-        BOTTOM: 9,
+        BOTTOM: 8,
     },
     LABEL_FONT: 'bold 13px Noto Sans JP',
     FONT_DETAILS: {
