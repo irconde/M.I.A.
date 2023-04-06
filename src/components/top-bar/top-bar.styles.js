@@ -41,7 +41,7 @@ export const ContactIconsContainer = styled.div`
     justify-content: center;
     align-items: center;
     gap: 18px;
-    padding: 0 19px;
+    padding: 0 8px;
 `;
 
 export const ConnectionTypeInfo = styled.div`
@@ -52,6 +52,7 @@ export const ConnectionTypeInfo = styled.div`
 export const VerticalDivider = styled.div`
     border: 1px solid #5b5b5b;
     height: 17px;
+    margin: 0 11px;
 `;
 
 export const ImportDataContainer = styled.div`

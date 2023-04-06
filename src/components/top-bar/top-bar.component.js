@@ -48,6 +48,11 @@ const TopBarComponent = (props) => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
+    const annotationFilePath = Utils.truncateFilePath(
+        selectedAnnotationFile,
+        25
+    );
+    const imagesPath = Utils.truncateFilePath(selectedImagesDirPath, 25);
     const [fileState, setFileState] = useState({
         currentFileName: '',
         numberOfFiles: 0,
@@ -96,7 +101,7 @@ const TopBarComponent = (props) => {
                     />
                     <ConnectionTypeInfo>
                         IMAGES: &nbsp;
-                        {selectedImagesDirPath}
+                        {imagesPath}
                     </ConnectionTypeInfo>
                 </InfoWrapper>
                 <InfoWrapper>
@@ -107,7 +112,7 @@ const TopBarComponent = (props) => {
                     />
                     <ConnectionTypeInfo>
                         ANNOTATIONS: &nbsp;
-                        {selectedAnnotationFile}
+                        {annotationFilePath}
                     </ConnectionTypeInfo>
                 </InfoWrapper>
             </FragmentWrapper>
