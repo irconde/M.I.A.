@@ -173,7 +173,9 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
                 context.fillText(
                     data.categoryName,
-                    myCoords.x + constants.annotationStyle.LABEL_PADDING.LEFT,
+                    myCoords.x +
+                        constants.annotationStyle.LABEL_PADDING.LEFT -
+                        1,
                     myCoords.y - constants.annotationStyle.LABEL_PADDING.BOTTOM
                 );
                 // Polygon Mask Rendering
