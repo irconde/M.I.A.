@@ -7,56 +7,46 @@ export const TopBarContainer = styled.div`
     height: 3.375rem;
     background-color: #3a3a3a;
     top: 0;
-    width: 100%;
+    width: 100vw;
     z-index: 2;
     align-items: center;
-    justify-content: flex-end;
     color: white;
     box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
     font-family: 'Noto Sans JP', sans-serif;
     white-space: nowrap;
 `;
 
-export const TitleLabelContainer = styled.div`
-    position: absolute;
+export const IconsContainer = styled.div`
     display: flex;
     height: 3.375rem;
-    background-color: #3a3a3a;
-    left: 0;
-    top: 0;
-    width: 100%;
-    z-index: 1;
     align-items: center;
     color: white;
-    justify-content: center;
-    font-weight: 50;
-    font-size: 10pt;
-    box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    margin-right: 16px;
 `;
 
-export const ConnectionStatusIconsContainer = styled.div`
+export const FragmentWrapper = styled.div`
     position: absolute;
+    left: calc(${LAZY_SIDE_MENU_WIDTH} + 221px);
     display: flex;
-    height: 3.375rem;
-    left: 0;
-    top: 0;
-    width: 35%;
-    z-index: 1;
-    margin-left: 65%;
+    align-items: end;
+    gap: 32px;
+    font-size: 15px;
+`;
+
+export const ContactIconsContainer = styled.div`
+    display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-end;
-    color: white;
-    gap: 1rem;
-    cursor: pointer;
+    gap: 18px;
+    padding: 0 19px;
 `;
 
 export const ConnectionTypeInfo = styled.div`
     color: #c3c3c3;
-`;
-
-export const InfoDivider = styled.div`
-    color: #6a6a6a;
-    font-weight: bold;
+    line-height: 20px;
 `;
 
 export const VerticalDivider = styled.div`
@@ -71,8 +61,6 @@ export const ImportDataContainer = styled.div`
     align-items: center;
     justify-content: center;
     position: fixed;
-    float: left;
-    left: 0;
     background-color: #484848;
     width: ${LAZY_SIDE_MENU_WIDTH};
 `;
@@ -84,30 +72,15 @@ export const ImportDataText = styled.div`
     font-size: medium;
 `;
 
-export const FragmentWrapper = styled.div`
+export const TopBarIconWrapper = styled.div`
     display: flex;
-    align-items: end;
-    gap: 32px;
+    justify-content: center;
+    align-items: center;
 `;
-
-export const TopBarIconWrapper = styled(FragmentWrapper)``;
 export const ImportIconWrapper = styled.div`
     margin-right: 1rem;
     margin-left: 0;
     display: inherit;
-`;
-
-export const MenuIconWrapper = styled.div`
-    margin: 0.5rem 1.5rem 0.5rem -0.5rem;
-    cursor: pointer;
-`;
-
-export const TopBarCogIconWrapper = styled.div`
-    width: fit-content;
-    height: fit-content;
-    display: flex;
-    margin: auto 0.75rem;
-    cursor: pointer;
 `;
 
 export const InfoWrapper = styled.div`

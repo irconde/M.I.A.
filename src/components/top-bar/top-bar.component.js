@@ -2,19 +2,17 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    ConnectionStatusIconsContainer,
+    IconsContainer,
     ConnectionTypeInfo,
     FragmentWrapper,
     ImportDataContainer,
     ImportDataText,
     ImportIconWrapper,
-    InfoDivider,
     InfoWrapper,
-    MenuIconWrapper,
-    TitleLabelContainer,
     TopBarContainer,
     TopBarIconWrapper,
     VerticalDivider,
+    ContactIconsContainer,
 } from './top-bar.styles';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import Tooltip from '@mui/material/Tooltip';
@@ -73,68 +71,70 @@ const TopBarComponent = (props) => {
     }, []);
 
     return (
-        <TopBarContainer>
-            <TitleLabelContainer>
-                <ImportDataContainer onClick={props.openImportModal}>
-                    <ImportDataText>IMPORT DATA</ImportDataText>
-                    <Tooltip title={'Import Data'}>
-                        <ImportIconWrapper>
-                            <ImportIcon
-                                color={'#ffffff'}
-                                width={'24px'}
-                                height={'24px'}
-                            />
-                        </ImportIconWrapper>
-                    </Tooltip>
-                </ImportDataContainer>
-
-                <FragmentWrapper id={'wrapper'}>
-                    <InfoWrapper>
-                        <ImagesIcon
+        <TopBarContainer id={'TopBar Container'}>
+            <ImportDataContainer
+                id={'Import Data Container'}
+                onClick={props.openImportModal}>
+                <ImportDataText>IMPORT DATA</ImportDataText>
+                <Tooltip title={'Import Data'}>
+                    <ImportIconWrapper>
+                        <ImportIcon
+                            color={'#ffffff'}
                             width={'24px'}
                             height={'24px'}
-                            color={'#c6c6c6'}
                         />
-                        <ConnectionTypeInfo>
-                            IMAGES: &nbsp;
-                            {selectedImagesDirPath}
-                        </ConnectionTypeInfo>
-                    </InfoWrapper>
-                    <InfoWrapper>
-                        <AnnotationIcon
-                            width={'24px'}
-                            height={'24px'}
-                            color={'#c6c6c6'}
-                        />
-                        <ConnectionTypeInfo>
-                            ANNOTATIONS: &nbsp;
-                            {selectedAnnotationFile}
-                        </ConnectionTypeInfo>
-                    </InfoWrapper>
-                </FragmentWrapper>
-            </TitleLabelContainer>
-
-            <ConnectionStatusIconsContainer>
-                <VerticalDivider />
-                <TopBarIconWrapper onClick={props.openAboutModal}>
-                    <InfoIcon {...iconProps} />
-                </TopBarIconWrapper>
-                <Tooltip title={'Contact Us'}>
-                    <TopBarIconWrapper onClick={props.openContactModal}>
-                        <ChatIcon {...iconProps} />
-                    </TopBarIconWrapper>
+                    </ImportIconWrapper>
                 </Tooltip>
+            </ImportDataContainer>
+
+            <FragmentWrapper id={'Fragment Wrapper'}>
+                <InfoWrapper>
+                    <ImagesIcon
+                        width={'24px'}
+                        height={'24px'}
+                        color={'#c6c6c6'}
+                    />
+                    <ConnectionTypeInfo>
+                        IMAGES: &nbsp;
+                        {selectedImagesDirPath}
+                    </ConnectionTypeInfo>
+                </InfoWrapper>
+                <InfoWrapper>
+                    <AnnotationIcon
+                        width={'24px'}
+                        height={'24px'}
+                        color={'#c6c6c6'}
+                    />
+                    <ConnectionTypeInfo>
+                        ANNOTATIONS: &nbsp;
+                        {selectedAnnotationFile}
+                    </ConnectionTypeInfo>
+                </InfoWrapper>
+            </FragmentWrapper>
+
+            <IconsContainer>
+                <VerticalDivider />
+                <ContactIconsContainer>
+                    <TopBarIconWrapper onClick={props.openAboutModal}>
+                        <InfoIcon {...iconProps} />
+                    </TopBarIconWrapper>
+                    <Tooltip title={'Contact Us'}>
+                        <TopBarIconWrapper onClick={props.openContactModal}>
+                            <ChatIcon {...iconProps} />
+                        </TopBarIconWrapper>
+                    </Tooltip>
+                </ContactIconsContainer>
                 <VerticalDivider />
                 <Tooltip title={'Fold/unfold Side Menu'}>
-                    <MenuIconWrapper>
+                    <TopBarIconWrapper>
                         <MenuToggleIcon
                             width={'32px'}
                             height={'32px'}
                             color={'white'}
                         />
-                    </MenuIconWrapper>
+                    </TopBarIconWrapper>
                 </Tooltip>
-            </ConnectionStatusIconsContainer>
+            </IconsContainer>
         </TopBarContainer>
     );
 };
