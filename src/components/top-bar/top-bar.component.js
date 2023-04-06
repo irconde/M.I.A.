@@ -9,6 +9,7 @@ import {
     ImportDataText,
     ImportIconWrapper,
     InfoDivider,
+    InfoWrapper,
     MenuIconWrapper,
     TitleLabelContainer,
     TopBarContainer,
@@ -29,11 +30,13 @@ import {
     updateFABVisibility,
 } from '../../redux/slices/ui.slice';
 import Utils from '../../utils/general/Utils';
+import ImagesIcon from '../../icons/shared/images-icon/images.icon';
+import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
-    width: '32px',
-    height: '32px',
+    width: '24px',
+    height: '24px',
     color: '#ffffff',
 };
 
@@ -86,24 +89,33 @@ const TopBarComponent = (props) => {
                 </ImportDataContainer>
 
                 <FragmentWrapper id={'wrapper'}>
-                    <InfoDivider>&#8427;</InfoDivider>
-                    &nbsp;&nbsp;
-                    <ConnectionTypeInfo>Connected to </ConnectionTypeInfo>
-                    &nbsp;&nbsp;
-                    {selectedImagesDirPath} &nbsp;
-                    {fileState.currentFileName && (
-                        <>
-                            <InfoDivider>/</InfoDivider>
-                            &nbsp;
-                            <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
-                        </>
-                    )}
-                    &nbsp;&nbsp;
+                    <InfoWrapper>
+                        <ImagesIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'#c6c6c6'}
+                        />
+                        <ConnectionTypeInfo>
+                            IMAGES: &nbsp;
+                            {selectedImagesDirPath}
+                        </ConnectionTypeInfo>
+                    </InfoWrapper>
+                    <InfoWrapper>
+                        <AnnotationIcon
+                            width={'24px'}
+                            height={'24px'}
+                            color={'#c6c6c6'}
+                        />
+                        <ConnectionTypeInfo>
+                            ANNOTATIONS: &nbsp;
+                            {selectedAnnotationFile}
+                        </ConnectionTypeInfo>
+                    </InfoWrapper>
                 </FragmentWrapper>
-                <span>{fileState.currentFileName} &nbsp;</span>
             </TitleLabelContainer>
 
             <ConnectionStatusIconsContainer>
+                <VerticalDivider />
                 <TopBarIconWrapper onClick={props.openAboutModal}>
                     <InfoIcon {...iconProps} />
                 </TopBarIconWrapper>
@@ -113,9 +125,13 @@ const TopBarComponent = (props) => {
                     </TopBarIconWrapper>
                 </Tooltip>
                 <VerticalDivider />
-                <Tooltip title={'Fold/unfold menu'}>
+                <Tooltip title={'Fold/unfold Side Menu'}>
                     <MenuIconWrapper>
-                        <MenuToggleIcon {...iconProps} />
+                        <MenuToggleIcon
+                            width={'32px'}
+                            height={'32px'}
+                            color={'white'}
+                        />
                     </MenuIconWrapper>
                 </Tooltip>
             </ConnectionStatusIconsContainer>

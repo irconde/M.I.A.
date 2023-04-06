@@ -13,7 +13,7 @@ export const TopBarContainer = styled.div`
     justify-content: flex-end;
     color: white;
     box-shadow: 0.1rem 0.1rem 0.5rem 0.3rem rgba(0, 0, 0, 0.5);
-    font-family: 'Noto Sans', sans-serif;
+    font-family: 'Noto Sans JP', sans-serif;
     white-space: nowrap;
 `;
 
@@ -61,7 +61,7 @@ export const InfoDivider = styled.div`
 
 export const VerticalDivider = styled.div`
     border: 1px solid #5b5b5b;
-    height: 50%;
+    height: 17px;
 `;
 
 export const ImportDataContainer = styled.div`
@@ -87,6 +87,7 @@ export const ImportDataText = styled.div`
 export const FragmentWrapper = styled.div`
     display: flex;
     align-items: end;
+    gap: 32px;
 `;
 
 export const TopBarIconWrapper = styled(FragmentWrapper)``;
@@ -107,4 +108,11 @@ export const TopBarCogIconWrapper = styled.div`
     display: flex;
     margin: auto 0.75rem;
     cursor: pointer;
+`;
+
+export const InfoWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
 `;
