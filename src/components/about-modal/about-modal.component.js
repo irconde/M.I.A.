@@ -7,7 +7,6 @@ import {
     ModalRoot,
     modalTheme,
     StyledPaper,
-    SummaryDivider,
     TeamAndLibrary,
     TeamLibraryHeader,
     TeamLibraryList,
@@ -18,7 +17,7 @@ import { Modal, ThemeProvider } from '@mui/material';
 import TeamIcon from '../../icons/settings-modal/team-icon/team.icon.component';
 import CodeBracketsIcon from '../../icons/settings-modal/code-brackets-icon/code-brackets.icon.component';
 import { ReactComponent as AppIcon } from '../../icons/app-logo.icon.svg';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
 
 const shell = window.require('electron').shell;
 

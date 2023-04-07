@@ -42,7 +42,7 @@ export const StyledModal = styled.div`
 export const ModalTitle = styled.h2`
     font-family: Noto Sans JP, serif;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 500;
     font-stretch: normal;
     font-style: normal;
     line-height: normal;

@@ -18,7 +18,7 @@ import {
     closeAppAndSaveAnnotations,
     getHasAnyTempOrCurrentChanged,
 } from '../../redux/slices/annotation.slice';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import WarningIcon from '../../icons/close-modal/warning-icon/warning.icon';
 import FabIcon from '../../icons/close-modal/fab-icon/fab.icon';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';

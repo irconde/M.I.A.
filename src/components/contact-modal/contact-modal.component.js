@@ -1,57 +1,31 @@
-import { Modal, TextField, ThemeProvider } from '@mui/material';
-import {
-    CloseIconWrapper,
-    ModalRoot,
-    modalTheme,
-    StyledPaper,
-} from '../about-modal/about-modal.styles';
+import { Modal, ThemeProvider } from '@mui/material';
+import { modalTheme } from '../about-modal/about-modal.styles';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import {
-    ContactHeader,
-    ContactHeaderInfo,
-    ContactHeaderParagraph,
+    CloseIconWrapper,
     ContactTitle,
-    FormContainer,
-    FormFieldFull,
-    FormFieldShort,
-    RequiredLabel,
+    FooterText,
+    FormField,
+    ModalIcon,
+    StyledForm,
+    StyledInput,
+    StyledPaper,
+    StyledRow,
     SubmitButton,
 } from './contact-modal.styles';
-import LoadingIcon from '../../icons/contact-modal/loading-icon/loading.icon';
 import { Channels } from '../../utils/enums/Constants';
-import CloseIcon from '../../icons/settings-modal/close-icon/close.icon';
+import CloseIcon from '../../icons/shared/close-icon/close.icon';
+import { CONTACT_MODAL_ROWS } from './rows';
+import SendIcon from '../../icons/contact-modal/send-icon/send.icon';
+import useValidate from './useValidate';
+import SpinnerIcon from '../../icons/shared/spinner-icon/spinner.icon';
+import CheckMarkIcon from '../../icons/shared/check-mark-icon/check-mark.icon';
+import ErrorIcon from '../../icons/contact-modal/error-icon/error.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
-const FIELDS = [
-    {
-        name: 'First Name',
-        placeholder: 'First Name',
-        sm: true,
-    },
-    {
-        name: 'Last Name',
-        placeholder: 'Last Name',
-        sm: true,
-    },
-    { name: 'Email', type: 'email', placeholder: 'Email' },
-    {
-        name: 'Institution Name',
-        placeholder: 'Institution Name',
-    },
-    {
-        name: 'Institution Website',
-        required: false,
-        placeholder: 'Institution Website',
-    },
-    {
-        name: 'Description',
-        placeholder: 'Description',
-        multiline: true,
-        rows: 4,
-    },
-];
+const iconProps = { width: '20px', height: '20px', color: 'white' };
 
 const ContactModal = ({ open, closeModal }) => {
     const [status, setStatus] = useState({
@@ -59,8 +33,15 @@ const ContactModal = ({ open, closeModal }) => {
         submitting: false,
         error: '',
     });
+    const [error, validate, resetError] = useValidate();
+
+    const handleClose = () => {
+        if (!status.submitting) closeModal();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (status.submitting || !validate(e.target)) return;
         const form = new FormData(e.target);
         const formData = new URLSearchParams(form).toString();
         setStatus({
@@ -100,100 +81,111 @@ const ContactModal = ({ open, closeModal }) => {
         }
     };
 
+    const getDisabled = () =>
+        !!(status.submitting || status.success || status.error);
+
     return (
         <ThemeProvider theme={modalTheme}>
             <Modal
                 open={open}
-                onClose={closeModal}
+                onClose={handleClose}
                 aria-labelledby="contact-window"
                 aria-describedby="send information to the development team">
                 <StyledPaper>
-                    <ModalRoot>
-                        <ContactHeader>
-                            <ContactHeaderInfo>
-                                <ContactTitle>Contact Us</ContactTitle>
-                                <ContactHeaderParagraph error={status.error}>
-                                    {status.error
-                                        ? status.error
-                                        : 'Your feedback will help us improve the user experience.'}
-                                </ContactHeaderParagraph>
-                            </ContactHeaderInfo>
-                            <CloseIconWrapper
-                                onClick={closeModal}
-                                style={{ position: 'absolute', right: 0 }}>
-                                <CloseIcon
-                                    width={'32px'}
-                                    height={'32px'}
-                                    color={'white'}
-                                />
-                            </CloseIconWrapper>
-                        </ContactHeader>
-                        <form onSubmit={handleSubmit}>
-                            <FormContainer>
-                                {FIELDS.map(
+                    <ContactTitle>
+                        CONTACT US
+                        <CloseIconWrapper onClick={handleClose}>
+                            <CloseIcon
+                                width={'24px'}
+                                height={'24px'}
+                                color={'white'}
+                            />
+                        </CloseIconWrapper>
+                    </ContactTitle>
+
+                    <StyledForm
+                        onSubmit={handleSubmit}
+                        disabled={getDisabled()}>
+                        {CONTACT_MODAL_ROWS.map(({ Icon, inputs }, i) => (
+                            <StyledRow key={i}>
+                                {Icon && (
+                                    <ModalIcon>
+                                        <Icon {...iconProps} />
+                                    </ModalIcon>
+                                )}
+                                {inputs.map(
                                     ({
-                                        required = true,
                                         name,
                                         placeholder,
-                                        variant = 'outlined',
+                                        width,
+                                        required = true,
+                                        variant = 'standard',
                                         type = 'text',
                                         multiline = false,
                                         rows = 1,
-                                        sm = false,
-                                    }) => {
-                                        const textField = (
-                                            <TextField
+                                    }) => (
+                                        <FormField key={name} width={width}>
+                                            <StyledInput
                                                 required={required}
                                                 name={name}
-                                                placeholder={`${placeholder}${
-                                                    required ? '*' : ''
-                                                }`}
                                                 variant={variant}
                                                 type={type}
                                                 multiline={multiline}
                                                 rows={rows}
-                                                onChange={() =>
-                                                    setStatus({
-                                                        ...status,
-                                                        error: '',
-                                                    })
+                                                disabled={getDisabled()}
+                                                error={error.name === name}
+                                                placeholder={`${placeholder}${
+                                                    required ? '*' : ''
+                                                }`}
+                                                helperText={
+                                                    error.name === name
+                                                        ? error.text
+                                                        : ''
+                                                }
+                                                onFocus={() =>
+                                                    error.name === name &&
+                                                    resetError()
                                                 }
                                             />
-                                        );
-                                        return sm ? (
-                                            <FormFieldShort key={name}>
-                                                {textField}
-                                            </FormFieldShort>
-                                        ) : (
-                                            <FormFieldFull key={name}>
-                                                {textField}
-                                            </FormFieldFull>
-                                        );
-                                    }
+                                        </FormField>
+                                    )
                                 )}
-                                <RequiredLabel>* required</RequiredLabel>
-                                <SubmitButton
-                                    $success={status.success}
-                                    $submitting={status.submitting}
-                                    type={'submit'}
-                                    variant="contained">
-                                    {status.submitting ? (
-                                        <LoadingIcon
-                                            width={'24px'}
-                                            height={'24px'}
-                                            color={'white'}
-                                        />
-                                    ) : status.success === null ? (
-                                        'SUBMIT'
-                                    ) : status.success ? (
-                                        'SENT'
-                                    ) : (
-                                        'FAILED'
-                                    )}
-                                </SubmitButton>
-                            </FormContainer>
-                        </form>
-                    </ModalRoot>
+                            </StyledRow>
+                        ))}
+                        <FooterText error={status.error}>
+                            {status.error
+                                ? 'An unexpected error occurred. Try it again, or wait a few minutes'
+                                : '*Required fields'}
+                        </FooterText>
+                        <SubmitButton
+                            $success={status.success}
+                            $submitting={status.submitting}
+                            $error={status.error}
+                            type={'submit'}
+                            variant="contained">
+                            {status.submitting ? (
+                                <>
+                                    SENDING MESSAGE
+                                    <SpinnerIcon {...iconProps} />
+                                </>
+                            ) : status.success === null ? (
+                                <>
+                                    SEND MESSAGE
+                                    <SendIcon {...iconProps} />
+                                </>
+                            ) : status.success ? (
+                                <>
+                                    MESSAGE SENT
+                                    <CheckMarkIcon {...iconProps} />
+                                </>
+                            ) : (
+                                <>
+                                    SUBMISSION FAILED
+                                    <ErrorIcon {...iconProps} />
+                                </>
+                            )}
+                        </SubmitButton>
+                    </StyledForm>
                 </StyledPaper>
             </Modal>
         </ThemeProvider>
