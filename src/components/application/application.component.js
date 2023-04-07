@@ -6,7 +6,6 @@ import ContactModal from '../contact-modal/contact-modal.component';
 import LazyImageMenuComponent from '../lazy-image/lazy-image-menu.component';
 import SideMenuComponent from '../side-menu/side-menu.component';
 import AnnotationContextMenuComponent from '../annotation-context/annotation-context-menu.component';
-import ColorPickerComponent from '../color/color-picker.component';
 import EditLabelComponent from '../edit-label/edit-label.component';
 import BoundPolyFABComponent from '../fab/bound-poly-fab.component';
 import SaveButtonComponent from '../side-menu/buttons/save-button.component';
@@ -51,7 +50,6 @@ function ApplicationComponent({ openImportModal }) {
             <LazyImageMenuComponent />
             <SideMenuComponent />
             <AnnotationContextMenuComponent />
-            <ColorPickerComponent />
             <EditLabelComponent />
             <BoundPolyFABComponent />
             <SaveButtonComponent />

@@ -35,6 +35,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
+import ColorPickerComponent from '../color/color-picker.component';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific
@@ -303,6 +304,7 @@ const AnnotationContextMenuComponent = () => {
                         </DeleteWidget>
                     </Tooltip>
                 </FlexContainer>
+                <ColorPickerComponent />
             </Positioner>
         );
     } else {
