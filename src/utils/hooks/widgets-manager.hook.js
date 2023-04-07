@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 function useWidgetsManager() {
     const isEditLabelVisible = useSelector(getEditLabelVisible);
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
+
     const dispatch = useDispatch();
     const widgetsDisplay = useRef({
         timeout: null,
@@ -57,6 +58,7 @@ function useWidgetsManager() {
             text: isEditLabelVisible,
             context: isAnnotationContextVisible,
         };
+
         isEditLabelVisible && dispatch(updateEditLabelVisibility(false));
         isAnnotationContextVisible &&
             dispatch(updateAnnotationContextVisibility(false));

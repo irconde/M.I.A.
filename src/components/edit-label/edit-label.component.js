@@ -55,7 +55,11 @@ const EditLabelComponent = () => {
         const horizontalGap = offsetLeft / zoomLevel;
         const verticalGap = offsetTop / zoomLevel;
 
-        setValue(selectedAnnotation.categoryName);
+        setValue(
+            selectedAnnotation.categoryName === UNKNOWN
+                ? ''
+                : selectedAnnotation.categoryName
+        );
         inputRef.current.focus();
 
         try {
