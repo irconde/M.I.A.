@@ -853,6 +853,20 @@ export default class Utils {
     }
 
     /**
+     *
+     * @param string {string}
+     * @param count {number}
+     * @return {string|*}
+     */
+    static limitCharCount(string, count = 16) {
+        if (string.length > count) {
+            return string.slice(0, count) + '...';
+        } else {
+            return string;
+        }
+    }
+
+    /**
      * Calculates the coordinates of the bounding box enclosing a given polygon
      *
      * @param {Array<number>} polygonData - List of handles, i.e., the vertices, of a polygon

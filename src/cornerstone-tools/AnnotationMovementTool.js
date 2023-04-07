@@ -94,8 +94,6 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
 
         const color = constants.annotationStyle.NORMAL_COLOR;
 
-        const zoom = this.options.zoomLevel;
-
         draw(context, (context) => {
             // If we have tool data for this element - iterate over each set and draw it
             for (let i = 0; i < toolData.data.length; i++) {
@@ -157,9 +155,10 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 context.strokeStyle = data.renderColor;
                 context.fillStyle = data.renderColor;
 
+                const labelText = Utils.limitCharCount(data.categoryName);
                 const labelSize = Utils.getTextLabelSize(
                     context,
-                    data.categoryName,
+                    labelText,
                     constants.annotationStyle.LABEL_PADDING.LEFT,
                     1,
                     constants.annotationStyle.LABEL_HEIGHT
@@ -172,7 +171,7 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                 );
                 context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
                 context.fillText(
-                    data.categoryName,
+                    labelText,
                     myCoords.x +
                         constants.annotationStyle.LABEL_PADDING.LEFT -
                         1,

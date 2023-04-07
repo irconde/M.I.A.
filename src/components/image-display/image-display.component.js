@@ -743,9 +743,10 @@ const ImageDisplayComponent = () => {
             context.globalAlpha = 1.0;
 
             // Label rendering
+            const labelText = Utils.limitCharCount(annotations[j].categoryName);
             const { width, height } = Utils.getTextLabelSize(
                 context,
-                annotations[j].categoryName,
+                labelText,
                 LABEL_PADDING.LEFT,
                 zoom,
                 LABEL_HEIGHT
@@ -759,7 +760,7 @@ const ImageDisplayComponent = () => {
             );
             context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
-                annotations[j].categoryName,
+                labelText,
                 x + (LABEL_PADDING.LEFT - 1) / zoom,
                 y - LABEL_PADDING.BOTTOM / zoom
             );

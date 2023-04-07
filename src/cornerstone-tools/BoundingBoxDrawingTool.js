@@ -87,7 +87,7 @@ export default class BoundingBoxDrawingTool extends BaseAnnotationTool {
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
         const zoom = this.options.zoomLevel;
-        const lineWidth = constants.annotationStyle.BORDER_WIDTH * zoom;
+        const lineWidth = constants.annotationStyle.BORDER_WIDTH;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
