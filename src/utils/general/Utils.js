@@ -622,15 +622,15 @@ export default class Utils {
      * @return {{top, left}}
      */
     static calculateAnnotationContextPosition(cornerstone, bbox, viewport) {
-        const gap = 5;
+        const GAP = 5;
         const width = bbox[2];
         const height = bbox[3];
         const { x, y } = cornerstone.pixelToCanvas(viewport, {
             x: bbox[0] + width / 2,
-            y: bbox[1] + height + gap,
+            y: bbox[1] + height,
         });
 
-        return { left: x, top: y };
+        return { left: x, top: y + GAP };
     }
 
     /**
