@@ -48,7 +48,7 @@ const EditLabelComponent = () => {
 
     // runs when the input widget becomes visible
     useLayoutEffect(() => {
-        if (!isVisible) return setIsListOpen(false);
+        if (!isVisible || !selectedAnnotation) return setIsListOpen(false);
         const newViewport = document.getElementById('imageContainer');
         if (newViewport === null) return;
         const { offsetLeft, offsetTop } = newViewport;
@@ -60,8 +60,8 @@ const EditLabelComponent = () => {
 
         try {
             const coordinates = cornerstone.pixelToCanvas(newViewport, {
-                x: selectedAnnotation?.bbox[0] + horizontalGap,
-                y: selectedAnnotation?.bbox[1] + verticalGap,
+                x: selectedAnnotation.bbox[0] + horizontalGap,
+                y: selectedAnnotation.bbox[1] + verticalGap,
             });
             setPosition(coordinates);
         } catch (e) {

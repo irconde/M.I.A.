@@ -87,6 +87,27 @@ const SideMenuComponent = () => {
             [categoryName]: !prevExpandedCategories[categoryName],
         }));
 
+    const handleAnnotationNameClick = (annotation) => {
+        if (annotation.selected === false) {
+            const viewport = document.getElementById('imageContainer');
+            if (viewport !== null) {
+                const { top, left } = Utils.calculateAnnotationContextPosition(
+                    cornerstone,
+                    annotation.bbox,
+                    viewport
+                );
+                dispatch(
+                    updateAnnotationContextPosition({
+                        top,
+                        left,
+                    })
+                );
+            }
+        }
+        dispatch(updateCornerstoneMode(cornerstoneMode.EDITION));
+        Utils.dispatchAndUpdateImage(dispatch, selectAnnotation, annotation.id);
+    };
+
     if (annotations.length > 0) {
         return (
             <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
@@ -232,48 +253,11 @@ const SideMenuComponent = () => {
                                                                 ? 'white'
                                                                 : 'gray'
                                                         }
-                                                        onClick={() => {
-                                                            if (
-                                                                annotation.selected ===
-                                                                false
-                                                            ) {
-                                                                const viewport =
-                                                                    document.getElementById(
-                                                                        'imageContainer'
-                                                                    );
-                                                                if (
-                                                                    viewport !==
-                                                                    null
-                                                                ) {
-                                                                    const {
-                                                                        x,
-                                                                        y,
-                                                                    } = Utils.calculateAnnotationContextPosition(
-                                                                        cornerstone,
-                                                                        annotation,
-                                                                        viewport
-                                                                    );
-                                                                    dispatch(
-                                                                        updateAnnotationContextPosition(
-                                                                            {
-                                                                                top: x,
-                                                                                left: y,
-                                                                            }
-                                                                        )
-                                                                    );
-                                                                }
-                                                            }
-                                                            dispatch(
-                                                                updateCornerstoneMode(
-                                                                    cornerstoneMode.EDITION
-                                                                )
-                                                            );
-                                                            Utils.dispatchAndUpdateImage(
-                                                                dispatch,
-                                                                selectAnnotation,
-                                                                annotation.id
-                                                            );
-                                                        }}
+                                                        onClick={() =>
+                                                            handleAnnotationNameClick(
+                                                                annotation
+                                                            )
+                                                        }
                                                         style={{
                                                             marginLeft:
                                                                 '2.5rem',

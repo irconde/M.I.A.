@@ -614,12 +614,14 @@ export default class Utils {
         return bbox;
     }
 
-    static calculateAnnotationContextPosition(
-        cornerstone,
-        bbox,
-        viewport,
-        zoomLevel
-    ) {
+    /**
+     *
+     * @param cornerstone
+     * @param bbox {Array<number>}
+     * @param viewport
+     * @return {{top, left}}
+     */
+    static calculateAnnotationContextPosition(cornerstone, bbox, viewport) {
         const gap = 5;
         const width = bbox[2];
         const height = bbox[3];

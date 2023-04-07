@@ -36,19 +36,18 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
-    getEditLabelVisible,
     toggleSideMenu,
     updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
-    updateEditLabelVisibility,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
 import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
 import AnnotationMovementTool from '../../cornerstone-tools/AnnotationMovementTool';
+import useWidgetsManager from '../../utils/hooks/widgets-manager.hook';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -106,13 +105,10 @@ const ImageDisplayComponent = () => {
     const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
     const maxImageValues = useSelector(getMaxImageValues);
     const maxImageValuesRef = useRef(maxImageValues);
-    const editLabelDisplayInfo = useRef({
-        timeout: null,
-        pendingDisplay: false,
-        clientX: 0,
-        clientY: 0,
-    });
-    const isEditLabelVisible = useSelector(getEditLabelVisible);
+    const [handleWheel, handleMouseDown, handleMouseUp] = useWidgetsManager(
+        viewportRef.current
+    );
+
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -561,16 +557,8 @@ const ImageDisplayComponent = () => {
                         }
                         bbox[2] = bbox[2] - bbox[0];
                         bbox[3] = bbox[3] - bbox[1];
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
+
+                        renderAnnotationContextMenu(bbox);
                     }
                 } else if (
                     editionModeRef.current === constants.editionMode.MOVE
@@ -587,16 +575,7 @@ const ImageDisplayComponent = () => {
                             handles.end.x - handles.start.x,
                             handles.end.y - handles.start.y,
                         ];
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
+                        renderAnnotationContextMenu(bbox);
                     }
                 } else if (
                     editionModeRef.current === constants.editionMode.POLYGON
@@ -609,26 +588,9 @@ const ImageDisplayComponent = () => {
                         const { data } = toolState;
                         const { handles } = data[0];
                         const bbox = Utils.calculateBoundingBox(handles.points);
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
+                        renderAnnotationContextMenu(bbox);
                     }
                 }
-            } else {
-                const { top, left } = Utils.calculateAnnotationContextPosition(
-                    cornerstone,
-                    selectedAnnotationRef.current.bbox,
-                    viewportRef.current,
-                    zoomLevel.current
-                );
-                dispatch(updateAnnotationContextPosition({ top, left }));
             }
         } else {
             if (isAnnotationContextVisibleRef.current) {
@@ -695,8 +657,7 @@ const ImageDisplayComponent = () => {
                         updateCornerstoneMode(constants.cornerstoneMode.EDITION)
                     );
                     renderAnnotationContextMenu(
-                        event,
-                        annotationRef.current[clickedPos]
+                        annotationRef.current[clickedPos].bbox
                     );
                 } else {
                     dispatch(clearAnnotationSelection());
@@ -714,13 +675,12 @@ const ImageDisplayComponent = () => {
         [annotationRef]
     );
 
-    const renderAnnotationContextMenu = (event, annotation) => {
-        if (annotation !== null && annotation !== undefined) {
+    const renderAnnotationContextMenu = (bbox) => {
+        if (bbox !== null && bbox !== undefined) {
             const { top, left } = Utils.calculateAnnotationContextPosition(
                 cornerstone,
-                annotation,
-                viewportRef.current,
-                zoomLevel.current
+                bbox,
+                viewportRef.current
             );
             dispatch(
                 updateAnnotationContextPosition({
@@ -900,44 +860,9 @@ const ImageDisplayComponent = () => {
                     id="viewerContainer"
                     onContextMenu={(e) => e.preventDefault()}
                     className="disable-selection noIbar"
-                    onWheel={() => {
-                        if (isEditLabelVisible) {
-                            dispatch(updateEditLabelVisibility(false));
-                            editLabelDisplayInfo.current.pendingDisplay = true;
-                        }
-
-                        if (editLabelDisplayInfo.current.pendingDisplay) {
-                            clearTimeout(editLabelDisplayInfo.current.timeout);
-                            editLabelDisplayInfo.current.timeout = setTimeout(
-                                () => {
-                                    // runs when done scrolling
-                                    dispatch(updateEditLabelVisibility(true));
-                                    editLabelDisplayInfo.current.pendingDisplay = false;
-                                },
-                                300
-                            );
-                        }
-                    }}
-                    onMouseDown={({ clientX, clientY }) => {
-                        if (!isEditLabelVisible) return;
-                        // step 1: if the edit label is visible, save the mouse position
-                        dispatch(updateEditLabelVisibility(false));
-                        editLabelDisplayInfo.current.clientX = clientX;
-                        editLabelDisplayInfo.current.clientY = clientY;
-                        editLabelDisplayInfo.current.pendingDisplay = true;
-                    }}
-                    onMouseUp={(e) => {
-                        const { clientX, clientY, pendingDisplay } =
-                            editLabelDisplayInfo.current;
-                        // step 2: if the mouse position is different then we have a drag event
-                        if (
-                            (e.clientX !== clientX || e.clientY !== clientY) &&
-                            pendingDisplay
-                        ) {
-                            dispatch(updateEditLabelVisibility(true));
-                        }
-                        editLabelDisplayInfo.current.pendingDisplay = false;
-                    }}
+                    onWheel={handleWheel}
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
                     style={{
                         userSelect: 'none',
                         height: '100vh',
