@@ -59,6 +59,7 @@ const AnnotationContextMenuComponent = () => {
         if (viewport !== null) {
             Utils.resetCornerstoneTools(viewport);
         }
+        dispatch(clearAnnotationWidgets());
         switch (type) {
             case constants.editionMode.MOVE:
                 dispatch(updateAnnotationContextVisibility(false));

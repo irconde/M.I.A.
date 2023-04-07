@@ -51,8 +51,6 @@ const uiSlice = createSlice({
             state.editLabelVisibility = action.payload;
         },
         clearAnnotationWidgets: (state, action) => {
-            state.annotationContextPosition.top = 0;
-            state.annotationContextPosition.left = 0;
             state.annotationContextVisible = false;
             state.editLabelVisibility = false;
             state.colorPickerVisible = false;
