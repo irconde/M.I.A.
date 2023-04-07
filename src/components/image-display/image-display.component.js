@@ -561,23 +561,6 @@ const ImageDisplayComponent = () => {
                         renderAnnotationContextMenu(bbox);
                     }
                 } else if (
-                    editionModeRef.current === constants.editionMode.MOVE
-                ) {
-                    toolState = cornerstoneTools.getToolState(
-                        viewportRef.current,
-                        constants.toolNames.movement
-                    );
-                    if (toolState !== undefined && toolState.data.length > 0) {
-                        const { handles } = toolState.data[0];
-                        const bbox = [
-                            handles.start.x,
-                            handles.start.y,
-                            handles.end.x - handles.start.x,
-                            handles.end.y - handles.start.y,
-                        ];
-                        renderAnnotationContextMenu(bbox);
-                    }
-                } else if (
                     editionModeRef.current === constants.editionMode.POLYGON
                 ) {
                     toolState = cornerstoneTools.getToolState(

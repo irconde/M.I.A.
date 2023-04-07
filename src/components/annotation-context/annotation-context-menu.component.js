@@ -62,7 +62,7 @@ const AnnotationContextMenuComponent = () => {
         dispatch(clearAnnotationWidgets());
         switch (type) {
             case constants.editionMode.MOVE:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 Utils.updateToolState(constants.toolNames.movement, {
                     handles: {
                         start: {
