@@ -37,11 +37,11 @@ import {
     getCurrFileName,
     getEditionMode,
     toggleSideMenu,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
+    updateEditLabelVisibility,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
@@ -330,6 +330,10 @@ const ImageDisplayComponent = () => {
                 area,
                 segmentation,
             });
+
+            console.log('Polygon created');
+            dispatch(updateAnnotationContextVisibility(true));
+            dispatch(updateEditLabelVisibility(true));
         }
         dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
         dispatch(updateCornerstoneMode(constants.cornerstoneMode.SELECTION));
@@ -379,6 +383,7 @@ const ImageDisplayComponent = () => {
                             area,
                             segmentation: [],
                         });
+                        console.log('Bounding end');
                     }
                     Utils.resetCornerstoneTools(viewportRef.current);
                 }
@@ -508,8 +513,10 @@ const ImageDisplayComponent = () => {
         }
         console.log('image render');
         const eventData = event.detail;
-        zoomLevel.current = eventData.viewport.scale;
-        dispatch(updateZoomLevel(zoomLevel.current));
+        if (zoomLevel.current !== eventData.viewport.scale) {
+            zoomLevel.current = eventData.viewport.scale;
+            dispatch(updateZoomLevel(zoomLevel.current));
+        }
 
         if (
             maxImageValuesRef.current.maxBrightness === 0 &&
@@ -557,21 +564,6 @@ const ImageDisplayComponent = () => {
                         }
                         bbox[2] = bbox[2] - bbox[0];
                         bbox[3] = bbox[3] - bbox[1];
-
-                        renderAnnotationContextMenu(bbox);
-                    }
-                } else if (
-                    editionModeRef.current === constants.editionMode.POLYGON
-                ) {
-                    toolState = cornerstoneTools.getToolState(
-                        viewportRef.current,
-                        constants.toolNames.segmentation
-                    );
-                    if (toolState !== undefined && toolState.data.length > 0) {
-                        const { data } = toolState;
-                        const { handles } = data[0];
-                        const bbox = Utils.calculateBoundingBox(handles.points);
-                        renderAnnotationContextMenu(bbox);
                     }
                 }
             }
@@ -639,9 +631,8 @@ const ImageDisplayComponent = () => {
                     dispatch(
                         updateCornerstoneMode(constants.cornerstoneMode.EDITION)
                     );
-                    renderAnnotationContextMenu(
-                        annotationRef.current[clickedPos].bbox
-                    );
+
+                    dispatch(updateAnnotationContextVisibility(true));
                 } else {
                     dispatch(clearAnnotationSelection());
                     dispatch(clearAnnotationWidgets());
@@ -657,22 +648,6 @@ const ImageDisplayComponent = () => {
         },
         [annotationRef]
     );
-
-    const renderAnnotationContextMenu = (bbox) => {
-        if (bbox !== null && bbox !== undefined) {
-            const { top, left } = Utils.calculateAnnotationContextPosition(
-                cornerstone,
-                bbox,
-                viewportRef.current
-            );
-            dispatch(
-                updateAnnotationContextPosition({
-                    top,
-                    left,
-                })
-            );
-        }
-    };
 
     const stopListeningClickEvents = () => {
         viewportRef.current.removeEventListener(

@@ -2,19 +2,14 @@ import React, { useRef } from 'react';
 import {
     getAnnotationContextVisible,
     getEditLabelVisible,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import Utils from '../general/Utils';
-import * as cornerstone from 'cornerstone-core';
-import { getSelectedAnnotation } from '../../redux/slices/annotation.slice';
 
-function useWidgetsManager(viewport) {
+function useWidgetsManager() {
     const isEditLabelVisible = useSelector(getEditLabelVisible);
     const isAnnotationContextVisible = useSelector(getAnnotationContextVisible);
-    const selectedAnnotation = useSelector(getSelectedAnnotation);
     const dispatch = useDispatch();
     const widgetsDisplay = useRef({
         timeout: null,
@@ -25,21 +20,6 @@ function useWidgetsManager(viewport) {
         clientX: 0,
         clientY: 0,
     });
-
-    const showContextMenu = () => {
-        const { top, left } = Utils.calculateAnnotationContextPosition(
-            cornerstone,
-            selectedAnnotation.bbox,
-            viewport
-        );
-        dispatch(
-            updateAnnotationContextPosition({
-                top,
-                left,
-            })
-        );
-        dispatch(updateAnnotationContextVisibility(true));
-    };
 
     const handleWheel = () => {
         if (isEditLabelVisible) {
@@ -58,7 +38,7 @@ function useWidgetsManager(viewport) {
             widgetsDisplay.current.timeout = setTimeout(() => {
                 // runs when done scrolling
                 text && dispatch(updateEditLabelVisibility(true));
-                context && showContextMenu();
+                context && dispatch(updateAnnotationContextVisibility(true));
                 widgetsDisplay.current.pending = {
                     text: false,
                     context: false,
@@ -87,7 +67,8 @@ function useWidgetsManager(viewport) {
         const { clientX, clientY, pending } = widgetsDisplay.current;
         if (e.clientX !== clientX || e.clientY !== clientY) {
             pending.text && dispatch(updateEditLabelVisibility(true));
-            pending.context && showContextMenu();
+            pending.context &&
+                dispatch(updateAnnotationContextVisibility(true));
         }
         widgetsDisplay.current.pending = { text: false, context: false };
     };

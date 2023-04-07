@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -6,6 +6,7 @@ import MovementIcon from '../../icons/detection-context-menu/movement-icon/movem
 import * as constants from '../../utils/enums/Constants';
 import { editionMode } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
+import * as cornerstone from 'cornerstone-core';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DeleteWidget,
@@ -17,10 +18,8 @@ import {
 } from './annotation-context-menu.styles';
 import {
     clearAnnotationWidgets,
-    getAnnotationContextPosition,
     getAnnotationContextVisible,
     getEditionMode,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateColorPickerVisibility,
@@ -47,14 +46,23 @@ const AnnotationContextMenuComponent = () => {
     const isVisible = useSelector(getAnnotationContextVisible);
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
-    const position = useSelector(getAnnotationContextPosition);
-    const positionRef = useRef(position);
-    useEffect(() => {
-        positionRef.current = position;
-    }, [position]);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
     const selectedAnnotation = useSelector(getSelectedAnnotation);
+
+    useLayoutEffect(() => {
+        if (!isVisible || !selectedAnnotation) return;
+        const viewport = document.getElementById('imageContainer');
+        const { top, left } = Utils.calculateAnnotationContextPosition(
+            cornerstone,
+            selectedAnnotation.bbox,
+            viewport
+        );
+
+        setPosition({ top, left });
+    }, [isVisible, selectedAnnotation]);
+
     const dispatch = useDispatch();
-    /*const recentScroll = useSelector(getRecentScroll);*/
+
     const handleClick = (type) => {
         const viewport = document.getElementById('imageContainer');
         if (viewport !== null) {
@@ -186,7 +194,6 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             case constants.editionMode.DELETE:
-                dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
                 dispatch(
                     updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
                 );
@@ -205,7 +212,6 @@ const AnnotationContextMenuComponent = () => {
         }
     };
 
-    /*if (isVisible === true && !recentScroll)*/
     if (isVisible === true) {
         return (
             <Positioner position={position}>

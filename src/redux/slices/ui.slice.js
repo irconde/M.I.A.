@@ -2,10 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../utils/enums/Constants';
 
 const initialState = {
-    annotationContextPosition: {
-        top: 0,
-        left: 0,
-    },
     annotationContextVisible: false,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     annotationMode: constants.annotationMode.NO_TOOL,
@@ -31,12 +27,6 @@ const uiSlice = createSlice({
         },
         toggleLazySideMenu: (state, action) => {
             state.lazyImageMenuVisible = !state.lazyImageMenuVisible;
-        },
-        updateAnnotationContextPosition: (state, action) => {
-            const { top, left } = action.payload;
-            state.annotationContextPosition.top = top;
-            state.annotationContextPosition.left = left;
-            state.annotationContextVisible = top !== 0 && left !== 0;
         },
         updateAnnotationContextVisibility: (state, action) => {
             state.annotationContextVisible = action.payload;
@@ -86,7 +76,6 @@ const uiSlice = createSlice({
 export const {
     toggleSideMenu,
     toggleLazySideMenu,
-    updateAnnotationContextPosition,
     updateZoomLevel,
     updateColorPickerVisibility,
     updateAnnotationContextVisibility,
@@ -102,8 +91,6 @@ export const {
     updateIsImageToolsOpen,
 } = uiSlice.actions;
 
-export const getAnnotationContextPosition = (state) =>
-    state.ui.annotationContextPosition;
 export const getAnnotationContextVisible = (state) =>
     state.ui.annotationContextVisible;
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;

@@ -422,6 +422,8 @@ const annotationSlice = createSlice({
             state.annotations.push(newAnnotation);
             state.hasAnnotationChanged = true;
 
+            state.selectedAnnotation = newAnnotation;
+
             saveToSessionStorage('annotations', state.annotations);
             saveToSessionStorage('categories', state.categories);
             saveToSessionStorage('maxAnnotationId', state.maxAnnotationId);
