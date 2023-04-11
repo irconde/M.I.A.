@@ -6,18 +6,19 @@ export const SideMenuButtonContainer = styled.div`
     display: flex;
     margin-top: auto;
     align-items: center;
-    align-self: flex-end;
-    justify-content: flex-start;
     background-color: ${colors.BLUE};
     box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
-    font-size: 20px;
-    height: 57px;
+    font-size: 16px;
+    height: 56px;
     z-index: 1;
-    ${({ disabled }) => css`
-        opacity: ${disabled && '0.4'};
-        pointer-events: ${disabled ? 'none' : 'auto'};
-        cursor: ${disabled ? 'normal' : 'pointer'};
-    `}
+    cursor: pointer;
+    ${({ disabled }) =>
+        disabled &&
+        css`
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: default;
+        `}
     p {
         flex: 1;
         text-transform: uppercase;
@@ -27,43 +28,38 @@ export const SideMenuButtonContainer = styled.div`
 `;
 
 export const SaveButtonText = styled.p`
-    display: contents;
     width: 49px;
-    height: 29px;
+    font-family: 'Noto Sans JP', sans-serif;
 `;
 
-export const SaveAsButtonContainer = styled.div`
-    width: 60px;
+const SideMenuBtn = styled.button`
     height: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    outline: none;
+    transition: background-color 100ms;
+    background-color: inherit;
+    padding: 0;
 
     :hover {
-        background-color: #2b65ce;
+        background-color: #2658b2;
     }
 `;
 
-export const SaveButtonContainer = styled.div`
-    width: 174px;
-    height: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+export const SaveAsButtonContainer = styled(SideMenuBtn)`
+    width: 61px;
+`;
 
-    :hover {
-        background-color: #2b65ce;
-    }
+export const SaveButtonContainer = styled(SideMenuBtn)`
+    width: 175px;
+    box-sizing: content-box;
+    border-right: 2px solid #2a62c6;
 `;
 
 export const SaveIconContainer = styled.div`
     display: flex;
     gap: 18px;
-`;
-
-export const SaveAsDivider = styled.div`
-    width: 2px;
-    height: 100%;
-
-    background-color: #2a62c6;
+    align-items: center;
 `;

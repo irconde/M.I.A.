@@ -35,9 +35,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  */
 
 const SaveButtonComponent = () => {
-    const isCollapsed = useSelector(getSideMenuVisible);
     const annotationChanges = useSelector(getHasAnnotationChanged);
-    const isAnyAnnotations = useSelector(getIsAnyAnnotations);
     const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
 
@@ -62,10 +60,7 @@ const SaveButtonComponent = () => {
                 id="SaveButtonComponent"
                 disabled={!annotationChanges}>
                 <Tooltip title={'Save Annotations'}>
-                    <SaveButtonContainer
-                        $isFaded={!annotationChanges}
-                        enabled={annotationChanges}
-                        onClick={() => saveImageClick()}>
+                    <SaveButtonContainer onClick={saveImageClick}>
                         <SaveIconContainer>
                             <SaveButtonText>Save</SaveButtonText>
                             <GrainIcon
@@ -76,14 +71,8 @@ const SaveButtonComponent = () => {
                         </SaveIconContainer>
                     </SaveButtonContainer>
                 </Tooltip>
-                <SaveAsDivider />
                 <Tooltip title={'Save As'}>
-                    <SaveAsButtonContainer
-                        $isFaded={!annotationChanges}
-                        enabled={annotationChanges}
-                        onClick={() => {
-                            saveAsImageClick();
-                        }}>
+                    <SaveAsButtonContainer onClick={saveAsImageClick}>
                         <SaveAsIcon
                             width={'24px'}
                             height={'24px'}
