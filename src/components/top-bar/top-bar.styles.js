@@ -62,6 +62,9 @@ export const ImportDataContainer = styled.div`
     position: fixed;
     background-color: #484848;
     width: ${LAZY_SIDE_MENU_WIDTH};
+    :hover {
+        background-color: #6d6d6d;
+    }
 `;
 
 export const ImportDataText = styled.div`
