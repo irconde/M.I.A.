@@ -28,12 +28,10 @@ export const IconsContainer = styled.div`
 `;
 
 export const FragmentWrapper = styled.div`
-    position: absolute;
-    left: calc(${LAZY_SIDE_MENU_WIDTH} + 221px);
     display: flex;
-    align-items: end;
+    margin: auto;
     gap: 32px;
-    font-size: 15px;
+    font-size: 13px;
 `;
 
 export const ContactIconsContainer = styled.div`

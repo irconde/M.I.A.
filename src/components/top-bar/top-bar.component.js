@@ -108,7 +108,7 @@ const TopBarComponent = (props) => {
                         color={'#c6c6c6'}
                     />
                     <ConnectionTypeInfo>
-                        IMAGES: &nbsp;
+                        IMAGES: &nbsp; &nbsp;
                         {imagesPath}
                     </ConnectionTypeInfo>
                 </InfoWrapper>
@@ -119,7 +119,7 @@ const TopBarComponent = (props) => {
                         color={'#c6c6c6'}
                     />
                     <ConnectionTypeInfo>
-                        ANNOTATIONS: &nbsp;
+                        ANNOTATIONS: &nbsp; &nbsp;
                         {annotationFilePath}
                     </ConnectionTypeInfo>
                 </InfoWrapper>
