@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { sideMenuWidth } from '../../../utils/enums/Constants';
+import { colors, sideMenuWidth } from '../../../utils/enums/Constants';
 
 export const SideMenuButtonContainer = styled.div`
     width: ${sideMenuWidth}px;
@@ -8,7 +8,7 @@ export const SideMenuButtonContainer = styled.div`
     align-items: center;
     align-self: flex-end;
     justify-content: flex-start;
-    background-color: #367eff;
+    background-color: ${colors.BLUE};
     box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
     font-size: 20px;
     height: 57px;
@@ -50,7 +50,6 @@ export const SaveButtonContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.1rem;
 
     :hover {
         background-color: #2b65ce;
