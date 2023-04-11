@@ -39,7 +39,16 @@ export const SideMenuListWrapper = styled.div`
     font-size: 11.5px;
     right: 0;
     width: ${sideMenuWidth}px;
-    height: ${(props) => props.height};
+`;
+
+export const SideMenuAnnotation = styled.div`
+    display: flex;
+    align-items: center;
+    background-color: ${({ selected, categorySelected }) =>
+        categorySelected
+            ? '#49526b'
+            : selected && annotationStyle.SELECTED_COLOR};
+    height: 32px;
 `;
 
 export const AnnotationContainer = styled.div`
@@ -50,6 +59,11 @@ export const AnnotationContainer = styled.div`
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
+
+    ${SideMenuAnnotation} {
+        background-color: ${({ selected }) => selected && '#49526b'};
+        border: 1px solid orange;
+    }
 `;
 
 export const AnnotationColor = styled.div`
@@ -82,16 +96,9 @@ export const CollapsableArrowIconContainer = styled.span`
     cursor: pointer;
 `;
 
-export const SideMenuAnnotation = styled.div`
-    display: flex;
-    align-items: center;
-    background-color: ${({ selected }) =>
-        selected ? annotationStyle.SELECTED_COLOR : ''};
-    height: 32px;
-`;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;
-    font-family: Noto Sans JP;
+    font-family: 'Noto Sans JP', sans-serif;
     cursor: default;
     color: ${({ color }) => color};
     user-select: none;

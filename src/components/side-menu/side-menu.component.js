@@ -132,8 +132,7 @@ const SideMenuComponent = () => {
     if (annotations.length > 0) {
         return (
             <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
-                <SideMenuListWrapper
-                    height={document.documentElement.clientHeight}>
+                <SideMenuListWrapper>
                     <SideMenuList id={'side-menu-list'}>
                         {Object.keys(annotationsByCategory).map(
                             (categoryName, index) => (
@@ -222,6 +221,10 @@ const SideMenuComponent = () => {
                                                 <SideMenuAnnotation
                                                     selected={
                                                         annotation.selected
+                                                    }
+                                                    categorySelected={
+                                                        selectedCategory ===
+                                                        categoryName
                                                     }
                                                     onClick={() =>
                                                         handleAnnotationNameClick(
