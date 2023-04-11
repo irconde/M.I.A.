@@ -64,6 +64,11 @@ export const AnnotationContainer = styled.div`
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
+    :hover {
+        background-color: ${({ selected }) =>
+            selected ? 'rgba(54,126,255,0.5)' : '#313339'};
+        cursor: pointer;
+    }
 `;
 
 export const AnnotationColor = styled.div`
