@@ -45,8 +45,8 @@ export const SideMenuListWrapper = styled.div`
 export const AnnotationContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    align-items: end;
-    min-height: 2.5rem;
+    align-items: center;
+    height: 32px;
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
@@ -55,14 +55,14 @@ export const AnnotationContainer = styled.div`
 export const AnnotationColor = styled.div`
     background: ${({ color }) => color};
     width: 0.6rem;
-    height: 2.5rem;
+    height: 32px;
 `;
 
 export const AnnotationWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2.5rem;
+    height: 32px;
 `;
 
 export const EyeIconWrapper = styled.span`
@@ -87,6 +87,7 @@ export const SideMenuAnnotation = styled.div`
     align-items: center;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
+    height: 32px;
 `;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;
