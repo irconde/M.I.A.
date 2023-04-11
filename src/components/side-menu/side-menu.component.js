@@ -35,6 +35,7 @@ import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibil
 import Utils from '../../utils/general/Utils';
 import { cornerstone } from '../image-display/image-display.component';
 import { cornerstoneMode } from '../../utils/enums/Constants';
+import SaveButtonComponent from './buttons/save-button.component';
 
 const iconProps = {
     width: '20px',
@@ -289,6 +290,7 @@ const SideMenuComponent = () => {
                         )}
                     </SideMenuList>
                 </SideMenuListWrapper>
+                <SaveButtonComponent />
             </SideMenuContainer>
         );
     }

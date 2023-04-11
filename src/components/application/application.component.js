@@ -54,7 +54,7 @@ function ApplicationComponent({ openImportModal }) {
             <ColorPickerComponent />
             <EditLabelComponent />
             <BoundPolyFABComponent />
-            <SaveButtonComponent />
+
             <ImageToolsFabComponent />
             <SaveFabComponent />
         </>

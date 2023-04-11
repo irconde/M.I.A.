@@ -1,5 +1,30 @@
-import styled from 'styled-components';
-import { Fab } from '@mui/material';
+import styled, { css } from 'styled-components';
+import { sideMenuWidth } from '../../../utils/enums/Constants';
+
+export const SideMenuButtonContainer = styled.div`
+    width: ${sideMenuWidth}px;
+    display: flex;
+    margin-top: auto;
+    align-items: center;
+    align-self: flex-end;
+    justify-content: flex-start;
+    background-color: #367eff;
+    box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
+    font-size: 20px;
+    height: 57px;
+    z-index: 1;
+    ${({ disabled }) => css`
+        opacity: ${disabled && '0.4'};
+        pointer-events: ${disabled ? 'none' : 'auto'};
+        cursor: ${disabled ? 'normal' : 'pointer'};
+    `}
+    p {
+        flex: 1;
+        text-transform: uppercase;
+        text-align: center;
+        color: white;
+    }
+`;
 
 export const SaveButtonText = styled.p`
     display: contents;
@@ -7,23 +32,12 @@ export const SaveButtonText = styled.p`
     height: 29px;
 `;
 
-export const SaveButtonFab = styled(Fab)`
-    &.MuiButtonBase-root {
-        background-color: ${(props) =>
-            props.$enabled ? '#367eff' : '#313131'};
-    }
-`;
-
 export const SaveAsButtonContainer = styled.div`
-    width: 25%;
+    width: 60px;
     height: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
-    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
-    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
 
     :hover {
         background-color: #2b65ce;
@@ -31,11 +45,7 @@ export const SaveAsButtonContainer = styled.div`
 `;
 
 export const SaveButtonContainer = styled.div`
-    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
-    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
-    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
-    width: 75%;
+    width: 174px;
     height: inherit;
     display: flex;
     align-items: center;
@@ -48,14 +58,13 @@ export const SaveButtonContainer = styled.div`
 `;
 
 export const SaveIconContainer = styled.div`
-    display: inherit;
-    margin-right: 2%;
-    margin-left: 2%;
+    display: flex;
+    gap: 18px;
 `;
 
 export const SaveAsDivider = styled.div`
     width: 2px;
     height: 100%;
-    opacity: 0.22;
-    background-color: #000;
+
+    background-color: #2a62c6;
 `;

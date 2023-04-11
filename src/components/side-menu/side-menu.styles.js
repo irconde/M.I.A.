@@ -6,10 +6,6 @@ import {
 } from '../../utils/enums/Constants';
 
 export const SideMenuContainer = styled.div`
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
     transition: ${({ isSideMenuVisible }) =>
         isSideMenuVisible ? 'all 0.3s ease-in' : 'none'};
     transform: translate(
@@ -17,6 +13,9 @@ export const SideMenuContainer = styled.div`
     );
     position: fixed;
     right: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 `;
 
 export const SideMenuList = styled.div`
@@ -48,6 +47,11 @@ export const SideMenuAnnotation = styled.div`
         categorySelected
             ? '#49526b'
             : selected && annotationStyle.SELECTED_COLOR};
+    cursor: pointer;
+    transition: background-color 100ms;
+    :hover {
+        background-color: #313339;
+    }
     height: 32px;
 `;
 
@@ -59,16 +63,11 @@ export const AnnotationContainer = styled.div`
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
-
-    ${SideMenuAnnotation} {
-        background-color: ${({ selected }) => selected && '#49526b'};
-        border: 1px solid orange;
-    }
 `;
 
 export const AnnotationColor = styled.div`
     background: ${({ color }) => color};
-    width: 0.6rem;
+    width: 4px;
     height: 32px;
 `;
 
@@ -92,7 +91,7 @@ export const EyeIconWrapper = styled.span`
 export const CollapsableArrowIconContainer = styled.span`
     height: 1.5rem;
     width: 1.5rem;
-    margin-inline: 0.5rem;
+    margin-inline: 11px;
     cursor: pointer;
 `;
 
