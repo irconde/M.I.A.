@@ -50,7 +50,8 @@ export const SideMenuAnnotation = styled.div`
     cursor: pointer;
     transition: background-color 100ms;
     :hover {
-        background-color: #313339;
+        background-color: ${({ selected }) =>
+            selected ? 'rgba(54,126,255,0.5)' : '#313339'};
     }
     height: 32px;
 `;
