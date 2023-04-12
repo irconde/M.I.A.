@@ -365,21 +365,19 @@ const annotationSlice = createSlice({
         },
         addAnnotation: (state, action) => {
             const { bbox, area, segmentation } = action.payload;
-            let newAnnotation = {
+            const newAnnotation = {
                 bbox,
                 area,
                 segmentation,
+                image_id: state.imageId,
+                id: state.maxAnnotationId++,
+                selected: true,
+                categorySelected: false,
+                visible: true,
+                categoryVisible: true,
+                iscrowd: 0,
             };
-            newAnnotation.image_id = state.imageId;
             // TODO: May need to check: Number.MAX_SAFE_INTEGER - some values from COCO data are getting large: 908800474295
-            newAnnotation.id = state.maxAnnotationId++;
-
-            newAnnotation.selected = false;
-            newAnnotation.categorySelected = false;
-            newAnnotation.visible = true;
-            newAnnotation.categoryVisible = true;
-            newAnnotation.iscrowd = 0;
-
             // Category lookup
             const foundCategoryIndex = state.categories.findIndex(
                 (category) => category.name.toLowerCase() === UNKNOWN
@@ -406,18 +404,18 @@ const annotationSlice = createSlice({
             }
 
             // Color lookup
-            let annotationColor = randomColor({
-                seed: newAnnotation.category_id,
-                hue: 'random',
-                luminosity: 'bright',
-            });
+
             const foundColorIdx = state.colors.findIndex(
                 (color) => color.categoryName === newAnnotation.categoryName
             );
-            if (foundColorIdx !== -1) {
-                annotationColor = state.colors[foundColorIdx].color;
-            }
-            newAnnotation.color = annotationColor;
+            newAnnotation.color =
+                foundColorIdx !== -1
+                    ? state.colors[foundColorIdx].color
+                    : randomColor({
+                          seed: newAnnotation.category_id,
+                          hue: 'random',
+                          luminosity: 'bright',
+                      });
 
             state.annotations.push(newAnnotation);
             state.hasAnnotationChanged = true;
@@ -574,6 +572,11 @@ const annotationSlice = createSlice({
                     id: newId,
                 });
                 foundAnnotation.category_id = newId;
+                foundAnnotation.color = randomColor({
+                    seed: newId,
+                    hue: 'random',
+                    luminosity: 'bright',
+                });
             } else {
                 const sameCategoryAnnotation = state.annotations.find(
                     (annotation) =>
