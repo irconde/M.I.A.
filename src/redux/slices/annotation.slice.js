@@ -312,7 +312,7 @@ const annotationSlice = createSlice({
                     );
 
                     let annotationColor = randomColor({
-                        seed: annotation.category_id,
+                        seed: annotation.categoryName,
                         hue: 'random',
                         luminosity: 'bright',
                     });
@@ -412,7 +412,7 @@ const annotationSlice = createSlice({
                 foundColorIdx !== -1
                     ? state.colors[foundColorIdx].color
                     : randomColor({
-                          seed: newAnnotation.category_id,
+                          seed: newAnnotation.categoryName,
                           hue: 'random',
                           luminosity: 'bright',
                       });
@@ -550,17 +550,16 @@ const annotationSlice = createSlice({
         },
         updateAnnotationCategory: (state, action) => {
             const { id, newCategory } = action.payload;
+            const categoryName = newCategory.toLowerCase();
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
             );
             if (foundAnnotation !== undefined) {
-                foundAnnotation.categoryName = newCategory.toLowerCase();
-                state.selectedAnnotation.categoryName =
-                    newCategory.toLowerCase();
+                foundAnnotation.categoryName = categoryName;
+                state.selectedAnnotation.categoryName = categoryName;
             }
             const foundCategory = state.categories.find(
-                (category) =>
-                    category.name.toLowerCase() === newCategory.toLowerCase()
+                (category) => category.name.toLowerCase() === categoryName
             );
             if (foundCategory === undefined) {
                 const newId =
@@ -568,12 +567,12 @@ const annotationSlice = createSlice({
                         .id + 1;
                 state.categories.push({
                     supercategory: UNKNOWN,
-                    name: newCategory.toLowerCase(),
+                    name: categoryName,
                     id: newId,
                 });
                 foundAnnotation.category_id = newId;
                 foundAnnotation.color = randomColor({
-                    seed: newId,
+                    seed: categoryName,
                     hue: 'random',
                     luminosity: 'bright',
                 });
