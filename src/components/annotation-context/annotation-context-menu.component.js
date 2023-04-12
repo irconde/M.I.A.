@@ -238,9 +238,7 @@ const AnnotationContextMenuComponent = () => {
                                 onClick={() => handleClick(editionMode.COLOR)}
                                 selected={selectedOption === editionMode.COLOR}>
                                 <StyledSelectedDetection
-                                    selectedDetectionColor={
-                                        selectedAnnotationColor
-                                    }
+                                    color={selectedAnnotationColor}
                                 />
                             </IconContainer>
                         </Tooltip>

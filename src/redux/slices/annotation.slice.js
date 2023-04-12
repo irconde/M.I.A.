@@ -593,6 +593,8 @@ const annotationSlice = createSlice({
                     foundAnnotation.category_id = foundCategory.id;
                 }
             }
+            foundAnnotation !== undefined &&
+                (state.selectedAnnotation = foundAnnotation);
             state.hasAnnotationChanged = true;
 
             saveToSessionStorage('annotations', state.annotations);
