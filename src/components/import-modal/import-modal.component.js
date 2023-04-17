@@ -12,8 +12,8 @@ import {
 } from './import-modal.styles';
 import { ThemeProvider } from '@mui/material/styles';
 import { Modal } from '@mui/material';
-import ImagesIcon from '../../icons/import-modal/images-icon/images.icon';
-import AnnotationsIcon from '../../icons/import-modal/annotations-icon/annotations.icon';
+import ImagesIcon from '../../icons/shared/images-icon/images.icon';
+import AnnotationsIcon from '../../icons/shared/annotations-icon/annotations.icon';
 import { Channels } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
