@@ -30,6 +30,7 @@ export const SideMenuButtonContainer = styled.div`
 export const SaveButtonText = styled.p`
     width: 49px;
     font-family: 'Noto Sans JP', sans-serif;
+    font-size: medium;
 `;
 
 const SideMenuBtn = styled.button`
