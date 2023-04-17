@@ -248,8 +248,7 @@ const SideMenuComponent = () => {
                                                                 : 'gray'
                                                         }
                                                         style={{
-                                                            marginLeft:
-                                                                '2.5rem',
+                                                            marginLeft: '45px',
                                                         }}
                                                         id={`annotation.categoryName-${index}`}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
