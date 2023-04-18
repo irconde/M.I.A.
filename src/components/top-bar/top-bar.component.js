@@ -2,38 +2,41 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    ConnectionStatusIconsContainer,
+    IconsContainer,
     ConnectionTypeInfo,
     FragmentWrapper,
     ImportDataContainer,
     ImportDataText,
     ImportIconWrapper,
-    InfoDivider,
-    MenuIconWrapper,
-    TitleLabelContainer,
+    InfoWrapper,
     TopBarContainer,
     TopBarIconWrapper,
     VerticalDivider,
+    ContactIconsContainer,
 } from './top-bar.styles';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import Tooltip from '@mui/material/Tooltip';
-import MenuToggleIcon from '../../icons/top-bar/menu-toggle-icon/menu-toggle.icon';
+import MenuFoldedIcon from '../../icons/top-bar/menu-folded-icon/menu-folded.icon';
+import MenuUnfoldedIcon from '../../icons/top-bar/menu-unfolded-icon/menu-unfolded.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
 import { Channels, cornerstoneMode } from '../../utils/enums/Constants';
 import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
 import {
     clearAnnotationWidgets,
+    toggleSideMenu,
     updateCornerstoneMode,
     updateCurrFileName,
     updateFABVisibility,
 } from '../../redux/slices/ui.slice';
 import Utils from '../../utils/general/Utils';
+import ImagesIcon from '../../icons/shared/images-icon/images.icon';
+import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
-    width: '32px',
-    height: '32px',
+    width: '24px',
+    height: '24px',
     color: '#ffffff',
 };
 
@@ -47,6 +50,12 @@ const TopBarComponent = (props) => {
     const dispatch = useDispatch();
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
+    const annotationFilePath = Utils.truncateFilePath(
+        selectedAnnotationFile,
+        25
+    );
+    const imagesPath = Utils.truncateFilePath(selectedImagesDirPath, 25);
+    const [isOpen, setIsOpen] = useState(true);
     const [fileState, setFileState] = useState({
         currentFileName: '',
         numberOfFiles: 0,
@@ -69,56 +78,84 @@ const TopBarComponent = (props) => {
         });
     }, []);
 
+    const toggleClickHandler = () => {
+        setIsOpen(!isOpen);
+        dispatch(toggleSideMenu());
+    };
+
     return (
-        <TopBarContainer>
-            <TitleLabelContainer>
-                <ImportDataContainer onClick={props.openImportModal}>
-                    <ImportDataText>IMPORT DATA</ImportDataText>
-                    <Tooltip title={'Import Data'}>
-                        <ImportIconWrapper>
-                            <ImportIcon
-                                color={'#ffffff'}
-                                width={'24px'}
-                                height={'24px'}
-                            />
-                        </ImportIconWrapper>
+        <TopBarContainer id={'TopBar Container'}>
+            <ImportDataContainer
+                id={'Import Data Container'}
+                onClick={props.openImportModal}>
+                <ImportDataText>IMPORT DATA</ImportDataText>
+                <Tooltip title={'Import Data'}>
+                    <ImportIconWrapper>
+                        <ImportIcon
+                            color={'#ffffff'}
+                            width={'24px'}
+                            height={'24px'}
+                        />
+                    </ImportIconWrapper>
+                </Tooltip>
+            </ImportDataContainer>
+
+            <FragmentWrapper id={'Fragment Wrapper'}>
+                <InfoWrapper>
+                    <ImagesIcon
+                        width={'24px'}
+                        height={'24px'}
+                        color={'#c6c6c6'}
+                    />
+                    <ConnectionTypeInfo>
+                        IMAGES: &nbsp; &nbsp;
+                        {imagesPath}
+                    </ConnectionTypeInfo>
+                </InfoWrapper>
+                <InfoWrapper>
+                    <AnnotationIcon
+                        width={'24px'}
+                        height={'24px'}
+                        color={'#c6c6c6'}
+                    />
+                    <ConnectionTypeInfo>
+                        ANNOTATIONS: &nbsp; &nbsp;
+                        {annotationFilePath}
+                    </ConnectionTypeInfo>
+                </InfoWrapper>
+            </FragmentWrapper>
+
+            <IconsContainer>
+                <VerticalDivider />
+                <ContactIconsContainer>
+                    <TopBarIconWrapper onClick={props.openAboutModal}>
+                        <InfoIcon {...iconProps} />
+                    </TopBarIconWrapper>
+                    <Tooltip title={'Contact Us'}>
+                        <TopBarIconWrapper onClick={props.openContactModal}>
+                            <ChatIcon {...iconProps} />
+                        </TopBarIconWrapper>
                     </Tooltip>
-                </ImportDataContainer>
-
-                <FragmentWrapper id={'wrapper'}>
-                    <InfoDivider>&#8427;</InfoDivider>
-                    &nbsp;&nbsp;
-                    <ConnectionTypeInfo>Connected to </ConnectionTypeInfo>
-                    &nbsp;&nbsp;
-                    {selectedImagesDirPath} &nbsp;
-                    {fileState.currentFileName && (
-                        <>
-                            <InfoDivider>/</InfoDivider>
-                            &nbsp;
-                            <ConnectionTypeInfo>Processing</ConnectionTypeInfo>
-                        </>
-                    )}
-                    &nbsp;&nbsp;
-                </FragmentWrapper>
-                <span>{fileState.currentFileName} &nbsp;</span>
-            </TitleLabelContainer>
-
-            <ConnectionStatusIconsContainer>
-                <TopBarIconWrapper onClick={props.openAboutModal}>
-                    <InfoIcon {...iconProps} />
-                </TopBarIconWrapper>
-                <Tooltip title={'Contact Us'}>
-                    <TopBarIconWrapper onClick={props.openContactModal}>
-                        <ChatIcon {...iconProps} />
+                </ContactIconsContainer>
+                <VerticalDivider />
+                <Tooltip title={'Fold/unfold Side Menu'}>
+                    <TopBarIconWrapper onClick={toggleClickHandler}>
+                        {isOpen ? (
+                            <MenuUnfoldedIcon
+                                width={'32px'}
+                                height={'32px'}
+                                color={'white'}
+                            />
+                        ) : (
+                            <MenuFoldedIcon
+                                width={'32px'}
+                                height={'32px'}
+                                color={'white'}
+                            />
+                        )}
                     </TopBarIconWrapper>
                 </Tooltip>
-                <VerticalDivider />
-                <Tooltip title={'Fold/unfold menu'}>
-                    <MenuIconWrapper>
-                        <MenuToggleIcon {...iconProps} />
-                    </MenuIconWrapper>
-                </Tooltip>
-            </ConnectionStatusIconsContainer>
+            </IconsContainer>
         </TopBarContainer>
     );
 };
