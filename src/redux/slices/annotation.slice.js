@@ -663,6 +663,7 @@ const annotationSlice = createSlice({
         [saveCurrentAnnotations.fulfilled]: (state) => {
             state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+            state.hasAnnotationChanged = false;
         },
         [saveCurrentAnnotations.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
