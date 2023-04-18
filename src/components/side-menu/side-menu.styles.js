@@ -7,7 +7,7 @@ import {
 
 export const SideMenuContainer = styled.div`
     transition: ${({ isSideMenuVisible }) =>
-        isSideMenuVisible ? 'all 0.3s ease-in' : 'none'};
+        isSideMenuVisible ? 'transform 0.3s ease-in' : 'none'};
     transform: translate(
         ${(props) => (props.isSideMenuVisible ? 0 : sideMenuWidth)}px
     );
