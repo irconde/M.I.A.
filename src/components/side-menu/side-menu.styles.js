@@ -49,10 +49,12 @@ export const SideMenuAnnotation = styled.div`
             : selected && annotationStyle.SELECTED_COLOR};
     cursor: pointer;
     transition: background-color 100ms;
+
     :hover {
         background-color: ${({ selected }) =>
             selected ? 'rgba(54,126,255,0.5)' : '#313339'};
     }
+
     height: 32px;
 `;
 
@@ -64,6 +66,7 @@ export const AnnotationContainer = styled.div`
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
+
     :hover {
         background-color: ${({ selected }) =>
             selected ? 'rgba(54,126,255,0.5)' : '#313339'};
@@ -91,7 +94,6 @@ export const EyeIconWrapper = styled.span`
     cursor: pointer;
     display: flex;
     align-items: center;
-    height: 2.5rem;
 `;
 
 export const CollapsableArrowIconContainer = styled.span`

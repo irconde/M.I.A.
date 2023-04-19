@@ -108,7 +108,6 @@ const SideMenuComponent = () => {
     };
 
     const handleAnnotationNameClick = (annotation) => {
-
         dispatch(updateCornerstoneMode(cornerstoneMode.EDITION));
         Utils.dispatchAndUpdateImage(dispatch, selectAnnotation, annotation.id);
         dispatch(updateAnnotationContextVisibility(true));
@@ -240,13 +239,14 @@ const SideMenuComponent = () => {
                                                         0{index + 1}
                                                     </SideMenuAnnotationName>
                                                     <EyeIconWrapper
-                                                        onClick={() =>
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             Utils.dispatchAndUpdateImage(
                                                                 dispatch,
                                                                 toggleVisibility,
                                                                 annotation.id
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         id={`${annotation.categoryName}-visible-icon-${index}`}>
                                                         {annotation.visible ? (
                                                             <VisibilityOnIcon
