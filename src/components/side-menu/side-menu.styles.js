@@ -6,17 +6,16 @@ import {
 } from '../../utils/enums/Constants';
 
 export const SideMenuContainer = styled.div`
-    -webkit-transition: all 0.3s ease-in;
-    -moz-transition: all 0.3s ease-in;
-    -o-transition: all 0.3s ease-in;
-    -ms-transition: all 0.3s ease-in;
     transition: ${({ isSideMenuVisible }) =>
-        isSideMenuVisible ? 'all 0.3s ease-in' : 'none'};
+        isSideMenuVisible ? 'transform 0.3s ease-in' : 'none'};
     transform: translate(
         ${(props) => (props.isSideMenuVisible ? 0 : sideMenuWidth)}px
     );
     position: fixed;
     right: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 `;
 
 export const SideMenuList = styled.div`
@@ -39,30 +38,50 @@ export const SideMenuListWrapper = styled.div`
     font-size: 11.5px;
     right: 0;
     width: ${sideMenuWidth}px;
-    height: ${(props) => props.height};
+`;
+
+export const SideMenuAnnotation = styled.div`
+    display: flex;
+    align-items: center;
+    background-color: ${({ selected, categorySelected }) =>
+        categorySelected
+            ? '#49526b'
+            : selected && annotationStyle.SELECTED_COLOR};
+    cursor: pointer;
+    transition: background-color 100ms;
+    :hover {
+        background-color: ${({ selected }) =>
+            selected ? 'rgba(54,126,255,0.5)' : '#313339'};
+    }
+    height: 32px;
 `;
 
 export const AnnotationContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    align-items: end;
-    min-height: 2.5rem;
+    align-items: center;
+    height: 32px;
     margin-top: 0.5rem;
     background-color: ${({ selected }) =>
         selected ? annotationStyle.SELECTED_COLOR : ''};
+    :hover {
+        background-color: ${({ selected }) =>
+            selected ? 'rgba(54,126,255,0.5)' : '#313339'};
+        cursor: pointer;
+    }
 `;
 
 export const AnnotationColor = styled.div`
     background: ${({ color }) => color};
-    width: 0.6rem;
-    height: 2.5rem;
+    width: 4px;
+    height: 32px;
 `;
 
 export const AnnotationWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2.5rem;
+    height: 32px;
 `;
 
 export const EyeIconWrapper = styled.span`
@@ -78,19 +97,13 @@ export const EyeIconWrapper = styled.span`
 export const CollapsableArrowIconContainer = styled.span`
     height: 1.5rem;
     width: 1.5rem;
-    margin-inline: 0.5rem;
+    margin-inline: 11px;
     cursor: pointer;
 `;
 
-export const SideMenuAnnotation = styled.div`
-    display: flex;
-    align-items: center;
-    background-color: ${({ selected }) =>
-        selected ? annotationStyle.SELECTED_COLOR : ''};
-`;
 export const SideMenuAnnotationName = styled.div`
     vertical-align: top;
-    font-family: Noto Sans JP;
+    font-family: 'Noto Sans JP', sans-serif;
     cursor: default;
     color: ${({ color }) => color};
     user-select: none;

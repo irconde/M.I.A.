@@ -1,61 +1,66 @@
-import styled from 'styled-components';
-import { Fab } from '@mui/material';
+import styled, { css } from 'styled-components';
+import { colors, sideMenuWidth } from '../../../utils/enums/Constants';
+
+export const SideMenuButtonContainer = styled.div`
+    width: ${sideMenuWidth}px;
+    display: flex;
+    margin-top: auto;
+    align-items: center;
+    background-color: ${colors.BLUE};
+    box-shadow: 0.1rem -0.4rem 2rem 0.2rem rgb(0 0 0 / 50%);
+    font-size: 16px;
+    height: 56px;
+    z-index: 1;
+    cursor: pointer;
+    ${({ disabled }) =>
+        disabled &&
+        css`
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: default;
+        `}
+    p {
+        flex: 1;
+        text-transform: uppercase;
+        text-align: center;
+        color: white;
+    }
+`;
 
 export const SaveButtonText = styled.p`
-    display: contents;
     width: 49px;
-    height: 29px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: medium;
 `;
 
-export const SaveButtonFab = styled(Fab)`
-    &.MuiButtonBase-root {
-        background-color: ${(props) =>
-            props.$enabled ? '#367eff' : '#313131'};
-    }
-`;
-
-export const SaveAsButtonContainer = styled.div`
-    width: 25%;
+const SideMenuBtn = styled.button`
     height: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
-    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
-    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
+    border: none;
+    outline: none;
+    transition: background-color 100ms;
+    background-color: inherit;
+    padding: 0;
 
     :hover {
-        background-color: #2b65ce;
+        background-color: #2658b2;
     }
 `;
 
-export const SaveButtonContainer = styled.div`
-    background-color: ${(props) => (props.enabled ? '#367eff' : '#252525')};
-    cursor: ${(props) => (props.$isFaded ? 'normal' : 'pointer')};
-    pointer-events: ${(props) => (props.$isFaded ? 'none' : 'pointer')};
-    opacity: ${(props) => (props.$isFaded ? '38%' : '100%')};
-    width: 75%;
-    height: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.1rem;
+export const SaveAsButtonContainer = styled(SideMenuBtn)`
+    width: 61px;
+`;
 
-    :hover {
-        background-color: #2b65ce;
-    }
+export const SaveButtonContainer = styled(SideMenuBtn)`
+    width: 175px;
+    box-sizing: content-box;
+    border-right: 2px solid #2a62c6;
 `;
 
 export const SaveIconContainer = styled.div`
-    display: inherit;
-    margin-right: 2%;
-    margin-left: 2%;
-`;
-
-export const SaveAsDivider = styled.div`
-    width: 2px;
-    height: 100%;
-    opacity: 0.22;
-    background-color: #000;
+    display: flex;
+    gap: 18px;
+    align-items: center;
 `;

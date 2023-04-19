@@ -35,6 +35,7 @@ import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibil
 import Utils from '../../utils/general/Utils';
 import { cornerstone } from '../image-display/image-display.component';
 import { cornerstoneMode } from '../../utils/enums/Constants';
+import SaveButtonComponent from './buttons/save-button.component';
 
 const iconProps = {
     width: '20px',
@@ -87,11 +88,52 @@ const SideMenuComponent = () => {
             [categoryName]: !prevExpandedCategories[categoryName],
         }));
 
+    const handleAnnotationContainerClick = (event, categoryName) => {
+        if (event.target.id.includes('category')) {
+            if (selectedAnnotation !== null) {
+                dispatch(updateAnnotationContextVisibility(false));
+            }
+            if (
+                JSON.stringify(expandedCategories) === '{}' ||
+                expandedCategories[categoryName] === undefined ||
+                expandedCategories[categoryName] === false
+            ) {
+                handleCollapse(categoryName);
+            }
+            dispatch(updateCornerstoneMode(cornerstoneMode.SELECTION));
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                selectAnnotationCategory,
+                categoryName
+            );
+        }
+    };
+
+    const handleAnnotationNameClick = (annotation) => {
+        if (annotation.selected === false) {
+            const viewport = document.getElementById('imageContainer');
+            if (viewport !== null) {
+                const { left, top } = Utils.calculateAnnotationContextPosition(
+                    cornerstone,
+                    annotation,
+                    viewport
+                );
+                dispatch(
+                    updateAnnotationContextPosition({
+                        top,
+                        left,
+                    })
+                );
+            }
+        }
+        dispatch(updateCornerstoneMode(cornerstoneMode.EDITION));
+        Utils.dispatchAndUpdateImage(dispatch, selectAnnotation, annotation.id);
+    };
+
     if (annotations.length > 0) {
         return (
             <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
-                <SideMenuListWrapper
-                    height={document.documentElement.clientHeight}>
+                <SideMenuListWrapper>
                     <SideMenuList id={'side-menu-list'}>
                         {Object.keys(annotationsByCategory).map(
                             (categoryName, index) => (
@@ -100,48 +142,12 @@ const SideMenuComponent = () => {
                                         selected={
                                             selectedCategory === categoryName
                                         }
-                                        onClick={(event) => {
-                                            if (
-                                                event.target.id.includes(
-                                                    'category'
-                                                )
-                                            ) {
-                                                if (
-                                                    selectedAnnotation !== null
-                                                ) {
-                                                    dispatch(
-                                                        updateAnnotationContextVisibility(
-                                                            false
-                                                        )
-                                                    );
-                                                }
-                                                if (
-                                                    JSON.stringify(
-                                                        expandedCategories
-                                                    ) === '{}' ||
-                                                    expandedCategories[
-                                                        categoryName
-                                                    ] === undefined ||
-                                                    expandedCategories[
-                                                        categoryName
-                                                    ] === false
-                                                ) {
-                                                    handleCollapse(
-                                                        categoryName
-                                                    );
-                                                }
-                                                dispatch(
-                                                    updateCornerstoneMode(
-                                                        cornerstoneMode.SELECTION
-                                                    )
-                                                );
-                                                Utils.dispatchAndUpdateImage(
-                                                    dispatch,
-                                                    selectAnnotationCategory,
-                                                    categoryName
-                                                );
-                                            }
-                                        }}
+                                        onClick={(e) =>
+                                            handleAnnotationContainerClick(
+                                                e,
+                                                categoryName
+                                            )
+                                        }
                                         id={'category-container'}>
                                         <AnnotationColor
                                             color={
@@ -217,6 +223,15 @@ const SideMenuComponent = () => {
                                                     selected={
                                                         annotation.selected
                                                     }
+                                                    categorySelected={
+                                                        selectedCategory ===
+                                                        categoryName
+                                                    }
+                                                    onClick={() =>
+                                                        handleAnnotationNameClick(
+                                                            annotation
+                                                        )
+                                                    }
                                                     key={index}>
                                                     <AnnotationColor
                                                         color={
@@ -232,52 +247,9 @@ const SideMenuComponent = () => {
                                                                 ? 'white'
                                                                 : 'gray'
                                                         }
-                                                        onClick={() => {
-                                                            if (
-                                                                annotation.selected ===
-                                                                false
-                                                            ) {
-                                                                const viewport =
-                                                                    document.getElementById(
-                                                                        'imageContainer'
-                                                                    );
-                                                                if (
-                                                                    viewport !==
-                                                                    null
-                                                                ) {
-                                                                    const {
-                                                                        x,
-                                                                        y,
-                                                                    } =
-                                                                        Utils.calculateAnnotationContextPosition(
-                                                                            cornerstone,
-                                                                            annotation,
-                                                                            viewport
-                                                                        );
-                                                                    dispatch(
-                                                                        updateAnnotationContextPosition(
-                                                                            {
-                                                                                top: x,
-                                                                                left: y,
-                                                                            }
-                                                                        )
-                                                                    );
-                                                                }
-                                                            }
-                                                            dispatch(
-                                                                updateCornerstoneMode(
-                                                                    cornerstoneMode.EDITION
-                                                                )
-                                                            );
-                                                            Utils.dispatchAndUpdateImage(
-                                                                dispatch,
-                                                                selectAnnotation,
-                                                                annotation.id
-                                                            );
-                                                        }}
                                                         style={{
                                                             marginLeft:
-                                                                '2.5rem',
+                                                                'calc(1.5rem + 22px)',
                                                         }}
                                                         id={`annotation.categoryName-${index}`}>
                                                         {annotation.categoryName.toUpperCase()}{' '}
@@ -318,6 +290,7 @@ const SideMenuComponent = () => {
                         )}
                     </SideMenuList>
                 </SideMenuListWrapper>
+                <SaveButtonComponent />
             </SideMenuContainer>
         );
     }
