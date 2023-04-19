@@ -51,7 +51,6 @@ function useWidgetsManager() {
     // step 1: if a widget is visible, save the mouse position
     const handleMouseDown = ({ clientX, clientY }) => {
         if (!isEditLabelVisible && !isAnnotationContextVisible) return;
-        console.log('handleMouseDownCustom');
         widgetsDisplay.current.clientX = clientX;
         widgetsDisplay.current.clientY = clientY;
         widgetsDisplay.current.pending = {

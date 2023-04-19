@@ -335,9 +335,10 @@ const ImageDisplayComponent = () => {
                 // show edit label when annotation is added
                 event.stopPropagation();
                 polygonJustGotCreated.current = true;
-                console.log('show edit label widget');
-                dispatch(updateAnnotationContextVisibility(true));
-                dispatch(updateEditLabelVisibility(true));
+                setTimeout(() => {
+                    dispatch(updateAnnotationContextVisibility(true));
+                    dispatch(updateEditLabelVisibility(true));
+                }, 0);
             }
             dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
             dispatch(updateCornerstoneMode(constants.cornerstoneMode.EDITION));
@@ -348,7 +349,6 @@ const ImageDisplayComponent = () => {
 
     const onDragEnd = useCallback(
         (event) => {
-            console.log('onDragEnd');
             let toolState = null;
             if (
                 annotationModeRef.current !== constants.annotationMode.NO_TOOL
@@ -600,11 +600,6 @@ const ImageDisplayComponent = () => {
                     }
                 }
             }
-        } else {
-            // if (isAnnotationContextVisibleRef.current) {
-            //     dispatch(updateAnnotationContextVisibility(false));
-            //     console.log('close context menu');
-            // }
         }
         const { boundingBox, segmentation, movement } = constants.toolNames;
         const options = {
@@ -637,7 +632,6 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = useCallback(
         (event) => {
-            console.log('onMouseClicked');
             if (!annotationRef.current.length > 0) return;
             if (polygonJustGotCreated.current) {
                 return (polygonJustGotCreated.current = false);
@@ -658,10 +652,6 @@ const ImageDisplayComponent = () => {
                 }
             }
             if (clickedPos !== constants.selection.NO_SELECTION) {
-                console.log(
-                    'annotation clicked',
-                    annotationRef.current[clickedPos].id
-                );
                 dispatch(
                     selectAnnotation(annotationRef.current[clickedPos].id)
                 );
@@ -671,7 +661,6 @@ const ImageDisplayComponent = () => {
 
                 dispatch(updateAnnotationContextVisibility(true));
             } else {
-                console.log('clear selection and widgets');
                 dispatch(clearAnnotationSelection());
                 dispatch(clearAnnotationWidgets());
                 dispatch(
