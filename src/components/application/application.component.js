@@ -52,7 +52,7 @@ function ApplicationComponent({ openImportModal }) {
             <AnnotationContextMenuComponent />
             <EditLabelComponent />
             <BoundPolyFABComponent />
-            <SaveButtonComponent />
+
             <ImageToolsFabComponent />
             <SaveFabComponent />
         </>

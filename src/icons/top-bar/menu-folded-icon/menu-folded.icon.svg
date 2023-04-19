@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ic_menu_folded</title>
+    <g id="Desktop-UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Save-FAB-folded-menu" transform="translate(-1528.000000, -64.000000)">
+            <g id="top-bar-icons" transform="translate(1301.000000, 60.000000)">
+                <g id="ic_menu_folded" transform="translate(227.000000, 4.000000)">
+                    <rect id="Rectangle" x="0" y="0" width="32" height="32"></rect>
+                    <g id="menu-icon" transform="translate(7.000000, 9.000000)" stroke="#898989" stroke-linecap="square" stroke-width="2">
+                        <line x1="4.5" y1="14.5" x2="18.5" y2="14.5" id="Line-6"></line>
+                        <line x1="4.5" y1="0.5" x2="18.5" y2="0.5" id="Line-6-Copy-2"></line>
+                        <line x1="0.5" y1="7.5" x2="18.5" y2="7.5" id="Line-6-Copy"></line>
+                    </g>
+                    <g id="menu-icon-copy" transform="translate(20.500000, 9.000000)" stroke="#FFFFFF" stroke-linecap="square" stroke-width="2">
+                        <line x1="8.54273917e-14" y1="14.5" x2="5" y2="14.5" id="Line-6"></line>
+                        <line x1="1.28392246e-13" y1="0.5" x2="5" y2="0.5" id="Line-6-Copy-2"></line>
+                        <line x1="-1.13637494e-13" y1="7.5" x2="5" y2="7.5" id="Line-6-Copy"></line>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

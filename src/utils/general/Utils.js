@@ -747,6 +747,32 @@ export default class Utils {
     }
 
     /**
+     * Creates a substring from a given string with the number of characters provided
+     *
+     * @param {string} filePath - Original file path
+     * @param {number} maxLength - Maximum length of path
+     * @returns {string} - Truncated string
+     */
+    static truncateFilePath(filePath, maxLength) {
+        let separator = '/';
+        if (filePath.indexOf('\\') >= 0) {
+            separator = '\\';
+        }
+        const parts = filePath.split(separator);
+        const fileName = parts.pop();
+        let truncatedPath = '';
+        for (let i = 0; i < parts.length; i++) {
+            if (truncatedPath.length + parts[i].length + 1 < maxLength) {
+                truncatedPath += parts[i] + separator;
+            } else {
+                truncatedPath += '...' + separator;
+                break;
+            }
+        }
+        return truncatedPath + fileName;
+    }
+
+    /**
      * Recalculates the four corners of a rectangle based on the coordinates of the corner being moved
      *
      * @param {{start: number, end: number, start_prima: number, end_prima: number}} cornerList - Rectangle corners'
