@@ -13,7 +13,6 @@ import {
 import {
     getSideMenuVisible,
     toggleSideMenu,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateCornerstoneMode,
 } from '../../redux/slices/ui.slice';
@@ -30,10 +29,9 @@ import {
     SideMenuListWrapper,
 } from './side-menu.styles';
 import VisibilityOnIcon from '../../icons/side-menu/visibility-on-icon/visibility-on.icon';
-import ExpandIcon from '../../icons/side-menu/expand-icon/expand.icon';
+import ExpandIcon from '../../icons/shared/expand-icon/expand.icon';
 import VisibilityOffIcon from '../../icons/side-menu/visibility-off-icon/visibility-off.icon';
 import Utils from '../../utils/general/Utils';
-import { cornerstone } from '../image-display/image-display.component';
 import { cornerstoneMode } from '../../utils/enums/Constants';
 import SaveButtonComponent from './buttons/save-button.component';
 
@@ -110,24 +108,10 @@ const SideMenuComponent = () => {
     };
 
     const handleAnnotationNameClick = (annotation) => {
-        if (annotation.selected === false) {
-            const viewport = document.getElementById('imageContainer');
-            if (viewport !== null) {
-                const { left, top } = Utils.calculateAnnotationContextPosition(
-                    cornerstone,
-                    annotation,
-                    viewport
-                );
-                dispatch(
-                    updateAnnotationContextPosition({
-                        top,
-                        left,
-                    })
-                );
-            }
-        }
+
         dispatch(updateCornerstoneMode(cornerstoneMode.EDITION));
         Utils.dispatchAndUpdateImage(dispatch, selectAnnotation, annotation.id);
+        dispatch(updateAnnotationContextVisibility(true));
     };
 
     if (annotations.length > 0) {

@@ -1,44 +1,63 @@
 import styled from 'styled-components';
 import * as constants from '../../utils/enums/Constants';
 
-export const EditLabelWrapper = styled.div`
-    position: absolute;
-    min-width: 160px;
-    z-index: 500;
-    width: ${(props) => `${props.width}px`};
-    left: ${(props) => `${props.left}px`};
-    top: ${(props) => `${props.top}px`};
-    background: ${constants.colors.BLUE};
-`;
+const LABEL_WIDTH = '182px';
+const LABEL_HEIGHT = '28px';
+
+const { FONT_DETAILS, LABEL_PADDING } = constants.annotationStyle;
 
 export const InputContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 1.5rem;
+    box-sizing: border-box;
+    height: fit-content;
+    min-height: 100%;
     width: 100%;
     position: relative;
 `;
+export const EditLabelWrapper = styled.div`
+    position: absolute;
+    display: flex;
+    align-items: center;
+
+    min-width: ${LABEL_WIDTH};
+    min-height: ${LABEL_HEIGHT};
+    z-index: 500;
+    width: ${(props) => `${props.width}px`};
+    left: ${(props) => `${props.left}px`};
+    top: ${(props) => `${props.top}px`};
+
+    background: ${constants.colors.BLUE};
+`;
 
 export const ArrowIconWrapper = styled.div`
-    display: flex;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    height: ${LABEL_HEIGHT};
     cursor: pointer;
+    background-color: ${constants.colors.BLUE};
 `;
 
 export const NewLabelInput = styled.input`
-    background-color: transparent;
-    font-family: 'Arial', 'sans-serif';
-    font-weight: 500;
+    font-family: ${FONT_DETAILS.FAMILY}, 'sans-serif';
+    font-weight: ${FONT_DETAILS.WEIGHT};
+    font-size: ${FONT_DETAILS.SIZE}px;
 
     color: ${constants.colors.WHITE};
+    min-height: 24px;
+    padding-left: ${LABEL_PADDING.LEFT - 2}px;
+    background-color: #395280;
     border: none;
     user-select: none;
     width: 100%;
     height: 100%;
     padding-right: 1.5rem;
+    box-sizing: border-box;
+    margin: 2px 0 2px 2px;
 
     &:disabled {
-        background-color: rgba(0, 0, 0, 0.35);
     }
 
     &:focus {
@@ -49,17 +68,15 @@ export const NewLabelInput = styled.input`
     }
 
     &::placeholder {
-        color: #e0e0e0;
+        color: rgba(255, 255, 255, 0.5);
     }
 `;
 
 export const ClearIconWrapper = styled.div`
     height: 20px;
     position: absolute;
-    right: 2px;
+    right: 6px;
     width: fit-content;
     cursor: pointer;
     vertical-align: text-top;
 `;
-
-export const INPUT_HEIGHT = 24;

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    LabelDivider,
     LabelList,
     LabelListItem,
     LabelListWrapper,
@@ -31,7 +30,6 @@ const LabelListComponent = ({ labels, onLabelSelect }) => {
                                 key={i}
                                 onClick={() => handleClick(i)}>
                                 <span>{label}</span>
-                                {i !== labels.length - 1 && <LabelDivider />}
                             </LabelListItem>
                         );
                     })}

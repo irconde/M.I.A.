@@ -2,17 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as constants from '../../utils/enums/Constants';
 
 const initialState = {
-    annotationContextPosition: {
-        top: 0,
-        left: 0,
-    },
     annotationContextVisible: false,
     cornerstoneMode: constants.cornerstoneMode.SELECTION,
     annotationMode: constants.annotationMode.NO_TOOL,
     editionMode: constants.editionMode.NO_TOOL,
     colorPickerVisible: false,
     editLabelVisibility: false,
-    inputLabel: '',
     zoomLevel: 0,
     currentFileName: '',
     sideMenuVisible: true,
@@ -33,12 +28,6 @@ const uiSlice = createSlice({
         toggleLazySideMenu: (state, action) => {
             state.lazyImageMenuVisible = !state.lazyImageMenuVisible;
         },
-        updateAnnotationContextPosition: (state, action) => {
-            const { top, left } = action.payload;
-            state.annotationContextPosition.top = top;
-            state.annotationContextPosition.left = left;
-            state.annotationContextVisible = top !== 0 && left !== 0;
-        },
         updateAnnotationContextVisibility: (state, action) => {
             state.annotationContextVisible = action.payload;
         },
@@ -51,12 +40,7 @@ const uiSlice = createSlice({
         updateEditLabelVisibility: (state, action) => {
             state.editLabelVisibility = action.payload;
         },
-        setInputLabel: (state, action) => {
-            state.inputLabel = action.payload;
-        },
         clearAnnotationWidgets: (state, action) => {
-            state.annotationContextPosition.top = 0;
-            state.annotationContextPosition.left = 0;
             state.annotationContextVisible = false;
             state.editLabelVisibility = false;
             state.colorPickerVisible = false;
@@ -92,12 +76,10 @@ const uiSlice = createSlice({
 export const {
     toggleSideMenu,
     toggleLazySideMenu,
-    updateAnnotationContextPosition,
     updateZoomLevel,
     updateColorPickerVisibility,
     updateAnnotationContextVisibility,
     updateEditLabelVisibility,
-    setInputLabel,
     clearAnnotationWidgets,
     updateEditionMode,
     updateCornerstoneMode,
@@ -109,8 +91,6 @@ export const {
     updateIsImageToolsOpen,
 } = uiSlice.actions;
 
-export const getAnnotationContextPosition = (state) =>
-    state.ui.annotationContextPosition;
 export const getAnnotationContextVisible = (state) =>
     state.ui.annotationContextVisible;
 export const getCornerstoneMode = (state) => state.ui.cornerstoneMode;
@@ -119,7 +99,6 @@ export const getEditionMode = (state) => state.ui.editionMode;
 export const getColorPickerVisible = (state) => state.ui.colorPickerVisible;
 export const getEditLabelVisible = (state) => state.ui.editLabelVisibility;
 export const getZoomLevel = (state) => state.ui.zoomLevel;
-export const getInputLabel = (state) => state.ui.inputLabel;
 export const getCurrFileName = (state) => state.ui.currentFileName;
 
 export const getSideMenuVisible = (state) => state.ui.sideMenuVisible;

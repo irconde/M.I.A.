@@ -3,34 +3,31 @@ import * as constants from '../../utils/enums/Constants';
 
 export const LabelListWrapper = styled.div`
     /* base container styles */
-    padding: 0.5rem;
-    max-height: 50px;
+    max-height: 120px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
+    box-sizing: border-box;
     background: ${constants.colors.WHITE};
-    border-bottom-left-radius: 4px;
     box-shadow: 5px 5px 15px 2px rgba(0, 0, 0, 0.41);
-    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 100%;
 
     /* container scrollbar styles */
 
     ::-webkit-scrollbar {
-        width: 15px;
-        height: 18px;
+        background-color: white;
+        width: 9px;
     }
 
     ::-webkit-scrollbar-thumb {
-        height: 45px;
-        border: 4px solid rgba(0, 0, 0, 0);
-        background-clip: padding-box;
-        border-radius: 7px;
-        background-color: rgba(0, 0, 0, 0.15);
-        box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05),
-            inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+        background-color: #909090;
+        width: 9px;
+        border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(0, 0, 0, 0.25);
+        background-color: rgba(144, 144, 144, 0.95);
     }
 
     ::-webkit-scrollbar-button {
@@ -44,23 +41,30 @@ export const LabelList = styled.ul`
     list-style: none;
     padding: 0;
     margin: 0;
-    text-transform: uppercase;
-    color: ${constants.colors.BLUE};
+    color: #464646;
 
     /* styles for list elements */
 
     li {
-        margin-top: 0.25rem;
-        margin-bottom: 0.25rem;
+        padding-left: 10px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        font-family: Noto Sans JP, sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: justify;
+        color: #464646;
+        margin-right: 3px;
     }
 
     & > *:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: #dedede;
     }
-`;
-
-export const LabelDivider = styled.div`
-    border-bottom: 1px solid #e8e8e8;
 `;
 
 export const LabelListItem = styled.li`

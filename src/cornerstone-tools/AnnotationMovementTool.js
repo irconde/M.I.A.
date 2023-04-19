@@ -84,8 +84,7 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
         const eventData = evt.detail;
         // eslint-disable-next-line no-unused-vars
         const { image, element } = eventData;
-        const lineWidth =
-            constants.annotationStyle.BORDER_WIDTH * this.options.zoomLevel;
+        const lineWidth = constants.annotationStyle.BORDER_WIDTH;
 
         const lineDash = csTools.getModule('globalConfiguration').configuration
             .lineDash;
@@ -149,39 +148,34 @@ export default class AnnotationMovementTool extends BaseAnnotationTool {
                         data.handles.start
                     );
                 }
-                const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
-                const fontSizeArr = fontArr[1].split('px');
-                let fontSize = fontSizeArr[0];
-                fontSize *= this.options.zoomLevel;
-                fontSizeArr[0] = fontSize;
-                const newFontSize = fontSizeArr.join('px');
-                context.font =
-                    fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
+
+                context.font = constants.annotationStyle.FONT_DETAILS.get(1);
 
                 context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
                 context.strokeStyle = data.renderColor;
                 context.fillStyle = data.renderColor;
+
+                const labelText = Utils.limitCharCount(data.categoryName);
                 const labelSize = Utils.getTextLabelSize(
                     context,
-                    data.categoryName,
-                    constants.annotationStyle.LABEL_PADDING *
-                        this.options.zoomLevel
+                    labelText,
+                    constants.annotationStyle.LABEL_PADDING.LEFT,
+                    1,
+                    constants.annotationStyle.LABEL_HEIGHT
                 );
                 context.fillRect(
-                    myCoords.x - 1 * this.options.zoomLevel,
-                    myCoords.y - labelSize['height'],
-                    labelSize['width'],
-                    labelSize['height']
+                    myCoords.x - context.lineWidth / 2,
+                    myCoords.y - labelSize.height,
+                    labelSize.width,
+                    labelSize.height
                 );
                 context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
                 context.fillText(
-                    data.categoryName,
+                    labelText,
                     myCoords.x +
-                        constants.annotationStyle.LABEL_PADDING *
-                            this.options.zoomLevel,
-                    myCoords.y -
-                        constants.annotationStyle.LABEL_PADDING *
-                            this.options.zoomLevel
+                        constants.annotationStyle.LABEL_PADDING.LEFT -
+                        1,
+                    myCoords.y - constants.annotationStyle.LABEL_PADDING.BOTTOM
                 );
                 // Polygon Mask Rendering
                 if (data.polygonCoords.length > 0) {

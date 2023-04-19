@@ -31,8 +31,20 @@ export const annotationStyle = {
     SELECTED_COLOR: colors.BLUE,
     VALID_COLOR: colors.GREEN,
     INVALID_COLOR: colors.RED,
-    LABEL_PADDING: 4,
-    LABEL_FONT: 'bold 12px Arial',
+    LABEL_PADDING: {
+        LEFT: 10,
+        BOTTOM: 8,
+    },
+    LABEL_FONT: 'bold 13px Noto Sans JP',
+    FONT_DETAILS: {
+        FAMILY: 'Noto Sans JP',
+        SIZE: 13,
+        WEIGHT: 'bold',
+        get(zoom = 1) {
+            return `${this.WEIGHT} ${this.SIZE / zoom}px ${this.FAMILY}`;
+        },
+    },
+    LABEL_HEIGHT: 28,
     LABEL_TEXT_COLOR: colors.WHITE,
     BORDER_WIDTH: 2,
 };
@@ -90,12 +102,10 @@ export const events = {
     POLYGON_MASK_MODIFIED: 'polygon_mask_modified',
 };
 
-export const OPERATOR = 'OPERATOR';
+export const UNKNOWN = 'unknown';
 export const BOUNDING_BOX_AREA_THRESHOLD = 10;
 export const ALGORITHM = 'Algorithm';
 export const MAX_LABEL_LENGTH = 10;
-export const ZERO_DEGREE_TRANSFORM = 'rotate(0deg)';
-export const PERPENDICULAR_DEGREE_TRANSFORM = 'rotate(90deg)';
 
 export const COOKIE = {
     // In seconds, 10800 = 3 hours

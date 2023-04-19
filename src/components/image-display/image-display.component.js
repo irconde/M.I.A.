@@ -15,7 +15,6 @@ import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import {
     addAnnotation,
     addAnnotationArray,
-    clearAnnotationData,
     clearAnnotationSelection,
     getAnnotations,
     getImageId,
@@ -37,16 +36,17 @@ import {
     getCurrFileName,
     getEditionMode,
     toggleSideMenu,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
     updateEditionMode,
+    updateEditLabelVisibility,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
 import SegmentationDrawingTool from '../../cornerstone-tools/SegmentationDrawingTool';
 import AnnotationMovementTool from '../../cornerstone-tools/AnnotationMovementTool';
+import useWidgetsManager from '../../utils/hooks/widgets-manager.hook';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -80,14 +80,13 @@ const ImageDisplayComponent = () => {
     const { selectedImagesDirPath } = useSelector(getAssetsDirPaths);
     const viewportRef = useRef(null);
     const annotations = useSelector(getAnnotations);
+    const annotationRef = useRef(annotations);
     const [pixelData, setPixelData] = useState(null);
     const [pixelType, setPixelType] = useState(null);
-    const [viewport, setViewport] = useState(null);
     const imageId = useSelector(getImageId);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mousePositionRef = useRef(mousePosition);
     const [error, setError] = useState('');
-    const annotationRef = useRef(annotations);
     const zoomLevel = useRef();
     const cornerstoneMode = useSelector(getCornerstoneMode);
     const cornerstoneModeRef = useRef(cornerstoneMode);
@@ -105,6 +104,13 @@ const ImageDisplayComponent = () => {
     const saveAnnotationStatus = useSelector(getSaveAnnotationStatus);
     const maxImageValues = useSelector(getMaxImageValues);
     const maxImageValuesRef = useRef(maxImageValues);
+    // when a polygon is created, the edit widget needs to be opened.
+    // So we update polygonJustGotCreated to skip running the onMouseClicked event handler
+    const polygonJustGotCreated = useRef(false);
+    const [handleWheel, handleMouseDown, handleMouseUp] = useWidgetsManager(
+        viewportRef.current
+    );
+
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
         const PanTool = cornerstoneTools.PanTool;
@@ -259,8 +265,6 @@ const ImageDisplayComponent = () => {
             dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
             dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
             dispatch(clearAnnotationWidgets());
-            dispatch(clearAnnotationData());
-            fetchCurrentFile();
         }
     }, [saveAnnotationStatus]);
 
@@ -302,193 +306,236 @@ const ImageDisplayComponent = () => {
         cornerstone.updateImage(viewportRef.current, true);
     }, [editionMode]);
 
-    const onPolygonEnd = useCallback(() => {
-        let toolState = cornerstoneTools.getToolState(
-            viewportRef.current,
-            constants.toolNames.segmentation
-        );
-        if (toolState !== undefined && toolState.data.length > 0) {
-            const { data } = toolState;
-            const { handles } = data[0];
-            const bbox = Utils.calculateBoundingBox(handles.points);
-            const segmentation = [
-                Utils.polygonDataToXYArray(data[0].handles.points, bbox),
-            ];
-            const area = Math.abs(
-                (bbox[0] - (bbox[0] + bbox[2])) *
-                    (bbox[1] - (bbox[1] + bbox[3]))
+    const onPolygonEnd = useCallback(
+        (event) => {
+            const toolState = cornerstoneTools.getToolState(
+                viewportRef.current,
+                constants.toolNames.segmentation
             );
-            if (annotationRef.current.length === 0) {
-                dispatch(toggleSideMenu());
-            }
-            Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
-                bbox,
-                area,
-                segmentation,
-            });
-        }
-        dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
-        dispatch(updateCornerstoneMode(constants.cornerstoneMode.SELECTION));
-        Utils.resetCornerstoneTools(viewportRef.current);
-    }, [annotationMode]);
+            if (toolState?.data.length > 0) {
+                const { data } = toolState;
+                const { handles } = data[0];
+                const bbox = Utils.calculateBoundingBox(handles.points);
+                const segmentation = [
+                    Utils.polygonDataToXYArray(handles.points, bbox),
+                ];
+                const area = Math.abs(
+                    (bbox[0] - (bbox[0] + bbox[2])) *
+                        (bbox[1] - (bbox[1] + bbox[3]))
+                );
+                if (annotationRef.current.length === 0) {
+                    dispatch(toggleSideMenu());
+                }
+                Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
+                    bbox,
+                    area,
+                    segmentation,
+                });
 
-    const onDragEnd = useCallback(() => {
-        let toolState = null;
-        if (annotationModeRef.current !== constants.annotationMode.NO_TOOL) {
-            if (
-                annotationModeRef.current === constants.annotationMode.BOUNDING
-            ) {
-                toolState = cornerstoneTools.getToolState(
-                    viewportRef.current,
-                    constants.toolNames.boundingBox
-                );
-                if (toolState !== undefined && toolState.data.length > 0) {
-                    const { data } = toolState;
-                    const { handles } = data[0];
-                    let bbox = Utils.getBboxFromHandles(
-                        handles.start,
-                        handles.end
-                    );
-                    const area = Math.abs(
-                        (bbox[0] - bbox[2]) * (bbox[1] - bbox[3])
-                    );
-                    // Converting from
-                    // [x_0, y_0, x_f, y_f]
-                    // to
-                    // [x_0, y_0, width, height]
-                    bbox[2] = bbox[2] - bbox[0];
-                    bbox[3] = bbox[3] - bbox[1];
-                    dispatch(
-                        updateAnnotationMode(constants.annotationMode.NO_TOOL)
-                    );
-                    dispatch(
-                        updateCornerstoneMode(
-                            constants.cornerstoneMode.SELECTION
-                        )
-                    );
-                    if (area > 0) {
-                        if (annotationRef.current.length === 0) {
-                            dispatch(toggleSideMenu());
-                        }
-                        Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
-                            bbox,
-                            area,
-                            segmentation: [],
-                        });
-                    }
-                    Utils.resetCornerstoneTools(viewportRef.current);
-                }
+                // show edit label when annotation is added
+                event.stopPropagation();
+                polygonJustGotCreated.current = true;
+                setTimeout(() => {
+                    dispatch(updateAnnotationContextVisibility(true));
+                    dispatch(updateEditLabelVisibility(true));
+                }, 0);
             }
-        } else if (editionModeRef.current !== constants.editionMode.NO_TOOL) {
-            if (editionModeRef.current === constants.editionMode.BOUNDING) {
-                toolState = cornerstoneTools.getToolState(
-                    viewportRef.current,
-                    constants.toolNames.boundingBox
-                );
-                if (toolState !== undefined && toolState.data.length > 0) {
-                    const { data } = toolState;
-                    const { handles, id, segmentation } = data[0];
-                    let bbox = Utils.getBboxFromHandles(
-                        handles.start,
-                        handles.end
-                    );
-                    const newSegmentation = [];
-                    if (segmentation?.length > 0) {
-                        segmentation.forEach((segment) => {
-                            newSegmentation.push(
-                                Utils.calculatePolygonMask(bbox, segment)
-                            );
-                        });
-                    }
-                    // Converting from
-                    // [x_0, y_0, x_f, y_f]
-                    // to
-                    // [x_0, y_0, width, height]
-                    bbox[2] = bbox[2] - bbox[0];
-                    bbox[3] = bbox[3] - bbox[1];
-                    dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
-                    dispatch(
-                        updateCornerstoneMode(constants.cornerstoneMode.EDITION)
-                    );
-                    dispatch(updateAnnotationContextVisibility(true));
-                    Utils.dispatchAndUpdateImage(
-                        dispatch,
-                        updateAnnotationPosition,
-                        { id, bbox: bbox, segmentation: newSegmentation }
-                    );
-                    Utils.resetCornerstoneTools(viewportRef.current);
-                }
-            } else if (
-                editionModeRef.current === constants.editionMode.POLYGON
+            dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
+            dispatch(updateCornerstoneMode(constants.cornerstoneMode.EDITION));
+            Utils.resetCornerstoneTools(viewportRef.current);
+        },
+        [annotationMode]
+    );
+
+    const onDragEnd = useCallback(
+        (event) => {
+            let toolState = null;
+            if (
+                annotationModeRef.current !== constants.annotationMode.NO_TOOL
             ) {
-                toolState = cornerstoneTools.getToolState(
-                    viewportRef.current,
-                    constants.toolNames.segmentation
-                );
-                if (toolState !== undefined && toolState.data.length > 0) {
-                    const { data } = toolState;
-                    const { handles, id } = data[0];
-                    const bbox = Utils.calculateBoundingBox(handles.points);
-                    const newSegmentation = [
-                        Utils.polygonDataToXYArray(
-                            data[0].handles.points,
-                            bbox
-                        ),
-                    ];
-                    dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
-                    dispatch(
-                        updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                if (
+                    annotationModeRef.current ===
+                    constants.annotationMode.BOUNDING
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.boundingBox
                     );
-                    dispatch(updateAnnotationContextVisibility(true));
-                    Utils.dispatchAndUpdateImage(
-                        dispatch,
-                        updateAnnotationPosition,
-                        { id, bbox, segmentation: newSegmentation }
-                    );
-                    Utils.resetCornerstoneTools(viewportRef.current);
-                }
-            } else if (editionModeRef.current === constants.editionMode.MOVE) {
-                toolState = cornerstoneTools.getToolState(
-                    viewportRef.current,
-                    constants.toolNames.movement
-                );
-                if (toolState !== undefined && toolState.data.length > 0) {
-                    const { handles, id, polygonCoords } = toolState.data[0];
-                    const bbox = [
-                        handles.start.x,
-                        handles.start.y,
-                        handles.end.x - handles.start.x,
-                        handles.end.y - handles.start.y,
-                    ];
-                    const newSegmentation = [];
-                    polygonCoords.forEach((segment) => {
-                        newSegmentation.push(
-                            Utils.calculatePolygonMask(
-                                [
-                                    handles.start.x,
-                                    handles.start.y,
-                                    handles.end.x,
-                                    handles.end.y,
-                                ],
-                                segment
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { data } = toolState;
+                        const { handles } = data[0];
+                        let bbox = Utils.getBboxFromHandles(
+                            handles.start,
+                            handles.end
+                        );
+                        const area = Math.abs(
+                            (bbox[0] - bbox[2]) * (bbox[1] - bbox[3])
+                        );
+                        // Converting from
+                        // [x_0, y_0, x_f, y_f]
+                        // to
+                        // [x_0, y_0, width, height]
+                        bbox[2] = bbox[2] - bbox[0];
+                        bbox[3] = bbox[3] - bbox[1];
+                        dispatch(
+                            updateAnnotationMode(
+                                constants.annotationMode.NO_TOOL
                             )
                         );
-                    });
-                    dispatch(updateAnnotationContextVisibility(true));
-                    Utils.dispatchAndUpdateImage(
-                        dispatch,
-                        updateAnnotationPosition,
-                        { id, bbox, segmentation: newSegmentation }
-                    );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.SELECTION
+                            )
+                        );
+                        if (area > 0) {
+                            if (annotationRef.current.length === 0) {
+                                dispatch(toggleSideMenu());
+                            }
+                            Utils.dispatchAndUpdateImage(
+                                dispatch,
+                                addAnnotation,
+                                {
+                                    bbox,
+                                    area,
+                                    segmentation: [],
+                                }
+                            );
+                            // show edit label when annotation is added
+                            event.stopPropagation();
+                            dispatch(updateAnnotationContextVisibility(true));
+                            setTimeout(
+                                () => dispatch(updateEditLabelVisibility(true)),
+                                0
+                            );
+                        }
+                        Utils.resetCornerstoneTools(viewportRef.current);
+                    }
                 }
-                dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
-                dispatch(
-                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
-                );
-                Utils.resetCornerstoneTools(viewportRef.current);
+            } else if (
+                editionModeRef.current !== constants.editionMode.NO_TOOL
+            ) {
+                if (editionModeRef.current === constants.editionMode.BOUNDING) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.boundingBox
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { data } = toolState;
+                        const { handles, id, segmentation } = data[0];
+                        let bbox = Utils.getBboxFromHandles(
+                            handles.start,
+                            handles.end
+                        );
+                        const newSegmentation = [];
+                        if (segmentation?.length > 0) {
+                            segmentation.forEach((segment) => {
+                                newSegmentation.push(
+                                    Utils.calculatePolygonMask(bbox, segment)
+                                );
+                            });
+                        }
+                        // Converting from
+                        // [x_0, y_0, x_f, y_f]
+                        // to
+                        // [x_0, y_0, width, height]
+                        bbox[2] = bbox[2] - bbox[0];
+                        bbox[3] = bbox[3] - bbox[1];
+                        dispatch(
+                            updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.EDITION
+                            )
+                        );
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox: bbox, segmentation: newSegmentation }
+                        );
+                        Utils.resetCornerstoneTools(viewportRef.current);
+                    }
+                } else if (
+                    editionModeRef.current === constants.editionMode.POLYGON
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.segmentation
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { data } = toolState;
+                        const { handles, id } = data[0];
+                        const bbox = Utils.calculateBoundingBox(handles.points);
+                        const newSegmentation = [
+                            Utils.polygonDataToXYArray(
+                                data[0].handles.points,
+                                bbox
+                            ),
+                        ];
+                        dispatch(
+                            updateEditionMode(constants.editionMode.NO_TOOL)
+                        );
+                        dispatch(
+                            updateCornerstoneMode(
+                                constants.cornerstoneMode.EDITION
+                            )
+                        );
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox, segmentation: newSegmentation }
+                        );
+                        Utils.resetCornerstoneTools(viewportRef.current);
+                    }
+                } else if (
+                    editionModeRef.current === constants.editionMode.MOVE
+                ) {
+                    toolState = cornerstoneTools.getToolState(
+                        viewportRef.current,
+                        constants.toolNames.movement
+                    );
+                    if (toolState !== undefined && toolState.data.length > 0) {
+                        const { handles, id, polygonCoords } =
+                            toolState.data[0];
+                        const bbox = [
+                            handles.start.x,
+                            handles.start.y,
+                            handles.end.x - handles.start.x,
+                            handles.end.y - handles.start.y,
+                        ];
+                        const newSegmentation = [];
+                        polygonCoords.forEach((segment) => {
+                            newSegmentation.push(
+                                Utils.calculatePolygonMask(
+                                    [
+                                        handles.start.x,
+                                        handles.start.y,
+                                        handles.end.x,
+                                        handles.end.y,
+                                    ],
+                                    segment
+                                )
+                            );
+                        });
+                        dispatch(updateAnnotationContextVisibility(true));
+                        Utils.dispatchAndUpdateImage(
+                            dispatch,
+                            updateAnnotationPosition,
+                            { id, bbox, segmentation: newSegmentation }
+                        );
+                    }
+                    dispatch(updateEditionMode(constants.editionMode.NO_TOOL));
+                    dispatch(
+                        updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                    );
+                    Utils.resetCornerstoneTools(viewportRef.current);
+                }
             }
-        }
-    }, [editionMode]);
+        },
+        [editionMode]
+    );
 
     const getCurrentFile = async () => {
         try {
@@ -499,13 +546,14 @@ const ImageDisplayComponent = () => {
     };
 
     const onImageRenderedHandler = (event) => {
-        if (!event) {
-            return;
-        }
+        if (!event) return;
+
         console.log('image render');
         const eventData = event.detail;
-        zoomLevel.current = eventData.viewport.scale;
-        dispatch(updateZoomLevel(zoomLevel.current));
+        if (zoomLevel.current !== eventData.viewport.scale) {
+            zoomLevel.current = eventData.viewport.scale;
+            dispatch(updateZoomLevel(zoomLevel.current));
+        }
 
         if (
             maxImageValuesRef.current.maxBrightness === 0 &&
@@ -532,11 +580,7 @@ const ImageDisplayComponent = () => {
                         viewportRef.current,
                         constants.toolNames.boundingBox
                     );
-                    if (
-                        toolState !== null &&
-                        toolState !== undefined &&
-                        toolState.data.length > 0
-                    ) {
+                    if (toolState?.data.length > 0) {
                         const { data } = toolState;
                         const { handles } = data[0];
                         let bbox = [];
@@ -553,90 +597,21 @@ const ImageDisplayComponent = () => {
                         }
                         bbox[2] = bbox[2] - bbox[0];
                         bbox[3] = bbox[3] - bbox[1];
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
-                    }
-                } else if (
-                    editionModeRef.current === constants.editionMode.MOVE
-                ) {
-                    toolState = cornerstoneTools.getToolState(
-                        viewportRef.current,
-                        constants.toolNames.movement
-                    );
-                    if (toolState !== undefined && toolState.data.length > 0) {
-                        const { handles } = toolState.data[0];
-                        const bbox = [
-                            handles.start.x,
-                            handles.start.y,
-                            handles.end.x - handles.start.x,
-                            handles.end.y - handles.start.y,
-                        ];
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
-                    }
-                } else if (
-                    editionModeRef.current === constants.editionMode.POLYGON
-                ) {
-                    toolState = cornerstoneTools.getToolState(
-                        viewportRef.current,
-                        constants.toolNames.segmentation
-                    );
-                    if (toolState !== undefined && toolState.data.length > 0) {
-                        const { data } = toolState;
-                        const { handles } = data[0];
-                        const bbox = Utils.calculateBoundingBox(handles.points);
-                        const { top, left } =
-                            Utils.calculateAnnotationContextPosition(
-                                cornerstone,
-                                bbox,
-                                viewportRef.current,
-                                zoomLevel.current
-                            );
-                        dispatch(
-                            updateAnnotationContextPosition({ top, left })
-                        );
                     }
                 }
-            } else {
-                const { top, left } = Utils.calculateAnnotationContextPosition(
-                    cornerstone,
-                    selectedAnnotationRef.current.bbox,
-                    viewportRef.current,
-                    zoomLevel.current
-                );
-                dispatch(updateAnnotationContextPosition({ top, left }));
             }
         } else {
             if (isAnnotationContextVisibleRef.current) {
                 dispatch(updateAnnotationContextVisibility(false));
             }
         }
-
-        Utils.setToolOptions(constants.toolNames.boundingBox, {
+        const { boundingBox, segmentation, movement } = constants.toolNames;
+        const options = {
             zoomLevel: zoomLevel.current,
-        });
-        Utils.setToolOptions(constants.toolNames.segmentation, {
-            zoomLevel: zoomLevel.current,
-        });
-        Utils.setToolOptions(constants.toolNames.movement, {
-            zoomLevel: zoomLevel.current,
-        });
+        };
+        Utils.setToolOptions(boundingBox, options);
+        Utils.setToolOptions(segmentation, options);
+        Utils.setToolOptions(movement, options);
         const context = eventData.canvasContext;
         if (
             annotationModeRef.current === constants.annotationMode.BOUNDING ||
@@ -661,67 +636,46 @@ const ImageDisplayComponent = () => {
 
     const onMouseClicked = useCallback(
         (event) => {
-            if (annotationRef.current.length > 0) {
-                const mousePos = cornerstone.canvasToPixel(event.target, {
-                    x: event.detail.currentPoints.canvas.x,
-                    y: event.detail.currentPoints.canvas.y,
-                });
-                let clickedPos = constants.selection.NO_SELECTION;
-                for (let j = 0; j < annotationRef.current.length; j++) {
-                    if (!annotationRef.current[j].visible) continue;
-                    if (
-                        Utils.pointInRect(
-                            mousePos,
-                            annotationRef.current[j].bbox
-                        )
-                    ) {
-                        clickedPos = j;
-                        break;
-                    }
-                }
-                if (clickedPos !== constants.selection.NO_SELECTION) {
-                    dispatch(
-                        selectAnnotation(annotationRef.current[clickedPos].id)
-                    );
-                    dispatch(
-                        updateCornerstoneMode(constants.cornerstoneMode.EDITION)
-                    );
-                    renderAnnotationContextMenu(
-                        event,
-                        annotationRef.current[clickedPos]
-                    );
-                } else {
-                    dispatch(clearAnnotationSelection());
-                    dispatch(clearAnnotationWidgets());
-                    dispatch(
-                        updateCornerstoneMode(
-                            constants.cornerstoneMode.SELECTION
-                        )
-                    );
-                    Utils.resetCornerstoneTools(viewportRef.current);
-                }
-                cornerstone.updateImage(viewportRef.current, true);
+            if (!annotationRef.current.length > 0) return;
+            if (polygonJustGotCreated.current) {
+                return (polygonJustGotCreated.current = false);
             }
+
+            const mousePos = cornerstone.canvasToPixel(event.target, {
+                x: event.detail.currentPoints.canvas.x,
+                y: event.detail.currentPoints.canvas.y,
+            });
+            let clickedPos = constants.selection.NO_SELECTION;
+            for (let j = 0; j < annotationRef.current.length; j++) {
+                if (!annotationRef.current[j].visible) continue;
+                if (
+                    Utils.pointInRect(mousePos, annotationRef.current[j].bbox)
+                ) {
+                    clickedPos = j;
+                    break;
+                }
+            }
+            if (clickedPos !== constants.selection.NO_SELECTION) {
+                dispatch(
+                    selectAnnotation(annotationRef.current[clickedPos].id)
+                );
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.EDITION)
+                );
+
+                dispatch(updateAnnotationContextVisibility(true));
+            } else {
+                dispatch(clearAnnotationSelection());
+                dispatch(clearAnnotationWidgets());
+                dispatch(
+                    updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
+                );
+                Utils.resetCornerstoneTools(viewportRef.current);
+            }
+            cornerstone.updateImage(viewportRef.current, true);
         },
         [annotationRef]
     );
-
-    const renderAnnotationContextMenu = (event, annotation) => {
-        if (annotation !== null && annotation !== undefined) {
-            const { top, left } = Utils.calculateAnnotationContextPosition(
-                cornerstone,
-                annotation,
-                viewportRef.current,
-                zoomLevel.current
-            );
-            dispatch(
-                updateAnnotationContextPosition({
-                    top,
-                    left,
-                })
-            );
-        }
-    };
 
     const stopListeningClickEvents = () => {
         viewportRef.current.removeEventListener(
@@ -738,8 +692,11 @@ const ImageDisplayComponent = () => {
     };
 
     const renderAnnotations = (context, annotations) => {
-        context.font = constants.annotationStyle.LABEL_FONT;
-        context.lineWidth = constants.annotationStyle.BORDER_WIDTH;
+        const { current: zoom } = zoomLevel;
+        const { LABEL_PADDING, BORDER_WIDTH, LABEL_HEIGHT } =
+            constants.annotationStyle;
+        context.font = constants.annotationStyle.FONT_DETAILS.get(zoom);
+        context.lineWidth = BORDER_WIDTH / zoom;
 
         for (let j = 0; j < annotations.length; j++) {
             if (
@@ -771,17 +728,9 @@ const ImageDisplayComponent = () => {
             context.strokeStyle = renderColor;
             context.fillStyle = renderColor;
 
-            const labelSize = Utils.getTextLabelSize(
-                context,
-                annotations[j].categoryName,
-                constants.annotationStyle.LABEL_PADDING
-            );
-            context.strokeRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1],
-                annotations[j].bbox[2],
-                annotations[j].bbox[3]
-            );
+            const [x, y, w, h] = annotations[j].bbox;
+
+            context.strokeRect(x, y, w, h);
 
             context.globalAlpha = 0.5;
             if (annotations[j].segmentation.length > 0) {
@@ -797,24 +746,26 @@ const ImageDisplayComponent = () => {
             context.globalAlpha = 1.0;
 
             // Label rendering
-            context.fillRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
+            const labelText = Utils.limitCharCount(annotations[j].categoryName);
+            const { width, height } = Utils.getTextLabelSize(
+                context,
+                labelText,
+                LABEL_PADDING.LEFT,
+                zoom,
+                LABEL_HEIGHT
             );
-            context.strokeRect(
-                annotations[j].bbox[0],
-                annotations[j].bbox[1] - labelSize['height'],
-                labelSize['width'],
-                labelSize['height']
+
+            context.fillRect(
+                x - context.lineWidth / 2,
+                y - height,
+                width,
+                height
             );
             context.fillStyle = constants.annotationStyle.LABEL_TEXT_COLOR;
             context.fillText(
-                annotations[j].categoryName,
-                annotations[j].bbox[0] +
-                    constants.annotationStyle.LABEL_PADDING,
-                annotations[j].bbox[1] - constants.annotationStyle.LABEL_PADDING
+                labelText,
+                x + (LABEL_PADDING.LEFT - 1) / zoom,
+                y - LABEL_PADDING.BOTTOM / zoom
             );
         }
     };
@@ -892,21 +843,28 @@ const ImageDisplayComponent = () => {
                     {error}
                 </p>
             ) : (
-                <>
-                    <div
-                        id="viewerContainer"
-                        onContextMenu={(e) => e.preventDefault()}
-                        className="disable-selection noIbar"
-                        style={{
-                            userSelect: 'none',
-                        }}
-                        ref={(el) => {
-                            el &&
-                                el.addEventListener('selectstart', (e) => {
-                                    e.preventDefault();
-                                });
-                        }}></div>
-                </>
+                <div
+                    id="viewerContainer"
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="disable-selection noIbar"
+                    onWheel={handleWheel}
+                    onMouseDown={(e) => {
+                        if (polygonJustGotCreated.current) return;
+                        handleMouseDown(e);
+                    }}
+                    onMouseUp={handleMouseUp}
+                    style={{
+                        userSelect: 'none',
+                        height: '100vh',
+                        width: '100%',
+                        position: 'absolute',
+                    }}
+                    ref={(el) => {
+                        el &&
+                            el.addEventListener('selectstart', (e) => {
+                                e.preventDefault();
+                            });
+                    }}></div>
             )}
         </ImageViewport>
     );

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import randomColor from 'randomcolor';
-import { Channels, SAVE_STATUSES } from '../../utils/enums/Constants';
+import { Channels, SAVE_STATUSES, UNKNOWN } from '../../utils/enums/Constants';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -312,7 +312,7 @@ const annotationSlice = createSlice({
                     );
 
                     let annotationColor = randomColor({
-                        seed: annotation.category_id,
+                        seed: annotation.categoryName,
                         hue: 'random',
                         luminosity: 'bright',
                     });
@@ -365,24 +365,22 @@ const annotationSlice = createSlice({
         },
         addAnnotation: (state, action) => {
             const { bbox, area, segmentation } = action.payload;
-            let newAnnotation = {
+            const newAnnotation = {
                 bbox,
                 area,
                 segmentation,
+                image_id: state.imageId,
+                id: state.maxAnnotationId++,
+                selected: true,
+                categorySelected: false,
+                visible: true,
+                categoryVisible: true,
+                iscrowd: 0,
             };
-            newAnnotation.image_id = state.imageId;
             // TODO: May need to check: Number.MAX_SAFE_INTEGER - some values from COCO data are getting large: 908800474295
-            newAnnotation.id = state.maxAnnotationId++;
-
-            newAnnotation.selected = false;
-            newAnnotation.categorySelected = false;
-            newAnnotation.visible = true;
-            newAnnotation.categoryVisible = true;
-            newAnnotation.iscrowd = 0;
-
             // Category lookup
             const foundCategoryIndex = state.categories.findIndex(
-                (category) => category.name.toLowerCase() === 'operator'
+                (category) => category.name.toLowerCase() === UNKNOWN
             );
             if (foundCategoryIndex === -1) {
                 if (state.categories.length > 0) {
@@ -392,11 +390,11 @@ const annotationSlice = createSlice({
                 } else {
                     newAnnotation.category_id = 1;
                 }
-                newAnnotation.categoryName = 'operator';
+                newAnnotation.categoryName = UNKNOWN;
                 state.categories.push({
-                    supercategory: 'operator',
+                    supercategory: UNKNOWN,
                     id: newAnnotation.category_id,
-                    name: 'operator',
+                    name: UNKNOWN,
                 });
             } else {
                 newAnnotation.category_id =
@@ -406,21 +404,23 @@ const annotationSlice = createSlice({
             }
 
             // Color lookup
-            let annotationColor = randomColor({
-                seed: newAnnotation.category_id,
-                hue: 'random',
-                luminosity: 'bright',
-            });
+
             const foundColorIdx = state.colors.findIndex(
                 (color) => color.categoryName === newAnnotation.categoryName
             );
-            if (foundColorIdx !== -1) {
-                annotationColor = state.colors[foundColorIdx].color;
-            }
-            newAnnotation.color = annotationColor;
+            newAnnotation.color =
+                foundColorIdx !== -1
+                    ? state.colors[foundColorIdx].color
+                    : randomColor({
+                          seed: newAnnotation.categoryName,
+                          hue: 'random',
+                          luminosity: 'bright',
+                      });
 
             state.annotations.push(newAnnotation);
             state.hasAnnotationChanged = true;
+
+            state.selectedAnnotation = newAnnotation;
 
             saveToSessionStorage('annotations', state.annotations);
             saveToSessionStorage('categories', state.categories);
@@ -550,26 +550,32 @@ const annotationSlice = createSlice({
         },
         updateAnnotationCategory: (state, action) => {
             const { id, newCategory } = action.payload;
+            const categoryName = newCategory.toLowerCase();
             const foundAnnotation = state.annotations.find(
                 (annotation) => annotation.id === id
             );
             if (foundAnnotation !== undefined) {
-                foundAnnotation.categoryName = newCategory.toLowerCase();
+                foundAnnotation.categoryName = categoryName;
+                state.selectedAnnotation.categoryName = categoryName;
             }
             const foundCategory = state.categories.find(
-                (category) =>
-                    category.name.toLowerCase() === newCategory.toLowerCase()
+                (category) => category.name.toLowerCase() === categoryName
             );
             if (foundCategory === undefined) {
                 const newId =
                     state.categories.reduce((a, b) => (a.id > b.id ? a : b))
                         .id + 1;
                 state.categories.push({
-                    supercategory: 'operator',
-                    name: newCategory.toLowerCase(),
+                    supercategory: UNKNOWN,
+                    name: categoryName,
                     id: newId,
                 });
                 foundAnnotation.category_id = newId;
+                foundAnnotation.color = randomColor({
+                    seed: categoryName,
+                    hue: 'random',
+                    luminosity: 'bright',
+                });
             } else {
                 const sameCategoryAnnotation = state.annotations.find(
                     (annotation) =>
@@ -587,6 +593,8 @@ const annotationSlice = createSlice({
                     foundAnnotation.category_id = foundCategory.id;
                 }
             }
+            foundAnnotation !== undefined &&
+                (state.selectedAnnotation = foundAnnotation);
             state.hasAnnotationChanged = true;
 
             saveToSessionStorage('annotations', state.annotations);
@@ -655,6 +663,7 @@ const annotationSlice = createSlice({
         [saveCurrentAnnotations.fulfilled]: (state) => {
             state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+            state.hasAnnotationChanged = false;
         },
         [saveCurrentAnnotations.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;

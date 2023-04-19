@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import ArrowIcon from '../../icons/shared/arrow-icon/arrow.icon';
-import * as constants from '../../utils/enums/Constants';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import { annotationStyle, UNKNOWN } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ArrowIconWrapper,
     ClearIconWrapper,
     EditLabelWrapper,
-    INPUT_HEIGHT,
     InputContainer,
     NewLabelInput,
 } from './edit-label.styles';
@@ -14,9 +12,7 @@ import LabelListComponent from './label-list.component';
 import ClearIcon from '../../icons/edit-label/clear-icon/clear.icon';
 import {
     getEditLabelVisible,
-    getInputLabel,
     getZoomLevel,
-    setInputLabel,
     updateAnnotationContextVisibility,
     updateEditLabelVisibility,
 } from '../../redux/slices/ui.slice';
@@ -27,6 +23,9 @@ import {
     updateAnnotationCategory,
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
+import ExpandIcon from '../../icons/shared/expand-icon/expand.icon';
+
+const { BORDER_WIDTH, LABEL_HEIGHT } = annotationStyle;
 
 /**
  * Widget for editing a selected detection's label.
@@ -38,74 +37,45 @@ const EditLabelComponent = () => {
     const zoomLevel = useSelector(getZoomLevel);
     const isVisible = useSelector(getEditLabelVisible);
     const selectedAnnotation = useSelector(getSelectedAnnotation);
-    const newLabel = useSelector(getInputLabel);
-    const viewport = document.getElementById('imageContainer');
+    const [value, setValue] = useState('');
+    const labels = useSelector(getAnnotationCategories);
+    const inputRef = useRef(null);
+    const [isListOpen, setIsListOpen] = useState(false);
     const [position, setPosition] = useState({
         x: 0,
         y: 0,
     });
-    useEffect(() => {
-        if (isVisible) {
-            const newViewport = document.getElementById('imageContainer');
-            if (newViewport !== null) {
-                const { offsetLeft, offsetTop } = newViewport;
-                const horizontalGap = offsetLeft / zoomLevel;
-                const verticalGap = offsetTop / zoomLevel;
 
-                try {
-                    const coordinates = cornerstone.pixelToCanvas(newViewport, {
-                        x: selectedAnnotation?.bbox[0] + horizontalGap,
-                        y: selectedAnnotation?.bbox[1] + verticalGap,
-                    });
-                    setPosition(coordinates);
-                } catch (e) {
-                    console.log(e);
-                }
-            }
+    // runs when the input widget becomes visible
+    useLayoutEffect(() => {
+        if (!isVisible || !selectedAnnotation) return setIsListOpen(false);
+        const newViewport = document.getElementById('imageContainer');
+        if (newViewport === null) return;
+        const { offsetLeft, offsetTop } = newViewport;
+        const horizontalGap = offsetLeft / zoomLevel;
+        const verticalGap = offsetTop / zoomLevel;
+
+        setValue(
+            selectedAnnotation.categoryName === UNKNOWN
+                ? ''
+                : selectedAnnotation.categoryName
+        );
+        inputRef.current.focus();
+
+        try {
+            const coordinates = cornerstone.pixelToCanvas(newViewport, {
+                x: selectedAnnotation.bbox[0] + horizontalGap,
+                y: selectedAnnotation.bbox[1] + verticalGap,
+            });
+            setPosition(coordinates);
+        } catch (e) {
+            console.log(e);
         }
     }, [isVisible, selectedAnnotation]);
 
-    const labels = useSelector(getAnnotationCategories);
-    const inputField = useRef(null);
-    const [isListOpen, setIsListOpen] = useState(false);
-    const [showClearIcon, setShowClearIcon] = useState(false);
-    const fontArr = constants.annotationStyle.LABEL_FONT.split(' ');
-    const fontSizeArr = fontArr[1].split('px');
-    fontSizeArr[0] = fontSizeArr[0] * zoomLevel;
-    const newFontSize = fontSizeArr.join('px');
-    const font = fontArr[0] + ' ' + newFontSize + ' ' + fontArr[2];
-
-    const formattedLabels = labels?.filter((label) => label !== 'unknown');
-
-    const placeholder = 'Input text';
-
-    // Clear input field when list is opened
-    useEffect(() => {
-        if (isListOpen) {
-            setShowClearIcon(false);
-        }
-    }, [isListOpen]);
-    useEffect(() => {
-        // When component is updated to be visible or the label list is closed, focus the text input field for user
-        // input
-        if (isVisible && !isListOpen) {
-            inputField.current.focus();
-            setShowClearIcon(true);
-            // set the value of the text input to the current detection class name
-            if (inputField.current.value === '') {
-                dispatch(
-                    setInputLabel(selectedAnnotation.categoryName.toUpperCase())
-                );
-            }
-        }
-
-        // Reset label list visibility when component is hidden
-        if (!isVisible) {
-            setIsListOpen(false);
-            setShowClearIcon(false);
-            dispatch(setInputLabel(''));
-        }
-    }, [isVisible, isListOpen]);
+    const formattedLabels = labels?.filter(
+        (label) => label.toLowerCase() !== UNKNOWN
+    );
 
     /**
      * Select new label from list of existing detection labels
@@ -113,7 +83,7 @@ const EditLabelComponent = () => {
      */
     const submitFromList = (label) => {
         setIsListOpen(false);
-        dispatch(setInputLabel(label.toUpperCase()));
+        submit(label);
     };
     /**
      * Called on every keydown in label input field.
@@ -122,116 +92,79 @@ const EditLabelComponent = () => {
      * @param {KeyboardEvent} e event fired for every key press
      */
     const submitFromInput = (e) => {
-        if (e.key === 'Enter' && e.target.value !== '') {
-            dispatch(updateEditLabelVisibility(false));
-            dispatch(updateAnnotationContextVisibility(true));
-            dispatch(setInputLabel(''));
-            Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
-                id: selectedAnnotation.id,
-                newCategory: newLabel,
-            });
-        }
+        if (e.key !== 'Enter') return;
+        submit(value.trim() || UNKNOWN);
     };
 
-    /**
-     * Scales a value based on the given viewport's zoom level
-     * @param {number} value
-     * @returns {number}
-     */
-    const scaleByZoom = (value) => {
-        return value * zoomLevel;
+    const submit = (value) => {
+        dispatch(updateEditLabelVisibility(false));
+        dispatch(updateAnnotationContextVisibility(true));
+        Utils.dispatchAndUpdateImage(dispatch, updateAnnotationCategory, {
+            id: selectedAnnotation.id,
+            newCategory: value,
+        });
+        setValue('');
     };
 
-    /**
-     * Calculate the font size based on the given string
-     * @param {string} str
-     * @returns {number} fontSize
-     */
-    const getFontSize = (str) => {
-        let fontArr = str.split(' ');
-        let floatNum = parseFloat(fontArr[1]);
-        Math.floor(floatNum);
-        let fontSize = parseInt(floatNum);
-        return fontSize <= 14 ? 14 : fontSize; // keeps font from getting too small
-    };
+    const scaleByZoom = (value) => value * zoomLevel;
 
-    /**
-     * Triggered when the edit label input field is changed. Shows and hides the clear icon
-     *
-     * @param {Event} e - change event object
-     */
-    const handleLabelInputChange = (e) => {
-        const { value } = e.target;
-        setShowClearIcon(!!value.length);
-        dispatch(setInputLabel(value.toUpperCase()));
-    };
+    const getWidth = (width) => scaleByZoom(width) + BORDER_WIDTH;
 
-    /**
-     * Scales the given width by the zoom level and account for the detection border width
-     *
-     * @param {number} width
-     * @returns {number}
-     */
-    const getWidth = (width) => {
-        const { BORDER_WIDTH } = constants.annotationStyle;
-        return scaleByZoom(width) + scaleByZoom(BORDER_WIDTH);
-    };
-
-    if (isVisible) {
-        return (
+    return (
+        isVisible &&
+        selectedAnnotation && (
             <EditLabelWrapper
-                viewport={viewport}
-                top={position.y - INPUT_HEIGHT}
-                left={position.x - zoomLevel}
-                width={getWidth(selectedAnnotation?.bbox[2])}
-                fontSize={getFontSize(font)}>
-                <InputContainer>
-                    <InputContainer>
-                        <NewLabelInput
-                            placeholder={isListOpen ? '' : placeholder}
-                            value={isListOpen ? '' : newLabel}
-                            onChange={handleLabelInputChange}
-                            onKeyDown={submitFromInput}
-                            disabled={isListOpen}
-                            ref={inputField}
+                top={position.y - LABEL_HEIGHT}
+                left={position.x - BORDER_WIDTH / 2}
+                width={getWidth(selectedAnnotation.bbox[2])}>
+                <InputContainer isListOpen={isListOpen}>
+                    <NewLabelInput
+                        placeholder={UNKNOWN}
+                        value={value.toLowerCase()}
+                        onChange={({ target }) => setValue(target.value)}
+                        onKeyDown={submitFromInput}
+                        disabled={isListOpen}
+                        ref={inputRef}
+                    />
+
+                    {isListOpen ? (
+                        <LabelListComponent
+                            width={selectedAnnotation.bbox[2]}
+                            labels={formattedLabels}
+                            onLabelSelect={submitFromList}
                         />
-                        {showClearIcon && (
+                    ) : (
+                        !!value.length && (
                             <ClearIconWrapper
                                 onClick={() => {
-                                    setShowClearIcon(false);
-                                    inputField.current.focus();
-                                    dispatch(setInputLabel(''));
+                                    inputRef.current.focus();
+                                    setValue('');
                                 }}>
                                 <ClearIcon
                                     width={'20px'}
                                     height={'20px'}
-                                    color={'white'}
+                                    color={'rgba(255, 255, 255, 0.5)'}
                                 />
                             </ClearIconWrapper>
-                        )}
-                    </InputContainer>
-                    <ArrowIconWrapper
-                        onClick={() => {
-                            setIsListOpen(!isListOpen);
-                        }}>
-                        <ArrowIcon
-                            direction={isListOpen ? 'up' : 'down'}
-                            height="24px"
-                            width="24px"
-                            color={'white'}
-                        />
-                    </ArrowIconWrapper>
+                        )
+                    )}
                 </InputContainer>
-                {isListOpen && (
-                    <LabelListComponent
-                        width={selectedAnnotation?.bbox[2]}
-                        labels={formattedLabels}
-                        onLabelSelect={submitFromList}
+                <ArrowIconWrapper
+                    onClick={() => {
+                        isListOpen &&
+                            setTimeout(() => inputRef.current.focus(), 0);
+                        setIsListOpen(!isListOpen);
+                    }}>
+                    <ExpandIcon
+                        direction={isListOpen ? 'up' : 'down'}
+                        height="24px"
+                        width="24px"
+                        color={'white'}
                     />
-                )}
+                </ArrowIconWrapper>
             </EditLabelWrapper>
-        );
-    } else return null;
+        )
+    );
 };
 
 export default EditLabelComponent;

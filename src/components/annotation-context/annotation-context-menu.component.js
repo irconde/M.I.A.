@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import DeleteIcon from '../../icons/detection-context-menu/delete-icon/delete.icon';
 import TextIcon from '../../icons/detection-context-menu/text-icon/text.icon';
 import PolygonIcon from '../../icons/shared/polygon-icon/polygon.icon';
@@ -6,6 +6,7 @@ import MovementIcon from '../../icons/detection-context-menu/movement-icon/movem
 import * as constants from '../../utils/enums/Constants';
 import { editionMode } from '../../utils/enums/Constants';
 import { useDispatch, useSelector } from 'react-redux';
+import * as cornerstone from 'cornerstone-core';
 import Tooltip from '@mui/material/Tooltip';
 import {
     DeleteWidget,
@@ -17,10 +18,8 @@ import {
 } from './annotation-context-menu.styles';
 import {
     clearAnnotationWidgets,
-    getAnnotationContextPosition,
     getAnnotationContextVisible,
     getEditionMode,
-    updateAnnotationContextPosition,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateColorPickerVisibility,
@@ -35,6 +34,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import Utils from '../../utils/general/Utils';
 import RectangleIcon from '../../icons/shared/rectangle-icon/rectangle.icon';
+import ColorPickerComponent from '../color/color-picker.component';
 
 /**
  * Component for editing position, coordinates of bounding box, coordinates of polygon mask, and labels of specific
@@ -46,22 +46,32 @@ const AnnotationContextMenuComponent = () => {
     const isVisible = useSelector(getAnnotationContextVisible);
     const selectedAnnotationColor = useSelector(getSelectedAnnotationColor);
     const selectedOption = useSelector(getEditionMode);
-    const position = useSelector(getAnnotationContextPosition);
-    const positionRef = useRef(position);
-    useEffect(() => {
-        positionRef.current = position;
-    }, [position]);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
     const selectedAnnotation = useSelector(getSelectedAnnotation);
+
+    useLayoutEffect(() => {
+        if (!isVisible || !selectedAnnotation) return;
+        const viewport = document.getElementById('imageContainer');
+        const { top, left } = Utils.calculateAnnotationContextPosition(
+            cornerstone,
+            selectedAnnotation.bbox,
+            viewport
+        );
+
+        setPosition({ top, left });
+    }, [isVisible, selectedAnnotation]);
+
     const dispatch = useDispatch();
-    /*const recentScroll = useSelector(getRecentScroll);*/
+
     const handleClick = (type) => {
         const viewport = document.getElementById('imageContainer');
         if (viewport !== null) {
             Utils.resetCornerstoneTools(viewport);
         }
+        dispatch(clearAnnotationWidgets());
         switch (type) {
             case constants.editionMode.MOVE:
-                dispatch(updateAnnotationContextVisibility(false));
+                dispatch(updateAnnotationContextVisibility(true));
                 Utils.updateToolState(constants.toolNames.movement, {
                     handles: {
                         start: {
@@ -184,7 +194,6 @@ const AnnotationContextMenuComponent = () => {
                 );
                 break;
             case constants.editionMode.DELETE:
-                dispatch(updateAnnotationContextPosition({ top: 0, left: 0 }));
                 dispatch(
                     updateCornerstoneMode(constants.cornerstoneMode.SELECTION)
                 );
@@ -203,7 +212,6 @@ const AnnotationContextMenuComponent = () => {
         }
     };
 
-    /*if (isVisible === true && !recentScroll)*/
     if (isVisible === true) {
         return (
             <Positioner position={position}>
@@ -230,9 +238,7 @@ const AnnotationContextMenuComponent = () => {
                                 onClick={() => handleClick(editionMode.COLOR)}
                                 selected={selectedOption === editionMode.COLOR}>
                                 <StyledSelectedDetection
-                                    selectedDetectionColor={
-                                        selectedAnnotationColor
-                                    }
+                                    color={selectedAnnotationColor}
                                 />
                             </IconContainer>
                         </Tooltip>
@@ -302,6 +308,7 @@ const AnnotationContextMenuComponent = () => {
                         </DeleteWidget>
                     </Tooltip>
                 </FlexContainer>
+                <ColorPickerComponent />
             </Positioner>
         );
     } else {

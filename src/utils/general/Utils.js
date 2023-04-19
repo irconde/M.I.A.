@@ -91,17 +91,17 @@ export default class Utils {
      *
      * @static
      * @param {Context} context - 2d canvas context
-     * @param {string} labelText - Text content of the label
+     * @param {string} text - Text content of the label
      * @param {number} padding - Blank space surrounding the text within the label
+     * @param {number} zoom - Current zoom level on canvas
+     * @param {number} height
      * @returns {{width: number, height: number}} - Label's dimensions
      */
-    static getTextLabelSize(context, labelText, padding) {
-        const textSize = context.measureText(labelText);
-        // Approximation to estimate the text height
-        const lineHeight = context.measureText('M').width;
+    static getTextLabelSize(context, text, padding, zoom, height = 28) {
+        const stringWidth = context.measureText(text).width;
         return {
-            width: textSize.width + 2 * padding,
-            height: lineHeight + 2 * padding,
+            width: stringWidth + (padding / zoom) * 2,
+            height: height / zoom,
         };
     }
 
@@ -614,21 +614,23 @@ export default class Utils {
         return bbox;
     }
 
-    static calculateAnnotationContextPosition(
-        cornerstone,
-        bbox,
-        viewport,
-        zoomLevel
-    ) {
-        const gap = 5;
+    /**
+     *
+     * @param cornerstone
+     * @param bbox {Array<number>}
+     * @param viewport
+     * @return {{top, left}}
+     */
+    static calculateAnnotationContextPosition(cornerstone, bbox, viewport) {
+        const GAP = 5;
         const width = bbox[2];
         const height = bbox[3];
         const { x, y } = cornerstone.pixelToCanvas(viewport, {
             x: bbox[0] + width / 2,
-            y: bbox[1] + height + gap,
+            y: bbox[1] + height,
         });
 
-        return { left: x, top: y };
+        return { left: x, top: y + GAP };
     }
 
     /**
@@ -874,6 +876,20 @@ export default class Utils {
             });
         }
         return points;
+    }
+
+    /**
+     *
+     * @param string {string}
+     * @param count {number}
+     * @return {string|*}
+     */
+    static limitCharCount(string, count = 16) {
+        if (string.length > count) {
+            return string.slice(0, count) + '...';
+        } else {
+            return string;
+        }
     }
 
     /**
