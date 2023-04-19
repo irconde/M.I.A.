@@ -600,6 +600,10 @@ const ImageDisplayComponent = () => {
                     }
                 }
             }
+        } else {
+            if (isAnnotationContextVisibleRef.current) {
+                dispatch(updateAnnotationContextVisibility(false));
+            }
         }
         const { boundingBox, segmentation, movement } = constants.toolNames;
         const options = {
