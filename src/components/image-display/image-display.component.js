@@ -35,7 +35,9 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
-    toggleSideMenu,
+    getIsManualSideMenuToggle,
+    getSideMenuVisible,
+    setSideMenu,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
@@ -110,6 +112,8 @@ const ImageDisplayComponent = () => {
     const [handleWheel, handleMouseDown, handleMouseUp] = useWidgetsManager(
         viewportRef.current
     );
+    const isManualSideMenuToggle = useSelector(getIsManualSideMenuToggle);
+    const isSideMenuVisible = useSelector(getSideMenuVisible);
 
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
@@ -277,6 +281,19 @@ const ImageDisplayComponent = () => {
                     dispatch(
                         addAnnotationArray({ annotationInformation, colors })
                     );
+
+                    if (
+                        annotationInformation?.annotations?.length === 0 ||
+                        annotationInformation?.annotations === null ||
+                        annotationInformation?.annotations === undefined
+                    ) {
+                        dispatch(setSideMenu(false));
+                    } else {
+                        if (!isManualSideMenuToggle) {
+                            console.log('dispatching');
+                            dispatch(setSideMenu(true));
+                        }
+                    }
                 } else {
                     dispatch(updateColors(colors));
                 }
@@ -324,7 +341,7 @@ const ImageDisplayComponent = () => {
                         (bbox[1] - (bbox[1] + bbox[3]))
                 );
                 if (annotationRef.current.length === 0) {
-                    dispatch(toggleSideMenu());
+                    dispatch(setSideMenu(false));
                 }
                 Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
                     bbox,
@@ -389,7 +406,7 @@ const ImageDisplayComponent = () => {
                         );
                         if (area > 0) {
                             if (annotationRef.current.length === 0) {
-                                dispatch(toggleSideMenu());
+                                dispatch(setSideMenu(false));
                             }
                             Utils.dispatchAndUpdateImage(
                                 dispatch,

@@ -16,6 +16,7 @@ const initialState = {
     splashScreenVisible: true,
     showApp: false,
     isImageToolsOpen: false,
+    manualSideMenuToggle: false,
 };
 
 const uiSlice = createSlice({
@@ -24,6 +25,10 @@ const uiSlice = createSlice({
     reducers: {
         toggleSideMenu: (state, action) => {
             state.sideMenuVisible = !state.sideMenuVisible;
+            state.manualSideMenuToggle = !state.manualSideMenuToggle;
+        },
+        setSideMenu: (state, action) => {
+            state.sideMenuVisible = action.payload;
         },
         toggleLazySideMenu: (state, action) => {
             state.lazyImageMenuVisible = !state.lazyImageMenuVisible;
@@ -75,6 +80,7 @@ const uiSlice = createSlice({
 
 export const {
     toggleSideMenu,
+    setSideMenu,
     toggleLazySideMenu,
     updateZoomLevel,
     updateColorPickerVisibility,
@@ -108,5 +114,7 @@ export const getSplashScreenVisibility = (state) =>
     state.ui.splashScreenVisible;
 export const getShowApp = (state) => state.ui.showApp;
 export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
+export const getIsManualSideMenuToggle = (state) =>
+    state.ui.manualSideMenuToggle;
 
 export default uiSlice.reducer;

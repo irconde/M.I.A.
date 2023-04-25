@@ -55,6 +55,8 @@ export const StyledSpeedDial = styled(SpeedDial)`
             $isOpen && $invert ? selectedBlue : noSelectGrey};
         border: 1px solid #414141;
         z-index: 1;
+        width: 4rem;
+        height: 4rem;
         box-shadow: 0 0.17rem 0.6rem 0.1rem rgba(0, 0, 0, 0.6);
 
         &:hover {
@@ -65,13 +67,15 @@ export const StyledSpeedDial = styled(SpeedDial)`
     }
 
     && .MuiSpeedDial-actions {
-        width: 56px;
-        height: 68%;
+        width: 4rem;
+        height: 75%;
         justify-content: space-around;
         padding: 0;
         display: flex;
         flex-direction: column-reverse;
         align-items: center;
+        position: relative;
+        bottom: 10%;
     }
 `;
 
@@ -119,7 +123,7 @@ export const StyledSlider = styled(Slider)`
 `;
 
 export const SliderGroup = styled.div`
-    height: 68%;
+    height: 75%;
     width: ${({ $show }) => ($show ? '10rem' : '0')};
     display: flex;
     flex-direction: column;
@@ -129,7 +133,6 @@ export const SliderGroup = styled.div`
 `;
 
 export const SliderWrapper = styled.div`
-    height: 56px;
     display: flex;
     align-items: center;
     opacity: ${({ $show }) => Number($show)};
