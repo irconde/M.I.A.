@@ -465,6 +465,10 @@ class ClientFilesManager {
                                                 console.log(
                                                     'Cleared temp data on save event'
                                                 );
+                                                this.mainWindow.webContents.send(
+                                                    Channels.anyTempDataUpdate,
+                                                    false
+                                                );
                                                 const savedFileName =
                                                     this.fileNames[
                                                         this.currentFileIndex
@@ -664,6 +668,10 @@ class ClientFilesManager {
                         });
                         writeStream.on('finish', () => {
                             console.log('Saved temp data');
+                            this.mainWindow.webContents.send(
+                                Channels.anyTempDataUpdate,
+                                true
+                            );
                             resolve();
                         });
                         writeStream.write(
@@ -880,6 +888,10 @@ class ClientFilesManager {
                                     console.log(
                                         'Cleared temp data on save new'
                                     );
+                                    this.mainWindow.webContents.send(
+                                        Channels.anyTempDataUpdate,
+                                        false
+                                    );
                                     resolve();
                                 });
                                 tempOutWriteStream.write(JSON.stringify([]));
@@ -1067,16 +1079,15 @@ class ClientFilesManager {
                             categories: foundTempData.cocoCategories,
                             deletedAnnotationIds: foundTempData.cocoDeleted,
                             imageId: foundTempData.imageId,
-                            anyTempData,
                         });
                     } else if (this.selectedAnnotationFile) {
                         this.#cocoAnnotationLoader()
-                            .then((data) => resolve({ ...data, anyTempData }))
+                            .then((data) => resolve(data))
                             .catch((err) => reject(err));
                     } else resolve({ imageId: this.currentFileIndex + 1 });
                 } else if (this.selectedAnnotationFile) {
                     this.#cocoAnnotationLoader()
-                        .then((data) => resolve({ ...data, anyTempData }))
+                        .then((data) => resolve(data))
                         .catch((err) => reject(err));
                 } else resolve({ imageId: this.currentFileIndex + 1 });
             });

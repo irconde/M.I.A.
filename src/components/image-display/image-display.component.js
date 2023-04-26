@@ -24,6 +24,7 @@ import {
     getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
+    updateAnyTempData,
     updateColors,
     updateMaxImageValues,
     updateSaveAnnotationStatus,
@@ -36,7 +37,6 @@ import {
     getCurrFileName,
     getEditionMode,
     getIsManualSideMenuToggle,
-    getSideMenuVisible,
     setSideMenu,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
@@ -113,7 +113,6 @@ const ImageDisplayComponent = () => {
         viewportRef.current
     );
     const isManualSideMenuToggle = useSelector(getIsManualSideMenuToggle);
-    const isSideMenuVisible = useSelector(getSideMenuVisible);
 
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
@@ -132,6 +131,12 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        ipcRenderer.on(Channels.anyTempDataUpdate, (e, anyTempData) => {
+            dispatch(updateAnyTempData(anyTempData));
+        });
+    });
 
     useEffect(() => {
         maxImageValuesRef.current = maxImageValues;
@@ -290,7 +295,6 @@ const ImageDisplayComponent = () => {
                         dispatch(setSideMenu(false));
                     } else {
                         if (!isManualSideMenuToggle) {
-                            console.log('dispatching');
                             dispatch(setSideMenu(true));
                         }
                     }

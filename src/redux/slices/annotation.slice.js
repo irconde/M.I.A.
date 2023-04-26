@@ -286,13 +286,10 @@ const annotationSlice = createSlice({
                 maxAnnotationId,
                 imageId,
                 deletedAnnotationIds,
-                anyTempData,
             } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
             state.imageId = imageId;
-
-            state.anyTempData = anyTempData;
 
             if (deletedAnnotationIds !== undefined) {
                 // Loaded from temp data
@@ -652,6 +649,9 @@ const annotationSlice = createSlice({
         updateShowSaveAsModal: (state, action) => {
             state.saveAsModalOpen = action.payload;
         },
+        updateAnyTempData: (state, action) => {
+            state.anyTempData = action.payload;
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -736,6 +736,7 @@ export const {
     updateImageContrast,
     updateImageInversion,
     updateShowSaveAsModal,
+    updateAnyTempData,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
