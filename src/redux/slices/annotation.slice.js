@@ -186,9 +186,7 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
             prepareAnnotationsForCoco(annotation);
         await ipcRenderer
             .invoke(Channels.selectFile, {
-                cocoAnnotations: annotation.hasAnnotationChanged
-                    ? cocoAnnotations
-                    : [],
+                cocoAnnotations: cocoAnnotations,
                 cocoCategories,
                 cocoDeleted,
                 tempFileName: ui.currentFileName,

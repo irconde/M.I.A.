@@ -627,63 +627,59 @@ class ClientFilesManager {
         filePath
     ) {
         return new Promise((resolve, reject) => {
-            if (cocoAnnotations?.length > 0) {
-                const readStream = fs.createReadStream(filePath);
-                let data = '';
-                readStream.on('error', (err) => {
-                    console.log(err);
-                    reject(err);
-                });
-                readStream.on('data', (chunk) => {
-                    data += chunk;
-                });
-                readStream.on('end', () => {
-                    try {
-                        let annotationFile = JSON.parse(data);
-                        const foundIndex = annotationFile.findIndex(
-                            (temp) => temp.fileName === fileName
-                        );
-                        if (foundIndex === -1) {
-                            annotationFile.push({
-                                fileName,
-                                imageId,
-                                cocoAnnotations,
-                                cocoCategories,
-                                cocoDeleted,
-                            });
-                        } else {
-                            annotationFile[foundIndex] = {
-                                fileName,
-                                imageId,
-                                cocoAnnotations,
-                                cocoCategories,
-                                cocoDeleted,
-                            };
-                        }
+            const readStream = fs.createReadStream(filePath);
+            let data = '';
+            readStream.on('error', (err) => {
+                console.log(err);
+                reject(err);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
+                try {
+                    let annotationFile = JSON.parse(data);
+                    const foundIndex = annotationFile.findIndex(
+                        (temp) => temp.fileName === fileName
+                    );
+                    if (foundIndex === -1) {
+                        annotationFile.push({
+                            fileName,
+                            imageId,
+                            cocoAnnotations,
+                            cocoCategories,
+                            cocoDeleted,
+                        });
+                    } else {
+                        annotationFile[foundIndex] = {
+                            fileName,
+                            imageId,
+                            cocoAnnotations,
+                            cocoCategories,
+                            cocoDeleted,
+                        };
+                    }
 
-                        const writeStream = fs.createWriteStream(filePath);
-                        writeStream.on('error', (err) => {
-                            console.log(err);
-                            reject(err);
-                        });
-                        writeStream.on('finish', () => {
-                            console.log('Saved temp data');
-                            this.mainWindow.webContents.send(
-                                Channels.anyTempDataUpdate,
-                                true
-                            );
-                            resolve();
-                        });
-                        writeStream.write(
-                            JSON.stringify(annotationFile, null, 4)
-                        );
-                        writeStream.end();
-                    } catch (err) {
+                    const writeStream = fs.createWriteStream(filePath);
+                    writeStream.on('error', (err) => {
                         console.log(err);
                         reject(err);
-                    }
-                });
-            } else resolve();
+                    });
+                    writeStream.on('finish', () => {
+                        console.log('Saved temp data');
+                        this.mainWindow.webContents.send(
+                            Channels.anyTempDataUpdate,
+                            true
+                        );
+                        resolve();
+                    });
+                    writeStream.write(JSON.stringify(annotationFile, null, 4));
+                    writeStream.end();
+                } catch (err) {
+                    console.log(err);
+                    reject(err);
+                }
+            });
         });
     }
 
@@ -1073,6 +1069,7 @@ class ClientFilesManager {
                     const foundTempData = tempData.find(
                         (temp) => temp.fileName === fileName
                     );
+                    console.log(`Found Temp: ${foundTempData}`);
                     if (foundTempData) {
                         resolve({
                             annotations: foundTempData.cocoAnnotations,
