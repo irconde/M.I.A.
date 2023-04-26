@@ -1067,9 +1067,11 @@ class ClientFilesManager {
                             temp.cocoDeleted?.length > 0
                     );
                     const foundTempData = tempData.find(
-                        (temp) => temp.fileName === fileName
+                        (temp) =>
+                            temp.fileName === fileName &&
+                            (temp.cocoAnnotations.length > 0 ||
+                                temp.cocoDeleted.length !== 0)
                     );
-                    console.log(`Found Temp: ${foundTempData}`);
                     if (foundTempData) {
                         resolve({
                             annotations: foundTempData.cocoAnnotations,
