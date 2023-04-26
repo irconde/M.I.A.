@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    IconsContainer,
     ConnectionTypeInfo,
+    ContactIconsContainer,
     FragmentWrapper,
+    IconsContainer,
     ImportDataContainer,
     ImportDataText,
     ImportIconWrapper,
@@ -12,7 +13,6 @@ import {
     TopBarContainer,
     TopBarIconWrapper,
     VerticalDivider,
-    ContactIconsContainer,
 } from './top-bar.styles';
 import { getAssetsDirPaths } from '../../redux/slices/settings.slice';
 import Tooltip from '@mui/material/Tooltip';
@@ -32,6 +32,7 @@ import {
 import Utils from '../../utils/general/Utils';
 import ImagesIcon from '../../icons/shared/images-icon/images.icon';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
+import { getAnnotationCount } from '../../redux/slices/annotation.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
@@ -48,6 +49,7 @@ const iconProps = {
  */
 const TopBarComponent = (props) => {
     const dispatch = useDispatch();
+    const annotationCount = useSelector(getAnnotationCount);
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     const annotationFilePath = Utils.truncateFilePath(
@@ -139,18 +141,23 @@ const TopBarComponent = (props) => {
                 </ContactIconsContainer>
                 <VerticalDivider />
                 <Tooltip title={'Fold/unfold Side Menu'}>
-                    <TopBarIconWrapper onClick={toggleClickHandler}>
+                    <TopBarIconWrapper
+                        onClick={() => {
+                            if (annotationCount > 0) {
+                                toggleClickHandler();
+                            }
+                        }}>
                         {isOpen ? (
                             <MenuUnfoldedIcon
                                 width={'32px'}
                                 height={'32px'}
-                                color={'white'}
+                                color={annotationCount > 0 ? 'white' : 'gray'}
                             />
                         ) : (
                             <MenuFoldedIcon
                                 width={'32px'}
                                 height={'32px'}
-                                color={'white'}
+                                color={annotationCount > 0 ? 'white' : 'gray'}
                             />
                         )}
                     </TopBarIconWrapper>

@@ -785,5 +785,7 @@ export const getImageBrightness = (state) => state.annotation.brightness;
 export const getImageContrast = (state) => state.annotation.contrast;
 export const getImageInversion = (state) => state.annotation.inverted;
 export const getIsSaveModalOpen = (state) => state.annotation.saveAsModalOpen;
+export const getAnnotationCount = (state) =>
+    state.annotation.annotations?.length;
 
 export default annotationSlice.reducer;
