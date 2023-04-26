@@ -373,6 +373,7 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
                 cocoDeleted,
                 tempFileName,
                 imageId,
+                hasChanges,
             } = args;
 
             files
@@ -382,6 +383,7 @@ ipcMain.handle(Channels.selectFile, async (e, args) => {
                     cocoDeleted,
                     tempFileName,
                     imageId,
+                    hasChanges,
                     TEMP_ANNOTATIONS_FILE_PATH
                 )
                 .then(() => {

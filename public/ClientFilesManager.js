@@ -624,6 +624,7 @@ class ClientFilesManager {
         cocoDeleted,
         fileName,
         imageId,
+        hasChanges,
         filePath
     ) {
         return new Promise((resolve, reject) => {
@@ -649,6 +650,7 @@ class ClientFilesManager {
                             cocoAnnotations,
                             cocoCategories,
                             cocoDeleted,
+                            hasChanges,
                         });
                     } else {
                         annotationFile[foundIndex] = {
@@ -657,6 +659,7 @@ class ClientFilesManager {
                             cocoAnnotations,
                             cocoCategories,
                             cocoDeleted,
+                            hasChanges,
                         };
                     }
 
@@ -669,7 +672,7 @@ class ClientFilesManager {
                         console.log('Saved temp data');
                         this.mainWindow.webContents.send(
                             Channels.anyTempDataUpdate,
-                            true
+                            hasChanges
                         );
                         resolve();
                     });

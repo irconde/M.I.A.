@@ -193,6 +193,7 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
                 cocoDeleted,
                 tempFileName: ui.currentFileName,
                 imageId: annotation.imageId,
+                hasChanges: annotation.hasAnnotationChanged,
                 fileName: payload,
             })
             .then(() => {
