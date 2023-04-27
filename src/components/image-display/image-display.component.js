@@ -24,6 +24,7 @@ import {
     getSelectedCategory,
     selectAnnotation,
     updateAnnotationPosition,
+    updateAnyTempData,
     updateColors,
     updateMaxImageValues,
     updateSaveAnnotationStatus,
@@ -35,7 +36,8 @@ import {
     getCornerstoneMode,
     getCurrFileName,
     getEditionMode,
-    toggleSideMenu,
+    getIsManualSideMenuToggle,
+    setSideMenu,
     updateAnnotationContextVisibility,
     updateAnnotationMode,
     updateCornerstoneMode,
@@ -110,6 +112,7 @@ const ImageDisplayComponent = () => {
     const [handleWheel, handleMouseDown, handleMouseUp] = useWidgetsManager(
         viewportRef.current
     );
+    const isManualSideMenuToggle = useSelector(getIsManualSideMenuToggle);
 
     const setupCornerstoneJS = () => {
         cornerstone.enable(viewportRef.current);
@@ -128,6 +131,12 @@ const ImageDisplayComponent = () => {
     };
 
     useEffect(setupCornerstoneJS, []);
+
+    useEffect(() => {
+        ipcRenderer.on(Channels.anyTempDataUpdate, (e, anyTempData) => {
+            dispatch(updateAnyTempData(anyTempData));
+        });
+    });
 
     useEffect(() => {
         maxImageValuesRef.current = maxImageValues;
@@ -277,6 +286,18 @@ const ImageDisplayComponent = () => {
                     dispatch(
                         addAnnotationArray({ annotationInformation, colors })
                     );
+
+                    if (
+                        annotationInformation?.annotations?.length === 0 ||
+                        annotationInformation?.annotations === null ||
+                        annotationInformation?.annotations === undefined
+                    ) {
+                        dispatch(setSideMenu(false));
+                    } else {
+                        if (!isManualSideMenuToggle) {
+                            dispatch(setSideMenu(true));
+                        }
+                    }
                 } else {
                     dispatch(updateColors(colors));
                 }
@@ -324,7 +345,7 @@ const ImageDisplayComponent = () => {
                         (bbox[1] - (bbox[1] + bbox[3]))
                 );
                 if (annotationRef.current.length === 0) {
-                    dispatch(toggleSideMenu());
+                    dispatch(setSideMenu(false));
                 }
                 Utils.dispatchAndUpdateImage(dispatch, addAnnotation, {
                     bbox,
@@ -389,7 +410,7 @@ const ImageDisplayComponent = () => {
                         );
                         if (area > 0) {
                             if (annotationRef.current.length === 0) {
-                                dispatch(toggleSideMenu());
+                                dispatch(setSideMenu(false));
                             }
                             Utils.dispatchAndUpdateImage(
                                 dispatch,

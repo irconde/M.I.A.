@@ -12,7 +12,7 @@ import {
 } from '../../redux/slices/annotation.slice';
 import {
     getSideMenuVisible,
-    toggleSideMenu,
+    setSideMenu,
     updateAnnotationContextVisibility,
     updateCornerstoneMode,
 } from '../../redux/slices/ui.slice';
@@ -60,7 +60,7 @@ const SideMenuComponent = () => {
             allAnnotationsDeleted !== allAnnotationsDeletedRef.current &&
             allAnnotationsDeleted === true
         ) {
-            dispatch(toggleSideMenu());
+            dispatch(setSideMenu(false));
         }
         allAnnotationsDeletedRef.current = allAnnotationsDeleted;
     }, [allAnnotationsDeleted]);
@@ -113,171 +113,160 @@ const SideMenuComponent = () => {
         dispatch(updateAnnotationContextVisibility(true));
     };
 
-    if (annotations.length > 0) {
-        return (
-            <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
-                <SideMenuListWrapper>
-                    <SideMenuList id={'side-menu-list'}>
-                        {Object.keys(annotationsByCategory).map(
-                            (categoryName, index) => (
-                                <div key={index}>
-                                    <AnnotationContainer
-                                        selected={
-                                            selectedCategory === categoryName
-                                        }
-                                        onClick={(e) =>
-                                            handleAnnotationContainerClick(
-                                                e,
+    return (
+        <SideMenuContainer isSideMenuVisible={isSideMenuVisible}>
+            <SideMenuListWrapper>
+                <SideMenuList id={'side-menu-list'}>
+                    {Object.keys(annotationsByCategory).map(
+                        (categoryName, index) => (
+                            <div key={index}>
+                                <AnnotationContainer
+                                    selected={selectedCategory === categoryName}
+                                    onClick={(e) =>
+                                        handleAnnotationContainerClick(
+                                            e,
+                                            categoryName
+                                        )
+                                    }
+                                    id={'category-container'}>
+                                    <AnnotationColor
+                                        color={
+                                            annotationsByCategory[
                                                 categoryName
-                                            )
+                                            ][0].categoryVisible
+                                                ? annotationsByCategory[
+                                                      categoryName
+                                                  ][0].color
+                                                : 'gray'
                                         }
-                                        id={'category-container'}>
-                                        <AnnotationColor
+                                    />
+                                    <AnnotationWrapper>
+                                        <CollapsableArrowIconContainer
+                                            onClick={() =>
+                                                handleCollapse(categoryName)
+                                            }>
+                                            <ExpandIcon
+                                                direction={
+                                                    expandedCategories[
+                                                        categoryName
+                                                    ]
+                                                        ? 'down'
+                                                        : 'right'
+                                                }
+                                                width="1.5rem"
+                                                height="1.5rem"
+                                                color="white"
+                                            />
+                                        </CollapsableArrowIconContainer>
+                                        <SideMenuAnnotationName
                                             color={
                                                 annotationsByCategory[
                                                     categoryName
                                                 ][0].categoryVisible
-                                                    ? annotationsByCategory[
-                                                          categoryName
-                                                      ][0].color
+                                                    ? 'white'
                                                     : 'gray'
                                             }
-                                        />
-                                        <AnnotationWrapper>
-                                            <CollapsableArrowIconContainer
-                                                onClick={() =>
-                                                    handleCollapse(categoryName)
-                                                }>
-                                                <ExpandIcon
-                                                    direction={
-                                                        expandedCategories[
-                                                            categoryName
-                                                        ]
-                                                            ? 'down'
-                                                            : 'right'
-                                                    }
-                                                    width="1.5rem"
-                                                    height="1.5rem"
-                                                    color="white"
-                                                />
-                                            </CollapsableArrowIconContainer>
-                                            <SideMenuAnnotationName
-                                                color={
-                                                    annotationsByCategory[
-                                                        categoryName
-                                                    ][0].categoryVisible
-                                                        ? 'white'
-                                                        : 'gray'
-                                                }
-                                                id={'category-text'}>
-                                                {categoryName.toUpperCase()}
-                                            </SideMenuAnnotationName>
-                                        </AnnotationWrapper>
-                                        <EyeIconWrapper
-                                            onClick={() =>
-                                                Utils.dispatchAndUpdateImage(
-                                                    dispatch,
-                                                    toggleCategoryVisibility,
-                                                    categoryName
-                                                )
-                                            }
-                                            id={`${categoryName}-visible-icon-${index}`}>
-                                            {annotationsByCategory[
+                                            id={'category-text'}>
+                                            {categoryName.toUpperCase()}
+                                        </SideMenuAnnotationName>
+                                    </AnnotationWrapper>
+                                    <EyeIconWrapper
+                                        onClick={() =>
+                                            Utils.dispatchAndUpdateImage(
+                                                dispatch,
+                                                toggleCategoryVisibility,
                                                 categoryName
-                                            ][0].categoryVisible ? (
-                                                <VisibilityOnIcon
-                                                    color={'#b9b9b9'}
-                                                    id={`${categoryName}-visible-on-icon-${index}`}
-                                                    {...iconProps}
-                                                />
-                                            ) : (
-                                                <VisibilityOffIcon
-                                                    color={'#808080'}
-                                                    id={`${categoryName}-visible-off-icon-${index}`}
-                                                    {...iconProps}
-                                                />
-                                            )}
-                                        </EyeIconWrapper>
-                                    </AnnotationContainer>
-                                    {expandedCategories[categoryName] &&
-                                        annotationsByCategory[categoryName].map(
-                                            (annotation, index) => (
-                                                <SideMenuAnnotation
-                                                    selected={
-                                                        annotation.selected
-                                                    }
-                                                    categorySelected={
-                                                        selectedCategory ===
-                                                        categoryName
-                                                    }
-                                                    onClick={() =>
-                                                        handleAnnotationNameClick(
-                                                            annotation
-                                                        )
-                                                    }
-                                                    key={index}>
-                                                    <AnnotationColor
-                                                        color={
-                                                            annotation.categoryVisible
-                                                                ? annotation.color
-                                                                : 'gray'
-                                                        }
-                                                        style={{ opacity: 0.6 }}
-                                                    />
-                                                    <SideMenuAnnotationName
-                                                        color={
-                                                            annotation.visible
-                                                                ? 'white'
-                                                                : 'gray'
-                                                        }
-                                                        style={{
-                                                            marginLeft:
-                                                                'calc(1.5rem + 22px)',
-                                                        }}
-                                                        id={`annotation.categoryName-${index}`}>
-                                                        {annotation.categoryName.toUpperCase()}{' '}
-                                                        0{index + 1}
-                                                    </SideMenuAnnotationName>
-                                                    <EyeIconWrapper
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            Utils.dispatchAndUpdateImage(
-                                                                dispatch,
-                                                                toggleVisibility,
-                                                                annotation.id
-                                                            );
-                                                        }}
-                                                        id={`${annotation.categoryName}-visible-icon-${index}`}>
-                                                        {annotation.visible ? (
-                                                            <VisibilityOnIcon
-                                                                color={
-                                                                    '#b9b9b9'
-                                                                }
-                                                                id={`${annotation.categoryName}-visible-on-icon-${index}`}
-                                                                {...iconProps}
-                                                            />
-                                                        ) : (
-                                                            <VisibilityOffIcon
-                                                                color={
-                                                                    '#808080'
-                                                                }
-                                                                id={`${annotation.categoryName}-visible-off-icon-${index}`}
-                                                                {...iconProps}
-                                                            />
-                                                        )}
-                                                    </EyeIconWrapper>
-                                                </SideMenuAnnotation>
                                             )
+                                        }
+                                        id={`${categoryName}-visible-icon-${index}`}>
+                                        {annotationsByCategory[categoryName][0]
+                                            .categoryVisible ? (
+                                            <VisibilityOnIcon
+                                                color={'#b9b9b9'}
+                                                id={`${categoryName}-visible-on-icon-${index}`}
+                                                {...iconProps}
+                                            />
+                                        ) : (
+                                            <VisibilityOffIcon
+                                                color={'#808080'}
+                                                id={`${categoryName}-visible-off-icon-${index}`}
+                                                {...iconProps}
+                                            />
                                         )}
-                                </div>
-                            )
-                        )}
-                    </SideMenuList>
-                </SideMenuListWrapper>
-                <SaveButtonComponent />
-            </SideMenuContainer>
-        );
-    }
+                                    </EyeIconWrapper>
+                                </AnnotationContainer>
+                                {expandedCategories[categoryName] &&
+                                    annotationsByCategory[categoryName].map(
+                                        (annotation, index) => (
+                                            <SideMenuAnnotation
+                                                selected={annotation.selected}
+                                                categorySelected={
+                                                    selectedCategory ===
+                                                    categoryName
+                                                }
+                                                onClick={() =>
+                                                    handleAnnotationNameClick(
+                                                        annotation
+                                                    )
+                                                }
+                                                key={index}>
+                                                <AnnotationColor
+                                                    color={
+                                                        annotation.categoryVisible
+                                                            ? annotation.color
+                                                            : 'gray'
+                                                    }
+                                                    style={{ opacity: 0.6 }}
+                                                />
+                                                <SideMenuAnnotationName
+                                                    color={
+                                                        annotation.visible
+                                                            ? 'white'
+                                                            : 'gray'
+                                                    }
+                                                    style={{
+                                                        marginLeft:
+                                                            'calc(1.5rem + 22px)',
+                                                    }}
+                                                    id={`annotation.categoryName-${index}`}>
+                                                    {annotation.categoryName.toUpperCase()}{' '}
+                                                    0{index + 1}
+                                                </SideMenuAnnotationName>
+                                                <EyeIconWrapper
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        Utils.dispatchAndUpdateImage(
+                                                            dispatch,
+                                                            toggleVisibility,
+                                                            annotation.id
+                                                        );
+                                                    }}
+                                                    id={`${annotation.categoryName}-visible-icon-${index}`}>
+                                                    {annotation.visible ? (
+                                                        <VisibilityOnIcon
+                                                            color={'#b9b9b9'}
+                                                            id={`${annotation.categoryName}-visible-on-icon-${index}`}
+                                                            {...iconProps}
+                                                        />
+                                                    ) : (
+                                                        <VisibilityOffIcon
+                                                            color={'#808080'}
+                                                            id={`${annotation.categoryName}-visible-off-icon-${index}`}
+                                                            {...iconProps}
+                                                        />
+                                                    )}
+                                                </EyeIconWrapper>
+                                            </SideMenuAnnotation>
+                                        )
+                                    )}
+                            </div>
+                        )
+                    )}
+                </SideMenuList>
+            </SideMenuListWrapper>
+            <SaveButtonComponent />
+        </SideMenuContainer>
+    );
 };
 
 export default SideMenuComponent;

@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getSideMenuVisible } from '../../redux/slices/ui.slice';
 import {
     getHasAllAnnotationsDeleted,
-    getHasAnnotationChanged,
+    getHasAnyTempOrCurrentChanged,
     saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../redux/slices/annotation.slice';
@@ -29,7 +29,7 @@ const ExpandableFab = () => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(false);
     const fabRef = useRef(null);
-    const hasAnnotationsChanged = useSelector(getHasAnnotationChanged);
+    const hasAnnotationsChanged = useSelector(getHasAnyTempOrCurrentChanged);
     const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
     const enabled = hasAnnotationsChanged || hasAllAnnotationsDeleted;
 

@@ -193,6 +193,7 @@ export const selectFileAndSaveTempAnnotations = createAsyncThunk(
                 cocoDeleted,
                 tempFileName: ui.currentFileName,
                 imageId: annotation.imageId,
+                hasChanges: annotation.hasAnnotationChanged,
                 fileName: payload,
             })
             .then(() => {
@@ -286,13 +287,10 @@ const annotationSlice = createSlice({
                 maxAnnotationId,
                 imageId,
                 deletedAnnotationIds,
-                anyTempData,
             } = annotationInformation;
             state.annotations = [];
             state.colors = colors;
             state.imageId = imageId;
-
-            state.anyTempData = anyTempData;
 
             if (deletedAnnotationIds !== undefined) {
                 // Loaded from temp data
@@ -652,6 +650,9 @@ const annotationSlice = createSlice({
         updateShowSaveAsModal: (state, action) => {
             state.saveAsModalOpen = action.payload;
         },
+        updateAnyTempData: (state, action) => {
+            state.anyTempData = action.payload;
+        },
     },
     extraReducers: {
         [saveColorsFile.fulfilled]: (state, { payload }) => {
@@ -736,6 +737,7 @@ export const {
     updateImageContrast,
     updateImageInversion,
     updateShowSaveAsModal,
+    updateAnyTempData,
 } = annotationSlice.actions;
 
 export const getCategories = (state) => state.annotation.categories;
@@ -786,5 +788,7 @@ export const getImageBrightness = (state) => state.annotation.brightness;
 export const getImageContrast = (state) => state.annotation.contrast;
 export const getImageInversion = (state) => state.annotation.inverted;
 export const getIsSaveModalOpen = (state) => state.annotation.saveAsModalOpen;
+export const getAnnotationCount = (state) =>
+    state.annotation.annotations?.length;
 
 export default annotationSlice.reducer;

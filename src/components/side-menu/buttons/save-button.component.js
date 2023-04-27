@@ -3,17 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {
     SaveAsButtonContainer,
-    SaveAsDivider,
     SaveButtonContainer,
     SaveButtonText,
     SaveIconContainer,
     SideMenuButtonContainer,
 } from './save-button.styles';
 import Tooltip from '@mui/material/Tooltip';
-import { getSideMenuVisible } from '../../../redux/slices/ui.slice';
 import {
-    getHasAnnotationChanged,
-    getIsAnyAnnotations,
+    getHasAnyTempOrCurrentChanged,
     getIsSaveModalOpen,
     saveAsCurrentFile,
     saveCurrentAnnotations,
@@ -35,7 +32,7 @@ const ipcRenderer = window.require('electron').ipcRenderer;
  */
 
 const SaveButtonComponent = () => {
-    const annotationChanges = useSelector(getHasAnnotationChanged);
+    const annotationChanges = useSelector(getHasAnyTempOrCurrentChanged);
     const openModal = useSelector(getIsSaveModalOpen);
     const dispatch = useDispatch();
 

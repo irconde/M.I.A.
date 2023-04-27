@@ -161,6 +161,7 @@ export const Channels = {
     sentFeedbackHTTP: 'send-feedback-http',
     updateSaveModalStatus: 'update-save-modal-status',
     closeApp: 'close-app',
+    anyTempDataUpdate: 'any-temp-data-update',
 };
 
 export const toolNames = {
