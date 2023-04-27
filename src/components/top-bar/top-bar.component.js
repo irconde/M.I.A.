@@ -140,7 +140,12 @@ const TopBarComponent = (props) => {
                     </Tooltip>
                 </ContactIconsContainer>
                 <VerticalDivider />
-                <Tooltip title={'Fold/unfold Side Menu'}>
+                <Tooltip
+                    title={
+                        annotationCount > 0
+                            ? 'Fold/unfold Side Menu'
+                            : 'Disabled'
+                    }>
                     <TopBarIconWrapper
                         onClick={() => {
                             if (annotationCount > 0) {
