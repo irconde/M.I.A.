@@ -13,6 +13,7 @@ import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 import DicomThumbnail from '../../icons/thumb_placeholder.png';
 import { useDispatch } from 'react-redux';
 import { selectFileAndSaveTempAnnotations } from '../../redux/slices/annotation.slice';
+import { updateIsLoadingFile } from '../../redux/slices/ui.slice';
 
 const ipcRenderer = window.require('electron').ipcRenderer;
 const REPEAT_REQUEST_COUNT = 3;
@@ -36,7 +37,11 @@ function LazyImageContainerComponent({
 
     const handleThumbnailClick = async () => {
         try {
-            !selected && dispatch(selectFileAndSaveTempAnnotations(fileName));
+            if (!selected) {
+                // we set the loading back to false when the DisplayImage requests the annotations and updates the view
+                dispatch(updateIsLoadingFile(true));
+                dispatch(selectFileAndSaveTempAnnotations(fileName));
+            }
         } catch (error) {
             console.log(error);
         }
