@@ -242,7 +242,8 @@ const AnnotationContextMenuComponent = () => {
                                 />
                             </IconContainer>
                         </Tooltip>
-                        {selectedAnnotation?.bbox?.length > 0 ? (
+                        {selectedAnnotation?.bbox?.length > 0 &&
+                        selectedAnnotation?.iscrowd === 0 ? (
                             <Tooltip
                                 title="Edit box annotation"
                                 placement="bottom">
@@ -262,7 +263,8 @@ const AnnotationContextMenuComponent = () => {
                                 </IconContainer>
                             </Tooltip>
                         ) : null}
-                        {selectedAnnotation?.segmentation?.length > 0 ? (
+                        {selectedAnnotation?.segmentation?.length > 0 &&
+                        selectedAnnotation?.iscrowd === 0 ? (
                             <Tooltip
                                 title="Edit mask annotation"
                                 placement="bottom">
@@ -282,20 +284,26 @@ const AnnotationContextMenuComponent = () => {
                                 </IconContainer>
                             </Tooltip>
                         ) : null}
-                        <Tooltip
-                            title="Translate annotation"
-                            placement="bottom">
-                            <IconContainer
-                                onClick={() => handleClick(editionMode.MOVE)}
-                                id="lastIcon"
-                                selected={selectedOption === editionMode.MOVE}>
-                                <MovementIcon
-                                    color={'#464646'}
-                                    width={'32px'}
-                                    height={'32px'}
-                                />
-                            </IconContainer>
-                        </Tooltip>
+                        {selectedAnnotation?.iscrowd === 0 ? (
+                            <Tooltip
+                                title="Translate annotation"
+                                placement="bottom">
+                                <IconContainer
+                                    onClick={() =>
+                                        handleClick(editionMode.MOVE)
+                                    }
+                                    id="lastIcon"
+                                    selected={
+                                        selectedOption === editionMode.MOVE
+                                    }>
+                                    <MovementIcon
+                                        color={'#464646'}
+                                        width={'32px'}
+                                        height={'32px'}
+                                    />
+                                </IconContainer>
+                            </Tooltip>
+                        ) : null}
                     </MainWidget>
                     <Tooltip title="Delete annotation">
                         <DeleteWidget

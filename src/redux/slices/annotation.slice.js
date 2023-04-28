@@ -71,11 +71,14 @@ const prepareAnnotationsForCoco = (annotation) => {
     annotation.annotations.forEach((annot) => {
         const { area, iscrowd, image_id, bbox, category_id, id, segmentation } =
             annot;
-        let newSegmentation = [];
-        if (segmentation?.length > 0) {
+        let newSegmentation;
+        if (segmentation?.length > 0 && iscrowd === 0) {
+            newSegmentation = [];
             segmentation.forEach((segment) => {
                 newSegmentation.push(polygonDataToCoordArray(segment));
             });
+        } else {
+            newSegmentation = segmentation;
         }
         let newAnnotation = {
             area,
@@ -333,14 +336,21 @@ const annotationSlice = createSlice({
                             annotationColor = colors[foundColorIdx].color;
                         }
                     }
-                    for (let j = 0; j < annotation.segmentation.length; j++) {
-                        const dataArray = coordArrayToPolygonData(
-                            annotation.segmentation[j]
-                        );
-                        annotation.segmentation[j] = calculateMaskAnchorPoints(
-                            annotation.bbox,
-                            dataArray
-                        );
+                    if (annotation.iscrowd === 0) {
+                        for (
+                            let j = 0;
+                            j < annotation.segmentation.length;
+                            j++
+                        ) {
+                            const dataArray = coordArrayToPolygonData(
+                                annotation.segmentation[j]
+                            );
+                            annotation.segmentation[j] =
+                                calculateMaskAnchorPoints(
+                                    annotation.bbox,
+                                    dataArray
+                                );
+                        }
                     }
 
                     state.annotations.push({
