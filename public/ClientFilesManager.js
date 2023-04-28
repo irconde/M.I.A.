@@ -368,6 +368,8 @@ class ClientFilesManager {
                     cocoDeleted,
                     fileName,
                     imageId,
+                    hasChanges,
+                    isSaving,
                 } = newAnnotationData;
                 if (
                     this.selectedAnnotationFile !== '' &&
@@ -388,13 +390,15 @@ class ClientFilesManager {
                         try {
                             let annotationFile = JSON.parse(data);
                             const annotationUpdates = [];
-                            annotationUpdates.push({
-                                fileName,
-                                imageId,
-                                cocoAnnotations,
-                                cocoCategories,
-                                cocoDeleted,
-                            });
+                            if (hasChanges && isSaving) {
+                                annotationUpdates.push({
+                                    fileName,
+                                    imageId,
+                                    cocoAnnotations,
+                                    cocoCategories,
+                                    cocoDeleted,
+                                });
+                            }
                             const tempReadStream = fs.createReadStream(
                                 this.tempPath
                             );
@@ -408,11 +412,12 @@ class ClientFilesManager {
                             });
                             tempReadStream.on('end', () => {
                                 const tempJsonData = JSON.parse(tempData);
-                                if (tempJsonData?.length > 0) {
+                                if (tempJsonData?.length > 0 && isSaving) {
                                     tempJsonData.forEach((temp) => {
                                         if (
                                             temp.fileName.toLowerCase() !==
-                                            fileName.toLowerCase()
+                                                fileName.toLowerCase() &&
+                                            temp.hasChanges
                                         ) {
                                             annotationUpdates.push({
                                                 fileName: temp.fileName,

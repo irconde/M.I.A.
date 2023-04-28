@@ -143,6 +143,8 @@ export const saveCurrentAnnotations = createAsyncThunk(
                 cocoDeleted,
                 fileName: ui.currentFileName,
                 imageId: annotation.imageId,
+                isSaving: true,
+                hasChanges: annotation.hasAnnotationChanged,
             })
             .then(() => {
                 return true;
@@ -168,6 +170,8 @@ export const saveAsCurrentFile = createAsyncThunk(
                 cocoDeleted,
                 fileName: ui.currentFileName,
                 imageId: annotation.imageId,
+                isSaving: true,
+                hasChanges: annotation.hasAnnotationChanged,
             });
             return true;
         } catch (error) {
@@ -222,6 +226,8 @@ export const closeAppAndSaveAnnotations = createAsyncThunk(
                 cocoDeleted,
                 imageId: annotation.imageId,
                 fileName: ui.currentFileName,
+                hasChanges: annotation.hasAnnotationChanged,
+                isSaving: true,
             })
             .catch((error) => {
                 console.log(error);
@@ -244,6 +250,8 @@ export const closeAppAndDontSaveAnnotations = createAsyncThunk(
                 cocoDeleted: [],
                 imageId: annotation.imageId,
                 fileName: ui.currentFileName,
+                hasChanges: annotation.hasAnnotationChanged,
+                isSaving: false,
             })
             .catch((error) => {
                 console.log(error);
