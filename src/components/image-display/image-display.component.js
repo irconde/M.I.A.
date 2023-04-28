@@ -43,6 +43,7 @@ import {
     updateCornerstoneMode,
     updateEditionMode,
     updateEditLabelVisibility,
+    updateIsLoadingFile,
     updateZoomLevel,
 } from '../../redux/slices/ui.slice';
 import BoundingBoxDrawingTool from '../../cornerstone-tools/BoundingBoxDrawingTool';
@@ -306,6 +307,9 @@ const ImageDisplayComponent = () => {
             })
             .catch((error) => {
                 console.log(error);
+            })
+            .finally(() => {
+                dispatch(updateIsLoadingFile(false));
             });
     };
 

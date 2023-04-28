@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -20,21 +20,13 @@ import MenuFoldedIcon from '../../icons/top-bar/menu-folded-icon/menu-folded.ico
 import MenuUnfoldedIcon from '../../icons/top-bar/menu-unfolded-icon/menu-unfolded.icon';
 import InfoIcon from '../../icons/shared/info-icon/info.icon';
 import ImportIcon from '../../icons/top-bar/import-icon/import.icon';
-import { Channels, cornerstoneMode } from '../../utils/enums/Constants';
 import ChatIcon from '../../icons/top-bar/chat-icon/chat.icon';
-import {
-    clearAnnotationWidgets,
-    toggleSideMenu,
-    updateCornerstoneMode,
-    updateCurrFileName,
-    updateFABVisibility,
-} from '../../redux/slices/ui.slice';
+import { toggleSideMenu } from '../../redux/slices/ui.slice';
 import Utils from '../../utils/general/Utils';
 import ImagesIcon from '../../icons/shared/images-icon/images.icon';
 import AnnotationIcon from '../../icons/annotation-icon/annotation.icon';
 import { getAnnotationCount } from '../../redux/slices/annotation.slice';
 
-const ipcRenderer = window.require('electron').ipcRenderer;
 const iconProps = {
     width: '24px',
     height: '24px',
@@ -58,27 +50,6 @@ const TopBarComponent = (props) => {
     );
     const imagesPath = Utils.truncateFilePath(selectedImagesDirPath, 25);
     const [isOpen, setIsOpen] = useState(true);
-    const [fileState, setFileState] = useState({
-        currentFileName: '',
-        numberOfFiles: 0,
-    });
-    useEffect(() => {
-        ipcRenderer.on(Channels.newFileUpdate, (e, args) => {
-            dispatch(clearAnnotationWidgets());
-            dispatch(updateFABVisibility(true));
-            dispatch(updateCornerstoneMode(cornerstoneMode.SELECTION));
-            const viewport = document.getElementById('imageContainer');
-            if (viewport !== null) {
-                Utils.resetCornerstoneTools(viewport);
-            }
-            Utils.dispatchAndUpdateImage(
-                dispatch,
-                updateCurrFileName,
-                args.currentFileName
-            );
-            setFileState(args);
-        });
-    }, []);
 
     const toggleClickHandler = () => {
         setIsOpen(!isOpen);

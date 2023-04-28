@@ -17,6 +17,9 @@ const initialState = {
     showApp: false,
     isImageToolsOpen: false,
     manualSideMenuToggle: false,
+    // when the user clicks on a thumbnail to open the file
+    // we use this boolean to indicate waiting on electron to send an update
+    isLoadingFile: false,
 };
 
 const uiSlice = createSlice({
@@ -75,6 +78,9 @@ const uiSlice = createSlice({
         updateIsImageToolsOpen: (state, action) => {
             state.isImageToolsOpen = action.payload;
         },
+        updateIsLoadingFile: (state, action) => {
+            state.isLoadingFile = action.payload;
+        },
     },
 });
 
@@ -95,6 +101,7 @@ export const {
     updateShowApp,
     updateFABVisibility,
     updateIsImageToolsOpen,
+    updateIsLoadingFile,
 } = uiSlice.actions;
 
 export const getAnnotationContextVisible = (state) =>
@@ -114,6 +121,7 @@ export const getSplashScreenVisibility = (state) =>
     state.ui.splashScreenVisible;
 export const getShowApp = (state) => state.ui.showApp;
 export const getIsImageToolsOpen = (state) => state.ui.isImageToolsOpen;
+export const getIsLoadingFile = (state) => state.ui.isLoadingFile;
 export const getIsManualSideMenuToggle = (state) =>
     state.ui.manualSideMenuToggle;
 

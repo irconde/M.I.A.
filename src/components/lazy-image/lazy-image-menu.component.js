@@ -8,6 +8,7 @@ import {
 import LazyImageContainerComponent from './lazy-image-container.component';
 import {
     getCurrFileName,
+    getIsLoadingFile,
     getLazyImageMenuVisible,
 } from '../../redux/slices/ui.slice';
 import { getAnnotations } from '../../redux/slices/annotation.slice';
@@ -55,11 +56,10 @@ function LazyImageMenuComponent() {
     const [currChunk, setCurrChunk] = useState(0);
     const scrollContainerRef = useRef(null);
     const { length: annotationsCount } = useSelector(getAnnotations);
-    const [prevFileName, setPrevFileName] = useState(currentFileName);
     const { selectedImagesDirPath, selectedAnnotationFile } =
         useSelector(getAssetsDirPaths);
     const [isScrolled, setIsScrolled] = useState(false);
-
+    const isLoadingFile = useSelector(getIsLoadingFile);
     useEffect(() => {
         scrollContainerRef.current.scrollTop = 0;
         setCurrChunk(0);
@@ -87,6 +87,8 @@ function LazyImageMenuComponent() {
     }, []);
 
     useEffect(() => {
+        // skip updating based on redux annotations if the user clicked on a new thumbnail
+        if (isLoadingFile) return;
         // update showAnnIcon when the annotation count changes
         setThumbnails((thumbs) =>
             thumbs.map((thumb) =>
@@ -98,23 +100,7 @@ function LazyImageMenuComponent() {
                     : thumb
             )
         );
-    }, [annotationsCount]);
-
-    useEffect(() => {
-        // if switch files, reflect the actual state of the previous file rather
-        // than the previous redux one
-        setThumbnails((thumbnails) =>
-            thumbnails.map((thumb) =>
-                thumb.fileName === prevFileName
-                    ? {
-                          ...thumb,
-                          showAnnIcon: thumb.hasAnnotations,
-                      }
-                    : thumb
-            )
-        );
-        setPrevFileName(currentFileName);
-    }, [currentFileName]);
+    }, [annotationsCount, currentFileName]);
 
     const listenForThumbnailUpdates = () => {
         const { removeThumbnail, addThumbnail, updateThumbnailHasAnnotations } =

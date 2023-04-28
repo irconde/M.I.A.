@@ -8,15 +8,23 @@ import SideMenuComponent from '../side-menu/side-menu.component';
 import AnnotationContextMenuComponent from '../annotation-context/annotation-context-menu.component';
 import EditLabelComponent from '../edit-label/edit-label.component';
 import BoundPolyFABComponent from '../fab/bound-poly-fab.component';
-import SaveButtonComponent from '../side-menu/buttons/save-button.component';
 
 import PropTypes from 'prop-types';
-import { updateSplashScreenVisibility } from '../../redux/slices/ui.slice';
+import {
+    clearAnnotationWidgets,
+    updateCornerstoneMode,
+    updateCurrFileName,
+    updateFABVisibility,
+    updateSplashScreenVisibility,
+} from '../../redux/slices/ui.slice';
 import { useDispatch } from 'react-redux';
 import SaveFabComponent from '../save-fab/save-fab.component';
 import ImageToolsFabComponent from '../image-tools-fab/image-tools-fab.component';
+import { Channels, cornerstoneMode } from '../../utils/enums/Constants';
+import Utils from '../../utils/general/Utils';
 
 const SPLASH_SCREEN_DELAY = 2000;
+const ipcRenderer = window.require('electron').ipcRenderer;
 
 function ApplicationComponent({ openImportModal }) {
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
@@ -32,6 +40,21 @@ function ApplicationComponent({ openImportModal }) {
                 ),
             SPLASH_SCREEN_DELAY
         );
+
+        ipcRenderer.on(Channels.newFileUpdate, (e, args) => {
+            dispatch(clearAnnotationWidgets());
+            dispatch(updateFABVisibility(true));
+            dispatch(updateCornerstoneMode(cornerstoneMode.SELECTION));
+            const viewport = document.getElementById('imageContainer');
+            if (viewport !== null) {
+                Utils.resetCornerstoneTools(viewport);
+            }
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateCurrFileName,
+                args.currentFileName
+            );
+        });
     }, []);
 
     return (
