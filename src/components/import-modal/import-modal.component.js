@@ -67,26 +67,45 @@ const ImportModalComponent = ({ open, setOpen }) => {
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
-        const path = await ipcRenderer.invoke(Channels.showFolderPicker, type);
+        const result = await ipcRenderer.invoke(
+            Channels.showFolderPicker,
+            type
+        );
         // if event is cancelled, then the path is null
-        updatePaths(path, path === null ? TYPE.CANCEL : type);
+        if (result.success === true) {
+            if (type === TYPE.IMAGES) {
+                updatePaths(result.path, type);
+            } else {
+                if (result.isValidCOCO) {
+                    updatePaths(result.path, type);
+                } else {
+                    updatePaths(
+                        result.path,
+                        TYPE.ANNOTATIONS,
+                        'Unexpected or unsupported format'
+                    );
+                }
+            }
+        } else {
+            updatePaths('', TYPE.CANCEL);
+        }
     };
 
-    const updatePaths = (value, type) => {
+    const updatePaths = (value, type, errorMessage = '') => {
         switch (type) {
             case TYPE.IMAGES:
                 return setPaths({
                     ...paths,
                     images: value,
                     isLoading: false,
-                    imagesError: '',
+                    imagesError: errorMessage,
                 });
             case TYPE.ANNOTATIONS:
                 return setPaths({
                     ...paths,
                     annotations: value,
                     isLoading: false,
-                    annotationsError: '',
+                    annotationsError: errorMessage,
                 });
             case TYPE.CANCEL:
                 return setPaths({ ...paths, isLoading: false });

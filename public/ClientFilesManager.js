@@ -359,6 +359,65 @@ class ClientFilesManager {
         this.#sendThumbnailsStatus(false);
     }
 
+    determineCocoJsonType(cocoJson) {
+        // Check if the JSON file has the necessary fields
+        if (
+            !cocoJson.info ||
+            !cocoJson.images ||
+            !cocoJson.annotations ||
+            !cocoJson.licenses
+        ) {
+            return 'Invalid COCO JSON';
+        }
+
+        // Check the contents of the "annotations" field
+        const firstAnnotation = cocoJson.annotations[0];
+        if (!firstAnnotation) {
+            return 'Invalid COCO JSON';
+        }
+
+        if (firstAnnotation.segmentation && !firstAnnotation.keypoints) {
+            if (firstAnnotation.iscrowd !== undefined) {
+                return 'Object Detection';
+            } else {
+                return 'Stuff Segmentation';
+            }
+        } else if (firstAnnotation.keypoints) {
+            return 'Keypoint Detection';
+        } else if (firstAnnotation.caption) {
+            return 'Image Captioning';
+        } else if (firstAnnotation.dp_I) {
+            return 'DensePose';
+        } else if (firstAnnotation.file_name && firstAnnotation.segments_info) {
+            return 'Panoptic Segmentation';
+        } else {
+            return 'Unknown COCO JSON';
+        }
+    }
+
+    determineCocoJsonTypeFromFile(filePath) {
+        return new Promise((resolve, reject) => {
+            const readStream = fs.createReadStream(filePath);
+            let data = '';
+            readStream.on('error', (err) => {
+                console.log(err);
+                reject(err);
+            });
+            readStream.on('data', (chunk) => {
+                data += chunk;
+            });
+            readStream.on('end', () => {
+                try {
+                    let annotationFile = JSON.parse(data);
+                    const fileType = this.determineCocoJsonType(annotationFile);
+                    resolve(fileType);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+    }
+
     async updateAnnotationsFile(newAnnotationData, appClosing = false) {
         return new Promise((resolve, reject) => {
             try {
