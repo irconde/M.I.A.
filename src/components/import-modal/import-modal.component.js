@@ -87,7 +87,7 @@ const ImportModalComponent = ({ open, setOpen }) => {
                 }
             }
         } else {
-            updatePaths({}, TYPE.CANCEL);
+            updatePaths('', TYPE.CANCEL);
         }
     };
 

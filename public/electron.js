@@ -187,7 +187,7 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
         });
 
         // if the event is cancelled by the user
-        if (result.canceled) return null;
+        if (result.canceled) return { success: false };
 
         let fileTypeResult = null;
         try {
