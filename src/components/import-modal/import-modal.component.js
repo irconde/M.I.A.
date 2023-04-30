@@ -79,7 +79,11 @@ const ImportModalComponent = ({ open, setOpen }) => {
                 if (result.isValidCOCO) {
                     updatePaths(result.path, type);
                 } else {
-                    updatePaths({}, TYPE.CANCEL);
+                    updatePaths(
+                        result.path,
+                        TYPE.ANNOTATIONS,
+                        'Unexpected or unsupported format'
+                    );
                 }
             }
         } else {
@@ -87,22 +91,21 @@ const ImportModalComponent = ({ open, setOpen }) => {
         }
     };
 
-    const updatePaths = (value, type) => {
-        // TODO: Refactor this to display error messages
+    const updatePaths = (value, type, errorMessage = '') => {
         switch (type) {
             case TYPE.IMAGES:
                 return setPaths({
                     ...paths,
                     images: value,
                     isLoading: false,
-                    imagesError: '',
+                    imagesError: errorMessage,
                 });
             case TYPE.ANNOTATIONS:
                 return setPaths({
                     ...paths,
                     annotations: value,
                     isLoading: false,
-                    annotationsError: '',
+                    annotationsError: errorMessage,
                 });
             case TYPE.CANCEL:
                 return setPaths({ ...paths, isLoading: false });

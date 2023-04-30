@@ -78,9 +78,9 @@ export const ModalSection = styled.div`
     padding-top: 32px;
 `;
 
-export const StyledInput = styled(TextField).attrs(() => ({
+export const StyledInput = styled(TextField).attrs(({ error }) => ({
     variant: 'standard',
-    color: 'secondary',
+    color: error ? 'primary' : 'secondary',
 }))`
     width: 224px;
 
@@ -96,7 +96,7 @@ export const StyledInput = styled(TextField).attrs(() => ({
         line-height: 1.46;
         letter-spacing: normal;
         text-align: justify;
-        color: #fafafa;
+        color: ${({ error }) => (error ? '#9d9d9d' : '#fafafa')};
     }
 
     & .MuiInput-root::before {
