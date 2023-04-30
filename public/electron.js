@@ -178,9 +178,9 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
         });
 
         // if the event is cancelled by the user
-        if (result.canceled) return null;
+        if (result.canceled) return { success: false };
 
-        return result.filePaths[0];
+        return { success: true, path: result.filePaths[0] };
     } else if (args === Constants.fileType.ANNOTATIONS) {
         const result = await dialog.showOpenDialog({
             properties: ['openFile'],
@@ -189,7 +189,22 @@ ipcMain.handle(Channels.showFolderPicker, async (event, args) => {
         // if the event is cancelled by the user
         if (result.canceled) return null;
 
-        return result.filePaths[0];
+        let fileTypeResult = null;
+        try {
+            fileTypeResult = await files.determineCocoJsonTypeFromFile(
+                result.filePaths[0]
+            );
+        } catch (error) {
+            console.log(error);
+        }
+
+        return {
+            success: true,
+            path: result.filePaths[0],
+            isValidCOCO:
+                fileTypeResult === 'Object Detection' ||
+                fileTypeResult === 'Stuff Segmentation',
+        };
     }
 });
 

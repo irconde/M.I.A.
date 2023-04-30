@@ -67,12 +67,28 @@ const ImportModalComponent = ({ open, setOpen }) => {
 
     const handleDirPathSelection = async (type) => {
         setPaths({ ...paths, isLoading: true });
-        const path = await ipcRenderer.invoke(Channels.showFolderPicker, type);
+        const result = await ipcRenderer.invoke(
+            Channels.showFolderPicker,
+            type
+        );
         // if event is cancelled, then the path is null
-        updatePaths(path, path === null ? TYPE.CANCEL : type);
+        if (result.success === true) {
+            if (type === TYPE.IMAGES) {
+                updatePaths(result.path, type);
+            } else {
+                if (result.isValidCOCO) {
+                    updatePaths(result.path, type);
+                } else {
+                    updatePaths({}, TYPE.CANCEL);
+                }
+            }
+        } else {
+            updatePaths({}, TYPE.CANCEL);
+        }
     };
 
     const updatePaths = (value, type) => {
+        // TODO: Refactor this to display error messages
         switch (type) {
             case TYPE.IMAGES:
                 return setPaths({
