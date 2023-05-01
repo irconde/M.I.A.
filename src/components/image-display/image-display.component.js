@@ -151,6 +151,17 @@ const ImageDisplayComponent = () => {
                 updateCornerstoneMode,
                 constants.cornerstoneMode.SELECTION
             );
+        } else if (
+            cornerstoneModeRef.current === constants.cornerstoneMode.EDITION &&
+            editionModeRef.current !== constants.editionMode.NO_TOOL
+        ) {
+            Utils.resetCornerstoneTools(viewportRef.current);
+            dispatch(updateAnnotationContextVisibility(true));
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateEditionMode,
+                constants.editionMode.NO_TOOL
+            );
         }
     };
 
