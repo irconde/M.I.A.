@@ -134,6 +134,27 @@ const ImageDisplayComponent = () => {
     useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
+        document.body.addEventListener('mouseleave', onMouseLeave);
+        return () => {
+            document.body.removeEventListener('mouseleave', onMouseLeave);
+        };
+    });
+
+    const onMouseLeave = () => {
+        if (
+            cornerstoneModeRef.current === constants.cornerstoneMode.ANNOTATION
+        ) {
+            Utils.resetCornerstoneTools(viewportRef.current);
+            dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateCornerstoneMode,
+                constants.cornerstoneMode.SELECTION
+            );
+        }
+    };
+
+    useEffect(() => {
         ipcRenderer.on(Channels.anyTempDataUpdate, (e, anyTempData) => {
             dispatch(updateAnyTempData(anyTempData));
         });
