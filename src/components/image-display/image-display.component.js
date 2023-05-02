@@ -134,6 +134,38 @@ const ImageDisplayComponent = () => {
     useEffect(setupCornerstoneJS, []);
 
     useEffect(() => {
+        document.body.addEventListener('mouseleave', onMouseLeave);
+        return () => {
+            document.body.removeEventListener('mouseleave', onMouseLeave);
+        };
+    });
+
+    const onMouseLeave = () => {
+        if (
+            cornerstoneModeRef.current === constants.cornerstoneMode.ANNOTATION
+        ) {
+            Utils.resetCornerstoneTools(viewportRef.current);
+            dispatch(updateAnnotationMode(constants.annotationMode.NO_TOOL));
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateCornerstoneMode,
+                constants.cornerstoneMode.SELECTION
+            );
+        } else if (
+            cornerstoneModeRef.current === constants.cornerstoneMode.EDITION &&
+            editionModeRef.current !== constants.editionMode.NO_TOOL
+        ) {
+            Utils.resetCornerstoneTools(viewportRef.current);
+            dispatch(updateAnnotationContextVisibility(true));
+            Utils.dispatchAndUpdateImage(
+                dispatch,
+                updateEditionMode,
+                constants.editionMode.NO_TOOL
+            );
+        }
+    };
+
+    useEffect(() => {
         ipcRenderer.on(Channels.anyTempDataUpdate, (e, anyTempData) => {
             dispatch(updateAnyTempData(anyTempData));
         });
