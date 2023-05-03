@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import { colors } from '../../utils/enums/Constants';
 
 const FAB_HEIGHT = '4rem';
 const ACTION_FAB_HEIGHT = '3.5rem';
@@ -15,11 +16,26 @@ export const FabWrapper = styled.div`
     flex-direction: column;
 `;
 
+/*
+    &:hover {
+        background: ${({ expanded, enabled }) =>
+            expanded
+                ? 'rgba(57,82,128,0.88)'
+                : enabled
+                ? '#2B65CE'
+                : '#4B4B4B'};
+    }
+    ${({ expanded }) =>
+        expanded &&
+        css`
+            background-color: #395280;
+        `}
+*/
 export const FabButton = styled.button`
     width: ${FAB_HEIGHT};
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: ${({ enabled }) => (enabled ? '#367eff' : '#252525')};
+    background-color: ${colors.BLUE};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -29,21 +45,25 @@ export const FabButton = styled.button`
     border: none;
     outline: none;
 
-    &:hover {
-        background: ${({ expanded, enabled }) =>
-            expanded
-                ? 'rgba(57,82,128,0.88)'
-                : enabled
-                ? '#2B65CE'
-                : '#4B4B4B'};
-    }
-
-    ${({ expanded }) =>
-        expanded &&
+    ${({ enabled }) =>
+        !enabled &&
         css`
-            background-color: #395280;
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: default;
         `}
+    p {
+        flex: 1;
+        text-transform: uppercase;
+        text-align: center;
+        color: white;
+    }
 `;
+
+// aspect-ratio: 1;
+//     height: 64px;
+//     border-radius: 50%;
+//     border: none;
 
 export const FabItem = styled(FabButton)`
     width: ${ACTION_FAB_HEIGHT};
@@ -76,7 +96,7 @@ export const FabItem = styled(FabButton)`
             ? css`
                   transform: translate(0, 0);
                   opacity: 1;
-                  background-color: #367eff;
+                  background-color: ${colors.BLUE};
               `
             : css`
                   transform: translate(0, calc(${index} * 117%));
