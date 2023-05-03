@@ -33,8 +33,6 @@ const ExpandableFab = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const fabRef = useRef(null);
     const hasAnnotationsChanged = useSelector(getHasAnyTempOrCurrentChanged);
-    const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
-    const enabled = hasAnnotationsChanged || hasAllAnnotationsDeleted;
 
     useEffect(() => {
         // only add the click listener to the document when the fab is open
@@ -70,7 +68,7 @@ const ExpandableFab = () => {
             <Tooltip title={'Save to New File'} placement={'left-start'}>
                 <FabItem
                     index={2}
-                    enabled={enabled}
+                    enabled={hasAnnotationsChanged}
                     expanded={isExpanded}
                     onClick={handleSaveAs}>
                     <SaveAsIcon {...iconProps} />
@@ -79,7 +77,7 @@ const ExpandableFab = () => {
             <Tooltip title={'Save Changes'} placement={'left-start'}>
                 <FabItem
                     index={1}
-                    enabled={enabled}
+                    enabled={hasAnnotationsChanged}
                     expanded={isExpanded}
                     onClick={handleSave}>
                     <SaveIcon {...iconProps} />
@@ -87,10 +85,10 @@ const ExpandableFab = () => {
             </Tooltip>
             <Tooltip title={'Save'} placement={'left-start'}>
                 <FabButton
-                    enabled={enabled}
+                    enabled={hasAnnotationsChanged}
                     expanded={isExpanded}
                     onClick={() => {
-                        if (enabled) {
+                        if (hasAnnotationsChanged) {
                             handleFabClick();
                         }
                     }}
