@@ -8,13 +8,10 @@ import {
     FabButton,
     FabItem,
     FabWrapper,
-    SaveAsFabBtn,
-    SaveFabBtn,
 } from './save-fab.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSideMenuVisible } from '../../redux/slices/ui.slice';
 import {
-    getHasAllAnnotationsDeleted,
     getHasAnyTempOrCurrentChanged,
     saveAsCurrentFile,
     saveCurrentAnnotations,

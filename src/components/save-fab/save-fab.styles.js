@@ -99,13 +99,3 @@ export const FabItem = styled(FabButton)`
                   opacity: 0;
               `}
 `;
-
-export const SaveFabBtn = styled(FabItem)`
-    :hover {
-    }
-`;
-
-export const SaveAsFabBtn = styled(FabItem)`
-    :hover {
-    }
-`;
