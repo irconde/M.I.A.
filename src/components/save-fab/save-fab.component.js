@@ -6,6 +6,7 @@ import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
 import {
     FabBackground,
     FabButton,
+    FabItem,
     FabWrapper,
     SaveAsFabBtn,
     SaveFabBtn,
@@ -18,6 +19,7 @@ import {
     saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../redux/slices/annotation.slice';
+import Tooltip from '@mui/material/Tooltip';
 
 const iconProps = {
     width: '24px',
@@ -65,30 +67,41 @@ const ExpandableFab = () => {
 
     return (
         <FabWrapper show={!sideMenuVisible}>
-            <SaveAsFabBtn
-                index={2}
-                expanded={isExpanded}
-                onClick={handleSaveAs}>
-                <SaveAsIcon {...iconProps} />
-            </SaveAsFabBtn>
-            <SaveFabBtn index={1} expanded={isExpanded} onClick={handleSave}>
-                <SaveIcon {...iconProps} />
-            </SaveFabBtn>
-            <FabButton
-                enabled={enabled}
-                expanded={isExpanded}
-                onClick={() => {
-                    if (enabled) {
-                        handleFabClick();
-                    }
-                }}
-                ref={fabRef}>
-                {isExpanded ? (
-                    <CloseIcon {...iconProps} />
-                ) : (
-                    <FabIcon {...iconProps} />
-                )}
-            </FabButton>
+            <Tooltip title={'Save to New File'} placement={'left-start'}>
+                <FabItem
+                    index={2}
+                    enabled={enabled}
+                    expanded={isExpanded}
+                    onClick={handleSaveAs}>
+                    <SaveAsIcon {...iconProps} />
+                </FabItem>
+            </Tooltip>
+            <Tooltip title={'Save Changes'} placement={'left-start'}>
+                <FabItem
+                    index={1}
+                    enabled={enabled}
+                    expanded={isExpanded}
+                    onClick={handleSave}>
+                    <SaveIcon {...iconProps} />
+                </FabItem>
+            </Tooltip>
+            <Tooltip title={'Save'} placement={'left-start'}>
+                <FabButton
+                    enabled={enabled}
+                    expanded={isExpanded}
+                    onClick={() => {
+                        if (enabled) {
+                            handleFabClick();
+                        }
+                    }}
+                    ref={fabRef}>
+                    {isExpanded ? (
+                        <CloseIcon {...iconProps} />
+                    ) : (
+                        <FabIcon {...iconProps} />
+                    )}
+                </FabButton>
+            </Tooltip>
             <FabBackground />
         </FabWrapper>
     );

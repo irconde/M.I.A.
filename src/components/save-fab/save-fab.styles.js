@@ -3,6 +3,8 @@ import { colors } from '../../utils/enums/Constants';
 
 const FAB_HEIGHT = '4rem';
 const ACTION_FAB_HEIGHT = '3.5rem';
+const HOVER_COLOR = '#2658b2';
+const FAB_EXPANDED_COLOR = '#395280';
 
 export const FabWrapper = styled.div`
     position: absolute;
@@ -37,18 +39,13 @@ export const FabButton = styled.button`
             pointer-events: none;
             cursor: default;
         `}
-    &:hover {
-        background: ${({ expanded, enabled }) =>
-            expanded
-                ? 'rgba(57,82,128,0.88)'
-                : enabled
-                ? '#2658b2'
-                : '#4B4B4B'};
+    :hover {
+        background: ${({ enabled }) => enabled && HOVER_COLOR};
     }
     ${({ expanded }) =>
         expanded &&
         css`
-            background-color: #395280;
+            background-color: ${FAB_EXPANDED_COLOR};
         `}
 `;
 
@@ -70,7 +67,7 @@ export const FabItem = styled(FabButton)`
     margin-bottom: 0.5rem;
     z-index: 3;
 
-    :hover {
+    &:hover {
         :before {
             width: 90px;
             height: 20px;
@@ -87,7 +84,7 @@ export const FabItem = styled(FabButton)`
             align-items: center;
         }
 
-        background-color: #2b65ce;
+        background-color: ${HOVER_COLOR};
     }
 
     ${({ expanded, index }) =>
@@ -105,16 +102,10 @@ export const FabItem = styled(FabButton)`
 
 export const SaveFabBtn = styled(FabItem)`
     :hover {
-        :before {
-            content: 'Save changes';
-        }
     }
 `;
 
 export const SaveAsFabBtn = styled(FabItem)`
     :hover {
-        :before {
-            content: 'Save to new file';
-        }
     }
 `;
