@@ -16,21 +16,6 @@ export const FabWrapper = styled.div`
     flex-direction: column;
 `;
 
-/*
-    &:hover {
-        background: ${({ expanded, enabled }) =>
-            expanded
-                ? 'rgba(57,82,128,0.88)'
-                : enabled
-                ? '#2B65CE'
-                : '#4B4B4B'};
-    }
-    ${({ expanded }) =>
-        expanded &&
-        css`
-            background-color: #395280;
-        `}
-*/
 export const FabButton = styled.button`
     width: ${FAB_HEIGHT};
     aspect-ratio: 1;
@@ -52,18 +37,32 @@ export const FabButton = styled.button`
             pointer-events: none;
             cursor: default;
         `}
-    p {
-        flex: 1;
-        text-transform: uppercase;
-        text-align: center;
-        color: white;
+    &:hover {
+        background: ${({ expanded, enabled }) =>
+            expanded
+                ? 'rgba(57,82,128,0.88)'
+                : enabled
+                ? '#2658b2'
+                : '#4B4B4B'};
     }
+    ${({ expanded }) =>
+        expanded &&
+        css`
+            background-color: #395280;
+        `}
 `;
 
-// aspect-ratio: 1;
-//     height: 64px;
-//     border-radius: 50%;
-//     border: none;
+export const FabBackground = styled.div`
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    aspect-ratio: 1;
+    height: ${FAB_HEIGHT};
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    background-color: #1f1f1f;
+`;
 
 export const FabItem = styled(FabButton)`
     width: ${ACTION_FAB_HEIGHT};
@@ -82,7 +81,7 @@ export const FabItem = styled(FabButton)`
             border-radius: 3px;
             box-shadow: 0 1px 2px 0 black;
             background-color: #fff;
-            color: #367eff;
+            color: ${colors.BLUE};
             display: flex;
             justify-content: center;
             align-items: center;

@@ -4,6 +4,7 @@ import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
 import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
 import {
+    FabBackground,
     FabButton,
     FabWrapper,
     SaveAsFabBtn,
@@ -88,6 +89,7 @@ const ExpandableFab = () => {
                     <FabIcon {...iconProps} />
                 )}
             </FabButton>
+            <FabBackground />
         </FabWrapper>
     );
 };
