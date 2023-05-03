@@ -62,7 +62,7 @@ const ExpandableFab = () => {
 
     return (
         <FabWrapper show={!sideMenuVisible}>
-            <Tooltip title={'Save to New File'} placement={'left-start'}>
+            <Tooltip title={'Save to New File'} placement={'left'}>
                 <FabItem
                     index={2}
                     enabled={hasAnnotationsChanged}
@@ -71,7 +71,7 @@ const ExpandableFab = () => {
                     <SaveAsIcon {...iconProps} />
                 </FabItem>
             </Tooltip>
-            <Tooltip title={'Save Changes'} placement={'left-start'}>
+            <Tooltip title={'Save Changes'} placement={'left'}>
                 <FabItem
                     index={1}
                     enabled={hasAnnotationsChanged}
@@ -80,7 +80,7 @@ const ExpandableFab = () => {
                     <SaveIcon {...iconProps} />
                 </FabItem>
             </Tooltip>
-            <Tooltip title={'Save'} placement={'left-start'}>
+            <Tooltip title={'Save'} placement={'left'}>
                 <FabButton
                     enabled={hasAnnotationsChanged}
                     expanded={isExpanded}
