@@ -1,7 +1,10 @@
 import styled, { css } from 'styled-components';
+import { colors } from '../../utils/enums/Constants';
 
 const FAB_HEIGHT = '4rem';
 const ACTION_FAB_HEIGHT = '3.5rem';
+const HOVER_COLOR = '#2658b2';
+const FAB_EXPANDED_COLOR = '#395280';
 
 export const FabWrapper = styled.div`
     position: absolute;
@@ -19,7 +22,7 @@ export const FabButton = styled.button`
     width: ${FAB_HEIGHT};
     aspect-ratio: 1;
     border-radius: 50%;
-    background-color: ${({ enabled }) => (enabled ? '#367eff' : '#252525')};
+    background-color: ${colors.BLUE};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -29,20 +32,33 @@ export const FabButton = styled.button`
     border: none;
     outline: none;
 
-    &:hover {
-        background: ${({ expanded, enabled }) =>
-            expanded
-                ? 'rgba(57,82,128,0.88)'
-                : enabled
-                ? '#2B65CE'
-                : '#4B4B4B'};
+    ${({ enabled }) =>
+        !enabled &&
+        css`
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: default;
+        `}
+    :hover {
+        background: ${({ enabled }) => enabled && HOVER_COLOR};
     }
-
     ${({ expanded }) =>
         expanded &&
         css`
-            background-color: #395280;
+            background-color: ${FAB_EXPANDED_COLOR};
         `}
+`;
+
+export const FabBackground = styled.div`
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    aspect-ratio: 1;
+    height: ${FAB_HEIGHT};
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    background-color: #1f1f1f;
 `;
 
 export const FabItem = styled(FabButton)`
@@ -51,7 +67,7 @@ export const FabItem = styled(FabButton)`
     margin-bottom: 0.5rem;
     z-index: 3;
 
-    :hover {
+    &:hover {
         :before {
             width: 90px;
             height: 20px;
@@ -62,13 +78,13 @@ export const FabItem = styled(FabButton)`
             border-radius: 3px;
             box-shadow: 0 1px 2px 0 black;
             background-color: #fff;
-            color: #367eff;
+            color: ${colors.BLUE};
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        background-color: #2b65ce;
+        background-color: ${HOVER_COLOR};
     }
 
     ${({ expanded, index }) =>
@@ -76,26 +92,10 @@ export const FabItem = styled(FabButton)`
             ? css`
                   transform: translate(0, 0);
                   opacity: 1;
-                  background-color: #367eff;
+                  background-color: ${colors.BLUE};
               `
             : css`
                   transform: translate(0, calc(${index} * 117%));
                   opacity: 0;
               `}
-`;
-
-export const SaveFabBtn = styled(FabItem)`
-    :hover {
-        :before {
-            content: 'Save changes';
-        }
-    }
-`;
-
-export const SaveAsFabBtn = styled(FabItem)`
-    :hover {
-        :before {
-            content: 'Save to new file';
-        }
-    }
 `;
