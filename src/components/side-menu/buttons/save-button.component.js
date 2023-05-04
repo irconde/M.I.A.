@@ -37,10 +37,23 @@ const SaveButtonComponent = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        ipcRenderer.on(Channels.updateSaveModalStatus, (e, args) => {
+        function handleUpdateSaveModalStatus(e, args) {
             dispatch(updateShowSaveAsModal(args));
-        });
-    });
+        }
+
+        ipcRenderer.on(
+            Channels.updateSaveModalStatus,
+            handleUpdateSaveModalStatus
+        );
+
+        return () => {
+            // Remove the listener when the component is unmounted
+            ipcRenderer.removeListener(
+                Channels.updateSaveModalStatus,
+                handleUpdateSaveModalStatus
+            );
+        };
+    }, []);
 
     const saveImageClick = () => {
         dispatch(saveCurrentAnnotations());

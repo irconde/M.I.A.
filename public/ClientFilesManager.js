@@ -476,7 +476,9 @@ class ClientFilesManager {
                                         if (
                                             temp.fileName.toLowerCase() !==
                                                 fileName.toLowerCase() &&
-                                            temp.hasChanges
+                                            temp.hasChanges &&
+                                            temp.imageId &&
+                                            temp.cocoAnnotations?.length > 0
                                         ) {
                                             annotationUpdates.push({
                                                 fileName: temp.fileName,
@@ -1178,6 +1180,12 @@ class ClientFilesManager {
                               a.id > b.id ? a : b
                           ).id + 1
                         : 1;
+                const maxImageId =
+                    allAnnotations?.images?.length > 0
+                        ? allAnnotations.images.reduce((a, b) =>
+                              a.id > b.id ? a : b
+                          ).id + 1
+                        : 1;
 
                 const image = allAnnotations.images.find(
                     (img) =>
@@ -1189,7 +1197,7 @@ class ClientFilesManager {
                 if (image && image?.id <= Number.MAX_SAFE_INTEGER) {
                     imageId = image.id;
                 } else {
-                    imageId = this.currentFileIndex + 1;
+                    imageId = maxImageId;
                 }
 
                 resolve({
