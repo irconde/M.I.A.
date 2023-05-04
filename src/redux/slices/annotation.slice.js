@@ -683,6 +683,7 @@ const annotationSlice = createSlice({
             state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
             state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
         },
         [saveCurrentAnnotations.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
@@ -719,6 +720,8 @@ const annotationSlice = createSlice({
         [saveAsCurrentFile.fulfilled]: (state) => {
             state.saveAsModalOpen = false;
             state.saveAnnotationsStatus = SAVE_STATUSES.SAVED;
+            state.hasAnnotationChanged = false;
+            state.deletedAnnotationIds = [];
         },
         [saveAsCurrentFile.pending]: (state) => {
             state.saveAnnotationsStatus = SAVE_STATUSES.PENDING;
