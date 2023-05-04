@@ -4,19 +4,19 @@ import SaveIcon from '../../icons/save-fab/save-icon/save.icon';
 import CloseIcon from '../../icons/shared/close-icon/close.icon';
 import FabIcon from '../../icons/save-fab/fab-icon/fab.icon';
 import {
+    FabBackground,
     FabButton,
+    FabItem,
     FabWrapper,
-    SaveAsFabBtn,
-    SaveFabBtn,
 } from './save-fab.styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSideMenuVisible } from '../../redux/slices/ui.slice';
 import {
-    getHasAllAnnotationsDeleted,
     getHasAnyTempOrCurrentChanged,
     saveAsCurrentFile,
     saveCurrentAnnotations,
 } from '../../redux/slices/annotation.slice';
+import Tooltip from '@mui/material/Tooltip';
 
 const iconProps = {
     width: '24px',
@@ -30,8 +30,6 @@ const ExpandableFab = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const fabRef = useRef(null);
     const hasAnnotationsChanged = useSelector(getHasAnyTempOrCurrentChanged);
-    const hasAllAnnotationsDeleted = useSelector(getHasAllAnnotationsDeleted);
-    const enabled = hasAnnotationsChanged || hasAllAnnotationsDeleted;
 
     useEffect(() => {
         // only add the click listener to the document when the fab is open
@@ -64,30 +62,42 @@ const ExpandableFab = () => {
 
     return (
         <FabWrapper show={!sideMenuVisible}>
-            <SaveAsFabBtn
-                index={2}
-                expanded={isExpanded}
-                onClick={handleSaveAs}>
-                <SaveAsIcon {...iconProps} />
-            </SaveAsFabBtn>
-            <SaveFabBtn index={1} expanded={isExpanded} onClick={handleSave}>
-                <SaveIcon {...iconProps} />
-            </SaveFabBtn>
-            <FabButton
-                enabled={enabled}
-                expanded={isExpanded}
-                onClick={() => {
-                    if (enabled) {
-                        handleFabClick();
-                    }
-                }}
-                ref={fabRef}>
-                {isExpanded ? (
-                    <CloseIcon {...iconProps} />
-                ) : (
-                    <FabIcon {...iconProps} />
-                )}
-            </FabButton>
+            <Tooltip title={'Save to New File'} placement={'left'}>
+                <FabItem
+                    index={2}
+                    enabled={hasAnnotationsChanged}
+                    expanded={isExpanded}
+                    onClick={handleSaveAs}>
+                    <SaveAsIcon {...iconProps} />
+                </FabItem>
+            </Tooltip>
+            <Tooltip title={'Save Changes'} placement={'left'}>
+                <FabItem
+                    index={1}
+                    enabled={hasAnnotationsChanged}
+                    expanded={isExpanded}
+                    onClick={handleSave}>
+                    <SaveIcon {...iconProps} />
+                </FabItem>
+            </Tooltip>
+            <Tooltip title={'Save'} placement={'left'}>
+                <FabButton
+                    enabled={hasAnnotationsChanged}
+                    expanded={isExpanded}
+                    onClick={() => {
+                        if (hasAnnotationsChanged) {
+                            handleFabClick();
+                        }
+                    }}
+                    ref={fabRef}>
+                    {isExpanded ? (
+                        <CloseIcon {...iconProps} />
+                    ) : (
+                        <FabIcon {...iconProps} />
+                    )}
+                </FabButton>
+            </Tooltip>
+            <FabBackground />
         </FabWrapper>
     );
 };
