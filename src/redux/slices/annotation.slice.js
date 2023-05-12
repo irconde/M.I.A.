@@ -321,7 +321,7 @@ const annotationSlice = createSlice({
                     );
 
                     let annotationColor = randomColor({
-                        seed: annotation.categoryName,
+                        seed: `${annotation.categoryName}`,
                         hue: 'random',
                         luminosity: 'bright',
                     });
@@ -428,7 +428,7 @@ const annotationSlice = createSlice({
                 foundColorIdx !== -1
                     ? state.colors[foundColorIdx].color
                     : randomColor({
-                          seed: newAnnotation.categoryName,
+                          seed: `${newAnnotation.categoryName}`,
                           hue: 'random',
                           luminosity: 'bright',
                       });
@@ -588,7 +588,7 @@ const annotationSlice = createSlice({
                 });
                 foundAnnotation.category_id = newId;
                 foundAnnotation.color = randomColor({
-                    seed: categoryName,
+                    seed: `${categoryName}`,
                     hue: 'random',
                     luminosity: 'bright',
                 });
